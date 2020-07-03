@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- 元素=标签+属性+内容,从标签的开始到结束所有 -->
+		<meta charset="utf-8" />
+		<meta content="width=device-width, initial-scale=1" name="viewport">
+		<title>文本格式化</title>
+	</head>
+	
+	<!-- id可以用于定义样式,还可以定义行为,是做唯一标识的,名字不可以重复 -->
+	<!-- class指的是类名,用于定义样式,还可以定义行为,指的是一个分类,可以重复使用,可以同名 -->
+	<!-- style给元素添加动态样式 -->
+	<!-- title属性定义鼠标悬停到元素身上显示的内容 -->
+	<!-- dir是定义文字在浏览器里一行的显示方向，常用在div和p标签身上 -->
+	<body id="myBody" class="mybody">
+		<!-- 这些标签全都没有独占一行 -->
+		
+		<i id="myITag">斜体</i>
+		<em>斜体,并且有强调的语义</em>
+
+		<b>粗体</b>
+		<strong class="mybody">粗体显示效果,并且有强调的语义</strong>
+		
+		<s>删除线</s>
+		<del class="mybody">删除线,并且有强调的语义</del>
+		
+		<u>下划线</u>
+		<ins style="color:red;" title="下划线,并且有强调语义">下划线,并且有强...</ins>
+		
+		<div dir="rtl">dir属性是定义元素的内容部分，文字显示方向</div>
+		
+	</body>
+</html>
