@@ -1,6 +1,6 @@
 3.利用maven命令自动生成实体类，dao方法
 
-mybatis-generator:generate
+mybatis-generator:generate -e
 
  https://blog.csdn.net/unkown_wind/article/details/47299051 
 
