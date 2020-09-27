@@ -16,3 +16,9 @@ internal;
 所有图片等静态资源都通过访问php来获取。Php接收请求，解析真实路径，X-Accel-Redirect把真实路径以静态资源的方式输出。权限的判断可以再php接收请求后进行判断。
 
 header("X-Accel-Redirect: /files/" . $path);
+
+```java
+// fileDir 配置的target
+response.setHeader("X-Accel-Redirect", fileDir +File.separator+filePath);
+```
+
