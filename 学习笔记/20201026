@@ -1,0 +1,61 @@
+供应商建议退货，直接点击Add，只出现提示语，未focus和边框变红
+
+![1603785744290](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1603785744290.png)
+
+#### view
+
+#### 供应商退货
+
+![1603679744059](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1603679744059.png)
+
+##### This order is still under review or not confirmed return!  表示这条单子已经添加过了。
+
+```sql
+(select count(*) from od0000 t where t.org_order_id = #{orderId,jdbcType=VARCHAR} and t.order_type = '02' and t.order_sts = '00' and t.review_status in(1,5,6,10)) audit_num/*统计正在审核的退货单*/
+```
+
+##### Please enter the correct Source Document No.!
+
+- 若可以正确下拉的话，店铺供应商也不为空，可能是店铺失效或供应商失效，应修改提示语！
+- PR-942434-168 这个订单不允许订货，是因为vendor_id C0466在ma2000中没在有效期内。
+- 提示语已修改
+
+供应商建议退货原单号收货下拉可以下拉收货中未审核通过的原单号，（已修改）
+
+#### 2020/10/27
+
+![1603781597566](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1603781597566.png)
+
+![1603781539085](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1603781539085.png)
+
+很有可能就是同一个订单号可以多次退货，生成不同的退货单号。这个栏位是把所有的退货单里退货数量加起来的,展示出该单号已经退货过的数量。
+
+
+
+#### 可优化：再议
+
+![1603692635915](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1603692635915.png)
+
+除去od0000.return_type = ‘20’,的订单号 
+
+```sql
+od0000.order_id not in (select od0000.org_order_id from od0000 where od0000.return_type = ‘20’)
+```
+
+##### 2020/10/28
+
+![1603873286106](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1603873286106.png)
+
+建议：现在该submit的功能是高权限的人可以直接审核，不用save保存，但是画面是从view点进来的，如果不save，无法进入View画面。建议将submit换为Approval，有审核意见框出现。如图所示
+
+![1603873532309](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1603873532309.png)
+
+
+
+
+
+1.直接退货未保存头档供应商，未保存明细供应商
+
+2.头档数据审核状态review_status为保存.
+
+3.back时状态为原单号退货的时候，原单号被禁用掉

@@ -22,3 +22,46 @@
 - [16 pickerPosition 选择框位置](https://blog.csdn.net/hizzyzzh/article/details/51212867#316-pickerposition-选择框位置)
 - [17 showMeridian 是否显示上下午](https://blog.csdn.net/hizzyzzh/article/details/51212867#317-showmeridian-是否显示上下午)
 - [18 initialDate 初始化日期时间](https://blog.csdn.net/hizzyzzh/article/details/51212867#318-initialdate-初始化日期时间)
+
+
+
+4、结束时间
+
+```javascript
+// 开始日
+        m.ud_start_date.datetimepicker({
+            language:'en',
+            format: 'dd/mm/yyyy',
+            maxView:4,
+            startView:2,
+            minView:2,
+            autoclose:true,
+            todayHighlight:true,
+            todayBtn:true
+        }).on('changeDate', function (ev) {
+            if (ev.date) {
+                m.ud_end_date.datetimepicker('setStartDate', new Date(ev.date.valueOf()))
+            } else {
+                m.ud_end_date.datetimepicker('setStartDate', null);
+            }
+
+        });
+        // 结束日
+        m.ud_end_date.datetimepicker({
+            language:'en',
+            format: 'dd/mm/yyyy',
+            maxView:4,
+            startView:2,
+            minView:2,
+            autoclose:true,
+            todayHighlight:true,
+            todayBtn:true
+        }).on('changeDate', function (ev) {
+            if (ev.date) {
+                m.ud_start_date.datetimepicker('setEndDate', new Date(ev.date.valueOf()))
+            } else {
+                m.ud_start_date.datetimepicker('setEndDate', new Date());
+            }
+        });
+```
+

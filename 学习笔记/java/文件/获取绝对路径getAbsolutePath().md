@@ -1,6 +1,6 @@
 ## getPath()与getAbsolutePath()的区别
 
-```
+```java
 public class TextPath {
 	public static void main(String[] args) {
 		File file = new File("workspace\\test\\test1.txt"); 
