@@ -1,0 +1,49 @@
+S@PGTYPE           brek2
+S@PROGRAM          iyed110
+S@TRANIN_STRUCT    ied102
+S@OUT1_STRUCT      ied104
+S@KEY              payment_no,payment_type,payment_kb,vendor,recieve_date,delivery_date,buy_tax_rate
+@VARABLE           int       tbl_point
+@VARABLE           char      wk_store_mg[4]
+@VARABLE           char      wk_payment_type[2]
+@TABLE_01          ied001    vendor vendor,regist_no
+@FUNC1             ied102    ied104 out1
+@INITIAL_01        ied104    1
+
+/*   INITSHORI                 */
+strcpy(wk_store_mg,"950");
+strcpy(wk_payment_type,"3");
+@@initial 01 out1
+/*   INITSHORI   END           */
+
+/*   READSHORI          */
+@@strccpy record ied102 out1 ied104
+@@tblsearch 01 tbl_point record.vendor
+if (tbl_point != -1){
+   strcpy(out1.regist_no,((rec_table_01) + tbl_point)->regist_no);
+}
+strcpy(out1.pay_type,"");
+strcpy(out1.check_mg,"");
+strcpy(out1.account_flg,"");
+strcpy(out1.zero_flg,"");
+strcpy(out1.minus_flg,"");
+strcpy(out1.disquery_flg,"");
+strcpy(out1.print_flg,"");
+strcpy(out1.pay_flg,"0");
+strcpy(out1.disquery_reason,"");
+strcpy(out1.store_mg,wk_store_mg);
+strcpy(out1.payment_type,wk_payment_type);
+out1.delivery_date_real = 0;
+out1.accounts = 0.0;
+out1.shori_date = 0;
+out1.realpay = 0.0;
+out1.pay_po_id = 0;
+memset(out1.grand_div, '0', sizeof(out1.grand_div)-1 );
+memcpy(out1.grand_div+2,record.vendor,1);
+@@write out1
+@@initial 01 out1
+/*   READSHORI   END    */
+
+/*   ENDSHORI           */
+/*   ENDSHORI    END    */
+

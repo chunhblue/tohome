@@ -1,0 +1,64 @@
+S@PGTYPE           brek2
+S@PROGRAM          iyed120
+S@TRANIN_STRUCT    ied101
+S@OUT1_STRUCT      ied105
+S@KEY              payment_no1,vendor,recieve_date_pc,delivery_date_dc
+@VARABLE           double    wk_payment_no
+@VARABLE           double    wk_payment
+@VARABLE           long      wk_buy_tax_rate
+@VARABLE           long      wk_delivery_date_real
+@VARABLE           long      wk_recieve_date
+@VARABLE           long      wk_delivery_date
+@VARABLE           double    wk_accounts
+@VARABLE           double    wk_realpay
+@FUNC1             ied101    ied105 out1
+@INITIAL_01        ied105    1
+
+/*   INITSHORI      */
+@@initial 01 out1
+/*   INITSHORI END  */
+
+/*   READSHORI          */
+@@strccpy record ied101 out1 ied105
+
+/*payment_no:支付通知书号*/
+wk_payment_no = atof(record.payment_no1);
+out1.payment_no = wk_payment_no;
+
+wk_payment = atof(record.payment_mg);
+if (strcmp(record.drcr_type,"1") == 0){
+    out1.payment = (-1)*wk_payment;
+} else {
+    out1.payment = wk_payment;
+}
+
+wk_buy_tax_rate = atol(record.buy_tax_rate_mg);
+out1.buy_tax_rate = wk_buy_tax_rate;
+
+/*delivery_date_real：实际支付日*/
+wk_delivery_date_real = atol(record.delivery_date_real_mg);
+out1.delivery_date_real = wk_delivery_date_real;
+
+/*recieve_date:结算日*/
+wk_recieve_date = atol(record.recieve_date_pc);
+out1.recieve_date = wk_recieve_date;
+
+/*delivery_date：预计支付日*/
+wk_delivery_date = atol(record.delivery_date_dc);
+out1.delivery_date = wk_delivery_date;
+
+/*accounts：帐扣金额*/
+wk_accounts = atol(record.accounts_mg);
+out1.accounts = wk_accounts;
+
+/*realpay：实际支付金额*/
+wk_realpay = atol(record.realpay_mg);
+if (strcmp(record.drcr_type2,"1") == 0){
+    out1.realpay = (-1)*wk_realpay;
+} else {
+    out1.realpay = wk_realpay;
+}
+
+@@write out1
+@@initial 01 out1
+/*   READSHORI   END    */

@@ -1,0 +1,38 @@
+S@PGTYPE                match2
+S@PROGRAM               iyed235
+S@MAIN_STRUCT           ied020
+S@TRANIN_STRUCT         ied020
+S@OUT1_STRUCT           ied020
+S@KEY                   regist_no,tax_po_no
+@MA_POOL		100
+@VARABLE		int idx
+
+/* MATCHING    */
+  /* 对每一条match上的master的处理 */
+  for ( idx=0; idx<ma_pool_count; idx++ ) {
+	out1 = ma_pool[idx];
+  	out1.bm_flg[0] = '1';
+  	@@write out1
+  }
+/* MATCHING END */
+
+/* READTR_MAARISHORI     */
+  /* 对每一条match上的tran的处理 */
+  out1 = *tran;
+  out1.bm_flg[0] = '1';
+  @@write out1
+/* READTR_MAARISHORI END */
+
+/* READTR_MANASHISHORI     */
+  /* 对每一条没有match上的tran的处理 */
+  out1 = *tran;
+  @@write out1
+/* READTR_MANASHISHORI END */
+
+/* MAONLY     */
+  /* 对每一条没有match上的master的处理 */
+ for ( idx=0; idx<ma_pool_count; idx++ ) {
+	out1 = ma_pool[idx];
+	@@write out1
+ }
+/* MAONLY END */

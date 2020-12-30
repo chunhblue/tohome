@@ -1,0 +1,3 @@
+iyed019ld
+1.正确创建表IYED_PAY_LIST
+2.edi_pay_list_t.dat的数据正确导入数据库IYED_PAY_LIST表内

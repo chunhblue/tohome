@@ -1,0 +1,40 @@
+S@PGTYPE           match2
+S@PROGRAM          iyed190
+S@MAIN_STRUCT      ied104
+S@TRANIN_STRUCT    ied104
+S@OUT1_STRUCT      ied104
+S@KEY              payment_no
+@INITIAL_01        ied104
+
+/*   INITSHORI                 */
+@@initial 01 out1
+/*   INITSHORI   END           */
+
+/*   READMASKIP                   */
+/*   READMASKIP            END    */
+
+/*   READTRSKIP           */
+/*   READTRSKIP    END    */
+
+/*   MAONLY          */
+out1 = master;
+@@write out1
+@@initial 01 out1
+/*   MAONLY   END    */
+
+/*   MATCHING    */
+out1 = master;
+strcpy(out1.disquery_flg,tran.disquery_flg);
+strcpy(out1.disquery_reason,tran.disquery_reason);
+@@write out1
+@@initial 01 out1
+/*   MATCHING END  */
+
+/* TRANONLY */
+/* TRANONLY END */
+
+/*   READTR_MAARISHORI                 */
+/*   READTR_MAARISHORI     END    */ 
+
+/*   READTR_MANASHISHORI          */
+/*   READTR_MANASHISHORI  END     */

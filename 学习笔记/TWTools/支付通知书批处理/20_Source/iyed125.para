@@ -1,0 +1,57 @@
+S@PGTYPE           match2
+S@PROGRAM          iyed125
+S@MAIN_STRUCT      ied104
+S@TRANIN_STRUCT    ied104
+S@OUT1_STRUCT      ied104
+S@KEY              payment_no,vendor,recieve_date,delivery_date
+@VARABLE           long   wk_today
+@VARABLE           long  wk_recieve_date_ma
+@VARABLE           long  wk_recieve_date_tr
+@VARABLE           long  wk_day_13month
+@INITIAL_01        ied104
+
+/*   INITSHORI                 */
+wk_today = set_gettoday();
+if (wk_today == -1) {
+   printf(" ** ABEND!! set_gettoday **\n");
+   exit(-1);
+}
+set_getdate(wk_today,-12L,2L,&wk_day_13month);
+printf("13 month ago is : %d\n",wk_day_13month);
+wk_recieve_date_ma = 0;
+wk_recieve_date_tr = 0;
+@@initial 01 out1
+/*   INITSHORI   END           */
+
+/*   READMASKIP                   */
+int_let((char*)&wk_recieve_date_ma,&buf[MASTER_recieve_date_POS],MASTER_recieve_date_LEN);
+if (wk_recieve_date_ma < wk_day_13month){
+    continue;}
+/*   READMASKIP            END    */
+
+/*   READTRSKIP           */
+int_let((char*)&wk_recieve_date_tr,&buf[TRAN_recieve_date_POS],TRAN_recieve_date_LEN);
+if (wk_recieve_date_tr < wk_day_13month){
+    continue;}
+/*   READTRSKIP    END    */
+
+
+/*   MAONLY                       */
+out1 = master;
+@@write out1
+@@initial 01 out1
+/*   MAONLY                END    */
+
+/*   MATCHING            */
+out1 = tran;
+@@write out1
+@@initial 01 out1
+
+/*   MATCHING     END    */
+
+/*   TRANONLY                     */
+out1 = tran;
+@@write out1
+@@initial 01 out1
+/*   TRANONLY              END    */
+

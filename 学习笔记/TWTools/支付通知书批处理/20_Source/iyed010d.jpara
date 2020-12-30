@@ -1,0 +1,17 @@
+@J  iyed010d
+
+@S  hizuke.sh
+export SET_APLDATEF=$CCDATA/apldate
+
+@S  iyed101
+@T1 IYED_PAY_LIST
+@O1 edi_pay_list_p_tmp
+
+@S  iyed100
+@I1 edi_pay_list_p_tmp
+@O1 edi_pay_list_p
+
+@S  iyed103
+@T1 IYED_PAY_CHECK
+@O1 edi_pay_list_check
+

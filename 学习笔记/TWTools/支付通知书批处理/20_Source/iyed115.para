@@ -1,0 +1,86 @@
+S@PGTYPE           match2
+S@PROGRAM          iyed115
+S@MAIN_STRUCT      ied104
+S@TRANIN_STRUCT    ied104
+S@OUT1_STRUCT      ied104
+S@OUT2_STRUCT      ied104
+S@KEY              payment_no,payment_type,vendor,recieve_date,delivery_date,buy_tax_rate
+@VARABLE           long      wk_today
+@TABLE_01          ied102    payment_no payment_no
+@INITIAL_01        ied104    1
+@INITIAL_02        ied104    2
+
+/*   INITSHORI                 */
+wk_today = set_gettoday();
+if (wk_today == -1) {
+   printf(" ** ABEND!! set_gettoday **\n");
+   exit(-1);
+}
+@@initial 01 out1
+@@initial 02 out2
+/*   INITSHORI   END           */
+
+/*   MAONLY                       */
+/*   MAONLY                END    */
+
+/*   TRANONLY                     */
+strcpy(out1.account_flg,"0");
+strcpy(out1.zero_flg,"0");
+strcpy(out1.minus_flg,"0");
+strcpy(out1.disquery_flg,"0");
+strcpy(out1.print_flg,"0");
+@@tblsearch 01 tbl_point tran.payment_no
+if (tbl_point != -1){
+   strcpy(out1.store_mg,"950");
+}
+@@write out1
+@@initial 01 out1
+/*   TRANONLY              END    */
+
+/*   READTR_MAARISHORI            */
+out1 = *tran;
+out2 = *tran;
+if ((master -> payment != tran -> payment) 
+    || (master -> accounts != tran -> accounts)
+    || (master -> realpay != tran -> realpay)){
+    out1.shori_date = wk_today;
+    out2.shori_date = wk_today;
+    strcpy(out2.account_flg,master -> account_flg);
+    strcpy(out2.zero_flg,master -> zero_flg);
+    strcpy(out2.minus_flg,master -> minus_flg);
+    strcpy(out2.disquery_flg,master -> disquery_flg);
+    strcpy(out2.print_flg,master -> print_flg);
+    out2.pay_po_id = master -> pay_po_id;
+    strcpy(out2.disquery_reason,master -> disquery_reason);
+    strcpy(out2.store_mg,master -> store_mg);
+    @@write out2
+    @@initial 02 out2
+} else {
+out1.shori_date = master ->shori_date;
+}
+strcpy(out1.account_flg,master -> account_flg);
+strcpy(out1.zero_flg,master -> zero_flg);
+strcpy(out1.minus_flg,master -> minus_flg);
+strcpy(out1.disquery_flg,master -> disquery_flg);
+strcpy(out1.print_flg,master -> print_flg);
+out1.pay_po_id = master -> pay_po_id;
+strcpy(out1.disquery_reason,master -> disquery_reason);
+strcpy(out1.store_mg,master -> store_mg);
+@@write out1
+@@initial 01 out1
+
+/*   READTR_MAARISHORI     END    */
+
+/*   READTR_MANASHISHORI          */
+out1 = *tran;
+strcpy(out1.account_flg,"0");
+strcpy(out1.zero_flg,"0");
+strcpy(out1.minus_flg,"0");
+strcpy(out1.disquery_flg,"0");
+strcpy(out1.print_flg,"1");
+@@write out1
+@@initial 01 out1
+/*   READTR_MANASHISHORI   END    */
+
+/*   MATCHING                     */
+/*   MATCHING              END    */

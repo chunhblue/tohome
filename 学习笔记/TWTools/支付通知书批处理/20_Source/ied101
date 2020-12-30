@@ -1,0 +1,19 @@
+struct ied101 {
+@ied01   /* payment_no1              c[11] */
+@imv01   /* vendor                   c[7]  */
+@img04   /* drcr_type                c[2]  */
+@ied03   /* payment_mg               c[12] */
+@img31   /* buy_tax_rate_mg          c[6]  */
+@ied05   /* pay_type                 c[3]  */
+@img05   /* delivery_date_real_mg    c[9]  */
+@ied06   /* check_mg                 c[11] */
+@iod27   /* recieve_date_pc          c[9]  */
+@idc12   /* delivery_date_dc         c[9]  */
+@ied07   /* accounts_mg              c[12] */
+@ied08   /* drcr_type2               c[2]  */
+@ied09   /* realpay_mg               c[12] */
+@ied81   /* pay_flg                  c[2]  */
+@img02   /* store_mg                 c[4]  */
+char     c_r[2];
+};
+

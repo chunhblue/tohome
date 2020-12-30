@@ -1,0 +1,33 @@
+S@PGTYPE           brek2
+S@PROGRAM          iyed106
+S@TRANIN_STRUCT    ied103
+S@OUT1_STRUCT      ied103
+S@KEY              payment_no
+@VARABLE           double    count_page_nbrs
+@VARABLE           int       count_line_nbrs
+@FUNC1             ied103    ied103 out1
+@INITIAL_01        ied103    1
+
+/*   INITSHORI                 */
+count_page_nbrs = 0;
+count_line_nbrs = 0;
+@@initial 01 out1
+/*   INITSHORI   END           */
+
+/*   READSHORI          */
+count_line_nbrs = count_line_nbrs + 1;
+if (count_line_nbrs % 50 == 1){
+    count_page_nbrs = count_page_nbrs + 1;
+}
+@@strccpy record ied103 out1 ied103
+out1.line_nbrs = count_line_nbrs;
+out1.page_nbrs = count_page_nbrs;
+@@write out1
+@@initial 01 out1
+
+/*   READSHORI   END    */
+
+/*   payment_no BREAKSHORI       */
+count_page_nbrs = 0;
+count_line_nbrs = 0;
+/*   payment_no BREAKSHORI   END */

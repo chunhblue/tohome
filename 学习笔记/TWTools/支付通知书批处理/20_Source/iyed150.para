@@ -1,0 +1,22 @@
+S@PGTYPE           brek2
+S@PROGRAM          iyed150
+S@TRANIN_STRUCT    ied104
+S@OUT1_STRUCT      ied104
+S@KEY              payment_no,payment_type,vendor,recieve_date,delivery_date,buy_tax_rate
+@VARABLE           int       tbl_point
+@TABLE_01          ied104    vendor vendor
+@INITIAL_01        ied104    1
+
+/*   INITSHORI                 */
+@@initial 01 out1
+/*   INITSHORI   END           */
+
+/*   READSHORI          */
+out1 = record;
+@@tblsearch 01 tbl_point record.vendor
+if (tbl_point != -1){
+   strcpy(out1.account_flg,"1");/*该供应商帐扣不够扣*/
+}
+@@write out1
+@@initial 01 out1
+/*   READSHORI   END    */

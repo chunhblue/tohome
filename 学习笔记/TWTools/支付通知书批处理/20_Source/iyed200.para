@@ -1,0 +1,33 @@
+S@PGTYPE                brek2
+S@PROGRAM               iyed200
+S@TRANIN_STRUCT         ied021
+S@OUT1_STRUCT           ied020
+S@KEY                   regist_no,tax_po_no
+@INITIAL_01		ied020 1
+@VARABLE		char tax_no_temp[16]
+@VARABLE		char regist_no_temp[21]
+
+/* READSHORI     */
+  sscanf(record.tax_po_no,"%s",tax_no_temp); 
+  if( strcmp(tax_no_temp,"99999999") != 0 ){
+	@@initial 01 out1
+    strcpy(out1.company,"095");
+	strcpy(out1.vendor,record.vendor);
+	sscanf(record.regist_no," %s",regist_no_temp);
+	sprintf(out1.regist_no,"%-20s",regist_no_temp);
+	sprintf(out1.tax_po_no,"%-15s",tax_no_temp);
+	strcpy(out1.tax_po_type,record.tax_po_type);
+    strcpy(out1.store_mg,record.store_mg);
+	out1.data_date = atoi(record.data_date_c);
+	out1.nontaxable_cost_amnt = atof(record.cost_nontax_amount_mg);
+	out1.tax_rate = atoi(record.buy_tax_rate_mg);
+	out1.cost_tax_amnt = atof(record.tax_amount_mg);
+	out1.taxable_cost_amnt = atof(record.cost_tax_amount_mg);
+	out1.state_flg[0] = '2';
+	out1.bm_flg[0] = '0';
+	out1.simple_err_flg[0] = '0';
+	out1.recieve_date = atoi(record.receive_date_mg);
+
+	@@write out1
+  }
+/* READSHORI END */

@@ -1,0 +1,35 @@
+S@PGTYPE           match2
+S@PROGRAM          iyed105
+S@MAIN_STRUCT      ied103
+S@TRANIN_STRUCT    ied102
+S@OUT1_STRUCT      ied103
+S@KEY              payment_no,payment_kb,vendor,po_number_mg
+@INITIAL_01        ied103
+@FUNC1             ied102 ied103 out1
+@MA_POOL           100
+@VARABLE           int idx
+
+/*   INITSHORI                 */
+@@initial 01 out1
+/*   INITSHORI   END           */
+
+/*   MAONLY                       */
+for ( idx=0; idx<ma_pool_count; idx++ ) {
+    out1 = ma_pool[idx];
+    @@write out1
+    @@initial 01 out1
+}
+/*   MAONLY                END    */
+
+/* READTR_MAARISHORI     */
+@@strccpy *tran ied102 out1 ied103
+@@write out1
+@@initial 01 out1
+/* READTR_MAARISHORI END */
+
+/* READTR_MANASHISHORI     */
+@@strccpy *tran ied102 out1 ied103
+@@write out1
+@@initial 01 out1
+/* READTR_MANASHISHORI END */
+

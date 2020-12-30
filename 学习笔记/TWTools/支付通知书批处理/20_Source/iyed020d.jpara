@@ -1,0 +1,65 @@
+@J iyed020d
+
+@S hizuke.sh
+export SET_APLDATEF=$CCDATA/apldate
+
+@S iyed200
+@I1 EDI_INVOICE_FROMMG
+@O1 edi_iyed200_out
+
+@S s_02_iyed020d_01
+@I1 edi_iyed200_out
+@O1 iyed200_sort
+
+@S iyed205
+@T1 iyed_tax_receipt
+@O1 edi_tax_data_tmp
+
+@S iyed210
+@I1 iyed200_sort
+@I2 edi_tax_data_tmp
+@O1 edi_iyed210_out1
+@O2 edi_iyed210_out2
+
+@S s_02_iyed020d_02
+@I1 edi_iyed210_out2
+@O1 iyed205_out2_sort
+
+@S iyed215
+@I1 iyed115_out2_sort
+@I2 iyed205_out2_sort
+@O1 edi_iyed215_out
+
+@S s_02_iyed020d_03
+@I1 edi_pay_list_t
+@O1 edi_pay_list_sort
+
+@S iyed225
+@I1 edi_iyed215_out
+@T1 edi_pay_list_sort
+@O1 edi_iyed225_out
+
+@S s_02_iyed020d_04
+@I1 edi_iyed210_out1
+@O1 iyed210_out1_sort
+
+@S iyed230
+@I1 iyed210_out1_sort
+@O1 edi_iyed230_out1
+@O2 edi_iyed230_out2
+
+@S iyed235
+@I1 edi_iyed230_out1
+@I2 edi_iyed230_out2
+@O1 edi_iyed235_out
+
+@S iyed240
+@I1 edi_iyed235_out
+@O1 edi_iyed240_out
+
+@S cat_file.sh
+cat $CCDATA/edi_iyed240_out $CCDATA/edi_iyed225_out > $CCDATA/iyed020d_cat_temp1
+
+@S s_02_iyed020d_05
+@I1 iyed020d_cat_temp1
+@O1 edi_tax_data

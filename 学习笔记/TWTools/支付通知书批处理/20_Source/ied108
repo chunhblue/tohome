@@ -1,0 +1,18 @@
+struct ied108 {
+@ied21   /* payment_no               double */
+@ied02   /* payment_type             c[2]   */
+@imv01   /* vendor                   c[7]   */
+@ied25   /* regist_no                c[21]  */
+@imi57   /* grand_div                c[4]   */
+@ied10   /* payment                  double */
+@ied69   /* payment_nontax           double */
+@ied70   /* payment_tax              double */
+@imi64   /* buy_tax_rate             long   */
+@imi20   /* tax_type                 c[2]   */
+@iod03   /* recieve_date             long   */
+@iod02   /* delivery_date            long   */
+@ied11   /* accounts                 double */
+@iia92   /* shori_date               long   */
+@ied71   /* alert_flg                c[2]   */
+};
+

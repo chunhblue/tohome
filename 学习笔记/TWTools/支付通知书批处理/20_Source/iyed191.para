@@ -1,0 +1,18 @@
+S@PGTYPE           brek2
+S@PROGRAM          iyed191
+S@TRANIN_STRUCT    ied104
+S@OUT1_STRUCT      ied108
+S@KEY              payment_no
+@FUNC1             ied104    ied108 out1
+@INITIAL_01        ied108    1
+
+/*   INITSHORI      */
+@@initial 01 out1
+/*   INITSHORI END  */
+
+/*   READSHORI          */
+@@strccpy record ied104 out1 ied108
+strcpy(out1.alert_flg,"1");
+@@write out1
+@@initial 01 out1
+/*   READSHORI   END    */

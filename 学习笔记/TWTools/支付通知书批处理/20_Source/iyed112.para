@@ -1,0 +1,21 @@
+S@PGTYPE           brek2
+S@PROGRAM          iyed112
+S@TRANIN_STRUCT    ied102
+S@OUT1_STRUCT      ied102
+S@KEY              payment_no,payment_type,payment_kb,vendor,recieve_date,delivery_date,po_number_mg,data_date
+@INITIAL_01        ied102    1
+
+/*   INITSHORI                 */
+/*   INITSHORI   END           */
+
+/*   READSHORI          */
+if( record.data_date <= 20130930 ){
+    out1 = record;
+    @@write out1
+    @@initial 01 out1
+}
+/*   READSHORI   END    */
+
+/*   ENDSHORI           */
+/*   ENDSHORI    END    */
+

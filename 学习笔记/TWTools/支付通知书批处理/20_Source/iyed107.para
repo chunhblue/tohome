@@ -1,0 +1,28 @@
+S@PGTYPE           brek2
+S@PROGRAM          iyed107
+S@TRANIN_STRUCT    ied103
+S@OUT1_STRUCT      ied103
+S@OUT2_STRUCT      ied103
+S@KEY              payment_no,payment_kb,vendor,po_number_mg
+@INITIAL_01        ied103    1
+@INITIAL_02        ied103    2
+
+/*   INITSHORI      */
+@@initial 01 out1
+@@initial 02 out2
+/*   INITSHORI END  */
+
+/*   READSHORI          */
+if (strcmp(record.payment_kb,"3") == 0){
+out1 = record;
+@@write out1
+@@initial 01 out1
+} else {
+out2 = record;
+@@write out2
+@@initial 02 out2
+}
+/*   READSHORI   END    */
+
+/*   ENDSHORI           */
+/*   ENDSHORI    END    */

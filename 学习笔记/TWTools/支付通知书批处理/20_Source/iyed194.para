@@ -1,0 +1,33 @@
+S@PGTYPE           brek2
+S@PROGRAM          iyed194
+S@TRANIN_STRUCT    ied104
+S@OUT1_STRUCT      ied104
+S@KEY              payment_no
+@INITIAL_01        ied104    1
+
+/*   INITSHORI      */
+@@initial 01 out1
+/*   INITSHORI END  */
+
+/*   READSHORI          */
+out1 = record;
+if (strcmp(record.payment_type,"3") == 0){
+    out1.realpay = record.payment;
+    out1.payment = record.payment + record.accounts;
+} else {
+if (strcmp(record.tax_type,"1") !=0) {
+out1.payment_tax=floor((record.payment*record.buy_tax_rate/(10000.0+record.buy_tax_rate))+0.5);
+} else {
+out1.payment_tax=floor((record.payment*record.buy_tax_rate/10000.0)+0.5);
+}
+out1.payment_nontax=record.payment-out1.payment_tax;
+}
+if ((strcmp(record.regist_no,"                    ") == 0) ||
+    (strcmp(record.regist_no,"0                   ") == 0) ||
+    (strcmp(record.regist_no,"00000000000000000000") == 0)){
+    strcpy(out1.zero_flg,"0");
+    strcpy(out1.minus_flg,"0");
+}
+@@write out1
+@@initial 01 out1
+/*   READSHORI   END    */

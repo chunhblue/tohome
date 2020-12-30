@@ -1,0 +1,32 @@
+S@PGTYPE           match2
+S@PROGRAM          iyed195
+S@MAIN_STRUCT      ied104
+S@TRANIN_STRUCT    ied104
+S@OUT1_STRUCT      ied104
+S@KEY              payment_no,vendor,recieve_date,delivery_date
+@INITIAL_01        ied104
+
+/*   INITSHORI                 */
+@@initial 01 out1
+/*   INITSHORI   END           */
+
+/*   MAONLY                       */
+out1 = master;
+@@write out1
+@@initial 01 out1
+/*   MAONLY                END    */
+
+/*   MATCHING                     */
+out1 = tran;
+@@write out1
+@@initial 01 out1
+/*   MATCHING              END    */
+
+/*   TRANONLY                     */
+out1 = tran;
+@@write out1
+@@initial 01 out1
+/*   TRANONLY              END    */
+
+/*   ENDSHORI           */
+/*   ENDSHORI    END    */

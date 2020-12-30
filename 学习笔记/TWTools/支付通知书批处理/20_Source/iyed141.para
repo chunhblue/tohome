@@ -1,0 +1,27 @@
+S@PGTYPE           brek2
+S@PROGRAM          iyed141
+S@TRANIN_STRUCT    ied030
+S@OUT1_STRUCT      ied104
+S@KEY              vendor
+@VARABLE           double wk_accounts
+@VARABLE           int    wk_fee_flg
+@FUNC1             ied030 ied104 out1
+@INITIAL_01        ied104    1
+
+/*   INITSHORI                 */
+@@initial 01 out1
+/*   INITSHORI   END           */
+
+/*   READSHORI          */
+if (strcmp(record.receive_type,"02") == 0){
+    @@strccpy record ied030 out1 ied104
+    wk_accounts = atof(record.fee_amnt_mg);
+    wk_fee_flg = atoi(record.fee_flg);
+    if (wk_fee_flg == 1){
+       out1.accounts = (-1)*wk_accounts;}
+    else{
+       out1.accounts = wk_accounts;}
+    @@write out1
+    @@initial 01 out1
+}
+/*   READSHORI   END    */

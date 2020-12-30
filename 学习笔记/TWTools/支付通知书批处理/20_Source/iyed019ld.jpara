@@ -1,0 +1,26 @@
+@J  iyed019ld
+
+@S  crt_iyed_pay_list_tbl.sql 
+@T1 iyed_pay_list
+
+@S  crt_iyed_pay_list_tbl_idx.sql
+
+@S  crt_iyed_pay_deno_tbl.sql
+@T1 iyed_pay_deno
+
+@S  crt_iyed_pay_deno_tbl_idx.sql
+
+@S  crt_iyed_alert_list_tbl.sql 
+@T1 iyed_alert_list
+
+#@S  crt_iyed_alert_list_tbl_idx.sql
+
+@S  load_iyed_pay_list_tbl_DIRECT.ctl edi_pay_list_t
+@T1 iyed_pay_list
+
+@S  load_iyed_pay_deno_tbl_DIRECT.ctl edi_pay_deno_t
+@T1 iyed_pay_deno
+
+@S  load_iyed_alert_list_tbl_DIRECT.ctl edi_alert_list
+@T1 iyed_alert_list
+

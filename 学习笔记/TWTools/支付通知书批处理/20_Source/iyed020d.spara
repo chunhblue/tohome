@@ -1,0 +1,5 @@
+01 sort2 ied020 vendor,tax_po_no,tax_po_type
+02 sort2 ied020 vendor,pay_po_id
+03 sort2 ied104 vendor,pay_po_id,delivery_date_real
+04 sort2 ied020 company,regist_no,tax_po_no,tax_po_type
+05 sort2 ied020 vendor,tax_rate,tax_po_no,tax_po_type tax_rate

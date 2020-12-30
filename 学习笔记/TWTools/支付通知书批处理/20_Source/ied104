@@ -1,0 +1,30 @@
+struct ied104 {
+@ied21   /* payment_no               double */
+@ied02   /* payment_type             c[2]   */
+@imv01   /* vendor                   c[7]   */
+@ied25   /* regist_no                c[21]  */
+@imi57   /* grand_div                c[4]   */
+@ied10   /* payment                  double */
+@ied69   /* payment_nontax           double */
+@ied70   /* payment_tax              double */
+@imi64   /* buy_tax_rate             long   */
+@imi20   /* tax_type                 c[2]   */
+@ied05   /* pay_type                 c[3]   */
+@iod23   /* delivery_date_real       long   */
+@ied06   /* check_mg                 c[11]  */
+@iod03   /* recieve_date             long   */
+@iod02   /* delivery_date            long   */
+@ied11   /* accounts                 double */
+@ied12   /* realpay                  double */
+@iia92   /* shori_date               long   */
+@ied13   /* account_flg              c[2]   */
+@ied14   /* zero_flg                 c[2]   */
+@ied15   /* minus_flg                c[2]   */
+@ied16   /* disquery_flg             c[2]   */
+@ied22   /* print_flg                c[2]   */
+@ied81   /* pay_flg                  c[2]   */
+@ied17   /* pay_po_id                long   */
+@ied26   /* disquery_reason          c[81]  */
+@img02   /* store_mg                 c[4]   */
+};
+

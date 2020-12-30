@@ -1,0 +1,81 @@
+S@PGTYPE           brek2
+S@PROGRAM          iyed102
+S@TRANIN_STRUCT    ied106
+S@OUT1_STRUCT      ied102
+S@KEY              payment_no2,payment_kb,vendor,recieve_date_pc,delivery_date_dc,po_number_mg,data_date_c
+@VARABLE           double    wk_payment_no
+@VARABLE           long      wk_recieve_date
+@VARABLE           long      wk_delivery_date
+@VARABLE           long      wk_data_date
+@VARABLE           char      wk_dpt[4]
+@VARABLE           double    wk_payment
+@VARABLE           int       i
+@VARABLE           double    wk_po_number_mg
+@FUNC1             ied106    ied102 out1
+@INITIAL_01        ied102    1
+
+/*   INITSHORI      */
+@@initial 01 out1
+/*   INITSHORI END  */
+
+/*   READSHORI          */
+@@strccpy record ied106 out1 ied102
+
+/*payment_no:支付通知书号*/
+wk_payment_no = atof(record.payment_no2);
+out1.payment_no = wk_payment_no;
+
+/*payment_type:0，代销；1，店中店；2，经销*/
+strcpy(out1.payment_type,"3");
+
+/*recieve_date:结算日*/
+wk_recieve_date = atol(record.recieve_date_pc);
+out1.recieve_date = wk_recieve_date;
+
+/*delivery_date：预计支付日*/
+wk_delivery_date = atol(record.delivery_date_dc);
+out1.delivery_date = wk_delivery_date;
+
+/*po_number:传票号码不足10位的左补0*/
+wk_po_number_mg=atof(record.po_number_mg);
+sprintf(out1.po_number_mg,"%010.0f",wk_po_number_mg);
+
+/*data_date:传票日期*/
+wk_data_date = atol(record.data_date_c);
+out1.data_date = wk_data_date;
+
+for (i=0;i<3;i++)
+{out1.dpt[i] = record.dpt_mg[i+1];}
+
+out1.buy_tax_rate = 0;
+
+/*payment_kb:0,销售传票；1，合同费用；2，商谈费用*/
+wk_payment = atof(record.payment_mg);
+if ((strcmp(record.payment_kb,"0") == 0) || (strcmp(record.payment_kb,"3") == 0)){
+    if (strcmp(record.drcr_type,"0") == 0){
+        out1.payment = wk_payment;
+    } else {
+        out1.payment = -wk_payment;
+    }
+} else {
+   if (strcmp(record.drcr_type,"0") == 0){
+      out1.payment = -wk_payment;
+   } else {
+      out1.payment = wk_payment;
+   }
+}
+
+/*sortline_no为全0*/
+out1.line_nbrs = 0;
+
+/*star_flg=‘1’，默认不显示‘*’*/
+strcpy(out1.star_flg, "1");
+
+out1.id_num = atof(record.id_num_c);
+
+@@write out1
+@@initial 01 out1
+/*   READSHORI   END    */
+
+/*   ENDSHORI           */
+/*   ENDSHORI    END    */

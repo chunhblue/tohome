@@ -1,0 +1,13 @@
+struct ied001{
+@imv01   /* vendor       c[7]  */
+@ied25   /* regist_no    c[21] */
+@imv03   /* vendor_name  c[41] */
+@ied27   /* addressc     c[61] */
+@ied28   /* bankcnm      c[41] */
+@ied29   /* bankacno     c[41] */
+@ied37   /* bankaccnm    c[41] */
+@ied38   /* telno        c[15] */
+@ied39   /* faxno        c[15] */
+@ied17   /* pay_po_id    long  */
+@ied77   /* vendor_type  c[2]  */
+};

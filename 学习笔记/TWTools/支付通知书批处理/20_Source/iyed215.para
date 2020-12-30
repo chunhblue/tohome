@@ -1,0 +1,11 @@
+S@PGTYPE		match2
+S@PROGRAM		iyed215
+S@MAIN_STRUCT		ied104
+S@TRANIN_STRUCT		ied020
+S@OUT1_STRUCT		ied020
+S@KEY			vendor,pay_po_id
+
+/* READTR_MANASHISHORI     */
+  out1 = *tran;
+  @@write out1
+/* READTR_MANASHISHORI END */

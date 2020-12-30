@@ -1,0 +1,21 @@
+struct ied103 {
+@ied21   /* payment_no               double   */
+@ied19   /* payment_kb               c[2]   */
+@ied23   /* page_nbrs                long   */
+@ied24   /* line_nbrs                long   */
+@imv01   /* vendor                   c[7]   */
+@img03   /* po_number_mg             c[11]  */
+@iod19   /* po_type                  c[4]   */
+@iib94   /* data_date                long   */
+@img02   /* store_mg                 c[4]   */
+@imi11   /* dpt                      c[4]   */
+@imi64   /* buy_tax_rate             long   */
+@imi20   /* tax_type                 c[2]   */
+@ied10   /* payment                  double */
+@ied69   /* payment_nontax           double */
+@ied70   /* payment_tax              double */
+@ied80   /* star_flg                 c[2]   */
+@ied83   /* id_num                   double */
+@ied20   /* fix_20                   c[21]  */
+};
+

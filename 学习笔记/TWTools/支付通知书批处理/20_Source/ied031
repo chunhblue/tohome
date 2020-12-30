@@ -1,0 +1,28 @@
+struct ied031 {
+@ied40   /* register_date_mg   c[9]   */
+@ied41   /* pay_number		   c[11]  */
+@img02   /* store_mg		   c[4]   */
+@imv01   /* vendor		       c[7]   */
+@ied66   /* tenanto_no_mg	   c[11]  */
+@img10   /* dpt_mg		       c[5]   */
+@ied42   /* money_type		   c[2]   */
+@ied43   /* operate_type	   c[2]   */
+@ied44   /* contract_num	   c[11]  */
+@ied45   /* resign_num		   c[4]   */
+@ied59   /* discuss_num		   c[11]  */
+@ied46   /* fee_open_date_mg   c[9]   */
+@ied47   /* fee_end_date_mg	   c[9]   */
+@ied48   /* fee_num			   c[3]   */
+@ied49   /* fee_name		   c[21]  */
+@ied50   /* fee_flg		       c[3]   */
+@ied51   /* fee_amnt_mg		   c[12]  */
+@ied52   /* receive_type	   c[3]   */
+@ied53   /* receive_date_mg	   c[9]   */
+@ied54   /* receipt_num		   c[51]  */
+@ied55   /* reparation_num	   c[41]  */
+@ied60   /* contract_over_num  c[11]  */
+@ied56   /* enter_person	   c[8]   */
+@ied57   /* check_person	   c[8]   */
+@ied58   /* memo			   c[201] */
+char     c_r[2];
+};

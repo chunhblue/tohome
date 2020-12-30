@@ -1,0 +1,240 @@
+@J  iyed011d
+
+@S  hizuke.sh
+export SET_APLDATEF=$CCDATA/apldate
+
+@S  iyed102
+@I1 EDI_PAYMENT_TEN_FROMMG
+@O1 &&1
+
+@S  iyed100
+@I1 EDI_PAYMENT_FROMMG
+@O1 &&2
+
+@S  cat1.sh
+cat $TMPDIR/o1_iyed102.$JOBID $TMPDIR/o2_iyed100.$JOBID > $CCDATA/iyed011d_cat1_tmp
+
+@S  s_02_iyed011d_01
+@I1 iyed011d_cat1_tmp
+@O1 edi_payment_day
+
+@S  iyed112
+@I1 edi_payment_day
+@O1 edi_payment_day_tmp1
+
+@S  s_sum_iyed011d_08
+@I1 edi_payment_day_tmp1
+@O1 edi_payment_day_tmp2
+
+@S  s_02_iyed011d_05
+@I1 edi_pay_deno_p
+@O1 &&
+
+@S  iyed105
+@I1 &&
+@I2 edi_payment_day
+@O1 &&
+
+@S  iyed107
+@I1 &&
+@O1 iyed107_out1
+@O2 iyed107_out2
+
+@S  s_02_iyed011d_04
+@I1 iyed107_out1
+@O1 &&1
+
+@S  s_02_iyed011d_06
+@I1 iyed107_out2
+@O1 &&2
+
+@S  cat6.sh
+cat $TMPDIR/o1_s_02_iyed011d_04.$JOBID $TMPDIR/o2_s_02_iyed011d_06.$JOBID > $CCDATA/iyed011d_cat6_tmp
+
+@S  iyed106
+@I1 iyed011d_cat6_tmp
+@O1 edi_pay_deno_tmp
+
+@S  s_sum_iyed011d_01_N1
+@I1 edi_payment_day
+@O1 &&
+
+@S  iyed110
+@I1 &&
+@T1 $CCDATA/edi_vendor
+@O1 &&3
+
+@S  iyed109
+@I1 edi_payment_day
+@O1 &&4
+
+@S  s_sum_iyed011d_01_N2
+@I1 &&4
+@O1 &&5
+
+@S  iyed111
+@I1 &&3
+@I2 &&5
+@O1 edi_pay_list
+
+@S  iyed115
+@I1 edi_pay_list_p
+@I2 edi_pay_list
+@T1 $CCDATA/edi_payment_day_tmp2
+@O1 iyed115_out1
+@O2 iyed115_out2
+
+@S  s_sum_iyed011d_02
+@I1 iyed115_out2
+@O1 iyed115_out2_sort
+
+@S  iyed116
+@I1 iyed115_out1
+@T1 $CCDATA/iyed115_out2_sort
+@O1 edi_pay_list_tmp
+
+@S  iyed121
+@I1 EDI_REALPAY_TEN_FROMMG
+@O1 &&1
+
+@S  iyed120
+@I1 EDI_REALPAY_FROMMG
+@O1 &&2
+
+@S  cat2.sh
+cat $TMPDIR/o1_iyed121.$JOBID $TMPDIR/o2_iyed120.$JOBID > $CCDATA/iyed011d_cat2_tmp
+
+@S  s_02_iyed011d_02
+@I1 iyed011d_cat2_tmp
+@O1 edi_realpay_day
+
+@S  iyed124
+@I1 edi_pay_list_p
+@I2 edi_realpay_day
+@O1 &&
+
+@S  iyed125
+@I1 edi_realpay_p
+@I2 &&
+@O1 edi_realpay_t
+
+@S  iyed130
+@I1 edi_realpay_t
+@I2 edi_pay_list_tmp
+@O1 iyed130_out
+
+@S  iyed135
+@I1 iyed130_out
+@I2 edi_pay_deno_tmp
+@O1 edi_pay_deno_t
+
+@S  iyed140
+@I1 EDI_UNRECEVIE_TEN_FROMMG
+@O1 &&1
+
+@S  iyed141
+@I1 EDI_UNRECEVIE_FROMMG
+@O1 &&2
+
+@S  cat3.sh
+cat $TMPDIR/o1_iyed140.$JOBID $TMPDIR/o2_iyed141.$JOBID > $CCDATA/iyed011d_cat3_tmp
+
+@S  s_sum_iyed011d_04
+@I1 iyed011d_cat3_tmp
+@O1 &&6
+
+@S  s_sum_iyed011d_03
+@I1 edi_pay_list_tmp
+@O1 &&7
+
+@S  iyed145
+@I1 &&6
+@I2 &&7
+@O1 iyed145_out
+
+@S  iyed150
+@I1 edi_pay_list_tmp
+@T1 $CCDATA/iyed145_out
+@O1 iyed150_out
+
+@S  iyed155
+@I1 iyed150_out
+@O1 iyed155_out
+
+@S  s_sum_iyed011d_05_N1
+@I1 iyed155_out
+@O1 iyed155_out_sort
+
+@S  iyed160
+@I1 iyed150_out
+@T1 $CCDATA/iyed155_out_sort
+@O1 iyed160_out
+
+@S  iyed165
+@I1 iyed160_out
+@O1 iyed165_out
+
+@S  iyed170
+@I1 iyed165_out
+@O1 iyed170_out
+
+@S  s_sum_iyed011d_05_N2
+@I1 iyed170_out
+@O1 iyed170_out_sort1
+
+@S  iyed175
+@I1 iyed165_out
+@T1 $CCDATA/iyed170_out_sort1
+@O1 iyed175_out
+
+@S  s_sum_iyed011d_06
+@I1 iyed170_out
+@O1 iyed170_out_sort2
+
+@S  iyed180
+@I1 iyed175_out
+@T1 $CCDATA/iyed170_out_sort2
+@O1 &&
+
+@S  s_sum_iyed011d_07
+@I1 iyed170_out
+@O1 iyed170_out_sort3
+
+@S  iyed185
+@I1 &&
+@T1 $CCDATA/iyed170_out_sort3
+@O1 iyed185_out
+
+@S  iyed190
+@I1 iyed185_out
+@I2 edi_pay_list_check
+@O1 &&8
+
+@S  iyed194
+@I1 &&8
+@O1 &&9
+
+@S  iyed195
+@I1 edi_realpay_t
+@I2 &&9
+@O1 iyed195_out
+
+@S  s_02_iyed011d_03
+@I1 iyed195_out
+@O1 edi_pay_list_t
+
+@S  iyed191
+@I1 iyed145_out
+@O1 &&1
+
+@S  iyed192
+@I1 iyed170_out
+@O1 &&2
+
+@S  iyed193
+@I1 iyed155_out
+@O1 &&3
+
+@S  cat5.sh
+cat $TMPDIR/o1_iyed191.$JOBID  $TMPDIR/o2_iyed192.$JOBID  $TMPDIR/o3_iyed193.$JOBID > $CCDATA/edi_alert_list
+

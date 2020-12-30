@@ -1,0 +1,21 @@
+iyed011d
+
+iyed110.para
+1.确认out1.payment_type = 3
+2.确认out1.store_mg = 950
+
+iyed115.para
+1.确认匹配成功的out1.store_mg = master.store_mg
+		out2.store_mg = master.store_mg
+
+iyed120.para
+1.确认out1.store_mg = record.store_mg
+
+iyed124.para
+1.确认out1.store_mg = tran.store_mg
+
+iyed140.para
+1.确认out1.stroe_mg = record.store_mg
+
+iyed141.para
+1.确认out1.stroe_mg = record.store_mg

@@ -1,0 +1,80 @@
+S@PGTYPE           brek2
+S@PROGRAM          iyed100
+S@TRANIN_STRUCT    ied100
+S@OUT1_STRUCT      ied102
+S@KEY              payment_no1,payment_type,vendor,recieve_date_pc,delivery_date_dc,po_number_mg,data_date_c
+@VARABLE           double    wk_payment_no
+@VARABLE           long      wk_recieve_date
+@VARABLE           long      wk_delivery_date
+@VARABLE           long      wk_data_date
+@VARABLE           char      wk_dpt[4]
+@VARABLE           long      wk_buy_tax_rate
+@VARABLE           long      wk_line_nbrs
+@VARABLE           double    wk_po_number_mg
+@VARABLE           double    wk_payment,wk_payment_nontax,wk_payment_tax
+@VARABLE           int       i
+@FUNC1             ied100    ied102 out1
+@INITIAL_01        ied102    1
+
+/*   INITSHORI      */
+@@initial 01 out1
+/*   INITSHORI END  */
+
+/*   READSHORI          */
+@@strccpy record ied100 out1 ied102
+/*payment_no：支付通知书号*/
+wk_payment_no = atof(record.payment_no1);
+out1.payment_no = wk_payment_no;
+
+/*payment_kb:0,销售传票；1，合同费用；2，商谈费用*/
+strcpy(out1.payment_kb,"3");
+
+/*recieve_date:结算日*/
+wk_recieve_date = atol(record.recieve_date_pc);
+out1.recieve_date = wk_recieve_date;
+
+/*delivery_date：预计支付日*/
+wk_delivery_date = atol(record.delivery_date_dc);
+out1.delivery_date = wk_delivery_date;
+
+/*po_number:传票号码不足10位的左补0*/
+wk_po_number_mg=atof(record.po_number_mg);
+sprintf(out1.po_number_mg,"%010.0f",wk_po_number_mg);
+
+/*data_date:传票日期*/
+wk_data_date = atol(record.data_date_c);
+out1.data_date = wk_data_date;
+
+for (i=0;i<3;i++)
+{out1.dpt[i] = record.dpt_mg[i+1];}
+
+wk_buy_tax_rate = atol(record.buy_tax_rate_mg);
+out1.buy_tax_rate = wk_buy_tax_rate;
+
+wk_payment = atof(record.payment_mg);
+wk_payment_nontax = atof(record.payment_nontax_mg);
+wk_payment_tax = atof(record.payment_tax_mg);
+/*drcr_type:付款金额正负标志，0为正，1为负*/
+if (strcmp(record.drcr_type,"1") == 0){
+   out1.payment = -wk_payment;
+   out1.payment_nontax = (-1)*wk_payment_nontax;
+   out1.payment_tax = (-1)*wk_payment_tax;}
+else {
+   out1.payment = wk_payment;
+   out1.payment_nontax = wk_payment_nontax;
+   out1.payment_tax = wk_payment_tax;}
+
+wk_line_nbrs = atol(record.line_nbrs_c);
+out1.line_nbrs = wk_line_nbrs;
+
+out1.id_num = 0.0;
+
+sprintf(out1.fix_20,"%20s",record.fix_6);
+
+@@write out1
+@@initial 01 out1
+/*   READSHORI   END    */
+
+/*   ENDSHORI           */
+/*   ENDSHORI    END    */
+

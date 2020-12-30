@@ -1,0 +1,16 @@
+struct ied106 {
+@ied18   /* payment_no2              c[13] */
+@ied19   /* payment_kb               c[2]  */
+@imv01   /* vendor                   c[7]  */
+@iod27   /* recieve_date_pc          c[9]  */
+@idc12   /* delivery_date_dc         c[9]  */
+@img03   /* po_number_mg             c[11] */
+@iib99   /* data_date_c              c[9]  */
+@img02   /* store_mg                 c[4]  */
+@img10   /* dpt_mg                   c[5]  */
+@img04   /* drcr_type                c[2]  */
+@ied03   /* payment_mg               c[12] */
+@ied20   /* fix_20                   c[21] */
+@ied82   /* id_num_c                 c[11] */
+char     c_r[2];
+};

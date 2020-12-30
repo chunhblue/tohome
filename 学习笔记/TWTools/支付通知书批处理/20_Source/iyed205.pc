@@ -1,0 +1,370 @@
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+#include <memory.h>
+#include <sys/stat.h>
+#include <malloc.h>
+#include <time.h>
+#define  NORMAL  0
+#define  NOREC   1403
+#define  GETNULL -1405
+#define shcclr(kstr){ int i; for( i=0; i<sizeof(kstr); kstr[i]='\0', i++ ); }
+#define shvclr(kstr){ int i; for( i=0, kstr.len=0; i<sizeof(kstr.arr); kstr.arr[i]='\0', i++ ); }
+
+FILE    *fp_log;
+int_let (intvar, source, len)
+int     *intvar;
+char    *source;
+int     len;
+{
+	if (sizeof (int) != len) {
+		log_d ("ERROR int_let length[%d]\n", len);
+		error_exit ("ABORT");
+	}
+	memcpy ((char *) intvar, source, sizeof (int));
+}
+
+
+short_let (intvar, source, len)
+int   *intvar;
+char  *source;
+int   len;
+{
+	if (sizeof (short) != len) {
+		log_d ("ERROR short_let length[%d]\n", len);
+		error_exit ("ABORT");
+	}
+	memcpy ((char *) intvar, source, sizeof (short));
+}
+
+
+double_let (intvar, source, len)
+int    *intvar;
+char   *source;
+int    len;
+{
+	if (sizeof (double) != len) {
+		log_d ("ERROR int_let length[%d]\n", len);
+		error_exit ("ABORT");
+	}
+	memcpy ((char *) intvar, source, sizeof (double));
+}
+
+
+uchar_let (intvar, source, len)
+unsigned char   *intvar;
+char            *source;
+int             len;
+{
+	if (sizeof (unsigned char) != len) {
+		log_d ("ERROR uchar_let length[%d]\n", len);
+		error_exit ("ABORT");
+	}
+	memcpy ((char *) intvar, source, sizeof (unsigned char));
+}
+
+
+str_let (dist, src, len)
+char    *dist;
+char    *src;
+int     len;
+{
+	memcpy (dist, src, len);
+	dist[len] = '\0';
+}
+
+
+log_exit (message)
+char    *message;
+{
+	fprintf (stdout, "%s\n", message);
+	error_exit ();
+}
+
+
+error_exit ()
+{
+	exit (-1);
+}
+
+
+normal_exit ()
+{
+	exit (0);
+}
+
+
+log_0 (form)
+char   *form;
+{
+	fprintf (stdout, form);
+}
+
+
+log_s (form, s1)
+char    *form;
+char    *s1;
+{
+	fprintf (stdout, form, s1);
+}
+
+
+log_d (form, d1)
+char    *form;
+int     d1;
+{
+	fprintf (stdout, form, d1);
+}
+
+
+int	
+open_record (fnam, rec_size, fp)
+char    *fnam;
+int     rec_size;
+FILE **fp;
+{
+	struct stat st;
+
+	stat (fnam, &st);
+	if ((st.st_size % rec_size) != 0) {
+		log_s ("File Size ERROR.[%s]\n", fnam);
+		log_d ("RecSize=%d\n", rec_size);
+		log_d ("File Size=%d\n", st.st_size);
+		error_exit ();
+	}
+	if ((*fp = fopen (fnam, "rb")) == NULL) {
+		log_s ("file [%s] can't Open.\n", fnam);
+		error_exit ();
+	}
+	return (st.st_size / rec_size);
+}
+
+
+EXEC SQL INCLUDE sqlca;
+
+int     main(argc, argv)
+int     argc;
+char    *argv[];
+{
+
+	/*   HOST VARAVLE          */
+
+	EXEC SQL BEGIN DECLARE SECTION;
+	VARCHAR  uid[20];
+	VARCHAR  pwd[20];
+	VARCHAR  wk_cmd[2000];
+
+	VARCHAR     company[100][3+1];	
+	VARCHAR     vendor[100][6+1];
+	VARCHAR     regist_no[100][20+1];
+	long         pay_po_id[100];
+	VARCHAR      tax_po_no[100][15+1];
+	VARCHAR      tax_po_type[100][3+1];
+	long         data_date[100];
+	double       nontaxable_cost_amount[100];
+	long         tax_rate[100];
+	double       tax_amount[100];
+	double       taxable_cost_amount[100];
+	VARCHAR       state_flag[100][1+1];
+	VARCHAR       bm_flag[100][1+1];
+	VARCHAR       error_flag[100][1+1];
+	VARCHAR       note[100][40+1];
+	short         ind_note[100];
+	VARCHAR       online_date_time[100][15+1];
+	long         ZERO[100];
+	long          receive_date[100];
+	short        ind_receive_date[100];
+	VARCHAR     store_mg[100][3+1];
+
+	EXEC SQL END   DECLARE SECTION;
+
+	/*   HOST VARAVLE  END     */
+
+	/*   LOCAL VARAVLE         */
+
+	int rec_count;
+	int last_count;
+	int idx;
+
+	FILE * fp_out1;
+	int  out1_count;
+	
+	char *iyed_tax_receipt_tbl;
+
+	/*   LOCAL VARAVLE  END    */
+
+	/*   connect to oracle     */
+
+	shvclr(uid);
+	strcpy(uid.arr, getenv("SETUID"));
+	uid.len = strlen(uid.arr);
+
+	shvclr(pwd);
+	strcpy(pwd.arr, getenv("SETPWD"));
+	pwd.len = strlen(pwd.arr);
+
+EXEC SQL        CONNECT:
+uid IDENTIFIED BY:
+	pwd;
+	if (sqlca.sqlcode == NORMAL) {
+	} else {
+		printf(" CONNECT ERROR  %d\n", sqlca.sqlcode);
+		return(-1);
+	}
+
+	/*    init                  */
+
+	if (argc != 2) {
+		fprintf (stderr, "Usage... %s outFileName \n", argv[0]);
+		error_exit ();
+	}
+	if ((fp_out1 = fopen (argv[1], "wb")) == NULL) {
+		log_s ("file [%s]", argv[1]);
+		log_exit ("OUTPUT_FILE can't Open");
+	}
+	out1_count = 0;
+	
+	iyed_tax_receipt_tbl = getenv("TBL_01");	
+
+	/*    init end              */
+
+
+	/* CURSOR DECLARE 01 */
+	shvclr(wk_cmd);
+
+	strcpy(wk_cmd.arr, "SELECT  COMPANY, VENDOR, REGIST_NO, ");
+
+	strcat(wk_cmd.arr, "PAY_PO_ID, TAX_PO_NO,TAX_PO_TYPE, ");
+	
+	strcat(wk_cmd.arr, "DATA_DATE, NONTAXABLE_COST_AMOUNT,TAX_RATE, ");
+	
+	strcat(wk_cmd.arr, "TAX_AMOUNT, TAXABLE_COST_AMOUNT,STATE_FLAG, ");
+	
+	strcat(wk_cmd.arr, "BM_FLAG, ERROR_FLAG,NOTE, ");
+	 
+	 strcat(wk_cmd.arr, "ONLINE_DATE_TIME, RECEIVE_DATE, STORE_MG ");
+	
+
+	strcat(wk_cmd.arr, "FROM  ");
+
+	strcat(wk_cmd.arr, iyed_tax_receipt_tbl );
+
+	strcat(wk_cmd.arr, " ORDER BY VENDOR,TAX_PO_NO,TAX_PO_TYPE " );
+
+	
+	wk_cmd.len = strlen(wk_cmd.arr);
+
+	wk_cmd.arr[wk_cmd.len] = '\0';
+
+EXEC SQL PREPARE prepare_01 FROM :
+	wk_cmd;
+
+	if (sqlca.sqlcode != NORMAL) {
+		printf("PREPARE ERROR = %d\n", sqlca.sqlcode);
+		return (-1);
+	}
+	EXEC SQL DECLARE cursor_01 CURSOR FOR prepare_01;
+	EXEC SQL OPEN cursor_01;
+
+	if (sqlca.sqlcode != NORMAL) {
+		printf("OPEN ERROR = %d\n", sqlca.sqlcode);
+		return (-1);
+	}
+
+	/* FETCH 01 */
+	last_count = 0;
+	while (1) {
+		EXEC SQL   FETCH  cursor_01  INTO
+       : company,
+	   : vendor,
+	   : regist_no,
+	   : pay_po_id,
+	   : tax_po_no,
+	   : tax_po_type,
+	   : data_date,
+	   : nontaxable_cost_amount,
+	   : tax_rate,
+	   : tax_amount,
+	   : taxable_cost_amount,
+	   : state_flag,
+	   : bm_flag,
+	   : error_flag,
+	   : note
+	   : ind_note,
+	   : online_date_time,
+	   : receive_date
+	   : ind_receive_date,
+	   : store_mg;
+
+		if (sqlca.sqlcode != NORMAL && sqlca.sqlcode != NOREC && sqlca.sqlcode != GETNULL) {
+			printf("FETCH 01   ERROR = %d\n", sqlca.sqlcode);
+			return (-1);
+		}
+		for (idx = 0; idx < sqlca.sqlerrd[2] - last_count; idx++) {
+			
+			/* INITAL OUTPUT */
+			company[idx].arr[company[idx].len]   = '\0';
+			vendor[idx].arr[vendor[idx].len]   = '\0';
+			regist_no[idx].arr[regist_no[idx].len]   = '\0';
+			tax_po_no[idx].arr[tax_po_no[idx].len]   = '\0';
+			tax_po_type[idx].arr[tax_po_type[idx].len]   = '\0';
+			note[idx].arr[note[idx].len]   = '\0';
+			online_date_time[idx].arr[online_date_time[idx].len]   = '\0';
+			store_mg[idx].arr[store_mg[idx].len]   = '\0';
+			ZERO[idx]=0;
+			
+			/* MAIN  01 */
+			fprintf(fp_out1, "%-3s", company[idx].arr);
+			fprintf(fp_out1, "%-6s", vendor[idx].arr);
+			fprintf(fp_out1, "%-20s", regist_no[idx].arr);
+			fwrite(&pay_po_id[idx], sizeof(int), 1, fp_out1);
+			fprintf(fp_out1, "%-15s", tax_po_no[idx].arr);
+			fprintf(fp_out1, "%-3s", tax_po_type[idx].arr);
+			fwrite(&data_date[idx], sizeof(int), 1, fp_out1);
+			fwrite(&nontaxable_cost_amount[idx], sizeof(double), 1, fp_out1);
+			fwrite(&tax_rate[idx], sizeof(int), 1, fp_out1);
+			fwrite(&tax_amount[idx], sizeof(double), 1, fp_out1);
+			fwrite(&taxable_cost_amount[idx], sizeof(double), 1, fp_out1);
+			fprintf(fp_out1, "%-1s", state_flag[idx].arr);
+			fprintf(fp_out1, "%-1s", bm_flag[idx].arr);
+			fprintf(fp_out1, "%-1s", error_flag[idx].arr);
+			if(ind_note[idx]!=-1)
+	        fprintf(fp_out1, "%-40s", note[idx].arr);
+			else
+			fprintf(fp_out1, "%-40s", "");
+			fprintf(fp_out1, "%-15s", online_date_time[idx].arr);
+            if(ind_receive_date[idx] != -1)
+			fwrite(&receive_date[idx], sizeof(int), 1, fp_out1);
+		    else
+			fwrite(&ZERO[idx], sizeof(int), 1, fp_out1);
+			
+			fprintf(fp_out1, "%-3s", store_mg[idx].arr);
+			out1_count++;
+		}	
+		
+		last_count = sqlca.sqlerrd[2];
+		if (sqlca.sqlcode == NOREC) {
+			break;
+		}
+	}
+	rec_count = sqlca.sqlerrd[2];
+
+	/* CURSOR CLOSE 01 */
+	EXEC SQL CLOSE cursor_01;
+
+	/*    end                  */
+
+	printf("    ******   iyed205  end   ***************\n");
+	printf("    *                                      \n");
+	printf("    *      out1    = %d \n", out1_count);
+	printf("    *                                      \n");
+	printf("    ***************************************\n");
+	fclose(fp_out1);
+
+	/*    end end              */
+	EXEC SQL COMMIT WORK RELEASE;
+	exit(0);
+}
+

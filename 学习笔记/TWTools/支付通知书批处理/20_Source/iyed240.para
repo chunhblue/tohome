@@ -1,0 +1,20 @@
+S@PGTYPE                brek2
+S@PROGRAM               iyed240
+S@TRANIN_STRUCT         ied020
+S@OUT1_STRUCT           ied020
+S@KEY                   company,regist_no,tax_po_no
+@VARABLE		char update_date[9]
+@VARABLE		int invalidate_date
+
+/* INITSHORI     */
+  set_getdate(set_gettoday(),-6,2,&invalidate_date);
+/* INITSHORI END */
+
+/* READSHORI     */
+   memcpy(update_date,record.online_date_time,8);
+   update_date[8] = '\0';
+   if( atoi(update_date) >= invalidate_date ){
+       out1 = record;
+       @@write out1
+   }
+/* READSHORI END */

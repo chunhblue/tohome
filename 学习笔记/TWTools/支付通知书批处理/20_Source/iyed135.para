@@ -1,0 +1,35 @@
+S@PGTYPE           match2
+S@PROGRAM          iyed135
+S@MAIN_STRUCT      ied104
+S@TRANIN_STRUCT    ied103
+S@OUT1_STRUCT      ied103
+S@KEY              payment_no,vendor
+@INITIAL_01        ied103
+
+/*   INITSHORI                 */
+@@initial 01 out1
+/*   INITSHORI   END           */
+
+/*   READMASKIP                   */
+/*   READMASKIP            END    */
+
+/*   READTRSKIP           */
+/*   READTRSKIP    END    */
+
+/*   MAONLY          */
+/*   MAONLY   END    */
+
+/*   MATCHING    */
+/*   MATCHING END  */
+
+/* TRANONLY */
+/* TRANONLY END */
+
+/*   READTR_MAARISHORI                 */
+out1 = *tran;
+@@write out1
+@@initial 01 out1
+/*   READTR_MAARISHORI     END    */ 
+
+/*   READTR_MANASHISHORI          */
+/*   READTR_MANASHISHORI  END     */

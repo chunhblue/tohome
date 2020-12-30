@@ -1,0 +1,15 @@
+struct ied105 {
+@ied21   /* payment_no               double */
+@imv01   /* vendor                   c[7]   */
+@ied10   /* payment                  double */
+@imi64   /* buy_tax_rate             long   */
+@ied05   /* pay_type                 c[3]   */
+@iod23   /* delivery_date_real       long   */
+@ied06   /* check_mg                 c[11]  */
+@iod03   /* recieve_date             long   */
+@iod02   /* delivery_date            long   */
+@ied11   /* accounts                 double */
+@ied12   /* realpay                  double */
+@ied81   /* pay_flg                  c[2]   */
+@img02   /* store_mg                 c[4]   */
+};

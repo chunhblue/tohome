@@ -1,0 +1,49 @@
+S@PGTYPE                match2
+S@PROGRAM               iyed210
+S@MAIN_STRUCT           ied020
+S@TRANIN_STRUCT         ied020
+S@OUT1_STRUCT           ied020
+S@OUT2_STRUCT		ied020
+S@KEY                   vendor,tax_po_no,tax_po_type
+@VARABLE		char today[16]
+
+/* INITSHORI     */
+  sprintf(today,"%d",set_gettoday());
+  memset(&today[8],'0',7);
+  today[15] = '\0';
+/* INITSHORI END */
+
+/* MATCHING     */
+  out1 = master;
+  out1.state_flg[0]='2';
+  out1.pay_po_id = tran.pay_po_id;
+  strcpy(out1.note_40,tran.note_40);
+  strcpy(out1.online_date_time,today);
+  if( master.nontaxable_cost_amnt != tran.nontaxable_cost_amnt ){
+     out1.simple_err_flg[0]='1';
+  }
+  if( master.cost_tax_amnt != tran.cost_tax_amnt ){
+    out1.simple_err_flg[0]='1';
+  }
+  if( master.taxable_cost_amnt != tran.taxable_cost_amnt ){
+      out1.simple_err_flg[0]='1';
+  }
+  @@write out1
+/* MATCHING END */
+
+/* TRANONLY     */
+  if( tran.state_flg[0] == '1'){
+    out2 = tran;
+    @@write out2
+  }else{
+    out1 = tran;
+    @@write out1
+  }
+/* TRANONLY END */
+
+/* MAONLY     */
+  out1 = master;
+  out1.state_flg[0]='2';
+  strcpy(out1.online_date_time,today);
+  @@write out1
+/* MAONLY END */

@@ -1,0 +1,61 @@
+S@PGTYPE           match2
+S@PROGRAM          iyed124
+S@MAIN_STRUCT      ied104
+S@TRANIN_STRUCT    ied105
+S@OUT1_STRUCT      ied104
+S@KEY              payment_no,vendor,recieve_date,delivery_date
+@INITIAL_01        ied104
+@FUNC1             ied105 ied104 out1
+
+/*   INITSHORI                 */
+@@initial 01 out1
+/*   INITSHORI   END           */
+
+/*   MAONLY                       */
+out1=master;
+if (strcmp(out1.payment_type,"3") == 0){
+out1.payment = master.payment + master.accounts;
+}
+@@write out1
+@@initial 01 out1
+/*   MAONLY                END    */
+
+/*   MATCHING            */
+@@strccpy tran ied105 out1 ied104
+out1.payment_nontax = master.payment_nontax;
+out1.payment_tax = master.payment_tax;
+strcpy(out1.payment_type,master.payment_type);
+strcpy(out1.regist_no,master.regist_no);
+strcpy(out1.grand_div,master.grand_div);
+strcpy(out1.tax_type,master.tax_type);
+out1.shori_date = master.shori_date;
+strcpy(out1.account_flg,master.account_flg);
+strcpy(out1.zero_flg,master.zero_flg);
+strcpy(out1.minus_flg,master.minus_flg);
+strcpy(out1.disquery_flg,master.disquery_flg);
+strcpy(out1.print_flg,master.print_flg);
+out1.pay_po_id = master.pay_po_id;
+strcpy(out1.disquery_reason,master.disquery_reason);
+@@write out1
+@@initial 01 out1
+
+/*   MATCHING     END    */
+
+/*   TRANONLY                     */
+@@strccpy tran ied105 out1 ied104
+strcpy(out1.payment_type,"");
+strcpy(out1.regist_no,"");
+strcpy(out1.grand_div,"");
+strcpy(out1.tax_type,"");
+strcpy(out1.account_flg,"0");
+strcpy(out1.zero_flg,"0");
+strcpy(out1.minus_flg,"0");
+strcpy(out1.disquery_flg,"0");
+strcpy(out1.print_flg,"0");
+out1.shori_date = 0;
+out1.pay_po_id = 0;
+strcpy(out1.disquery_reason,"");
+@@write out1
+@@initial 01 out1
+/*   TRANONLY              END    */
+

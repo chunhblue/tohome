@@ -1,0 +1,15 @@
+struct ied021 {
+@ied36
+@ied34
+@iib99
+@ied53
+@imv01
+@ied25
+@img23
+@img31
+@img24
+@img22
+@imc72
+@img02   /* store_mg            c[4]  */
+char c_r[2];
+};

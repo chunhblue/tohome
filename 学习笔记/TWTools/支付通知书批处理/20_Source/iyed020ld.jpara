@@ -1,0 +1,9 @@
+@J iyed020ld
+
+@S crt_iyed_tax_receipt_tbl.sql
+@T1 iyed_tax_receipt
+
+@S crt_iyed_tax_receipt_idx.sql
+
+@S load_iyed_tax_receipt.ctl edi_tax_data
+@T1 iyed_tax_receipt

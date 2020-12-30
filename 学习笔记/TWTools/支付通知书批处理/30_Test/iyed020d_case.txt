@@ -1,0 +1,10 @@
+iyed020d
+
+iyed200.para
+1.当税票号不是99999999时，结构体转换：ied021->ied020并且out1.store_mg = record.store_mg
+
+iyed205.pc
+1.确认正确获取对应数据
+2.确认输出数据对应：
+	store_mg          同数据库中的STORE_MG
+

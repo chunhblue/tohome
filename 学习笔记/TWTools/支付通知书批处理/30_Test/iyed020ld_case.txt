@@ -1,0 +1,3 @@
+iyed020ld
+1.正确创建表IYED_TAX_RECEIPT
+2.iyed_tax_receipt.dat的数据正确导入数据库IYED_TAX_RECEIPT表内

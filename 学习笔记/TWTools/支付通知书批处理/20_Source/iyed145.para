@@ -1,0 +1,43 @@
+S@PGTYPE           match2
+S@PROGRAM          iyed145
+S@MAIN_STRUCT      ied104
+S@TRANIN_STRUCT    ied104
+S@OUT1_STRUCT      ied104
+S@KEY              vendor
+@VARABLE           double wk_zhangkou
+@INITIAL_01        ied104
+
+/*   INITSHORI                 */
+@@initial 01 out1
+/*   INITSHORI   END           */
+
+/*   READMASKIP                   */
+/*   READMASKIP            END    */
+
+/*   READTRSKIP           */
+/*   READTRSKIP    END    */
+
+/*   MAONLY          */
+/*   MAONLY   END    */
+
+/*   MATCHING    */
+if (strcmp(tran.payment_type,"3") != 0) {
+    wk_zhangkou = tran.payment - master.accounts;
+    if ( wk_zhangkou < 0){
+        strcpy(out1.vendor,tran.vendor);
+        strcpy(out1.regist_no,tran.regist_no);
+        strcpy(out1.account_flg,"1");
+        @@write out1
+        @@initial 01 out1
+    }
+}
+/*   MATCHING END  */
+
+/* TRANONLY */
+/* TRANONLY END */
+
+/*   READTR_MAARISHORI                 */
+/*   READTR_MAARISHORI     END    */ 
+
+/*   READTR_MANASHISHORI          */
+/*   READTR_MANASHISHORI  END     */

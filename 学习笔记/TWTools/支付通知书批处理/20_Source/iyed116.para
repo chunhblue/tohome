@@ -1,0 +1,26 @@
+S@PGTYPE           brek2
+S@PROGRAM          iyed116
+S@TRANIN_STRUCT    ied104
+S@OUT1_STRUCT      ied104
+S@KEY              payment_no,payment_type,vendor,recieve_date,delivery_date,buy_tax_rate
+@VARABLE           int       tbl_point
+@VARABLE           long      wk_pay_po_id
+@TABLE_01          ied104    vendor,pay_po_id vendor,pay_po_id
+@INITIAL_01        ied104    1
+
+/*   INITSHORI                 */
+@@initial 01 out1
+/*   INITSHORI   END           */
+
+/*   READSHORI          */
+out1 = record;
+strcpy(out1.account_flg,"0");
+strcpy(out1.zero_flg,"0");
+strcpy(out1.minus_flg,"0");
+@@tblsearch 01 tbl_point record.vendor record.pay_po_id
+if (tbl_point != -1){
+   out1.pay_po_id = 0;
+}
+@@write out1
+@@initial 01 out1
+/*   READSHORI   END    */

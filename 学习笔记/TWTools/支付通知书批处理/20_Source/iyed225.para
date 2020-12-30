@@ -1,0 +1,20 @@
+S@PGTYPE             brek2
+S@PROGRAM            iyed225
+S@TRANIN_STRUCT      ied020
+S@OUT1_STRUCT        ied020
+S@KEY                vendor,pay_po_id
+@VARABLE             int tbl_point
+@TABLE_01	     ied104 vendor,pay_po_id,delivery_date_real vendor,pay_po_id,delivery_date_real
+
+/* INITSHORI     */
+  tbl_point = 0;
+/* INITSHORI END */
+
+/* READSHORI     */
+  @@tblsearch 01 tbl_point record.vendor record.pay_po_id 0 
+  
+  if(tbl_point != -1){
+  	out1 = record;
+  	@@write out1
+  }
+/* READSHORI END */

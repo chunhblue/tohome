@@ -1,0 +1,14 @@
+01  sort2   ied102   payment_no,payment_type,payment_kb,vendor,recieve_date,delivery_date,po_number_mg,data_date,store_mg,dpt,buy_tax_rate
+02  sort2   ied105   payment_no,vendor,recieve_date,delivery_date,buy_tax_rate
+03  sort2   ied104   payment_no,payment_type,vendor,recieve_date,delivery_date,buy_tax_rate
+04  sort2   ied103   payment_no,payment_kb,store_mg,data_date,id_num,po_number_mg,line_nbrs
+05  sort2   ied103   payment_no,payment_kb,vendor,po_number_mg
+06  sort2   ied103   payment_no,payment_kb,store_mg,id_num,po_number_mg
+01  sum2    ied102   payment_no,payment_type,vendor,recieve_date,delivery_date,buy_tax_rate payment,payment_nontax,payment_tax
+02  sum2    ied104   vendor,pay_po_id payment
+03  sum2    ied104   vendor payment,accounts,realpay
+04  sum2    ied104   vendor accounts
+05  sum2    ied104   regist_no payment
+06  sum2    ied104   regist_no,grand_div payment
+07  sum2    ied104   regist_no,grand_div,vendor payment
+08  sum2    ied102   payment_no payment
