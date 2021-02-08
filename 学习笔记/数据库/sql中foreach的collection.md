@@ -21,9 +21,32 @@ foreach元素的属性主要有 item，index，collection，open，separator，c
   \2. 如果传入的是单参数且参数类型是一个array数组的时候，collection的属性值为array
   \3. 如果传入的参数是多个的时候，我们就需要把它们封装成一个Map了，当然单参数也可
 
+#### **实战报错**
+
+org.mybatis.spring.MyBatisSystemException: nested exception is org.apache.ibatis.binding.BindingException: Parameter 'saveRtQtyList' not found. Available parameters are [collection, list]
+
+```sql
+<insert id="addRtQtyListToEs"  parameterType="cn.com.bbut.SaveInventoryQty">
+        INSERT INTO public.user(
+        store_cd,article_id,user_name
+        ) VALUES
+        <foreach collection="saveRtQtyList" item="saveInQty" index="index" separator=",">
+            (#{saveInQty.storeCd},
+            #{saveInQty.articleId},
+            #{saveInQty.userName})
+        </foreach>
+    </insert>
+```
+
+**解析**：saveRtQtyList (xxxXxx)这样的写法容易让mybatis将saveRtQtyList 这个list误认为类对象中的一个字段，只要将xxxXxx修改为 xxxx就可以了。
+
+**修正**： mapper    int addRtQtyListToEs(Collection<SaveInventoryQty> list);
+
+collection="saveRtQtyList"    ---->  collection="list"
+
 以封装成map，实际上如果你在传入参数的时候，在breast里面也是会把它封装成一个Map的，map的key就是参数名，所以这个时候collection属性值就是传入的List或array对象在自己封装的map里面的key 下面分别来看看上述三种情况的示例代码：
 1.单参数List的类型：
- 
+
 
 [![复制代码](https://common.cnblogs.com/images/copycode.gif)](javascript:void(0);)
 
@@ -89,7 +112,7 @@ public List dynamicForeachTest(List ids);
 上述collection为array，对应的Mapper代码：
 public List dynamicForeach2Test(int[] ids);
 对应的测试代码：
-   
+
 
 [![复制代码](https://common.cnblogs.com/images/copycode.gif)](javascript:void(0);)
 
@@ -136,7 +159,7 @@ public List dynamicForeach2Test(int[] ids);
 上述collection的值为ids，是传入的参数Map的key，对应的Mapper代码：
 public List dynamicForeach3Test(Map params);
 对应测试代码：
-  
+
 
 [![复制代码](https://common.cnblogs.com/images/copycode.gif)](javascript:void(0);)
 
@@ -165,3 +188,4 @@ public List dynamicForeach3Test(Map params);
 ```
 
 [![复制代码](https://common.cnblogs.com/images/copycode.gif)](javascript:void(0);)
+
