@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.MA4330Mapper">
+
+  <select id="getList" parameterType="cn.com.bbut.iy.itemmaster.dto.inform.Ma4330DetailParamDto" resultType="cn.com.bbut.iy.itemmaster.dto.inform.Ma4330DetailGridDto">
+    select ma4300.inform_cd, ma4300.inform_title,ma4330.store_cd,
+    ma4330.create_ymd,ma4330.create_hms,ma4330.create_user_id,
+    (select store_name from ma1000
+    where
+    <![CDATA[
+        ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
+    ]]>
+    and ma1000.store_cd = ma4330.store_cd) as store_name,
+    (select code_name log_type_name from cm9010 where
+    ma4330.log_type = cm9010.code_value
+    and cm9010.code_type = '00420'
+    and effective_sts = '10') as log_type_name,
+    (select emp_name create_user_name from ma4200 where
+    ma4330.create_user_id = ma4200.emp_num_id) as create_user_name
+    from ma4330,ma4300
+    where
+    ma4330.inform_cd = ma4300.inform_cd
+    <if test="informCd != null and informCd != ''">
+      AND lower(ma4330.inform_cd) like lower(CONCAT('%',#{informCd},'%'))
+    </if>
+    <if test="informTitle != null and informTitle !=''">
+      AND lower(ma4300.inform_title) like lower(CONCAT('%',#{informTitle},'%'))
+    </if>
+    <if test="logType != null and logType !=''">
+      and ma4330.log_type = #{logType}
+    </if>
+    <if test="startDate != null and startDate !=''">
+      <![CDATA[and  ma4330.create_ymd>=#{startDate}]]>
+    </if>
+    <if test="endDate != null and endDate !=''">
+      <![CDATA[and  ma4330.create_ymd<=#{endDate}]]>
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limitStart >= 0">
+      limit ${limitEnd} offset ${limitStart}
+    </if>
+  </select>
+  <select id="getListCount" parameterType="cn.com.bbut.iy.itemmaster.dto.inform.Ma4330DetailParamDto" resultType="long">
+    select count(*)
+    from ma4330,ma4300
+    where
+    ma4330.inform_cd = ma4300.inform_cd
+    <if test="informCd != null and informCd != ''">
+      AND lower(ma4330.inform_cd) like lower(CONCAT('%',#{informCd},'%'))
+    </if>
+    <if test="informTitle != null and informTitle !=''">
+      AND lower(ma4300.inform_title) like lower(CONCAT('%',#{informTitle},'%'))
+    </if>
+    <if test="startDate != null and startDate !=''">
+      <![CDATA[and  ma4330.create_ymd>=#{startDate}]]>
+    </if>
+    <if test="endDate != null and endDate !=''">
+      <![CDATA[and  ma4330.create_ymd<=#{endDate}]]>
+    </if>
+  </select>
+</mapper>

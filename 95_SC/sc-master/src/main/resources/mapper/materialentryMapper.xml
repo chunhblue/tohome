@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.materialEntryMapper" >
+
+    <resultMap id="BaseItemResult" type="cn.com.bbut.iy.itemmaster.dto.pi0100c.StocktakeItemDTOC">
+        <result column="article_id" property="articleId"></result>
+        <result column="article_name" property="articleName"></result>
+        <result column="effective_start_date" property="effectiveStartDate"></result>
+        <result column="effective_end_date" property="effectiveEndDate"></result>
+        <result column="barcode" property="barcode"></result>
+        <result column="sales_unit_id" property="uom"></result>
+        <result column="spec" property="spec"></result>
+        <result column="first_qty" property="firstQty"></result>
+        <result column="second_qty" property="secondQty"></result>
+        <result column="stock_qty" property="stockQty"></result>
+    </resultMap>
+
+    <resultMap id="BaseItemResult2" type="cn.com.bbut.iy.itemmaster.dto.pi0100c.StocktakeItemDTOC">
+        <result column="article_id" property="articleId"></result>
+        <result column="article_name" property="articleName"></result>
+        <result column="barcode" property="barcode"></result>
+        <result column="sales_unit_id" property="uom"></result>
+        <result column="spec" property="spec"></result>
+        <result column="first_qty" property="firstQty"></result>
+        <result column="second_qty" property="secondQty"></result>
+        <result column="expense_price" property="expensePrice"></result>
+        <result column="stock_qty" property="stockQty"></result>
+    </resultMap>
+
+    <select id="getItemInfo" parameterType="java.lang.String" resultMap="BaseItemResult">
+        SELECT
+            A.article_id,
+            A.article_name,
+            C.default_barcode barcode,
+            D.unit_name sales_unit_id,
+            A.spec
+        FROM
+             MA1100 A
+            left join
+            (select ma11.default_barcode,ma11.vendor_id,ma11.article_id	from ma1110 ma11,ma2240 ma22 where
+             ma11.article_id = ma22.article_id and ma22.store_cd = #{storeCd,jdbcType=VARCHAR}
+            and ma11.vendor_id = ma22.vendor_id AND ma11.structure_cd = (
+            SELECT ma2.admin_structure_cd
+            FROM ma0020 ma2 WHERE
+                ma2.structure_cd = ( SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd,jdbcType=VARCHAR} )
+            )) C on A.article_id = C.article_id ,
+	        ma0220 D
+        WHERE
+            A.article_id = #{itemCode}
+            AND #{businessDate} BETWEEN A.effective_start_date AND A.effective_end_date
+            AND A.sales_unit_id = D.unit_id
+        limit 1
+    </select>
+
+    <!--<select id="getItemInfo" parameterType="java.lang.String" resultMap="BaseItemResult">
+        SELECT
+            T.*,
+            T1.barcode,
+            T2.unit_name
+        FROM
+            ( SELECT * FROM ma1100 WHERE article_id = #{itemCode} AND (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000')
+            BETWEEN effective_start_date AND effective_end_date ) T
+            LEFT JOIN ( SELECT article_id, effective_start_date, barcode FROM ma1140 WHERE is_default = '1' ) T1
+            ON T.article_id = T1.article_id AND T.effective_start_date = T1.effective_start_date
+            LEFT JOIN ( SELECT unit_id, unit_name FROM ma0220 ) T2 ON T.sales_unit_id = T2.unit_id
+        WHERE
+            T.pma_cd IN (SELECT P2.pma_cd FROM PI0100 P1, PI0110 P2 WHERE P1.pi_cd = #{piCd} AND P1.pi_date=#{piDate} AND P1.pi_cd = P2.pi_cd)
+    </select>-->
+
+    <select id="getCountByPicd" resultType="int">
+        SELECT COUNT(P.PI_CD) FROM PI0150 P WHERE P.PI_CD = #{piCd} AND P.PI_DATE = #{piDate}
+    </select>
+
+    <delete id="deleteByPicd">
+        DELETE FROM PI0150 WHERE PI_CD = #{piCd}
+    </delete>
+
+    <insert id="saveItem" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100DTOC">
+        INSERT INTO PI0155(pi_cd,store_cd,remarks,create_user_id,create_ymd,create_hms)
+        VALUES (
+            #{param.piCd},
+            #{param.storeCd},
+            #{param.remarks},
+            #{param.createUserId},
+            #{param.createYmd},
+            #{param.createHms}
+        )
+    </insert>
+
+    <update id="updateItem" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100DTOC">
+        UPDATE pi0155
+        SET
+        store_cd = #{param.storeCd},
+        remarks = #{param.remarks},
+        update_user_id = #{param.updateUserId},
+        update_ymd = #{param.updateYmd},
+        update_hms = #{param.updateHms}
+        WHERE
+            pi_cd = #{param.piCd}
+    </update>
+
+    <insert id="saveAllItem" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100c.StocktakeItemDTOC">
+        INSERT INTO PI0150 (
+        pi_cd,
+        article_id,
+        barcode,
+        qty
+        ) VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (
+            #{item.piCd,jdbcType=VARCHAR},
+            #{item.articleId,jdbcType=VARCHAR},
+            #{item.barcode,jdbcType=VARCHAR},
+            #{item.qty,jdbcType=NUMERIC}
+            )
+        </foreach>
+    </insert>
+
+    <select id="getPI0140ByPrimary" resultMap="BaseItemResult2">
+        SELECT
+            P1.pi_cd,
+            P1.barcode,
+            M1.article_id,
+            M1.article_name,
+            M1.spec,
+            M1.sales_unit_id,
+            P1.qty
+
+        FROM
+            PI0150 P1,
+            MA1100 M1,
+
+            CM9060 C1
+        WHERE
+            P1.pi_cd = #{piCd}
+            AND C1.sp_id = '0000'
+            AND P1.article_id = M1.article_id
+            AND C1.sp_value BETWEEN M1.effective_start_date
+            AND M1.effective_end_date
+
+    </select>
+
+</mapper>

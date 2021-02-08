@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.DaSaleReportMapper">
+    <resultMap id="BaseItemResult" type="cn.com.bbut.iy.itemmaster.dto.daysalereport.DaySaleReportDTO">
+        <result column="psd" property="psd" />
+        <result column="store_name" property="storeName"/>
+        <result column="store_cd" property="storeCd"/>
+        <result column="customer_count" property="avgCustomerNo"/>
+        <result column="acc_date" property="saleDate"/>
+        <result column="sales_amt" property="saleAmt"/>
+        <result column="c_operatorcode" property="amCd"/>
+        <result column="c_operatorname" property="amName"/>
+        <result column="6h-8h" jdbcType="DECIMAL" property="time68"/>
+        <result column="8h-10h" jdbcType="DECIMAL" property="time810"/>
+        <result column="10h-12h" jdbcType="DECIMAL" property="time1012"/>
+        <result column="12h-14h" jdbcType="DECIMAL" property="time1214"/>
+        <result column="shift1" jdbcType="DECIMAL" property="shift1"/>
+        <result column="14h-16h" jdbcType="DECIMAL" property="time1416"/>
+        <result column="16h-18h" jdbcType="DECIMAL" property="time1618"/>
+        <result column="18h-20h" jdbcType="DECIMAL" property="time1820"/>
+        <result column="20h-22h" jdbcType="DECIMAL" property="time2022"/>
+        <result column="shift2" jdbcType="DECIMAL" property="shift2"/>
+        <result column="22h-24h" jdbcType="DECIMAL" property="time2224"/>
+        <result column="0h-2h" jdbcType="DECIMAL" property="time02"/>
+        <result column="2h-4h" jdbcType="DECIMAL" property="time24"/>
+        <result column="4h-6h" jdbcType="DECIMAL" property="time46"/>
+        <result column="shift3" jdbcType="DECIMAL" property="shift3"/>
+        <result column="total_amt" jdbcType="DECIMAL" property="totalAmt"/>
+    </resultMap>
+
+    <select id="selectDaySaleReport01" parameterType="cn.com.bbut.iy.itemmaster.dto.daysalereport.DaySaleReportParamDTO" resultMap="BaseItemResult">
+        SELECT
+            a.psd,
+            a.store_cd,
+            a.store_name,
+            SUM(A.avg_customer_no) as  avg_customer,
+            SUM(A.sale_amt) as  sale_amt_sum,
+            to_char(A.sale_date,'dd/mm/yyyy') AS every_sale_date,
+            a.c_operatorcode,
+            a.c_operatorname
+        FROM
+         (
+        select distinct
+            sa02.sale_date,
+            ma10.store_name,
+            d1.avg_customer_no,
+            d1.sale_amt,
+            ia1.psd,
+            ma10.store_cd,
+            oper.c_operatorcode,
+            oper.c_operatorname
+        from
+            ia0010  ia1
+            left JOIN ma1000  ma10 ON ia1.store_cd=ma10.store_cd,
+            sa0020 sa02,
+            cm9060  c1,
+            in0010  d1,
+            t_operator oper
+        where
+            ma10.store_cd=ia1.store_cd
+            AND sa02.store_cd=ia1.store_cd
+            AND  ia1.store_cd= d1.store_cd
+            AND c1.sp_id = '0000'
+            AND c1.sp_value BETWEEN ma10.effective_start_date
+            AND ma10.effective_end_date
+            AND oper.c_operatorcode = ma10.ofc
+            AND ma10.store_cd IN
+            <foreach item="store" index="index" collection="daySaleReportParamdto.stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            <if test="daySaleReportParamdto.storeName!=null and daySaleReportParamdto.storeName!='' ">
+                AND ma10.store_name=#{daySaleReportParamdto.storeName}
+            </if>
+            <if test="daySaleReportParamdto.effectiveStartDate !=null and daySaleReportParamdto.effectiveEndDate !=null and  daySaleReportParamdto.effectiveEndDate!='' ">
+                AND   to_char(sa02.sale_date,'yyyyMMdd') between #{daySaleReportParamdto.effectiveStartDate} and #{daySaleReportParamdto.effectiveEndDate}
+            </if>
+            <if test="daySaleReportParamdto.effectiveStartDate !=null and daySaleReportParamdto.effectiveStartDate !=''">
+                AND   to_char(sa02.sale_date,'yyyyMMdd') between #{daySaleReportParamdto.effectiveStartDate} and ma10.effective_end_date
+            </if>
+            <if test="daySaleReportParamdto.am!=null and daySaleReportParamdto.am!=''">
+                AND ma10.ofc = #{daySaleReportParamdto.am}
+            </if>
+        )  A
+        GROUP BY
+            a.store_name,
+            a.store_cd,
+            a.c_operatorcode,
+            a.c_operatorname,
+            to_char(A.sale_date,'dd/mm/yyyy'),
+            a.psd
+    </select>
+
+    <select id="selectDaySaleReportCount" parameterType="cn.com.bbut.iy.itemmaster.dto.daysalereport.DaySaleReportParamDTO" resultType="int">
+        select  count(two.*)
+        from
+        (select store_cd,store_name,acc_date,c_operatorcode,c_operatorname,
+        sum(customer_count) customer_count,
+        max(case two_hours when '6h-8h' then sales_amt else 0 end) as "6h-8h",
+        max(case two_hours when '8h-10h' then sales_amt else 0 end) as "8h-10h",
+        max(case two_hours when '10h-12h' then sales_amt else 0 end) as "10h-12h",
+        max(case two_hours when '12h-14h' then sales_amt else 0 end) as "12h-14h",
+        max(case two_hours when '14h-16h' then sales_amt else 0 end) as "14h-16h",
+        max(case two_hours when '16h-18h' then sales_amt else 0 end) as "16h-18h",
+        max(case two_hours when '18h-20h' then sales_amt else 0 end) as "18h-20h",
+        max(case two_hours when '20h-22h' then sales_amt else 0 end) as "20h-22h",
+        max(case two_hours when '22h-24h' then sales_amt else 0 end) as "22h-24h",
+        max(case two_hours when '0h-2h' then sales_amt else 0 end) as "0h-2h",
+        max(case two_hours when '2h-4h' then sales_amt else 0 end) as "2h-4h",
+        max(case two_hours when '4h-6h' then sales_amt else 0 end) as "4h-6h"
+        from
+        (SELECT B.*, T.c_operatorname,T.c_operatorcode,T1.code_name as two_hours
+        FROM
+        (SELECT
+        MA1000.STORE_NAME,
+        IA0010.acc_date,
+        IA0010.store_cd,
+        IA0010.hours,
+        IA0010.customer_count,
+        IA0010.SALES_AMT,
+        IA0010.PSD
+        FROM
+        ia0010
+        LEFT JOIN MA1000 ON IA0010.STORE_CD = MA1000.STORE_CD) AS B LEFT JOIN
+        (SELECT t_operator.c_operatorname,t_operator.c_operatorcode,MA1000.STORE_CD FROM t_operator,MA1000 WHERE
+        MA1000.OFC=t_operator.c_operatorcode) AS T
+        ON T.STORE_CD=B.STORE_CD
+        LEFT JOIN (select code_type,code_value,code_name from cm9010 where code_type = '00840' and effective_sts = '10')
+        T1
+        on B.hours = T1.code_value
+        where 1 =1
+        AND B.store_cd In
+        <foreach item="store" index="index" collection="daySaleReportParamdto.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="daySaleReportParamdto.effectiveStartDate !=null and daySaleReportParamdto.effectiveEndDate !=null and  daySaleReportParamdto.effectiveEndDate!='' ">
+            AND B.acc_date between #{daySaleReportParamdto.effectiveStartDate} and
+            #{daySaleReportParamdto.effectiveEndDate}
+        </if>
+        <if test="daySaleReportParamdto.am!=null and daySaleReportParamdto.am!=''">
+            AND T.c_operatorcode = #{daySaleReportParamdto.am}
+        </if>
+        <if test="daySaleReportParamdto.flg">
+            LIMIT ${daySaleReportParamdto.rows} OFFSET ${daySaleReportParamdto.limitStart}
+        </if>
+        ) as one
+        group by store_cd,store_name,acc_date,c_operatorcode,c_operatorname
+        ) as two
+    </select>
+
+    <select id="selectDaySaleReport" parameterType="cn.com.bbut.iy.itemmaster.dto.daysalereport.DaySaleReportParamDTO" resultMap="BaseItemResult">
+        select  store_cd,store_name,acc_date,c_operatorcode,c_operatorname,customer_count,
+        "6h-8h","8h-10h","10h-12h","12h-14h",("6h-8h"+"8h-10h"+"10h-12h"+"12h-14h") as shift1,
+        "14h-16h","16h-18h","18h-20h","20h-22h",("14h-16h"+"16h-18h"+"18h-20h"+"20h-22h") as shift2,
+        "22h-24h","0h-2h","2h-4h","4h-6h",("22h-24h"+"0h-2h"+"2h-4h"+"4h-6h") as shift3,
+        ("6h-8h"+"8h-10h"+"10h-12h"+"12h-14h"+"14h-16h"+"16h-18h"+"18h-20h"+"20h-22h"+"22h-24h"+"0h-2h"+"2h-4h"+"4h-6h") as total_amt
+        from
+        (select store_cd,store_name,acc_date,c_operatorcode,c_operatorname,
+        sum(customer_count) customer_count,
+        max(case two_hours when '6h-8h' then sales_amt else 0 end) as "6h-8h",
+        max(case two_hours when '8h-10h' then sales_amt else 0 end) as "8h-10h",
+        max(case two_hours when '10h-12h' then sales_amt else 0 end) as "10h-12h",
+        max(case two_hours when '12h-14h' then sales_amt else 0 end) as "12h-14h",
+        max(case two_hours when '14h-16h' then sales_amt else 0 end) as "14h-16h",
+        max(case two_hours when '16h-18h' then sales_amt else 0 end) as "16h-18h",
+        max(case two_hours when '18h-20h' then sales_amt else 0 end) as "18h-20h",
+        max(case two_hours when '20h-22h' then sales_amt else 0 end) as "20h-22h",
+        max(case two_hours when '22h-24h' then sales_amt else 0 end) as "22h-24h",
+        max(case two_hours when '0h-2h' then sales_amt else 0 end) as "0h-2h",
+        max(case two_hours when '2h-4h' then sales_amt else 0 end) as "2h-4h",
+        max(case two_hours when '4h-6h' then sales_amt else 0 end) as "4h-6h"
+        from
+        (SELECT B.*,T.c_operatorname,T.c_operatorcode,T1.code_name as two_hours
+        FROM
+        (SELECT
+        MA1000.STORE_NAME,
+        IA0010.acc_date,
+        IA0010.store_cd,
+        IA0010.hours,
+        IA0010.customer_count,
+        IA0010.SALES_AMT,
+        IA0010.PSD
+        FROM
+        ia0010
+        LEFT JOIN MA1000 ON IA0010.STORE_CD = MA1000.STORE_CD) AS B LEFT JOIN
+        (SELECT t_operator.c_operatorname,t_operator.c_operatorcode,MA1000.STORE_CD FROM t_operator,MA1000 WHERE
+        MA1000.OFC=t_operator.c_operatorcode) AS T
+        ON T.STORE_CD=B.STORE_CD
+        LEFT JOIN (select code_type,code_value,code_name from cm9010 where code_type = '00840' and effective_sts = '10')
+        T1
+        on B.hours = T1.code_value
+        where 1 =1
+        AND B.store_cd In
+        <foreach item="store" index="index" collection="daySaleReportParamdto.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="daySaleReportParamdto.effectiveStartDate !=null and daySaleReportParamdto.effectiveEndDate !=null and  daySaleReportParamdto.effectiveEndDate!='' ">
+            AND B.acc_date between #{daySaleReportParamdto.effectiveStartDate} and
+            #{daySaleReportParamdto.effectiveEndDate}
+        </if>
+        <if test="daySaleReportParamdto.am!=null and daySaleReportParamdto.am!=''">
+            AND T.c_operatorcode = #{daySaleReportParamdto.am}
+        </if>
+        <if test="daySaleReportParamdto.flg">
+            LIMIT ${daySaleReportParamdto.rows} OFFSET ${daySaleReportParamdto.limitStart}
+        </if>
+        ) as one
+        group by store_cd,store_name,acc_date,c_operatorcode,c_operatorname
+        ) as two
+    </select>
+
+    <select id="getCity" resultType="cn.com.bbut.iy.itemmaster.entity.ma0020.MA0020C">
+        SELECT DISTINCT
+            A.structure_cd AS structureCd,
+            concat(A.structure_cd,' ',A.structure_name) AS structureName
+        FROM
+            MA0020 A
+        WHERE
+            A.structure_level = '2'
+    </select>
+<!--    <select id="getAMList" resultType="cn.com.bbut.iy.itemmaster.entity.base.Ma1000">-->
+<!--        SELECT DISTINCT-->
+<!--            A.ofc-->
+<!--        FROM-->
+<!--            MA1000 A-->
+<!--    </select>-->
+    <select id="getAMList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" parameterType="java.lang.String">
+        SELECT DISTINCT
+            ofc k, CONCAT(ma_cd,' ',ofc) AS v,ofc d
+        FROM
+            MA1000
+            where 1=1
+        <if test="v!=null and v!=''">
+            AND (
+            lower(ofc) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(ma_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+    </select>
+
+    <!--    <select id="selectDaySaleReport" parameterType="cn.com.bbut.iy.itemmaster.dto.daysalereport.DaySaleReportParamDTO" resultMap="BaseItemResult">-->
+    <!--         select-->
+    <!--        distinct sa02.sale_date,-->
+
+    <!--       ma10.store_name,-->
+    <!--         d1.avg_customer_no,-->
+    <!--         d1.sale_amt,-->
+
+    <!--          ma8.psd,-->
+    <!--         ma10.store_cd-->
+    <!--        from-->
+    <!--				ma8070  ma8 left JOIN ma1000  ma10 ON ma8.store_cd=ma10.store_cd,-->
+
+    <!--        sa0020 sa02,-->
+    <!--        cm9060  c1,-->
+    <!--        in0010  d1-->
+    <!--        where-->
+    <!--        ma10.store_cd=ma8.store_cd-->
+    <!--		AND sa02.store_cd=ma8.store_cd-->
+    <!--        AND  ma8.store_cd= d1.store_cd-->
+    <!--        AND c1.sp_id = '0000'-->
+    <!--        AND c1.sp_value BETWEEN ma10.effective_start_date-->
+    <!--        AND ma10.effective_end_date-->
+    <!--        <if test="daySaleReportParamdto.storeCd!=null and  daySaleReportParamdto.storeCd!=''">-->
+    <!--            AND sa02.store_cd=#{daySaleReportParamdto.storeCd}-->
+    <!--        </if>-->
+
+    <!--        <if test="daySaleReportParamdto.effectiveStartDate!=null and daySaleReportParamdto.effectiveStartDate!=''  and daySaleReportParamdto.effectiveEndDate!=null and daySaleReportParamdto.effectiveEndDate!=''">-->
+    <!--            AND   to_char(sa02.sale_date,'YYYYMM') between #{daySaleReportParamdto.effectiveStartDate} and #{daySaleReportParamdto.effectiveEndDate}-->
+    <!--        </if>-->
+    <!--        <if test="daySaleReportParamdto.storeName!=null and daySaleReportParamdto.storeName!=''">-->
+    <!--            AND sa02.store_name = #{daySaleReportParamdto.storeName}-->
+    <!--        </if>-->
+
+    <!--        <if test="daySaleReportParamdto.city!=null and daySaleReportParamdto.city!=''">-->
+    <!--            AND ma10.zo_cd = #{daySaleReportParamdto.city}-->
+    <!--        </if>-->
+</mapper>

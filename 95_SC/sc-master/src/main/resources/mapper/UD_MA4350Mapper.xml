@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.MA4350Mapper">
+
+  <sql id="ma4350_where_sql">
+    <where>
+      <![CDATA[
+        and ma1100.effective_start_date <= sale_date
+        and ma1100.effective_end_date >= sale_date
+      ]]>
+      <![CDATA[
+        and ma1000.effective_start_date <= sale_date
+        and ma1000.effective_end_date >= sale_date
+      ]]>
+      and ma1100.article_id = ma4350.formula_article_id
+      and ma1000.store_cd = ma4350.store_cd
+      and ma4350.store_cd IN
+      <foreach item="store" index="index" collection="stores"
+               open="(" separator="," close=")">
+        #{store,jdbcType=VARCHAR}
+      </foreach>
+      <if test="voucherCd != null and voucherCd != ''">
+        AND lower(ma4350.voucher_cd) like lower(CONCAT('%',#{voucherCd,jdbcType=VARCHAR},'%'))
+      </if>
+      <if test="saleStartDate != null and saleStartDate != ''">
+        <![CDATA[
+        and ma4350.sale_date >= #{saleStartDate,jdbcType=VARCHAR}
+        ]]>
+      </if>
+      <if test="saleEndDate != null and saleEndDate != ''">
+        <![CDATA[
+        and ma4350.sale_date <= #{saleEndDate,jdbcType=VARCHAR}
+        ]]>
+      </if>
+      <if test="formulaArticleId != null and formulaArticleId != ''">
+        AND lower(ma4350.formula_article_id) like lower(CONCAT('%',#{formulaArticleId,jdbcType=VARCHAR},'%'))
+      </if>
+      <if test="formulaArticleName != null and formulaArticleName != ''">
+        AND lower(ma1100.article_name) like lower(CONCAT('%',#{formulaArticleName,jdbcType=VARCHAR},'%'))
+      </if>
+      <if test="barcode != null and barcode != ''">
+        AND lower(ma4350.barcode) like lower(CONCAT('%',#{barcode,jdbcType=VARCHAR},'%'))
+      </if>
+      <if test="tranSerialNo != null and tranSerialNo != ''">
+        AND lower(ma4350.tran_serial_no) like lower(CONCAT('%',#{tranSerialNo,jdbcType=VARCHAR},'%'))
+      </if>
+      <if test="posId != null and posId != ''">
+        AND lower(ma4350.pos_id) like lower(CONCAT('%',#{posId,jdbcType=VARCHAR},'%'))
+      </if>
+    </where>
+  </sql>
+
+  <select id="getList" parameterType="cn.com.bbut.iy.itemmaster.dto.ma4350.Ma4350DetailParamDto" resultType="cn.com.bbut.iy.itemmaster.dto.ma4350.Ma4350DetailGridDto">
+    select  voucher_cd, sale_date, ma4350.store_cd,
+    formula_article_id,barcode,sale_qty,sale_price,sale_amt,
+    pos_id,tran_serial_no,ma1100.article_name,
+    ma1000.store_name store_name
+    from ma4350,ma1000,ma1100
+    <include refid="ma4350_where_sql"/>
+    <if test="flg and orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="flg and limitStart >= 0">
+      limit ${limitEnd} offset ${limitStart}
+    </if>
+  </select>
+
+  <select id="getMa4350ByVoucherCd" resultType="cn.com.bbut.iy.itemmaster.dto.ma4350.Ma4350DetailGridDto">
+    select  voucher_cd, sale_date, ma4350.store_cd,
+    formula_article_id,barcode,sale_qty,sale_price,sale_amt,
+    pos_id,tran_serial_no,ma1100.article_name,
+    CONCAT(ma1000.store_name,' ',MA1000.store_name_en) store_name
+    from ma4350,ma1000,ma1100
+    where voucher_cd = #{voucherCd,jdbcType=VARCHAR}
+      <![CDATA[
+        and ma1100.effective_start_date <= sale_date
+        and ma1100.effective_end_date >= sale_date
+      ]]>
+      <![CDATA[
+        and ma1000.effective_start_date <= sale_date
+        and ma1000.effective_end_date >= sale_date
+      ]]>
+      and ma1100.article_id = ma4350.formula_article_id
+      and ma1000.store_cd = ma4350.store_cd
+    limit 1
+  </select>
+
+  <select id="getListCount" parameterType="cn.com.bbut.iy.itemmaster.dto.ma4350.Ma4350DetailParamDto" resultType="long">
+    select count(*)
+    from ma4350,ma1000,ma1100
+    <include refid="ma4350_where_sql"/>
+  </select>
+</mapper>

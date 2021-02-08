@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.Ma1200Mapper">
+
+    <resultMap id="ReBasicInfo" type="cn.com.bbut.iy.itemmaster.dto.ma1200.MA1200DTO">
+        <id column="parent_article_id" jdbcType="VARCHAR" property="parentArticleId" />
+        <result column="auto_repackage" jdbcType="VARCHAR" property="autoRepackage" />
+        <result column="repackage_status" jdbcType="VARCHAR" property="repackageStatus" />
+        <result column="child_article_id" jdbcType="VARCHAR" property="childArticleId" />
+        <result column="quantity" jdbcType="NUMERIC" property="childQty" />
+    </resultMap>
+
+    <select id="selectByParentId" parameterType="cn.com.bbut.iy.itemmaster.dto.ma1200.MA1200DTO" resultMap="ReBasicInfo">
+        SELECT parent_article_id, auto_repackage, repackage_status FROM MA1200
+        WHERE parent_article_id = #{parentArticleId,jdbcType=VARCHAR}
+        AND #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+    </select>
+
+    <select id="selectAllParentId" resultType="String">
+        SELECT parent_article_id FROM MA1200
+        WHERE (SELECT sp_value FROM CM9060 WHERE sp_id = '0000')
+        BETWEEN effective_start_date AND effective_end_date
+    </select>
+
+    <select id="selectList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT T.parent_article_id AS k, CONCAT(T1.article_id, ' ', T1.article_name) AS v
+        FROM MA1200 T
+        JOIN (
+            SELECT M.article_id, M.article_name
+            FROM MA1100 M, MA1140 M1
+            WHERE M1.is_default = '1'
+            AND M.article_id = M1.article_id
+            AND M.effective_start_date = M1.effective_start_date
+            AND (SELECT sp_value FROM CM9060 WHERE sp_id = '0000')
+            BETWEEN M.effective_start_date AND M.effective_end_date
+            AND (
+                LOWER(M.article_id) LIKE LOWER(CONCAT('%',#{v,jdbcType=VARCHAR},'%')) OR
+                LOWER(M.article_name) LIKE LOWER(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        ) T1
+        ON T.parent_article_id = T1.article_id
+        WHERE (SELECT sp_value FROM CM9060 WHERE sp_id = '0000')
+        BETWEEN T.effective_start_date AND T.effective_end_date
+    </select>
+
+    <select id="getChildInfo" resultMap="ReBasicInfo">
+        select parent_article_id,child_article_id,quantity from ma1210
+        where parent_article_id in
+        <foreach item="parentArticleId" index="index" collection="groupParentIdList"
+                 open="(" separator="," close=")">
+            #{parentArticleId,jdbcType=VARCHAR}
+        </foreach>
+
+    </select>
+
+    <select id="selectBOMAllParentId" resultType="String">
+        SELECT formula_id as parent_article_id FROM MA1170
+        WHERE (SELECT sp_value FROM CM9060 WHERE sp_id = '0000')
+        BETWEEN effective_start_date AND effective_end_date
+    </select>
+
+    <select id="getBOMChildInfo" resultMap="ReBasicInfo">
+        select formula_id as parent_article_id,article_id as child_article_id,quantity from ma1171
+        where formula_id in
+        <foreach item="parentArticleId" index="index" collection="bomParentIdList"
+                 open="(" separator="," close=")">
+            #{parentArticleId,jdbcType=VARCHAR}
+        </foreach>
+    </select>
+</mapper>

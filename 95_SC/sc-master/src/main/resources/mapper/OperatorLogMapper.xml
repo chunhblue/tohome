@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.OperatorLogMapper">
+
+    <resultMap id="MenuResultMap" type="cn.com.bbut.iy.itemmaster.entity.base.Menu">
+        <id column="ID" jdbcType="SMALLINT" property="id" />
+        <result column="PARENT_ID" jdbcType="SMALLINT" property="parentId" />
+        <result column="PARENT_NAME" jdbcType="SMALLINT" property="parentName" />
+        <result column="NAME" jdbcType="VARCHAR" property="name" />
+        <result column="URL" jdbcType="VARCHAR" property="url" />
+        <result column="SORT" jdbcType="SMALLINT" property="sort" />
+        <result column="GROUP_CODE" jdbcType="VARCHAR" property="group" />
+    </resultMap>
+
+    <resultMap id="BaseResultMap" type="cn.com.bbut.iy.itemmaster.dto.operatorLog.OperatorLogDTO">
+        <result column="rownum" property="rowNum"/>
+        <result column="emp_num_id" property="userId"/>
+        <result column="emp_name" property="userName"/>
+        <result column="menu_id" property="menuId"/>
+        <result column="menu_name" property="menuName"/>
+        <result column="operate_ymd" property="operateYmd"/>
+        <result column="operate_hms" property="operateHms"/>
+    </resultMap>
+
+    <select id="getMenuByUrl" parameterType="string" resultMap="MenuResultMap">
+        select
+            ID, PARENT_ID, NAME, URL, SORT, GROUP_CODE
+        from
+            IY_M_MENU
+        where
+            URL = #{menuUrl,jdbcType=VARCHAR}
+        LIMIT 1
+    </select>
+
+    <insert id="save" parameterType="cn.com.bbut.iy.itemmaster.dto.operatorLog.OperatorLogDTO">
+        insert into t_operator_log (
+            emp_num_id,
+            emp_name,
+            menu_id,
+            menu_name,
+            operate_ymd,
+            operate_hms
+		) values (
+		    #{dto.userId, jdbcType=VARCHAR},
+            #{dto.userName, jdbcType=VARCHAR},
+            #{dto.menuId, jdbcType=DECIMAL},
+            #{dto.menuName, jdbcType=VARCHAR},
+            #{dto.operateYmd, jdbcType=VARCHAR},
+            #{dto.operateHms, jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <select id="searchCount" parameterType="cn.com.bbut.iy.itemmaster.dto.operatorLog.OperatorLogParamDTO" resultType="int">
+        SELECT
+            count(1)
+        FROM
+            t_operator_log
+        <where>
+            1 = 1
+            <if test="param.userId != null and param.userId != ''">
+                AND emp_num_id = #{param.userId}
+            </if>
+            <if test="param.userName != null and param.userName != ''">
+                AND lower(emp_name) like lower(CONCAT('%',#{param.userName},'%'))
+            </if>
+            <if test="param.menuName != null and param.menuName != ''">
+                AND lower(menu_name) like lower(CONCAT('%',#{param.menuName},'%'))
+            </if>
+            <if test="param.startYmd != null and param.startYmd != ''">
+                AND operate_ymd >= #{param.startYmd}
+            </if>
+            <if test="param.endYmd != null and param.endYmd != ''">
+                AND #{param.endYmd} >= operate_ymd
+            </if>
+            <if test="param.startHms != null and param.startHms != ''">
+                AND operate_hms >= #{param.startHms}
+            </if>
+            <if test="param.endHms != null and param.endHms != ''">
+                AND #{param.endHms} >= operate_hms
+            </if>
+        </where>
+    </select>
+
+    <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.operatorLog.OperatorLogParamDTO" resultMap="BaseResultMap">
+        SELECT
+            row_number() OVER (ORDER BY CONCAT(operate_ymd,operate_hms) DESC) as rownum ,
+            emp_num_id,
+            emp_name,
+            menu_id,
+            menu_name,
+            operate_ymd,
+            operate_hms
+        FROM
+            t_operator_log
+        <where>
+            1 = 1
+            <if test="param.userId != null and param.userId != ''">
+                AND emp_num_id = #{param.userId}
+            </if>
+            <if test="param.userName != null and param.userName != ''">
+                AND lower(emp_name) like lower(CONCAT('%',#{param.userName},'%'))
+            </if>
+            <if test="param.menuName != null and param.menuName != ''">
+                AND lower(menu_name) like lower(CONCAT('%',#{param.menuName},'%'))
+            </if>
+            <if test="param.startYmd != null and param.startYmd != ''">
+                AND operate_ymd >= #{param.startYmd}
+            </if>
+            <if test="param.endYmd != null and param.endYmd != ''">
+                AND #{param.endYmd} >= operate_ymd
+            </if>
+            <if test="param.startHms != null and param.startHms != ''">
+                AND operate_hms >= #{param.startHms}
+            </if>
+            <if test="param.endHms != null and param.endHms != ''">
+                AND #{param.endHms} >= operate_hms
+            </if>
+        </where>
+        ORDER BY CONCAT(operate_ymd,operate_hms) DESC
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+
+    <delete id="deleteOperatorLog">
+        DELETE FROM t_operator_log
+    </delete>
+</mapper>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.BomSaleMapper">
+
+    <resultMap id="ReMap" type="cn.com.bbut.iy.itemmaster.dto.bomSale.BomSaleDTO">
+        <id column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <id column="acc_date" property="accDate" jdbcType="VARCHAR" />
+        <id column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <result column="barcode" property="barcode" jdbcType="VARCHAR" />
+        <result column="sale_cost_t" property="saleCostT" jdbcType="DECIMAL" />
+        <result column="sale_qty_t" property="saleQtyT" jdbcType="DECIMAL" />
+        <result column="sale_amt_notax_t" property="saleAmtNoTaxT" jdbcType="DECIMAL" />
+        <result column="sale_amt_t" property="saleAmtT" jdbcType="DECIMAL" />
+        <result column="return_qty_t" property="returnQtyT" jdbcType="DECIMAL" />
+        <result column="return_amt_notax_t" property="returnAmtNoTaxT" jdbcType="DECIMAL" />
+        <result column="return_amt_t" property="returnAmtT" jdbcType="DECIMAL" />
+        <result column="avg_cost_notax" property="avgCostNoTax" jdbcType="DECIMAL" />
+        <result column="sub_category_cd" property="subCategoryCd" jdbcType="VARCHAR" />
+        <result column="sale_tax_t" property="saleTaxT" jdbcType="DECIMAL" />
+        <result column="return_tax_t" property="returnTaxT" jdbcType="DECIMAL" />
+        <result column="article_name" property="articleName" jdbcType="VARCHAR" />
+        <result column="spec" property="spec" jdbcType="VARCHAR" />
+        <result column="sales_unit_id" property="salesUnit" jdbcType="VARCHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <result column="gross_margin" property="grossMargin" jdbcType="DECIMAL" />
+        <result column="gross_margin_rate" property="grossMarginRate" jdbcType="DECIMAL" />
+    </resultMap>
+
+    <sql id="selectCondition">
+        <if test="articleId != null and articleId != ''">
+            AND A.article_id = #{articleId,jdbcType=VARCHAR}
+        </if>
+        <if test="saleStartDate != null and saleStartDate != ''">
+            AND A.acc_date >= #{saleStartDate,jdbcType=VARCHAR}
+        </if>
+        <if test="saleEndDate != null and saleEndDate != ''">
+            AND #{saleEndDate,jdbcType=VARCHAR} >= A.acc_date
+        </if>
+    </sql>
+
+    <select id="selectListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.bomSale.BomSaleParamDTO" resultMap="ReMap">
+        SELECT DISTINCT
+            T.*, T1.article_name, T1.spec, T1.sales_unit_id, T2.store_name,
+            T1.dep_cd, T1.pma_cd, T1.category_cd, T1.sub_category_cd,
+            T3.barcode
+        FROM(
+            SELECT
+                A.store_cd,
+                A.acc_date,
+                B.formula_id AS article_id,
+                COALESCE(A.sale_cost_t,0) AS sale_cost_t,
+                COALESCE(A.sale_qty_t,0) AS sale_qty_t,
+                COALESCE(A.sale_amt_t,0) AS sale_amt_t,
+                COALESCE(A.return_qty_t,0) AS return_qty_t,
+                COALESCE(A.return_amt_t,0) AS return_amt_t,
+                COALESCE(A.avg_cost_notax,0) AS avg_cost_notax,
+                COALESCE(A.bom_sale_cost,0) AS bom_sale_cost,
+                COALESCE((A.sale_amt_t - A.sale_amt_notax_t),0) AS sale_tax_t,
+                COALESCE((A.return_amt_t - A.return_amt_notax_t),0) AS return_tax_t,
+                COALESCE((A.sale_amt_t - A.sale_cost_t),0) AS gross_margin,
+                CASE WHEN A.sale_cost_t = 0 OR A.sale_cost_t IS NULL THEN 0
+                    ELSE ROUND(( A.sale_amt_t - A.sale_cost_t ) / A.sale_cost_t, 4 ) END AS gross_margin_rate,
+                C.vendor_id
+            FROM
+                SK3000 A,
+                MA1170 B,
+                ma2240 C
+            WHERE A.article_id = B.formula_id
+            AND A.acc_date BETWEEN B.effective_start_date AND B.effective_end_date
+            AND A.store_cd = C.store_cd
+            AND B.formula_id = C.article_id
+        <if test="storeCd != null and storeCd != ''">
+            AND A.store_cd = #{storeCd,jdbcType=VARCHAR}
+        </if>
+            <include refid="selectCondition"></include>
+        ) T
+        LEFT JOIN (
+            SELECT
+                article_id, effective_start_date, article_name, spec, sales_unit_id,
+                dep_cd, pma_cd, category_cd, sub_category_cd
+            FROM
+                MA1100
+            WHERE
+                #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.article_id = T1.article_id
+        LEFT JOIN (
+            SELECT
+                store_cd, effective_start_date, store_name
+            FROM
+                MA1000
+            WHERE
+                #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T2
+        ON T.store_cd = T2.store_cd
+        LEFT JOIN (
+        SELECT article_id,default_barcode barcode,vendor_id from ma1110 where  #{businessDate,jdbcType=VARCHAR}
+         BETWEEN effective_start_date AND effective_end_date
+         and structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
+            (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd,jdbcType=VARCHAR}))
+        ) T3
+        ON T.article_id = T3.article_id AND T3.vendor_id  = T.vendor_id
+        ORDER BY T.acc_date DESC, T.article_id
+    </select>
+
+
+    <select id="getBomItemList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT DISTINCT
+            B.article_id k,
+            CONCAT(B.article_id,' ',B.article_name) v
+        FROM
+            MA1170 A,
+            MA1100 B,
+            MA1140 C
+        WHERE
+            A.formula_id = B.article_id
+            AND B.article_id = C.article_id
+            AND #{businessDate,jdbcType=VARCHAR} BETWEEN B.effective_start_date AND B.effective_end_date
+            AND #{businessDate,jdbcType=VARCHAR} BETWEEN A.effective_start_date AND A.effective_end_date
+            AND #{businessDate,jdbcType=VARCHAR} BETWEEN C.effective_start_date AND C.effective_end_date
+            AND C.is_default = '1'
+        <if test="v!=null and v!=''">
+            AND (
+            lower(B.article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%')) OR
+            lower(B.article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%')) OR
+            lower(C.barcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.ReturnsDailyMapper">
+
+    <resultMap id="returnMap" type="cn.com.bbut.iy.itemmaster.dto.returnsDaily.ReturnsDailyDTO">
+        <result column="article_id" property="articleId"></result>
+        <result column="article_name" property="articleName"></result>
+        <result column="barcode" property="barcode"></result>
+        <result column="sale_date" property="saleDate"></result>
+        <result column="pos_id" property="posId"></result>
+        <result column="sale_serial_no" property="saleSerialNo"></result>
+        <result column="sale_qty" property="orderQty"></result>
+        <result column="price_actual" property="priceActual"></result>
+        <result column="sale_amount" property="orderAmt"></result>
+        <result column="cashier_id" property="cashierId"></result>
+        <result column="cashier_name" property="cashierName"></result>
+        <result column="cash" property="cash"></result>
+        <result column="suNingCard" property="suNingCard"></result>
+        <result column="unionPay" property="unionPay"></result>
+        <result column="commodityCoupon" property="commodityCoupon"></result>
+        <result column="discountCoupon" property="discountCoupon"></result>
+        <result column="prepaidCard" property="prepaidCard"></result>
+        <result column="creditCar" property="creditCar"></result>
+        <result column="store_cd" property="storeCd"></result>
+        <result column="store_name" property="storeName"></result>
+
+        <result column="cardPayment" property="cardPayment"></result>
+        <result column="eVoucher" property="eVoucher"></result>
+        <result column="momo" property="momo"></result>
+        <result column="payoo" property="payoo"></result>
+        <result column="viettel" property="viettel"></result>
+        <result column="totalAmt" property="totalAmt"></result>
+        <result column="c_operatorcode" property="amCd"></result>
+        <result column="c_operatorname" property="amName"></result>
+    </resultMap>
+
+    <select id="selectByStoreCd" parameterType="java.lang.String"
+            resultType="cn.com.bbut.iy.itemmaster.entity.base.Ma1000">
+        SELECT
+            A.store_cd AS storeCd,
+            A.store_name AS storeName
+        FROM
+            MA1000 A
+        WHERE
+            A.store_cd = #{storeCd}
+            AND #{businessDate} BETWEEN A.effective_start_date
+            AND A.effective_end_date
+        LIMIT 1
+    </select>
+
+    <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.returnsDaily.ReturnsDailyParamDTO"
+            resultMap="returnMap">
+        SELECT
+        B.article_id,
+        C.article_name,
+        B.sale_date,
+        B.barcode,
+        to_char(B.sale_date,'dd/MM/yyyy') as sale_formt_date,
+        B.pos_id,
+        B.sale_serial_no,
+        B.sale_qty,
+        B.price_original,
+        B.price_actual,
+        B.sale_amount,
+        A.cashier_id,
+        D.cashier_name,
+        E.store_cd,
+        E.store_name,
+        oper.c_operatorcode,
+        oper.c_operatorname,
+        CASE WHEN A.pay_cd1='01' THEN B.sale_amount ELSE '0' END AS cash,
+        CASE WHEN A.pay_cd1='02' THEN B.sale_amount ELSE '0' END AS cardPayment,
+        CASE WHEN A.pay_cd1='03' THEN B.sale_amount ELSE '0' END AS eVoucher,
+        CASE WHEN A.pay_cd1='04' THEN B.sale_amount ELSE '0' END AS momo,
+        CASE WHEN A.pay_cd1='05' THEN B.sale_amount ELSE '0' END AS payoo,
+        CASE WHEN A.pay_cd1='06' THEN B.sale_amount ELSE '0' END AS viettel,
+        CASE WHEN A.pay_cd1='07' THEN B.sale_amount ELSE '0' END AS creditCard, /*creditCard 字段不用了*/
+        (B.sale_amount) as totalAmt
+        FROM
+        SA0010 A,
+        SA0020 B,
+        MA1100 C,
+        SA0050 D,
+        MA1000 E,
+        t_operator oper
+        WHERE
+        A.tran_serial_no = B.tran_serial_no
+        AND A.acc_date = B.acc_date
+        AND A.store_cd = B.store_cd
+        AND B.store_cd = E.store_cd
+        AND B.acc_date BETWEEN E.effective_start_date AND E.effective_end_date
+        AND E.ofc = oper.c_operatorcode
+        AND A.pos_id = B.pos_id
+        AND A.tran_type = 'return'
+        AND B.detail_type = 'r'
+        AND B.article_id = C.article_id
+        AND B.acc_date BETWEEN C.effective_start_date AND C.effective_end_date
+        AND A.cashier_id = D.cashier_id
+        AND A.store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        /*--早班*/
+        <if test="param.shift!=null and param.shift=='00'">
+            <![CDATA[
+                and A.tran_date >= to_timestamp(A.acc_date||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(A.acc_date||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                ]]>
+        </if>
+        /*--中班*/
+        <if test="param.shift!=null and param.shift=='01'">
+            <![CDATA[
+                and A.tran_date >= to_timestamp(A.acc_date||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(A.acc_date||' 22:00:00','yyyyMMdd hh24:mi:ss')
+                ]]>
+        </if>
+        /*--晚班*/
+        <if test="param.shift!=null and param.shift=='02'">
+            <![CDATA[
+                and (A.tran_date < to_timestamp(A.acc_date||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                or A.tran_date >= to_timestamp(A.acc_date||' 22:00:00','yyyyMMdd hh24:mi:ss'))
+                ]]>
+        </if>
+        <if test="param.returnDate!=null and param.returnDate!=''">
+            and to_char(A.tran_date,'YYYYMMDD') = #{param.returnDate}
+        </if>
+
+        <if test="param.cashierCd!=null and param.cashierCd!=''">
+            and A.cashier_id = trim(#{param.cashierCd})
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            and E.ofc = #{param.am}
+        </if>
+        <if test="param.storeCd!=null and param.storeCd!=''">
+            AND lower(A.store_cd) like lower(CONCAT('%',#{param.storeCd},'%'))
+        </if>
+        <if test="param.storeName!=null and param.storeName!=''">
+            AND lower(E.store_name) like lower(CONCAT('%',#{param.storeName},'%'))
+        </if>
+        <if test="param.depCd != null and param.depCd != ''">
+            and C.dep_cd = #{param.depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.pmaCd != null and param.pmaCd != ''">
+            and C.pma_cd = #{param.pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.categoryCd != null and param.categoryCd != ''">
+            and C.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
+            and C.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.articleName!=null and param.articleName!=''">
+            AND concat(lower( C.article_id ),'',lower( C.article_name ),'',lower( C.article_name_en ),'',lower(
+            C.article_short_name_en )) LIKE lower( CONCAT('%',#{articleName},'%') )
+        </if>
+        <if test="param.totalAmt != null and param.totalAmt != '' and param.calType != null and param.calType != ''" >
+            <![CDATA[
+            and B.sale_amount ${param.calType} cast(#{param.totalAmt,jdbcType=VARCHAR} as NUMERIC)
+            ]]>
+        </if>
+        <if test="param.barcode != null and param.totalAmt != ''" >
+
+            and B.barcode LIKE lower( CONCAT('%',#{param.barcode},'%')
+        </if>
+    </select>
+
+</mapper>

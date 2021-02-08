@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.RRModifyMapper">
+
+    <resultMap id="ReOd0000Map" type="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyDTO" >
+        <id column="store_cd" property="storeCd" jdbcType="CHAR" />
+        <id column="order_id" property="orderId" jdbcType="VARCHAR" />
+        <result column="org_order_id" property="orgOrderId" jdbcType="VARCHAR" />
+        <result column="vendor_id" property="vendorId" jdbcType="CHAR" />
+        <result column="delivery_type_cd" property="deliveryTypeCd" jdbcType="CHAR" />
+        <result column="delivery_center_id" property="deliveryCenterId" jdbcType="CHAR" />
+        <result column="delivery_area_cd" property="deliveryAreaCd" jdbcType="CHAR" />
+        <result column="shipment" property="shipment" jdbcType="CHAR" />
+        <result column="order_type" property="orderType" jdbcType="CHAR" />
+        <result column="order_method" property="orderMethod" jdbcType="CHAR" />
+        <result column="payment_type" property="paymentType" jdbcType="CHAR" />
+        <result column="promotion_id" property="promotionId" jdbcType="VARCHAR" />
+        <result column="order_date" property="orderDate" jdbcType="CHAR" />
+        <result column="delivery_date" property="deliveryDate" jdbcType="CHAR" />
+        <result column="expire_date" property="expireDate" jdbcType="CHAR" />
+        <result column="receive_date" property="receiveDate" jdbcType="CHAR" />
+        <result column="vendor_address" property="vendorAddress" jdbcType="VARCHAR" />
+        <result column="store_address" property="storeAddress" jdbcType="VARCHAR" />
+        <result column="order_sts" property="orderSts" jdbcType="CHAR" />
+        <result column="nr_flg" property="nrFlg" jdbcType="CHAR" />
+        <result column="order_remark" property="orderRemark" jdbcType="VARCHAR" />
+        <result column="purchase_vat_cd" property="purchaseVatCd" jdbcType="CHAR" />
+        <result column="tax_rate" property="taxRate" jdbcType="NUMERIC" />
+        <result column="order_amt" property="orderAmt" jdbcType="NUMERIC" />
+        <result column="order_tax" property="orderTax" jdbcType="NUMERIC" />
+        <result column="receive_amt" property="receiveAmt" jdbcType="NUMERIC" />
+        <result column="receive_tax" property="receiveTax" jdbcType="NUMERIC" />
+        <result column="order_differentiate" property="orderDifferentiate" jdbcType="CHAR" />
+        <result column="upload_flg" property="uploadFlg" jdbcType="CHAR" />
+        <result column="upload_date" property="uploadDate" jdbcType="CHAR" />
+        <result column="vendor_name" property="vendorName" jdbcType="VARCHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <result column="review_status" property="reviewStatus" jdbcType="NUMERIC" />
+        <result column="return_type" property="returnType" jdbcType="NUMERIC" />
+    </resultMap>
+
+    <resultMap id="ReOd0010Map" type="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyDetailsDTO" >
+        <id column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <id column="order_id" property="orderId" jdbcType="VARCHAR" />
+        <id column="serial_no" property="serialNo" jdbcType="VARCHAR" />
+        <id column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <result column="barcode" property="barcode" jdbcType="VARCHAR" />
+        <result column="vendor_id" property="vendorId" jdbcType="CHAR" />
+        <result column="promotion_id" property="promotionId" jdbcType="VARCHAR" />
+        <result column="order_unit" property="orderUnit" jdbcType="VARCHAR" />
+        <result column="order_qty" property="orderQty" jdbcType="NUMERIC" />
+        <result column="order_nocharge_qty" property="orderNochargeQty" jdbcType="NUMERIC" />
+        <result column="order_price" property="orderPrice" jdbcType="NUMERIC" />
+        <result column="order_amt" property="orderAmt" jdbcType="NUMERIC" />
+        <result column="receive_price" property="rrOrderPrice" jdbcType="NUMERIC" />
+        <result column="receive_qty" property="rrOrderQty" jdbcType="NUMERIC" />
+        <result column="receive_total_amt" property="rrOrderAmt" jdbcType="NUMERIC" />
+        <result column="reason_id" property="reasonId" jdbcType="VARCHAR" />
+        <result column="correction_difference" property="modifyQty" jdbcType="NUMERIC" />
+        <result column="correction_nocharge_qty" property="modifyNochargeQty" jdbcType="NUMERIC" />
+        <result column="spec" property="spec" jdbcType="VARCHAR" />
+        <result column="article_name" property="articleName" jdbcType="VARCHAR" />
+        <result column="article_name_en" property="articleNameEn" jdbcType="VARCHAR" />
+        <result column="is_free_item" property="isFreeItem" jdbcType="CHAR"/>
+        <result column="is_free_item_t" property="isFreeItemText" jdbcType="CHAR"/>
+        <result column="on_hand_qty" property="onHandQty" jdbcType="NUMERIC"/>
+        <result column="on_order_qty" property="onOrderQty" jdbcType="NUMERIC"/>
+
+    </resultMap>
+
+    <sql id="selectCondition">
+        <where>
+            AND store_cd IN
+            <foreach item="store" index="index" collection="stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            <choose>
+                <when test="orderType != null and orderType != ''">
+                    AND order_type = #{orderType,jdbcType=VARCHAR}
+                </when>
+                <otherwise>
+                    AND order_type IN ('07','08')
+                </otherwise>
+            </choose>
+            <if test="modifyStartDate != null and modifyStartDate != ''">
+                AND order_date >= #{modifyStartDate,jdbcType=VARCHAR}
+            </if>
+            <if test="modifyEndDate != null and modifyEndDate != ''">
+                AND #{modifyEndDate,jdbcType=VARCHAR} >= order_date
+            </if>
+            <if test="orderId != null and orderId != ''">
+                AND LOWER(order_id) LIKE LOWER(CONCAT('%',#{orderId,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="orgOrderId != null and orgOrderId != ''">
+                AND LOWER(org_order_id) LIKE LOWER(CONCAT('%',#{orgOrderId,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="vendorId != null and vendorId != ''">
+                AND LOWER(vendor_id) LIKE LOWER(CONCAT('%',#{vendorId,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="reviewStatus != null and reviewStatus != ''">
+                AND review_status = cast(#{reviewStatus,jdbcType=VARCHAR} as NUMERIC)
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectCountByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyParamDTO" resultType="INT">
+        SELECT COUNT(1) FROM (SELECT
+        T.*,
+        coalesce (T1.vendor_name, T3.vendor_name) AS vendor_name,
+        T2.store_name,
+        T5.om_name as om,
+        T5.ofc_name as am,
+        T5.oc_name  as oc
+        FROM (
+        SELECT
+        store_cd, order_id, org_order_id, vendor_id, delivery_type_cd, delivery_center_id,
+        delivery_area_cd, shipment, order_type, order_method, payment_type, promotion_id,
+        order_date, delivery_date, expire_date, receive_date, vendor_address, store_address,
+        order_sts, nr_flg, order_remark, purchase_vat_cd, tax_rate, order_amt, order_tax,
+        receive_amt, receive_tax, order_differentiate, upload_flg, upload_date,review_status
+        FROM OD0000
+        <include refid="selectCondition"></include>
+        ) T
+        LEFT JOIN (
+        SELECT vendor_id, vendor_name
+        FROM MA2000
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.vendor_id = T1.vendor_id
+        left  JOIN(
+        select  warehouse_name AS vendor_name,warehouse_no   from ma5321
+        ) T3
+        ON  T.vendor_id= T3.warehouse_no
+        LEFT JOIN (
+        SELECT store_cd, store_name
+        FROM MA1000
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T2
+        ON T.store_cd = T2.store_cd
+        LEFT JOIN ( SELECT store_cd, store_name,oc,om,ofc,ofcName.c_operatorname as ofc_name,ocName.c_operatorname as oc_name,omName.c_operatorname om_name
+        FROM MA1000
+        LEFT JOIN (SELECT distinct t_operator.c_operatorcode,t_operator.c_operatorname
+        FROM t_operator
+        LEFT JOIN MA1000
+        ON MA1000.ofc= t_operator.c_operatorcode
+        where 1=1
+
+        ) ofcName
+        ON ma1000.ofc=ofcName.c_operatorcode
+        LEFT JOIN (SELECT distinct t_operator.c_operatorcode,t_operator.c_operatorname
+        FROM t_operator
+        LEFT JOIN MA1000
+        ON MA1000.oc= t_operator.c_operatorcode
+        where 1=1
+        ) AS ocName
+        ON ma1000.oc=ocName.c_operatorcode
+        LEFT JOIN (SELECT distinct t_operator.c_operatorcode,t_operator.c_operatorname
+        FROM t_operator
+        LEFT JOIN MA1000
+        ON MA1000.om= t_operator.c_operatorcode
+        where 1=1
+
+        ) AS omName
+        ON ma1000.om=omName.c_operatorcode
+        WHERE #{businessDate,jdbcType=VARCHAR}  BETWEEN effective_start_date AND effective_end_date ) T5 ON t5.store_cd=T2.store_cd
+        where 1=1
+        <if test="am != null and am != ''">
+            And T5.ofc=#{am,jdbcType=VARCHAR}
+        </if>
+        <if test="oc != null and oc != ''">
+            And T5.oc=#{oc,jdbcType=VARCHAR}
+        </if>
+        <if test="om != null and om != ''">
+            And T5.om =#{om,jdbcType=VARCHAR}
+        </if>
+        ORDER BY T.receive_date, T.vendor_id, T.order_id ASC) B
+    </select>
+
+    <select id="selectListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyParamDTO" resultMap="ReOd0000Map">
+        SELECT
+        T.*,
+        coalesce (T1.vendor_name, T3.vendor_name) AS vendor_name,
+        T2.store_name,
+        T5.om_name as om,
+        T5.ofc_name as am,
+        T5.oc_name  as oc
+        FROM (
+        SELECT
+        store_cd, order_id, org_order_id, vendor_id, delivery_type_cd, delivery_center_id,
+        delivery_area_cd, shipment, order_type, order_method, payment_type, promotion_id,
+        order_date, delivery_date, expire_date, receive_date, vendor_address, store_address,
+        order_sts, nr_flg, order_remark, purchase_vat_cd, tax_rate, order_amt, order_tax,
+        receive_amt, receive_tax, order_differentiate, upload_flg, upload_date,review_status
+        FROM OD0000
+        <include refid="selectCondition"></include>
+        ) T
+        LEFT JOIN (
+        SELECT vendor_id, vendor_name
+        FROM MA2000
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.vendor_id = T1.vendor_id
+        left  JOIN(
+        select  warehouse_name AS vendor_name,warehouse_no   from ma5321
+        ) T3
+        ON  T.vendor_id= T3.warehouse_no
+        LEFT JOIN (
+        SELECT store_cd, store_name
+        FROM MA1000
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T2
+        ON T.store_cd = T2.store_cd
+        LEFT JOIN ( SELECT store_cd, store_name,oc,om,ofc,ofcName.c_operatorname as ofc_name,ocName.c_operatorname as oc_name,omName.c_operatorname om_name
+        FROM MA1000
+        LEFT JOIN (SELECT distinct t_operator.c_operatorcode,t_operator.c_operatorname
+        FROM t_operator
+        LEFT JOIN MA1000
+        ON MA1000.ofc= t_operator.c_operatorcode
+        where 1=1
+
+        ) ofcName
+        ON ma1000.ofc=ofcName.c_operatorcode
+        LEFT JOIN (SELECT distinct t_operator.c_operatorcode,t_operator.c_operatorname
+        FROM t_operator
+        LEFT JOIN MA1000
+        ON MA1000.oc= t_operator.c_operatorcode
+        where 1=1
+        ) AS ocName
+        ON ma1000.oc=ocName.c_operatorcode
+        LEFT JOIN (SELECT distinct t_operator.c_operatorcode,t_operator.c_operatorname
+        FROM t_operator
+        LEFT JOIN MA1000
+        ON MA1000.om= t_operator.c_operatorcode
+        where 1=1
+
+        ) AS omName
+        ON ma1000.om=omName.c_operatorcode
+        WHERE #{businessDate,jdbcType=VARCHAR}  BETWEEN effective_start_date AND effective_end_date ) T5 ON t5.store_cd=T2.store_cd
+        where 1=1
+        <if test="am != null and am != ''">
+            And T5.ofc=#{am,jdbcType=VARCHAR}
+        </if>
+        <if test="oc != null and oc != ''">
+            And T5.oc=#{oc,jdbcType=VARCHAR}
+        </if>
+        <if test="om != null and om != ''">
+            And T5.om =#{om,jdbcType=VARCHAR}
+        </if>
+        ORDER BY T.receive_date, T.vendor_id, T.order_id ASC
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+
+    <select id="selectByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyParamDTO" resultMap="ReOd0000Map">
+        SELECT
+            T.*, T1.vendor_name, T2.store_name
+        FROM (
+            SELECT
+                store_cd, order_id, org_order_id, vendor_id, delivery_type_cd, delivery_center_id,
+                delivery_area_cd, shipment, order_type, order_method, payment_type, promotion_id,
+                order_date, delivery_date, expire_date, receive_date, vendor_address, store_address,
+                order_sts, nr_flg, order_remark, purchase_vat_cd, tax_rate, order_amt, order_tax,
+                receive_amt, receive_tax, order_differentiate, upload_flg, upload_date,return_type
+            FROM OD0000
+            WHERE store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND order_id = #{orderId,jdbcType=VARCHAR}
+        ) T
+        LEFT JOIN (
+            SELECT vendor_id, vendor_name
+            FROM MA2000
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.vendor_id = T1.vendor_id
+        LEFT JOIN (
+            SELECT store_cd, CONCAT(store_cd,' ',store_name,' ',store_name_en) AS store_name
+            FROM MA1000
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T2
+        ON T.store_cd = T2.store_cd
+    </select>
+
+    <select id="selectDetailsByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyParamDTO" resultMap="ReOd0010Map">
+        SELECT
+            T.*, T1.article_name,T1.article_name_en, T1.spec
+        FROM (
+            SELECT
+                store_cd, order_id, serial_no, article_id, barcode, vendor_id,is_free_item,is_free_item as is_free_item_t,
+                promotion_id, order_unit, order_qty, order_price,order_nocharge_qty,receive_nocharge_qty,
+                order_amt, receive_price, receive_qty,
+                receive_total_amt, reason_id, correction_difference,correction_nocharge_qty
+            FROM OD0010
+            WHERE store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND order_id = #{orderId,jdbcType=VARCHAR}
+        ) T
+        LEFT JOIN (
+            SELECT article_id, article_name, article_name_en, spec
+            FROM MA1100
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.article_id = T1.article_id
+        ORDER BY serial_no ASC
+        LIMIT ${rows} OFFSET ${limitStart}
+    </select>
+
+    <select id="selectCountDetailsByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyParamDTO" resultType="int">
+        SELECT
+           count(*)
+        FROM (
+            SELECT
+                store_cd, order_id, serial_no, article_id, barcode, vendor_id,is_free_item,is_free_item as is_free_item_t,
+                promotion_id, order_unit, order_qty, order_price,order_nocharge_qty,receive_nocharge_qty,
+                order_amt, receive_price, receive_qty,
+                receive_total_amt, reason_id, correction_difference,correction_nocharge_qty
+            FROM OD0010
+            WHERE store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND order_id = #{orderId,jdbcType=VARCHAR}
+        ) T
+        LEFT JOIN (
+            SELECT article_id, article_name, article_name_en, spec
+            FROM MA1100
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.article_id = T1.article_id
+    </select>
+
+    <insert id="insertRecord" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyDTO">
+        INSERT INTO od0000 (
+            store_cd, order_id, org_order_id, vendor_id, delivery_type_cd, delivery_center_id,
+            delivery_area_cd, order_type, order_method, order_date, order_remark, order_amt,
+            receive_amt, create_user_id, create_ymd, create_hms, update_user_id, update_ymd,
+            update_hms, order_sts, receive_date,return_type
+        ) VALUES (
+            #{storeCd,jdbcType=VARCHAR}, #{orderId,jdbcType=VARCHAR}, #{orgOrderId,jdbcType=VARCHAR},
+            #{vendorId,jdbcType=VARCHAR}, '999', '00000', '000000', #{orderType,jdbcType=VARCHAR}, '20',
+            #{orderDate,jdbcType=VARCHAR}, #{orderRemark,jdbcType=VARCHAR}, #{orderAmt,jdbcType=NUMERIC},
+            #{receiveAmt,jdbcType=NUMERIC}, #{commonDTO.createUserId,jdbcType=VARCHAR},
+            #{commonDTO.createYmd,jdbcType=VARCHAR}, #{commonDTO.createHms,jdbcType=VARCHAR},
+            #{commonDTO.updateUserId,jdbcType=VARCHAR}, #{commonDTO.updateYmd,jdbcType=VARCHAR},
+            #{commonDTO.updateHms,jdbcType=VARCHAR}, '04', #{commonDTO.createYmd,jdbcType=VARCHAR},
+            #{returnType,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <update id="updateRecord">
+        update od0000 set
+        order_remark = #{orderRemark,jdbcType=VARCHAR},
+        update_user_id = #{commonDTO.updateUserId,jdbcType=VARCHAR},
+        update_ymd = #{commonDTO.updateYmd,jdbcType=VARCHAR},
+        update_hms = #{commonDTO.updateHms,jdbcType=VARCHAR}
+        where order_id = #{orderId,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 查询待选 -->
+    <select id="selectOrgOrderId" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT store_cd k, order_id v,return_type hidek FROM OD0000
+        WHERE order_type = '02'
+        AND order_sts = '04'
+        AND store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND LOWER(order_id) LIKE LOWER(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+    </select>
+
+    <!-- 修正传票获取原数据 -->
+    <select id="selectReturnModify" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyParamDTO"
+            resultType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyDetailsDTO">
+		SELECT
+			T.*, T0.order_price AS orderPrice, T0.order_qty AS orderQty, T0.order_amt AS orderAmt,
+			T1.article_name AS articleName, T1.article_name_en AS articleNameEn, T1.spec
+		FROM (
+			SELECT
+				O1.store_cd AS storeCd, O1.order_id AS orderId, O1.serial_no AS serialNo, O1.article_id AS articleId,
+				O1.barcode, O1.vendor_id AS vendorId, O1.order_unit AS orderUnit, O1.order_price AS rrOrderPrice,
+				O1.receive_qty AS rrOrderQty, (O1.order_price * O1.receive_qty) AS rrOrderAmt, O.org_order_id,O1.order_nocharge_qty,receive_nocharge_qty
+			FROM OD0000 O, OD0010 O1
+			WHERE O.order_type = '02'
+            AND O.order_sts = '04'
+			AND O.store_cd = O1.store_cd
+			AND O.order_id = O1.order_id
+			AND O.order_id = #{orderId,jdbcType=VARCHAR}
+			AND O.store_cd = #{storeCd,jdbcType=VARCHAR}
+           and o1.is_free_item = '0'
+		) T
+		LEFT JOIN (
+			SELECT store_cd, order_id, article_id, order_price, order_qty, order_amt
+        FROM OD0010
+		) T0
+		ON T.org_order_id = T0.order_id AND T.storeCd = T0.store_cd AND T.articleId = T0.article_id
+		/* ON  T.storeCd = T0.store_cd AND T.articleId = T0.article_id */
+		LEFT JOIN (
+			SELECT article_id, article_name, article_name_en, spec FROM MA1100
+			WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+		) T1
+		ON T.articleId = T1.article_id
+		ORDER BY T.serialNo
+		LIMIT ${rows} OFFSET ${limitStart}
+	</select>
+
+    <select id="selectCountReturnModify" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyParamDTO"
+            resultType="int">
+		SELECT
+			count(*)
+		FROM (
+			SELECT
+				O1.store_cd AS storeCd, O1.order_id AS orderId, O1.serial_no AS serialNo, O1.article_id AS articleId,
+				O1.barcode, O1.vendor_id AS vendorId, O1.order_unit AS orderUnit, O1.order_price AS rrOrderPrice,
+				O1.receive_qty AS rrOrderQty, (O1.order_price * O1.receive_qty) AS rrOrderAmt, O.org_order_id,O1.order_nocharge_qty,receive_nocharge_qty
+			FROM OD0000 O, OD0010 O1
+			WHERE O.order_type = '02'
+            AND O.order_sts = '04'
+			AND O.store_cd = O1.store_cd
+			AND O.order_id = O1.order_id
+			AND O.order_id = #{orderId,jdbcType=VARCHAR}
+			AND O.store_cd = #{storeCd,jdbcType=VARCHAR}
+           and o1.is_free_item = '0'
+		) T
+		LEFT JOIN (
+			SELECT store_cd, order_id, article_id, order_price, order_qty, order_amt
+        FROM OD0010
+		) T0
+		ON T.org_order_id = T0.order_id AND T.storeCd = T0.store_cd AND T.articleId = T0.article_id
+		/* ON  T.storeCd = T0.store_cd AND T.articleId = T0.article_id */
+		LEFT JOIN (
+			SELECT article_id, article_name, article_name_en, spec FROM MA1100
+			WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+		) T1
+		ON T.articleId = T1.article_id
+	</select>
+
+    <!-- 根据主键查询收货单头档信息 -->
+    <select id="selectReceiveByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyParamDTO"
+            resultType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyDTO">
+        SELECT
+            T1.vendor_id, T2.vendor_name
+        FROM (
+            SELECT store_cd, receive_id, order_id FROM OD0000_T
+            WHERE store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND receive_id = #{orderId,jdbcType=VARCHAR}
+        ) T
+        JOIN (
+            SELECT store_cd, order_id, vendor_id
+            FROM OD0000
+        )T1
+        ON T.order_id = T1.order_id
+		LEFT JOIN (
+			SELECT vendor_id, vendor_name FROM MA2000
+			WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+		) T2
+		ON T1.vendor_id = T2.vendor_id
+    </select>
+
+    <!-- 根据主键查询退货单头档信息 -->
+    <select id="selectReturnByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyParamDTO"
+            resultType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyDTO">
+        SELECT
+            T.vendor_id,T.return_type, T1.vendor_name
+        FROM (
+            SELECT store_cd, order_id, vendor_id,return_type FROM OD0000
+            WHERE store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND order_id = #{orderId,jdbcType=VARCHAR}
+        ) T
+		LEFT JOIN (
+			SELECT vendor_id, vendor_name FROM MA2000
+			WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+		) T1
+		ON T.vendor_id = T1.vendor_id
+    </select>
+
+    <select id="getdirectItemInfo" resultType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyDTO">
+        SELECT A.on_hand_qty,A.on_order_qty,A.article_id,B.spec,B.article_name,B.unit_id,B.spec,B.unit_name,
+        (SELECT distinct MA1110.default_barcode FROM MA1110 WHERE MA1110.article_id=#{dto.articleId,jdbcType=VARCHAR} AND
+        MA1110.vendor_id = A.major_vendor_id AND (#{businessDate,jdbcType=VARCHAR} between MA1110.effective_start_date and MA1110.effective_end_date)
+         ) AS barcode
+        from
+        (SELECT
+            sk0000_today.on_hand_qty,
+            sk0000_today.on_order_qty,
+            sk0000_today.article_id,
+	        sk0000_today.major_vendor_id
+        FROM
+            sk0000_today
+        WHERE
+            sk0000_today.article_id = #{dto.articleId,jdbcType=VARCHAR} AND sk0000_today.store_cd=#{dto.storeCd,jdbcType=VARCHAR}) AS A
+            LEFT JOIN
+                (
+        SELECT
+        MA1100.article_id,
+            ma1100.article_name,
+            ma1100.sales_unit_id AS unit_id,
+            MA0220.unit_name,
+            ma1100.spec
+        FROM
+            MA1100,MA0220
+        WHERE
+            MA1100.article_id =#{dto.articleId,jdbcType=VARCHAR}
+            AND MA0220.unit_id=ma1100.sales_unit_id
+            )AS B ON B.article_id=A.article_id
+    </select>
+
+</mapper>

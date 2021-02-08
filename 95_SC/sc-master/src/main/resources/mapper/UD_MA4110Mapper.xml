@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.MA4110Mapper">
+
+  <resultMap id="BaseResultMap" type="cn.com.bbut.iy.itemmaster.dto.ma4110.Ma4110GridDto">
+    <id column="promotion_cd" jdbcType="VARCHAR" property="promotionCd" />
+    <result column="promotion_name" jdbcType="VARCHAR" property="promotionName" />
+    <result column="dep_name" jdbcType="VARCHAR" property="depName" />
+    <result column="sub_category_name" jdbcType="VARCHAR" property="subCategoryName" />
+    <result column="promotion_days" jdbcType="INTEGER" property="promotionDays" />
+    <result column="create_user_id" jdbcType="VARCHAR" property="createUserId" />
+    <result column="create_ymd" jdbcType="CHAR" property="createYmd" />
+    <result column="create_hms" jdbcType="CHAR" property="createHms" />
+    <result column="update_user_id" jdbcType="VARCHAR" property="updateUserId" />
+    <result column="update_ymd" jdbcType="CHAR" property="updateYmd" />
+    <result column="update_hms" jdbcType="CHAR" property="updateHms" />
+    <result column="update_screen_id" jdbcType="VARCHAR" property="updateScreenId" />
+    <result column="update_ip_address" jdbcType="VARCHAR" property="updateIpAddress" />
+    <result column="review_status" javaType="INTEGER" property="reviewStatus"/>
+    <result column="n_reviewid"  property="processSelection"/>
+    <result column="dep_cd"  property="depCd"/>
+    <result column="promotion_start_date" property="promotionStartDate" jdbcType="VARCHAR" />
+    <result column="promotion_end_date" property="promotionEndDate" jdbcType="VARCHAR" />
+    <result column="refer_sale_price" jdbcType="DECIMAL" property="articleSalePrice" />
+    <result column="display_seq" jdbcType="DECIMAL" property="displaySeq"/>
+    <result column="create_user_name" property="createUser" jdbcType="VARCHAR" />
+  </resultMap>
+
+
+  <sql id="Base_Where_Clause" >
+    /*通知进入 已读信息*/
+    <if test="informType == '1'.toString()">
+      AND ma4040.promotion_cd in (
+        select info_id from ma4370 where
+        inform_type = '2'
+        and inform_id in
+        (select inform_id from ma4380
+        where inform_type = '2'
+        and user_id = #{userId,jdbcType=VARCHAR}
+        and ma4380.inform_num = ma4370.inform_num
+        )
+      )
+    </if>
+    /*通知进入 未读信息*/
+    <if test="informType == '2'.toString()">
+      AND ma4040.promotion_cd in (
+        select info_id from ma4370 where
+          inform_type = '2'
+          /*通知天数*/
+            <![CDATA[
+          and effective_date<=#{businessDate,jdbcType=VARCHAR}
+          and #{businessDate,jdbcType=VARCHAR}<=to_char(to_date( effective_date, 'yyyymmdd' ) + CAST ( (select cm9060.sp_value from cm9060 where cm9060.sp_id = '1205') AS INT ), 'yyyymmdd' )
+          ]]>
+          and inform_id not in
+          (select inform_id from ma4380
+          where inform_type = '2'
+          and user_id = #{userId,jdbcType=VARCHAR}
+          and ma4380.inform_num = ma4370.inform_num
+            )
+      )
+    </if>
+    <if test="promotionCd !=null and promotionCd !=''">
+      AND lower(ma4040.promotion_cd) like lower(CONCAT('%',#{promotionCd,jdbcType=VARCHAR},'%'))
+    </if>
+    <if test="promotionName !=null and promotionName !=''">
+      AND lower(ma4040.promotion_name) like lower(CONCAT('%',#{promotionName,jdbcType=VARCHAR},'%'))
+    </if>
+    <if test="createYmd != null and createYmd != ''">
+      AND ma4040.create_ymd >= #{createYmd}
+    </if>
+    <if test="createEndYmd != null and createEndYmd != ''">
+      <![CDATA[
+      		AND ma4040.create_ymd <= #{createEndYmd}
+      	]]>
+    </if>
+    <if test="depCd != null and depCd !=''">
+      AND ma4040.dep_cd = #{depCd,jdbcType=VARCHAR}
+    </if>
+    <if test="itemCode != null and itemCode !=''">
+      AND ma4040.promotion_cd in (
+      select DISTINCT ma4070.promotion_cd from ma4070 where
+      lower(ma4070.article_id) like lower(CONCAT('%',#{itemCode,jdbcType=VARCHAR},'%'))
+      )
+    </if>
+    <if test="itemName != null and itemName !=''">
+      AND ma4040.promotion_cd in (
+      select DISTINCT ma4070.promotion_cd from ma4070 where ma4070.article_id in (
+      select DISTINCT article_id from ma1100 where
+      <![CDATA[
+                effective_start_date <= #{businessDate,jdbcType=VARCHAR}
+                and effective_end_date >= #{businessDate,jdbcType=VARCHAR}
+                ]]>
+      AND lower(article_name) like lower(CONCAT('%',#{itemName,jdbcType=VARCHAR},'%'))
+      )
+      )
+    </if>
+    <if test="promotionStartDate != null and promotionStartDate != ''">
+      <![CDATA[
+      AND ma4040.promotion_start_date >= #{promotionStartDate,jdbcType=VARCHAR}
+      ]]>
+    </if>
+    <if test="promotionEndDate != null and promotionEndDate != ''">
+      <![CDATA[
+      		AND ma4040.promotion_start_date <= #{promotionEndDate,jdbcType=VARCHAR}
+      	]]>
+    </if>
+
+    <if test="storeList != null and storeList.size() != 0">
+      AND ma4040.structure_cd IN (
+      select DISTINCT admin_structure_cd from ma0020 where structure_cd in(
+      select admin_structure_cd from ma0020 where structure_cd in(
+      select admin_structure_cd from ma0020 where structure_cd in
+      <foreach item="store" index="index" collection="storeList"
+               open="(" separator="," close=")">
+        #{store,jdbcType=VARCHAR}
+      </foreach>
+      )
+      )
+      )
+    </if>
+         /*审核通过的数据*/
+    AND ma4040.review_status = 10
+  </sql>
+
+  <select id="getRegionList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+    SELECT structure_cd k, structure_name v
+    FROM MA0020
+    <where>
+      and level = '0'
+      and effective_sts = '10'
+    </where>
+  </select>
+
+  <select id="getList" resultMap="BaseResultMap" parameterType="cn.com.bbut.iy.itemmaster.dto.ma4110.Ma4110ParamDto">
+    SELECT T
+    .*,
+    T1.article_name,
+    T1.refer_sale_price,
+    T2.sub_category_name,
+    T3.emp_name AS create_user_name
+    FROM
+    (
+    SELECT MA4040
+    .promotion_cd,MA4040.promotion_name,
+    MA4040.promotion_start_date,MA4040.promotion_end_date,
+    MA4070.promotion_term_group,MA4070.article_id,
+    MA4070.barcode,MA4070.display_seq,
+    concat(MA4040.create_ymd,'',MA4040.create_hms) as create_ymd,MA4040.create_user_id,
+    MA4040.effective_sts,MA4040.effective_date
+    FROM
+    MA4070,MA4040 
+    WHERE
+    MA4070.promotion_cd = MA4040.promotion_cd
+    <include refid="Base_Where_Clause"/>
+    )T LEFT JOIN ( SELECT article_id, article_name, effective_start_date, effective_end_date, refer_sale_price, dep_cd, pma_cd, category_cd, sub_category_cd FROM MA1100 ) T1 ON T.article_id = T1.article_id
+    AND T.effective_date BETWEEN T1.effective_start_date
+    AND T1.effective_end_date
+    LEFT JOIN ( SELECT dep_cd, pma_cd, category_cd, sub_category_cd, sub_category_name FROM MA0100 ) T2 ON T1.dep_cd = T2.dep_cd
+    AND T1.pma_cd = T2.pma_cd
+    AND T1.category_cd = T2.category_cd
+    AND T1.sub_category_cd = T2.sub_category_cd
+    LEFT JOIN (SELECT emp_num_id, emp_name FROM ma4200) T3 ON T.create_user_id = T3.emp_num_id
+    <if test="limitStart >= 0">
+      limit ${rows} offset ${limitStart}
+    </if>
+  </select>
+
+  <select id="getListCount" parameterType="cn.com.bbut.iy.itemmaster.dto.ma4110.Ma4110ParamDto" resultType="long">
+    SELECT count(*) FROM
+    (
+    SELECT MA4040
+    .promotion_cd,MA4040.promotion_name,
+    MA4040.promotion_start_date,MA4040.promotion_end_date,
+    MA4070.promotion_term_group,MA4070.article_id,
+    MA4070.barcode,MA4070.display_seq,
+    MA4040.create_ymd, MA4040.effective_sts,MA4040.effective_date
+    FROM
+    MA4070,MA4040
+    WHERE
+    MA4070.promotion_cd = MA4040.promotion_cd
+    <include refid="Base_Where_Clause"/>
+    )T LEFT JOIN ( SELECT article_id, article_name, effective_start_date, effective_end_date, refer_sale_price, dep_cd, pma_cd, category_cd, sub_category_cd FROM MA1100 ) T1 ON T.article_id = T1.article_id
+    AND T.effective_date BETWEEN T1.effective_start_date
+    AND T1.effective_end_date
+    LEFT JOIN ( SELECT dep_cd, pma_cd, category_cd, sub_category_cd, sub_category_name FROM MA0100 ) T2 ON T1.dep_cd = T2.dep_cd
+    AND T1.pma_cd = T2.pma_cd
+    AND T1.category_cd = T2.category_cd
+    AND T1.sub_category_cd = T2.sub_category_cd
+  </select>
+
+  <select id="getDetailList" resultType="cn.com.bbut.iy.itemmaster.dto.ma4110.Ma4110DetailGridDto" parameterType="cn.com.bbut.iy.itemmaster.dto.ma4110.Ma4110ParamDto">
+    select
+    ma0020.structure_name as location,ma0080.pma_name as department,ma4120.item_code as iteamCode,ma4120.barcode,ma1100.article_name as descriptionEN,
+    ma1100.article_name_vietnamese as descriptionVN,ma4140.material_type_name as materialType,ma1100.dc_item as dcItem,
+    ma4120.scheme_customer_start_date as startDate,ma4120.scheme_customer_end_date as endDate,ma4120.scheme_customer_details as details,
+    ma4120.selling_price_normal as normal,ma4120.selling_price_promotion as promotion,ma4120.vat_output as vatOutput,ma4120.vendor_id as vendorId,
+    ma2000.vendor_name as vendorName
+    from ma4110,ma0020,ma4120,ma1100,ma0080,ma4140,ma2000
+    where ma4110.location=ma0020.structure_cd and ma4110.promotion_id=ma4120.promotion_id and ma4120.item_code=ma1100.article_id and ma1100.pma_cd=ma0080.pma_cd
+    and ma4120.material_type=ma4140.material_type_id and ma4120.vendor_id=ma2000.vendor_id and ma0020.effective_sts='10' and ma0020.level = '0'
+    and ma4110.create_ymd between ma2000.effective_start_date and ma2000.effective_end_date
+    and ma4110.create_ymd between ma1100.effective_start_date and ma1100.effective_end_date
+    and ma0080.effective_sts='10' and ma4140.effective_sts='10'
+    and ma4110.promotion_id = #{promotionCd,jdbcType=VARCHAR}
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limitStart >= 0">
+      limit ${limitEnd} offset ${limitStart}
+    </if>
+  </select>
+
+  <select id="getDetailListCount" resultType="long" parameterType="cn.com.bbut.iy.itemmaster.dto.ma4110.Ma4110ParamDto">
+    select
+    count (*)
+    from ma4110,ma0020,ma4120,ma1100,ma0080,ma4140,ma2000
+    where ma4110.location=ma0020.structure_cd and ma4110.promotion_id=ma4120.promotion_id and ma4120.item_code=ma1100.article_id and ma1100.pma_cd=ma0080.pma_cd
+    and ma4120.material_type=ma4140.material_type_id and ma4120.vendor_id=ma2000.vendor_id and ma0020.effective_sts='10' and ma0020.level = '0'
+    and ma4110.create_ymd between ma2000.effective_start_date and ma2000.effective_end_date
+    and ma4110.create_ymd between ma1100.effective_start_date and ma1100.effective_end_date
+    and ma0080.effective_sts='10' and ma4140.effective_sts='10'
+    and ma4110.promotion_id = #{promotionCd,jdbcType=VARCHAR}
+  </select>
+</mapper>

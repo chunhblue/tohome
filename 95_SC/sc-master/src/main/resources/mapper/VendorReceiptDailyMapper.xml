@@ -1,0 +1,1068 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.VendorReceiptDailyMapper">
+
+    <resultMap id="resultItemMap" type="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyDTO">
+        <result column="receive_id" property="receiveId"></result>
+        <result column="store_cd" property="storeCd"></result>
+        <result column="store_name" property="storeName"></result>
+        <result column="order_date" property="accDate"></result>
+        <result column="article_id" property="articleId"></result>
+        <result column="barcode" property="barcode"></result>
+        <result column="receive_total_qty" property="receiveTotalQty"></result>
+        <result column="receive_qty" property="receiveQty"></result>
+        <result column="receive_total_amt" property="receiveAmt"></result>
+        <result column="pma_cd" property="pmaCd"></result>
+        <result column="pma_name" property="pmaName"></result>
+        <result column="category_cd" property="categoryCd"></result>
+        <result column="category_name" property="categoryName"></result>
+        <result column="sub_category_cd" property="subCategoryCd"></result>
+        <result column="sub_category_name" property="subCategoryName"></result>
+        <result column="vendor_id" property="vendorId"></result>
+        <result column="vendor_name" property="vendorName"></result>
+        <result column="ofc" property="amCd"></result>
+        <result column="om" property="omCd"></result>
+        <result column="am_name" property="amName"></result>
+        <result column="om_name" property="omName"></result>
+        <result column="delivery_center_id" property="dc"></result>
+        <result column="emp_name" property="userName"></result>
+        <result column="received_remark" property="receivedRemark"></result>
+        <result column="receive_date" property="receiveDate"></result>
+    </resultMap>
+
+    <sql id="commonInclude">
+        <foreach item="store" index="index" collection="receiptDaily.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="receiptDaily.startDate!=null and receiptDaily.startDate!='' and receiptDaily.endDate!=null and receiptDaily.endDate!=''">
+            AND od1.update_ymd BETWEEN #{receiptDaily.startDate} AND #{receiptDaily.endDate}
+        </if>
+        <if test="receiptDaily.depCd!=null and receiptDaily.depCd!=''">
+            AND MA1.dep_cd = #{receiptDaily.depCd}
+        </if>
+        <if test="receiptDaily.pmaCd!=null and receiptDaily.pmaCd!=''">
+            AND MA1.pma_cd = #{receiptDaily.pmaCd}
+        </if>
+        <if test="receiptDaily.categoryCd!=null and receiptDaily.categoryCd!=''">
+            AND MA1.category_cd = #{receiptDaily.categoryCd}
+        </if>
+        <if test="receiptDaily.subCategoryCd!=null and receiptDaily.subCategoryCd!=''">
+            AND MA1.sub_category_cd = #{receiptDaily.subCategoryCd}
+        </if>
+<!--        <if test="receiptDaily.articleId!=null and receiptDaily.articleId!=''">-->
+<!--            AND lower(MA1.article_id) like lower(CONCAT('%',#{receiptDaily.articleId},'%'))-->
+<!--        </if>-->
+<!--        <if test="receiptDaily.articleName!=null and receiptDaily.articleName!=''">-->
+<!--            AND lower(MA1.article_name) like lower(CONCAT('%',#{receiptDaily.articleName},'%'))-->
+<!--        </if>-->
+        <if test="receiptDaily.city!=null and receiptDaily.city!=''">
+            AND MA2.zo_cd = #{receiptDaily.city}
+        </if>
+        <if test="receiptDaily.am!=null and receiptDaily.am!=''">
+            AND MA2.ofc = #{receiptDaily.am}
+        </if>
+        <if test="receiptDaily.om!=null and receiptDaily.om!=''">
+            AND MA2.om = #{receiptDaily.om}
+        </if>
+        <if test="receiptDaily.receiveId !=null and receiptDaily.receiveId !=''">
+            AND lower(od1.receive_id) like lower(CONCAT('%',#{receiptDaily.receiveId},'%'))
+        </if>
+    </sql>
+    <select id="getPmaList" resultType="cn.com.bbut.iy.itemmaster.entity.ma0080.MA0080">
+        SELECT
+            A.PMA_CD AS pmaCd,
+            concat(A.PMA_CD,' ',A.PMA_NAME) AS pmName
+        FROM
+            MA0080 A
+        WHERE
+            A.EFFECTIVE_STS = '10'
+    </select>
+
+    <select id="getAMList" parameterType="java.lang.String" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT DISTINCT
+            B.c_operatorcode k,
+		    CONCAT(B.c_operatorcode,' ',B.c_operatorname) v
+        FROM
+            MA1000 A,
+            t_operator B,
+            OD0010_T C,
+            OD0000 D
+        WHERE
+            A.OFC = B.c_operatorcode
+            AND C.store_cd = A.store_cd
+            AND C.order_id = D.order_id
+        <if test="flag!=null and flag!=''">
+            AND D.order_differentiate = #{flag}
+        </if>
+        <if test="v!=null and v!=''">
+            AND (
+            lower(B.c_operatorcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(B.c_operatorcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+    </select>
+
+    <select id="getOMList" parameterType="java.lang.String" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT DISTINCT
+        B.c_operatorcode k,
+        CONCAT(B.c_operatorcode,' ',B.c_operatorname) v
+        FROM
+        MA1000 A,
+        t_operator B,
+        OD0010_T C,
+        OD0000 D
+        WHERE
+        A.om = B.c_operatorcode
+        AND C.store_cd = A.store_cd
+        AND C.order_id = D.order_id
+        <if test="flag!=null and flag!=''">
+            AND D.order_differentiate = #{flag}
+        </if>
+        <if test="v!=null and v!=''">
+            AND (
+            lower(B.c_operatorcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(B.c_operatorcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+    </select>
+
+    <select id="getCity" resultType="cn.com.bbut.iy.itemmaster.entity.ma0020.MA0020C">
+        SELECT DISTINCT
+            A.structure_cd AS structureCd,
+            concat(A.structure_cd,' ',A.structure_name) AS structureName
+        FROM
+            MA0020 A
+        WHERE
+            A.structure_level = '2'
+    </select>
+
+    <select id="searchCount1" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+            resultType="int">
+        SELECT
+            COUNT (A.article_id)
+        FROM
+            (
+            SELECT DISTINCT
+                A.order_date,
+                od1.receive_id,
+                od1.received_remark,
+                C.order_id,
+                C.article_id,
+                MA1.article_name,
+                C.store_cd,
+                MA2.store_name,
+                MA1.pma_cd,
+                MA3.pma_name,
+                MA5.category_cd,
+                MA5.category_name,
+                MA6.sub_category_cd,
+                MA6.sub_category_name,
+                MA4.vendor_id,
+                MA4.vendor_name,
+                C.barcode,
+                C.receive_total_qty,
+                MA2.ofc,
+                MA2.om,
+                ma7.emp_name
+            FROM
+                OD0000 A,
+                od0010 C,
+                od0000_t od1
+                LEFT JOIN ma4200 ma7 on od1.create_user_id = ma7.emp_num_id,
+                MA1100 MA1
+                LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+                LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+                LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+                MA1000 MA2
+                left join t_operator oper on ma2.ofc = oper.c_operatorcode
+                left join t_operator oper1 on ma2.om = oper1.c_operatorcode,
+                MA2000 MA4
+            WHERE
+                A.order_differentiate = '0'
+                AND A.order_type = '01'
+                AND A.order_sts = '04'
+                AND A.review_status = 20
+                AND od1.order_id =C.order_id
+                AND A.order_id = C.order_id
+                AND C.article_id = MA1.article_id
+                AND #{receiptDaily.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+                AND C.store_cd = MA2.store_cd
+                AND #{receiptDaily.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+                AND C.vendor_id = MA4.vendor_id
+                AND #{receiptDaily.businessDate} BETWEEN MA4.effective_start_date
+                AND MA4.effective_end_date
+                AND A.store_cd IN
+                <include refid="commonInclude"></include>
+                <if test="receiptDaily.vendorCd!=null and receiptDaily.vendorCd!=''">
+                    AND lower(C.vendor_id) like lower(CONCAT('%',#{receiptDaily.vendorCd},'%'))
+                </if>
+                <if test="receiptDaily.vendorName!=null and receiptDaily.vendorName!=''">
+                    AND lower(MA4.vendor_name) like lower(CONCAT('%',#{receiptDaily.vendorName},'%'))
+                </if>
+        ) A
+    </select>
+    <select id="SearchCount" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+            resultType="int">
+        SELECT DISTINCT
+        A.order_date,
+        od1.update_ymd receive_date,
+        od1.receive_id,
+        od1.received_remark,
+        C.order_id,
+        C.article_id,
+        MA1.article_name,
+        MA1.article_name_en,
+        MA1.article_short_name,
+        MA1.article_short_name_en,
+        C.store_cd,
+        MA2.store_name,
+        MA1.pma_cd,
+        MA3.pma_name,
+        MA5.category_cd,
+        MA5.category_name,
+        MA6.sub_category_cd,
+        MA6.sub_category_name,
+        MA4.vendor_id,
+        MA4.vendor_name,
+        C.barcode,
+        coalesce(C.receive_qty,0)+coalesce(rec.rec_qty,0) AS receive_total_qty,/*收货数量 = 收货数量+更正数量*/
+        coalesce(C.receive_qty,0)  AS receive_qty,
+        MA2.ofc,oper.c_operatorname as am_name,
+        MA2.om,oper1.c_operatorname as om_name,
+        ma7.emp_name
+        into tmp_order_article
+        FROM
+        OD0000 A,
+        od0010 C
+        LEFT JOIN lateral(
+        select od0000_t.order_id,od0010.article_id,
+        sum(coalesce(correction_difference,0)-coalesce(receive_qty,0)) rec_qty
+        from od0000_t left join od0000 on  od0000.org_order_id = od0000_t.receive_id
+        and od0000.create_ymd||od0000.create_hms = (select max(od0000.create_ymd||od0000.create_hms) from od0000 where od0000.org_order_id = od0000_t.receive_id)
+        left join od0010 on od0000.order_id = od0010.order_id
+        where od0000.order_type='07'
+        and od0000_t.order_id =C.order_id
+        and od0010.article_id =C.article_id
+        GROUP BY od0000_t.order_id,od0010.article_id
+        ) rec on true,
+        od0000_t od1
+        LEFT JOIN ma4200 ma7 on od1.create_user_id = ma7.emp_num_id
+        ,MA1100 MA1
+        LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+        LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+        LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+        MA1000 MA2
+        left join t_operator oper on ma2.ofc = oper.c_operatorcode
+        left join t_operator oper1 on ma2.om = oper1.c_operatorcode,
+        MA2000 MA4
+        WHERE
+        A.order_differentiate = '0'
+        AND A.order_type = '01'
+        AND A.order_sts = '04'
+        AND A.review_status = 20
+        AND A.order_id = C.order_id
+        AND od1.order_id =C.order_id
+        AND C.article_id = MA1.article_id
+        <if test="receiptDaily.barcode!=null  and receiptDaily.barcode!=''">
+            AND C.barcode like lower(CONCAT('%',#{receiptDaily.barcode},'%'))
+        </if>
+        <if test="receiptDaily.vendorCd!=null and receiptDaily.vendorCd!=''">
+            AND lower(C.vendor_id) like lower(CONCAT('%',#{receiptDaily.vendorCd},'%'))
+        </if>
+        <if test="receiptDaily.vendorName!=null and receiptDaily.vendorName!=''">
+            AND lower(MA4.vendor_name) like lower(CONCAT('%',#{receiptDaily.vendorName},'%'))
+        </if>
+        AND #{receiptDaily.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+        AND C.store_cd = MA2.store_cd
+        AND #{receiptDaily.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+        AND C.vendor_id = MA4.vendor_id
+        AND #{receiptDaily.businessDate} BETWEEN MA4.effective_start_date
+        AND MA4.effective_end_date
+        AND A.store_cd IN
+        <include refid="commonInclude"></include>
+        ;
+--         CREATE INDEX index_moni_gk_city_day ON moni_gk_city_day USING btree (datatime, citycode);
+        SELECT COUNT(1) FROM (SELECT
+        tmp.order_date,
+        tmp.receive_date,
+        tmp.receive_id,
+        tmp.received_remark,
+        tmp.order_id,
+        tmp.article_id,
+        tmp.barcode,
+        tmp.article_name,
+        tmp.article_name_en,
+        tmp.article_short_name,
+        tmp.article_short_name_en,
+        tmp.store_cd,
+        tmp.store_name,
+        tmp.pma_cd,
+        tmp.pma_name,
+        tmp.category_cd,
+        tmp.category_name,
+        tmp.sub_category_cd,
+        tmp.sub_category_name,
+        tmp.vendor_id,
+        tmp.vendor_name,
+        tmp.barcode,
+        tmp.receive_total_qty,
+        /*收货数量 = 收货数量+更正数量*/
+        tmp.receive_qty,
+        tmp.ofc,
+        tmp.am_name,
+        tmp.om,
+        tmp.om_name,
+        tmp.emp_name  from tmp_order_article  tmp where 1=1
+        <if test="receiptDaily.articleName !=null and receiptDaily.articleName !=''">
+            AND concat(lower( tmp.article_id ),'',lower( tmp.article_name ),'',lower( tmp.article_name_en ),'',lower( tmp.article_short_name_en )) LIKE lower( CONCAT('%',#{receiptDaily.articleName},'%') )
+        </if>
+         )AS A
+    </select>
+
+    <select id="search1" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+            resultMap="resultItemMap">
+        SELECT DISTINCT
+            A.order_date,
+            od1.update_ymd receive_date,
+            od1.receive_id,
+            od1.received_remark,
+            C.order_id,
+            C.article_id,
+            MA1.article_name,
+            C.store_cd,
+            MA2.store_name,
+            MA1.pma_cd,
+            MA3.pma_name,
+            MA5.category_cd,
+            MA5.category_name,
+            MA6.sub_category_cd,
+            MA6.sub_category_name,
+            MA4.vendor_id,
+            MA4.vendor_name,
+            C.barcode,
+            coalesce(C.receive_qty,0)+coalesce(rec.rec_qty,0) AS receive_total_qty,/*收货数量 = 收货数量+更正数量*/
+            coalesce(C.receive_qty,0)  AS receive_qty,
+            MA2.ofc,oper.c_operatorname as am_name,
+            MA2.om,oper1.c_operatorname as om_name,
+            ma7.emp_name
+        FROM
+            OD0000 A,
+            od0010 C
+            LEFT JOIN lateral(
+            select od0000_t.order_id,od0010.article_id,
+            sum(coalesce(correction_difference,0)-coalesce(receive_qty,0)) rec_qty
+            from od0000_t left join od0000 on  od0000.org_order_id = od0000_t.receive_id
+            and od0000.create_ymd||od0000.create_hms = (select max(od0000.create_ymd||od0000.create_hms) from od0000 where od0000.org_order_id = od0000_t.receive_id)
+            left join od0010 on od0000.order_id = od0010.order_id
+            where od0000.order_type='07'
+            and od0000_t.order_id =C.order_id
+            and od0010.article_id =C.article_id
+            GROUP BY od0000_t.order_id,od0010.article_id
+            ) rec on true,
+            od0000_t od1
+            LEFT JOIN ma4200 ma7 on od1.create_user_id = ma7.emp_num_id
+            ,MA1100 MA1
+            LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+            LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+            LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+            MA1000 MA2
+            left join t_operator oper on ma2.ofc = oper.c_operatorcode
+            left join t_operator oper1 on ma2.om = oper1.c_operatorcode,
+            MA2000 MA4
+        WHERE
+            A.order_differentiate = '0'
+            AND A.order_type = '01'
+            AND A.order_sts = '04'
+            AND A.review_status = 20
+            AND A.order_id = C.order_id
+            AND od1.order_id =C.order_id
+            AND C.article_id = MA1.article_id
+            AND #{receiptDaily.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+            AND C.store_cd = MA2.store_cd
+            AND #{receiptDaily.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+            AND C.vendor_id = MA4.vendor_id
+            AND #{receiptDaily.businessDate} BETWEEN MA4.effective_start_date
+            AND MA4.effective_end_date
+            AND A.store_cd IN
+            <include refid="commonInclude"></include>
+            <if test="receiptDaily.vendorCd!=null and receiptDaily.vendorCd!=''">
+                AND lower(C.vendor_id) like lower(CONCAT('%',#{receiptDaily.vendorCd},'%'))
+            </if>
+            <if test="receiptDaily.vendorName!=null and receiptDaily.vendorName!=''">
+                AND lower(MA4.vendor_name) like lower(CONCAT('%',#{receiptDaily.vendorName},'%'))
+            </if>
+            <if test="receiptDaily.flg">
+                LIMIT ${receiptDaily.rows} OFFSET ${receiptDaily.limitStart}
+            </if>
+    </select>
+    <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+            resultMap="resultItemMap">
+        SELECT DISTINCT
+        A.order_date,
+        od1.update_ymd receive_date,
+        od1.receive_id,
+        od1.received_remark,
+        C.order_id,
+        C.article_id,
+        MA1.article_name,
+        MA1.article_name_en,
+        MA1.article_short_name,
+        MA1.article_short_name_en,
+        C.store_cd,
+        MA2.store_name,
+        MA1.pma_cd,
+        MA3.pma_name,
+        MA5.category_cd,
+        MA5.category_name,
+        MA6.sub_category_cd,
+        MA6.sub_category_name,
+        MA4.vendor_id,
+        MA4.vendor_name,
+        C.barcode,
+        coalesce(C.receive_qty,0)+coalesce(rec.rec_qty,0) AS receive_total_qty,/*收货数量 = 收货数量+更正数量*/
+        coalesce(C.receive_qty,0)  AS receive_qty,
+        MA2.ofc,oper.c_operatorname as am_name,
+        MA2.om,oper1.c_operatorname as om_name,
+        ma7.emp_name
+        into tmp_order_article
+        FROM
+        OD0000 A,
+        od0010 C
+        LEFT JOIN lateral(
+        select od0000_t.order_id,od0010.article_id,
+        sum(coalesce(correction_difference,0)-coalesce(receive_qty,0)) rec_qty
+        from od0000_t left join od0000 on  od0000.org_order_id = od0000_t.receive_id
+        and od0000.create_ymd||od0000.create_hms = (select max(od0000.create_ymd||od0000.create_hms) from od0000 where od0000.org_order_id = od0000_t.receive_id)
+        left join od0010 on od0000.order_id = od0010.order_id
+        where od0000.order_type='07'
+        and od0000_t.order_id =C.order_id
+        and od0010.article_id =C.article_id
+        GROUP BY od0000_t.order_id,od0010.article_id
+        ) rec on true,
+        od0000_t od1
+        LEFT JOIN ma4200 ma7 on od1.create_user_id = ma7.emp_num_id
+        ,MA1100 MA1
+        LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+        LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+        LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+        MA1000 MA2
+        left join t_operator oper on ma2.ofc = oper.c_operatorcode
+        left join t_operator oper1 on ma2.om = oper1.c_operatorcode,
+        MA2000 MA4
+        WHERE
+        A.order_differentiate = '0'
+        AND A.order_type = '01'
+        AND A.order_sts = '04'
+        AND A.review_status = 20
+        AND A.order_id = C.order_id
+        AND od1.order_id =C.order_id
+        AND C.article_id = MA1.article_id
+        <if test="receiptDaily.barcode!=null  and receiptDaily.barcode!=''">
+        AND C.barcode like lower(CONCAT('%',#{receiptDaily.barcode},'%'))
+        </if>
+        <if test="receiptDaily.vendorCd!=null and receiptDaily.vendorCd!=''">
+            AND lower(C.vendor_id) like lower(CONCAT('%',#{receiptDaily.vendorCd},'%'))
+        </if>
+        <if test="receiptDaily.vendorName!=null and receiptDaily.vendorName!=''">
+            AND lower(MA4.vendor_name) like lower(CONCAT('%',#{receiptDaily.vendorName},'%'))
+        </if>
+        AND #{receiptDaily.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+        AND C.store_cd = MA2.store_cd
+        AND #{receiptDaily.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+        AND C.vendor_id = MA4.vendor_id
+        AND #{receiptDaily.businessDate} BETWEEN MA4.effective_start_date
+        AND MA4.effective_end_date
+        AND A.store_cd IN
+        <include refid="commonInclude"></include>
+        ;
+        SELECT
+        tmp.order_date,
+        tmp.receive_date,
+        tmp.receive_id,
+        tmp.received_remark,
+        tmp.order_id,
+        tmp.article_id,
+        tmp.barcode,
+        tmp.article_name,
+        tmp.article_name_en,
+        tmp.article_short_name,
+        tmp.article_short_name_en,
+        tmp.store_cd,
+        tmp.store_name,
+        tmp.pma_cd,
+        tmp.pma_name,
+        tmp.category_cd,
+        tmp.category_name,
+        tmp.sub_category_cd,
+        tmp.sub_category_name,
+        tmp.vendor_id,
+        tmp.vendor_name,
+        tmp.barcode,
+        tmp.receive_total_qty,
+        /*收货数量 = 收货数量+更正数量*/
+        tmp.receive_qty,
+        tmp.ofc,
+        tmp.am_name,
+        tmp.om,
+        tmp.om_name,
+        tmp.emp_name  from tmp_order_article  tmp where 1=1
+        <if test="receiptDaily.articleName !=null and receiptDaily.articleName !=''">
+         AND concat(lower( tmp.article_id ),'',lower( tmp.article_name ),'',lower( tmp.article_name_en ),'',lower( tmp.article_short_name_en )) LIKE lower( CONCAT('%',#{receiptDaily.articleName},'%') )
+        </if>
+        <if test="receiptDaily.flg">
+            LIMIT ${receiptDaily.rows} OFFSET ${receiptDaily.limitStart}
+        </if>
+ </select>
+    <delete id="deleteTempTable">
+        DROP TABLE IF EXISTS ${tableName};
+    </delete>
+
+    <select id="searchDcReceipt1" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+            resultMap="resultItemMap">
+        SELECT DISTINCT
+            A.order_date,
+            od1.update_ymd receive_date,
+            od1.receive_id,
+            od1.received_remark,
+            A.delivery_center_id,
+            C.order_id,
+            C.article_id,
+            MA1.article_name,
+            C.store_cd,
+            MA2.store_name,
+            MA1.pma_cd,
+            MA3.pma_name,
+            MA5.category_cd,
+            MA5.category_name,
+            MA6.sub_category_cd,
+            MA6.sub_category_name,
+            MA4.vendor_id,
+            MA4.vendor_name,
+            C.barcode,
+            coalesce(C.receive_total_qty,0)+coalesce(rec.rec_qty,0) AS receive_total_qty,/*收货数量 = 收货数量+更正数量*/
+           coalesce(C.receive_qty,0)  AS receive_qty,
+            oper.c_operatorcode,
+            oper.c_operatorname,
+            MA2.ofc,oper.c_operatorname as am_name,
+            MA2.om,oper1.c_operatorname as om_name,
+            ma7.emp_name
+        FROM
+            OD0000 A,
+            od0010 C
+            LEFT JOIN lateral(
+            select od0000_t.order_id,od0010.article_id,
+            sum(coalesce(correction_difference,0)-coalesce(receive_qty,0)) rec_qty
+            from od0000_t left join od0000 on  od0000.org_order_id = od0000_t.receive_id
+            and od0000.create_ymd||od0000.create_hms = (select max(od0000.create_ymd||od0000.create_hms) from od0000 where od0000.org_order_id = od0000_t.receive_id)
+            left join od0010 on od0000.order_id = od0010.order_id
+            where od0000.order_type='07'
+            and od0000_t.order_id =C.order_id
+            and od0010.article_id =C.article_id
+            GROUP BY od0000_t.order_id,od0010.article_id
+            ) rec on true,
+            od0000_t od1
+            LEFT JOIN ma4200 ma7 on od1.create_user_id = ma7.emp_num_id
+            , MA1100 MA1
+            LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+            LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+            LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+            MA1000 MA2
+            left join t_operator oper on ma2.ofc = oper.c_operatorcode
+            left join t_operator oper1 on ma2.om = oper1.c_operatorcode,
+            MA2000 MA4
+        WHERE
+            A.order_differentiate = '1'
+            AND A.order_type = '01'
+            AND A.order_sts = '04'
+            AND A.review_status = 20
+            AND A.order_id = C.order_id
+            AND od1.order_id =C.order_id
+            AND C.article_id = MA1.article_id
+            AND #{receiptDaily.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+            AND C.store_cd = MA2.store_cd
+            AND #{receiptDaily.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+            AND C.vendor_id = MA4.vendor_id
+            AND #{receiptDaily.businessDate} BETWEEN MA4.effective_start_date
+            AND MA4.effective_end_date
+            AND A.store_cd IN
+            <include refid="commonInclude"></include>
+            <if test="receiptDaily.dc!=null and receiptDaily.dc!=''">
+                AND lower(A.delivery_center_id) like lower(CONCAT('%',#{receiptDaily.dc},'%'))
+            </if>
+            <if test="receiptDaily.flg">
+                LIMIT ${receiptDaily.rows} OFFSET ${receiptDaily.limitStart}
+            </if>
+    </select>
+    <select id="searchDcReceipt" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+            resultMap="resultItemMap">
+        SELECT DISTINCT
+            A.order_date,
+            od1.update_ymd receive_date,
+            od1.receive_id,
+            od1.received_remark,
+            A.delivery_center_id,
+            C.order_id,
+            C.article_id,
+            MA1.article_name,
+            MA1.article_name_en,
+           MA1.article_short_name,
+           MA1.article_short_name_en,
+            C.store_cd,
+            MA2.store_name,
+            MA1.pma_cd,
+            MA3.pma_name,
+            MA5.category_cd,
+            MA5.category_name,
+            MA6.sub_category_cd,
+            MA6.sub_category_name,
+            MA4.vendor_id,
+            MA4.vendor_name,
+            C.barcode,
+            coalesce(C.receive_total_qty,0)+coalesce(rec.rec_qty,0) AS receive_total_qty,/*收货数量 = 收货数量+更正数量*/
+           coalesce(C.receive_qty,0)  AS receive_qty,
+            oper.c_operatorcode,
+            oper.c_operatorname,
+            MA2.ofc,oper.c_operatorname as am_name,
+            MA2.om,oper1.c_operatorname as om_name,
+            ma7.emp_name
+            into tmp_dc_order_article
+        FROM
+            OD0000 A,
+            od0010 C
+            LEFT JOIN lateral(
+            select od0000_t.order_id,od0010.article_id,
+            sum(coalesce(correction_difference,0)-coalesce(receive_qty,0)) rec_qty
+            from od0000_t left join od0000 on  od0000.org_order_id = od0000_t.receive_id
+            and od0000.create_ymd||od0000.create_hms = (select max(od0000.create_ymd||od0000.create_hms) from od0000 where od0000.org_order_id = od0000_t.receive_id)
+            left join od0010 on od0000.order_id = od0010.order_id
+            where od0000.order_type='07'
+            and od0000_t.order_id =C.order_id
+            and od0010.article_id =C.article_id
+            GROUP BY od0000_t.order_id,od0010.article_id
+            ) rec on true,
+            od0000_t od1
+            LEFT JOIN ma4200 ma7 on od1.create_user_id = ma7.emp_num_id
+            , MA1100 MA1
+            LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+            LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+            LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+            MA1000 MA2
+            left join t_operator oper on ma2.ofc = oper.c_operatorcode
+            left join t_operator oper1 on ma2.om = oper1.c_operatorcode,
+            MA2000 MA4
+        WHERE
+            A.order_differentiate = '1'
+            AND A.order_type = '01'
+            AND A.order_sts = '04'
+            AND A.review_status = 20
+            AND A.order_id = C.order_id
+            AND od1.order_id =C.order_id
+            AND C.article_id = MA1.article_id
+            AND #{receiptDaily.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+            AND C.store_cd = MA2.store_cd
+            AND #{receiptDaily.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+            AND C.vendor_id = MA4.vendor_id
+            AND #{receiptDaily.businessDate} BETWEEN MA4.effective_start_date
+            AND MA4.effective_end_date
+            AND A.store_cd IN
+            <include refid="commonInclude"></include>
+        <if test="receiptDaily.barcode!=null  and receiptDaily.barcode!=''">
+            AND C.barcode like lower(CONCAT('%',#{receiptDaily.barcode},'%'))
+        </if>
+        <if test="receiptDaily.dc!=null and receiptDaily.dc!=''">
+                AND lower(A.delivery_center_id) like lower(CONCAT('%',#{receiptDaily.dc},'%'))
+            </if>;
+         select
+        tmp.order_date,
+        tmp.receive_date,
+        tmp.receive_id,
+        tmp.received_remark,
+        tmp.delivery_center_id,
+        tmp.order_id,
+        tmp.article_id,
+        tmp.article_name,
+        tmp.store_cd,
+        tmp.store_name,
+        tmp.pma_cd,
+        tmp.pma_name,
+        tmp.category_cd,
+        tmp.category_name,
+        tmp.sub_category_cd,
+        tmp.sub_category_name,
+        tmp.vendor_id,
+        tmp.vendor_name,
+        tmp.barcode,
+        tmp.receive_total_qty,/*收货数量 = 收货数量+更正数量*/
+        tmp.receive_qty,
+        tmp.c_operatorcode,
+        tmp.c_operatorname,
+        tmp.am_name,
+        tmp.om_name,
+        tmp.emp_name
+       from tmp_dc_order_article tmp
+       where
+          1=1
+        <if test="receiptDaily.articleName !=null and receiptDaily.articleName !=''">
+            AND concat(lower( tmp.article_id ),'',lower( tmp.article_name ),'',lower( tmp.article_name_en ),'',lower( tmp.article_short_name_en )) LIKE lower( CONCAT('%',#{receiptDaily.articleName},'%') )
+        </if>
+        <if test="receiptDaily.flg">
+                LIMIT ${receiptDaily.rows} OFFSET ${receiptDaily.limitStart}
+            </if>
+    </select>
+
+    <select id="searchDcReceiptCount1" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+            resultType="int">
+        SELECT
+            COUNT (A.article_id)
+        FROM (
+        SELECT DISTINCT
+            A.order_date,
+            A.delivery_center_id,
+            od1.receive_id,
+            od1.received_remark,
+            C.order_id,
+            C.article_id,
+            MA1.article_name,
+            C.store_cd,
+            MA2.store_name,
+            MA1.pma_cd,
+            MA3.pma_name,
+            MA5.category_cd,
+            MA5.category_name,
+            MA6.sub_category_cd,
+            MA6.sub_category_name,
+            MA4.vendor_id,
+            MA4.vendor_name,
+            C.barcode,
+            C.receive_total_qty,0,
+            oper.c_operatorcode,
+            oper.c_operatorname,
+            ma7.emp_name
+        FROM
+            OD0000 A,
+            od0010 C,
+            od0000_t od1
+            LEFT JOIN ma4200 ma7 on od1.create_user_id = ma7.emp_num_id,
+            MA1100 MA1
+            LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+            LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+            LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+            MA1000 MA2
+            LEFT JOIN t_operator oper ON MA2.OFC = oper.c_operatorcode,
+            MA2000 MA4
+            WHERE
+            A.order_differentiate = '1'
+            AND A.order_type = '01'
+            AND A.order_sts = '04'
+            AND A.review_status = 20
+            AND A.order_id = C.order_id
+            AND od1.order_id =C.order_id
+            AND C.article_id = MA1.article_id
+            AND #{receiptDaily.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+            AND C.store_cd = MA2.store_cd
+            AND #{receiptDaily.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+            AND C.vendor_id = MA4.vendor_id
+            AND #{receiptDaily.businessDate} BETWEEN MA4.effective_start_date
+            AND MA4.effective_end_date
+            AND A.store_cd IN
+            <include refid="commonInclude"></include>
+            <if test="receiptDaily.dc!=null and receiptDaily.dc!=''">
+                AND lower(A.delivery_center_id) like lower(CONCAT('%',#{receiptDaily.dc},'%'))
+            </if>
+        ) A
+    </select>
+    <select id="searchDcReceiptCount" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+            resultType="int">
+   SELECT DISTINCT
+        A.order_date,
+        od1.update_ymd receive_date,
+        od1.receive_id,
+        od1.received_remark,
+        A.delivery_center_id,
+        C.order_id,
+        C.article_id,
+        MA1.article_name,
+        MA1.article_name_en,
+        MA1.article_short_name,
+        MA1.article_short_name_en,
+        C.store_cd,
+        MA2.store_name,
+        MA1.pma_cd,
+        MA3.pma_name,
+        MA5.category_cd,
+        MA5.category_name,
+        MA6.sub_category_cd,
+        MA6.sub_category_name,
+        MA4.vendor_id,
+        MA4.vendor_name,
+        C.barcode,
+        coalesce(C.receive_total_qty,0)+coalesce(rec.rec_qty,0) AS receive_total_qty,/*收货数量 = 收货数量+更正数量*/
+        coalesce(C.receive_qty,0) AS receive_qty,
+        oper.c_operatorcode,
+        oper.c_operatorname,
+        MA2.ofc,oper.c_operatorname as am_name,
+        MA2.om,oper1.c_operatorname as om_name,
+        ma7.emp_name
+        into tmp_dc_order_article
+        FROM
+        OD0000 A,
+        od0010 C
+        LEFT JOIN lateral(
+        select od0000_t.order_id,od0010.article_id,
+        sum(coalesce(correction_difference,0)-coalesce(receive_qty,0)) rec_qty
+        from od0000_t left join od0000 on od0000.org_order_id = od0000_t.receive_id
+        and od0000.create_ymd||od0000.create_hms = (select max(od0000.create_ymd||od0000.create_hms) from od0000 where
+        od0000.org_order_id = od0000_t.receive_id)
+        left join od0010 on od0000.order_id = od0010.order_id
+        where od0000.order_type='07'
+        and od0000_t.order_id =C.order_id
+        and od0010.article_id =C.article_id
+        GROUP BY od0000_t.order_id,od0010.article_id
+        ) rec on true,
+        od0000_t od1
+        LEFT JOIN ma4200 ma7 on od1.create_user_id = ma7.emp_num_id
+        , MA1100 MA1
+        LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+        LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+        LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+        MA1000 MA2
+        left join t_operator oper on ma2.ofc = oper.c_operatorcode
+        left join t_operator oper1 on ma2.om = oper1.c_operatorcode,
+        MA2000 MA4
+        WHERE
+        A.order_differentiate = '1'
+        AND A.order_type = '01'
+        AND A.order_sts = '04'
+        AND A.review_status = 20
+        AND A.order_id = C.order_id
+        AND od1.order_id =C.order_id
+        AND C.article_id = MA1.article_id
+        AND #{receiptDaily.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+        AND C.store_cd = MA2.store_cd
+        AND #{receiptDaily.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+        AND C.vendor_id = MA4.vendor_id
+        AND #{receiptDaily.businessDate} BETWEEN MA4.effective_start_date
+        AND MA4.effective_end_date
+        <if test="receiptDaily.barcode!=null  and receiptDaily.barcode!=''">
+            AND C.barcode like lower(CONCAT('%',#{receiptDaily.barcode},'%'))
+        </if>
+        <if test="receiptDaily.dc!=null and receiptDaily.dc!=''">
+            AND lower(A.delivery_center_id) like lower(CONCAT('%',#{receiptDaily.dc},'%'))
+        </if>
+        AND A.store_cd IN
+        <include refid="commonInclude"></include>
+        ;
+        select count(1)
+        from
+        (SELECT
+        tmp.order_date,
+        tmp.receive_date,
+        tmp.receive_id,
+        tmp.received_remark,
+        tmp.delivery_center_id,
+        tmp.order_id,
+        tmp.article_id,
+        tmp.article_name,
+        tmp.store_cd,
+        tmp.store_name,
+        tmp.pma_cd,
+        tmp.pma_name,
+        tmp.category_cd,
+        tmp.category_name,
+        tmp.sub_category_cd,
+        tmp.sub_category_name,
+        tmp.vendor_id,
+        tmp.vendor_name,
+        tmp.barcode,
+        tmp.receive_total_qty,/*收货数量 = 收货数量+更正数量*/
+        tmp.receive_qty,
+        tmp.c_operatorcode,
+        tmp.c_operatorname,
+        tmp.am_name,
+        tmp.om_name,
+        tmp.emp_name
+        from tmp_dc_order_article tmp
+        where
+        1=1
+        <if test="receiptDaily.articleName !=null and receiptDaily.articleName !=''">
+            AND concat(lower( tmp.article_id ),'',lower( tmp.article_name ),'',lower( tmp.article_name_en ),'',lower(
+            tmp.article_short_name_en )) LIKE lower( CONCAT('%',#{receiptDaily.articleName},'%') )
+        </if>
+        )AS tmp
+
+    </select>
+
+    <select id="getItemCount1" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+            resultType="int">
+        SELECT
+            COUNT (distinct A.article_id)
+        FROM (
+        SELECT DISTINCT
+            A.order_date,
+            A.delivery_center_id,
+            od1.receive_id,
+            od1.received_remark,
+            C.order_id,
+            C.article_id,
+            MA1.article_name,
+            C.store_cd,
+            MA2.store_name,
+            MA1.pma_cd,
+            MA3.pma_name,
+            MA5.category_cd,
+            MA5.category_name,
+            MA6.sub_category_cd,
+            MA6.sub_category_name,
+            MA4.vendor_id,
+            MA4.vendor_name,
+            C.barcode,
+            C.receive_total_qty,0,
+            oper.c_operatorcode,
+            oper.c_operatorname,
+            ma7.emp_name
+        FROM
+            OD0000 A,
+            od0010 C,
+            od0000_t od1
+            LEFT JOIN ma4200 ma7 on od1.create_user_id = ma7.emp_num_id,
+            MA1100 MA1
+            LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+            LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+            LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+            MA1000 MA2
+            LEFT JOIN t_operator oper ON MA2.OFC = oper.c_operatorcode,
+            MA2000 MA4
+            WHERE
+            A.order_differentiate = '1'
+            AND A.order_type = '01'
+            AND A.order_sts = '04'
+            AND A.review_status = 20
+            AND A.order_id = C.order_id
+            AND od1.order_id =C.order_id
+            AND C.article_id = MA1.article_id
+            AND #{receiptDaily.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+            AND C.store_cd = MA2.store_cd
+            AND #{receiptDaily.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+            AND C.vendor_id = MA4.vendor_id
+            AND #{receiptDaily.businessDate} BETWEEN MA4.effective_start_date
+            AND MA4.effective_end_date
+            AND A.store_cd IN
+            <include refid="commonInclude"></include>
+            <if test="receiptDaily.dc!=null and receiptDaily.dc!=''">
+                AND lower(A.delivery_center_id) like lower(CONCAT('%',#{receiptDaily.dc},'%'))
+            </if>
+        ) A
+    </select>
+    <select id="getItemCount" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+            resultType="int">
+        select  COUNT(distinct A.article_id)
+        FROM(SELECT
+        tmp.order_date,
+        tmp.receive_date,
+        tmp.receive_id,
+        tmp.received_remark,
+        tmp.delivery_center_id,
+        tmp.order_id,
+        tmp.article_id,
+        tmp.article_name,
+        tmp.store_cd,
+        tmp.store_name,
+        tmp.pma_cd,
+        tmp.pma_name,
+        tmp.category_cd,
+        tmp.category_name,
+        tmp.sub_category_cd,
+        tmp.sub_category_name,
+        tmp.vendor_id,
+        tmp.vendor_name,
+        tmp.barcode,
+        tmp.receive_total_qty,/*收货数量 = 收货数量+更正数量*/
+        tmp.receive_qty,
+        tmp.c_operatorcode,
+        tmp.c_operatorname,
+        tmp.am_name,
+        tmp.om_name,
+        tmp.emp_name
+        from tmp_dc_order_article tmp
+        where
+        1=1
+        <if test="receiptDaily.articleName !=null and receiptDaily.articleName !=''">
+            AND concat(lower( tmp.article_id ),'',lower( tmp.article_name ),'',lower( tmp.article_name_en ),'',lower(
+            tmp.article_short_name_en )) LIKE lower( CONCAT('%',#{receiptDaily.articleName},'%') )
+        </if>
+        ) A
+    </select>
+
+    <select id="getprintData" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+            resultMap="resultItemMap">
+        SELECT DISTINCT
+        A.order_date,
+        od1.update_ymd receive_date,
+        od1.receive_id,
+        od1.received_remark,
+        A.delivery_center_id,
+        C.order_id,
+        C.article_id,
+        MA1.article_name,
+        C.store_cd,
+        MA2.store_name,
+        MA1.pma_cd,
+        MA3.pma_name,
+        MA5.category_cd,
+        MA5.category_name,
+        MA6.sub_category_cd,
+        MA6.sub_category_name,
+        MA4.vendor_id,
+        MA4.vendor_name,
+        C.barcode,
+        coalesce(C.receive_total_qty,0)+coalesce(rec.rec_qty,0) AS receive_total_qty,/*收货数量 = 收货数量+更正数量*/
+        oper.c_operatorcode,
+        oper.c_operatorname,
+        MA2.ofc,
+        MA2.om,
+        ma7.emp_name
+        FROM
+        OD0000 A,
+        od0010 C
+        LEFT JOIN lateral(
+        select od0000_t.order_id,od0010.article_id,
+        sum((coalesce(correction_difference,0)+coalesce(correction_nocharge_qty,0))-(coalesce(receive_qty,0)+coalesce(receive_nocharge_qty,0))) rec_qty
+        from od0000_t left join od0000 on  od0000.org_order_id = od0000_t.receive_id
+        and od0000.create_ymd||od0000.create_hms = (select max(od0000.create_ymd||od0000.create_hms) from od0000 where od0000.org_order_id = od0000_t.receive_id)
+        left join od0010 on od0000.order_id = od0010.order_id
+        where od0000.order_type='07'
+        and od0000_t.order_id =C.order_id
+        and od0010.article_id =C.article_id
+        GROUP BY od0000_t.order_id,od0010.article_id
+        ) rec on true,
+        od0000_t od1
+        LEFT JOIN ma4200 ma7 on od1.create_user_id = ma7.emp_num_id
+        , MA1100 MA1
+        LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+        LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+        LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+        MA1000 MA2
+        LEFT JOIN t_operator oper ON MA2.OFC = oper.c_operatorcode,
+        MA2000 MA4
+        WHERE
+        A.order_differentiate = '1'
+        AND A.order_type = '01'
+        AND A.order_sts = '04'
+        AND A.review_status = 20
+        AND A.order_id = C.order_id
+        AND od1.order_id =C.order_id
+        AND C.article_id = MA1.article_id
+        AND #{receiptDaily.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+        AND C.store_cd = MA2.store_cd
+        AND #{receiptDaily.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+        AND C.vendor_id = MA4.vendor_id
+        AND #{receiptDaily.businessDate} BETWEEN MA4.effective_start_date
+        AND MA4.effective_end_date
+        AND A.store_cd IN
+        <include refid="commonInclude"></include>
+        <if test="receiptDaily.dc!=null and receiptDaily.dc!=''">
+            AND lower(A.delivery_center_id) like lower(CONCAT('%',#{receiptDaily.dc},'%'))
+        </if>
+    </select>
+</mapper>

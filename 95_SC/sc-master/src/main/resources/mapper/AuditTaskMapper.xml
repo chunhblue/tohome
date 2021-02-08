@@ -1,0 +1,1305 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.AuditTaskMapper">
+
+    <resultMap type="cn.com.bbut.iy.itemmaster.dto.audit.NotificationDTO" id="ReNotificationDTO">
+        <result column="n_recordid" property="nNotificationid"/>
+        <result column="record_cd" property="recordCd" jdbcType="VARCHAR"/>
+        <result column="effective_start_date" property="startDate" jdbcType="VARCHAR"/>
+        <result column="c_url" property="cUrl" jdbcType="VARCHAR"/>
+        <result column="message" property="cNotificationTitle" jdbcType="VARCHAR"/>
+        <result column="d_insert_time" property="cNotificationTime" jdbcType="TIMESTAMP"/>
+        <result column="C_ENABLE" property="status" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap type="cn.com.bbut.iy.itemmaster.dto.audit.NotificationBean" id="ReNotificationPOJO">
+        <result column="n_recordid" property="nRecordid"/>
+        <result column="n_reviewid" property="nReviewid"/>
+        <result column="n_roleid" property="nRoleid"/>
+        <result column="c_priority" property="cPriority"/>
+        <result column="c_url" property="cUrl" jdbcType="VARCHAR"/>
+        <result column="d_insert_time" property="cNotificationTime" jdbcType="TIMESTAMP"/>
+        <result column="n_typeid" property="nTypeid"/>
+        <result column="record_cd" property="cRecordCd" jdbcType="VARCHAR"/>
+        <result column="effective_start_date" property="effectiveStartDate" jdbcType="VARCHAR"/>
+        <result column="sub_no" property="cSubNo"/>
+        <result column="C_ENABLE" property="status" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap type="cn.com.bbut.iy.itemmaster.dto.auditTask.AuditTaskGridDataDTO" id="shortcutDTO">
+        <result column="category" 				property="approvalCategory" 	/>
+        <result column="c_type_name" 			property="approvalType" 		/>
+        <result column="review_status" 			property="approvalStatus" 		/>
+        <result column="summary" 				property="summary" 				/>
+        <result column="create_user_id" 		property="createUser" 			/>
+        <result column="create_date_time" 		property="createDateTime" 		/>
+        <result column="n_recordid" 			property="nRecordid" 			/>
+        <result column="c_url" 					property="URL" 					/>
+        <result column="record_cd" 				property="recordCd" 			/>
+        <result column="effective_start_date" 	property="effectiveStartDate" 	/>
+        <result column="region_cd"				property="nTypeId"				/>
+    </resultMap>
+
+
+    <!-- add by dxq 20191211 start -->
+    <select id="getShortcutList" resultMap="shortcutDTO">
+        select 	a.category,
+        a.c_type_name,
+        a.review_status,
+        a.summary,
+        b.c_operatorname as create_user_id,
+        a.create_date_time,
+        a.n_recordid,
+        a.c_url,
+        a.record_cd,
+        a.effective_start_date
+        from
+        (select 	distinct
+        'Item' as category,
+        f.c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        e.article_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma1100 e,
+        web.t_audit_type f,
+        web.t_operator_data_permission g
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.article_id
+        and b.effective_start_date = e.effective_start_date
+        and e.n_typeid = f.n_typeid
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and e.pma_cd = g.pma_cd
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and b.n_typeid = 1
+        and b.c_enable <![CDATA[ <>]]> '0'
+        and d.c_enable = '1'
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Item' as category,
+        'Item Price Info Update' as c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        h.article_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(create_time, 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma1350 e,
+        web.t_operator_data_permission g,
+        ma1100 h
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.proposal_id
+        and d.region_cd = h.region_cd
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and h.pma_cd = g.pma_cd
+        and e.article_id = h.article_id
+        and e.effective_date = h.effective_start_date
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        AND b.n_typeid = 35
+        and b.c_enable <![CDATA[ <>]]> '0'
+        and b.c_enable = '1'
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Item' as category,
+        f.c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        h.article_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma1100_b e,
+        web.t_audit_type f,
+        web.t_operator_data_permission g,
+        ma1100 h
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.article_id
+        and b.effective_start_date = e.effective_start_date
+        and d.region_cd = h.region_cd
+        and e.n_typeid = f.n_typeid
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and g.pma_cd in (select case when a.pma_cd is null then b.pma_cd else a.pma_cd end from ma1100_b a, ma1100 b where a.article_id = b.article_id and a.old_effective_start_date = b.effective_start_date)
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and e.article_id = h.article_id
+        and e.old_effective_start_date = h.effective_start_date
+        and b.n_typeid = 1102
+        and b.c_enable <![CDATA[ <>]]> '0'
+        and d.c_enable = '1'
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Item' as category,
+        'Inactive Item Evaluation' AS c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        i.article_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma1380 e,
+        web.t_operator_data_permission g,
+        ma1390 h,
+        ma1100 i
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.product_delist_id
+        and d.region_cd = e.structure_cd
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and g.dep_cd = e.pma_cd
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and e.product_delist_id = h.product_delist_id
+        and h.item_code = i.article_id
+        and e.effective_date between i.effective_start_date and i.effective_end_date
+        AND b.n_typeid = 15
+        and b.c_enable <![CDATA[ <>]]> '0'
+        and d.c_enable = '1'
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Item' as category,
+        'Item Control Data Update' as c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        h.article_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma1103 e,
+        web.t_operator_data_permission g,
+        ma1100 h
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.article_id
+        and b.effective_start_date = e.effective_start_date
+        and d.region_cd = e.structure_cd
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and e.article_id = h.article_id
+        and e.effective_start_date_old = h.effective_start_date
+        and g.dep_cd =  e.dep_cd
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        AND b.n_typeid = 1103
+        and b.c_enable <![CDATA[ <>]]> '0'
+        and d.c_enable = '1'
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Item' as category,
+        'New/Update Bom' as c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        e.formula_explain as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma1170 e,
+        web.t_operator_data_permission g
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.formula_id
+        and b.effective_start_date = e.effective_start_date
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and g.dep_cd = e.dep_cd
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        AND b.n_typeid = 17
+        and b.c_enable <![CDATA[ <>]]> '0'
+        and d.c_enable = '1'
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Item' AS category,
+        'New/Update Group Sale' as c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        h.article_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma1200 e,
+        web.t_operator_data_permission g,
+        ma1100 h
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.parent_article_id
+        and b.effective_start_date = e.effective_start_date
+        and d.region_cd = e.structure_cd
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and e.parent_article_id = h.article_id
+        and e.effective_start_date between h.effective_start_date and h.effective_end_date
+        and g.dep_cd = e.dep_cd
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        AND b.n_typeid = 18
+        and b.c_enable <![CDATA[<>]]> '0'
+        and d.c_enable = '1'
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Item' as category,
+        'Item Listing Evaluation' as c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        h.product_en_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma1300 e,
+        web.t_operator_data_permission g,
+        ma1320 h
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.product_evaluation_code
+        and d.region_cd = e.structure_cd
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and e.product_evaluation_code = h.product_evaluation_code
+        and g.dep_cd = e.department_cd
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and b.n_typeid = 14
+        and b.c_enable <![CDATA[<>]]> '0'
+        and d.c_enable = '1'
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Vendor' as category,
+        f.c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        e.vendor_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma2000 e,
+        web.t_audit_type f,
+        web.t_operator_data_permission g
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.vendor_id
+        and b.effective_start_date = e.effective_start_date
+        and e.n_typeid = f.n_typeid
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and e.pma_cd = g.pma_cd
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and b.c_enable <![CDATA[<>]]> '0'
+        and d.c_enable = '1'
+        and b.n_typeid = 2
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Vendor' as category,
+        'New/Update Trading Term' AS c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        e.vendor_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(create_time, 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma2100 e,
+        web.t_operator_data_permission g
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.contract_no
+        and b.effective_start_date = e.effective_start_date
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and b.c_enable <![CDATA[<>]]> '0'
+        and d.c_enable = '1'
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Vendor' as category,
+        'Vendor Fee Contract' AS c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        f.vendor_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(create_time, 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma2210 e,
+        ma2000 f,
+        web.t_operator_data_permission g
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.expense_contract_no
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and f.pma_cd = g.pma_cd
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and b.c_enable <![CDATA[<>]]> '0'
+        and d.c_enable = '1'
+        and e.vendor_id = f.vendor_id
+        and e.effective_date between f.effective_start_date and f.effective_end_date
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Vendor' as category,
+        'Vendor Info Update' as c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        f.vendor_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma2001 e,
+        ma2000 f,
+        web.t_operator_data_permission g
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.vendor_id
+        and b.effective_start_date = e.effective_start_date
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and f.pma_cd = g.pma_cd
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and b.c_enable <![CDATA[<>]]> '0'
+        and d.c_enable = '1'
+        and e.vendor_id = f.vendor_id
+        and e.effective_start_date_old = f.effective_start_date
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Vendor' as category,
+        f.c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        e.vendor_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma2000 e,
+        web.t_audit_type f,
+        web.t_operator_data_permission g
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.vendor_id
+        and b.effective_start_date = e.effective_start_date
+        and e.n_typeid = f.n_typeid
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and e.pma_cd = g.pma_cd
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and b.c_enable <![CDATA[<>]]> '0'
+        and d.c_enable = '1'
+        and b.n_typeid = 2002
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Vendor' as category,
+        f.c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        e.vendor_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma2000 e,
+        web.t_audit_type f,
+        web.t_operator_data_permission g
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.vendor_id
+        and b.effective_start_date = e.effective_start_date
+        and e.n_typeid = f.n_typeid
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and e.pma_cd = g.pma_cd
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and b.c_enable <![CDATA[<>]]> '0'
+        and d.c_enable = '1'
+        and b.n_typeid = 2000
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Promotion' as category,
+        f.c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        i.article_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma4110 e,
+        web.t_audit_type f,
+        web.t_operator_data_permission g,
+        ma4120 h,
+        ma1100 i
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.promotion_id
+        and b.n_typeid = f.n_typeid
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and e.promotion_id = h.promotion_id
+        and h.item_code = i.article_id
+        and h.scheme_ck_start_date between i.effective_start_date and i.effective_end_date
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and b.c_enable <![CDATA[<>]]> '0'
+        and d.c_enable = '1'
+        and b.n_typeid = 13
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Promotion' as category,
+        f.c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        i.article_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma4001 e,
+        web.t_audit_type f,
+        web.t_operator_data_permission g,
+        ma4031 h,
+        ma1100 i
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.promotion_cd
+        and b.effective_start_date = e.pro_purchase_start_date
+        and b.n_typeid = f.n_typeid
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and e.promotion_cd = h.promotion_cd
+        and h.article_id = i.article_id
+        and e.pro_purchase_start_date between i.effective_start_date and i.effective_end_date
+        and e.dep_cd = g.dep_cd
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and b.c_enable <![CDATA[<>]]> '0'
+        and d.c_enable = '1'
+        and b.n_typeid = 4001
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Promotion' as category,
+        f.c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        e.promotion_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma4040 e,
+        web.t_audit_type f,
+        web.t_operator_data_permission g
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.promotion_cd
+        and b.n_typeid = f.n_typeid
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and b.c_enable <![CDATA[<>]]> '0'
+        and d.c_enable = '1'
+        and b.n_typeid = 34
+        and d.n_operatorid = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Store' as category,
+        f.c_type_name,
+        case e.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        e.store_name as summary,
+        cast(e.create_user_id as varchar),
+        to_char(to_timestamp((e.create_ymd || e.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	web.t_review a,
+        web.t_backlog b,
+        web.t_operator_role_rel c,
+        web.t_operator d,
+        ma1000 e,
+        web.t_audit_type f,
+        web.t_operator_data_permission g
+        where 	a.n_reviewid = b.n_reviewid
+        and b.n_roleid = c.n_roleid
+        and c.n_operatorid = d.n_operatorid
+        and b.record_cd = e.store_cd
+        and b.effective_start_date = e.effective_start_date
+        and b.n_typeid = f.n_typeid
+        and d.n_operatorid = cast(g.n_operatorid as integer)
+        and cast(e.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and b.c_enable <![CDATA[<>]]> '0'
+        and d.c_enable = '1'
+        and b.n_typeid = 3
+        and d.n_operatorid = #{id}) a , t_operator b
+        where a.create_user_id = cast(b.n_operatorid as varchar)
+        order by to_date(a.create_date_time, 'dd/mm/yyyy hh24:mi:ss') desc
+    </select>
+    <!-- add by dxq 20191211 end -->
+
+    <!-- add by dxq 20191211 start -->
+    <select id="getShortcutListByUser" resultMap="shortcutDTO">
+        select 	a.category,
+        a.c_type_name,
+        a.review_status,
+        a.summary,
+        b.c_operatorname as create_user_id,
+        a.create_date_time,
+        a.n_recordid,
+        a.c_url,
+        a.record_cd,
+        a.effective_start_date
+        from
+        (
+        select 	distinct
+        'Item' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        a.article_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma1100 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.article_id
+        and b.effective_start_date = a.effective_start_date
+        and b.c_enable <![CDATA[<>]]> '0'
+        and a.n_typeid = c.n_typeid
+        and a.n_typeid = b.n_typeid
+        and b.n_typeid = 1
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Item' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        e.article_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(create_time, 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma1350 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d,
+        ma1100 e
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.proposal_id
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and a.article_id = e.article_id
+        and a.effective_date = e.effective_start_date
+        and b.n_typeid = 35
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Item' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        e.article_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma1100_b a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d,
+        ma1100 e
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.article_id
+        and b.effective_start_date = a.effective_start_date
+        and a.article_id = e.article_id
+        and a.old_effective_start_date = e.effective_start_date
+        and b.c_enable <![CDATA[<>]]> '0'
+        and a.n_typeid = c.n_typeid
+        and a.n_typeid = b.n_typeid
+        and b.n_typeid = 1102
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Item' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        f.article_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma1380 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d,
+        ma1390 e,
+        ma1100 f
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.product_delist_id
+        and a.product_delist_id = e.product_delist_id
+        and e.item_code = f.article_id
+        and e.expected_date_delist between f.effective_start_date and f.effective_end_date
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 15
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Item' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        e.article_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma1103 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d,
+        ma1100 e
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.article_id
+        and b.effective_start_date = a.effective_start_date
+        and a.article_id = e.article_id
+        and a.effective_start_date_old = e.effective_start_date
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 1103
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Item' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        a.formula_explain as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma1170 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.formula_id
+        and b.effective_start_date = a.effective_start_date
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 17
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Item' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        e.article_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma1200 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d,
+        ma1100 e
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.parent_article_id
+        and b.effective_start_date = a.effective_start_date
+        and a.parent_article_id = e.article_id
+        and a.effective_start_date between e.effective_start_date and e.effective_end_date
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 18
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Item' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        e.product_en_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma1300 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d,
+        ma1320 e
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.product_evaluation_code
+        and a.product_evaluation_code = e.product_evaluation_code
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 14
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Vendor' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        a.vendor_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma2000 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.vendor_id
+        and b.effective_start_date = a.effective_start_date
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 2
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Vendor' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        a.vendor_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(create_time, 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma2100 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.trading_term_no
+        and b.effective_start_date = a.effective_start_date
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 26
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Vendor' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        a.vendor_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(create_time, 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma2210 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.expense_contract_no
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 25
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Vendor' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        a.vendor_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma2001 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d,
+        ma2000 e
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.vendor_id
+        and b.effective_start_date  = a.effective_start_date
+        and a.vendor_id = e.vendor_id
+        and a.effective_start_date_old = e.effective_start_date
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 23
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Vendor' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        a.vendor_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma2000 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.vendor_id
+        and b.effective_start_date  = a.effective_start_date
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 2002
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Vendor' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        a.vendor_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma2000 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.vendor_id
+        and b.effective_start_date  = a.effective_start_date
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 2000
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Promotion' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        '' as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma4110 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.promotion_id
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 13
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Promotion' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        a.promotion_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma4001 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.promotion_cd
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 4001
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Promotion' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        a.promotion_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma4040 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.promotion_cd
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 34
+        and cast(a.create_user_id as integer) = #{id}
+
+        UNION ALL
+
+        select 	distinct
+        'Store' as category,
+        c.c_type_name,
+        case a.review_status when 1 then 'Pending' when 5 then 'Rejected' else 'Approved' end as review_status,
+        a.store_name as summary,
+        cast(a.create_user_id as varchar),
+        to_char(to_timestamp((a.create_ymd || a.create_hms), 'yyyymmddhh24miss'), 'dd/mm/yyyy hh24:mi:ss') as create_date_time,
+        b.n_recordid,
+        b.c_url,
+        b.record_cd,
+        b.effective_start_date
+        from 	ma1000 a,
+        web.t_backlog b,
+        web.t_audit_type c,
+        web.t_review d
+        where 	cast(a.review_status as varchar) in
+        <foreach collection="status" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+        and a.n_reviewid = b.n_reviewid
+        and d.n_reviewid = b.n_reviewid
+        and b.record_cd = a.store_cd
+        and b.effective_start_date = a.effective_start_date
+        and b.c_enable <![CDATA[<>]]> '0'
+        and b.n_typeid = c.n_typeid
+        and b.n_typeid = 3
+        and cast(a.create_user_id as integer) = #{id}) a , t_operator b
+        where a.create_user_id = cast(b.n_operatorid as varchar)
+        order by to_date(a.create_date_time, 'dd/mm/yyyy hh24:mi:ss') desc
+    </select>
+    <!-- add by dxq 20191211 end -->
+
+</mapper>

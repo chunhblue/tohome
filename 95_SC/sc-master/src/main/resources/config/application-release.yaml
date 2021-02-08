@@ -1,0 +1,27 @@
+logging:
+  file:
+    max-size: 10MB
+    max-history: 10
+  level:
+    root: ERROR
+    cn.com.bbut: ERROR
+    cn.com.bbut.iy.itemmaster.dao: ERROR
+    org.springframework: ERROR
+    com.ibatis: ERROR
+
+freemarker:
+    cache: true
+    settings.template_update_delay: 0
+
+# 线程池
+threadpool:
+  coresize : 20
+  maxsize : 50
+  queuesize : 100
+  keepalivesec : 30
+
+#spring:
+#  security:
+#    user:
+#      name: check
+#      password: IYnribCheck2019

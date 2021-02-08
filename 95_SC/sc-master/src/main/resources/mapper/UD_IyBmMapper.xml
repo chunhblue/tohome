@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.IyBmMapper">
+<sql id="bm_common_where">
+      	<if test="div != null">
+     		   and ( regexp_instr(bm.dpt_all,#{div})> 0)
+     	</if>
+      	<if test="dpt != null">
+     		   and ( regexp_instr(bm.dpt_all, #{dpt})> 0)
+     	</if>
+      	
+      	<if test="bmType != null">
+     		and  bm.bm_type=#{bmType}
+     	</if>
+      	<if test="bmCode != null">
+     		and  bm.bm_code=#{bmCode}
+     	</if>
+      	<if test="itemCode != null">
+     		 and item.bm_type=bm.bm_type
+   			 and item.bm_code=bm.bm_code
+   			 and trim(item.item)=#{itemCode}
+     	</if>
+      	<if test="sellStartDate != null">
+     		<![CDATA[and  bm.bm_eff_from>=#{sellStartDate}]]>
+     	</if>
+      	<if test="sellEndDate != null">
+     		<![CDATA[and  bm.bm_eff_to<=#{sellEndDate}]]>
+     	</if>
+     	<if test="resources != null">
+     	 and 
+           ( 
+        		<foreach collection="resources" item="res_group" separator="or" index="index">
+        				( 1=1
+        					<if test="res_group.dpt != null">
+                 		and   <![CDATA[ regexp_instr(bm.dpt_all,#{res_group.dpt}) > 0]]>
+        					</if>
+        					<if test="res_group.store != null">
+                 		and     bm.store=#{res_group.store}
+        					</if>
+        				)
+               </foreach>       
+           )
+     	</if>
+</sql>
+<select id="getBmCkNewNoMax" resultType="string">
+			select c.new_no from IY_BM_CK c where rownum=1 order by c.new_no desc
+	</select>
+  <!-- 商品条码和店铺 在bm正式表是否有内容 -->	
+  <select id="isItemBmExistByItemAndStore" resultType="java.lang.Long" parameterType="java.util.Map">
+  	select count(a.bm_code) from IY_BM a,iy_bm_item b
+		where a.store=#{store}
+		and b.item=#{item1}
+		and a.bm_code=b.bm_code
+	</select>
+  <!-- 商品条码和店铺 在bm——ck表是否有内容 -->	
+  <select id="isItemBmCkExistByItemAndStore" resultType="java.lang.Long" parameterType="java.util.Map">
+  	select count(a.bm_code) from IY_BM_CK a,IY_BM_ITEM_CK b
+   	where a.store=#{store}
+		and b.item=#{item1}
+		and a.bm_code=b.bm_code
+	</select>
+  <!-- 商品系统码 店铺 销售日期区间 是否有数据-->	
+  <select id="verdictItemIndateByMap" resultType="java.lang.Long" parameterType="java.util.Map">
+  	<![CDATA[
+	  	select  count(c.item_system)
+		  from iy_item_c c
+		 where c.item_system = #{itemSystem}
+		   and c.store = #{store}
+		   and c.sales_date_from <= #{startDate}
+		   and c.sales_date_to >= #{endDate}
+	   ]]>
+	</select>
+  <!-- 得到商品的店铺控制记录数据，根据销售日期取得最近的-->	
+  <select id="getItemStoreInfoByDate" resultType="cn.com.bbut.iy.itemmaster.dto.bm.ItmeForStoreResultDto" parameterType="java.util.Map">
+  	<![CDATA[
+	  select *
+		  from (select 
+		  			 trim(m.item1) as item,
+				      trim(m.item_name) as itemName, 
+				      c.item_system as itemSystem,
+				      m.dpt as dpt,
+		  			c.store as store,
+			  		c.price_tax/100 as priceTax,
+			  		c.cost_tax/100 as costTax
+		        from iy_item_c c, iy_item_m m
+		        where 
+		         	   m.item_system=c.item_system
+		           and c.item_system = #{itemSystem}
+		           and c.store = #{store}
+		           and c.sales_date_from <= #{startDate}
+		           and c.sales_date_to >= #{endDate}
+		         order by c.sales_date_from desc, c.sales_date_to desc
+		  )
+		 where rownum = 1
+	   ]]>
+	</select>
+	
+<!-- list画面检索sql，得到正式表的数据 -->
+ <select id="getBmDataByJsonParam" resultType="cn.com.bbut.iy.itemmaster.dto.bm.BmListGridDataDTO" parameterType="cn.com.bbut.iy.itemmaster.dto.bm.BmJsonParamDTO">
+		select * from (
+			select row_number() over() as od, tt.*
+			  from (
+						select 
+					       	bm.bm_type as bmType,
+					       	bm.bm_type as bmTypeText,
+					       	bm.bm_code as bmCode,
+					       	max(bm.BM_GROSS) as bmGross,
+					       	count(bm.company) as bmCount,
+					       	max(bm.bm_eff_from) as startDate,
+					       	max(bm.bm_eff_to) as endDate,
+					       	max(bm.dpt) as createDpt,
+					       	max(bm.bm_number) as bmNumber,
+					       	max(bm.num_a) as numA,
+			            	max(bm.num_b) as numB,
+			            	max(bm.DPT_ALL) as dptAll,
+			            	'11111' as rightFlg,
+					       	'2' as checkFlg,
+					       	'2' as checkFlgText,
+					       	'0' as firstFlg,
+					      	'27' as opFlg,
+					      	'27' as opFlgText,
+					       	null as buyer,
+					       	null as buyerName,
+					       	null as newFlg,
+					       	null as newFlgText,
+					       	bm.bm_type||'#'||bm.bm_code  as trKey,
+					       	null as rejectreason
+					  from 
+					  		iy_bm bm
+					  		<if test="itemCode != null">
+			     				,iy_bm_item item
+			     			</if>
+					  where
+					       	1=1
+					       	<include refid="bm_common_where" />
+					  group 
+					  		by bm.bm_type,
+					  		bm.bm_code
+					<if test="orderByClause != null">
+			            order by ${orderByClause}
+			        </if>
+			 			        ) tt
+			) ttt
+			<if test="limitStart != null">
+				<![CDATA[ WHERE ttt.od >${limitStart} ]]>
+				<![CDATA[ and  ttt.od <=${limitEnd}]]>
+			</if>
+	</select>
+<!-- list画面检索sql，得到正式表的数据量 -->
+ <select id="getBmCountByJsonParam" resultType="java.lang.Long" parameterType="cn.com.bbut.iy.itemmaster.dto.bm.BmJsonParamDTO">
+		  select count(*) from (
+			  select 
+			       	bm.bm_type as bmType,
+			       	bm.bm_code as bmCode
+			  from 
+			  		iy_bm bm
+			  		<if test="itemCode != null">
+	     				,iy_bm_item item
+	     			</if>
+			  where
+			       	1=1
+			       	<include refid="bm_common_where" />
+			  group 
+			  		by bm.bm_type,
+			  		bm.bm_code
+		  )
+	</select>
+	<!-- 得到指定的bm类型和code的bm数量 04类型 -->
+ <select id="getBmNumberTypeFour" resultType="java.lang.Integer" parameterType="string">
+  	select  max(c.num_a)
+          from iy_bm_item c
+         where 
+         	c.bm_type = #{bmType}
+           and c.bm_code = #{bmCode}
+         group by c.bm_type, c.bm_code
+
+ </select>
+	<!-- 得到指定的bm类型和code的bm数量 -->
+ <select id="getBmNumber" resultType="java.lang.Integer" parameterType="string">
+ 	select count(*)
+  	from (select c.bm_type, c.bm_code, c.item
+          from iy_bm_item c
+         where 
+         c.bm_type = #{bmType}
+           and c.bm_code = #{bmCode}
+         group by c.bm_type, c.bm_code, c.item)
+
+ </select>
+	<!-- 得到指定的bm类型和code的bm数量 -->
+ <select id="getBmItemMandCInof" resultType="cn.com.bbut.iy.itemmaster.dto.bm.BmItemMandCInofDto" parameterType="string">
+ 	select m.item_system as itemSystem,
+	       m.item1 as item,
+	       m.item_name as name,
+	       m.dpt as dpt,
+	       c.store as stroe,
+	       c.cost_tax as costTax,
+	       c.price_tax as priceTax
+	  from iy_item_m m, iy_item_c c
+	 where m.item_system = c.item_system
+	   and m.item1 = #{itemCode}
+	   and c.store = #{store}
+ </select>
+ 	<!-- 根据newNo得到his表中最大的new_no_sub-->
+	<select id="getNewNoSubByNo" resultType="string" parameterType="string">
+			select  
+				max(h.new_no_sub) 
+			from 
+				iy_bm_his h 
+			where 
+				h.new_no = #{newNo}
+			group by h.new_no
+	</select>
+	<!-- 根据商品编码得到商品m表信息-->
+	<select id="getItemByCode" resultType="cn.com.bbut.iy.itemmaster.entity.base.IyItemM" parameterType="string">
+			select m.item1, m.item_name, m.item_system
+			  from iy_item_m m
+			 where trim(m.item1) = #{item1}
+	</select>
+	<!-- 根据参数得到正式表中excel导出的数据-->
+	<select id="getBmOutExcelData" resultType="cn.com.bbut.iy.itemmaster.dto.bm.BmOutExcel" parameterType="cn.com.bbut.iy.itemmaster.dto.bm.BmJsonParamDTO">
+		select * from (
+			select row_number() over() as od, tt.*
+			  from (
+					select
+						t.dpt as createDpt,
+				       t.bm_type as bmType,
+				       t.bm_code as bmCode,
+				       t.bm_eff_from as startDate,
+				       t.bm_eff_to as endDate,
+				       t.bm_discount_rate as bmDiscountRate,
+				       t.bm_number as bmCount,
+				       t.bm_price as bmPrice,
+				       tc.store as store,
+				       m.dpt as itemDpt,
+				       tc.item as itemCode,
+				       trim(m.item_name) as itemName,
+				       m.item_system as itemSystem,
+				       tc.price as itemPrice,
+				       tc.price_disc as itemPriceDisc,
+				       t.bm_gross as itemGross,
+				       tc.num_a as numA,
+				       tc.num_b as numB
+				  from iy_bm_item tc
+				  left join iy_item_m m
+				    on trim(m.item1) = trim(tc.item)
+				 , iy_bm t
+				 where t.bm_type = tc.bm_type
+				   and t.bm_code = tc.bm_code
+				   and t.store = tc.store
+				   
+			      	<if test="div != null">
+			     		   and ( regexp_instr(t.dpt_all,#{div})> 0)
+			     	</if>
+			      	<if test="dpt != null">
+			     		   and ( regexp_instr(t.dpt_all, #{dpt})> 0)
+			     	</if>
+			      	<if test="bmType != null">
+			     		and  t.bm_type=#{bmType}
+			     	</if>
+			      	<if test="bmCode != null">
+			     		and  t.bm_code=#{bmCode}
+			     	</if>
+			      	<if test="itemCode != null">
+			   			 and trim(tc.item)=#{itemCode}
+			     	</if>
+			      	<if test="sellStartDate != null">
+			     		<![CDATA[and  t.bm_eff_from>=#{sellStartDate}]]>
+			     	</if>
+			      	<if test="sellEndDate != null">
+			     		<![CDATA[and  t.bm_eff_to<=#{sellEndDate}]]>
+			     	</if>
+			     	<if test="resources != null">
+			     	 and 
+			           ( 
+			         			<foreach collection="resources" item="res_group" separator="or" index="index">
+			         				( 1=1
+			         					<if test="res_group.dpt != null">
+				                 and   <![CDATA[ regexp_instr(t.dpt_all,#{res_group.dpt}) > 0]]>
+			         					</if>
+			         					<if test="res_group.store != null">
+				                 and     t.store=#{res_group.store}
+			         					</if>
+			         					
+			         				)
+			         			
+			               </foreach>       
+			           )
+			     	</if>
+				   
+				 order by t.bm_type,t.bm_code,tc.store, tc.item
+				 	        ) tt
+			) ttt
+			<if test="limitStart != null">
+				<![CDATA[ WHERE ttt.od >${limitStart} ]]>
+				<![CDATA[ and  ttt.od <=${limitEnd}]]>
+			</if>
+	</select>
+</mapper>

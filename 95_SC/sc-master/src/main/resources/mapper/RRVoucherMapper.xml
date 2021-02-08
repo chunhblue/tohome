@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.RRVoucherMapper">
+
+    <resultMap id="ReRRVoucherDTOMap" type="cn.com.bbut.iy.itemmaster.dto.receipt.rrVoucher.RRVoucherDTO">
+        <id column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <id column="order_id" property="orderId" jdbcType="VARCHAR" />
+        <result column="org_order_id" property="orgOrderId" jdbcType="VARCHAR" />
+        <result column="vendor_id" property="warehouseCd" jdbcType="VARCHAR" />
+        <result column="delivery_type_cd" property="deliveryTypeCd" jdbcType="VARCHAR" />
+        <result column="delivery_center_id" property="deliveryCenterId" jdbcType="VARCHAR" />
+        <result column="delivery_area_cd" property="deliveryAreaCd" jdbcType="VARCHAR" />
+        <result column="shipment" property="shipment" jdbcType="VARCHAR" />
+        <result column="order_type" property="orderType" jdbcType="VARCHAR" />
+        <result column="order_method" property="orderMethod" jdbcType="VARCHAR" />
+        <result column="payment_type" property="paymentType" jdbcType="VARCHAR" />
+        <result column="promotion_id" property="promotionId" jdbcType="VARCHAR" />
+        <result column="order_date" property="orderDate" jdbcType="VARCHAR" />
+        <result column="delivery_date" property="deliveryDate" jdbcType="VARCHAR" />
+        <result column="expire_date" property="expireDate" jdbcType="VARCHAR" />
+        <result column="receive_date" property="receiveDate" jdbcType="VARCHAR" />
+        <result column="vendor_address" property="vendorAddress" jdbcType="VARCHAR" />
+        <result column="store_address" property="storeAddress" jdbcType="VARCHAR" />
+        <result column="order_sts" property="orderSts" jdbcType="VARCHAR" />
+        <result column="nr_flg" property="nrFlg" jdbcType="VARCHAR" />
+        <result column="order_remark" property="orderRemark" jdbcType="VARCHAR" />
+        <result column="purchase_vat_cd" property="purchaseVatCd" jdbcType="VARCHAR" />
+        <result column="tax_rate" property="taxRate" jdbcType="DECIMAL" />
+        <result column="order_tax" property="orderTax" jdbcType="DECIMAL" />
+        <result column="order_amt" property="orderAmt" jdbcType="DECIMAL" />
+        <result column="receive_tax" property="receiveTax" jdbcType="DECIMAL" />
+        <result column="receive_amt" property="receiveAmt" jdbcType="DECIMAL" />
+        <result column="upload_flg" property="uploadFlg" jdbcType="VARCHAR" />
+        <result column="upload_date" property="uploadDate" jdbcType="VARCHAR" />
+        <result column="order_differentiate" property="orderDifferentiate" jdbcType="VARCHAR" />
+        <result column="create_user_name" property="commonDTO.createUserName" jdbcType="VARCHAR" />
+        <result column="create_ymd" property="commonDTO.createYmd" jdbcType="VARCHAR" />
+        <result column="update_user_name" property="commonDTO.updateUserName" jdbcType="VARCHAR" />
+        <result column="update_ymd" property="commonDTO.updateYmd" jdbcType="VARCHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <result column="vendor_name" property="warehouseName" jdbcType="VARCHAR" />
+        <result column="order_method_name" property="orderMethodName" jdbcType="VARCHAR" />
+        <result column="order_sts_name" property="stsName" jdbcType="VARCHAR" />
+        <result column="vouch_type_name" property="vouchTypeName" jdbcType="VARCHAR" />
+        <result column="n_reviewId" property="reviewId" jdbcType="INTEGER" />
+        <result column="review_status" property="reviewSts" jdbcType="INTEGER" />
+        <result column="review_status_text" property="reviewStsText" jdbcType="VARCHAR" />
+        <result column="org_order_date" property="orgOrderDate" jdbcType="INTEGER" />
+        <result column="status" property="status" jdbcType="INTEGER" />
+        <result column="ofc" property="ofc" jdbcType="INTEGER" />
+        <result column="ofc_name" property="ofcName" jdbcType="INTEGER" />
+        <result column="oc" property="oc" jdbcType="INTEGER" />
+        <result column="oc_name" property="ocName" jdbcType="INTEGER" />
+        <result column="om" property="om" jdbcType="INTEGER" />
+        <result column="om_name" property="omName" jdbcType="INTEGER" />
+    </resultMap>
+
+    <resultMap id="ReDetailsDTOMap" type="cn.com.bbut.iy.itemmaster.dto.receipt.rrVoucher.RRVoucherDetailsDTO">
+        <id column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <id column="order_id" property="orderId" jdbcType="VARCHAR" />
+        <id column="serial_no" property="serialNo" jdbcType="VARCHAR" />
+        <id column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <result column="barcode" property="barcode" jdbcType="VARCHAR" />
+        <result column="vendor_id" property="vendorId" jdbcType="VARCHAR" />
+        <result column="promotion_id" property="promotionId" jdbcType="VARCHAR" />
+        <result column="order_unit" property="orderUnit" jdbcType="VARCHAR" />
+        <result column="order_qty" property="orderQty" jdbcType="DECIMAL" />
+        <result column="order_nocharge_qty" property="orderNoChargeQty" jdbcType="DECIMAL" />
+        <result column="order_price" property="orderPrice" jdbcType="DECIMAL" />
+        <result column="order_amt" property="orderAmt" jdbcType="DECIMAL" />
+        <result column="order_amt_notax" property="orderAmtNoTax" jdbcType="DECIMAL" />
+        <result column="order_tax" property="orderTax" jdbcType="DECIMAL" />
+        <result column="receive_price" property="receivePrice" jdbcType="DECIMAL" />
+        <result column="receive_qty" property="receiveQty" jdbcType="DECIMAL" />
+        <result column="receive_nocharge_qty" property="receiveNoChargeQty" jdbcType="DECIMAL" />
+        <result column="receive_total_qty" property="receiveTotalQty" jdbcType="DECIMAL" />
+        <result column="receive_total_amt" property="receiveTotalAmt" jdbcType="DECIMAL" />
+        <result column="receive_total_amt_notax" property="receiveTotalAmtNoTax" jdbcType="DECIMAL" />
+        <result column="receive_tax" property="receiveTax" jdbcType="DECIMAL" />
+        <result column="article_name" property="articleName" jdbcType="VARCHAR" />
+        <result column="vat" property="vat" jdbcType="VARCHAR" />
+        <result column="spec" property="spec" jdbcType="VARCHAR" />
+        <result column="unit_name" property="uom" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <!-- 查询一览信息 -->
+    <sql id="selectCondition">
+        <if test="orderMethod != null and orderMethod != ''">
+            AND order_method = #{orderMethod,jdbcType=VARCHAR}
+        </if>
+        <if test="vendorId != null and vendorId != ''">
+            AND lower(vendor_id) like lower(CONCAT('%',#{vendorId,jdbcType=VARCHAR},'%'))
+        </if>
+    </sql>
+
+    <select id="selectCountByCondition" resultType="INT" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrVoucher.RRVoucherParamDTO">
+    SELECT
+        count(*)
+        FROM (
+        SELECT
+        '0' AS order_type, order_differentiate, store_cd, OD0000.order_id,
+        OD0000.org_order_id, vendor_id, tax_rate, order_amt,
+        order_date, order_method, OD0000.n_reviewId, OD0000.review_status,
+        cast(OD0000.review_status as varchar) as review_status_text,f.review_status as status
+        FROM OD0000
+        left join od0005 f
+        on OD0000.order_id = f.order_id
+        <choose>
+            <when test="orderType!=null and orderType=='1'.toString()">
+                WHERE 1 = 2
+            </when>
+            <otherwise>
+                WHERE order_type = '02'
+                AND store_cd IN
+                <foreach item="store" index="index" collection="stores"
+                         open="(" separator="," close=")">
+                    #{store,jdbcType=VARCHAR}
+                </foreach>
+                <if test="orderStartDate != null and orderStartDate != ''">
+                    AND order_date >= #{orderStartDate,jdbcType=VARCHAR}
+                </if>
+                <if test="orderEndDate != null and orderEndDate != ''">
+                    AND #{orderEndDate,jdbcType=VARCHAR} >= order_date
+                </if>
+                <if test="orderId != null and orderId != ''">
+                    AND lower(OD0000.order_id) like lower(CONCAT('%',#{orderId,jdbcType=VARCHAR},'%'))
+                </if>
+                <if test="orgOrderId != null and orgOrderId != ''">
+                    AND lower(OD0000.org_order_id) like lower(CONCAT('%',#{orgOrderId,jdbcType=VARCHAR},'%'))
+                </if>
+                <choose>
+                    <when test="status !=null and status != 0 and orderSts != null and orderSts != ''">
+                        and (f.review_status = #{status,jdbcType=INTEGER}
+                        or CAST(OD0000.review_status AS VARCHAR) = #{orderSts,jdbcType=VARCHAR})
+                    </when>
+                    <otherwise>
+                        <if test="status !=null and status != 0 and (orderSts == null or orderSts == '')">
+                            and f.review_status = #{status,jdbcType=INTEGER}
+                        </if>
+                        <if test="orderSts != null and orderSts != '' and (status == null or status == 0)">
+                            AND CAST(OD0000.review_status AS VARCHAR) = #{orderSts,jdbcType=VARCHAR}
+                            <if test="orderSts == '10'">
+                                and f.review_status ISNULL
+                            </if>
+                        </if>
+                    </otherwise>
+                </choose>
+                <include refid="selectCondition"></include>
+            </otherwise>
+        </choose>
+        UNION
+        SELECT
+        '1' AS order_type, M1.order_differentiate, M.store_cd,
+        M.receive_id AS order_id, M.order_id AS org_order_id,
+        M1.vendor_id, M1.tax_rate, M.receive_amt AS order_amt,
+        M.update_ymd AS order_date, M1.order_method, M.n_reviewId,
+        M.review_status,cast(M.review_status as varchar) as review_status_text,f.review_status as status
+        FROM OD0000_T M
+        JOIN (
+        SELECT
+        store_cd, order_id, vendor_id, tax_rate, order_amt,
+        order_date, order_method, order_differentiate
+        FROM OD0000 WHERE order_type = '01'
+        ) M1
+        ON M.store_cd = M1.store_cd AND M.order_id = M1.order_id
+        left join od0005 f
+        on M.order_id = f.order_id
+        <choose>
+            <when test="orderType!=null and orderType=='0'.toString()">
+                WHERE 1 = 2
+            </when>
+            <otherwise>
+                WHERE M.store_cd IN
+                <foreach item="store" index="index" collection="stores"
+                         open="(" separator="," close=")">
+                    #{store,jdbcType=VARCHAR}
+                </foreach>
+                <if test="orderStartDate != null and orderStartDate != ''">
+                    AND M.update_ymd >= #{orderStartDate,jdbcType=VARCHAR}
+                </if>
+                <if test="orderEndDate != null and orderEndDate != ''">
+                    AND #{orderEndDate,jdbcType=VARCHAR} >= M.update_ymd
+                </if>
+                <if test="orderId != null and orderId != ''">
+                    AND M.receive_id like CONCAT('%',#{orderId,jdbcType=VARCHAR},'%')
+                </if>
+                <if test="orgOrderId != null and orgOrderId != ''">
+                    AND lower(M.order_id) like lower(CONCAT('%',#{orgOrderId,jdbcType=VARCHAR},'%'))
+                </if>
+                <if test="orderSts != null and orderSts != ''">
+                    <choose>
+                        <when test="orderSts == '10' ">
+                            AND 1 = 2
+                        </when>
+                        <otherwise>
+                            AND CAST(M.review_status AS VARCHAR) = #{orderSts,jdbcType=VARCHAR}
+                        </otherwise>
+                    </choose>
+                </if>
+                <include refid="selectCondition"></include>
+            </otherwise>
+        </choose>
+        ) T
+        JOIN (
+        SELECT order_id,order_date FROM OD0000 WHERE order_type = '01'
+        <if test="orgOrderStartDate != null and orgOrderStartDate != ''">
+            AND order_date >= #{orgOrderStartDate,jdbcType=VARCHAR}
+        </if>
+        <if test="orgOrderEndDate != null and orgOrderEndDate != ''">
+            AND #{orgOrderEndDate,jdbcType=VARCHAR} >= order_date
+        </if>
+        ) T0
+        ON T.org_order_id = T0.order_id
+        LEFT JOIN (
+        SELECT store_cd, store_name,oc,om,ofc,ofcName.c_operatorname as ofc_name,ocName.c_operatorname as oc_name,omName.c_operatorname om_name
+        FROM MA1000 left join
+        (SELECT distinct t_operator.c_operatorcode,t_operator.c_operatorname  from   t_operator  LEFT JOIN  MA1000 ON  MA1000.ofc= t_operator.c_operatorcode)  ofcName  on ma1000.ofc=ofcName.c_operatorcode
+        left join (SELECT  distinct t_operator.c_operatorcode,t_operator.c_operatorname  from   t_operator  LEFT JOIN  MA1000 ON  MA1000.oc= t_operator.c_operatorcode) AS ocName  on ma1000.oc=ocName.c_operatorcode
+        left join (SELECT distinct t_operator.c_operatorcode,t_operator.c_operatorname  from   t_operator  LEFT JOIN  MA1000 ON  MA1000.om= t_operator.c_operatorcode) AS omName  on ma1000.om=omName.c_operatorcode
+        WHERE #{businessDate,jdbcType=VARCHAR}
+        BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.store_cd = T1.store_cd
+        LEFT JOIN (
+        SELECT vendor_id, vendor_name FROM MA2000
+        WHERE #{businessDate,jdbcType=VARCHAR}
+        BETWEEN effective_start_date AND effective_end_date
+        UNION
+        SELECT warehouse_no AS vendor_id, warehouse_name AS vendor_name FROM MA5321
+        ) T2
+        ON T.vendor_id = T2.vendor_id
+        LEFT JOIN (
+        SELECT code_value, code_name FROM CM9010 WHERE code_type = '00065'
+        ) T3
+        ON T.order_method = T3.code_value
+        where  1=1
+        <if test="ocCode !=null and ocCode != '' ">
+            and   T1.oc=#{ocCode,jdbcType=VARCHAR}
+        </if>
+        <if test="omCode !=null and omCode != '' ">
+            and  T1.om=#{omCode,jdbcType=VARCHAR}
+        </if>
+        <if test="amCode !=null and amCode != '' ">
+            and T1.ofc=#{amCode,jdbcType=VARCHAR}
+        </if>
+    </select>
+
+    <select id="selectListByCondition" resultMap="ReRRVoucherDTOMap" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrVoucher.RRVoucherParamDTO">
+        SELECT
+            T.*,T0.order_date org_order_date, T1.store_name, T2.vendor_name, T3.code_name AS order_method_name,
+        T1.oc,T1.om,T1.ofc,T1.ofc_name,T1.oc_name,T1.om_name
+        FROM (
+            SELECT
+                '0' AS order_type, order_differentiate, store_cd, OD0000.order_id,
+                OD0000.org_order_id, vendor_id, tax_rate, order_amt,
+                order_date, order_method, OD0000.n_reviewId, OD0000.review_status,
+                cast(OD0000.review_status as varchar) as review_status_text,f.review_status status
+            FROM OD0000
+            left join od0005 f
+            on OD0000.order_id = f.order_id
+            <choose>
+                <when test="orderType!=null and orderType=='1'.toString()">
+                    WHERE 1 = 2
+                </when>
+                <otherwise>
+                    WHERE order_type = '02'
+                    AND store_cd IN
+                    <foreach item="store" index="index" collection="stores"
+                             open="(" separator="," close=")">
+                        #{store,jdbcType=VARCHAR}
+                    </foreach>
+                    <if test="orderStartDate != null and orderStartDate != ''">
+                        AND order_date >= #{orderStartDate,jdbcType=VARCHAR}
+                    </if>
+                    <if test="orderEndDate != null and orderEndDate != ''">
+                        AND #{orderEndDate,jdbcType=VARCHAR} >= order_date
+                    </if>
+                    <if test="orderId != null and orderId != ''">
+                        AND lower(OD0000.order_id) like lower(CONCAT('%',#{orderId,jdbcType=VARCHAR},'%'))
+                    </if>
+                    <if test="orgOrderId != null and orgOrderId != ''">
+                        AND lower(OD0000.org_order_id) like lower(CONCAT('%',#{orgOrderId,jdbcType=VARCHAR},'%'))
+                    </if>
+                    <choose>
+                        <when test="status !=null and status != 0 and orderSts != null and orderSts != ''">
+                            and (f.review_status = #{status,jdbcType=INTEGER}
+                            or CAST(OD0000.review_status AS VARCHAR) = #{orderSts,jdbcType=VARCHAR})
+                        </when>
+                        <otherwise>
+                            <if test="status !=null and status != 0 and (orderSts == null or orderSts == '')">
+                                and f.review_status = #{status,jdbcType=INTEGER}
+                            </if>
+                            <if test="orderSts != null and orderSts != '' and (status == null or status == 0)">
+                                AND CAST(OD0000.review_status AS VARCHAR) = #{orderSts,jdbcType=VARCHAR}
+                                <if test="orderSts == '10'">
+                                    and f.review_status ISNULL
+                                </if>
+                            </if>
+                        </otherwise>
+                    </choose>
+                    <include refid="selectCondition"></include>
+                </otherwise>
+            </choose>
+            UNION
+            SELECT
+                '1' AS order_type, M1.order_differentiate, M.store_cd,
+                M.receive_id AS order_id, M.order_id AS org_order_id,
+                M1.vendor_id, M1.tax_rate, M.receive_amt AS order_amt,
+                M.update_ymd AS order_date, M1.order_method, M.n_reviewId,
+                M.review_status,cast(M.review_status as varchar) as review_status_text,f.review_status as status
+            FROM OD0000_T M
+            JOIN (
+                SELECT
+                    store_cd, order_id, vendor_id, tax_rate, order_amt,
+                    order_date, order_method, order_differentiate
+                FROM OD0000 WHERE order_type = '01'
+            ) M1
+            ON M.store_cd = M1.store_cd AND M.order_id = M1.order_id
+            left join od0005 f
+            on M.order_id = f.order_id
+            <choose>
+                <when test="orderType!=null and orderType=='0'.toString()">
+                    WHERE 1 = 2
+                </when>
+                <otherwise>
+                    WHERE M.store_cd IN
+                    <foreach item="store" index="index" collection="stores"
+                             open="(" separator="," close=")">
+                        #{store,jdbcType=VARCHAR}
+                    </foreach>
+                    <if test="orderStartDate != null and orderStartDate != ''">
+                        AND M.update_ymd >= #{orderStartDate,jdbcType=VARCHAR}
+                    </if>
+                    <if test="orderEndDate != null and orderEndDate != ''">
+                        AND #{orderEndDate,jdbcType=VARCHAR} >= M.update_ymd
+                    </if>
+                    <if test="orderId != null and orderId != ''">
+                        AND M.receive_id like CONCAT('%',#{orderId,jdbcType=VARCHAR},'%')
+                    </if>
+                    <if test="orgOrderId != null and orgOrderId != ''">
+                        AND lower(M.order_id) like lower(CONCAT('%',#{orgOrderId,jdbcType=VARCHAR},'%'))
+                    </if>
+                    <if test="orderSts != null and orderSts != ''">
+                        <choose>
+                            <when test="orderSts == '10' ">
+                                AND 1 = 2
+                            </when>
+                            <otherwise>
+                                AND CAST(M.review_status AS VARCHAR) = #{orderSts,jdbcType=VARCHAR}
+                            </otherwise>
+                        </choose>
+                    </if>
+                    <include refid="selectCondition"></include>
+                </otherwise>
+            </choose>
+        ) T
+        JOIN (
+            SELECT order_id,order_date FROM OD0000 WHERE order_type = '01'
+            <if test="orgOrderStartDate != null and orgOrderStartDate != ''">
+                AND order_date >= #{orgOrderStartDate,jdbcType=VARCHAR}
+            </if>
+            <if test="orgOrderEndDate != null and orgOrderEndDate != ''">
+                AND #{orgOrderEndDate,jdbcType=VARCHAR} >= order_date
+            </if>
+        ) T0
+        ON T.org_order_id = T0.order_id
+        LEFT JOIN (
+        SELECT store_cd, store_name,oc,om,ofc,ofcName.c_operatorname as ofc_name,ocName.c_operatorname as oc_name,omName.c_operatorname om_name
+        FROM MA1000 left join
+        (SELECT distinct t_operator.c_operatorcode,t_operator.c_operatorname  from   t_operator  LEFT JOIN  MA1000 ON  MA1000.ofc= t_operator.c_operatorcode)  ofcName  on ma1000.ofc=ofcName.c_operatorcode
+        left join (SELECT  distinct t_operator.c_operatorcode,t_operator.c_operatorname  from   t_operator  LEFT JOIN  MA1000 ON  MA1000.oc= t_operator.c_operatorcode) AS ocName  on ma1000.oc=ocName.c_operatorcode
+        left join (SELECT distinct t_operator.c_operatorcode,t_operator.c_operatorname  from   t_operator  LEFT JOIN  MA1000 ON  MA1000.om= t_operator.c_operatorcode) AS omName  on ma1000.om=omName.c_operatorcode
+        WHERE #{businessDate,jdbcType=VARCHAR}
+        BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.store_cd = T1.store_cd
+        LEFT JOIN (
+            SELECT vendor_id, vendor_name FROM MA2000
+            WHERE #{businessDate,jdbcType=VARCHAR}
+            BETWEEN effective_start_date AND effective_end_date
+        UNION
+            SELECT warehouse_no AS vendor_id, warehouse_name AS vendor_name FROM MA5321
+        ) T2
+        ON T.vendor_id = T2.vendor_id
+        LEFT JOIN (
+            SELECT code_value, code_name FROM CM9010 WHERE code_type = '00065'
+        ) T3
+
+        ON T.order_method = T3.code_value
+        where  1=1
+        <if test="ocCode !=null and ocCode != '' ">
+            and   T1.oc=#{ocCode,jdbcType=VARCHAR}
+        </if>
+        <if test="omCode !=null and omCode != '' ">
+            and  T1.om=#{omCode,jdbcType=VARCHAR}
+        </if>
+        <if test="amCode !=null and amCode != '' ">
+            and T1.ofc=#{amCode,jdbcType=VARCHAR}
+        </if>
+        ORDER BY order_date DESC
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+
+    <select id="selectVoucherByKey" resultMap="ReRRVoucherDTOMap" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrVoucher.RRVoucherParamDTO">
+        SELECT
+            T.*, T1.store_name, T2.vendor_name, T3.order_method_name,
+            T4.order_type_name, T5.order_sts_name, T6.vouch_type_name
+        FROM (
+            SELECT
+                LEFT(order_id, 3) AS vouch_type_user,
+                RIGHT(order_id, 7) AS short_order_id,
+                store_cd, order_id, org_order_id, vendor_id, delivery_type_cd,
+                delivery_center_id, delivery_area_cd, shipment, order_type,
+                order_method, payment_type, promotion_id, order_date, delivery_date,
+                expire_date, receive_date, vendor_address, store_address, order_sts,
+                nr_flg, order_remark, purchase_vat_cd, tax_rate, order_amt, order_tax,
+                receive_tax, upload_flg, upload_date, create_user_id,
+                create_ymd, create_hms, update_user_id, update_ymd, update_hms,
+                update_screen_id, update_ip_address, order_differentiate,
+                CASE WHEN receive_amt IS NULL THEN order_amt ELSE receive_amt END AS receive_amt
+            FROM
+                OD0000
+            WHERE
+                store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND order_id = #{orderId,jdbcType=VARCHAR}
+        )T
+        LEFT JOIN (
+            SELECT store_cd, store_name
+            FROM MA1000
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.store_cd = T1.store_cd
+        LEFT JOIN (
+            SELECT vendor_id, vendor_name
+            FROM MA2000
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T2
+        ON T.vendor_id = T2.vendor_id
+        LEFT JOIN (
+            SELECT code_value AS temp4, code_name AS order_method_name
+            FROM CM9010
+            WHERE code_type = '00065'
+        ) T3
+        ON T.order_method = T3.temp4
+        LEFT JOIN (
+            SELECT code_value AS temp5, code_name AS order_type_name
+            FROM CM9010
+            WHERE code_type = '00145'
+        ) T4
+        ON T.order_type = T4.temp5
+        LEFT JOIN (
+            SELECT code_value AS temp6, code_name AS order_sts_name
+            FROM CM9010
+            WHERE code_type = '00150'
+        ) T5
+        ON T.order_sts = T5.temp6
+        LEFT JOIN (
+            SELECT
+                vouch_type_user,
+                '['||vouch_type_user||'] '||vouch_name AS vouch_type_name
+            FROM
+                CM9100
+            WHERE
+                vouch_type_user BETWEEN '101' AND '102'
+        ) T6
+        ON T.vouch_type_user = T6.vouch_type_user
+    </select>
+
+    <!-- 查询明细详情 -->
+    <sql id="selectDetailsCondition">
+        <where>
+            store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND order_id = #{orderId,jdbcType=VARCHAR}
+        </where>
+    </sql>
+
+    <select id="selectDetailCount" resultType="INT" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrVoucher.RRVoucherParamDTO">
+        SELECT COUNT(1) FROM OD0010
+        <include refid="selectDetailsCondition"></include>
+    </select>
+
+    <select id="selectDetail" resultMap="ReDetailsDTOMap" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrVoucher.RRVoucherParamDTO">
+        SELECT
+            T.*, T1.article_name, T1.spec,
+            T2.unit_name, T3.code_name AS vat
+        FROM (
+            SELECT
+                store_cd, order_id, serial_no, article_id, barcode, vendor_id, promotion_id,
+                order_unit, order_qty, order_nocharge_qty, order_price, order_amt,
+                order_amt_notax, order_tax, receive_price, receive_total_qty,
+                receive_total_amt_notax, receive_tax, reason_id, adjust_amt, adjust_qty,
+--           /*：如果实收数量为空，说明未收货，才返回订单数量;如果不为空，表示已经收货，返回实际的收货数量*/
+                CASE WHEN receive_qty IS NULL THEN order_qty ELSE receive_qty END AS receive_qty,
+                CASE WHEN receive_nocharge_qty IS NULL THEN order_nocharge_qty ELSE receive_nocharge_qty END AS receive_nocharge_qty,
+                CASE WHEN receive_total_amt IS NULL THEN order_amt ELSE receive_total_amt END AS receive_total_amt
+            FROM
+                OD0010
+            <include refid="selectDetailsCondition"></include>
+        ) T
+        LEFT JOIN (
+            SELECT
+                article_id, article_name, spec, purchase_vat_cd
+            FROM MA1100
+            WHERE #{businessDate,jdbcType=VARCHAR}
+            BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.article_id = T1.article_id
+        LEFT JOIN (
+            SELECT unit_id, unit_name FROM MA0220
+        ) T2
+        ON T.order_unit = T2.unit_id
+        LEFT JOIN (
+            SELECT code_type, code_value, code_name
+            FROM CM9010 WHERE code_type = '00120'
+        ) T3
+        ON T1.purchase_vat_cd = T3.code_value
+        ORDER BY T.serial_no ASC
+        LIMIT ${rows} OFFSET ${limitStart}
+    </select>
+
+
+    <!-- 更新 -->
+    <update id="updateVoucher" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrVoucher.RRVoucherDTO">
+        UPDATE OD0000
+        SET
+            <choose>
+                <when test="flag=='quick'">
+                    receive_amt = order_amt,
+                </when>
+                <otherwise>
+                    receive_amt = #{dto.receiveAmt,jdbcType=DECIMAL},
+                </otherwise>
+            </choose>
+            receive_date = #{dto.receiveDate,jdbcType=VARCHAR},
+            order_sts = #{dto.orderSts,jdbcType=VARCHAR},
+            update_user_id = #{dto.commonDTO.updateUserId,jdbcType=VARCHAR},
+            update_ymd = #{dto.commonDTO.updateYmd,jdbcType=VARCHAR},
+            update_hms = #{dto.commonDTO.updateHms,jdbcType=VARCHAR}
+        WHERE
+            store_cd = #{dto.storeCd,jdbcType=VARCHAR}
+        AND order_id = #{dto.orderId,jdbcType=VARCHAR}
+    </update>
+
+    <update id="updateDetails" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrVoucher.RRVoucherDetailsDTO">
+        UPDATE OD0010
+        SET
+            <choose>
+                <when test="flag=='quick'">
+                    receive_qty = order_qty,
+                    receive_nocharge_qty = order_nocharge_qty,
+                    receive_total_qty = order_qty + order_nocharge_qty,
+                    receive_total_amt = order_amt,
+                </when>
+                <otherwise>
+                    receive_qty = #{dto.receiveQty,jdbcType=DECIMAL},
+                    receive_nocharge_qty = #{dto.receiveNoChargeQty,jdbcType=DECIMAL},
+                    receive_total_qty = #{dto.receiveTotalQty,jdbcType=DECIMAL},
+                    receive_total_amt = #{dto.receiveTotalAmt,jdbcType=DECIMAL},
+                </otherwise>
+            </choose>
+            update_user_id = #{dto.commonDTO.updateUserId,jdbcType=VARCHAR},
+            update_ymd = #{dto.commonDTO.updateYmd,jdbcType=VARCHAR},
+            update_hms = #{dto.commonDTO.updateHms,jdbcType=VARCHAR}
+        WHERE
+            store_cd = #{dto.storeCd,jdbcType=VARCHAR}
+        AND order_id = #{dto.orderId,jdbcType=VARCHAR}
+        <if test="flag!='quick'">
+            AND serial_no = #{dto.serialNo,jdbcType=VARCHAR}
+            AND article_id = #{dto.articleId,jdbcType=VARCHAR}
+        </if>
+    </update>
+
+    <select id="getPrintdata" resultMap="ReRRVoucherDTOMap" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrVoucher.RRVoucherParamDTO">
+        SELECT
+        T.*, T1.store_name, T2.vendor_name, T3.order_method_name,
+        T4.order_type_name, T5.order_sts_name, T6.vouch_type_name
+        FROM (
+        SELECT
+        LEFT(order_id, 3) AS vouch_type_user,
+        RIGHT(order_id, 7) AS short_order_id,
+        store_cd, order_id, org_order_id, vendor_id, delivery_type_cd,
+        delivery_center_id, delivery_area_cd, shipment, order_type,
+        order_method, payment_type, promotion_id, order_date, delivery_date,
+        expire_date, receive_date, vendor_address, store_address, order_sts,
+        nr_flg, order_remark, purchase_vat_cd, tax_rate, order_amt, order_tax,
+        receive_tax, upload_flg, upload_date, create_user_id,
+        create_ymd, create_hms, update_user_id, update_ymd, update_hms,
+        update_screen_id, update_ip_address, order_differentiate,
+        CASE WHEN receive_amt IS NULL THEN order_amt ELSE receive_amt END AS receive_amt
+        FROM
+        OD0000
+        <include refid="selectCondition"></include>
+        )T
+        LEFT JOIN (
+        SELECT store_cd, store_name
+        FROM MA1000
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.store_cd = T1.store_cd
+        LEFT JOIN (
+        SELECT vendor_id, vendor_name
+        FROM MA2000
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T2
+        ON T.vendor_id = T2.vendor_id
+        LEFT JOIN (
+        SELECT code_value AS temp4, code_name AS order_method_name
+        FROM CM9010
+        WHERE code_type = '00065'
+        ) T3
+        ON T.order_method = T3.temp4
+        LEFT JOIN (
+        SELECT code_value AS temp5, code_name AS order_type_name
+        FROM CM9010
+        WHERE code_type = '00145'
+        ) T4
+        ON T.order_type = T4.temp5
+        LEFT JOIN (
+        SELECT code_value AS temp6, code_name AS order_sts_name
+        FROM CM9010
+        WHERE code_type = '00150'
+        ) T5
+        ON T.order_sts = T5.temp6
+        LEFT JOIN (
+        SELECT
+        vouch_type_user,
+        '['||vouch_type_user||'] '||vouch_name AS vouch_type_name
+        FROM
+        CM9100
+        WHERE
+        vouch_type_user BETWEEN '101' AND '102'
+        ) T6
+        ON T.vouch_type_user = T6.vouch_type_user
+        ORDER BY delivery_date DESC, order_date DESC
+    </select>
+</mapper>

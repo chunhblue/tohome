@@ -1,0 +1,675 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.OrderDcUrgentMapper">
+    <resultMap id="ResultMap" type="cn.com.bbut.iy.itemmaster.dto.orderVendor.OrderVendorGridDTO">
+        <id column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <id column="order_id" property="orderId" jdbcType="VARCHAR" />
+        <result column="org_order_id" property="orgOrderId" jdbcType="VARCHAR" />
+        <result column="vendor_id" property="vendorId" jdbcType="VARCHAR" />
+        <result column="delivery_type_cd" property="deliveryTypeCd" jdbcType="VARCHAR" />
+        <result column="delivery_center_id" property="deliveryCenterId" jdbcType="VARCHAR" />
+        <result column="delivery_area_cd" property="deliveryAreaCd" jdbcType="VARCHAR" />
+        <result column="shipment" property="shipment" jdbcType="VARCHAR" />
+        <result column="order_type" property="orderType" jdbcType="VARCHAR" />
+        <result column="order_method" property="orderMethod" jdbcType="VARCHAR" />
+        <result column="payment_type" property="paymentType" jdbcType="VARCHAR" />
+        <result column="promotion_id" property="promotionId" jdbcType="VARCHAR" />
+        <result column="order_date" property="orderDate" jdbcType="VARCHAR" />
+        <result column="delivery_date" property="deliveryDate" jdbcType="VARCHAR" />
+        <result column="expire_date" property="expireDate" jdbcType="VARCHAR" />
+        <result column="receive_date" property="receiveDate" jdbcType="VARCHAR" />
+        <result column="vendor_address" property="vendorAddress" jdbcType="VARCHAR" />
+        <result column="store_address" property="storeAddress" jdbcType="VARCHAR" />
+        <result column="order_sts" property="orderSts" jdbcType="VARCHAR" />
+        <result column="nr_flg" property="nrFlg" jdbcType="VARCHAR" />
+        <result column="order_remark" property="orderRemark" jdbcType="VARCHAR" />
+        <result column="order_tax_type_cd" property="purchaseVatCd" jdbcType="VARCHAR" />
+        <result column="tax_rate" property="taxRate" jdbcType="DECIMAL" />
+        <result column="order_tax" property="orderTax" jdbcType="DECIMAL" />
+        <result column="order_amt" property="orderAmt" jdbcType="DECIMAL" />
+        <result column="receive_tax" property="receiveTax" jdbcType="DECIMAL" />
+        <result column="receive_amt" property="receiveAmt" jdbcType="DECIMAL" />
+        <result column="upload_flg" property="uploadFlg" jdbcType="VARCHAR" />
+        <result column="upload_date" property="uploadDate" jdbcType="VARCHAR" />
+        <result column="order_differentiate" property="orderDifferentiate" jdbcType="VARCHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <result column="vendor_name" property="vendorName" jdbcType="VARCHAR" />
+        <result column="order_type_name" property="orderTypeName" jdbcType="VARCHAR" />
+        <result column="order_sts_name" property="orderStsName" jdbcType="VARCHAR" />
+        <result column="create_user_name" property="createUserName" jdbcType="VARCHAR" />
+        <result column="review_status" property="reviewStatus" jdbcType="VARCHAR" />
+        <!-- 子表统计汇总 -->
+        <!--        <result column="order_total_qty" property="orderTotalQty" jdbcType="DECIMAL" />-->
+        <!--        <result column="order_total_amt" property="orderTotalAmt" jdbcType="DECIMAL" />-->
+        <!--        <result column="order_total_amt_notax" property="orderTotalAmtNoTax" jdbcType="DECIMAL" />-->
+        <!--        <result column="receive_total_qty" property="receiveTotalQty" jdbcType="DECIMAL" />-->
+        <!--        <result column="receive_total_amt" property="receiveTotalAmt" jdbcType="DECIMAL" />-->
+        <!--        <result column="receive_total_amt_notax" property="receiveTotalAmtNoTax" jdbcType="DECIMAL" />-->
+    </resultMap>
+
+    <resultMap id="ResultMap1" type="cn.com.bbut.iy.itemmaster.dto.orderVendor.OrderVendorDetailInfo">
+        <id column="order_id" property="orderId" jdbcType="VARCHAR" />
+        <id column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <result column="barcode" property="barcode" jdbcType="VARCHAR" />
+        <result column="article_name" property="articleName" jdbcType="VARCHAR" />
+        <result column="vendor_id" property="vendorId" jdbcType="VARCHAR" />
+        <result column="unit_id" property="unitId" jdbcType="VARCHAR" />
+        <result column="unit_name" jdbcType="VARCHAR" property="unitName" />
+        <result column="min_display_qty" jdbcType="NUMERIC" property="minDisplayQty" />
+        <result column="auto_order_qty" jdbcType="NUMERIC" property="autoOrderQty" />
+        <result column="order_nocharge_qty" jdbcType="NUMERIC" property="orderNochargeQty" />
+        <result column="order_total_qty" jdbcType="NUMERIC" property="orderTotalQty" />
+        <result column="order_qty" jdbcType="NUMERIC" property="orderQty" />
+        <result column="sale_price" jdbcType="NUMERIC" property="salePrice" />
+        <result column="order_tax_type_cd" property="purchaseVatCd" jdbcType="VARCHAR" />
+        <result column="tax_rate" property="taxRate" jdbcType="DECIMAL" />
+        <result column="spec" jdbcType="VARCHAR" property="spec" />
+        <result column="converter" jdbcType="VARCHAR" property="converter" />
+        <!--        <result column="psd" property="psd" jdbcType="DECIMAL" />-->
+        <result column="order_batch_qty" property="orderBatchQty" jdbcType="DECIMAL" />
+        <result column="min_order_amt_tax" property="minOrderAmtTax" jdbcType="DECIMAL" />
+        <result column="order_price" property="orderPrice" jdbcType="DECIMAL" />
+        <result column="min_order_qty" property="minOrderQty" jdbcType="DECIMAL" />
+        <result column="vendor_name" property="vendorName" jdbcType="VARCHAR" />
+        <result column="order_total_amt" property="orderTotalAmt" jdbcType="DECIMAL" />
+        <result column="dc_min_order_qty" property="dcMinOrderQty" jdbcType="DECIMAL" />
+        <result column="psd" jdbcType="VARCHAR" property="psd" />
+        <!--        <result column="order_total_amt_notax" property="orderTotalAmtNoTax" jdbcType="DECIMAL" />-->
+    </resultMap>
+
+    <select id="getOrderDetailList" parameterType="cn.com.bbut.iy.itemmaster.dto.order.OrderDcParamDTO" resultMap="ResultMap1">
+        SELECT DISTINCT
+            od0010.barcode,
+            od0010.article_id,
+            ma1100.article_name,
+            od0010.vendor_id,
+            od0010.order_unit purchase_unit_id,
+            od0010.order_price,
+            ma1100.converter,
+            ma1100.spec,
+            ma1110.order_batch_qty,
+            ma1110.min_order_amt_tax,/*最低订货金额*/
+            COALESCE(ma1110.dc_m_order_qty, 0) min_order_qty,
+            ma1110.order_tax_type_cd,/*税率cd*/
+            tax.tax_rate,/*税率*/
+            ma1100.min_display_qty,
+            sk0000_today.advise_qty AS auto_order_qty,
+            od0010.order_unit AS unit_id,
+            ma0220.unit_name,
+            od0010.order_qty AS order_qty,
+            od0010.order_nocharge_qty,
+--             COALESCE(od0010.order_qty, 0)+COALESCE(od0010.order_nocharge_qty, 0) order_total_qty,
+            COALESCE(od0010.order_qty, 0) order_total_qty,
+            ( SELECT ma8070.psd ma8070 FROM ma8070 WHERE ma8070.store_cd = #{storeCd,jdbcType=VARCHAR} AND ma8070.article_id = od0010.article_id ) AS psd,
+            od0010.order_amt AS order_total_amt
+        FROM
+            ma1000,
+            ma1100,
+            ma1110
+            LEFT JOIN (
+                select cast(code_name as numeric(4,4)) as tax_rate,
+                code_value,dealer_reserved_1
+                from cm9010 where code_type='00120'
+            ) tax
+            on tax.code_value = ma1110.order_tax_type_cd,
+            od0010 LEFT JOIN sk0000_today on
+            od0010.article_id = sk0000_today.article_id
+            AND sk0000_today.store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND sk0000_today.store_cd = od0010.store_cd
+            AND sk0000_today.effective_date = #{orderDate,jdbcType=VARCHAR}
+            LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id
+        WHERE
+            ma1100.article_id = od0010.article_id
+            AND ma1000.store_cd = od0010.store_cd
+            AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date
+            AND ma1000.effective_end_date
+            AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date
+            AND ma1100.effective_end_date
+            AND ma1100.article_id = ma1110.article_id
+            AND ma1100.effective_start_date = ma1110.effective_start_date
+            AND ma1110.structure_cd = (
+                select admin_structure_cd from MA0020 where structure_cd =
+                (SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = od0010.store_cd and effective_sts = '10') and effective_sts = '10'
+                )
+            AND od0010.vendor_id = ma1110.vendor_id
+--             AND ma1110.ma_cd = ma1000.ma_cd
+            AND od0010.order_id =#{orderId,jdbcType=VARCHAR}
+        ORDER BY
+            od0010.article_id ASC;
+    </select>
+
+    <select id="getDcInfoByOrderId" resultType="cn.com.bbut.iy.itemmaster.dto.order.OrderDcInfo">
+        select
+        od0000.store_cd, od0000.order_id, od0000.vendor_id,
+        ma5321.warehouse_no dc_id,ma5321.warehouse_name dc_name,
+        od0000.expire_date, od0000.order_date, od0000.order_type,
+        od0000.order_sts, od0000.order_remark, od0000.update_user_id,
+        od0000.update_ymd, od0000.create_user_id, od0000.create_ymd,
+        od0000.review_status as reviewStatus,od0000.purchase_vat_cd,
+        ma1000.store_name,
+        (select ma4200.emp_name updateUserName from ma4200 where od0000.update_user_id = ma4200.emp_num_id ),
+        (select ma4200.emp_name createUserName from ma4200 where od0000.create_user_id = ma4200.emp_num_id )
+        from
+        od0000
+        left join ma5321
+            on ma5321.warehouse_no = od0000.vendor_id
+        left join ma1000
+            on od0000.order_date between ma1000.effective_start_date and ma1000.effective_end_date
+            and ma1000.store_cd = od0000.store_cd
+        where od0000.order_id = #{orderId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getItems" parameterType="cn.com.bbut.iy.itemmaster.dto.orderVendor.OrderVendorParamDTO" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select
+        distinct
+        ma8040.article_id k, CONCAT(ma8040.article_id,' ',ma8040.article_name) AS v
+        from
+        ma1105,
+        ma2240,
+        /*od0010,*/
+        sk0000_today right join ma8040 on
+        ma8040.article_id = sk0000_today.article_id
+        and sk0000_today.effective_date = #{orderDate,jdbcType=VARCHAR}
+        and sk0000_today.store_cd = #{storeCd,jdbcType=VARCHAR},
+        (select ma8140.article_id,max(ma8140.barcode) as barcode from ma8140
+        where ma8140.effective_date = #{orderDate,jdbcType=VARCHAR}
+        group by ma8140.article_id) c
+        where
+        ma8040.article_id = c.article_id
+        and ma1105.item_code = ma8040.article_id
+        and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
+        /*and od0010.article_id = ma8040.article_id*/
+        and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
+        <if test="vendorId !=null and vendorId != ''">
+            and ma8040.vendor_id = #{vendorId,jdbcType=VARCHAR}
+        </if>
+        <if test="articleId !=null and articleId != ''">
+            and ma8040.article_id = #{articleId,jdbcType=VARCHAR}
+        </if>
+        /*限制为dc订货*/
+        and ma8040.dc_item = '1'
+        /*限制dc订货为非暂停*/
+        and ma8040.order_pause_dc_flg = '1'
+        /*取对应供应商商品*/
+        and ma2240.store_cd = #{storeCd,jdbcType=VARCHAR}
+        and ma2240.article_id = ma8040.article_id
+        and ma2240.vendor_id = ma8040.vendor_id
+        /*限制区域*/
+        and ma8040.structure_cd = (
+        select admin_structure_cd from MA0020 where structure_cd =
+        (SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = #{storeCd,jdbcType=VARCHAR} and effective_sts = '10') and effective_sts = '10'
+        )
+        <if test="v!=null and v!=''">
+            AND (
+            lower(ma8040.article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(ma8040.article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        order by ma8040.article_id ASC
+    </select>
+
+    <select id="getOrderDetailListByAuto" parameterType="cn.com.bbut.iy.itemmaster.dto.orderVendor.OrderVendorParamDTO" resultMap="ResultMap1">
+        select
+        distinct
+        c.barcode,
+        ma8040.article_id,
+        ma8040.article_name,
+        ma8040.vendor_id,
+        ma8040.purchase_unit_id,
+        ma8040.base_order_price order_price,/*原价*/
+        ma8040.order_batch_qty,
+        ma8040.min_order_amt_tax,/*最低订货金额*/
+        ma8040.sale_price as sale_price,
+        ma1100.converter,
+        ma8040.dc_m_order_qty min_order_qty,/*dc最低订货量*/
+        ma8040.min_display_qty,
+        sk0000_today.advise_qty as auto_order_qty,
+        ma8040.purchase_unit_id as unit_id,
+        ma8040.order_tax_type_cd,
+        (select ma8070.psd ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR} and ma8070.article_id=ma8040.article_id) as psd,
+        ma8040.spec,
+        ma0220.unit_name,
+        tax.tax_rate tax_rate
+        /*od0010.order_qty as order_qty,
+        coalesce(od0010.order_qty,0) * coalesce(ma8040.order_price,0) as order_total_amt*/
+        from
+        ma1100,
+        ma1105,
+        ma2240,
+        /* od0010,*/
+        sk0000_today right join ma8040 on
+        ma8040.article_id = sk0000_today.article_id
+        and sk0000_today.effective_date = #{orderDate,jdbcType=VARCHAR}
+        and sk0000_today.store_cd = #{storeCd,jdbcType=VARCHAR}
+        left join ma0220 ON ma8040.purchase_unit_id = ma0220.unit_id
+        left join (
+        select cast(code_name as numeric(4,4)) as tax_rate,
+                code_value,dealer_reserved_1
+                from cm9010 where code_type='00120'
+            ) tax
+            on tax.code_value = ma8040.order_tax_type_cd
+        ,
+        (select ma8140.article_id,max(ma8140.barcode) as barcode from ma8140
+        where ma8140.effective_date = #{orderDate,jdbcType=VARCHAR}
+        group by ma8140.article_id) c
+        where
+        ma8040.article_id = c.article_id
+        and ma1100.article_id = ma8040.article_id
+        and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
+        /*限制货架信息*/
+        and ma1105.item_code = ma8040.article_id
+        and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
+        /*and od0010.article_id = ma8040.article_id*/
+        and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
+        <if test="articleId !=null and articleId != ''">
+            and ma8040.article_id = #{articleId,jdbcType=VARCHAR}
+        </if>
+        /*限制为dc订货*/
+        and ma8040.dc_item = '1'
+        /*限制dc订货为非暂停*/
+        and ma8040.order_pause_dc_flg = '1'
+        /*取对应供应商商品*/
+        and ma2240.store_cd = #{storeCd,jdbcType=VARCHAR}
+        and ma2240.article_id = ma8040.article_id
+        and ma2240.vendor_id = ma8040.vendor_id
+        /*限制区域*/
+        and ma8040.structure_cd = (
+        select admin_structure_cd from MA0020 where structure_cd =
+        (SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = #{storeCd,jdbcType=VARCHAR} and effective_sts = '10') and effective_sts = '10'
+        )
+        order by ma8040.article_id ASC
+    </select>
+
+    <select id="getOrderTaxRate" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select
+        distinct
+        ma8040.order_tax_type_cd k,
+        tax.code_name v
+        from
+        ma1100,
+        ma1105,
+        ma8040,
+        ma2240,
+        (select code_name,code_value from cm9010 where code_type='00120' ) as tax
+        where
+        ma8040.order_tax_type_cd = tax.code_value
+        and ma1100.article_id = ma8040.article_id
+        and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
+        /*限制货架信息*/
+        and ma1105.item_code = ma8040.article_id
+        and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
+        /*and od0010.article_id = ma8040.article_id*/
+        and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
+        /*限制为dc订货*/
+        and ma8040.dc_item = '1'
+        /*限制dc订货为非暂停*/
+        and ma8040.order_pause_dc_flg = '1'
+        /*取对应供应商商品*/
+        and ma2240.store_cd = #{storeCd,jdbcType=VARCHAR}
+        and ma2240.article_id = ma8040.article_id
+        and ma2240.vendor_id = ma8040.vendor_id
+        /*限制区域*/
+        and ma8040.structure_cd = (
+        select admin_structure_cd from MA0020 where structure_cd =
+        (SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = #{storeCd,jdbcType=VARCHAR} and effective_sts = '10') and effective_sts = '10'
+        )
+        order by ma8040.order_tax_type_cd ASC
+    </select>
+
+    <select id="getOrderDetailListByAutoCount" parameterType="cn.com.bbut.iy.itemmaster.dto.orderVendor.OrderVendorParamDTO" resultType="integer">
+        select
+        count(*)
+        from
+        ma1100,
+        ma1105,
+        ma2240,
+        /* od0010,*/
+        sk0000_today right join ma8040 on
+        ma8040.article_id = sk0000_today.article_id
+        and sk0000_today.effective_date = #{orderDate,jdbcType=VARCHAR}
+        and sk0000_today.store_cd = #{storeCd,jdbcType=VARCHAR}
+        left join ma0220 ON ma8040.purchase_unit_id = ma0220.unit_id
+        ,
+        (select ma8140.article_id,max(ma8140.barcode) as barcode from ma8140
+        where ma8140.effective_date = #{orderDate,jdbcType=VARCHAR}
+        group by ma8140.article_id) c
+        where
+        ma8040.article_id = c.article_id
+        and ma1100.article_id = ma8040.article_id
+        and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
+        /*限制货架信息*/
+        and ma1105.item_code = ma8040.article_id
+        and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
+        /*and od0010.article_id = ma8040.article_id*/
+        and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
+        <if test="articleId !=null and articleId != ''">
+            and ma8040.article_id = #{articleId,jdbcType=VARCHAR}
+        </if>
+        /*限制为dc订货*/
+        and ma8040.dc_item = '1'
+        /*限制dc订货为非暂停*/
+        and ma8040.order_pause_dc_flg = '1'
+        /*取对应供应商商品*/
+        and ma2240.store_cd = #{storeCd,jdbcType=VARCHAR}
+        and ma2240.article_id = ma8040.article_id
+        and ma2240.vendor_id = ma8040.vendor_id
+        /*限制区域*/
+        and ma8040.structure_cd = (
+        select admin_structure_cd from MA0020 where structure_cd =
+        (SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = #{storeCd,jdbcType=VARCHAR} and effective_sts = '10') and effective_sts = '10'
+        )
+    </select>
+
+    <select id="getOrderList" parameterType="cn.com.bbut.iy.itemmaster.dto.orderVendor.OrderVendorParamDTO" resultMap="ResultMap">
+        SELECT o.*,o2.order_type_name,
+        o3.order_sts_name,
+        MA2000.vendor_name,
+        o.create_user_id,
+        ma4200.emp_name create_user_name,
+        (select sum(od0010.order_qty)+sum(od0010.order_nocharge_qty) from od0010 where o.order_id=od0010.order_id) order_qty
+        FROM OD0000 O
+        LEFT JOIN (
+        SELECT code_value order_type_code, code_name AS order_type_name
+        FROM CM9010
+        WHERE code_type = '00145'
+        ) O2
+        ON o.order_type = O2.order_type_code
+        LEFT JOIN (
+        SELECT code_value AS order_sts_code, code_name AS order_sts_name
+        FROM CM9010
+        WHERE code_type = '00150'
+        ) O3
+        ON o.order_sts = O3.order_sts_code
+        LEFT JOIN
+        MA2000
+        on #{businessDate,jdbcType=VARCHAR}
+        BETWEEN effective_start_date AND effective_end_date
+        AND o.vendor_id = MA2000.vendor_id
+        LEFT JOIN
+        MA4200
+        on ma4200.emp_num_id = o.create_user_id
+        where o.order_differentiate = '0'
+        and o.order_type = '01' /*订货*/
+        and o.store_cd in
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="orderSts != null and orderSts != ''" >
+            and o.order_sts = #{orderSts,jdbcType=CHAR}
+        </if>
+        <if test="reviewStatus != null and reviewStatus != ''" >
+            and o.review_status = cast (#{reviewStatus,jdbcType=CHAR} as smallint)
+        </if>
+        <if test="orderStartDate != null and orderStartDate != ''" >
+            <![CDATA[
+        and o.order_date >= #{orderStartDate,jdbcType=CHAR}
+        ]]>
+        </if>
+        <if test="orderEndDate != null and orderStartDate != ''" >
+            <![CDATA[
+        and o.order_date <= #{orderEndDate,jdbcType=CHAR}
+        ]]>
+        </if>
+        <if test="orderId != null and orderId != ''" >
+            AND lower(o.order_id) like lower(CONCAT('%',#{orderId,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="vendorId !=null">
+            AND lower(o.vendor_id) like lower(CONCAT('%',#{vendorId,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="orderByClause != null" >
+            order by ${orderByClause}
+        </if>
+        <if test="limitStart >= 0">
+            limit ${limitEnd} offset ${limitStart}
+        </if>
+    </select>
+
+    <select id="getOrderListCount" parameterType="cn.com.bbut.iy.itemmaster.dto.orderVendor.OrderVendorParamDTO" resultType="java.lang.Long">
+        SELECT
+        count(o.order_id)
+        FROM
+        OD0000 O
+        where
+        o.order_differentiate = '0'
+        and o.order_type = '01' /*订货*/
+        and o.store_cd in
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="orderSts != null and orderSts != ''" >
+            and o.order_sts = #{orderSts,jdbcType=CHAR}
+        </if>
+        <if test="reviewStatus != null and reviewStatus != ''" >
+            and o.review_status = cast (#{reviewStatus,jdbcType=CHAR} as smallint)
+        </if>
+        <if test="orderStartDate != null and orderStartDate != ''" >
+            <![CDATA[
+        and o.order_date >= #{orderStartDate,jdbcType=CHAR}
+        ]]>
+        </if>
+        <if test="orderEndDate != null and orderStartDate != ''" >
+            <![CDATA[
+        and o.order_date <= #{orderEndDate,jdbcType=CHAR}
+        ]]>
+        </if>
+        <if test="orderId != null and orderId != ''" >
+            AND lower(o.order_id) like lower(CONCAT('%',#{orderId,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="vendorId !=null">
+            AND lower(o.vendor_id) like lower(CONCAT('%',#{vendorId,jdbcType=VARCHAR},'%'))
+        </if>
+    </select>
+
+    <select id="getItemInfo" parameterType="cn.com.bbut.iy.itemmaster.dto.orderVendor.OrderVendorParamDTO" resultMap="ResultMap1">
+        select
+        distinct
+        c.barcode,
+        ma8040.article_id,
+        ma8040.article_name,
+        ma8040.vendor_id,
+        ma8040.purchase_unit_id,
+        ma8040.base_order_price order_price,/*原价*/
+        ma8040.order_batch_qty,
+        ma8040.min_order_amt_tax,/*最低订货金额*/
+        ma8040.sale_price as sale_price,
+        ma1100.converter,
+        /*ma8040.min_order_qty,*/
+        COALESCE(ma8040.dc_m_order_qty, 0) min_order_qty,/*dc moq*/
+        ma8040.min_display_qty,
+        sk0000_today.advise_qty as auto_order_qty,
+        ma8040.purchase_unit_id as unit_id,
+        ma8040.order_tax_type_cd,/*税区分*/
+        tax.tax_rate,/*税率*/
+        (select ma8070.psd ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR} and ma8070.article_id=ma8040.article_id) as psd,
+        ma8040.spec,
+        ma0220.unit_name
+        /*od0010.order_qty as order_qty,
+        coalesce(od0010.order_qty,0) * coalesce(ma8040.order_price,0) as order_total_amt*/
+        from
+        ma1100,
+        ma1105,
+        ma2240,
+        /*od0010,*/
+        sk0000_today right join ma8040 on
+        ma8040.article_id = sk0000_today.article_id
+        and sk0000_today.effective_date = #{orderDate,jdbcType=VARCHAR}
+        and sk0000_today.store_cd = #{storeCd,jdbcType=VARCHAR}
+        left join ma0220 ON ma8040.purchase_unit_id = ma0220.unit_id
+        LEFT JOIN (
+            select cast(code_name as numeric(4,4)) as tax_rate,
+            code_value,dealer_reserved_1
+            from cm9010 where code_type='00120'
+        ) tax
+        on tax.code_value = ma8040.order_tax_type_cd
+        ,
+        (select ma8140.article_id,max(ma8140.barcode) as barcode from ma8140
+        where ma8140.effective_date = #{orderDate,jdbcType=VARCHAR}
+        group by ma8140.article_id) c
+        where
+        ma8040.article_id = c.article_id
+        and ma1100.article_id = ma8040.article_id
+        and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
+        /*限制货架信息*/
+        and ma1105.item_code = ma8040.article_id
+        and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
+        /*and od0010.article_id = ma8040.article_id*/
+        and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
+        <if test="articleId !=null and articleId != ''">
+            and ma8040.article_id = #{articleId,jdbcType=VARCHAR}
+        </if>
+        /*限制为dc订货*/
+        and ma8040.dc_item = '1'
+        /*限制dc订货为非暂停*/
+        and ma8040.order_pause_dc_flg = '1'
+        /*取对应供应商商品*/
+        and ma2240.store_cd = #{storeCd,jdbcType=VARCHAR}
+        and ma2240.article_id = ma8040.article_id
+        and ma2240.vendor_id = ma8040.vendor_id
+        /*限制区域*/
+        and ma8040.structure_cd = (
+        select admin_structure_cd from MA0020 where structure_cd =
+        (SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = #{storeCd,jdbcType=VARCHAR} and effective_sts = '10') and effective_sts = '10'
+        )
+        limit 1
+    </select>
+    <!--获取DC订货截止时间-->
+    <select id="getExpireDate" resultType="java.lang.String" statementType="CALLABLE">
+        <![CDATA[
+        select fn_get_delivery_date(
+            '000000',
+            #{storeCd,mode=IN,jdbcType=VARCHAR},
+            '1',
+            '00000',
+            #{effectiveDate,mode=IN,jdbcType=CHAR}
+        )
+        ]]>
+    </select>
+
+
+    <select id="getStoreDiscount" resultType="cn.com.bbut.iy.itemmaster.entity.od0010.OD0010">
+        SELECT DISTINCT
+            od0000.order_id,
+            od0000.store_cd,
+            od0000.vendor_id,
+        (
+            SELECT COUNT
+            ( * )
+            FROM
+            od0000 T
+            WHERE
+                T.store_cd = od0000.store_cd
+                AND T.vendor_id = od0000.vendor_id
+            <![CDATA[
+                AND T.update_ymd <  #{auditDate,jdbcType=VARCHAR}
+                AND T.order_type = '01'
+                AND T.review_status >= 10
+            ]]>
+        ) order_qty
+        FROM
+            od0000,
+            ma1000,
+            cm9060
+        WHERE
+            od0000.order_id = #{orderId,jdbcType=VARCHAR}
+            AND od0000.store_cd = ma1000.store_cd
+            AND #{auditDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
+            AND cm9060.sp_id = '0221'
+            <![CDATA[
+            AND  #{auditDate,jdbcType=VARCHAR} <= to_char( to_date( ma1000.open_date, 'yyyymmdd' ) + CAST ( cm9060.sp_value AS INT ), 'yyyymmdd' );
+            ]]>
+    </select>
+
+    <select id="getDiscountRate" resultType="java.lang.String">
+        SELECT
+            CAST(ma2170.this_store_1st_support AS NUMERIC ( 19, 6 )) / 100 AS discount_rate
+        FROM
+            ma2100,
+            ma2170
+        WHERE
+            ma2100.vendor_id = #{vendorId,jdbcType=VARCHAR}
+            AND ma2100.trading_term_no = ma2170.trading_term_no
+            AND ma2100.effective_start_date = ma2170.effective_start_date
+            <![CDATA[
+            AND ma2100.this_contract_start_date <= #{auditDate,jdbcType=VARCHAR}
+            AND to_char(
+            to_timestamp( ma2100.this_contract_end_date, 'yyyyMMdd' ) + ( CASE WHEN ma2100.this_auto_extend = '' OR ma2100.this_auto_extend IS NULL THEN '0' ELSE ma2100.this_auto_extend END || ' month' ) :: INTERVAL,
+            'yyyyMMdd'
+            ) >= #{auditDate,jdbcType=VARCHAR}
+            ]]>
+        LIMIT 1
+    </select>
+
+    <update id="updateOrderDiscount">
+        /*更新商品详细*/
+        UPDATE od0010
+            SET
+            /*设置未税折扣金额*/
+            discount_amt_notax = COALESCE(order_amt_notax,0) * (1 - #{discountRate,jdbcType=NUMERIC}),
+            /*设置含税税折扣金额*/
+            discount_amt = COALESCE(order_amt,0) * (1 - #{discountRate,jdbcType=NUMERIC}),
+            /*设置折扣税额*/
+            discount_tax = COALESCE(order_tax,0) * (1 - #{discountRate,jdbcType=NUMERIC})
+        WHERE order_id = #{orderId,jdbcType=VARCHAR};
+        /*更新头档*/
+        UPDATE od0000
+            SET
+            /*设置折扣率*/
+            discount_rate = #{discountRate,jdbcType=NUMERIC},
+            /*设置含税税折扣金额*/
+            discount_amt = COALESCE(order_amt,0) * (1 - #{discountRate,jdbcType=NUMERIC}),
+            /*设置折扣税额*/
+            discount_tax = COALESCE(order_tax,0) * (1 - #{discountRate,jdbcType=NUMERIC}),
+            /*设置未税折扣金额*/
+            discount_amt_notax = (COALESCE(order_amt,0) * (1 - #{discountRate,jdbcType=NUMERIC})) - (COALESCE(order_tax,0) * (1 - #{discountRate,jdbcType=NUMERIC}))
+        WHERE order_id = #{orderId,jdbcType=VARCHAR};
+    </update>
+
+
+    <select id="checkUploadOrder" resultType="java.lang.Integer">
+        select count(*) from od0000
+        where order_id = #{orderId,jdbcType=VARCHAR}
+        and upload_flg = '1'
+    </select>
+
+    <select id="getStoreRegion" resultType="java.lang.String">
+        SELECT
+            admin_structure_cd
+        FROM
+            MA0020
+        WHERE
+            structure_cd = (
+            SELECT
+                admin_structure_cd
+            FROM
+                MA0020
+            WHERE
+                structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = #{storeCd,jdbcType=VARCHAR} AND effective_sts = '10' )
+                AND effective_sts = '10'
+            )
+    </select>
+
+    <select id="getDcInfo" resultType="cn.com.bbut.iy.itemmaster.entity.od0000.OD0000">
+        select
+            ma5321.warehouse_no delivery_center_id,ma5321.warehouse_name delivery_center_name
+         from ma5321,ma5323
+         where
+            ma5321.warehouse_no = ma5323.warehouse_no
+            and ma5323.store_cd = #{storeCd,jdbcType=VARCHAR}
+        limit 1
+    </select>
+
+    <select id="getInvertoryQty" resultType="java.math.BigDecimal">
+        SELECT COALESCE(real_time_qty,0) as invertory_qty
+        FROM pipelinedb.inventory_view
+        WHERE store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND article_id = #{articleId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getDcStores" resultType="java.lang.String">
+        select distinct store_cd from ma5323
+    </select>
+
+
+</mapper>

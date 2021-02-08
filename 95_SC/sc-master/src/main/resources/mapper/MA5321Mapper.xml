@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.MA5321Mapper">
+
+    <!-- 查询待选 -->
+    <select id="selectWarehouse" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT warehouse_no AS k, CONCAT(warehouse_no,' ',warehouse_name) AS v
+        FROM MA5321
+        <where>
+            <if test="v != null and v != ''">
+                LOWER(warehouse_no) LIKE LOWER(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                OR LOWER(warehouse_name) LIKE LOWER(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            </if>
+        </where>
+    </select>
+
+</mapper>

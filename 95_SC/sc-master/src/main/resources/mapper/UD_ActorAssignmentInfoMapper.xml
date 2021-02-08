@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.IymActorAssignmentInfoMapper">
+
+    <select id="getActorAssIdsByInfo"
+            parameterType="java.lang.Integer"
+            resultType="int">
+        select
+        AA.ID as id
+        from
+        IY_M_ACTOR_ASSIGNMENT AA
+        left join IY_M_ACTOR_ASSIGNMENT_INFO AAI on AA.ID = AAI.ACTOR_ASS_ID
+        where 1=1 and
+        <choose>
+            <when test="_parameter  == null or _parameter  !=1">
+                AAI.FLG is null
+            </when>
+            <otherwise>
+                AAI.FLG is not null
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getRoleIdsByResource" parameterType="java.util.Collection"
+            resultType="java.lang.Integer">
+        select distinct rr1.role_id as roleid
+        from iy_m_role_resources rr1
+        left join iy_m_role_resources rr2
+        on rr1.role_id = rr2.role_id
+        and rr1.group_code = rr2.group_code
+        and rr2.type = 2
+        left join iy_m_role_resources rr3
+        on rr1.role_id = rr3.role_id
+        and rr1.group_code = rr3.group_code
+        and rr3.type = 3
+        left join iy_m_role_resources rr4
+        on rr1.role_id = rr4.role_id
+        and rr1.group_code = rr4.group_code
+        and rr4.type = 4
+        where rr1.type = 1
+        <if test="list!= null and list.size != 0 ">
+            and
+            <trim prefix="(" prefixOverrides="or" suffix=")">
+                <foreach collection="list" item="item" open="(" separator="or" close=")"
+                         index="index">
+                    <if test="item.group!= null and item.group.size != 0 ">
+                        <trim prefix="(" prefixOverrides="and" suffix=")">
+                            <foreach collection="item.group" item="res" open="(" separator="and"
+                                     close=")"
+                                     index="index">
+                                <if test="res.type == 1">
+                                    rr1.resource_id = #{res.id}
+                                </if>
+                                <if test="res.type == 2">
+                                    <choose>
+                                        <when test="res.id!=null and res.id!=''">
+                                            rr2.resource_id = #{res.id}
+                                        </when>
+                                        <otherwise>
+                                            rr2.resource_id is null
+                                        </otherwise>
+                                    </choose>
+                                </if>
+                                <if test="res.type == 3">
+                                    <choose>
+                                        <when test="res.id!=null and res.id!=''">
+                                            rr3.resource_id = #{res.id}
+                                        </when>
+                                        <otherwise>
+                                            rr3.resource_id is null
+                                        </otherwise>
+                                    </choose>
+                                </if>
+                                <if test="res.type == 4">
+                                    rr4.resource_id = #{res.id}
+                                </if>
+                            </foreach>
+                        </trim>
+                        or
+                        <trim prefix="(" prefixOverrides="and" suffix=")">
+                            <foreach collection="item.group" item="res" open="(" separator="and"
+                                     close=")"
+                                     index="index">
+                                <if test="res.type == 1">
+                                    rr1.resource_id = #{res.id}
+                                </if>
+                                <if test="res.type == 2">
+                                    <choose>
+                                        <when test="res.id!=null and res.id!=''">
+                                            rr2.resource_id = #{res.id}
+                                        </when>
+                                        <otherwise>
+                                            rr2.resource_id is null
+                                        </otherwise>
+                                    </choose>
+                                </if>
+                                <if test="res.type == 3">
+                                    rr3.resource_id is null
+                                </if>
+                                <if test="res.type == 4">
+                                    rr4.resource_id = #{res.id}
+                                </if>
+                            </foreach>
+                        </trim>
+                        or
+                        <trim prefix="(" prefixOverrides="and" suffix=")">
+                            <foreach collection="item.group" item="res" open="(" separator="and"
+                                     close=")"
+                                     index="index">
+                                <if test="res.type == 1">
+                                    rr1.resource_id = #{res.id}
+                                </if>
+                                <if test="res.type == 2">
+                                    rr2.resource_id is null
+                                </if>
+                                <if test="res.type == 3">
+                                    rr3.resource_id is null
+                                </if>
+                                <if test="res.type == 4">
+                                    rr4.resource_id = #{res.id}
+                                </if>
+                            </foreach>
+                        </trim>
+                        or
+                        <trim prefix="(" prefixOverrides="and" suffix=")">
+                            <foreach collection="item.group" item="res" open="(" separator="and"
+                                     close=")"
+                                     index="index">
+                                <if test="res.type == 1">
+                                    rr1.resource_id = '999'
+                                </if>
+                                <if test="res.type == 2">
+                                    rr2.resource_id is null
+                                </if>
+                                <if test="res.type == 3">
+                                    rr3.resource_id is null
+                                </if>
+                                <if test="res.type == 4">
+                                    rr4.resource_id = #{res.id}
+                                </if>
+                            </foreach>
+                        </trim>
+                    </if>
+                </foreach>
+            </trim>
+        </if>
+    </select>
+    <select id="getActorAssIdsByAssUserIdAndRoleId"
+            parameterType="java.util.Map"
+            resultType="int">
+        select aa.id as id
+        from iy_m_actor_assignment_info info
+        left join iy_m_actor_assignment aa
+        on aa.id = info.actor_ass_id
+        where aa.role_id = #{roleId}
+        and info.ass_user_id = #{assUserId}
+        and status = 0
+        <if test="id != null">
+            and info.actor_ass_id!=#{id}
+        </if>
+    </select>
+</mapper>

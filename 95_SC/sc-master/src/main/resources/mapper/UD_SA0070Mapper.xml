@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.SA0070Mapper">
+    <resultMap id="PriceResultMap" type="cn.com.bbut.iy.itemmaster.dto.priceChange.Price">
+        <id column="change_id" jdbcType="VARCHAR" property="changeId" />
+        <id column="serial_no" jdbcType="VARCHAR" property="serialNo" />
+        <result column="acc_date" jdbcType="VARCHAR" property="accDate" />
+        <result column="store_cd" jdbcType="VARCHAR" property="storeCd" />
+        <result column="article_id" jdbcType="VARCHAR" property="articleId" />
+        <result column="article_name" jdbcType="VARCHAR" property="articleName" />
+        <result column="spec" jdbcType="VARCHAR" property="spec" />
+        <result column="unit_name" jdbcType="VARCHAR" property="unitName" />
+        <result column="sale_status" jdbcType="VARCHAR" property="saleStatus" />
+        <result column="barcode" jdbcType="VARCHAR" property="barcode" />
+        <result column="old_price" jdbcType="NUMERIC" property="oldPrice" />
+        <result column="new_price" jdbcType="NUMERIC" property="newPrice" />
+        <result column="sale_price" jdbcType="NUMERIC" property="salePrice" />
+        <result column="delta_serial_no" jdbcType="INTEGER" property="deltaSerialNo" />
+        <result column="create_date" jdbcType="VARCHAR" property="createDate" />
+        <result column="create_user_id" jdbcType="VARCHAR" property="createUserId" />
+        <result column="create_ymd" jdbcType="CHAR" property="createYmd" />
+        <result column="create_hms" jdbcType="CHAR" property="createHms" />
+    </resultMap>
+    <resultMap id="PriceStsResultMap" type="cn.com.bbut.iy.itemmaster.dto.priceChange.PriceSts">
+        <result column="lifecycle_status" jdbcType="VARCHAR" property="lifecycleStatus" />
+        <result column="article_type" jdbcType="VARCHAR" property="articleType" />
+        <result column="store_price_chg_flg" jdbcType="VARCHAR" property="storePriceChgFlg" />
+    </resultMap>
+    <!--  <sql id="Base_Column_List">-->
+    <!--    change_id, serial_no, acc_date, store_cd, article_id, barcode, old_price, new_price, -->
+    <!--    delta_serial_no, create_user_id, create_ymd, create_hms, update_user_id, update_ymd, -->
+    <!--    update_hms, update_screen_id, update_ip_address, nr_update_flg, nr_ymd, nr_hms-->
+    <!--  </sql>-->
+
+    <select id="getBarcode" resultMap="PriceResultMap" parameterType="string">
+        select barcode  from ma8130
+         where article_id = #{articleId}
+  </select>
+
+    <select id="getArticleId" resultType="string" parameterType="string">
+        select article_id  from ma8130
+         where barcode = #{barcode}
+  </select>
+
+    <select id="getPriceSts" resultMap="PriceStsResultMap" parameterType="string">
+        select lifecycle_status,article_type,store_price_chg_flg from ma1100 where article_id=#{articleId}
+        and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN effective_start_date AND effective_end_date
+  </select>
+
+    <select id="getChangeId" resultType="string" parameterType="string">
+        select distinct change_id from sa0070 where change_id=#{changeId}
+  </select>
+
+    <select id="getNewPrice" resultType="java.math.BigDecimal" parameterType="string">
+        select
+            new_price
+        from
+            sa0070
+        where
+            article_id=#{articleId}
+            and store_cd=#{storeCd}
+            and acc_date=#{effectiveDate}
+        order by
+            create_ymd,
+            create_hms DESC
+        limit 1
+  </select>
+
+    <select id="getArticleName" resultType="string">
+        select article_name from ma1100
+        where article_id in(#{articleId},
+                    (select article_id from ma1140 where
+                    barcode = #{articleId}
+                    <![CDATA[
+                    and effective_start_date <= #{businessDate,jdbcType=VARCHAR}
+                    and effective_end_date >= #{businessDate,jdbcType=VARCHAR}
+                    ]]>
+                    )
+                )
+        <![CDATA[
+        and effective_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and effective_end_date >= #{businessDate,jdbcType=VARCHAR}
+        ]]>
+        limit 1
+  </select>
+
+    <select id="getPrice" resultMap="PriceResultMap">
+        select DISTINCT
+            ma8050.article_id,
+            ma8050.article_name,
+            ma8050.spec,
+            ma0220.unit_name,
+            ma8050.price as sale_price,
+            ma8050.price as old_price
+        from
+            ma8050,
+            ma0220
+        where
+            ma8050.article_id=#{articleId}
+            and ma8050.unit=ma0220.unit_id
+        limit 1;
+    </select>
+
+    <select id="getBarcodeByInfo" resultType="String">
+        select ma11.default_barcode barcode from ma1110 ma11,ma2240 ma22
+        where ma11.vendor_id = ma22.vendor_id
+        and ma11.article_id = ma22.article_id
+        and #{businessDate,jdbcType=VARCHAR} between ma11.effective_start_date and effective_end_date
+        and ma22.article_id = #{articleId,jdbcType=VARCHAR}
+        and ma22.store_cd = #{storeCd,jdbcType=VARCHAR}
+        and ma11.structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
+            (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd,jdbcType=VARCHAR}))
+    </select>
+
+    <select id="getList" parameterType="cn.com.bbut.iy.itemmaster.dto.priceChange.PriceDetailParamDto" resultType="cn.com.bbut.iy.itemmaster.dto.priceChange.PriceDetailGridDto">
+        select sa0070.acc_date,sa0070.change_id,sa0070.barcode,sa0070.article_id,
+        ma1100.article_name,ma1100.spec,ma0220.unit_name,sa0070.old_price,
+        sa0070.new_price,sa0070.create_ymd,sa0070.create_hms,sa0070.create_user_id,
+        ma4200.emp_name create_user_name,
+        ma1000.store_cd,ma1000.store_name
+        from ma1100,ma0220,ma1000,sa0070 left join ma4200 on ma4200.emp_num_id = sa0070.create_user_id
+        where
+        sa0070.article_id=ma1100.article_id
+        and sa0070.new_price <![CDATA[<>]]> -1
+        and ma1000.store_cd = sa0070.store_cd
+        and sa0070.acc_date BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
+        and ma1100.sales_unit_id=ma0220.unit_id
+        and ma1100.effective_end_date = (select max(ma1100.effective_end_date) from ma1100 where ma1100.article_id =sa0070.article_id)
+        and sa0070.store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="articleName != null and articleName != ''">
+            and lower(ma1100.article_name) like lower(CONCAT('%',#{articleName},'%'))
+        </if>
+        <if test="articleId != null and articleId != ''">
+            and lower(sa0070.article_id) like lower(CONCAT('%',#{articleId},'%'))
+        </if>
+        <if test="barcode != null and barcode != ''">
+            and lower(sa0070.barcode) like lower(CONCAT('%',#{barcode},'%'))
+        </if>
+        <if test="startDate != null and startDate != ''">
+            <![CDATA[
+                and sa0070.acc_date >= #{startDate}
+                ]]>
+        </if>
+        <if test="endDate != null and endDate != ''">
+            <![CDATA[
+                    and sa0070.acc_date <= #{endDate}
+                ]]>
+        </if>
+        <if test="startChangeId != null and startChangeId != ''">
+            <![CDATA[
+                    and sa0070.change_id >= #{startChangeId}
+                    ]]>
+        </if>
+        <if test="endChangeId != null and endChangeId != ''">
+            <![CDATA[
+                    and sa0070.change_id <= #{endChangeId}
+                ]]>
+        </if>
+        <if test="createUserId != null and createUserId != ''">
+            and (
+            lower(sa0070.create_user_id) like lower(CONCAT('%',#{createUserId},'%'))
+            or lower(emp_name) like lower(CONCAT('%',#{createUserId},'%'))
+            )
+        </if>
+        order by acc_date,change_id,serial_no
+        <if test="flg and limitStart >= 0">
+            limit ${limitEnd} offset ${limitStart}
+        </if>
+    </select>
+
+    <select id="getListCount" parameterType="cn.com.bbut.iy.itemmaster.dto.priceChange.PriceDetailParamDto" resultType="long">
+        select count(*)
+        from ma1100,ma0220,ma1000,sa0070 left join ma4200 on ma4200.emp_num_id = sa0070.create_user_id
+        where
+        sa0070.article_id=ma1100.article_id
+        and sa0070.new_price <![CDATA[<>]]> -1
+        and ma1000.store_cd = sa0070.store_cd
+        and sa0070.acc_date BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
+        and ma1100.sales_unit_id=ma0220.unit_id
+        and ma1100.effective_end_date = (select max(ma1100.effective_end_date) from ma1100 where ma1100.article_id =sa0070.article_id)
+        and sa0070.store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="articleName != null and articleName != ''">
+            and lower(ma1100.article_name) like lower(CONCAT('%',#{articleName},'%'))
+        </if>
+        <if test="articleId != null and articleId != ''">
+            and lower(sa0070.article_id) like lower(CONCAT('%',#{articleId},'%'))
+        </if>
+        <if test="barcode != null and barcode != ''">
+            and lower(sa0070.barcode) like lower(CONCAT('%',#{barcode},'%'))
+        </if>
+        <if test="startDate != null and startDate != ''">
+            <![CDATA[
+                and sa0070.acc_date >= #{startDate}
+                ]]>
+        </if>
+        <if test="endDate != null and endDate != ''">
+            <![CDATA[
+                    and sa0070.acc_date <= #{endDate}
+                ]]>
+        </if>
+        <if test="startChangeId != null and startChangeId != ''">
+            <![CDATA[
+                    and sa0070.change_id >= #{startChangeId}
+                    ]]>
+        </if>
+        <if test="endChangeId != null and endChangeId != ''">
+            <![CDATA[
+                and sa0070.change_id <= #{endChangeId}
+            ]]>
+        </if>
+        <if test="createUserId != null and createUserId != ''">
+            and (
+            lower(sa0070.create_user_id) like lower(CONCAT('%',#{createUserId},'%'))
+            or lower(emp_name) like lower(CONCAT('%',#{createUserId},'%'))
+            )
+        </if>
+
+    </select>
+</mapper>

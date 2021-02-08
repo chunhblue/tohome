@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.MA4305Mapper">
+
+  <select id="getList" resultType="cn.com.bbut.iy.itemmaster.dto.inform.Ma4305DetailGridDto">
+    select
+    MA4305.inform_cd, MA4305.role_id,r.name role_name
+    from MA4305,iy_m_role r
+    where
+    r.id = MA4305.role_id
+    <if test="informCd != null and informCd !=''">
+      and MA4305.inform_cd = #{informCd,jdbcType=VARCHAR}
+    </if>
+    order by MA4305.role_id
+  </select>
+</mapper>

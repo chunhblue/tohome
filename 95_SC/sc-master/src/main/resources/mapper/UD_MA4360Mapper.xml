@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.MA4360Mapper">
+
+  <select id="getList" resultType="cn.com.bbut.iy.itemmaster.dto.ma4360.Ma4360DetailGridDto">
+    select ma4360.voucher_cd, ma4360.article_id,ma4360.barcode,
+        COALESCE(ma4360.sale_price,0) sale_price,
+        COALESCE(ma4360.article_qty,0) article_qty,
+        COALESCE(ma4360.unit_qty,0) unit_qty,
+        ma1100.article_name,ma1100.spec,
+        ma0220.unit_name as uom,
+         COALESCE(COALESCE(ma4360.sale_price,0)*COALESCE(ma4360.article_qty,0),0) as sale_price_amount
+    from ma4350,ma4360,ma1100,ma0220
+    where
+    ma4360.voucher_cd = #{voucherCd,jdbcType=VARCHAR}
+    and ma4360.voucher_cd = ma4350.voucher_cd
+    and ma4360.article_id = ma1100.article_id
+    <![CDATA[
+        and ma1100.effective_start_date <= ma4350.sale_date
+        and ma1100.effective_end_date >= ma4350.sale_date
+    ]]>
+    and ma1100.sales_unit_id = ma0220.unit_id
+  </select>
+</mapper>

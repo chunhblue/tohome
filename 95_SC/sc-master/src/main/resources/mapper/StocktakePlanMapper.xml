@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.StocktakePlanMapper" >
+
+    <resultMap id="BaseResultMap" type="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100DTO">
+        <result column="pi_date" property="piDate"></result>
+        <result column="pi_cd" property="piCd"></result>
+        <result column="pi_start_time" property="piStartTime"></result>
+        <result column="pi_end_time" property="piEndTime"></result>
+        <result column="store_cd" property="storeCd"></result>
+        <result column="store_name" property="storeName"></result>
+        <result column="pi_status" property="piStatus"></result>
+        <result column="pi_type" property="piType"></result>
+        <result column="pi_status_code" property="piStatusCode"></result>
+        <result column="pi_type_code" property="piTypeCode"></result>
+        <result column="pi_method" property="piMethod"></result>
+        <result column="review_status" property="reviewStatus"></result>
+        <result column="remarks" property="remarks"></result>
+        <result column="create_user_id" property="createUserId"></result>
+        <result column="create_ymd" property="createYmd"></result>
+        <result column="update_user_id" property="updateUserId"></result>
+        <result column="export_flg" property="exportFlg"></result>
+    </resultMap>
+
+    <resultMap id="Pi0110ResultMap" type="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0110DTO">
+        <result column="pi_date" property="piDate"></result>
+        <result column="pi_cd" property="piCd"></result>
+        <result column="pma_cd" property="pmaCd"></result>
+        <result column="pma_name" property="pmaName"></result>
+    </resultMap>
+
+    <resultMap id="BaseItemResult" type="cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO">
+        <result column="article_id" property="articleId"></result>
+        <result column="article_name" property="articleName"></result>
+        <result column="barcode" property="barcode"></result>
+        <result column="sales_unit_id" property="uom"></result>
+        <result column="spec" property="spec"></result>
+        <result column="real_time_qty" property="realTimeQty"></result>
+        <result column="sale_qty_total" property="saleQtyTotal"></result>
+        <result column="customer_return_qty_total" property="customerReturnQtyTotal"></result>
+        <result column="scrap_qty" property="scrapQty"></result>
+        <result column="allocation_qty_reduce" property="allocationQtyReduce"></result>
+        <result column="allocation_qty_add" property="allocationQtyAdd"></result>
+        <result column="receive_total_qty" property="receiveTotalQty"></result>
+        <result column="store_return_qty" property="storeReturnQty"></result>
+    </resultMap>
+
+    <!--设置 超过了 end time 没有submit的 计划为 过期, 根据业务日期为准-->
+    <update id="updateStocktakingPlanExpired" parameterType="string">
+        UPDATE PI0100
+            SET pi_status = '04'
+        WHERE
+        pi_cd IN (
+            SELECT
+                A.pi_cd
+            FROM
+                PI0100 A
+            WHERE
+                <![CDATA[ CONCAT(A.pi_date,A.pi_end_time)  < concat(#{bsDate},to_char(now(),'hh24miss')) ]]>
+                AND A.review_status IS NULL
+                AND A.pi_status BETWEEN '01' AND '02'
+        )
+    </update>
+
+    <select id="getPi0125CountByPicd" resultType="int">
+        SELECT
+            COUNT(p.pi_cd)
+        FROM
+            pi0125 p
+        WHERE
+            p.pi_cd = #{piCd}
+            AND p.pi_date = #{piDate}
+            AND p.store_cd = #{storeCd}
+        LIMIT 1;
+    </select>
+
+    <delete id="deletePi0125ByPicd">
+        DELETE FROM
+            pi0125
+        WHERE
+            pi_cd = #{piCd}
+            AND pi_date = #{piDate}
+            AND store_cd = #{storeCd}
+    </delete>
+
+    <insert id="insertExportItemsToDB">
+        INSERT INTO pi0125 (
+            pi_cd,
+            pi_date,
+            store_cd,
+            article_id,
+            real_time_qty,
+            export_time
+        ) VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (
+            #{piCd,jdbcType=VARCHAR},
+            #{piDate,jdbcType=VARCHAR},
+            #{storeCd,jdbcType=VARCHAR},
+            #{item.articleId,jdbcType=VARCHAR},
+            #{item.realTimeQty,jdbcType=VARCHAR},
+            #{item.exportTime,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+
+    <update id="modifyPI0100ExportTime">
+        UPDATE pi0100
+        SET export_time = #{exportTime},
+            export_flg = '1'
+        WHERE
+            pi_cd = #{piCd}
+            and pi_date = #{piDate}
+            and store_cd = #{storeCd}
+    </update>
+
+    <update id="modifyPI0100StartTime">
+        UPDATE pi0100
+        SET pi_start_time = #{startTime}
+        WHERE
+            pi_cd = #{piCd}
+            and pi_date = #{piDate}
+            and store_cd = #{storeCd}
+    </update>
+
+    <update id="modifyPI0100EndTime">
+        UPDATE pi0100
+        SET pi_end_time = #{endTime}
+        WHERE
+            pi_cd = #{piCd}
+            and pi_date = #{piDate}
+            and store_cd = #{storeCd}
+    </update>
+
+    <select id="getAllItemDepartmentByStore" resultType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0110DTO">
+        SELECT DISTINCT
+            C.pma_cd,
+            C.pma_name
+        FROM
+            SK0000 A,
+            MA1100 B,
+            MA0080 C
+        WHERE
+            A.store_cd = #{storeCd}
+            AND A.effective_date = #{businessDate}
+            AND A.article_id = B.article_id
+            AND #{businessDate} BETWEEN B.effective_start_date AND B.effective_end_date
+            AND B.pma_cd = C.pma_cd
+    </select>
+
+    <select id="checkPicd" parameterType="java.lang.String" resultType="int">
+        SELECT
+            COUNT( P.pi_cd )
+        FROM
+            PI0100 P
+        WHERE
+            P.pi_cd = #{piCd};
+    </select>
+
+    <update id="updatePI0100" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100DTO">
+        UPDATE pi0100
+        SET remarks = #{pi0100.remarks},
+        update_user_id = #{pi0100.updateUserId},
+        update_ymd = #{pi0100.updateYmd},
+        update_hms = #{pi0100.updateHms}
+        WHERE
+            pi_cd = #{pi0100.piCd}
+            and pi_date = #{pi0100.piDate}
+    </update>
+
+    <delete id="deletePI0110" parameterType="java.lang.String">
+        DELETE FROM pi0110 WHERE pi_cd = #{piCd} and pi_date = #{piDate}
+    </delete>
+
+    <select id="getStocktakeParam" resultType="java.util.HashMap">
+        SELECT
+            c.code_value as codeValue,
+            c.code_name as codeName
+        FROM
+            cm9010 c
+        WHERE
+            c.code_type = #{type}
+            AND c.effective_sts = '10'
+        ORDER BY c.code_value ASC
+    </select>
+
+    <!--    获取盘点计划明细数据-->
+    <select id="getPI0110ByPrimary" resultMap="Pi0110ResultMap">
+        SELECT
+            p1.pi_cd,
+            p1.pi_date,
+            p1.pma_cd,
+            p1.pma_name
+        FROM
+            PI0110 P1
+        WHERE
+            P1.pi_cd = #{piCd}
+            AND P1.pi_date = #{piDate}
+    </select>
+
+    <!--    获取盘点计划主档数据-->
+    <select id="getPI0100ByPrimary" resultMap="BaseResultMap">
+        SELECT
+            p1.pi_date,
+            p1.pi_cd,
+            p1.pi_start_time,
+            p1.pi_end_time,
+            p1.store_cd,
+            concat(p1.store_cd,' ',p2.store_name) store_name,
+            p1.pi_method,
+            p1.pi_status,
+            p1.pi_type,
+            p1.remarks,
+            M1.emp_name AS create_user_id,
+            M2.emp_name AS update_user_id,
+            p1.review_status,
+            p1.export_flg
+        FROM
+            PI0100 P1
+            LEFT JOIN MA4200 M1 ON P1.create_user_id = M1.emp_num_id
+            LEFT JOIN MA4200 M2 ON P1.update_user_id = M2.emp_num_id,
+            ma1000 p2,
+            cm9060 p3
+        WHERE
+            P1.pi_cd = #{piCd}
+            AND P1.pi_date = #{piDate}
+            and p3.sp_id = '0000'
+            and p1.store_cd = p2.store_cd
+            and p3.sp_value BETWEEN p2.effective_start_date and p2.effective_end_date
+    </select>
+
+    <select id="getPmaList" parameterType="int" resultType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0110DTO">
+        SELECT
+            m.pma_cd AS pmaCd,
+            m.pma_name AS pmaName,
+            n.num
+        FROM
+            ma0080 m,
+            (SELECT COUNT(pma_cd) as num FROM MA0080 WHERE effective_sts = '10') n
+        WHERE
+            m.effective_sts = '10'
+        LIMIT ${rows} OFFSET ${limit}
+    </select>
+
+    <select id="selectCountByParam" resultType="int" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100ParamDTO">
+        SELECT
+        count(p.pi_date)
+        FROM
+        pi0100 p LEFT JOIN MA4200 oper ON oper.emp_num_id = p.create_user_id,
+        ma1000 p1,
+        cm9060 p2,
+        (SELECT c.code_value,c.code_name FROM CM9010 C WHERE C.code_type = '00510' AND C.effective_sts = '10') C1,
+        (SELECT c.code_value,c.code_name FROM CM9010 C WHERE C.code_type = '00530' AND C.effective_sts = '10') C2
+        <where>
+            p2.sp_id = '0000'
+            and p.store_cd = p1.store_cd
+            and p2.sp_value BETWEEN p1.effective_start_date and p1.effective_end_date
+            and p.pi_status = c2.code_value
+            and p.pi_type = c1.code_value
+            AND P.pi_account_flg = '0'
+            AND P.pi_first_finish_flg = '0'
+            AND P.pi_commit_flg = '0'
+            and P.store_cd IN
+            <foreach item="store" index="index" collection="pi0100Param.stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            <if test="pi0100Param.piCd != null and pi0100Param.piCd != ''">
+                AND lower(p.pi_cd) like lower(CONCAT('%',#{pi0100Param.piCd},'%'))
+            </if>
+            <if test="pi0100Param.piStatus != null and pi0100Param.piStatus != ''">
+                and P.pi_status = #{pi0100Param.piStatus}
+            </if>
+            <if test="pi0100Param.piStartDate!=null and pi0100Param.piStartDate!='' and pi0100Param.piEndDate!=null and pi0100Param.piEndDate!=''">
+                and P.pi_date BETWEEN #{pi0100Param.piStartDate} AND #{pi0100Param.piEndDate}
+            </if>
+        </where>
+    </select>
+
+    <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100ParamDTO" resultMap="BaseResultMap">
+        SELECT
+        p.pi_date,
+        p.pi_cd,
+        p.pi_start_time,
+        p.pi_end_time,
+        p1.store_cd,
+        p1.store_name,
+        p.pi_status as pi_status_code,
+        p.pi_type as pi_type_code,
+        c2.code_name as pi_status,
+        c1.code_name as pi_type,
+        p.review_status,
+        p.remarks,
+        p.export_flg,
+        oper.emp_name as create_user_id,
+        CONCAT(P.create_ymd,P.create_hms) as create_ymd
+        FROM
+        pi0100 p LEFT JOIN MA4200 oper ON oper.emp_num_id = p.create_user_id,
+        ma1000 p1,
+        cm9060 p2,
+        (SELECT c.code_value,c.code_name FROM CM9010 C WHERE C.code_type = '00510' AND C.effective_sts = '10') C1,
+        (SELECT c.code_value,c.code_name FROM CM9010 C WHERE C.code_type = '00530' AND C.effective_sts = '10') C2
+        <where>
+            p2.sp_id = '0000'
+            and p.store_cd = p1.store_cd
+            and p2.sp_value BETWEEN p1.effective_start_date and p1.effective_end_date
+            and p.pi_status = c2.code_value
+            and p.pi_type = c1.code_value
+            AND P.pi_account_flg = '0'
+            AND P.pi_first_finish_flg = '0'
+            AND P.pi_commit_flg = '0'
+            and P.store_cd IN
+            <foreach item="store" index="index" collection="pi0100Param.stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            <if test="pi0100Param.piCd != null and pi0100Param.piCd != ''">
+                AND lower(p.pi_cd) like lower(CONCAT('%',#{pi0100Param.piCd},'%'))
+            </if>
+            <if test="pi0100Param.piStatus != null and pi0100Param.piStatus != ''">
+                and P.pi_status = #{pi0100Param.piStatus}
+            </if>
+            <if test="pi0100Param.piStartDate!=null and pi0100Param.piStartDate!='' and pi0100Param.piEndDate!=null and pi0100Param.piEndDate!=''">
+                and P.pi_date BETWEEN #{pi0100Param.piStartDate} AND #{pi0100Param.piEndDate}
+            </if>
+        </where>
+        ORDER BY P.pi_date DESC
+        <if test="pi0100Param.flg">
+            LIMIT ${pi0100Param.rows} OFFSET ${pi0100Param.limitStart}
+        </if>
+    </select>
+
+    <insert id="savePI0100" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100DTO">
+    INSERT INTO PI0100 (
+        pi_cd,
+        pi_date,
+        store_cd,
+        pi_type,
+        pi_method,
+        pi_status,
+        pi_start_time,
+        pi_end_time,
+        remarks,
+        create_user_id,
+        create_ymd,
+        create_hms,
+        pi_account_flg,
+        pi_first_finish_flg,
+        pi_commit_flg)
+        VALUES
+            (
+            #{pi0100.piCd},
+            #{pi0100.piDate},
+            #{pi0100.storeCd},
+            #{pi0100.piType},
+            #{pi0100.piMethod},
+            #{pi0100.piStatus},
+            #{pi0100.piStartTime},
+            #{pi0100.piEndTime},
+            #{pi0100.remarks},
+            #{pi0100.createUserId},
+            #{pi0100.createYmd},
+            #{pi0100.createHms},
+            '0',
+            '0',
+            '0'
+             )
+  </insert>
+
+    <insert id="savePI0110" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0110DTO">
+        INSERT INTO PI0110 (
+        pi_cd,
+        pi_date,
+        pma_cd,
+        pma_name)
+        VALUES
+        <foreach collection="pi0110List" item="item" index="index" separator="," >
+            (
+            #{item.piCd,jdbcType=VARCHAR},
+            #{item.piDate,jdbcType=VARCHAR},
+            #{item.pmaCd,jdbcType=VARCHAR},
+            #{item.pmaName,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+
+    <select id="queryExport" resultMap="BaseItemResult">
+    SELECT DISTINCT
+        B.article_id,
+        B.article_name,
+        D.default_barcode AS barcode,
+        B.spec,
+        B.sales_unit_id
+    FROM
+        PI0110 A,
+        MA1100 B,
+        MA1110 D,
+        MA1000 E,
+        CM9060 F,
+		MA2240 G
+    WHERE
+        A.pi_cd = #{piCd}
+        AND A.pi_date = #{piDate}
+        AND F.sp_id = '0000'
+        AND A.pma_cd = B.pma_cd
+        AND F.sp_value BETWEEN B.effective_start_date AND B.effective_end_date
+        AND B.article_id = D.article_id
+        AND G.vendor_id = D.vendor_id
+        AND F.sp_value BETWEEN D.effective_start_date AND D.effective_end_date
+        AND E.store_cd = #{storeCd}
+        AND F.sp_value BETWEEN E.effective_start_date AND E.effective_end_date
+        AND D.structure_cd = E.zo_cd
+        AND G.article_id = B.article_id
+        AND G.store_cd = #{storeCd}
+</select>
+
+    <select id="getPrintData" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100ParamDTO" resultMap="BaseResultMap">
+        SELECT
+        p.pi_date,
+        p.pi_cd,
+        p.pi_start_time,
+        p.pi_end_time,
+        p1.store_cd,
+        p1.store_name,
+        p.pi_status as pi_status_code,
+        p.pi_type as pi_type_code,
+        c2.code_name as pi_status,
+        c1.code_name as pi_type,
+        p.review_status,
+        p.remarks,
+        p.export_flg,
+        oper.emp_name as create_user_id,
+        CONCAT(P.create_ymd,P.create_hms) as create_ymd
+        FROM
+        pi0100 p LEFT JOIN MA4200 oper ON oper.emp_num_id = p.create_user_id,
+        ma1000 p1,
+        cm9060 p2,
+        (SELECT c.code_value,c.code_name FROM CM9010 C WHERE C.code_type = '00510' AND C.effective_sts = '10') C1,
+        (SELECT c.code_value,c.code_name FROM CM9010 C WHERE C.code_type = '00530' AND C.effective_sts = '10') C2
+        <where>
+            p2.sp_id = '0000'
+            and p.store_cd = p1.store_cd
+            and p2.sp_value BETWEEN p1.effective_start_date and p1.effective_end_date
+            and p.pi_status = c2.code_value
+            and p.pi_type = c1.code_value
+            AND P.pi_account_flg = '0'
+            AND P.pi_first_finish_flg = '0'
+            AND P.pi_commit_flg = '0'
+            and P.store_cd IN
+            <foreach item="store" index="index" collection="pi0100Param.stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            <if test="pi0100Param.piCd != null and pi0100Param.piCd != ''">
+                AND lower(p.pi_cd) like lower(CONCAT('%',#{pi0100Param.piCd},'%'))
+            </if>
+            <if test="pi0100Param.piStatus != null and pi0100Param.piStatus != ''">
+                and P.pi_status = #{pi0100Param.piStatus}
+            </if>
+            <if test="pi0100Param.piStartDate!=null and pi0100Param.piStartDate!='' and pi0100Param.piEndDate!=null and pi0100Param.piEndDate!=''">
+                and P.pi_date BETWEEN #{pi0100Param.piStartDate} AND #{pi0100Param.piEndDate}
+            </if>
+        </where>
+        ORDER BY P.pi_date DESC
+    </select>
+
+    <insert id="insertAudit">
+        insert into pi0105(pi_cd) values (#{piCd,jdbcType=VARCHAR})
+        ON CONFLICT (pi_cd) DO NOTHING;
+    </insert>
+
+    <select id="getDayOfEnd" resultType="Integer">
+        SELECT pi_date FROM pi0100
+        WHERE
+            pi_account_flg = '0'
+            AND pi_first_finish_flg = '0'
+            AND pi_commit_flg = '0'
+            AND store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND pi_date > #{piDate,jdbcType=VARCHAR}
+        ORDER BY
+            pi_date ASC
+    </select>
+</mapper>

@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.SuspendSaleMapper">
+
+    <select id="getStoreListByDistrictCd" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" parameterType="java.lang.String" >
+        SELECT
+            ma1.structure_cd AS k,
+            ma1.structure_name AS v,
+            ma11.default_barcode as hidek
+        FROM
+            MA0020 ma1
+            left join
+            (select vendor_id,default_barcode from ma1110
+            where
+            article_id = #{articleId,jdbcType=VARCHAR}
+            and #{accDate} between ma1110.effective_start_date and effective_end_date
+            and ma1110.structure_cd = #{cityCd,jdbcType=VARCHAR})
+            ma11 on
+            ma11.vendor_id = (
+                select vendor_id from ma2240 where store_cd = ma1.structure_cd
+                and article_id = #{articleId,jdbcType=VARCHAR})
+        WHERE
+            ma1.level = '3'
+            AND ma1.admin_structure_cd = #{districtCd}
+            AND ma1.structure_cd not in
+            (SELECT sa.store_cd FROM sa0070 sa WHERE sa.acc_date = #{accDate} and sa.article_id = #{articleId} and sa.new_price = -1)
+    </select>
+
+    <select id="getBarcode" resultType="String">
+         select default_barcode from ma1110 where
+         article_id = #{articleId,jdbcType=VARCHAR}
+         and vendor_id = (select vendor_id from ma2240 where store_cd = #{storeCd,jdbcType=VARCHAR} and article_id = #{articleId,jdbcType=VARCHAR})
+         AND structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
+                (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd,jdbcType=VARCHAR}))
+    </select>
+
+    <select id="selectListByLevel0" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" parameterType="java.lang.String" >
+        SELECT DISTINCT
+            ma1.structure_cd k,
+            CONCAT(ma1.structure_cd,' ',ma1.structure_name) AS v
+        FROM
+            MA0020 ma1,
+            (
+                SELECT
+                    ma1.structure_cd,
+                    ma1.admin_structure_cd
+                FROM
+                    MA0020 MA1
+                WHERE
+                    MA1.structure_cd IN (
+                        SELECT DISTINCT
+                            admin_structure_cd
+                        FROM
+                            MA0020 ma1, MA8050 ma2
+                        WHERE
+                            ma1.LEVEL = '1'
+                        AND
+                            ma2.article_id = #{articleId}
+                        AND ma2.structure_cd = ma1.structure_cd )
+            ) T
+        WHERE
+            ma1.effective_sts = '10'
+            AND ma1.LEVEL = '0'
+            AND (ma1.structure_cd = T.structure_cd or ma1.structure_cd = t.admin_structure_cd)
+        <if test="v!=null and v!=''">
+            AND (
+            lower(ma1.structure_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(ma1.structure_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ORDER BY
+            ma1.structure_cd
+    </select>
+
+    <select id="selectListByLevel1" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" parameterType="java.lang.String" >
+        SELECT DISTINCT
+            ma1.structure_cd k,
+            CONCAT( ma1.structure_cd, ' ', ma1.structure_name ) AS v
+        FROM
+            MA0020 ma1,
+            MA8050 ma2
+        WHERE
+            ma1.effective_sts = '10'
+            AND ma1.LEVEL = '1'
+            <choose>
+                <when test="adminId=='000001'.toString()">
+                    AND ma1.admin_structure_cd IN ( SELECT structure_cd FROM MA0020 WHERE admin_structure_cd = #{adminId} )
+                </when>
+                <otherwise>
+                    AND ma1.admin_structure_cd = #{adminId,jdbcType=VARCHAR}
+                </otherwise>
+            </choose>
+            AND ma2.article_id = #{articleId}
+            AND ma2.structure_cd = ma1.structure_cd
+            AND ma1.structure_cd in
+            (SELECT distinct ma.admin_structure_cd FROM ma0020 ma WHERE ma.LEVEL = '2' AND ma.structure_cd IN
+                (SELECT DISTINCT ma.admin_structure_cd FROM ma0020 ma WHERE ma.LEVEL = '3' AND ma.structure_cd NOT IN
+                    (SELECT DISTINCT sa.store_cd FROM sa0070 sa,ma0020 ma WHERE ma.structure_cd = sa.store_cd AND sa.article_id = #{articleId}
+                        AND sa.acc_date = #{accDate} AND sa.new_price = - 1)))
+        <if test="v!=null and v!=''">
+            AND (
+            lower(ma1.structure_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(ma1.structure_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ORDER BY
+            ma1.structure_cd
+    </select>
+
+    <select id="selectListByLevel2" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" parameterType="java.lang.String" >
+        SELECT DISTINCT
+            ma1.structure_cd k,
+            CONCAT( ma1.structure_cd, ' ', ma1.structure_name ) AS v
+        FROM
+            MA0020 ma1,
+            MA8050 ma2
+        WHERE
+            ma1.effective_sts = '10'
+            AND ma1.LEVEL = '2'
+            AND ma1.admin_structure_cd = #{adminId}
+            AND ma2.article_id = #{articleId}
+            AND ma2.structure_cd = ma1.admin_structure_cd
+            AND ma1.structure_cd in
+            (SELECT DISTINCT ma.admin_structure_cd FROM ma0020 ma WHERE ma.level = '3' AND ma.structure_cd NOT IN
+                (SELECT DISTINCT sa.store_cd FROM sa0070 sa, ma0020 ma WHERE ma.structure_cd = sa.store_cd
+                AND sa.article_id = #{articleId} AND sa.acc_date = #{accDate} AND sa.new_price = -1))
+        <if test="v!=null and v!=''">
+            AND (
+            lower(ma1.structure_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(ma1.structure_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ORDER BY
+            ma1.structure_cd
+    </select>
+
+    <select id="selectListByLevel3" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" parameterType="java.lang.String" >
+        SELECT DISTINCT
+            ma1.structure_cd K,
+            CONCAT ( ma1.structure_cd, ' ', ma1.structure_name,' ',ma2.store_name_en
+             ) AS v
+        FROM
+            MA0020 ma1,
+            ma1000 ma2,
+            sk0000_today st
+        WHERE
+            ma1.effective_sts = '10'
+            AND ma1.LEVEL = '3'
+            AND ma1.structure_cd=ma2.store_cd
+            AND ma1.admin_structure_cd = #{adminId}
+            AND st.effective_date = #{accDate}
+            AND st.article_id = #{articleId}
+            AND ma1.structure_cd = st.store_cd
+            AND ma1.structure_cd NOT IN
+            (SELECT DISTINCT sa.store_cd FROM sa0070 sa WHERE sa.article_id = #{articleId} and sa.acc_date = #{accDate} and sa.new_price = -1)
+        <if test="v!=null and v!=''">
+            AND (
+            lower(ma1.structure_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(ma1.structure_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ORDER BY
+            ma1.structure_cd
+    </select>
+
+    <select id="getList" parameterType="cn.com.bbut.iy.itemmaster.dto.priceChange.PriceDetailParamDto"
+            resultType="cn.com.bbut.iy.itemmaster.dto.priceChange.PriceDetailGridDto">
+        select
+            sa0070.acc_date,
+            sa0070.change_id,
+            sa0070.barcode,
+            sa0070.article_id,
+            ma1100.article_name,
+            ma1100.spec,
+            ma0220.unit_name,
+            sa0070.create_ymd,
+            sa0070.create_hms,
+            sa0070.create_user_id,
+            ma4200.emp_name create_user_name,
+            ma1000.store_cd,
+            ma1000.store_name
+        from
+            ma1100,
+            ma0220,
+            ma1000,
+            sa0070 left join ma4200 on ma4200.emp_num_id = sa0070.create_user_id
+        where
+            sa0070.article_id=ma1100.article_id
+            and sa0070.new_price = -1
+            and ma1000.store_cd = sa0070.store_cd
+            and sa0070.acc_date BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
+            and ma1100.sales_unit_id=ma0220.unit_id
+            and ma1100.effective_end_date = (select max(ma1100.effective_end_date) from ma1100
+                where ma1100.article_id =sa0070.article_id)
+            and sa0070.store_cd IN
+            <foreach item="store" index="index" collection="stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+        <if test="articleName != null and articleName != ''">
+            and lower(ma1100.article_name) like lower(CONCAT('%',#{articleName},'%'))
+        </if>
+        <if test="articleId != null and articleId != ''">
+            and lower(sa0070.article_id) like lower(CONCAT('%',#{articleId},'%'))
+        </if>
+        <if test="barcode != null and barcode != ''">
+            and lower(sa0070.barcode) like lower(CONCAT('%',#{barcode},'%'))
+        </if>
+        <if test="startDate != null and startDate != ''">
+            <![CDATA[
+                and sa0070.acc_date >= #{startDate}
+                ]]>
+        </if>
+        <if test="endDate != null and endDate != ''">
+            <![CDATA[
+                    and sa0070.acc_date <= #{endDate}
+                ]]>
+        </if>
+        <if test="startChangeId != null and startChangeId != ''">
+            <![CDATA[
+                    and sa0070.change_id >= #{startChangeId}
+                    ]]>
+        </if>
+        <if test="endChangeId != null and endChangeId != ''">
+            <![CDATA[
+                    and sa0070.change_id <= #{endChangeId}
+                ]]>
+        </if>
+        <if test="createUserId != null and createUserId != ''">
+            and (
+            lower(sa0070.create_user_id) like lower(CONCAT('%',#{createUserId},'%'))
+            or emp_name like lower(CONCAT('%',#{createUserId},'%'))
+            )
+        </if>
+        order by acc_date,change_id,serial_no
+        <if test="flg and limitStart >= 0">
+            limit ${limitEnd} offset ${limitStart}
+        </if>
+    </select>
+
+    <select id="getListCount" parameterType="cn.com.bbut.iy.itemmaster.dto.priceChange.PriceDetailParamDto"
+            resultType="long">
+        select count(*)
+        from ma1100,ma0220,ma1000,sa0070 left join ma4200 on ma4200.emp_num_id = sa0070.create_user_id
+        where
+        sa0070.article_id=ma1100.article_id
+        and sa0070.new_price = -1
+        and ma1100.sales_unit_id=ma0220.unit_id
+        and ma1000.store_cd = sa0070.store_cd
+        and sa0070.acc_date BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
+        and ma1100.effective_end_date = (select max(ma1100.effective_end_date) from ma1100 where ma1100.article_id
+        =sa0070.article_id)and sa0070.store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="articleName != null and articleName != ''">
+            and lower(ma1100.article_name) like lower(CONCAT('%',#{articleName},'%'))
+        </if>
+        <if test="articleId != null and articleId != ''">
+            and lower(sa0070.article_id) like lower(CONCAT('%',#{articleId},'%'))
+        </if>
+        <if test="barcode != null and barcode != ''">
+            and lower(sa0070.barcode) like lower(CONCAT('%',#{barcode},'%'))
+        </if>
+        <if test="startDate != null and startDate != ''">
+            <![CDATA[
+                and sa0070.acc_date >= #{startDate}
+                ]]>
+        </if>
+        <if test="endDate != null and endDate != ''">
+            <![CDATA[
+                    and sa0070.acc_date <= #{endDate}
+                ]]>
+        </if>
+        <if test="startChangeId != null and startChangeId != ''">
+            <![CDATA[
+                    and sa0070.change_id >= #{startChangeId}
+                    ]]>
+        </if>
+        <if test="endChangeId != null and endChangeId != ''">
+            <![CDATA[
+                and sa0070.change_id <= #{endChangeId}
+            ]]>
+        </if>
+        <if test="createUserId != null and createUserId != ''">
+            and (
+            lower(sa0070.create_user_id) like lower(CONCAT('%',#{createUserId},'%'))
+            or emp_name like lower(CONCAT('%',#{createUserId},'%'))
+            )
+        </if>
+    </select>
+
+    <select id="getDocId" resultType="string" parameterType="string">
+        select distinct change_id from sa0070 where change_id=#{docId}
+  </select>
+
+    <insert id="insertSuppendSaleItem" parameterType="cn.com.bbut.iy.itemmaster.entity.sa0070.SA0070">
+    INSERT INTO
+    sa0070
+    (
+        change_id,
+        acc_date,
+        store_cd,
+        serial_no,
+        article_id,
+        barcode,
+        old_price,
+        new_price,
+        delta_serial_no,
+        create_user_id,
+        create_ymd,
+        create_hms
+    ) VALUES
+    (
+        #{changeId},
+        #{accDate},
+        #{storeCd},
+        #{serialNo},
+        #{articleId},
+        #{barcode},
+        #{oldPrice},
+        #{newPrice},
+        #{deltaSerialNo},
+        #{createUserId},
+        #{createYmd},
+        #{createHms}
+    )
+  </insert>
+
+</mapper>

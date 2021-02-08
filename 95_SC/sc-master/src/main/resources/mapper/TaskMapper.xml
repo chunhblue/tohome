@@ -1,0 +1,704 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.TaskMapper">
+	<select id="getApprovalType" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+    SELECT n_typeid k, c_type_name v
+    FROM t_audit_type
+    order by n_typeId
+  </select>
+
+  <select id="getInformTaskCount" resultType="int" parameterType="cn.com.bbut.iy.itemmaster.dto.task.TodoTaskParamDto">
+	  select
+	  count(*)
+	  from ma4300,ma4310,ma1000,(
+	  SELECT distinct ma4305.inform_cd FROM ma4300,ma4305
+	  <where>
+		  and ma4300.inform_cd = ma4305.inform_cd
+		  <if test="roleList != null and roleList.size() != 0">
+			  and ma4305.role_id  in
+			  <foreach item="role" index="index" collection="roleList"
+					   open="(" separator="," close=")">
+				  #{role,jdbcType=INTEGER}
+			  </foreach>
+		  </if>
+		  <if test="roleList == null">
+			  and ma4305.role_id  = 0
+		  </if>
+	  </where>) t
+	  <where>
+		  <![CDATA[
+        and ma4300.inform_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and ma4300.inform_end_date >= #{businessDate,jdbcType=VARCHAR}
+      ]]>
+		  and ma4300.inform_cd = t.inform_cd
+		  and ma4300.inform_cd = ma4310.inform_cd
+		  <if test="storeList != null and storeList.size() != 0">
+			  and ma4310.store_cd  in
+			  <foreach item="store" index="index" collection="storeList"
+					   open="(" separator="," close=")">
+				  #{store,jdbcType=VARCHAR}
+			  </foreach>
+		  </if>
+		  <if test="storeList == null">
+			  and ma4310.store_cd  = ''
+		  </if>
+		  <![CDATA[
+        and ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
+        ]]>
+		  and ma1000.store_cd = ma4310.store_cd
+		  <if test="isReply != null and isReply !=''">
+			  --         查询当前用户是否回复 1为回复 0则没有
+			  <if test="isReply =='1'.toString()">
+			  and (SELECT count(*) from ma4315 where ma4300.inform_cd = ma4315.inform_cd and ma4315.reply_user_id=#{userId} and ma4315.store_cd = ma4310.store_cd)>0
+			  </if>
+			  <if test="isReply =='0'.toString()">
+			  and (SELECT count(*) from ma4315 where ma4300.inform_cd = ma4315.inform_cd and ma4315.reply_user_id=#{userId} and ma4315.store_cd = ma4310.store_cd)=0
+			  </if>
+		  </if>
+	  </where>
+  </select>
+
+	<select id="getHQInformCount" resultType="int">
+		select count(*) from ma4370 where
+			inform_type = #{informType,jdbcType=CHAR}
+          /*通知天数*/
+            <![CDATA[
+          and effective_date<=#{businessDate,jdbcType=VARCHAR}
+          and #{businessDate,jdbcType=VARCHAR}<=to_char(to_date( effective_date, 'yyyymmdd' ) + CAST ( (select cm9060.sp_value from cm9060 where cm9060.sp_id = '1205') AS INT ), 'yyyymmdd' )
+          ]]>
+			and inform_id not in
+			(select inform_id from ma4380
+				where inform_type = #{informType,jdbcType=CHAR}
+				and ma4380.inform_num = ma4370.inform_num
+				and user_id = #{userId,jdbcType=VARCHAR}
+			)
+	</select>
+
+	<select id="getNewItemCount" resultType="int">
+		select count(*) from ma4370,ma4340 where
+			inform_type = '1'
+          /*通知天数*/
+            <![CDATA[
+          and effective_date<=#{businessDate,jdbcType=VARCHAR}
+          and #{businessDate,jdbcType=VARCHAR}<=to_char(to_date( effective_date, 'yyyymmdd' ) + CAST ( (select cm9060.sp_value from cm9060 where cm9060.sp_id = '1205') AS INT ), 'yyyymmdd' )
+          ]]>
+			and inform_id not in
+			(select inform_id from ma4380
+				where inform_type = '1'
+				and ma4380.inform_num = ma4370.inform_num
+				and user_id = #{userId,jdbcType=VARCHAR}
+			)
+		and ma4340.row_num = ma4370.info_id
+		<if test="storeCds != null and storeCds.size() != 0">
+			and ma4340.store_cd  in
+			<foreach item="store" index="index" collection="storeCds"
+					 open="(" separator="," close=")">
+				#{store,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+	</select>
+
+	<insert id="insertInformRecors">
+		insert into ma4380 (inform_id,inform_type,user_id,inform_num)
+		select inform_id,#{informType,jdbcType=CHAR},#{userId,jdbcType=VARCHAR},inform_num from ma4370 where
+          inform_type = #{informType,jdbcType=CHAR}
+          and inform_id not in
+          (select inform_id from ma4380
+          where inform_type = #{informType,jdbcType=CHAR}
+          and user_id = #{userId,jdbcType=VARCHAR}
+			and ma4380.inform_num = ma4370.inform_num
+            )
+            <if test="infoIds!=null and infoIds.size()>0">
+			and	info_id in
+				<foreach item="infoId" collection="infoIds" open="(" separator="," close=")">
+					#{infoId,jdbcType=VARCHAR}
+				</foreach>
+			</if>
+	</insert>
+
+  <select id="getPendingApprovals" parameterType="cn.com.bbut.iy.itemmaster.dto.audit.ReviewTaskParamDTO" resultType="cn.com.bbut.iy.itemmaster.dto.audit.ReviewTaskGridDTO">
+        select 	distinct
+				t_backlog.c_enable status,
+				t_backlog.record_cd,
+				t_backlog.n_typeid type_id,
+				t_audit_type.c_type_name type_name,
+				audit_tab.audit_time,/*发起时间*/
+				ma4200.emp_num_id create_user_id,/*发起人id*/
+				ma4200.emp_name create_user_name,/*发起人name*/
+				t_backlog.c_url url,
+				t_backlog.n_recordid id
+		from
+				t_backlog,
+				t_audit_type,
+				ma4200,
+				(select t_audit_tab.record_cd,
+				t_audit_tab.audit_time,
+				t_audit_tab.n_operatorid,
+			    t_audit_tab.n_typeid
+			    from t_audit_tab
+				where t_audit_tab.c_enable = '1' and t_audit_tab.sub_no = 0
+				) audit_tab
+		where
+				t_backlog.c_enable = '1'
+				and t_backlog.n_typeid = t_audit_type.n_typeid
+	  			and t_backlog.n_typeid = audit_tab.n_typeid
+				and t_backlog.record_cd = audit_tab.record_cd
+				and ma4200.emp_num_id = audit_tab.n_operatorid
+			  	AND t_backlog.n_roleid||t_backlog.store_cd IN
+				  (
+				  select position||store_cd from ma4210 where user_code = #{operatorId}
+				  union
+				  select CASE ma4160.position WHEN 5 THEN '5000000' ELSE position||store_cd END from ma4200,ma4160
+				  where ma4200.emp_num_id = #{operatorId}
+				  and ma4200.job_type_cd = ma4160.job_type_cd
+				  )
+	  <if test="startDate != null and startDate != ''">
+		  and to_char(audit_tab.audit_time, 'yyyymmdd') >= #{startDate}
+	  </if>
+	  <if test="endDate != null and endDate != ''">
+		  and #{endDate} >= to_char(audit_tab.audit_time, 'yyyymmdd')
+	  </if>
+	  <if test="typeId != null and typeId > 0">
+		  and  t_backlog.n_typeid = #{typeId,jdbcType=INTEGER}
+	  </if>
+	  <if test="userCode != null and userCode != ''">
+		  and lower(ma4200.emp_num_id) LIKE CONCAT('%',lower(#{userCode}),'%')
+	  </if>
+	  <if test="userName != null and userName != ''">
+		  and lower(ma4200.emp_name) LIKE CONCAT('%',lower(#{userName}),'%')
+	  </if>
+	  order by audit_time desc
+	  <if test="limitStart >= 0">
+		  limit ${limitEnd} offset ${limitStart}
+	  </if>
+  </select>
+
+	<select id="getPendingApprovalsCount" parameterType="cn.com.bbut.iy.itemmaster.dto.audit.ReviewTaskParamDTO" resultType="long">
+		select count(*) from (select distinct
+		t_backlog.c_enable status,
+		t_backlog.record_cd,
+		t_backlog.n_typeid type_id,
+		t_audit_type.c_type_name type_name,
+		audit_tab.audit_time,/*发起时间*/
+		ma4200.emp_num_id create_user_id,/*发起人id*/
+		ma4200.emp_name create_user_name,/*发起人name*/
+		t_backlog.c_url url,
+		t_backlog.n_recordid id
+		from
+		t_backlog,
+		t_audit_type,
+		ma4200,
+		(select t_audit_tab.record_cd,
+		t_audit_tab.audit_time,
+		t_audit_tab.n_operatorid,
+		t_audit_tab.n_typeid
+		from t_audit_tab
+		where t_audit_tab.c_enable = '1' and t_audit_tab.sub_no = 0
+		) audit_tab
+		where
+		t_backlog.c_enable = '1'
+		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_backlog.n_typeid = audit_tab.n_typeid
+		and t_backlog.record_cd = audit_tab.record_cd
+		and ma4200.emp_num_id = audit_tab.n_operatorid
+		AND t_backlog.n_roleid||t_backlog.store_cd IN
+		(
+		select position||store_cd from ma4210 where user_code = #{operatorId}
+		union
+		select CASE ma4160.position WHEN 5 THEN '5000000' ELSE position||store_cd END from ma4200,ma4160
+		where ma4200.emp_num_id = #{operatorId} and ma4200.store_cd is not null
+		and ma4200.job_type_cd = ma4160.job_type_cd
+		)
+		<if test="startDate != null and startDate != ''">
+			and to_char(audit_tab.audit_time, 'yyyymmdd') >= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			and #{endDate} >= to_char(audit_tab.audit_time, 'yyyymmdd')
+		</if>
+		<if test="typeId != null and typeId > 0">
+			and  t_backlog.n_typeid = #{typeId,jdbcType=INTEGER}
+		</if>
+		<if test="userCode != null and userCode != ''">
+			and lower(ma4200.emp_num_id) LIKE CONCAT('%',lower(#{userCode}),'%')
+		</if>
+		<if test="userName != null and userName != ''">
+			and lower(ma4200.emp_name) LIKE CONCAT('%',lower(#{userName}),'%')
+		</if>
+		) pendingCount
+	</select>
+
+	<select id="getRejectedApprovals" parameterType="cn.com.bbut.iy.itemmaster.dto.audit.ReviewTaskParamDTO" resultType="cn.com.bbut.iy.itemmaster.dto.audit.ReviewTaskGridDTO">
+		select 	distinct
+		t_backlog.c_enable status,
+		t_backlog.record_cd,
+		t_backlog.n_typeid type_id,
+		t_audit_type.c_type_name type_name,
+		audit_tab.audit_time,/*发起时间*/
+		ma4200.emp_num_id create_user_id,/*发起人id*/
+		ma4200.emp_name create_user_name,/*发起人name*/
+		t_backlog.d_insert_time,
+		t_backlog.c_url url,
+		t_backlog.n_recordid id
+		from
+		t_backlog,
+		t_audit_type,
+		ma4200,
+		(select t_audit_tab.record_cd,
+		t_audit_tab.audit_time,
+		t_audit_tab.n_operatorid,
+		t_audit_tab.n_typeid
+		from t_audit_tab
+		where t_audit_tab.c_enable = '1' and t_audit_tab.sub_no = 0
+		) audit_tab
+		where
+		t_backlog.c_enable in ('5')
+		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_backlog.n_typeid = audit_tab.n_typeid
+		and t_backlog.record_cd = audit_tab.record_cd
+		and ma4200.emp_num_id = audit_tab.n_operatorid
+		<if test="operatorId != null and operatorId != ''">
+			and audit_tab.n_operatorid = #{operatorId}
+		</if>
+		<if test="startDate != null and startDate != ''">
+			and to_char(audit_tab.audit_time, 'yyyymmdd') >= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			and #{endDate} >= to_char(audit_tab.audit_time, 'yyyymmdd')
+		</if>
+		<if test="typeId != null and typeId > 0">
+			and  t_backlog.n_typeid = #{typeId,jdbcType=INTEGER}
+		</if>
+		<if test="userCode != null and userCode != ''">
+			and lower(ma4200.emp_num_id) LIKE CONCAT('%',lower(#{userCode}),'%')
+		</if>
+		<if test="userName != null and userName != ''">
+			and lower(ma4200.emp_name) LIKE CONCAT('%',lower(#{userName}),'%')
+		</if>
+-- 		order by audit_time desc
+		order by d_insert_time desc
+		<if test="limitStart >= 0">
+			limit ${limitEnd} offset ${limitStart}
+		</if>
+	</select>
+
+	<select id="getRejectedApprovalsCount" parameterType="cn.com.bbut.iy.itemmaster.dto.audit.ReviewTaskParamDTO" resultType="long">
+		select count(*) from (select distinct
+		t_backlog.c_enable status,
+		t_backlog.record_cd,
+		t_backlog.n_typeid type_id,
+		t_audit_type.c_type_name type_name,
+		audit_tab.audit_time,/*发起时间*/
+		ma4200.emp_num_id create_user_id,/*发起人id*/
+		ma4200.emp_name create_user_name,/*发起人name*/
+		t_backlog.c_url url,
+		t_backlog.n_recordid id
+		from
+		t_backlog,
+		t_audit_type,
+		ma4200,
+		(select t_audit_tab.record_cd,
+		t_audit_tab.audit_time,
+		t_audit_tab.n_operatorid,
+		t_audit_tab.n_typeid
+		from t_audit_tab
+		where t_audit_tab.c_enable = '1' and t_audit_tab.sub_no = 0
+		) audit_tab
+		where
+		t_backlog.c_enable in ('5')
+		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_backlog.n_typeid = audit_tab.n_typeid
+		and t_backlog.record_cd = audit_tab.record_cd
+		and ma4200.emp_num_id = audit_tab.n_operatorid
+		<if test="operatorId != null and operatorId != ''">
+			and audit_tab.n_operatorid = #{operatorId}
+		</if>
+		<if test="startDate != null and startDate != ''">
+			and to_char(audit_tab.audit_time, 'yyyymmdd') >= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			and #{endDate} >= to_char(audit_tab.audit_time, 'yyyymmdd')
+		</if>
+		<if test="typeId != null and typeId > 0">
+			and  t_backlog.n_typeid = #{typeId,jdbcType=INTEGER}
+		</if>
+		<if test="userCode != null and userCode != ''">
+			and lower(ma4200.emp_num_id) LIKE CONCAT('%',lower(#{userCode}),'%')
+		</if>
+		<if test="userName != null and userName != ''">
+			and lower(ma4200.emp_name) LIKE CONCAT('%',lower(#{userName}),'%')
+		</if>
+		) submissionsCount
+	</select>
+
+	<select id="getSubmissionsApprovals" parameterType="cn.com.bbut.iy.itemmaster.dto.audit.ReviewTaskParamDTO" resultType="cn.com.bbut.iy.itemmaster.dto.audit.ReviewTaskGridDTO">
+		select 	distinct
+		t_backlog.c_enable status,
+		t_backlog.record_cd,
+		t_backlog.n_typeid type_id,
+		t_audit_type.c_type_name type_name,
+		audit_tab.audit_time,/*发起时间*/
+		ma4200.emp_num_id create_user_id,/*发起人id*/
+		ma4200.emp_name create_user_name,/*发起人name*/
+		t_backlog.c_url url,
+		t_backlog.n_recordid id
+		from
+		t_backlog,
+		t_audit_type,
+		ma4200,
+		(select t_audit_tab.record_cd,
+		t_audit_tab.audit_time,
+		t_audit_tab.n_operatorid,
+		t_audit_tab.n_typeid
+		from t_audit_tab
+		where t_audit_tab.c_enable = '1' and t_audit_tab.sub_no = 0
+		) audit_tab
+		where
+		t_backlog.c_enable in ('1','5','6','7','10')
+		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_backlog.n_typeid = audit_tab.n_typeid
+		and t_backlog.record_cd = audit_tab.record_cd
+		and ma4200.emp_num_id = audit_tab.n_operatorid
+		<if test="operatorId != null and operatorId != ''">
+			and audit_tab.n_operatorid = #{operatorId}
+		</if>
+		<if test="startDate != null and startDate != ''">
+			and to_char(audit_tab.audit_time, 'yyyymmdd') >= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			and #{endDate} >= to_char(audit_tab.audit_time, 'yyyymmdd')
+		</if>
+		<if test="typeId != null and typeId > 0">
+			and  t_backlog.n_typeid = #{typeId,jdbcType=INTEGER}
+		</if>
+		<if test="recordCd != null and recordCd  != ''">
+			and  lower(t_backlog.record_cd) LIKE CONCAT('%',lower(#{recordCd,jdbcType=VARCHAR}),'%')
+		</if>
+		<if test=" status!= null and status  != ''">
+			and  t_backlog.c_enable = #{status,jdbcType=INTEGER}
+		</if>
+		<if test="userCode != null and userCode != ''">
+			and lower(ma4200.emp_num_id) LIKE CONCAT('%',lower(#{userCode}),'%')
+		</if>
+		<if test="userName != null and userName != ''">
+		and lower(ma4200.emp_name) LIKE CONCAT('%',lower(#{userName}),'%')
+		</if>
+		order by audit_time desc
+		<if test="limitStart >= 0">
+			limit ${limitEnd} offset ${limitStart}
+		</if>
+	</select>
+
+	<select id="getSubmissionsApprovalsCount" parameterType="cn.com.bbut.iy.itemmaster.dto.audit.ReviewTaskParamDTO" resultType="long">
+		select count(*) from (select distinct
+		t_backlog.c_enable status,
+		t_backlog.record_cd,
+		t_backlog.n_typeid type_id,
+		t_audit_type.c_type_name type_name,
+		audit_tab.audit_time,/*发起时间*/
+		ma4200.emp_num_id create_user_id,/*发起人id*/
+		ma4200.emp_name create_user_name,/*发起人name*/
+		t_backlog.c_url url,
+		t_backlog.n_recordid id
+		from
+		t_backlog,
+		t_audit_type,
+		ma4200,
+		(select t_audit_tab.record_cd,
+		t_audit_tab.audit_time,
+		t_audit_tab.n_operatorid,
+		t_audit_tab.n_typeid
+		from t_audit_tab
+		where t_audit_tab.c_enable = '1' and t_audit_tab.sub_no = 0
+		) audit_tab
+		where
+		t_backlog.c_enable in ('1','5','6','7','10')
+		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_backlog.n_typeid = audit_tab.n_typeid
+		and t_backlog.record_cd = audit_tab.record_cd
+		and ma4200.emp_num_id = audit_tab.n_operatorid
+		<if test="operatorId != null and operatorId != ''">
+			and audit_tab.n_operatorid = #{operatorId}
+		</if>
+		<if test="startDate != null and startDate != ''">
+			and to_char(audit_tab.audit_time, 'yyyymmdd') >= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			and #{endDate} >= to_char(audit_tab.audit_time, 'yyyymmdd')
+		</if>
+		<if test="typeId != null and typeId > 0">
+			and  t_backlog.n_typeid = #{typeId,jdbcType=INTEGER}
+		</if>
+		<if test="recordCd != null and recordCd  != ''">
+			and  lower(t_backlog.record_cd) LIKE CONCAT('%',lower(#{recordCd,jdbcType=VARCHAR}),'%')
+	    </if>
+		<if test="status != null and status  != ''">
+			and  t_backlog.c_enable = #{status,jdbcType=INTEGER}
+		</if>
+		<if test="userCode != null and userCode != ''">
+			and lower(ma4200.emp_num_id) LIKE CONCAT('%',lower(#{userCode}),'%')
+		</if>
+		<if test="userName != null and userName != ''">
+			and lower(ma4200.emp_name) LIKE CONCAT('%',lower(#{userName}),'%')
+		</if>
+		) submissionsCount
+	</select>
+
+	<select id="getMyMessage" parameterType="cn.com.bbut.iy.itemmaster.dto.audit.ReviewTaskParamDTO" resultType="cn.com.bbut.iy.itemmaster.dto.audit.ReviewTaskGridDTO">
+		select * from(select distinct
+		t_backlog.c_enable status,
+		t_backlog.record_cd,
+		t_backlog.n_typeid type_id,
+		t_audit_type.c_type_name type_name,
+		audit_tab.audit_time,/*发起时间*/
+		ma4200.emp_num_id create_user_id,/*发起人id*/
+		ma4200.emp_name create_user_name,/*发起人name*/
+		t_backlog.c_url url,
+		t_backlog.n_recordid id
+		from
+		t_backlog,
+		t_audit_type,
+		ma4200,
+		(select t_audit_tab.record_cd,
+		t_audit_tab.audit_time,
+		t_audit_tab.n_operatorid,
+		t_audit_tab.n_typeid
+		from t_audit_tab
+		where t_audit_tab.c_enable = '1' and t_audit_tab.sub_no = 0
+		) audit_tab
+		where
+		t_backlog.c_enable = '1'
+		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_backlog.n_typeid = audit_tab.n_typeid
+		and t_backlog.record_cd = audit_tab.record_cd
+		and ma4200.emp_num_id = audit_tab.n_operatorid
+        AND t_backlog.n_roleid||t_backlog.store_cd IN
+		(
+		select position||store_cd from ma4210 where user_code = #{operatorId}
+		union
+		select CASE ma4160.position WHEN 5 THEN '5000000' ELSE position||store_cd END from ma4200,ma4160
+		where ma4200.emp_num_id = #{operatorId} and ma4200.store_cd is not null
+		and ma4200.job_type_cd = ma4160.job_type_cd
+		)
+		<if test="startDate != null and startDate != ''">
+			and to_char(audit_tab.audit_time, 'yyyymmdd') >= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			and #{endDate} >= to_char(audit_tab.audit_time, 'yyyymmdd')
+		</if>
+		<if test="typeId != null and typeId > 0">
+			and t_backlog.n_typeid = #{typeId,jdbcType=INTEGER}
+		</if>
+		<if test="userCode != null and userCode != ''">
+			and lower(ma4200.emp_num_id) LIKE CONCAT('%',lower(#{userCode}),'%')
+		</if>
+		<if test="userName != null and userName != ''">
+			and lower(ma4200.emp_name) LIKE CONCAT('%',lower(#{userName}),'%')
+		</if>) pending
+		union
+		select * from(select distinct
+		t_backlog.c_enable status,
+		t_backlog.record_cd,
+		t_backlog.n_typeid type_id,
+		t_audit_type.c_type_name type_name,
+		audit_tab.audit_time,/*发起时间*/
+		ma4200.emp_num_id create_user_id,/*发起人id*/
+		ma4200.emp_name create_user_name,/*发起人name*/
+		t_backlog.c_url url,
+		t_backlog.n_recordid id
+		from
+		t_backlog,
+		t_audit_type,
+		ma4200,
+		(select t_audit_tab.record_cd,
+		t_audit_tab.audit_time,
+		t_audit_tab.n_operatorid,
+		t_audit_tab.n_typeid
+		from t_audit_tab
+		where t_audit_tab.c_enable = '1' and t_audit_tab.sub_no = 0
+		) audit_tab
+		where
+		t_backlog.c_enable in ('1','5','6','7','10')
+		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_backlog.n_typeid = audit_tab.n_typeid
+		and t_backlog.record_cd = audit_tab.record_cd
+		and ma4200.emp_num_id = audit_tab.n_operatorid
+		<if test="operatorId != null and operatorId != ''">
+			and audit_tab.n_operatorid = #{operatorId}
+		</if>
+		<if test="startDate != null and startDate != ''">
+			and to_char(audit_tab.audit_time, 'yyyymmdd') >= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			and #{endDate} >= to_char(audit_tab.audit_time, 'yyyymmdd')
+		</if>
+		<if test="typeId != null and typeId > 0">
+			and t_backlog.n_typeid = #{typeId,jdbcType=INTEGER}
+		</if>
+		<if test="userCode != null and userCode != ''">
+			and lower(ma4200.emp_num_id) LIKE CONCAT('%',lower(#{userCode}),'%')
+		</if>
+		<if test="userName != null and userName != ''">
+			and lower(ma4200.emp_name) LIKE CONCAT('%',lower(#{userName}),'%')
+		</if>) submissions
+		order by audit_time desc
+		<if test="limitStart >= 0">
+			limit ${limitEnd} offset ${limitStart}
+		</if>
+	</select>
+
+	<select id="getMyMessageCount" parameterType="cn.com.bbut.iy.itemmaster.dto.audit.ReviewTaskParamDTO" resultType="long">
+		select count(*) from(select distinct
+		t_backlog.c_enable status,
+		t_backlog.record_cd,
+		t_backlog.n_typeid type_id,
+		t_audit_type.c_type_name type_name,
+		audit_tab.audit_time,/*发起时间*/
+		ma4200.emp_num_id create_user_id,/*发起人id*/
+		ma4200.emp_name create_user_name,/*发起人name*/
+		t_backlog.c_url url,
+		t_backlog.n_recordid id
+		from
+		t_backlog,
+		t_audit_type,
+		ma4200,
+		(select t_audit_tab.record_cd,
+		t_audit_tab.audit_time,
+		t_audit_tab.n_operatorid,
+		t_audit_tab.n_typeid
+		from t_audit_tab
+		where t_audit_tab.c_enable = '1' and t_audit_tab.sub_no = 0
+		) audit_tab
+		where
+		t_backlog.c_enable = '1'
+		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_backlog.n_typeid = audit_tab.n_typeid
+		and t_backlog.record_cd = audit_tab.record_cd
+		and ma4200.emp_num_id = audit_tab.n_operatorid
+        AND t_backlog.n_roleid||t_backlog.store_cd IN
+		(
+		select position||store_cd from ma4210 where user_code = #{operatorId}
+		union
+		select CASE ma4160.position WHEN 5 THEN '5000000' ELSE position||store_cd END from ma4200,ma4160
+		where ma4200.emp_num_id = #{operatorId} and ma4200.store_cd is not null
+		and ma4200.job_type_cd = ma4160.job_type_cd
+		)
+		<if test="startDate != null and startDate != ''">
+			and to_char(audit_tab.audit_time, 'yyyymmdd') >= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			and #{endDate} >= to_char(audit_tab.audit_time, 'yyyymmdd')
+		</if>
+		<if test="typeId != null and typeId > 0">
+			and t_backlog.n_typeid = #{typeId,jdbcType=INTEGER}
+		</if>
+		<if test="userCode != null and userCode != ''">
+			and lower(ma4200.emp_num_id) LIKE CONCAT('%',lower(#{userCode}),'%')
+		</if>
+		<if test="userName != null and userName != ''">
+			and lower(ma4200.emp_name) LIKE CONCAT('%',lower(#{userName}),'%')
+		</if>
+		union
+		select distinct
+		t_backlog.c_enable status,
+		t_backlog.record_cd,
+		t_backlog.n_typeid type_id,
+		t_audit_type.c_type_name type_name,
+		audit_tab.audit_time,/*发起时间*/
+		ma4200.emp_num_id create_user_id,/*发起人id*/
+		ma4200.emp_name create_user_name,/*发起人name*/
+		t_backlog.c_url url,
+		t_backlog.n_recordid id
+		from
+		t_backlog,
+		t_audit_type,
+		ma4200,
+		(select t_audit_tab.record_cd,
+		t_audit_tab.audit_time,
+		t_audit_tab.n_operatorid,
+		t_audit_tab.n_typeid
+		from t_audit_tab
+		where t_audit_tab.c_enable = '1' and t_audit_tab.sub_no = 0
+		) audit_tab
+		where
+		t_backlog.c_enable in ('1','5','6','7','10')
+		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_backlog.n_typeid = audit_tab.n_typeid
+		and t_backlog.record_cd = audit_tab.record_cd
+		and ma4200.emp_num_id = audit_tab.n_operatorid
+		<if test="operatorId != null and operatorId != ''">
+			and audit_tab.n_operatorid = #{operatorId}
+		</if>
+		<if test="startDate != null and startDate != ''">
+			and to_char(audit_tab.audit_time, 'yyyymmdd') >= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			and #{endDate} >= to_char(audit_tab.audit_time, 'yyyymmdd')
+		</if>
+		<if test="typeId != null and typeId > 0">
+			and t_backlog.n_typeid = #{typeId,jdbcType=INTEGER}
+		</if>
+		<if test="userCode != null and userCode != ''">
+			and lower(ma4200.emp_num_id) LIKE CONCAT('%',lower(#{userCode}),'%')
+		</if>
+		<if test="userName != null and userName != ''">
+			and lower(ma4200.emp_name) LIKE CONCAT('%',lower(#{userName}),'%')
+		</if>) message
+	</select>
+
+	<select id="getStockScrap" resultType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0010DTO">
+		select
+		store_cd,voucher_no,voucher_type,voucher_date,store_cd1
+		from sk0010
+		where
+			voucher_no = #{voucherNo}
+		limit 1;
+	</select>
+
+	<select id="getStocktake" resultType="cn.com.bbut.iy.itemmaster.dto.stocktakeProcess.StocktakeProcessDTO">
+		select
+		pi_cd,pi_date
+		from pi0100
+		where
+			pi_cd = #{piCd}
+		limit 1;
+	</select>
+
+    <select id="getReceive"
+            resultType="cn.com.bbut.iy.itemmaster.dto.receipt.warehouse.WarehouseReceiptGridDTO">
+		select
+		receive_id,store_cd,order_id
+		from od0000_t
+		where
+			receive_id = #{receiveId}
+		limit 1;
+	</select>
+
+    <select id="selectCashier" resultType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail">
+		select
+			store_cd,pay_id,pay_date,cash_split_flag,
+			shift,pos_id,user_id
+		from sa0170
+		where pay_id = #{payId}
+		limit 1;
+	</select>
+
+    <select id="getStoreCdByOrderId" resultType="java.lang.String">
+		select store_cd from od0000 where order_id =  #{orderId}
+	</select>
+
+    <select id="getSk0010Info" resultType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0010DTO">
+		select
+			store_cd,voucher_no,voucher_date,voucher_type,store_cd1
+		from sk0010
+		where voucher_no = #{voucherNo}
+	</select>
+
+    <select id="getExpenditureInfo" resultType="cn.com.bbut.iy.itemmaster.dto.expenditure.ExpenditureParamDTO">
+		select
+			store_cd,voucher_no,acc_date
+		from op0040
+			where voucher_no = #{voucherNo}
+	</select>
+
+</mapper>

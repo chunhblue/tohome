@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.MA4200Mapper">
+  <select id="selectList"  parameterType="cn.com.bbut.iy.itemmaster.dto.ma4200.MA4200ParamDTO"
+          resultType="cn.com.bbut.iy.itemmaster.dto.ma4200.MA4200GridDTO">
+    SELECT
+    emp_num_id, emp_id, ma4200.store_cd,ma1000.store_name,
+    ma4200.job_type_cd,ma4160.job_catagory_name, effective_status, emp_name,
+    emp_gender, emp_country, telephone_no, mobile_phone_no, emp_birthdate, emp_education,
+    emp_date, emp_leave_date, emp_address, emp_postal_code, emp_comment, emp_email, md,
+    (select code_name from cm9010
+    where cm9010.code_type='00270'
+    and cm9010.code_value=ma4200.emp_gender
+    ) as emp_gender_name,
+    (select code_name from cm9010
+    where cm9010.code_type='00220'
+    and cm9010.code_value=ma4200.effective_status
+    ) as effective_status_name
+    FROM ma4200
+    left join ma1000
+        on ma4200.store_cd=ma1000.store_cd
+        and #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+    left join ma4160 on ma4200.job_type_cd = ma4160.job_type_cd
+    <where>
+      <if test="empNumId!=null and empNumId!=''">
+        AND lower(emp_num_id)  like concat('%',lower(#{empNumId,jdbcType=VARCHAR}),'%')
+      </if>
+      <if test="empName !=null and empName !='' ">
+        AND lower(emp_name) like concat('%',lower(#{empName,jdbcType=VARCHAR}),'%')
+      </if>
+      <if test="storeCd !=null and storeCd!='' ">
+        AND ma4200.store_cd=#{storeCd,jdbcType=VARCHAR}
+      </if>
+      <if test="jobTypeCd !=null and jobTypeCd!='' ">
+        AND ma4200.job_type_cd=#{jobTypeCd,jdbcType=VARCHAR}
+      </if>
+      <if test="effectiveStatus !=null and effectiveStatus!='' ">
+        AND ma4200.effective_status=#{effectiveStatus,jdbcType=CHAR}
+      </if>
+    </where>
+    ORDER BY  emp_num_id desc
+    <if test="limitStart >= 0">
+      limit ${limitEnd} offset ${limitStart}
+    </if>
+  </select>
+  <select id="selectListCount"  parameterType="cn.com.bbut.iy.itemmaster.dto.ma4200.MA4200ParamDTO"
+          resultType="long">
+    SELECT
+    count(*)
+    FROM ma4200
+    left join ma1000
+    on ma4200.store_cd=ma1000.store_cd
+    and #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+    left join ma4160 on ma4200.job_type_cd = ma4160.job_type_cd
+    <where>
+      <if test="empNumId!=null and empNumId!=''">
+        AND emp_num_id  like concat('%',#{empNumId,jdbcType=VARCHAR},'%')
+      </if>
+      <if test="empName !=null and empName !='' ">
+        AND emp_name like concat('%',#{empName,jdbcType=VARCHAR},'%')
+      </if>
+      <if test="storeCd !=null and storeCd!='' ">
+        AND ma4200.store_cd=#{storeCd,jdbcType=VARCHAR}
+      </if>
+      <if test="jobTypeCd !=null and jobTypeCd!='' ">
+        AND ma4200.job_type_cd=#{jobTypeCd,jdbcType=VARCHAR}
+      </if>
+      <if test="effectiveStatus !=null and effectiveStatus!='' ">
+        AND ma4200.effective_status=#{effectiveStatus,jdbcType=CHAR}
+      </if>
+    </where>
+  </select>
+  <update id="updateUserInfo" parameterType="cn.com.bbut.iy.itemmaster.entity.MA4200">
+    update ma4200
+    set
+      store_cd = #{storeCd,jdbcType=VARCHAR},
+      job_type_cd = #{jobTypeCd,jdbcType=VARCHAR},
+      effective_status = #{effectiveStatus,jdbcType=CHAR},
+      emp_name = #{empName,jdbcType=VARCHAR},
+      emp_gender = #{empGender,jdbcType=CHAR},
+      emp_country = #{empCountry,jdbcType=VARCHAR},
+      telephone_no = #{telephoneNo,jdbcType=VARCHAR},
+      mobile_phone_no = #{mobilePhoneNo,jdbcType=VARCHAR},
+      emp_birthdate = #{empBirthdate,jdbcType=VARCHAR},
+      emp_education = #{empEducation,jdbcType=VARCHAR},
+      emp_date = #{empDate,jdbcType=VARCHAR},
+      emp_leave_date = #{empLeaveDate,jdbcType=VARCHAR},
+      emp_address = #{empAddress,jdbcType=VARCHAR},
+      emp_postal_code = #{empPostalCode,jdbcType=VARCHAR},
+      emp_comment = #{empComment,jdbcType=VARCHAR},
+      emp_email = #{empEmail,jdbcType=CHAR},
+      update_user_id = #{updateUserId,jdbcType=VARCHAR},
+      update_ymd = #{updateYmd,jdbcType=CHAR},
+      update_hms = #{updateHms,jdbcType=CHAR}
+      <where>
+          AND emp_id=#{empId,jdbcType=INTEGER}
+        <if test="empNumId !=null and empNumId!='' ">
+          AND emp_num_id=#{empNumId,jdbcType=VARCHAR}
+        </if>
+      </where>
+  </update>
+
+  <update id="deleteByEmpId" parameterType="cn.com.bbut.iy.itemmaster.entity.MA4200">
+    update ma4200
+    set
+    effective_status = '90',
+    update_user_id = #{updateUserId,jdbcType=VARCHAR},
+    update_ymd = #{updateYmd,jdbcType=CHAR},
+    update_hms = #{updateHms,jdbcType=CHAR}
+    <where>
+      AND emp_id=#{empId,jdbcType=INTEGER}
+      <if test="empNumId !=null and empNumId!='' ">
+        AND emp_num_id=#{empNumId,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </update>
+
+  <update id="updatePassword" parameterType="cn.com.bbut.iy.itemmaster.entity.MA4200">
+    update ma4200
+    set
+    emp_password = #{empNewPassword,jdbcType=VARCHAR},
+    update_user_id = #{updateUserId,jdbcType=VARCHAR},
+    update_ymd = #{updateYmd,jdbcType=CHAR},
+    update_hms = #{updateHms,jdbcType=CHAR}
+    <where>
+        AND emp_num_id=#{empNumId,jdbcType=VARCHAR}
+        AND emp_password=#{empPassword,jdbcType=VARCHAR}
+    </where>
+  </update>
+</mapper>

@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.classifiedsalereport.ClassifiedSaleReportMapper">
+
+<resultMap id="BaseItemResult" type="cn.com.bbut.iy.itemmaster.dto.classifiedsalereport.classifiedSaleReportDTO">
+    <result column="article_id" property="articleId"></result>
+    <result column="sale_date" property="saleDate"></result>
+    <result column="store_cd" property="storeCd"></result>
+    <result column="store_name" property="storeName"></result>
+    <result column="city" property="city"></result>
+    <result column="pma_cd" property="pmaCd"></result>
+    <result column="pma_name" property="pmaName"></result>
+    <result column="sale_amount" property="saleAmount"></result>
+    <result column="sale_qty" property="saleQty"></result>
+    <result column="acc_date" property="accDate"></result>
+    <result column="ofc" property="ofc"></result>
+    <result column="ma_cd" property="maCd"></result>
+    <result column="dep_cd" property="depCd"></result>
+    <result column="dep_name" property="depName"></result>
+    <result column="category_cd" property="categoryCd"></result>
+    <result column="category_name" property="categoryName"></result>
+    <result column="sub_category_cd" property="subCategoryCd"></result>
+    <result column="sub_category_name" property="subCategoryName"></result>
+    <result column="c_operatorcode" property="amCd"></result>
+    <result column="c_operatorname" property="amName"></result>
+</resultMap>
+<select id="search01" parameterType="cn.com.bbut.iy.itemmaster.dto.classifiedsalereport.clssifiedSaleParamReportDTO" resultMap="BaseItemResult">
+    SELECT  DISTINCT
+    ma10.store_cd,
+    ma10.store_name,
+    ma08.pma_cd,
+    ma08.pma_name,
+    sa02.sale_date,
+    sa02.sale_qty,
+    sa02.sale_amount,
+    sa02.acc_date
+    FROM
+    ma1000 ma10,
+    sa0020 sa02 LEFT JOIN ma0080 ma08 ON sa02.pma_cd = ma08.pma_cd,
+    CM9060 C1
+   where
+        ma10.store_cd=sa02.store_cd
+    AND sa02.pma_cd=ma08.pma_cd
+    AND sa02.store_cd IN
+    <foreach item="store" index="index" collection="classParamdto.stores"
+             open="(" separator="," close=")">
+        #{store,jdbcType=VARCHAR}
+    </foreach>
+
+    <if test="classParamdto.startDate!=null and classParamdto.startDate!=''  and classParamdto.endDate!=null and classParamdto.endDate!=''">
+        AND   to_char(sa02.sale_date,'YYYYMM') between #{classParamdto.startDate} and #{classParamdto.endDate}
+    </if>
+    <if test="classParamdto.pmaCd!=null and classParamdto.pmaCd!=''">
+        AND sa02.pma_cd = #{classParamdto.pmaCd}
+    </if>
+
+    <if test="classParamdto.city!=null and classParamdto.city!=''">
+        AND ma10.zo_cd = #{classParamdto.city}
+    </if>
+    <if test="classParamdto.am!=null and classParamdto.am!=''">
+        AND ma10.ofc = #{classParamdto.am}
+    </if>
+</select>
+
+    <select id="searchCount" parameterType="cn.com.bbut.iy.itemmaster.dto.classifiedsalereport.clssifiedSaleParamReportDTO" resultType="int">
+        SELECT
+           count (1)
+        FROM
+            ia0000 ia,
+            ma1000 ma1,
+            t_operator oper,
+            cm9060 cm1
+        WHERE
+            ia.store_cd = ma1.store_cd
+            AND cm1.sp_id = '0000'
+            AND cm1.sp_value BETWEEN ma1.effective_start_date AND ma1.effective_end_date
+            AND ia.ofc = oper.c_operatorcode
+            AND ia.store_cd In
+            <foreach item="store" index="index" collection="classParamdto.stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            <if test="classParamdto.startDate!=null and classParamdto.startDate!='' ">
+                <![CDATA[
+                 AND ia.acc_date >= #{classParamdto.startDate}
+                ]]>
+            </if>
+            <if test="classParamdto.endDate!=null and classParamdto.endDate!='' ">
+                <![CDATA[
+                 AND ia.acc_date <= #{classParamdto.endDate}
+                ]]>
+            </if>
+            <if test="classParamdto.pmaCd!=null and classParamdto.pmaCd!=''">
+                AND ia.pma_cd = #{classParamdto.pmaCd}
+            </if>
+            <if test="classParamdto.depCd!=null and classParamdto.depCd!='' and classParamdto.depCd!='999'">
+                AND ia.dep_cd = #{classParamdto.depCd}
+            </if>
+            <if test="classParamdto.subCategoryCd!=null and classParamdto.subCategoryCd!=''">
+                AND ia.sub_category_cd=#{classParamdto.subCategoryCd}
+            </if>
+            <if test="classParamdto.categoryCd!=null and classParamdto.categoryCd!=''">
+                AND ia.category_cd=#{classParamdto.categoryCd}
+            </if>
+            <if test="classParamdto.city!=null and classParamdto.city!=''">
+                AND ia.zo_cd = #{classParamdto.city}
+            </if>
+            <if test="classParamdto.am!=null and classParamdto.am!=''">
+                AND ia.ofc = #{classParamdto.am}
+            </if>
+            <if test="classParamdto.storeCd!=null and classParamdto.storeCd!=''">
+                AND ia.store_cd = #{classParamdto.storeCd}
+            </if>
+    </select>
+
+    <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.classifiedsalereport.clssifiedSaleParamReportDTO" resultMap="BaseItemResult">
+        SELECT
+            ia.store_cd,
+            ma1.store_name,
+            ia.acc_date AS sale_date,
+            CONCAT(ia.dep_cd,' ',ia.dep_name) AS dep_name,
+            CONCAT(ia.pma_cd,' ',ia.pma_name) AS pma_name,
+            CONCAT(ia.category_cd,' ',ia.category_name) AS category_name,
+            CONCAT(ia.sub_category_cd,' ',ia.sub_category_name) AS sub_category_name,
+            ia.sale_qty_t AS sale_qty,
+            ia.sale_amt_t AS sale_amount,
+            oper.c_operatorcode,
+            oper.c_operatorname
+        FROM
+            ia0000 ia,
+            ma1000 ma1,
+            t_operator oper,
+            cm9060 cm1
+        WHERE
+            ia.store_cd = ma1.store_cd
+            AND cm1.sp_id = '0000'
+            AND cm1.sp_value BETWEEN ma1.effective_start_date AND ma1.effective_end_date
+            AND ia.ofc = oper.c_operatorcode
+            AND ia.store_cd In
+            <foreach item="store" index="index" collection="classParamdto.stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            <if test="classParamdto.startDate!=null and classParamdto.startDate!='' ">
+                <![CDATA[
+             AND ia.acc_date >= #{classParamdto.startDate}
+            ]]>
+            </if>
+            <if test="classParamdto.endDate!=null and classParamdto.endDate!='' ">
+                <![CDATA[
+             AND ia.acc_date <= #{classParamdto.endDate}
+            ]]>
+            </if>
+            <if test="classParamdto.pmaCd!=null and classParamdto.pmaCd!=''">
+                AND ia.pma_cd = #{classParamdto.pmaCd}
+            </if>
+            <if test="classParamdto.depCd!=null and classParamdto.depCd!='' and classParamdto.depCd!='999'">
+                AND ia.dep_cd = #{classParamdto.depCd}
+            </if>
+            <if test="classParamdto.subCategoryCd!=null and classParamdto.subCategoryCd!=''">
+                AND ia.sub_category_cd=#{classParamdto.subCategoryCd}
+            </if>
+            <if test="classParamdto.categoryCd!=null and classParamdto.categoryCd!=''">
+                AND ia.category_cd=#{classParamdto.categoryCd}
+            </if>
+            <if test="classParamdto.city!=null and classParamdto.city!=''">
+                AND ia.zo_cd = #{classParamdto.city}
+            </if>
+            <if test="classParamdto.am!=null and classParamdto.am!=''">
+                AND ia.ofc = #{classParamdto.am}
+            </if>
+            <if test="classParamdto.storeCd!=null and classParamdto.storeCd!=''">
+                AND ia.store_cd = #{classParamdto.storeCd}
+            </if>
+            <if test="classParamdto.flg">
+                LIMIT ${classParamdto.rows} OFFSET ${classParamdto.limitStart}
+            </if>
+    </select>
+
+    <select id="getAMList" resultType="cn.com.bbut.iy.itemmaster.entity.base.Ma1000">
+        SELECT DISTINCT
+            A.ofc
+        FROM
+            MA1000 A
+    </select>
+
+    <select id="getCity" resultType="cn.com.bbut.iy.itemmaster.entity.ma0020.MA0020C">
+        SELECT DISTINCT
+            A.structure_cd AS structureCd,
+            concat(A.structure_cd,' ',A.structure_name) AS structureName
+        FROM
+            MA0020 A
+        WHERE
+            A.structure_level = '2'
+    </select>
+
+    <select id="getPmaList" resultType="cn.com.bbut.iy.itemmaster.entity.ma0080.MA0080">
+        SELECT
+            A.PMA_CD AS pmaCd,
+            concat(A.PMA_CD,' ',A.PMA_NAME) AS pmaName
+        FROM
+            MA0080 A
+        WHERE
+            A.EFFECTIVE_STS = '10'
+    </select>
+
+</mapper>

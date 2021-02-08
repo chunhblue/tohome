@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.ArticleMasterMapper">
+
+    <resultMap id="ReMa1100" type="cn.com.bbut.iy.itemmaster.dto.article.ArticleDTO">
+        <id column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <id column="effective_start_date" property="effectiveStartDate" jdbcType="VARCHAR" />
+        <result column="effective_end_date" property="effectiveEndDate" jdbcType="VARCHAR" />
+        <result column="article_name" property="articleName" jdbcType="VARCHAR" />
+        <result column="article_short_name" property="articleShortName" jdbcType="VARCHAR" />
+        <result column="article_name_en" property="articleNameEn" jdbcType="VARCHAR" />
+        <result column="article_short_name_en" property="articleShortNameEn" jdbcType="VARCHAR" />
+        <result column="delivery_type_cd" property="deliveryTypeCd" jdbcType="VARCHAR" />
+        <result column="dep_cd" property="depCd" jdbcType="VARCHAR" />
+        <result column="pma_cd" property="pmaCd" jdbcType="VARCHAR" />
+        <result column="category_cd" property="categoryCd" jdbcType="VARCHAR" />
+        <result column="sub_category_cd" property="subCategoryCd" jdbcType="VARCHAR" />
+        <result column="spec" property="spec" jdbcType="VARCHAR" />
+        <result column="sales_unit_id" property="salesUnitId" jdbcType="VARCHAR" />
+        <result column="brand" property="brand" jdbcType="VARCHAR" />
+        <result column="grade" property="grade" jdbcType="VARCHAR" />
+        <result column="production_location" property="productionLocation" jdbcType="VARCHAR" />
+        <result column="pb_flg" property="pbFlg" jdbcType="VARCHAR" />
+        <result column="especial_flg" property="especialFlg" jdbcType="VARCHAR" />
+        <result column="article_weigh_flag" property="articleWeighFlag" jdbcType="VARCHAR" />
+        <result column="article_type" property="articleType" jdbcType="VARCHAR" />
+        <result column="article_new_flag" property="articleNewFlag" jdbcType="VARCHAR" />
+        <result column="store_price_chg_flg" property="storePriceChgFlg" jdbcType="VARCHAR" />
+        <result column="tag_type" property="tagType" jdbcType="VARCHAR" />
+        <result column="season_cd" property="seasonCd" jdbcType="VARCHAR" />
+        <result column="lifecycle_status" property="lifecycleStatus" jdbcType="VARCHAR" />
+        <result column="recommend_reason_cd" property="recommendReasonCd" jdbcType="VARCHAR" />
+        <result column="receive_unit_id" property="receiveUnitId" jdbcType="VARCHAR" />
+        <result column="package_number" property="packageNumber" jdbcType="DECIMAL" />
+        <result column="opl_method" property="oplMethod" jdbcType="VARCHAR" />
+        <result column="min_display_qty" property="minDisplayQty" jdbcType="DECIMAL" />
+        <result column="order_type" property="orderType" jdbcType="VARCHAR" />
+        <result column="barcode_type" property="barcodeType" jdbcType="VARCHAR" />
+        <result column="tenant_contract_no" property="tenantContractNo" jdbcType="VARCHAR" />
+        <result column="sales_vat_cd" property="salesVatCd" jdbcType="VARCHAR" />
+        <result column="purchase_vat_cd" property="purchaseVatCd" jdbcType="VARCHAR" />
+        <result column="refer_purchase_price" property="referPurchasePrice" jdbcType="DECIMAL" />
+        <result column="refer_sale_price" property="referSalePrice" jdbcType="DECIMAL" />
+        <result column="preserve_type" property="preserveType" jdbcType="VARCHAR" />
+        <result column="warranty_days" property="warrantyDays" jdbcType="DECIMAL" />
+        <result column="receive_date_limit" property="receiveDateLimit" jdbcType="DECIMAL" />
+        <result column="sale_date_limit" property="saleDateLimit" jdbcType="DECIMAL" />
+        <result column="package_os_weight" property="packageOsWeight" jdbcType="DECIMAL" />
+        <result column="package_os_size_length" property="packageOsSizeLength" jdbcType="DECIMAL" />
+        <result column="package_os_size_width" property="packageOsSizeWidth" jdbcType="DECIMAL" />
+        <result column="package_os_size_height" property="packageOsSizeHeight" jdbcType="DECIMAL" />
+        <result column="package_is_weight" property="packageIsWeight" jdbcType="DECIMAL" />
+        <result column="package_is_size_length" property="packageIsSizeLength" jdbcType="DECIMAL" />
+        <result column="package_is_size_width" property="packageIsSizeWidth" jdbcType="DECIMAL" />
+        <result column="package_is_size_height" property="packageIsSizeHeight" jdbcType="DECIMAL" />
+        <result column="area_cd" property="areaCd" jdbcType="VARCHAR" />
+        <result column="member_price" property="memberPrice" jdbcType="DECIMAL" />
+        <result column="n_reviewid" property="nReviewId" jdbcType="DECIMAL" />
+        <result column="review_status" property="reviewStatus" jdbcType="INTEGER"/>
+        <result column="article_name_vietnamese" property="articleNameVietnamese" jdbcType="VARCHAR" />
+        <result column="article_short_name_vietnamese" property="articleShortNameVietnamese" jdbcType="VARCHAR" />
+        <result column="vietnamese_item_shortname" property="vietnameseShortName" jdbcType="VARCHAR" />
+        <result column="manufacturer" property="manufacturer" jdbcType="VARCHAR" />
+        <result column="material_type" property="materialType" jdbcType="VARCHAR" />
+        <result column="converter" property="converter" jdbcType="VARCHAR" />
+        <result column="purchase_item" property="purchaseItem" jdbcType="VARCHAR" />
+        <result column="sales_item" property="salesItem" jdbcType="VARCHAR" />
+        <result column="inventory_item" property="inventoryItem" jdbcType="VARCHAR" />
+        <result column="cost_item" property="costItem" jdbcType="VARCHAR" />
+        <result column="dc_item" property="dcItem" jdbcType="VARCHAR" />
+        <result column="is_default_free_item" property="isDefaultFreeItem" jdbcType="VARCHAR" />
+        <result column="is_food_sevice_item" property="isFoodServiceItem" jdbcType="VARCHAR" />
+        <result column="is_food_sevice_stock_count" property="isFoodServiceStockCount" jdbcType="VARCHAR" />
+        <result column="not_allow_order_to_supplier" property="notAllowOrderToSupplier" jdbcType="VARCHAR" />
+        <result column="allow_order_to_dc" property="allowOrderToDc" jdbcType="VARCHAR" />
+        <result column="customer" property="customer" jdbcType="VARCHAR" />
+        <result column="income" property="income" jdbcType="VARCHAR" />
+        <result column="discount_on_invoice" property="discountOnInvoice" jdbcType="DECIMAL" />
+        <result column="price_unit_vat" property="priceUnitVat" jdbcType="DECIMAL" />
+        <result column="remaining_shelf_life" property="remainingShelfLife" jdbcType="INTEGER"/>
+        <result column="aging_stock_exchangeable" property="agingStockExchangeable" jdbcType="VARCHAR" />
+        <result column="aging_stock_returnable" property="agingStockReturnable" jdbcType="VARCHAR" />
+        <result column="image_path" property="imagePath" jdbcType="VARCHAR" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="contract_expire_date" property="contractExpireDate" jdbcType="VARCHAR" />
+        <result column="qos_expire_date" property="qosExpireDate" jdbcType="VARCHAR" />
+        <result column="upload_file_path" property="uploadFilePath" jdbcType="VARCHAR" />
+        <result column="upload_file_name" property="uploadFileName" jdbcType="VARCHAR" />
+        <result column="update_reason" property="updateReason" jdbcType="VARCHAR" />
+        <result column="region_cd" property="regionCd" jdbcType="VARCHAR" />
+        <result column="n_typeid" property="nTypeId" jdbcType="DECIMAL" />
+        <result column="production_location_name" property="productionLocationName" jdbcType="VARCHAR" />
+        <result column="service_partner" property="servicePartner" jdbcType="VARCHAR" />
+        <result column="phone_code_value" property="phoneCodeValue" jdbcType="VARCHAR" />
+        <result column="product_status" property="productStatus" jdbcType="VARCHAR" />
+        <result column="temperature" property="temperature" jdbcType="VARCHAR" />
+        <result column="dep_name" property="depName" jdbcType="VARCHAR" />
+        <result column="pma_name" property="pmaName" jdbcType="VARCHAR" />
+        <result column="category_name" property="categoryName" jdbcType="VARCHAR" />
+        <result column="sub_category_name" property="subCategoryName" jdbcType="VARCHAR" />
+        <result column="structure_name" property="regionName" jdbcType="VARCHAR" />
+        <result column="brand_name" property="brandName" jdbcType="VARCHAR" />
+        <result column="material_type_name" property="materialTypeName" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="ReMa1110" type="cn.com.bbut.iy.itemmaster.dto.article.OrderControlDTO">
+        <id column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <id column="structure_cd" property="structureCd" jdbcType="VARCHAR" />
+        <id column="ma_cd" property="maCd" jdbcType="VARCHAR" />
+        <id column="vendor_id" property="vendorId" jdbcType="VARCHAR" />
+        <id column="effective_start_date" property="effectiveStartDate" jdbcType="VARCHAR" />
+        <result column="effective_end_date" property="effectiveEndDate" jdbcType="VARCHAR" />
+        <result column="sale_tax_type_cd" property="saleTaxTypeCd" jdbcType="VARCHAR" />
+        <result column="order_tax_type_cd" property="orderTaxTypeCd" jdbcType="VARCHAR" />
+        <result column="base_order_price" property="baseOrderPrice" jdbcType="DECIMAL" />
+        <result column="advise_sale_price" property="adviseSalePrice" jdbcType="DECIMAL" />
+        <result column="purchase_unit_id" property="purchaseUnitId" jdbcType="VARCHAR" />
+        <result column="order_unit_qty" property="orderUnitQty" jdbcType="DECIMAL" />
+        <result column="min_order_qty" property="minOrderQty" jdbcType="DECIMAL" />
+        <result column="max_order_qty" property="maxOrderQty" jdbcType="DECIMAL" />
+        <result column="order_batch_qty" property="orderBatchQty" jdbcType="DECIMAL" />
+        <result column="order_pause_flg" property="orderPauseFlg" jdbcType="VARCHAR" />
+        <result column="return_pause_flg" property="returnPauseFlg" jdbcType="VARCHAR" />
+        <result column="receive_price_chg_flg" property="receivePriceChgFlg" jdbcType="VARCHAR" />
+        <result column="vendor_article_id" property="vendorArticleId" jdbcType="VARCHAR" />
+        <result column="shipment_flg" property="shipmentFlg" jdbcType="VARCHAR" />
+        <result column="major_vendor_flg" property="majorVendorFlg" jdbcType="VARCHAR" />
+        <result column="is_default" property="isDefault" jdbcType="VARCHAR" />
+        <result column="dc_m_order_qty" property="dcMOrderQty" jdbcType="DECIMAL" />
+        <result column="order_pause_dc_flg" property="orderPauseDcFlg" jdbcType="VARCHAR" />
+        <result column="remaining_shelf_life" property="remainingShelfLife" jdbcType="DECIMAL" />
+        <result column="exchangable_pause_flg" property="exchangablePauseFlg" jdbcType="VARCHAR" />
+        <result column="exchangable_shelf_life" property="exchangableShelfLife" jdbcType="DECIMAL" />
+        <result column="notification_shelf_life" property="notificationShelfLife" jdbcType="DECIMAL" />
+        <result column="order_discount_on_invoice" property="orderDiscountOnInvoice" jdbcType="DECIMAL" />
+        <result column="min_order_amt_tax" property="minOrderAmtTax" jdbcType="DECIMAL" />
+        <result column="product_group_cd" property="productGroupCd" jdbcType="VARCHAR" />
+        <result column="vendor_eff_date" property="vendorEffDate" jdbcType="VARCHAR" />
+        <result column="order_terminated" property="orderTerminated" jdbcType="VARCHAR" />
+        <result column="default_barcode" property="defaultBarcode" jdbcType="VARCHAR" />
+        <result column="dc_item" property="dcItem" jdbcType="VARCHAR" />
+        <result column="product_group_name" property="productGroupName" jdbcType="VARCHAR" />
+        <result column="vendor_name_short" property="vendorShortName" jdbcType="VARCHAR" />
+        <result column="structure_name" property="structureName" jdbcType="VARCHAR" />
+        <result column="order_tax_type_name" property="orderTaxTypeName" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="ReMa1130" type="cn.com.bbut.iy.itemmaster.dto.article.SalesControlDTO">
+        <id column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <id column="structure_cd" property="structureCd" jdbcType="VARCHAR" />
+        <id column="store_type_cd" property="storeTypeCd" jdbcType="VARCHAR" />
+        <id column="ma_cd" property="maCd" jdbcType="VARCHAR" />
+        <id column="effective_start_date" property="effectiveStartDate" jdbcType="VARCHAR" />
+        <result column="effective_end_date" property="effectiveEndDate" jdbcType="VARCHAR" />
+        <result column="sale_flg" property="saleFlg" jdbcType="VARCHAR" />
+        <result column="base_sale_price" property="baseSalePrice" jdbcType="DECIMAL" />
+        <result column="recommend_qty" property="recommendQty" jdbcType="DECIMAL" />
+        <result column="sale_pause_flg" property="salePauseFlg" jdbcType="VARCHAR" />
+        <result column="member_price" property="memberPrice" jdbcType="DECIMAL" />
+        <result column="sale_tax_type_cd" property="saleTaxTypeCd" jdbcType="VARCHAR" />
+        <result column="structure_name" property="structureName" jdbcType="VARCHAR" />
+        <result column="ma_name" property="maName" jdbcType="VARCHAR" />
+        <result column="sale_inactive" property="saleInactive" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="ReMa1140" type="cn.com.bbut.iy.itemmaster.dto.article.BarcodeDTO">
+        <id column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <id column="barcode" property="barcode" jdbcType="VARCHAR" />
+        <id column="effective_start_date" property="effectiveStartDate" jdbcType="VARCHAR" />
+        <result column="effective_end_date" property="effectiveEndDate" jdbcType="VARCHAR" />
+        <result column="is_default" property="isDefault" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="ReMa1190" type="cn.com.bbut.iy.itemmaster.dto.article.FlavorDTO">
+        <id column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <id column="tasting_id" property="tastingId" jdbcType="VARCHAR" />
+        <id column="effective_start_date" property="effectiveStartDate" jdbcType="VARCHAR" />
+        <result column="effective_end_date" property="effectiveEndDate" jdbcType="VARCHAR" />
+        <result column="nr_update_flg" property="nrUpdateFlg" jdbcType="VARCHAR" />
+        <result column="nr_ymd" property="nrYmd" jdbcType="VARCHAR" />
+        <result column="nr_hms" property="nrHms" jdbcType="VARCHAR" />
+        <result column="create_user_id" property="createUserId" jdbcType="VARCHAR" />
+        <result column="create_ymd" property="createYmd" jdbcType="VARCHAR" />
+        <result column="create_hms" property="createHms" jdbcType="VARCHAR" />
+        <result column="update_user_id" property="updateUserId" jdbcType="VARCHAR" />
+        <result column="update_ymd" property="updateYmd" jdbcType="VARCHAR" />
+        <result column="update_hms" property="updateHms" jdbcType="VARCHAR" />
+        <result column="update_screen_id" property="updateScreenId" jdbcType="VARCHAR" />
+        <result column="update_ip_address" property="updateIpAddress" jdbcType="VARCHAR" />
+        <result column="tasting_name" property="tastingName" jdbcType="VARCHAR" />
+        <result column="tasting_category_id" property="tastingCategoryId" jdbcType="VARCHAR" />
+        <result column="tasting_category_name" property="tastingCategoryName" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="ReMa1191" type="cn.com.bbut.iy.itemmaster.dto.article.FoodServiceDTO">
+        <id column="article_id" jdbcType="VARCHAR" property="articleId" />
+        <id column="effective_start_date" jdbcType="CHAR" property="effectiveStartDate" />
+        <result column="kitchen_choose" jdbcType="CHAR" property="kitchenChoose" />
+        <result column="scheme_one" jdbcType="VARCHAR" property="schemeOne" />
+        <result column="scheme_two" jdbcType="VARCHAR" property="schemeTwo" />
+        <result column="scheme_three" jdbcType="VARCHAR" property="schemeThree" />
+        <result column="effective_end_date" jdbcType="CHAR" property="effectiveEndDate" />
+        <result column="effective_sts" jdbcType="CHAR" property="effectiveSts" />
+        <result column="scheme_one_name" jdbcType="VARCHAR" property="schemeOneName" />
+        <result column="scheme_two_name" jdbcType="VARCHAR" property="schemeTwoName" />
+        <result column="scheme_three_name" jdbcType="VARCHAR" property="schemeThreeName" />
+    </resultMap>
+
+    <resultMap id="ReMa1192" type="cn.com.bbut.iy.itemmaster.dto.article.CartonSpecificationDTO">
+        <id column="article_id" jdbcType="VARCHAR" property="articleId" />
+        <id column="effective_start_date" jdbcType="CHAR" property="effectiveStartDate" />
+        <result column="net_weight_g" jdbcType="DECIMAL" property="netWeightG" />
+        <result column="gross_weight_g" jdbcType="DECIMAL" property="grossWeightG" />
+        <result column="units_per" jdbcType="VARCHAR" property="unitsPer" />
+        <result column="units_per_carton" jdbcType="VARCHAR" property="unitsPerCarton" />
+        <result column="cartons_per_layer" jdbcType="VARCHAR" property="cartonsPerLayer" />
+        <result column="cartons_per_pallet" jdbcType="VARCHAR" property="cartonsPerPallet" />
+        <result column="length" jdbcType="DECIMAL" property="length" />
+        <result column="width" jdbcType="DECIMAL" property="width" />
+        <result column="height" jdbcType="DECIMAL" property="height" />
+        <result column="bundle_per" jdbcType="VARCHAR" property="bundlePer" />
+    </resultMap>
+
+    <sql id="selectCondition">
+        <if test="articleId != null and articleId != ''">
+            AND lower(article_id) like lower(CONCAT('%',#{articleId,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="articleName != null and articleName != ''">
+            AND lower(article_name) like lower(CONCAT('%',#{articleName,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="materialType != null and materialType != ''">
+            AND material_type = #{materialType,jdbcType=VARCHAR}
+        </if>
+        <if test="brand != null and brand != ''">
+            AND brand = #{brand,jdbcType=VARCHAR}
+        </if>
+        <if test="depCd != null and depCd != '' and depCd!='999'">
+            AND dep_cd = #{depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="pmaCd != null and pmaCd != ''">
+            AND pma_cd = #{pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="categoryCd != null and categoryCd != ''">
+            AND category_cd = #{categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="subCategoryCd != null and subCategoryCd != ''">
+            AND sub_category_cd = #{subCategoryCd,jdbcType=VARCHAR}
+        </if>
+    </sql>
+
+    <select id="selectCountByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.article.ArticleParamDTO" resultType="INT">
+        SELECT
+--             COUNT(1)
+        count (distinct T.article_id)
+        FROM(
+        SELECT
+        distinct
+        article_id, effective_start_date, effective_end_date, article_name, article_short_name,
+        article_name_en, article_short_name_en, delivery_type_cd, dep_cd, pma_cd, category_cd,
+        sub_category_cd, spec, sales_unit_id, brand, grade, production_location, pb_flg,
+        especial_flg, article_weigh_flag, article_type, article_new_flag, store_price_chg_flg,
+        tag_type, season_cd, lifecycle_status, recommend_reason_cd, receive_unit_id,
+        package_number, opl_method, min_display_qty, order_type, product_status, material_type
+        FROM
+        MA1100
+        WHERE
+        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        <include refid="selectCondition"></include>
+        ) T
+        left join ma1140
+        on T.article_id = ma1140.article_id and T.effective_start_date = ma1140.effective_start_date,
+        ( SELECT brand_cd, brand_name FROM MA0230 ) T0 ,
+        ( SELECT dep_cd, dep_name FROM MA0070 ) T2 ,
+        ( SELECT dep_cd, pma_cd, pma_name FROM MA0080 ) T3 ,
+        ( SELECT dep_cd, pma_cd, category_cd, category_name FROM MA0090 ) T4,
+        ( SELECT dep_cd, pma_cd, category_cd, sub_category_cd, sub_category_name FROM MA0100 ) T5,
+        ( SELECT material_type_id, material_type_name FROM MA4140 WHERE effective_sts = '10' ) T6
+        <where>
+            T.brand = T0.brand_cd
+            AND T.dep_cd = T2.dep_cd
+            AND T.dep_cd = T3.dep_cd AND T.pma_cd = T3.pma_cd
+            AND T.dep_cd = T4.dep_cd AND T.pma_cd = T4.pma_cd AND T.category_cd = T4.category_cd
+            AND T.dep_cd = T5.dep_cd AND T.pma_cd = T5.pma_cd
+            AND T.category_cd = T5.category_cd AND T.sub_category_cd = T5.sub_category_cd
+            AND T.material_type = T6.material_type_id
+            <if test="barcode != null and barcode != ''">
+                AND ma1140.barcode like concat('%',#{barcode,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.article.ArticleParamDTO" resultMap="ReMa1100">
+        SELECT
+        distinct  T.*, T0.brand_name, T6.material_type_name,
+            T2.dep_name, T3.pma_name, T4.category_name, T5.sub_category_name
+        FROM(
+            SELECT
+                article_id, effective_start_date, effective_end_date, article_name, article_short_name,
+                article_name_en, article_short_name_en, delivery_type_cd, dep_cd, pma_cd, category_cd,
+                sub_category_cd, spec, sales_unit_id, brand, grade, production_location, pb_flg,
+                especial_flg, article_weigh_flag, article_type, article_new_flag, store_price_chg_flg,
+                tag_type, season_cd, lifecycle_status, recommend_reason_cd, receive_unit_id,
+                package_number, opl_method, min_display_qty, order_type, product_status, material_type
+            FROM
+                MA1100
+            WHERE
+                #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            <include refid="selectCondition"></include>
+        ) T
+        left join ma1140
+        on T.article_id = ma1140.article_id and T.effective_start_date = ma1140.effective_start_date,
+        ( SELECT brand_cd, brand_name FROM MA0230 ) T0 ,
+        ( SELECT dep_cd, dep_name FROM MA0070 ) T2 ,
+        ( SELECT dep_cd, pma_cd, pma_name FROM MA0080 ) T3 ,
+        ( SELECT dep_cd, pma_cd, category_cd, category_name FROM MA0090 ) T4,
+        ( SELECT dep_cd, pma_cd, category_cd, sub_category_cd, sub_category_name FROM MA0100 ) T5,
+        ( SELECT material_type_id, material_type_name FROM MA4140 WHERE effective_sts = '10' ) T6
+        <where>
+            T.brand = T0.brand_cd
+            AND T.dep_cd = T2.dep_cd
+            AND T.dep_cd = T3.dep_cd AND T.pma_cd = T3.pma_cd
+            AND T.dep_cd = T4.dep_cd AND T.pma_cd = T4.pma_cd AND T.category_cd = T4.category_cd
+            AND T.dep_cd = T5.dep_cd AND T.pma_cd = T5.pma_cd
+            AND T.category_cd = T5.category_cd AND T.sub_category_cd = T5.sub_category_cd
+            AND T.material_type = T6.material_type_id
+            <if test="barcode != null and barcode != ''">
+                AND ma1140.barcode like concat('%',#{barcode,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+        ORDER BY T.effective_start_date DESC
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+
+    <select id="selectArticle" parameterType="cn.com.bbut.iy.itemmaster.dto.article.ArticleParamDTO" resultMap="ReMa1100">
+        SELECT
+            T.*, T1.structure_name, T6.brand_name,
+            T2.dep_name, T3.pma_name, T4.category_name, T5.sub_category_name
+        FROM(
+            SELECT
+                article_id, effective_start_date, effective_end_date, article_name, article_short_name,
+                article_name_en, article_short_name_en, delivery_type_cd, dep_cd, pma_cd, category_cd,
+                sub_category_cd, spec, sales_unit_id, brand, grade, production_location, pb_flg,
+                especial_flg, article_weigh_flag, article_type, article_new_flag, store_price_chg_flg,
+                tag_type, season_cd, lifecycle_status, recommend_reason_cd, receive_unit_id, package_number,
+                opl_method, min_display_qty, order_type, barcode_type, tenant_contract_no, sales_vat_cd,
+                purchase_vat_cd, refer_purchase_price, refer_sale_price, preserve_type, warranty_days,
+                receive_date_limit, sale_date_limit, package_os_weight, package_os_size_length,
+                package_os_size_width, package_os_size_height, package_is_weight, package_is_size_length,
+                package_is_size_width, package_is_size_height, area_cd, member_price, article_name_vietnamese,
+                article_short_name_vietnamese, manufacturer, material_type, converter, purchase_item,
+                sales_item, inventory_item, cost_item, dc_item, is_default_free_item, is_food_sevice_item,
+                is_food_sevice_stock_count, not_allow_order_to_supplier, allow_order_to_dc, customer, income,
+                discount_on_invoice, price_unit_vat, remaining_shelf_life, aging_stock_exchangeable,
+                aging_stock_returnable, image_path, remark, contract_expire_date, qos_expire_date,
+                upload_file_path, upload_file_name, update_reason, region_cd, n_typeid, production_location_name,
+                service_partner, phone_code_value, product_status, temperature, vietnamese_item_shortname
+            FROM
+                MA1100
+            WHERE
+                article_id = #{articleId,jdbcType=VARCHAR}
+            AND effective_start_date = #{effectiveStartDate,jdbcType=VARCHAR}
+        ) T
+        LEFT JOIN (
+            SELECT structure_cd, structure_name
+            FROM MA0020
+            WHERE level = '0'
+        ) T1
+        ON T.region_cd = T1.structure_cd
+        LEFT JOIN (
+            SELECT dep_cd, dep_name FROM MA0070
+        ) T2
+        ON T.dep_cd = T2.dep_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, pma_name FROM MA0080
+        ) T3
+        ON T.dep_cd = T3.dep_cd AND T.pma_cd = T3.pma_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, category_cd, category_name FROM MA0090
+        ) T4
+        ON T.dep_cd = T4.dep_cd AND T.pma_cd = T4.pma_cd AND T.category_cd = T4.category_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, category_cd, sub_category_cd, sub_category_name FROM MA0100
+        ) T5
+        ON T.dep_cd = T5.dep_cd AND T.pma_cd = T5.pma_cd AND T.category_cd = T5.category_cd AND T.sub_category_cd = T5.sub_category_cd
+        LEFT JOIN (
+            SELECT brand_cd, brand_name FROM MA0230
+        ) T6
+        ON T.brand = T6.brand_cd
+    </select>
+
+    <select id="selectOrderControl" parameterType="cn.com.bbut.iy.itemmaster.dto.article.ArticleParamDTO" resultMap="ReMa1110">
+        SELECT
+            T.*, T0.structure_name, T1.product_group_name, T2.vendor_name_short,
+            T3.dealer_reserved_1 AS order_tax_type_name
+        FROM (
+            SELECT
+                article_id, structure_cd, ma_cd, vendor_id, effective_start_date, effective_end_date,
+                sale_tax_type_cd, order_tax_type_cd, base_order_price, advise_sale_price, purchase_unit_id,
+                order_unit_qty, min_order_qty, max_order_qty, order_batch_qty, order_pause_flg, return_pause_flg,
+                receive_price_chg_flg, vendor_article_id, shipment_flg, major_vendor_flg, is_default,
+                dc_m_order_qty, order_pause_dc_flg, remaining_shelf_life, exchangable_pause_flg,
+                exchangable_shelf_life, notification_shelf_life, order_discount_on_invoice, min_order_amt_tax,
+                product_group_cd, vendor_eff_date, order_terminated, default_barcode, dc_item
+            FROM
+                MA1110
+            WHERE
+                article_id = #{articleId,jdbcType=VARCHAR}
+            AND effective_start_date = #{effectiveStartDate,jdbcType=VARCHAR}
+        ) T
+        LEFT JOIN (
+            SELECT structure_cd, structure_name
+            FROM MA0020 WHERE structure_level = '2'
+        ) T0
+        ON T.structure_cd = T0.structure_cd
+        LEFT JOIN (
+            SELECT product_group_cd, product_group_name
+            FROM MA0240 WHERE effective_sts = '10'
+        ) T1
+        ON T.product_group_cd = T1.product_group_cd
+        LEFT JOIN (
+            SELECT vendor_id, effective_start_date, effective_end_date, vendor_name_short
+            FROM MA2000
+        ) T2
+        ON T.vendor_id = T2.vendor_id AND T.effective_start_date BETWEEN T2.effective_start_date AND T2.effective_end_date
+        LEFT JOIN (
+            SELECT code_value, dealer_reserved_1 FROM CM9010 WHERE code_type = '00120'
+        ) T3
+        ON T.order_tax_type_cd = T3.code_value
+    </select>
+
+    <select id="selectSalesControl" parameterType="cn.com.bbut.iy.itemmaster.dto.article.ArticleParamDTO" resultMap="ReMa1130">
+        SELECT distinct
+            T.*, m1.advise_sale_price,T1.structure_name, T2.ma_name, T3.dealer_reserved_1 AS sale_tax_type_name
+        FROM (
+            SELECT
+                article_id, structure_cd, store_type_cd, ma_cd, effective_start_date, effective_end_date,
+                sale_flg, base_sale_price, recommend_qty, sale_pause_flg, member_price, sale_tax_type_cd,
+                sale_inactive
+            FROM
+                MA1130
+            WHERE
+                article_id = #{articleId,jdbcType=VARCHAR}
+            AND effective_start_date = #{effectiveStartDate,jdbcType=VARCHAR}
+        ) T
+        LEFT JOIN ma1110 m1 on T.article_id = m1.article_id
+        LEFT JOIN (
+            SELECT structure_cd, structure_name
+            FROM MA0020
+            WHERE structure_level = '2'
+        ) T1
+        ON T.structure_cd = T1.structure_cd
+        LEFT JOIN (
+            SELECT ma_cd, ma_name FROM MA0200
+        ) T2
+        ON T.ma_cd = T2.ma_cd
+        LEFT JOIN (
+            SELECT code_value, dealer_reserved_1 FROM CM9010 WHERE code_type = '00120'
+        ) T3
+        ON T.sale_tax_type_cd = T3.code_value
+    </select>
+
+    <select id="selectBarcode" parameterType="cn.com.bbut.iy.itemmaster.dto.article.ArticleParamDTO" resultMap="ReMa1140">
+        SELECT
+            article_id, barcode, effective_start_date
+        FROM
+            MA1140
+        WHERE
+            article_id = #{articleId,jdbcType=VARCHAR}
+        AND effective_start_date = #{effectiveStartDate,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectFlavor" parameterType="cn.com.bbut.iy.itemmaster.dto.article.ArticleParamDTO" resultMap="ReMa1190">
+        SELECT
+            T.tasting_id, tasting_name,
+            MA5020.tasting_category_id, tasting_category_name
+        FROM (
+            SELECT
+                tasting_id
+            FROM
+                MA1190
+            WHERE
+                article_id = #{articleId,jdbcType=VARCHAR}
+            AND effective_start_date = #{effectiveStartDate,jdbcType=VARCHAR}
+        ) T
+        LEFT JOIN MA5020 ON T.tasting_id = MA5020.tasting_id
+        LEFT JOIN MA5010 ON MA5010.tasting_category_id = MA5020.tasting_category_id
+    </select>
+
+    <select id="selectFoodService" parameterType="cn.com.bbut.iy.itemmaster.dto.article.ArticleParamDTO" resultMap="ReMa1191">
+        SELECT
+            T.article_id, T.kitchen_choose,
+            T1.kitchen_scheme_name AS scheme_one_name,
+            T2.kitchen_scheme_name AS scheme_two_name,
+            T3.kitchen_scheme_name AS scheme_three_name
+        FROM (
+            SELECT
+                article_id, kitchen_choose, scheme_one, scheme_two, scheme_three
+            FROM
+                MA1191
+            WHERE
+                article_id = #{articleId,jdbcType=VARCHAR}
+            AND effective_start_date = #{effectiveStartDate,jdbcType=VARCHAR}
+        ) T
+        LEFT JOIN (
+            SELECT scheme_id, kitchen_scheme_name FROM MA0530
+        ) T1
+        ON T.scheme_one = T1.scheme_id
+        LEFT JOIN (
+            SELECT scheme_id, kitchen_scheme_name FROM MA0530
+        ) T2
+        ON T.scheme_two = T2.scheme_id
+        LEFT JOIN (
+            SELECT scheme_id, kitchen_scheme_name FROM MA0530
+        ) T3
+        ON T.scheme_three = T3.scheme_id
+    </select>
+
+    <select id="selectCartonSpecification" parameterType="cn.com.bbut.iy.itemmaster.dto.article.ArticleParamDTO" resultMap="ReMa1192">
+        SELECT
+            article_id, effective_start_date, net_weight_g, gross_weight_g, units_per, units_per_carton,
+            cartons_per_layer, cartons_per_pallet, length, width, height, bundle_per
+        FROM
+            MA1192
+        WHERE
+            article_id = #{articleId,jdbcType=VARCHAR}
+        AND effective_start_date = #{effectiveStartDate,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT article_id k, CONCAT(article_id,' ',article_name) AS v
+        FROM ma1100
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN EFFECTIVE_START_DATE AND EFFECTIVE_END_DATE
+        <if test="v!=null and v!=''">
+            AND (
+                lower(article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                OR lower(article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ORDER BY article_id
+    </select>
+
+    <select id="selectBrand" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT brand_cd k, CONCAT(brand_cd,' ',brand_name) AS v
+        FROM ma0230
+        WHERE effective_sts = '10'
+        <if test="v!=null and v!=''">
+            AND (
+                lower(brand_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                OR lower(brand_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ORDER BY brand_cd
+    </select>
+
+    <select id="selectMaterialType" resultType="cn.com.bbut.iy.itemmaster.entity.cm9010.Cm9010">
+        SELECT material_type_id AS codeValue, material_type_name AS codeName
+        FROM ma4140
+        WHERE effective_sts = '10'
+        ORDER BY material_type_id
+    </select>
+
+</mapper>

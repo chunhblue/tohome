@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.audit.ApprovalRecordsMapper">
+	
+	<resultMap type="cn.com.bbut.iy.itemmaster.dto.audit.ApprovalRecordsGridDTO" id="ApprovalRecordsDTO">
+		<result column="c_reviewname" property="approvalType" jdbcType="VARCHAR"/>
+		<result column="c_rolename" property="approvalLevel" jdbcType="VARCHAR"/>
+		<result column="SUB_NO" property="subNo" />
+		<result column="c_auditstatus" property="auditStatus" />
+		<result column="emp_num_id" property="userCode" jdbcType="VARCHAR"/>
+		<result column="emp_name" property="userName" jdbcType="VARCHAR"/>
+		<result column="audit_time" property="dateTime" jdbcType="TIMESTAMP"/>
+		<result column="audit_content" property="comments" jdbcType="VARCHAR"/>
+		<result column="c_type_name" property="typeName" jdbcType="VARCHAR"/>
+	</resultMap>
+
+ 	<select id="selectApprovalRecords" resultMap="ApprovalRecordsDTO" parameterType="cn.com.bbut.iy.itemmaster.dto.audit.ApprovalRecordsParamDTO">
+		SELECT DISTINCT
+		AT.N_DISTINGUISH_TYPEID AS AUDITTYPE,
+		A.SUB_NO, A.AUDIT_TIME, A.AUDIT_CONTENT, A.C_AUDITSTATUS,
+		R.C_REVIEWNAME, O.EMP_NAME, O.EMP_NUM_ID, at.C_TYPE_NAME,
+		CASE WHEN ro.NAME IS NULL THEN r.START_ROLE ELSE ro.NAME END
+		FROM
+		(
+			SELECT *
+			FROM
+			T_AUDIT_TAB
+			WHERE
+			<![CDATA[
+			N_OPERATORID <> ''
+			]]>
+			AND RECORD_CD = #{id}
+			<if test="typeIdArray !=null and typeIdArray.length > 0">
+				AND N_TYPEID IN
+				<foreach collection="typeIdArray" item="typeId" open="(" separator=","  close=")">
+					#{typeId}
+				</foreach>
+			</if>
+		 ) a
+		LEFT JOIN
+		T_REVIEW r
+		ON
+		a.N_REVIEWID = r.N_REVIEWID
+		LEFT JOIN
+		MA4200 o
+		ON
+		a.N_OPERATORID =o.EMP_NUM_ID 
+		LEFT JOIN
+		T_REVIEW_STEP rs
+		ON
+		a.SUB_NO = rs.C_STEP
+		AND
+		a.N_REVIEWID = rs.N_REVIEWID
+		LEFT JOIN
+		iy_m_role ro
+		ON
+		rs.N_ROLEID = ro.id
+		LEFT JOIN
+		t_audit_type at
+		on
+		at.n_typeid = a.n_typeid
+		<where>
+			<if test="userCode != null and userCode != ''">
+				AND o.c_operatorcode like concat('%',#{userCode},'%')
+			</if>
+			<if test="startDate != null and startDate != ''">
+				AND A.AUDIT_TIME >= cast(#{startDate} as timestamp)
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND cast(#{endDate} as timestamp) >= A.AUDIT_TIME
+			</if>
+		</where>
+		ORDER BY a.audit_time DESC,a.sub_no DESC
+		<if test="limitStart >= 0">
+			limit ${limitEnd} offset ${limitStart}
+		</if>
+	</select>
+
+	<select id="selectApprovalRecordsCount" resultType="long" parameterType="cn.com.bbut.iy.itemmaster.dto.audit.ApprovalRecordsParamDTO">
+		SELECT COUNT (*) FROM (SELECT DISTINCT
+		AT.N_DISTINGUISH_TYPEID AS AUDITTYPE,
+		A.SUB_NO, A.AUDIT_TIME, A.AUDIT_CONTENT, A.C_AUDITSTATUS,
+		R.C_REVIEWNAME, O.EMP_NAME, O.EMP_NUM_ID, at.C_TYPE_NAME,
+		CASE WHEN ro.NAME IS NULL THEN r.START_ROLE ELSE ro.NAME END
+		FROM
+		(
+		SELECT *
+		FROM
+		T_AUDIT_TAB
+		WHERE
+		<![CDATA[
+			N_OPERATORID <> ''
+		]]>
+		AND RECORD_CD = #{id}
+		<if test="typeIdArray !=null and typeIdArray.length > 0">
+			AND N_TYPEID IN
+			<foreach collection="typeIdArray" item="typeId" open="(" separator=","  close=")">
+				#{typeId}
+			</foreach>
+		</if>
+		) a
+		LEFT JOIN
+		T_REVIEW r
+		ON
+		a.N_REVIEWID = r.N_REVIEWID
+		LEFT JOIN
+		MA4200 o
+		ON
+		a.N_OPERATORID =o.EMP_NUM_ID 
+		LEFT JOIN
+		T_REVIEW_STEP rs
+		ON
+		a.SUB_NO = rs.C_STEP
+		AND
+		a.N_REVIEWID = rs.N_REVIEWID
+		LEFT JOIN
+		iy_m_role ro
+		ON
+		rs.N_ROLEID = ro.id
+		LEFT JOIN
+		t_audit_type at
+		on
+		at.n_typeid = a.n_typeid
+		<where>
+			<if test="userCode != null and userCode != ''">
+				AND o.c_operatorcode like concat('%',#{userCode},'%')
+			</if>
+			<if test="startDate != null and startDate != ''">
+				AND A.AUDIT_TIME >= cast(#{startDate} as timestamp)
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND cast(#{endDate} as timestamp) >= A.AUDIT_TIME
+			</if>
+		</where>
+		) result
+	</select>
+</mapper>

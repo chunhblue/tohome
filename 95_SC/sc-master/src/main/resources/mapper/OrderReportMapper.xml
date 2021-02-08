@@ -1,0 +1,597 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.OrderReportMapper">
+    <resultMap id="BaseResultMap" type="cn.com.bbut.iy.itemmaster.dto.orderReport.OrderReportDTO">
+        <result column="article_id" property="articleId"></result>
+        <result column="barcode" property="barcode"></result>
+        <result column="article_name" property="articleName"></result>
+        <result column="article_Id" property="articleId"></result>
+        <result column="sales_unit_id" property="orderUnit"></result>
+        <result column="purchase_unit_id" property="uom"></result>
+        <result column="order_qty" property="orderQty"></result>
+        <result column="order_nocharge_qty" property="orderNochargeQty"></result>
+        <result column="receive_total_qty" property="receiveTotalQty"></result>
+        <result column="receive_qty" property="receiveQty"></result>
+        <result column="order_id" property="orderId"></result>
+        <result column="order_date" property="orderDate"></result>
+        <result column="store_name" property="storeName"></result>
+        <result column="store_cd" property="storeCd"></result>
+        <result column="auto_order_qty" property="autoOrderQty"></result>
+        <result column="real_qty" property="realQty"></result>
+        <result column="variance_qty" property="varianceQty"></result>
+        <result column="qty1" property="qty1"></result>
+        <result column="variance" property="variance"></result>
+        <result column="am" property="am"></result>
+        <result column="warehouse_name" property="dcName"></result>
+
+    </resultMap>
+
+    <select id="getOrderInfo" parameterType="cn.com.bbut.iy.itemmaster.dto.orderReport.OrderReportParamDTO"
+            resultMap="BaseResultMap">
+        SELECT
+        T.*,T.order_date,T5.warehouse_name,T3.store_name
+        FROM (
+        SELECT
+        distinct
+        store_cd,order_id,order_date,A.review_status,vendor_id,delivery_date,A.order_method
+        FROM
+        OD0000 A
+        WHERE
+           A.order_date =#{param.orderDate}
+            AND A.order_type='01'
+        <if test="param.storeCd !='' and param.storeCd !=null ">
+         AND   A.store_cd=#{param.storeCd }
+        </if>
+        ) AS T
+        LEFT JOIN (
+        SELECT vendor_id, vendor_name FROM MA2000
+        ) T2
+        ON T.vendor_id = T2.vendor_id
+        LEFT JOIN (
+        SELECT store_cd, store_name, zo_cd FROM MA1000) T3
+        on T.store_cd=T3.store_cd
+        left join(
+        Select * from ma5321
+        ) T5
+        on T.vendor_id=T5.warehouse_no
+    </select>
+
+<!--    <select id="getItemInfo" parameterType="cn.com.bbut.iy.itemmaster.dto.orderReport.OrderReportDTO"-->
+<!--            resultMap="BaseResultMap">-->
+<!--        SELECT DISTINCT-->
+<!--            od0010.barcode,-->
+<!--            od0010.article_id,-->
+<!--            ma1100.article_name,-->
+<!--            od0010.vendor_id,-->
+<!--            od0010.order_unit purchase_unit_id,-->
+<!--            od0010.order_price,-->
+<!--            ma1100.converter,-->
+<!--            ma1100.spec,-->
+<!--           COALESCE(receive_qty,0) as receive_qty,-->
+<!--            ma1110.order_batch_qty,-->
+<!--            ma1110.min_order_amt_tax,/*最低订货金额*/-->
+<!--&#45;&#45;             ma1110.min_order_qty,-->
+<!--        COALESCE(min_order_qty,0) as min_order_qty,-->
+<!--        COALESCE(dc_m_order_qty,0) as dc_m_order_qty,-->
+<!--            ma1110.order_tax_type_cd,/*税率cd*/-->
+<!--            ma1100.min_display_qty,-->
+<!--            sk0000.advise_qty AS auto_order_qty,-->
+<!--            od0010.order_unit AS unit_id,-->
+<!--            ma0220.unit_name,-->
+<!--            od0010.order_qty AS order_qty,-->
+<!--            od0010.order_nocharge_qty,-->
+<!--            	od0010.order_qty +  COALESCE(od0010.order_nocharge_qty,0) as real_qty,-->
+<!--            ( SELECT ma8070.psd ma8070 FROM ma8070 WHERE ma8070.store_cd = #{param.storeCd,jdbcType=VARCHAR} AND ma8070.article_id = od0010.article_id ) AS psd,-->
+<!--            od0010.order_amt AS order_total_amt-->
+<!--        FROM-->
+<!--            ma1000,-->
+<!--            ma1100,-->
+<!--            ma1110,-->
+<!--            od0010 LEFT JOIN sk0000 on-->
+<!--            od0010.article_id = sk0000.article_id-->
+<!--            AND sk0000.store_cd = #{param.storeCd,jdbcType=VARCHAR}-->
+<!--            AND sk0000.store_cd = od0010.store_cd-->
+<!--            AND sk0000.effective_date = #{param.orderDate,jdbcType=VARCHAR}-->
+<!--            LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id-->
+<!--        WHERE-->
+<!--            ma1100.article_id = od0010.article_id-->
+<!--            AND ma1000.store_cd = od0010.store_cd-->
+<!--            AND #{param.orderDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date-->
+<!--            AND ma1000.effective_end_date-->
+<!--            AND #{param.orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date-->
+<!--            AND ma1100.effective_end_date-->
+<!--            AND ma1100.article_id = ma1110.article_id-->
+<!--&#45;&#45;             AND ma1100.effective_start_date = ma1110.effective_start_date-->
+<!--            AND ma1110.structure_cd = (-->
+<!--                select admin_structure_cd from MA0020 where structure_cd =-->
+<!--                (SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = od0010.store_cd and effective_sts = '10') and effective_sts = '10'-->
+<!--                )-->
+<!--            AND od0010.vendor_id = ma1110.vendor_id-->
+<!--&#45;&#45;             AND ma1110.ma_cd = ma1000.ma_cd-->
+<!--            AND od0010.order_id =#{param.orderId,jdbcType=VARCHAR}-->
+<!--        ORDER BY-->
+<!--            od0010.article_id ASC;-->
+<!--    </select>-->
+
+    <select id="getList" parameterType="java.lang.String"
+            resultMap="BaseResultMap">
+        SELECT DISTINCT
+        T.store_cd,
+        T.article_id,
+        T6.default_barcode,
+        T.on_hand_qty AS qty1,
+        T.effective_date AS voucher_date,
+        T0.store_name,
+        oper.c_operatorcode,
+        oper.c_operatorname,
+        T1.article_name,
+        T1.dep_cd,
+        T1.pma_cd,
+        T1.category_cd,
+        T1.sub_category_cd,
+        concat(T1.dep_cd,' ',T2.dep_name) dep_name,
+        concat(T1.pma_cd,' ',T3.pma_name) pma_name,
+        concat(T1.category_cd,' ',T4.category_name) category_name,
+        concat(T1.sub_category_cd,' ',T5.sub_category_name) sub_category_name
+        FROM
+        SK0000 T,
+        ma1000 T0,
+        ma1100 T1,
+        ma0070 T2,
+        ma0080 T3,
+        ma0090 T4,
+        ma0100 T5,
+        ma1110 T6,
+        t_operator oper
+        <where>
+            AND T.article_id = T1.article_id
+            AND #{param} BETWEEN T1.effective_start_date AND T1.effective_end_date
+            AND T.store_cd = T0.store_cd
+            AND #{param} BETWEEN T0.effective_start_date AND T0.effective_end_date
+            AND oper.c_operatorcode = T0.ofc
+            AND T1.article_id = T6.article_id
+            AND T1.effective_start_date = T6.effective_start_date
+            AND T6.is_default = '1'
+            AND T1.dep_cd = T2.dep_cd
+            AND T1.pma_cd = T3.pma_cd
+            AND T1.category_cd = T4.category_cd
+            AND T1.sub_category_cd = T5.sub_category_cd
+        </where>
+
+    </select>
+    <select id="getListCount" parameterType="java.lang.String"
+            resultMap="BaseResultMap">
+        SELECT
+        COUNT(T.article_id)
+        FROM
+        SK0000 T,
+        ma1000 T0,
+        ma1100 T1,
+        ma0070 T2,
+        ma0080 T3,
+        ma0090 T4,
+        ma0100 T5,
+        ma1110 T6,
+        t_operator oper
+        <where>
+            AND T.article_id = T1.article_id
+            AND #{param} BETWEEN T1.effective_start_date AND T1.effective_end_date
+            AND T.store_cd = T0.store_cd
+            AND #{param} BETWEEN T0.effective_start_date AND T0.effective_end_date
+            AND oper.c_operatorcode = T0.ofc
+            AND T1.article_id = T6.article_id
+            AND T1.effective_start_date = T6.effective_start_date
+            AND T6.is_default = '1'
+            AND T1.dep_cd = T2.dep_cd
+            AND T1.pma_cd = T3.pma_cd
+            AND T1.category_cd = T4.category_cd
+            AND T1.sub_category_cd = T5.sub_category_cd
+        </where>
+
+    </select>
+
+    <select id="getData" parameterType="cn.com.bbut.iy.itemmaster.dto.orderReport.OrderReportParamDTO"
+            resultMap="BaseResultMap">
+       SELECT DISTINCT
+             ma1000.store_name,
+             ma1000.store_cd,
+             sk0000.on_hand_qty qty1,
+             od0010.barcode,
+             od0010.order_date,
+             od0010.article_id,
+             ma1100.article_name,
+             od0010.vendor_id,
+             od0010.order_unit purchase_unit_id,
+             od0010.order_price,
+             ma1100.converter,
+             ma1100.spec,
+            COALESCE(receive_qty,0) as receive_qty,
+            ma1110.order_batch_qty,
+            ma1110.min_order_amt_tax,/*最低订货金额*/
+          COALESCE(min_order_qty,0) as min_order_qty,
+           COALESCE(dc_m_order_qty,0) as dc_m_order_qty,
+            ma1110.order_tax_type_cd,/*税率cd*/
+            ma1100.min_display_qty,
+            COALESCE(sk0000.advise_qty) AS auto_order_qty,
+            od0010.order_unit AS unit_id,
+            ma0220.unit_name,
+            od0010.order_qty AS order_qty,
+            od0010.order_nocharge_qty,
+       od0010.order_qty +  COALESCE(od0010.order_nocharge_qty,0) as real_qty,
+            ( SELECT ma8070.psd FROM ma8070,OD0010 WHERE ma8070.store_cd = #{param.storeCd}AND ma8070.article_id = od0010.article_id ) AS psd,
+           (select  od0000.order_date from  od0000 where od0000.order_id=od0010.order_id)  AS order_date,
+            od0010.order_amt AS order_total_amt
+        FROM
+            ma1000,
+            ma1100,
+            ma1110,
+            PI0125 PI1 LEFT JOIN PI0120 PI2
+            AND pi1.pi_cd = pi2.pi_cd
+            AND pi1.pi_date = pi2.pi_date
+            AND pi1.article_id = pi2.article_id,
+            od0010 LEFT JOIN sk0000 on
+            od0010.article_id = sk0000.article_id
+            AND sk0000.store_cd = #{param.storeCd}
+            AND sk0000.store_cd = od0010.store_cd
+            AND sk0000.effective_date =#{param.orderDate}
+            LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id
+        WHERE
+            ma1100.article_id = od0010.article_id
+              AND pi1.store_cd = #{storeCd}
+             AND pi1.article_id = ma1100.article_id
+            AND ma1000.store_cd = od0010.store_cd
+            AND #{param.orderDate} BETWEEN ma1000.effective_start_date
+            AND ma1000.effective_end_date
+            AND #{param.orderDate} BETWEEN ma1100.effective_start_date
+            AND ma1100.effective_end_date
+            AND ma1100.article_id = ma1110.article_id
+            AND ma1110.structure_cd = (
+                select admin_structure_cd from MA0020 where structure_cd =
+                (SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = od0010.store_cd and effective_sts = '10') and effective_sts = '10'
+                )
+            AND od0010.vendor_id = ma1110.vendor_id
+        LIMIT ${param.rows} OFFSET ${param.limitStart}
+
+    </select>
+    <select id="getData01" parameterType="cn.com.bbut.iy.itemmaster.dto.orderReport.OrderReportParamDTO"
+            resultMap="BaseResultMap">
+       SELECT B.*,
+    D.*
+    FROM
+    (
+    SELECT DISTINCT
+    COALESCE(PI1.variance_qty,0) variance_qty,
+    OD0010.order_id,
+    sk0000.on_hand_qty qty1,
+    od0010.barcode,
+    od0010.article_id,
+    ma1100.article_name,
+    od0010.vendor_id,
+    od0010.order_unit purchase_unit_id,
+    od0010.order_price,
+    ma1100.converter,
+    ma1100.spec,
+    COALESCE ( receive_qty, 0 ) AS receive_qty,
+    ma1110.order_batch_qty,
+    ma1110.min_order_amt_tax,
+    /*最低订货金额*/
+    COALESCE ( min_order_qty, 0 ) AS min_order_qty,
+    COALESCE ( dc_m_order_qty, 0 ) AS dc_m_order_qty,
+    ma1110.order_tax_type_cd,
+    /*税率cd*/
+    ma1100.min_display_qty,
+    sk0000.advise_qty AS auto_order_qty,
+    od0010.order_unit AS unit_id,
+    ma0220.unit_name,
+    od0010.order_qty AS order_qty,
+    od0010.order_nocharge_qty,
+    od0010.order_qty + COALESCE ( od0010.order_nocharge_qty, 0 ) AS real_qty,
+    ( SELECT ma8070.psd ma8070 FROM ma8070 WHERE ma8070.store_cd = #{param.storeCd} AND ma8070.article_id = od0010.article_id ) AS psd,
+    od0010.order_amt AS order_total_amt
+    FROM
+    ma1000,
+    ma1100,
+    ma1110,
+    PI0125 PI1
+    LEFT JOIN PI0120 PI2 ON pi1.pi_cd = pi2.pi_cd
+    AND pi1.pi_date = pi2.pi_date
+    AND pi1.article_id = pi2.article_id,
+    od0010
+    LEFT JOIN sk0000 ON od0010.article_id = sk0000.article_id
+    AND sk0000.store_cd = #{param.storeCd}
+    AND sk0000.store_cd = od0010.store_cd
+    AND sk0000.effective_date = #{param.orderDate}
+    LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id
+    WHERE
+    ma1100.article_id = od0010.article_id
+    AND pi1.store_cd =#{param.storeCd}
+    AND pi1.article_id = ma1100.article_id
+    AND ma1000.store_cd = od0010.store_cd
+    AND #{param.orderDate} BETWEEN ma1000.effective_start_date
+    AND ma1000.effective_end_date
+    AND #{param.orderDate} BETWEEN ma1100.effective_start_date
+    AND ma1100.effective_end_date
+    AND ma1100.article_id = ma1110.article_id
+        <if test="param.articleId != null and param.articleId != ''">
+            AND lower(ma1110.default_barcode) like lower(CONCAT('%',#{param.articleId,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="param.depCd != null and param.depCd != ''">
+            AND  ma1100.dep_cd = #{param.depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.pmaCd != null and param.pmaCd != ''">
+            AND  ma1100.pma_cd = #{param.pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.categoryCd != null and param.categoryCd != ''">
+            AND  ma1100.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
+            AND  ma1100.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.articleName != null and param.articleName != ''">
+            AND lower( ma1100.article_name) like lower(CONCAT('%',#{param.articleName,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            AND  ma1000.ofc = #{param.am}
+        </if>
+    AND ma1110.structure_cd = (
+    SELECT
+    admin_structure_cd
+    FROM
+    MA0020
+    WHERE
+    structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = od0010.store_cd AND effective_sts = '10' )
+    AND effective_sts = '10'
+    )
+    AND od0010.vendor_id = ma1110.vendor_id
+    ) D
+    LEFT JOIN (
+    SELECT T
+    .*,
+    T5.warehouse_name,
+    T3.store_name
+    FROM
+    (
+    SELECT DISTINCT
+    store_cd,
+    order_id,
+    order_date,
+    A.review_status,
+    vendor_id,
+    delivery_date,
+    A.order_method
+    FROM
+    OD0000 A
+    WHERE
+      A.store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        AND  A.order_date=#{param.orderDate}
+    AND A.store_cd=#{param.storeCd}
+
+    )
+    AS T LEFT JOIN ( SELECT vendor_id, vendor_name FROM MA2000 ) T2 ON T.vendor_id = T2.vendor_id
+    LEFT JOIN ( SELECT store_cd, store_name, zo_cd FROM MA1000 ) T3 ON T.store_cd = T3.store_cd
+    LEFT JOIN ( SELECT * FROM ma5321 ) T5 ON T.vendor_id = T5.warehouse_no
+    ) B ON D.order_id = B.order_id WHERE store_cd=#{param.storeCd}
+      LIMIT ${param.rows} OFFSET ${param.limitStart}
+    </select>
+    <select id="getItemInfo" parameterType="cn.com.bbut.iy.itemmaster.dto.orderReport.OrderReportDTO" resultMap="BaseResultMap">
+      SELECT DISTINCT
+        ma1000.store_cd,
+        ma1000.store_name,
+      COALESCE(PI1.variance_qty,0) variance_qty,
+      OD0010.order_id,
+      sk0000.on_hand_qty qty1,
+      od0010.barcode,
+      od0010.article_id,
+      ma1100.article_name,
+      od0010.vendor_id,
+      od0010.order_unit purchase_unit_id,
+      od0010.order_price,
+      ma1100.converter,
+      ma1100.spec,
+      COALESCE ( receive_qty, 0 ) AS receive_qty,
+      ma1110.order_batch_qty,
+      ma1110.min_order_amt_tax,
+      /*最低订货金额*/
+      COALESCE ( min_order_qty, 0 ) AS min_order_qty,
+      COALESCE ( dc_m_order_qty, 0 ) AS dc_m_order_qty,
+      ma1110.order_tax_type_cd,
+      /*税率cd*/
+      ma1100.min_display_qty,
+      coalesce (sk0000.advise_qty,0) AS auto_order_qty,
+      od0010.order_unit AS unit_id,
+      ma0220.unit_name,
+      od0010.order_qty AS order_qty,
+      od0010.order_nocharge_qty,
+      od0010.order_qty + COALESCE ( od0010.order_nocharge_qty, 0 ) AS real_qty,
+      COALESCE (( SELECT ma8070.psd FROM ma8070 WHERE ma8070.store_cd = #{param.storeCd} AND od0010.article_id=ma8070.article_id) ,0) AS psd,
+      od0010.order_amt AS order_total_amt
+      FROM
+      ma1000,
+      ma1100,
+      ma1110,
+      PI0125 PI1
+      LEFT JOIN PI0120 PI2 ON pi1.pi_cd = pi2.pi_cd
+      AND pi1.pi_date = pi2.pi_date
+      AND pi1.article_id = pi2.article_id,
+      od0010
+      LEFT JOIN sk0000 ON od0010.article_id = sk0000.article_id
+      AND sk0000.store_cd = #{param.storeCd}
+      AND sk0000.store_cd = od0010.store_cd
+      AND sk0000.effective_date = #{param.orderDate}
+      LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id
+      WHERE
+      ma1100.article_id = od0010.article_id
+      AND pi1.store_cd =#{param.storeCd}
+      AND pi1.article_id = ma1100.article_id
+      AND ma1000.store_cd = od0010.store_cd
+      AND #{param.orderDate} BETWEEN ma1000.effective_start_date
+      AND ma1000.effective_end_date
+      AND #{param.orderDate} BETWEEN ma1100.effective_start_date
+      AND ma1100.effective_end_date
+      AND ma1100.article_id = ma1110.article_id
+<!--      <if test="param.articleId != null and param.articleId != ''">-->
+<!--          AND ma1100.article_id=#{param.articleId}-->
+<!--      </if>-->
+        <if test="param.articleName != null and param.articleName != ''">
+        AND concat(lower( ma1100.article_id ),'',lower( ma1100.article_name ),'',lower( ma1100.article_name_en ),'',lower(
+        ma1100.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
+        </if>
+        <if test="param.depCd != null and param.depCd != ''">
+            AND  ma1100.dep_cd = #{param.depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.pmaCd != null and param.pmaCd != ''">
+            AND  ma1100.pma_cd = #{param.pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.categoryCd != null and param.categoryCd != ''">
+            AND  ma1100.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
+            AND  ma1100.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            AND  ma1000.ofc = #{param.am}
+        </if>
+      AND ma1110.structure_cd = (
+      SELECT
+      admin_structure_cd
+      FROM
+      MA0020
+      WHERE
+      structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = od0010.store_cd AND effective_sts = '10' )
+      AND effective_sts = '10'
+      )
+      AND od0010.vendor_id = ma1110.vendor_id
+      AND od0010.order_id =#{param.orderId}
+  </select>
+
+
+    <select id="getDataCount" parameterType="cn.com.bbut.iy.itemmaster.dto.orderReport.OrderReportParamDTO"
+            resultType="int">
+        SELECT COUNT (B.store_cd)
+        FROM
+        (
+        SELECT DISTINCT
+        COALESCE(PI1.variance_qty,0),
+        OD0010.order_id,
+        sk0000.on_hand_qty qty1,
+        od0010.barcode,
+        od0010.article_id,
+        ma1100.article_name,
+        od0010.vendor_id,
+        od0010.order_unit purchase_unit_id,
+        od0010.order_price,
+        ma1100.converter,
+        ma1100.spec,
+        COALESCE ( receive_qty, 0 ) AS receive_qty,
+        ma1110.order_batch_qty,
+        ma1110.min_order_amt_tax,
+        /*最低订货金额*/
+        COALESCE ( min_order_qty, 0 ) AS min_order_qty,
+        COALESCE ( dc_m_order_qty, 0 ) AS dc_m_order_qty,
+        ma1110.order_tax_type_cd,
+        /*税率cd*/
+        ma1100.min_display_qty,
+        sk0000.advise_qty AS auto_order_qty,
+        od0010.order_unit AS unit_id,
+        ma0220.unit_name,
+        od0010.order_qty AS order_qty,
+        od0010.order_nocharge_qty,
+        od0010.order_qty + COALESCE ( od0010.order_nocharge_qty, 0 ) AS real_qty,
+        ( SELECT ma8070.psd ma8070 FROM ma8070 WHERE ma8070.store_cd = #{param.storeCd} AND ma8070.article_id = od0010.article_id ) AS psd,
+        od0010.order_amt AS order_total_amt
+        FROM
+        ma1000,
+        ma1100,
+        ma1110,
+        PI0125 PI1
+        LEFT JOIN PI0120 PI2 ON pi1.pi_cd = pi2.pi_cd
+        AND pi1.pi_date = pi2.pi_date
+        AND pi1.article_id = pi2.article_id,
+        od0010
+        LEFT JOIN sk0000 ON od0010.article_id = sk0000.article_id
+        AND sk0000.store_cd = #{param.storeCd}
+        AND sk0000.store_cd = od0010.store_cd
+        AND sk0000.effective_date = #{param.orderDate}
+        LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id
+        WHERE
+        ma1100.article_id = od0010.article_id
+        AND pi1.store_cd =#{param.storeCd}
+        AND pi1.article_id = ma1100.article_id
+        AND ma1000.store_cd = od0010.store_cd
+        AND #{param.orderDate} BETWEEN ma1000.effective_start_date
+        AND ma1000.effective_end_date
+        AND #{param.orderDate} BETWEEN ma1100.effective_start_date
+        AND ma1100.effective_end_date
+        AND ma1100.article_id = ma1110.article_id
+        <if test="param.articleId != null and param.articleId != ''">
+            AND lower(ma1110.default_barcode) like lower(CONCAT('%',#{param.articleId,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="param.depCd != null and param.depCd != ''">
+            AND  ma1100.dep_cd = #{param.depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.pmaCd != null and param.pmaCd != ''">
+            AND  ma1100.pma_cd = #{param.pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.categoryCd != null and param.categoryCd != ''">
+            AND  ma1100.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
+            AND  ma1100.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.articleName != null and param.articleName != ''">
+            AND lower( ma1100.article_name) like lower(CONCAT('%',#{param.articleName,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            AND  ma1000.ofc = #{param.am}
+        </if>
+
+        AND ma1110.structure_cd = (
+        SELECT
+        admin_structure_cd
+        FROM
+        MA0020
+        WHERE
+        structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = od0010.store_cd AND effective_sts = '10' )
+        AND effective_sts = '10'
+        )
+        AND od0010.vendor_id = ma1110.vendor_id
+        ) D
+        LEFT JOIN (
+        SELECT T
+        .*,
+        T5.warehouse_name,
+        T3.store_name
+        FROM
+        (
+        SELECT DISTINCT
+        store_cd,
+        order_id,
+        order_date,
+        A.review_status,
+        vendor_id,
+        delivery_date,
+        A.order_method
+        FROM
+        OD0000 A
+        WHERE
+        A.store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        AND  A.order_date=#{param.orderDate}
+        AND A.store_cd=#{param.storeCd}
+
+        )
+        AS T LEFT JOIN ( SELECT vendor_id, vendor_name FROM MA2000 ) T2 ON T.vendor_id = T2.vendor_id
+        LEFT JOIN ( SELECT store_cd, store_name, zo_cd FROM MA1000 ) T3 ON T.store_cd = T3.store_cd
+        LEFT JOIN ( SELECT * FROM ma5321 ) T5 ON T.vendor_id = T5.warehouse_no
+        ) B ON D.order_id = B.order_id WHERE store_cd=#{param.storeCd}
+
+</select>
+
+</mapper>

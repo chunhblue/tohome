@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.audit.AuditBeanMapper">
+  <resultMap type="cn.com.bbut.iy.itemmaster.dto.audit.AuditBean" id="ReAuditBean">
+    <result column="n_recordid" property="NRecordid"/>
+    <result column="n_reviewid" property="NReviewid"/>
+    <result column="n_typeid" property="NTypeid"/>
+    <result column="n_distinguish_typeid" property="distinguishId" jdbcType="VARCHAR"/>
+    <result column="record_cd" property="CRecordCd" jdbcType="VARCHAR"/>
+    <result column="store_cd" property="storeCd" jdbcType="VARCHAR"/>
+    <result column="sub_no" property="subNo"/>
+    <result column="c_step" property="CStep"/>
+    <result column="c_auditstatus" property="CAuditstatus"/>
+    <result column="n_roleid" property="NRoleid"/>
+    <result column="n_operatorid" property="NOperatorid"/>
+    <result column="audit_time" property="DAuditTime" jdbcType="TIMESTAMP"/>
+    <result column="audit_content" property="CAuditContent" jdbcType="VARCHAR"/>
+    <result column="d_insert_time" property="DInsertTime" jdbcType="TIMESTAMP"/>
+    <result column="C_ENABLE" property="status" jdbcType="BOOLEAN"/>
+  </resultMap>
+
+  <insert id="insertAudit">
+		INSERT INTO t_audit_tab
+			(N_REVIEWID, N_TYPEID, RECORD_CD, STORE_CD,
+			N_DISTINGUISH_TYPEID, SUB_NO, C_STEP, C_AUDITSTATUS,
+			N_OPERATORID, AUDIT_TIME, AUDIT_CONTENT, D_INSERT_TIME, C_ENABLE)
+		VALUES
+			(#{insertBean.nReviewid}, #{insertBean.nTypeid}, #{insertBean.cRecordCd},
+			 #{insertBean.storeCd},#{insertBean.distinguishId}, #{insertBean.subNo},
+			#{insertBean.cStep}, #{insertBean.cAuditstatus}, #{insertBean.nOperatorid},
+			#{insertBean.dAuditTime}, #{insertBean.cAuditContent}, #{insertBean.dInsertTime}, '1')
+	</insert>
+
+  <update id="invalidAudit">
+		UPDATE t_audit_tab
+		SET C_ENABLE = '0'
+		WHERE
+			N_TYPEID = #{invalidBean.nTypeid}
+		AND RECORD_CD = #{invalidBean.cRecordCd}
+		AND STORE_CD = #{invalidBean.storeCd}
+	</update>
+
+  <update id="updateAuditStatus">
+		UPDATE
+			t_audit_tab
+		SET
+			c_auditstatus = #{cAuditstatus,jdbcType=DECIMAL}
+		WHERE
+			C_ENABLE = '1'
+		AND	N_REVIEWID = #{nReviewid,jdbcType=DECIMAL}
+		AND RECORD_CD = #{cRecordCd,jdbcType=VARCHAR}
+		AND (SUB_NO = 0 OR SUB_NO = #{subNo,jdbcType=SMALLINT})
+	</update>
+
+  <update id="updateAuditInfo">
+		UPDATE
+			t_audit_tab
+		SET
+			audit_time = #{_AuditInfo.dAuditTime},
+			audit_content = #{_AuditInfo.cAuditContent},
+			n_operatorid = #{_AuditInfo.nOperatorid}
+		WHERE
+			n_recordid = #{_AuditInfo.nRecordid}
+		AND sub_no = #{_AuditInfo.subNo}
+	</update>
+
+  <select id="selectMaxId" resultType="int">
+		SELECT COALESCE(max(n_recordid),0) FROM t_audit_tab
+	</select>
+
+  <select id="selectMaxSubNo" resultType="int">
+		SELECT COALESCE(max(sub_no),0) FROM T_AUDIT_TAB
+		WHERE
+			C_ENABLE = '1'
+		AND RECORD_CD = #{_AuditSubNoBean.cRecordCd}
+	</select>
+
+  <select id="selectAuditByRecordIdAndTime" resultMap="ReAuditBean">
+		SELECT * FROM T_AUDIT_TAB
+		WHERE
+			C_ENABLE = '1'
+		AND SUB_NO != 0
+		AND RECORD_CD = #{selectBean.cRecordCd}
+	</select>
+
+  <select id="selectAuditByRecordIdAndTimeAndSubNo" resultMap="ReAuditBean">
+		SELECT * FROM t_audit_tab T, t_review_step R
+		WHERE sub_no = (
+			SELECT MAX(sub_no) FROM t_audit_tab
+			WHERE record_cd = #{recordCd}
+			AND n_typeid = #{typeId}
+			AND c_enable = '1')
+		AND T.record_cd = #{recordCd}
+		AND T.n_typeid = #{typeId}
+		AND T.n_reviewid = R.n_reviewid
+		AND T.c_step = R.n_recordid
+		AND T.c_enable = '1'
+	</select>
+
+  <select id="selectByRecordId" resultMap="ReAuditBean">
+    SELECT * FROM t_audit_tab
+    WHERE sub_no = (
+    SELECT MAX(sub_no) FROM t_audit_tab
+    WHERE record_cd = #{recordCd}
+    AND n_typeid = #{typeId}
+    AND c_enable = '1')
+    AND record_cd = #{recordCd}
+    AND n_typeid = #{typeId}
+    AND c_enable = '1'
+  </select>
+
+  <select id="selectAuditById" resultMap="ReAuditBean">
+		SELECT * FROM t_audit_tab
+		WHERE n_recordid = #{nRecordid} AND C_ENABLE = '1'
+	</select>
+
+  <select id="selectInAuditById" resultType="int">
+      SELECT
+         COUNT(1)
+      FROM
+         t_audit_tab
+      WHERE
+         SUB_NO = 0
+      AND C_ENABLE = '1'
+	  <if test="distinguishId!=null and distinguishId!='' ">
+      AND N_DISTINGUISH_TYPEID = #{distinguishId,jdbcType=VARCHAR}
+	  </if>
+      AND RECORD_CD = #{recordCd,jdbcType=VARCHAR}
+      AND C_AUDITSTATUS = 0
+	</select>
+
+  <select id="selectDistinguishById" resultType="String">
+		SELECT
+			N_DISTINGUISH_TYPEID
+		FROM
+			t_audit_type
+		WHERE
+			N_TYPEID = #{typeId,jdbcType=SMALLINT}
+	</select>
+
+	<update id="modifyRecordStatus">
+		UPDATE  ${table}
+		SET
+			REVIEW_STATUS = #{status,jdbcType=SMALLINT}
+			<if test="reviewId!=0">
+				,n_reviewid = #{reviewId}
+			</if>
+			<if test="updateUserId!=null and updateUserId!=''">
+				,update_user_id = #{updateUserId,jdbcType=VARCHAR}
+			</if>
+			<if test="updateYmd!=null and updateYmd!=''">
+				,update_ymd = #{updateYmd,jdbcType=CHAR}
+			</if>
+			<if test="updateHms!=null and updateHms!=''">
+				,update_hms = #{updateHms,jdbcType=CHAR}
+			</if>
+		WHERE
+			${key} = #{recordCd}
+	</update>
+
+	<select id="getAuditStatus" resultType="integer" >
+		select REVIEW_STATUS
+		from ${table}
+		where ${key} = #{recordCd}
+	</select>
+
+	<select id="checkAuditByUserId" resultType="java.lang.Integer">
+		select count(*)
+		from ma4200
+		where store_cd = #{storeCd,jdbcType=VARCHAR}
+		and emp_num_id = #{userId,jdbcType=VARCHAR}
+	</select>
+
+	<select id="checkAuditByPosition" resultType="java.lang.Integer">
+		select count(*)
+		from ma4200,ma4160
+		<where>
+			ma4200.emp_num_id = #{userId,jdbcType=VARCHAR}
+			and ma4200.job_type_cd = ma4160.job_type_cd
+			and ma4160.position = #{position,jdbcType=NUMERIC}
+			<if test="position!=5">
+				and ma4200.store_cd = #{storeCd,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+
+	<select id="checkAuditByUserIdAndPosition" resultType="java.lang.Integer">
+		select count(*)
+		from ma4210
+		where store_cd = #{storeCd,jdbcType=VARCHAR}
+		and user_code = #{userId,jdbcType=VARCHAR}
+		and position = #{position,jdbcType=NUMERIC}
+	</select>
+</mapper>

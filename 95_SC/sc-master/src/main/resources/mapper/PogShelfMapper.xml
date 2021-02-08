@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.PogShelfMapper">
+    <resultMap id="BaseResultMap" type="cn.com.bbut.iy.itemmaster.dto.pogShelf.PogShelfDto">
+        <id column="pog_cd" jdbcType="VARCHAR" property="pogCd" />
+        <id column="store_cd" jdbcType="VARCHAR" property="storeCd" />
+        <result column="store_name" jdbcType="VARCHAR" property="storeName" />
+        <result column="pog_name" jdbcType="VARCHAR" property="pogName" />
+        <result column="shelf" jdbcType="VARCHAR" property="shelf" />
+        <result column="sub_shelf" jdbcType="VARCHAR" property="subShelf" />
+        <result column="create_user_id" jdbcType="VARCHAR" property="commonDTO.createUserId" />
+        <result column="create_user_name" jdbcType="VARCHAR" property="createUserName" />
+        <result column="createTime" jdbcType="VARCHAR" property="createTime" />
+        <result column="create_ymd" jdbcType="CHAR" property="commonDTO.createYmd" />
+        <result column="create_hms" jdbcType="CHAR" property="commonDTO.createHms" />
+        <result column="update_user_id" jdbcType="VARCHAR" property="commonDTO.updateUserId" />
+        <result column="update_ymd" jdbcType="CHAR" property="commonDTO.updateYmd" />
+        <result column="update_hms" jdbcType="CHAR" property="commonDTO.updateHms" />
+        <result column="update_screen_id" jdbcType="VARCHAR" property="commonDTO.updateScreenId" />
+        <result column="update_ip_address" jdbcType="VARCHAR" property="commonDTO.updateIpAddress" />
+    </resultMap>
+    <select id="getPogShelfList" resultMap="BaseResultMap">
+        select pog_cd,pog_name,ma1104.store_cd,ma1000.store_name,ma4200.emp_name create_user_name,
+        concat(ma1104.create_ymd,ma1104.create_hms) as createTime
+        from ma1104
+        left join ma1000 on ma1104.store_cd = ma1000.store_cd
+        left join ma4200 on ma1104.create_user_id = ma4200.emp_num_id
+        where ma1104.store_cd = #{storeCd,jdbcType=VARCHAR}
+        <if test="startDate != null and startDate != ''">
+            AND ma1104.create_ymd >= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND #{endDate} >= ma1104.create_ymd
+        </if>
+        <if test="pogName != null and pogName != ''">
+            And lower(ma1104.pog_name) like lower(concat('%',#{pogName,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+
+    <select id="pogShelfListCount"  resultType="java.lang.Integer" parameterType="cn.com.bbut.iy.itemmaster.dto.pogShelf.PogShelfParamDto">
+        select count(*)
+        from ma1104
+        left join ma1000 on ma1104.store_cd = ma1000.store_cd
+        left join ma4200 on ma1104.create_user_id = ma4200.emp_num_id
+        where ma1104.store_cd = #{storeCd,jdbcType=VARCHAR}
+        <if test="startDate != null and startDate != ''">
+            AND ma1104.create_ymd >= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND #{endDate} >= ma1104.create_ymd
+        </if>
+        <if test="pogName != null and pogName != ''">
+            And lower(ma1104.pog_name) like lower(concat('%',#{pogName,jdbcType=VARCHAR},'%'))
+        </if>
+    </select>
+
+    <select id="pogShelfDetail" resultMap="BaseResultMap">
+        SELECT
+            ma1109.pog_cd,ma1104.pog_name,
+            shelf,sub_shelf
+        FROM
+            ma1109
+            left join ma1104
+            on ma1109.pog_cd = ma1104.pog_cd and ma1109.store_cd = ma1109.store_cd
+        WHERE
+            ma1109.pog_cd = #{pogCd,jdbcType=VARCHAR}
+            AND ma1109.store_cd = #{storeCd,jdbcType=VARCHAR}
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+
+    <select id="pogShelfDetailCount" resultType="java.lang.Integer" parameterType="cn.com.bbut.iy.itemmaster.dto.pogShelf.PogShelfParamDto">
+        SELECT
+            count(*)
+        FROM
+            ma1109
+            left join ma1104
+            on ma1109.pog_cd = ma1104.pog_cd and ma1109.store_cd = ma1109.store_cd
+        WHERE
+            ma1109.pog_cd = #{pogCd,jdbcType=VARCHAR}
+            AND ma1109.store_cd = #{storeCd,jdbcType=VARCHAR}
+    </select>
+</mapper>

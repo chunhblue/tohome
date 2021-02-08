@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.MA4310Mapper">
+
+  <select id="getList" resultType="cn.com.bbut.iy.itemmaster.dto.inform.Ma4310DetailGridDto">
+    select
+    ma4310.inform_cd, ma4310.store_cd,ma1000.store_name
+    from ma4310,ma1000
+    where
+    <![CDATA[
+        ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
+    ]]>
+    and ma1000.store_cd = ma4310.store_cd
+    <if test="informCd != null and informCd !=''">
+      ma4310.inform_cd = #{informCd,jdbcType=VARCHAR}
+    </if>
+    order by ma4310.store_cd
+  </select>
+
+  <select id="getReplyList" parameterType="cn.com.bbut.iy.itemmaster.dto.inform.Ma4310DetailParamDto" resultType="cn.com.bbut.iy.itemmaster.dto.inform.Ma4310DetailGridDto">
+    select
+        ma4300.inform_cd,
+        ma4300.inform_title,
+        ma4300.create_ymd,
+        ma4310.store_cd,
+        ma1000.store_name,
+--         查询当前用户是否回复 1为回复 0则没有
+        CASE WHEN
+            (SELECT count(*) from ma4315 where ma4300.inform_cd = ma4315.inform_cd and ma4315.reply_user_id=#{userId} and ma4315.store_cd = ma4310.store_cd)>0
+            THEN '1'
+        ELSE '0' END AS is_reply
+    from ma4300,ma4310,ma1000,(
+    SELECT distinct ma4305.inform_cd FROM ma4300,ma4305
+    <where>
+      and ma4300.inform_cd = ma4305.inform_cd
+      <if test="roleList != null and roleList.size() != 0">
+        and ma4305.role_id  in
+        <foreach item="role" index="index" collection="roleList"
+                 open="(" separator="," close=")">
+          #{role,jdbcType=INTEGER}
+        </foreach>
+      </if>
+      <if test="roleList == null">
+        and ma4305.role_id  = 0
+      </if>
+    </where>) t
+    <where>
+      <![CDATA[
+        and ma4300.inform_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and ma4300.inform_end_date >= #{businessDate,jdbcType=VARCHAR}
+      ]]>
+      and ma4300.inform_cd = t.inform_cd
+      and ma4300.inform_cd = ma4310.inform_cd
+      <if test="storeList != null and storeList.size() != 0">
+        and ma4310.store_cd  in
+        <foreach item="store" index="index" collection="storeList"
+                 open="(" separator="," close=")">
+          #{store,jdbcType=VARCHAR}
+        </foreach>
+      </if>
+      <if test="storeList == null">
+        and ma4310.store_cd  = ''
+      </if>
+      <![CDATA[
+        and ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
+        ]]>
+      and ma1000.store_cd = ma4310.store_cd
+      <if test="informCd != null and informCd !=''">
+        AND lower(ma4310.inform_cd) like lower(CONCAT('%',#{informCd,jdbcType=VARCHAR},'%'))
+      </if>
+      <if test="informTitle != null and informTitle !=''">
+        AND lower(ma4310.inform_title) like lower(CONCAT('%',#{informTitle,jdbcType=VARCHAR},'%'))
+      </if>
+      <if test="startDate != null and startDate !=''">
+        <![CDATA[and  ma4300.create_ymd>=#{startDate}]]>
+      </if>
+      <if test="endDate != null and endDate !=''">
+        <![CDATA[and  ma4300.create_ymd<=#{endDate}]]>
+      </if>
+      <if test="isReply != null and isReply !=''">
+        --         查询当前用户是否回复 1为回复 0则没有
+        <if test="isReply =='1'.toString()">
+          and (SELECT count(*) from ma4315 where ma4300.inform_cd = ma4315.inform_cd and ma4315.reply_user_id=#{userId} and ma4315.store_cd = ma4310.store_cd)>0
+        </if>
+        <if test="isReply =='0'.toString()">
+          and (SELECT count(*) from ma4315 where ma4300.inform_cd = ma4315.inform_cd and ma4315.reply_user_id=#{userId} and ma4315.store_cd = ma4310.store_cd)=0
+        </if>
+      </if>
+      <if test="orderByClause != null">
+        order by ${orderByClause}
+      </if>
+      <if test="limitStart >= 0">
+        limit ${limitEnd} offset ${limitStart}
+      </if>
+    </where>
+  </select>
+
+  <select id="getReplyListCount" parameterType="cn.com.bbut.iy.itemmaster.dto.inform.Ma4310DetailParamDto" resultType="long">
+    select
+    count(*)
+    from ma4300,ma4310,ma1000,(
+    SELECT distinct ma4305.inform_cd FROM ma4300,ma4305
+    <where>
+      and ma4300.inform_cd = ma4305.inform_cd
+      <if test="roleList != null and roleList.size() != 0">
+        and ma4305.role_id  in
+        <foreach item="role" index="index" collection="roleList"
+                 open="(" separator="," close=")">
+          #{role,jdbcType=INTEGER}
+        </foreach>
+      </if>
+      <if test="roleList == null">
+        and ma4305.role_id  = 0
+      </if>
+    </where>) t
+    <where>
+    <![CDATA[
+        and ma4300.inform_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and ma4300.inform_end_date >= #{businessDate,jdbcType=VARCHAR}
+      ]]>
+    and ma4300.inform_cd = t.inform_cd
+    and ma4300.inform_cd = ma4310.inform_cd
+    <if test="storeList != null and storeList.size() != 0">
+      and ma4310.store_cd  in
+      <foreach item="store" index="index" collection="storeList"
+               open="(" separator="," close=")">
+        #{store,jdbcType=VARCHAR}
+      </foreach>
+    </if>
+    <if test="storeList == null">
+      and ma4310.store_cd  = ''
+    </if>
+    <![CDATA[
+        and ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
+        ]]>
+    and ma1000.store_cd = ma4310.store_cd
+    <if test="informCd != null and informCd !=''">
+      AND lower(ma4310.inform_cd) like lower(CONCAT('%',#{informCd,jdbcType=VARCHAR},'%'))
+    </if>
+    <if test="informTitle != null and informTitle !=''">
+      AND lower(ma4310.inform_title) like lower(CONCAT('%',#{informTitle,jdbcType=VARCHAR},'%'))
+    </if>
+    <if test="startDate != null and startDate !=''">
+      <![CDATA[and  ma4300.create_ymd>=#{startDate}]]>
+    </if>
+    <if test="endDate != null and endDate !=''">
+      <![CDATA[and  ma4300.create_ymd<=#{endDate}]]>
+    </if>
+      <if test="isReply != null and isReply !=''">
+        --         查询当前用户是否回复 1为回复 0则没有
+        <if test="isReply =='1'.toString()">
+          and (SELECT count(*) from ma4315 where ma4300.inform_cd = ma4315.inform_cd and ma4315.reply_user_id=#{userId} and ma4315.store_cd = ma4310.store_cd)>0
+        </if>
+        <if test="isReply =='0'.toString()">
+          and (SELECT count(*) from ma4315 where ma4300.inform_cd = ma4315.inform_cd and ma4315.reply_user_id=#{userId} and ma4315.store_cd = ma4310.store_cd)=0
+        </if>
+      </if>
+    </where>
+  </select>
+
+  <select id="getInformReply" resultType="cn.com.bbut.iy.itemmaster.dto.inform.Ma4310ResultDto">
+    select
+    ma4310.inform_cd, store_cd,
+    (select store_name from ma1000
+    where
+    <![CDATA[
+        ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
+    ]]>
+    and ma1000.store_cd = ma4310.store_cd) as store_name,
+    ma4300.inform_title,
+    ma4300.inform_content
+    from ma4310,ma4300
+    where ma4310.inform_cd = ma4300.inform_cd
+    <![CDATA[
+        and ma4300.inform_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and ma4300.inform_end_date >= #{businessDate,jdbcType=VARCHAR}
+    ]]>
+      and ma4310.inform_cd = #{informCd,jdbcType=VARCHAR}
+      and ma4310.store_cd = #{storeCd,jdbcType=VARCHAR}
+  </select>
+</mapper>

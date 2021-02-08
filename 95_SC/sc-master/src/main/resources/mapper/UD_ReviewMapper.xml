@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.ReviewMapper">
+  <select id="getApprovalType" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+    SELECT n_typeid k, c_type_name v
+    FROM t_audit_type
+    order by n_typeId
+  </select>
+
+  <select id="getReviewList" resultType="cn.com.bbut.iy.itemmaster.dto.approval.ReviewGridDto" parameterType="cn.com.bbut.iy.itemmaster.dto.approval.ReviewParamDto">
+      SELECT
+      R.N_REVIEWID, R.C_REVIEWCODE, R.N_TYPEID, R.START_ROLE, T.C_TYPE_NAME,
+      R.C_REVIEWNAME, R.C_ENABLE
+      --   , T.N_DISTINGUISH_TYPEID
+    FROM
+    T_REVIEW R, T_AUDIT_TYPE T
+    WHERE C_ENABLE = '1'
+    AND T.N_TYPEID = R.N_TYPEID
+    AND R.N_TYPEID != 0
+    <if test="cReviewcode != null and cReviewcode != ''">
+      AND R.C_REVIEWCODE like CONCAT('%',#{cReviewcode},'%')
+    </if>
+    <if test="cReviewname != null and cReviewname != ''">
+      AND R.C_REVIEWNAME like CONCAT('%',#{cReviewname},'%')
+    </if>
+    <if test="nTypeid != null and nTypeid != 0">
+      AND R.N_TYPEID  = #{nTypeid,jdbcType=INTEGER}
+    </if>
+    ORDER BY N_REVIEWID
+    <if test="limitStart >= 0">
+      limit ${limitEnd} offset ${limitStart}
+    </if>
+  </select>
+
+  <select id="getReviewListCount" resultType="long">
+    SELECT
+    count (*)
+    FROM
+    T_REVIEW R, T_AUDIT_TYPE T
+    WHERE C_ENABLE = '1'
+    AND T.N_TYPEID = R.N_TYPEID
+    AND R.N_TYPEID != 0
+    <if test="cReviewcode != null and cReviewcode != ''">
+      AND R.C_REVIEWCODE like CONCAT('%',#{cReviewcode},'%')
+    </if>
+    <if test="cReviewname != null and cReviewname != ''">
+      AND R.C_REVIEWNAME like CONCAT('%',#{cReviewname},'%')
+    </if>
+    <if test="nTypeid != null and nTypeid != 0">
+      AND R.N_TYPEID  = #{nTypeid,jdbcType=INTEGER}
+    </if>
+  </select>
+
+</mapper>

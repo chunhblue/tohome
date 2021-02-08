@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.MMPromotionSaleDailyMapper">
+
+    <resultMap id="MMDataMap" type="cn.com.bbut.iy.itemmaster.dto.mmPromotionSaleDaily.MMPromotionDataDTO">
+        <result column="tran_serial_no" property="tranSerialNo" jdbcType="VARCHAR" />
+        <result column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <result column="acc_date" property="accDate" jdbcType="VARCHAR" />
+        <result column="promotion_cd" property="promotionCd" jdbcType="VARCHAR" />
+        <result column="promotion_name" property="promotionTheme" jdbcType="VARCHAR" />
+        <result column="promotion_pattern" property="promotionPattern" jdbcType="VARCHAR" />
+        <result column="promotion_type" property="promotionType" jdbcType="VARCHAR" />
+        <result column="distribution_type" property="distributionType" jdbcType="VARCHAR" />
+        <result column="total_sale_price" property="totalSellingPrice" jdbcType="NUMERIC" />
+        <result column="total_sale_qty" property="totalSaleQty" jdbcType="NUMERIC" />
+        <result column="total_sale_amount" property="totalSaleAmt" jdbcType="NUMERIC" />
+        <result column="discount_amount" property="discountAmt" jdbcType="NUMERIC" />
+        <result column="promotion_allot_type" property="promotionAllotCd" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="MMItemMap" type="cn.com.bbut.iy.itemmaster.dto.mmPromotionSaleDaily.MMPromotionItemsDTO">
+        <result column="barcode" property="barcode" jdbcType="VARCHAR" />
+        <result column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <result column="article_name" property="articleName" jdbcType="VARCHAR" />
+        <result column="price_actual" property="sellingPrice" jdbcType="NUMERIC" />
+        <result column="sale_qty" property="saleQty" jdbcType="NUMERIC" />
+        <result column="sale_amount" property="saleAmt" jdbcType="NUMERIC" />
+        <result column="promotion_allot_value" property="promotionAllotValue" jdbcType="NUMERIC" />
+    </resultMap>
+
+    <select id="getPromotionPattern" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" parameterType="java.lang.String">
+        select DISTINCT
+        code_value k,CONCAT(code_value,' ',code_name) AS v
+        from CM9010
+        where code_type='00155'
+        AND effective_sts = '10'
+        <if test="v!=null and v!=''">
+            AND (
+            lower(code_value) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(code_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+    </select>
+
+    <select id="getPromotionType" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" parameterType="java.lang.String">
+        select DISTINCT
+        code_value k,CONCAT(code_value,' ',code_name) AS v
+        from CM9010
+        where code_type='00160'
+        AND effective_sts = '10'
+        <if test="v!=null and v!=''">
+            AND (
+            lower(code_value) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(code_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+    </select>
+
+    <select id="getDistributionType" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" parameterType="java.lang.String">
+        select DISTINCT
+        code_value k,CONCAT(code_value,' ',code_name) AS v
+        from CM9010
+        where code_type='00165'
+        AND effective_sts = '10'
+        <if test="v!=null and v!=''">
+            AND (
+            lower(code_value) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(code_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+    </select>
+
+    <select id="searchCount" parameterType="cn.com.bbut.iy.itemmaster.dto.mmPromotionSaleDaily.MMPromotionSaleDailyParamDTO" resultType="int">
+        SELECT
+            COUNT (A.tran_serial_no)
+        FROM (
+            SELECT DISTINCT
+                sa1.tran_serial_no
+            FROM
+                sa0210 sa1,
+                ma1000 ma2,
+                ma1110 ma4,
+                ma1100 ma5,
+                ma4050 ma9
+            WHERE
+                sa1.detail_type = 's'
+                AND sa1.store_cd = ma2.store_cd
+                AND #{param.businessDate,jdbcType=VARCHAR} BETWEEN ma2.effective_start_date AND ma2.effective_end_date
+                AND sa1.article_id = ma4.article_id
+                AND #{param.businessDate,jdbcType=VARCHAR} BETWEEN ma4.effective_start_date AND ma4.effective_end_date
+                AND ma4.is_default = '1'
+                AND ma4.article_id = ma5.article_id
+                AND ma4.effective_start_date = ma5.effective_start_date
+                AND ma9.promotion_cd = sa1.promotion_cd
+                <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">
+                    AND sa1.acc_date BETWEEN #{param.startDate} AND #{param.endDate}
+                </if>
+                <if test="param.barcode!=null and param.barcode!=''">
+                    AND lower(ma4.default_barcode) like lower(CONCAT('%',#{param.barcode},'%'))
+                </if>
+              <if test="param.articleName!=null and param.articleName!=''">
+               AND concat(lower( ma5.article_id ),'',lower( ma5.article_name ),'',lower( ma5.article_name_en ),'',lower(
+               ma5.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
+              </if>
+
+                <if test="param.promotionPattern!=null and param.promotionPattern!=''">
+                    AND sa1.promotion_diff = #{param.promotionPattern}
+                </if>
+                <if test="param.promotionType!=null and param.promotionType!=''">
+                    AND ma9.promotion_type = #{param.promotionType}
+                </if>
+                <if test="param.distributionType!=null and param.distributionType!=''">
+                    AND sa1.promotion_allot_type = #{param.distributionType}
+                </if>
+                <if test="param.promotionCd!=null and param.promotionCd!=''">
+                    AND lower(sa1.promotion_cd) like lower(CONCAT('%',#{param.promotionCd},'%'))
+                </if>
+                <if test="param.am!=null and param.am!=''">
+                    AND ma2.ofc = #{param.am}
+                </if>
+                <if test="param.storeCd!=null and param.storeCd!=''">
+                    AND sa1.store_cd = #{param.storeCd}
+                </if>
+        ) A
+    </select>
+
+    <select id="searchItems" parameterType="cn.com.bbut.iy.itemmaster.dto.mmPromotionSaleDaily.MMPromotionSaleDailyParamDTO" resultMap="MMItemMap">
+        SELECT DISTINCT
+            s.tran_serial_no,
+            s.promotion_cd,
+            s.acc_date,
+            s.article_id,
+            s1.price_actual,
+            s.sale_amount,
+            s1.sale_qty,
+            ma2.default_barcode AS barcode,
+            ma3.article_name,
+            ma4.promotion_allot_value
+        FROM
+            sa0210 s,
+            sa0020 s1,
+            ma1110 ma2,
+            ma1100 ma3,
+            ma4060 ma4
+        WHERE
+            s.detail_type = 's'
+            AND s.tran_serial_no = s1.tran_serial_no
+            AND s.sale_seq_no = s1.sale_seq_no
+            AND s.tran_serial_no = #{tranSerialNo}
+            AND s.promotion_cd =  #{promotionCd,jdbcType=VARCHAR}
+            AND s.acc_date =  #{accDate,jdbcType=VARCHAR}
+            AND s.article_id = ma2.article_id
+            AND #{param.businessDate,jdbcType=VARCHAR} BETWEEN ma2.effective_start_date AND ma2.effective_end_date
+            AND ma2.is_default = '1'
+            AND ma2.article_id = ma3.article_id
+            AND ma2.effective_start_date = ma3.effective_start_date
+            AND s.promotion_cd = ma4.promotion_cd
+            AND s.promotion_term_group = ma4.promotion_term_group
+        <if test="param.barcode!=null and param.barcode!=''">
+            AND lower(ma2.default_barcode) like lower(CONCAT('%',#{param.barcode},'%'))
+        </if>
+        <if test="param.articleName!=null and param.articleName!=''">
+         AND ma3.article_name=#{param.articleName}
+        </if>
+
+    </select>
+
+    <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.mmPromotionSaleDaily.MMPromotionSaleDailyParamDTO" resultMap="MMDataMap">
+        SELECT DISTINCT
+            sa1.store_cd,
+            sa1.tran_serial_no,
+            ma2.store_name,
+            sa1.acc_date,
+            sa1.promotion_cd,
+            ma3.promotion_name,
+            cm5.code_name AS promotion_pattern,
+            cm6.code_name AS promotion_type,
+            cm7.code_name AS distribution_type,
+            sa1.promotion_allot_type,
+            sa1.sale_amount AS discount_amount,
+            sa8.total_sale_price,
+            sa8.total_sale_qty,
+            sa8.total_sale_amount
+        FROM
+            sa0210 sa1,
+            ma1000 ma2,
+            ma4040 ma3,
+            ma4050 ma4,
+            (SELECT * FROM cm9010 WHERE code_type = '00155') cm5, /*促销模式*/
+            (SELECT * FROM cm9010 WHERE code_type = '00160') cm6, /*促销类型*/
+            (SELECT * FROM cm9010 WHERE code_type = '00165') cm7, /*分摊类型*/
+            (
+                SELECT
+                    s.tran_serial_no,
+                    s.promotion_cd,
+                    s.acc_date,
+                    sum(s1.price_actual) AS total_sale_price,
+                    sum(s.sale_amount) AS total_sale_amount,
+                    sum(s1.sale_qty) AS total_sale_qty,s2.sale_amount AS discount_amount
+                FROM
+                    sa0210 s, sa0020 s1,
+                    (select s.tran_serial_no,s.acc_date,s.promotion_cd,s.store_cd,s.sale_amount FROM sa0210 s WHERE s.detail_type = 'm') s2,
+                    ma1110 s3, ma1100 s4
+                WHERE
+                    s.detail_type = 's'
+                    AND s.tran_serial_no = s1.tran_serial_no
+                    AND s.sale_seq_no = s1.sale_seq_no
+                    AND s.tran_serial_no = s2.tran_serial_no
+                    AND s.acc_date = s2.acc_date
+                    AND s.promotion_cd = s2.promotion_cd
+                    AND s.store_cd = s2.store_cd
+                    AND s.article_id = s3.article_id
+                    AND #{param.businessDate,jdbcType=VARCHAR} BETWEEN s3.effective_start_date AND s3.effective_end_date
+                    AND s3.article_id = s4.article_id
+                    AND s3.effective_start_date = s4.effective_start_date
+                <if test="param.barcode!=null and param.barcode!=''">
+                    AND lower(s3.default_barcode) like lower(CONCAT('%',#{param.barcode},'%'))
+                </if>
+                    <if test="param.articleName!=null and param.articleName!=''">
+                        AND concat(lower( s4.article_id ),'',lower( s4.article_name ),'',lower( s4.article_name_en ),'',lower(
+                        s4.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
+                    </if>
+
+                GROUP BY
+                    s.tran_serial_no,
+                    s.promotion_cd,
+                    s.acc_date,
+                    s2.sale_amount
+          ) sa8
+        WHERE
+            sa1.detail_type = 'm'
+            AND sa1.store_cd = ma2.store_cd
+            AND #{param.businessDate,jdbcType=VARCHAR} BETWEEN ma2.effective_start_date AND ma2.effective_end_date
+            AND ma4.promotion_cd = sa1.promotion_cd
+            AND ma3.promotion_cd = sa1.promotion_cd
+            AND sa1.promotion_diff = cm5.code_value
+            AND ma4.promotion_type = cm6.code_value
+            AND sa1.promotion_allot_type = cm7.code_value
+            AND sa8.promotion_cd = sa1.promotion_cd
+            AND sa8.tran_serial_no = sa1.tran_serial_no
+        <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">
+            AND sa1.acc_date BETWEEN #{param.startDate} AND #{param.endDate}
+        </if>
+        <if test="param.promotionPattern!=null and param.promotionPattern!=''">
+            AND sa1.promotion_diff = #{param.promotionPattern}
+        </if>
+        <if test="param.promotionType!=null and param.promotionType!=''">
+            AND ma4.promotion_type = #{param.promotionType}
+        </if>
+        <if test="param.distributionType!=null and param.distributionType!=''">
+            AND sa1.promotion_allot_type = #{param.distributionType}
+        </if>
+        <if test="param.promotionCd!=null and param.promotionCd!=''">
+            AND lower(sa1.promotion_cd) like lower(CONCAT('%',#{param.promotionCd},'%'))
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            AND ma2.ofc = #{param.am}
+        </if>
+        <if test="param.storeCd!=null and param.storeCd!=''">
+            AND sa1.store_cd = #{param.storeCd}
+        </if>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+</mapper>

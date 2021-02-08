@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.AdjustmentDailyMapper">
+
+    <resultMap id="ReMap" type="cn.com.bbut.iy.itemmaster.dto.adjustmentDaily.AdjustmentDailyDTO">
+        <result column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <result column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <result column="article_name" property="articleName" jdbcType="VARCHAR" />
+        <result column="sales_unit_id" property="uom" jdbcType="VARCHAR" />
+        <result column="voucher_date" property="adjustmentDate" jdbcType="VARCHAR" />
+        <result column="dep_cd" property="depCd" jdbcType="VARCHAR" />
+        <result column="dep_name" property="depName" jdbcType="VARCHAR" />
+        <result column="pma_cd" property="pmaCd" jdbcType="VARCHAR" />
+        <result column="pma_name" property="pmaName" jdbcType="VARCHAR" />
+        <result column="category_cd" property="categoryCd" jdbcType="VARCHAR" />
+        <result column="category_name" property="categoryName" jdbcType="VARCHAR" />
+        <result column="sub_category_cd" property="subCategoryCd" jdbcType="VARCHAR" />
+        <result column="sub_category_name" property="subCategoryName" jdbcType="VARCHAR" />
+        <result column="barcode" property="barcode" jdbcType="VARCHAR" />
+        <result column="ofc" property="ofc" jdbcType="VARCHAR" />
+        <result column="ofc_name" property="ofcName" jdbcType="VARCHAR" />
+        <result column="qty1" property="adjustmentQty" jdbcType="DECIMAL" />
+        <result column="amt_notax" property="adjustmentAmt" jdbcType="DECIMAL" />
+        <result column="adjust_reason" property="adjustReason" jdbcType="VARCHAR" />
+        <result column="adjust_reason_text" property="adjustReasonText" jdbcType="VARCHAR" />
+        <result column="general_reason" property="generalReason" jdbcType="VARCHAR" />
+        <result column="general_level_reason" property="generalReasonText" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="selectCondition">
+        AND S.store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="adjustmentStartDate != null and adjustmentStartDate != ''">
+            AND S.voucher_date >= #{adjustmentStartDate,jdbcType=VARCHAR}
+        </if>
+        <if test="adjustmentEndDate != null and adjustmentEndDate != ''">
+            AND #{adjustmentEndDate,jdbcType=VARCHAR} >= S.voucher_date
+        </if>
+<!--        <if test="articleId != null and articleId != ''">-->
+<!--            AND lower(S1.article_id) like lower(CONCAT('%',#{articleId,jdbcType=VARCHAR},'%'))-->
+<!--        </if>-->
+        <if test="generalReason != null and generalReason != ''">
+            AND m8.general_level_cd = #{generalReason,jdbcType=VARCHAR}
+        </if>
+        <if test="adjustReason != null and adjustReason != ''">
+            AND adjust_reason = #{adjustReason,jdbcType=VARCHAR}
+        </if>
+    </sql>
+
+    <select id="selectListByCondition1" parameterType="cn.com.bbut.iy.itemmaster.dto.adjustmentDaily.AdjustmentDailyParamDTO" resultMap="ReMap">
+        SELECT
+            T.store_cd,
+            T.voucher_no,
+            T.voucher_type,
+            T.voucher_date,
+            T.article_id,
+            T.general_level_cd,
+            T.adjust_reason,
+            T.adjust_reason_text,
+            T.qty1,
+            T.amt_notax,
+            T.display_seq,
+            T0.store_name,
+            T1.article_name,
+            T1.pma_cd,
+            T2.pma_name,
+            T1.dep_cd,
+            T1.category_cd,
+            T1.sub_category_cd,
+            T3.code_name AS adjust_reason_name
+        FROM (
+            SELECT
+                S.store_cd,
+                S.voucher_no,
+                S.voucher_type,
+                S.voucher_date,
+                S1.article_id,
+                m8.general_level_cd,
+                S1.adjust_reason,
+                concat(S1.adjust_reason,' ',m8.detailed_level_reason) adjust_reason_text,
+                S1.qty1,
+                S1.amt_notax,
+                S1.display_seq
+            FROM
+                sk0010 S, sk0020 S1,ma8360 m8
+            WHERE
+                S.store_cd = S1.store_cd
+        /*审核通过*/
+        AND S.review_status = 10
+            AND S.voucher_no = S1.voucher_no
+            AND S.voucher_type = S1.voucher_type
+            AND S.voucher_date = S1.voucher_date
+            AND S1.adjust_reason = m8.detailed_level_cd
+            AND S.store_cd1 = S1.store_cd1
+            AND S.voucher_type = '604'
+            <include refid="selectCondition"></include>
+        ) T
+        JOIN (
+            SELECT store_cd, store_name
+            FROM ma1000
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T0
+        ON T.store_cd = T0.store_cd
+        JOIN (
+            SELECT
+                article_id, effective_start_date, article_name,  dep_cd, pma_cd, category_cd,sub_category_cd
+            FROM
+                ma1100
+            WHERE
+                #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            <if test="depCd != null and depCd != ''">
+                AND dep_cd = #{depCd,jdbcType=VARCHAR}
+            </if>
+          <if test="pmaCd != null and pmaCd != ''">
+            AND pma_cd = #{pmaCd,jdbcType=VARCHAR}
+        </if>
+         <if test="categoryCd != null and categoryCd != ''">
+            AND category_cd = #{categoryCd,jdbcType=VARCHAR}
+         </if>
+        <if test="subCategoryCd != null and subCategoryCd != ''">
+            AND sub_categor_cd = #{subCategoryCd,jdbcType=VARCHAR}
+         </if>
+        ) T1
+        ON T.article_id = T1.article_id
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, pma_name FROM ma0080 WHERE effective_sts = '10'
+        ) T2
+        ON T1.dep_cd = T2.dep_cd AND T1.pma_cd = T2.pma_cd
+        LEFT JOIN (
+            SELECT code_value, code_name FROM cm9010 WHERE code_type = '00235'
+        ) T3
+        ON T.adjust_reason = T3.code_value
+        ORDER BY T.voucher_date DESC, T.display_seq
+    </select>
+
+    <select id="selectListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.adjustmentDaily.AdjustmentDailyParamDTO" resultMap="ReMap">
+        drop table if exists tmp_inventory_adjustment_daily;
+        SELECT
+        T.store_cd,
+        T.voucher_no,
+        T.voucher_type,
+        T.voucher_date,
+        T.article_id,
+        T.sales_unit_id,
+        T.general_level_cd,
+        T.adjust_reason,
+        T.adjust_reason_text,
+        T.qty1,
+        T.amt_notax,
+        T.display_seq,
+        T.barcode,
+        T0.store_name,
+        T1.article_name_en,
+        T1.article_short_name,
+        T1.article_short_name_en,
+        T3.code_name AS adjust_reason_name,
+        T0.ofc_name,
+             T0.ofc,
+             T1.article_name,
+             T1.pma_cd,
+             T2.pma_name,
+             T1.dep_cd,
+             T1.category_cd,
+             T1.sub_category_cd,
+            ( select dep_name from ma0070 where ma0070.dep_cd=T1.dep_cd) AS dep_name,
+            (select category_name  from ma0090 where ma0090.category_cd=T1.category_cd AND pma_cd=T1.pma_cd and dep_cd=T1.dep_cd) AS category_name,
+            (select sub_category_name  from ma0100 where ma0100.sub_category_cd=T1.sub_category_cd
+             and ma0100.dep_cd=T1.dep_cd and ma0100.pma_cd=T1.pma_cd and MA0100.category_cd = T1.category_cd) AS sub_category_name
+             into tmp_inventory_adjustment_daily
+        FROM (
+            SELECT
+                S.store_cd, S.voucher_no, S.voucher_type, S.voucher_date,
+                S1.article_id,S1.sales_unit_id,m8.general_level_cd,
+                S1.adjust_reason,
+                concat(S1.adjust_reason,' ',m8.detailed_level_reason) adjust_reason_text,
+                S1.qty1, S1.amt_notax, S1.barcode,
+                S1.display_seq
+            FROM
+            sk0010 S, sk0020 S1,ma8360 m8
+            WHERE
+            S.store_cd = S1.store_cd
+            /*审核通过*/
+            AND S.review_status = 10
+            AND S.voucher_no = S1.voucher_no
+            AND S.voucher_type = S1.voucher_type
+            AND S.voucher_date = S1.voucher_date
+            AND S.store_cd1 = S1.store_cd1
+            AND S1.adjust_reason = m8.detailed_level_cd
+            AND S.voucher_type = '604'
+            <include refid="selectCondition"></include>
+        ) T
+        JOIN (
+            SELECT store_cd, store_name,ofc,
+            (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
+            FROM ma1000
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            <if test="am !=null and am !=''">
+                AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
+            </if>
+        ) T0
+        ON T.store_cd = T0.store_cd
+        JOIN (
+            SELECT
+                article_id, effective_start_date, article_name, article_name_en,article_short_name_en,article_short_name,dep_cd, pma_cd, category_cd,sub_category_cd
+            FROM
+                ma1100
+            WHERE
+            #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        <if test="depCd != null and depCd != ''">
+            AND dep_cd = #{depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="pmaCd != null and pmaCd != ''">
+            AND pma_cd = #{pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="categoryCd != null and categoryCd != ''">
+            AND category_cd = #{categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="subCategoryCd != null and subCategoryCd != ''">
+            AND sub_category_cd = #{subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        ) T1
+        ON T.article_id = T1.article_id
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, pma_name FROM ma0080 WHERE effective_sts = '10'
+        ) T2
+        ON T1.dep_cd = T2.dep_cd AND T1.pma_cd = T2.pma_cd
+        LEFT JOIN (
+        SELECT code_value, code_name FROM cm9010 WHERE code_type = '00235'
+        ) T3
+        ON T.adjust_reason = T3.code_value
+        ORDER BY T.voucher_date DESC, T.display_seq;
+        CREATE  INDEX tmpInventoryDailyIndex ON tmp_inventory_adjustment_daily  USING btree (barcode,article_name,article_name_en,article_short_name,article_short_name_en);
+       select
+       *
+       from tmp_inventory_adjustment_daily  tmp
+       where 1=1
+        <if test="barcode !=null  and barcode !=''">
+            AND lower(tmp.barcode) like lower(CONCAT('%',#{barcode},'%'))
+        </if>
+        <if test="articleName !=null and articleName !=''">
+            AND concat(lower( tmp.article_id ),'',lower( tmp.article_name ),'',lower( tmp.article_name_en ),'',lower(
+            tmp.article_short_name_en )) LIKE lower( CONCAT('%',#{articleName},'%') )
+        </if>
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+
+    <select id="selectCountByCondition1" parameterType="cn.com.bbut.iy.itemmaster.dto.adjustmentDaily.AdjustmentDailyParamDTO" resultType="int">
+        SELECT
+        count(*)
+        FROM (
+        SELECT
+        S.store_cd, S.voucher_no, S.voucher_type, S.voucher_date,
+        S1.article_id,S1.sales_unit_id,m8.general_level_cd,
+        S1.adjust_reason,
+        concat(S1.adjust_reason,' ',m8.detailed_level_reason) adjust_reason_text,
+        S1.qty1, S1.amt_notax, S1.barcode,
+        S1.display_seq
+        FROM
+        sk0010 S, sk0020 S1,ma8360 m8
+        WHERE
+        S.store_cd = S1.store_cd
+        /*审核通过*/
+        AND S.review_status = 10
+        AND S.voucher_no = S1.voucher_no
+        AND S.voucher_type = S1.voucher_type
+        AND S.voucher_date = S1.voucher_date
+        AND S.store_cd1 = S1.store_cd1
+        AND S1.adjust_reason = m8.detailed_level_cd
+        AND S.voucher_type = '604'
+        <include refid="selectCondition"></include>
+        ) T
+        JOIN (
+        SELECT store_cd, store_name,ofc,
+        (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
+        FROM ma1000
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        <if test="am !=null and am !=''">
+            AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
+        </if>
+        ) T0
+        ON T.store_cd = T0.store_cd
+        JOIN (
+        SELECT
+        article_id, effective_start_date, article_name,  dep_cd, pma_cd, category_cd,sub_category_cd
+        FROM
+        ma1100
+        WHERE
+        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        <if test="depCd != null and depCd != ''">
+            AND dep_cd = #{depCd,jdbcType=VARCHAR}
+            <if test="pmaCd != null and pmaCd != ''">
+                AND pma_cd = #{pmaCd,jdbcType=VARCHAR}
+                <if test="categoryCd != null and categoryCd !=''">
+                    AND category_cd=#{categoryCd,jdbcType=VARCHAR}
+                    <if test="subCategoryCd !=null and subCategoryCd !=''">
+                        AND sub_category_cd=#{subCategoryCd,jdbcType=VARCHAR}
+                    </if>
+                </if>
+            </if>
+        </if>
+        <if test="articleName != null and articleName != ''">
+            AND lower(article_name) like lower(CONCAT('%',#{articleName,jdbcType=VARCHAR},'%'))
+        </if>
+        ) T1
+        ON T.article_id = T1.article_id
+        LEFT JOIN (
+        SELECT dep_cd, pma_cd, pma_name FROM ma0080 WHERE effective_sts = '10'
+        ) T2
+        ON T1.dep_cd = T2.dep_cd AND T1.pma_cd = T2.pma_cd
+    </select>
+    <select id="selectCountByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.adjustmentDaily.AdjustmentDailyParamDTO" resultType="int">
+        drop table if exists tmp_inventory_adjustment_daily;
+        SELECT
+        T.store_cd,
+        T.voucher_no,
+        T.voucher_type,
+        T.voucher_date,
+        T.article_id,
+        T.general_level_cd,
+        T.adjust_reason,
+        T.adjust_reason_text,
+        T.qty1,
+        T.amt_notax,
+        T.display_seq,
+        T.barcode,
+        T.sales_unit_id,
+        T0.store_name,
+        T1.article_name_en,
+        T1.article_short_name,
+        T1.article_short_name_en,
+        T3.code_name AS adjust_reason_name,
+        T0.ofc_name,
+        T0.ofc,
+        T1.article_name,
+        T1.pma_cd,
+        T2.pma_name,
+        T1.dep_cd,
+        T1.category_cd,
+        T1.sub_category_cd,
+        ( select dep_name from ma0070 where ma0070.dep_cd=T1.dep_cd) AS dep_name,
+        (select category_name  from ma0090 where ma0090.category_cd=T1.category_cd AND pma_cd=T1.pma_cd and dep_cd=T1.dep_cd) AS category_name,
+        (select sub_category_name  from ma0100 where ma0100.sub_category_cd=T1.sub_category_cd
+        and ma0100.dep_cd=T1.dep_cd and ma0100.pma_cd=T1.pma_cd and MA0100.category_cd = T1.category_cd) AS sub_category_name
+        into tmp_inventory_adjustment_daily
+        FROM (
+        SELECT
+        S.store_cd, S.voucher_no, S.voucher_type, S.voucher_date,
+        S1.article_id,S1.sales_unit_id,m8.general_level_cd,
+        S1.adjust_reason,
+        concat(S1.adjust_reason,' ',m8.detailed_level_reason) adjust_reason_text,
+        S1.qty1, S1.amt_notax, S1.barcode,
+        S1.display_seq
+        FROM
+        sk0010 S, sk0020 S1,ma8360 m8
+        WHERE
+        S.store_cd = S1.store_cd
+        /*审核通过*/
+        AND S.review_status = 10
+        AND S.voucher_no = S1.voucher_no
+        AND S.voucher_type = S1.voucher_type
+        AND S.voucher_date = S1.voucher_date
+        AND S.store_cd1 = S1.store_cd1
+        AND S1.adjust_reason = m8.detailed_level_cd
+        AND S.voucher_type = '604'
+        <include refid="selectCondition"></include>
+        ) T
+        JOIN (
+        SELECT store_cd, store_name,ofc,
+        (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
+        FROM ma1000
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        <if test="am !=null and am !=''">
+            AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
+        </if>
+        ) T0
+        ON T.store_cd = T0.store_cd
+        JOIN (
+        SELECT
+        article_id, effective_start_date, article_name, article_name_en,article_short_name_en,article_short_name,dep_cd, pma_cd, category_cd,sub_category_cd
+        FROM
+        ma1100
+        WHERE
+        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        <if test="depCd != null and depCd != ''">
+            AND dep_cd = #{depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="pmaCd != null and pmaCd != ''">
+            AND pma_cd = #{pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="categoryCd != null and categoryCd != ''">
+            AND category_cd = #{categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="subCategoryCd != null and subCategoryCd != ''">
+            AND sub_category_cd = #{subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        ) T1
+        ON T.article_id = T1.article_id
+        LEFT JOIN (
+        SELECT dep_cd, pma_cd, pma_name FROM ma0080 WHERE effective_sts = '10'
+        ) T2
+        ON T1.dep_cd = T2.dep_cd AND T1.pma_cd = T2.pma_cd
+        LEFT JOIN (
+        SELECT code_value, code_name FROM cm9010 WHERE code_type = '00235'
+        ) T3
+        ON T.adjust_reason = T3.code_value
+        ORDER BY T.voucher_date DESC, T.display_seq;
+        CREATE  INDEX tmpInventoryDailyIndex ON tmp_inventory_adjustment_daily  USING btree (barcode,article_name,article_name_en,article_short_name,article_short_name_en);
+        select count(1) FROM
+        (select
+        *
+        from tmp_inventory_adjustment_daily  tmp
+        where 1=1
+        <if test="barcode !=null  and barcode !=''">
+            AND lower(tmp.barcode) like lower(CONCAT('%',#{barcode},'%'))
+        </if>
+        <if test="articleName !=null and articleName !=''">
+            AND concat(lower( tmp.article_id ),'',lower( tmp.article_name ),'',lower( tmp.article_name_en ),'',lower(
+            tmp.article_short_name_en )) LIKE lower( CONCAT('%',#{articleName},'%') )
+        </if>
+        )AS tmp;
+    </select>
+    <select id="getCountItemSKU1" parameterType="cn.com.bbut.iy.itemmaster.dto.adjustmentDaily.AdjustmentDailyParamDTO" resultType="int">
+        SELECT
+        count(distinct T.article_id)
+        FROM (
+        SELECT
+        S.store_cd, S.voucher_no, S.voucher_type, S.voucher_date,
+        S1.article_id,m8.general_level_cd,
+        S1.adjust_reason,
+        concat(S1.adjust_reason,' ',m8.detailed_level_reason) adjust_reason_text,
+        S1.qty1, S1.amt_notax, S1.barcode,
+        S1.display_seq
+        FROM
+        sk0010 S, sk0020 S1,ma8360 m8
+        WHERE
+        S.store_cd = S1.store_cd
+        /*审核通过*/
+        AND S.review_status = 10
+        AND S.voucher_no = S1.voucher_no
+        AND S.voucher_type = S1.voucher_type
+        AND S.voucher_date = S1.voucher_date
+        AND S.store_cd1 = S1.store_cd1
+        AND S1.adjust_reason = m8.detailed_level_cd
+        AND S.voucher_type = '604'
+        <include refid="selectCondition"></include>
+        ) T
+        JOIN (
+        SELECT store_cd, store_name,ofc,
+        (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
+        FROM ma1000
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        <if test="am !=null and am !=''">
+            AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
+        </if>
+        ) T0
+        ON T.store_cd = T0.store_cd
+        JOIN (
+        SELECT
+        article_id, effective_start_date, article_name,  dep_cd, pma_cd, category_cd,sub_category_cd
+        FROM
+        ma1100
+        WHERE
+        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        <if test="depCd != null and depCd != ''">
+            AND dep_cd = #{depCd,jdbcType=VARCHAR}
+            <if test="pmaCd != null and pmaCd != ''">
+                AND pma_cd = #{pmaCd,jdbcType=VARCHAR}
+                <if test="categoryCd != null and categoryCd !=''">
+                    AND category_cd=#{categoryCd,jdbcType=VARCHAR}
+                    <if test="subCategoryCd !=null and subCategoryCd !=''">
+                        AND sub_category_cd=#{subCategoryCd,jdbcType=VARCHAR}
+                    </if>
+                </if>
+            </if>
+        </if>
+        <if test="articleName != null and articleName != ''">
+            AND lower(article_name) like lower(CONCAT('%',#{articleName,jdbcType=VARCHAR},'%'))
+        </if>
+        ) T1
+        ON T.article_id = T1.article_id
+        LEFT JOIN (
+        SELECT dep_cd, pma_cd, pma_name FROM ma0080 WHERE effective_sts = '10'
+        ) T2
+        ON T1.dep_cd = T2.dep_cd AND T1.pma_cd = T2.pma_cd
+    </select>
+    <select id="getCountItemSKU" parameterType="cn.com.bbut.iy.itemmaster.dto.adjustmentDaily.AdjustmentDailyParamDTO" resultType="int">
+        drop table if exists tmp_inventory_adjustment_daily;
+        SELECT
+        T.store_cd,
+        T.voucher_no,
+        T.voucher_type,
+        T.voucher_date,
+        T.article_id,
+        T.general_level_cd,
+        T.adjust_reason,
+        T.adjust_reason_text,
+        T.qty1,
+        T.amt_notax,
+        T.display_seq,
+        T.barcode,
+        T0.store_name,
+        T1.article_name_en,
+        T1.article_short_name,
+        T1.article_short_name_en,
+        T3.code_name AS adjust_reason_name,
+        T0.ofc_name,
+        T0.ofc,
+        T1.article_name,
+        T1.pma_cd,
+        T2.pma_name,
+        T1.dep_cd,
+        T1.category_cd,
+        T1.sub_category_cd,
+        ( select dep_name from ma0070 where ma0070.dep_cd=T1.dep_cd) AS dep_name,
+        (select category_name  from ma0090 where ma0090.category_cd=T1.category_cd AND pma_cd=T1.pma_cd and dep_cd=T1.dep_cd) AS category_name,
+        (select sub_category_name  from ma0100 where ma0100.sub_category_cd=T1.sub_category_cd
+        and ma0100.dep_cd=T1.dep_cd and ma0100.pma_cd=T1.pma_cd and MA0100.category_cd = T1.category_cd) AS sub_category_name
+        into tmp_inventory_adjustment_daily
+        FROM (
+        SELECT
+        S.store_cd, S.voucher_no, S.voucher_type, S.voucher_date,
+        S1.article_id,S1.sales_unit_id,m8.general_level_cd,
+        S1.adjust_reason,
+        concat(S1.adjust_reason,' ',m8.detailed_level_reason) adjust_reason_text,
+        S1.qty1, S1.amt_notax, S1.barcode,
+        S1.display_seq
+        FROM
+        sk0010 S, sk0020 S1,ma8360 m8
+        WHERE
+        S.store_cd = S1.store_cd
+        /*审核通过*/
+        AND S.review_status = 10
+        AND S.voucher_no = S1.voucher_no
+        AND S.voucher_type = S1.voucher_type
+        AND S.voucher_date = S1.voucher_date
+        AND S.store_cd1 = S1.store_cd1
+        AND S1.adjust_reason = m8.detailed_level_cd
+        AND S.voucher_type = '604'
+        <include refid="selectCondition"></include>
+        ) T
+        JOIN (
+        SELECT store_cd, store_name,ofc,
+        (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
+        FROM ma1000
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        <if test="am !=null and am !=''">
+            AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
+        </if>
+        ) T0
+        ON T.store_cd = T0.store_cd
+        JOIN (
+        SELECT
+        article_id, effective_start_date, article_name, article_name_en,article_short_name_en,article_short_name,dep_cd, pma_cd, category_cd,sub_category_cd
+        FROM
+        ma1100
+        WHERE
+        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        <if test="depCd != null and depCd != ''">
+            AND dep_cd = #{depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="pmaCd != null and pmaCd != ''">
+            AND pma_cd = #{pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="categoryCd != null and categoryCd != ''">
+            AND category_cd = #{categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="subCategoryCd != null and subCategoryCd != ''">
+            AND sub_category_cd = #{subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        ) T1
+        ON T.article_id = T1.article_id
+        LEFT JOIN (
+        SELECT dep_cd, pma_cd, pma_name FROM ma0080 WHERE effective_sts = '10'
+        ) T2
+        ON T1.dep_cd = T2.dep_cd AND T1.pma_cd = T2.pma_cd
+        LEFT JOIN (
+        SELECT code_value, code_name FROM cm9010 WHERE code_type = '00235'
+        ) T3
+        ON T.adjust_reason = T3.code_value
+        ORDER BY T.voucher_date DESC, T.display_seq;
+        CREATE  INDEX tmpInventoryDailyIndex ON tmp_inventory_adjustment_daily  USING btree (barcode,article_name,article_name_en,article_short_name,article_short_name_en);
+        select count(DISTINCT tmp_adjust.article_id) FROM
+        (select
+        *
+        from tmp_inventory_adjustment_daily  tmp
+        where 1=1
+        <if test="barcode !=null  and barcode !=''">
+            AND lower(tmp.barcode) like lower(CONCAT('%',#{barcode},'%'))
+        </if>
+        <if test="articleName !=null and articleName !=''">
+            AND concat(lower( tmp.article_id ),'',lower( tmp.article_name ),'',lower( tmp.article_name_en ),'',lower(
+            tmp.article_short_name_en )) LIKE lower( CONCAT('%',#{articleName},'%') )
+        </if>
+        )AS tmp_adjust;
+    </select>
+
+    <select id="getGeneralReason" resultMap="ReMap">
+        SELECT
+        ma8350.general_level_cd general_reason,
+        concat(ma8350.general_level_cd,' ',ma8350.general_level_reason) as general_level_reason
+        FROM ma8360,ma8350
+        WHERE ma8360.detailed_level_cd = #{adjustReason,jdbcType=VARCHAR}
+        AND ma8350.general_level_cd = ma8360.general_level_cd
+        AND ma8360.effective_sts = '10'
+    </select>
+</mapper>

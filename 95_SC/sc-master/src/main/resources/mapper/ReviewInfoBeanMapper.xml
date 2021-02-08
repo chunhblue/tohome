@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.audit.ReviewInfoBeanMapper">
+
+	<resultMap type="cn.com.bbut.iy.itemmaster.dto.audit.ReviewInfoBean" id="ReReviewInfo">
+		<result column="n_recordid" property="NRecordid"/>
+		<result column="n_reviewid" property="NReviewid"/>
+		<result column="c_step" property="CStep"/>
+		<result column="c_stepname" property="CStepName" jdbcType="VARCHAR"/>
+		<result column="n_roleid" property="NRoleid"/>
+		<result column="c_rolename" property="CRoleName"/>
+		<result column="c_auditstatus" property="CAuditStatus"/>
+		<result column="C_ENABLE" property="status" jdbcType="BOOLEAN"/>
+	</resultMap>
+
+	<resultMap type="cn.com.bbut.iy.itemmaster.dto.audit.ReviewInfoDTO" id="ReReviewInfoDTO">
+		<result column="n_recordid" property="NRecordid"/>
+		<result column="n_reviewid" property="NReviewid"/>
+		<result column="c_step" property="CStep"/>
+		<result column="c_stepname" property="CStepName" jdbcType="VARCHAR"/>
+		<result column="n_roleid" property="NRoleid"/>
+		<result column="c_rolename" property="CRoleName" jdbcType="VARCHAR"/>
+		<result column="c_auditstatus" property="CAuditStatus"/>
+		<result column="C_ENABLE" property="status" jdbcType="BOOLEAN"/>
+	</resultMap>
+
+	<select id="selectReviewInfoByID" resultMap="ReReviewInfo">
+		select 
+			r.n_recordid, r.n_reviewid, r.c_step, r.c_stepname, r.n_roleid, 
+			r.c_auditstatus, r.C_ENABLE
+		from 
+			t_review_step r
+		where 
+			r.c_enable = '1' 
+		and r.n_reviewid = #{nReviewid} 
+		order by c_stepname
+	</select>
+
+	<select id="selectInfoByReviewID" resultMap="ReReviewInfoDTO">
+		SELECT RS.n_recordid, RS.n_reviewid, RS.c_step, RS.c_stepname, RS.n_roleid, RS.c_auditstatus, RS.C_ENABLE
+		FROM t_review_step RS
+		WHERE RS.c_enable = '1'
+		AND RS.n_reviewid = #{nReviewid}
+		ORDER BY c_step
+	</select>
+
+	<select id="selectByID" resultMap="ReReviewInfo">
+		select n_recordid, n_reviewid, c_step, c_stepname, n_roleid, c_auditstatus, C_ENABLE 
+		from t_review_step
+		where c_enable = '1' and n_recordid = #{id} 
+	</select>
+
+	<select id="selectMaxId" resultType="int">
+		select COALESCE(max(n_recordid),0) from t_review_step 
+	</select>
+
+	<select id="selectMaxByReviewId" resultType="long">
+		select COALESCE(max(c_step),0) from t_review_step 
+		where n_reviewid = #{reviewId} and c_enable = '1' 
+	</select>
+
+	<select id="selectIdByReviewIdAndSubNo" resultMap="ReReviewInfo">
+		select n_recordid, n_reviewid, c_step, c_stepname, n_roleid, c_auditstatus, C_ENABLE 
+		from t_review_step 
+		WHERE n_reviewid = #{reviewId} 
+		AND c_step = #{subNo} AND c_enable = '1'
+	</select>
+
+	<insert id="insertReviewInfo">
+		insert into t_review_step 
+		(n_reviewid, c_step, c_stepname, n_roleid, c_auditstatus, C_ENABLE)
+		values
+		(#{insertBean.nReviewid},  #{insertBean.cStep}, #{insertBean.cStepName}, 
+		#{insertBean.nRoleid}, #{insertBean.cAuditStatus}, 1)
+	</insert>
+
+	<update id="updateReviewInfo">
+		update t_review_step 
+		set 
+		c_step = #{updateBean.cStep}, c_stepname = #{updateBean.cStepName}, 
+		n_roleid = #{updateBean.nRoleid}, c_auditstatus = #{updateBean.cAuditStatus}, 
+		C_ENABLE = #{updateBean.status, jdbcType=VARCHAR} 
+		where 
+		n_recordid = #{updateBean.nRecordid}
+	</update>
+
+	<delete id="deleteReviewInfo">
+		delete from t_review_step where n_recordid = #{recordid}
+	</delete>
+
+	<delete id="deleteAllStepById">
+		delete from t_review_step where n_reviewid = #{nReviewid}
+	</delete>
+
+	<update id="invalidAllStepById">
+		update t_review_step set c_enable = '0' where n_reviewid = #{reviewid}
+	</update>
+
+</mapper>

@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.importantgoodsale.importantGoodsSaleReportMapper">
+    <resultMap id="BaseItemResult" type="cn.com.bbut.iy.itemmaster.dto.importantgoodsale.importantgoodSaleReportDTO">
+
+        <result column="article_id" property="articleId"></result>
+        <result column="sale_date" property="saleDate"></result>
+        <result column="store_cd" property="storeCd"></result>
+        <result column="store_name" property="storeName"></result>
+        <result column="city" property="city"></result>
+        <result column="dep_cd" property="depCd"></result>
+        <result column="dep_name" property="depName"></result>
+        <result column="pma_cd" property="pmaCd"></result>
+        <result column="pma_name" property="pmaName"></result>
+        <result column="category_cd" property="categoryCd"></result>
+        <result column="category_name" property="categoryName"></result>
+        <result column="sub_category_cd" property="subCategoryCd"></result>
+        <result column="sub_category_name" property="subCategoryName"></result>
+        <result column="sale_amount" property="saleAmount"></result>
+        <result column="sale_qty" property="saleQty"></result>
+        <result column="price_actual" property="priceActual"></result>
+        <result column="acc_date" property="accDate"></result>
+        <result column="ofc" property="ofc"></result>
+        <result column="ma_cd" property="maCd"></result>
+        <result column="amCd" property="amCd"></result>
+        <result column="amName" property="amName"></result>
+        <result column="product_status" property="productStatus"></result>
+    </resultMap>
+    <select id="getPamList" resultType="cn.com.bbut.iy.itemmaster.entity.ma0080.MA0080">
+          SELECT
+            A.PMA_CD AS pmaCd,
+            A.PMA_NAME AS pmaName
+        FROM
+            MA0080 A
+        WHERE
+            A.EFFECTIVE_STS = '10'
+         </select>
+
+    <select id="getAMlist" resultType="cn.com.bbut.iy.itemmaster.entity.base.Ma1000">
+        SELECT DISTINCT
+            A.ofc
+        FROM
+            MA1000 A
+    </select>
+
+    <select id="getCityList" resultType="cn.com.bbut.iy.itemmaster.entity.ma0020.MA0020C">
+        SELECT DISTINCT
+            A.structure_cd AS structureCd,
+            A.structure_name AS structureName
+        FROM
+            MA0020 A
+        WHERE
+            A.structure_level = '2'
+    </select>
+    <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.goodsalereport.goodSaleReportParamDTO" resultMap="BaseItemResult">
+    SELECT  DISTINCT
+        ma10.store_cd,
+        ma10.store_name,
+        sa02.sale_date,
+        sa02.price_actual,
+        sa02.sale_qty,
+        sa02.sale_amount,
+		ma11.article_id,
+		ma11.article_name,
+        ma07.dep_cd,
+        ma08.pma_cd,
+        ma09.category_cd,
+        ma01.sub_category_cd,
+        concat(ma07.dep_cd,' ',ma07.dep_name) dep_name,
+        concat(ma08.pma_cd,' ',ma08.pma_name) pma_name,
+        concat(ma09.category_cd,' ',ma09.category_name) category_name,
+        concat(ma01.sub_category_cd,' ',ma01.sub_category_name) sub_category_name,
+        oper.c_operatorcode amCd,
+        oper.c_operatorname amName,
+		sa02.barcode,
+		sa02.acc_date
+    FROM
+        ma1000 ma10,
+        sa0020 sa02,
+        ma1100 ma11,
+        ma0070 ma07,
+        ma0080 ma08,
+        ma0090 ma09,
+        ma0100 ma01,
+        t_operator oper
+   where
+        ma10.store_cd=sa02.store_cd
+        and ma10.ofc = oper.c_operatorcode
+        and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma11.effective_start_date AND ma11.effective_end_date
+        and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma10.effective_start_date AND ma10.effective_end_date
+        AND sa02.article_id=ma11.article_id
+        AND ma11.pma_cd=ma08.pma_cd
+        AND MA07.dep_cd=ma08.dep_cd
+        AND ma11.category_cd = ma09.category_cd
+        AND ma11.sub_category_cd = ma01.sub_category_cd
+        AND ma08.effective_sts = '10'
+        AND ma11.product_status = '10'
+        AND ma10.store_cd IN
+        <foreach item="store" index="index" collection="goodSaleReport.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="goodSaleReport.startDate!=null and goodSaleReport.startDate!=''">
+            <![CDATA[
+            AND   to_char(sa02.sale_date,'yyyyMMdd')  >= #{goodSaleReport.startDate}
+        ]]>
+        </if>
+        <if test="goodSaleReport.endDate!=null and goodSaleReport.endDate!=''">
+            <![CDATA[
+            AND   to_char(sa02.sale_date,'yyyyMMdd')  <= #{goodSaleReport.endDate}
+           ]]>
+        </if>
+        <if test="goodSaleReport.depCd!=null and goodSaleReport.depCd!=''">
+        AND ma11.dep_cd = #{goodSaleReport.depCd}
+        </if>
+        <if test="goodSaleReport.storeCd !=null and goodSaleReport.storeCd !=''">
+            AND sa02.store_cd = #{goodSaleReport.storeCd}
+        </if>
+        <if test="goodSaleReport.pmaCd!=null and goodSaleReport.pmaCd!=''">
+            AND ma11.pma_cd = #{goodSaleReport.pmaCd}
+        </if>
+        <if test="goodSaleReport.categoryCd!=null and goodSaleReport.categoryCd!=''">
+            AND ma11.category_cd = #{goodSaleReport.categoryCd}
+        </if>
+        <if test="goodSaleReport.subCategoryCd!=null and goodSaleReport.subCategoryCd!=''">
+            AND ma11.sub_category_cd = #{goodSaleReport.subCategoryCd}
+        </if>
+        <if test="goodSaleReport.city!=null and goodSaleReport.city!=''">
+            AND ma10.zo_cd = #{goodSaleReport.city}
+        </if>
+        <if test="goodSaleReport.am!=null and goodSaleReport.am!=''">
+            AND ma10.ofc = #{goodSaleReport.am}
+        </if>
+        order by   sa02.sale_amount DESC
+        <if test="goodSaleReport.flg">
+            LIMIT ${goodSaleReport.rows} OFFSET ${goodSaleReport.limitStart}
+        </if>
+
+    </select>
+
+    <select id="searchCount" parameterType="cn.com.bbut.iy.itemmaster.dto.goodsalereport.goodSaleReportParamDTO" resultType="int">
+        SELECT  DISTINCT
+            count (ma11.article_id)
+        FROM
+            ma1000 ma10,
+            sa0020 sa02,
+            ma1100 ma11,
+            ma0070 ma07,
+            ma0080 ma08,
+            ma0090 ma09,
+            ma0100 ma01,
+            t_operator oper
+        where
+            ma10.store_cd=sa02.store_cd
+            and ma10.ofc = oper.c_operatorcode
+            and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma11.effective_start_date AND ma11.effective_end_date
+            and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma10.effective_start_date AND ma10.effective_end_date
+            AND sa02.article_id=ma11.article_id
+            AND ma11.pma_cd=ma08.pma_cd
+            AND MA07.dep_cd=ma08.dep_cd
+            AND ma11.category_cd = ma09.category_cd
+            AND ma11.sub_category_cd = ma01.sub_category_cd
+            AND ma08.effective_sts = '10'
+            AND ma11.product_status = '10'
+            AND ma10.store_cd IN
+            <foreach item="store" index="index" collection="goodSaleReport.stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            <if test="goodSaleReport.startDate!=null and goodSaleReport.startDate!=''">
+                <![CDATA[
+                AND   to_char(sa02.sale_date,'yyyyMMdd')  >= #{goodSaleReport.startDate}
+            ]]>
+            </if>
+            <if test="goodSaleReport.endDate!=null and goodSaleReport.endDate!=''">
+                <![CDATA[
+                AND   to_char(sa02.sale_date,'yyyyMMdd')  <= #{goodSaleReport.endDate}
+               ]]>
+            </if>
+            <if test="goodSaleReport.depCd!=null and goodSaleReport.depCd!=''">
+                AND ma11.dep_cd = #{goodSaleReport.depCd}
+            </if>
+            <if test="goodSaleReport.storeCd !=null and goodSaleReport.storeCd !=''">
+                AND sa02.store_cd = #{goodSaleReport.storeCd}
+            </if>
+            <if test="goodSaleReport.pmaCd!=null and goodSaleReport.pmaCd!=''">
+                AND ma11.pma_cd = #{goodSaleReport.pmaCd}
+            </if>
+            <if test="goodSaleReport.categoryCd!=null and goodSaleReport.categoryCd!=''">
+                AND ma11.category_cd = #{goodSaleReport.categoryCd}
+            </if>
+            <if test="goodSaleReport.subCategoryCd!=null and goodSaleReport.subCategoryCd!=''">
+                AND ma11.sub_category_cd = #{goodSaleReport.subCategoryCd}
+            </if>
+            <if test="goodSaleReport.city!=null and goodSaleReport.city!=''">
+                AND ma10.zo_cd = #{goodSaleReport.city}
+            </if>
+            <if test="goodSaleReport.am!=null and goodSaleReport.am!=''">
+                AND ma10.ofc = #{goodSaleReport.am}
+            </if>
+    </select>
+
+</mapper>

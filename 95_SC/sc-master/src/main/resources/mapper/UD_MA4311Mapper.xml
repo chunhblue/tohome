@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.MA4311Mapper">
+  <resultMap id="baseResult" type="cn.com.bbut.iy.itemmaster.dto.base.role.RoleStoreDTO" >
+    <result column="region_cd" property="regionCd" jdbcType="VARCHAR" />
+    <result column="region_name" property="regionName" jdbcType="VARCHAR" />
+    <result column="city_cd" property="cityCd" jdbcType="VARCHAR" />
+    <result column="city_name" property="cityName" jdbcType="VARCHAR" />
+    <result column="district_cd" property="districtCd" jdbcType="VARCHAR" />
+    <result column="district_name" property="districtName" jdbcType="VARCHAR" />
+    <result column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+    <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+    <result column="serial_no" property="serialNo" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="selectListByInformCd" resultMap="baseResult">
+        SELECT
+            m.*,
+            CASE WHEN m.region_cd='999999' THEN 'All Region'
+                ELSE CONCAT(m1.structure_cd, ' ', m1.structure_name) END AS region_name,
+            CASE WHEN m.city_cd='999999' THEN 'All City'
+                ELSE CONCAT(m2.structure_cd, ' ', m2.structure_name) END AS city_name,
+            CASE WHEN m.district_cd='999999' THEN 'All District'
+                ELSE CONCAT(m3.structure_cd, ' ', m3.structure_name) END AS district_name,
+            CASE WHEN m.store_cd='999999' THEN 'All Store'
+                ELSE CONCAT(m4.structure_cd, ' ', m4.structure_name) END AS store_name
+        FROM (
+            SELECT * FROM MA4311 WHERE inform_cd = #{informCd,jdbcType=VARCHAR}
+        ) m
+        LEFT JOIN (
+            SELECT structure_cd, structure_name FROM MA0020 WHERE effective_sts = '10' and level = '0'
+        ) m1
+        ON m.region_cd = m1.structure_cd
+        LEFT JOIN (
+            SELECT structure_cd, structure_name FROM MA0020 WHERE effective_sts = '10' and level = '1'
+        ) m2
+        ON m.city_cd = m2.structure_cd
+        LEFT JOIN (
+            SELECT structure_cd, structure_name FROM MA0020 WHERE effective_sts = '10' and level = '2'
+        ) m3
+        ON m.district_cd = m3.structure_cd
+        LEFT JOIN (
+            SELECT structure_cd, structure_name FROM MA0020 WHERE effective_sts = '10' and level = '3'
+        ) m4
+        ON m.store_cd = m4.structure_cd
+        ORDER BY m.serial_no
+    </select>
+</mapper>

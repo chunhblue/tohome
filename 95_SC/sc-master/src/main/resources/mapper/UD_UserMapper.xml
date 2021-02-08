@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.UserMapper">
+<!--	<select id="getFullUserInfo" resultType="cn.com.bbut.iy.itemmaster.entity.User" parameterType="string">-->
+<!--		<![CDATA[-->
+<!--			SELECT A.STORE,-->
+<!--					SF.POST  postCode,-->
+<!--					SF.OCCUP  occupCode,-->
+<!--			       B.MMCBA52_SECTION1 dpt,-->
+<!--			       TRIM(A.STORE_NAME) dptName,-->
+<!--			       U.COMPANY,-->
+<!--			       U.USER_ID userId,-->
+<!--			       U.USER_GROUP userGroup,-->
+<!--			       U.ONLINE_DATE onlineDate,-->
+<!--			       TRIM(U.USER_NAME) as userName-->
+<!--			  FROM IY_STORE A, MMCBA52_STAFF B, IY_USER_MNG U,IYED_STAFF SF -->
+<!--			 WHERE U.USER_ID = B.MMCBA52_STAFFCODE-->
+<!--			 	AND SF.PERSON_CODE = B.MMCBA52_STAFFCODE-->
+<!--			   AND A.STORE = '00' || B.MMCBA52_STRCD-->
+<!--			   AND B.MMCBA52_STAFFCODE = #{userId}-->
+<!--		]]>-->
+<!--	</select>-->
+	<select id="getFullUserInfo" resultType="cn.com.bbut.iy.itemmaster.entity.User" parameterType="string">
+		<![CDATA[
+			SELECT
+			       U.emp_num_id userId,
+			       U.job_type_cd jobTypeCd,
+			       U.store_cd storeCd,
+			       TRIM(U.emp_name) as userName
+			  FROM MA4200 U
+			 WHERE U.emp_num_id = #{userId} and effective_status = '10'
+		]]>
+	</select>
+	<select id="getPassWordByUserId" resultType="string" parameterType="string">
+		<![CDATA[
+			SELECT 
+			       U.emp_password as password
+			  FROM  MA4200 U
+			 WHERE U.emp_num_id = #{userId} and effective_status = '10'
+		]]>
+	</select>
+
+	<select id="getUserStatus" resultType="string" parameterType="string">
+		<![CDATA[
+			SELECT
+			       U.effective_status as userStatus
+			  FROM  MA4200 U
+			 WHERE U.emp_num_id = #{userId}
+		]]>
+	</select>
+	<select id="getUsersLikeUserId" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO"
+			parameterType="string">
+		SELECT U.emp_num_id as k,
+			   U.emp_name as v
+	  	FROM MA4200 U
+		WHERE U.emp_num_id like #{userId} and effective_status = '10'
+	</select>
+	<select id="getIyedStaffNameByUserId" resultType="string"
+			parameterType="string">
+		select s.emp_name as username from MA4200 s where s.emp_num_id=#{userId} and effective_status = '10'
+	</select>
+    <select id="getStoresByUserId" resultType="java.lang.String">
+		select distinct store_cd from ma4210 where user_code = #{userId}
+	</select>
+</mapper>

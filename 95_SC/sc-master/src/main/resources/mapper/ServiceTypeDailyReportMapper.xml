@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.serviceTypeDailyReport.ServiceTypeDailyReportMapper">
+    <resultMap id="BaseItemResult" type="cn.com.bbut.iy.itemmaster.dto.classifiedsalereport.classifiedSaleReportDTO">
+        <result column="sale_date" property="saleDate"></result>
+        <result column="store_cd" property="storeCd"></result>
+        <result column="store_name" property="storeName"></result>
+        <result column="merchandising" property="merchandising"></result>
+        <result column="foodService" property="foodService"></result>
+        <result column="service" property="service"></result>
+        <result column="acc_date" property="accDate"></result>
+        <result column="ofc" property="ofc"></result>
+        <result column="ma_cd" property="maCd"></result>
+        <result column="c_operatorcode" property="amCd"></result>
+        <result column="c_operatorname" property="amName"></result>
+    </resultMap>
+
+    <select id="searchCount" parameterType="cn.com.bbut.iy.itemmaster.dto.classifiedsalereport.clssifiedSaleParamReportDTO" resultType="int">
+        SELECT
+        count (1)
+        FROM(
+        SELECT
+        B.store_cd,
+        B.acc_date ,
+        coalesce( merchandising, 0 ) AS merchandising,
+        coalesce( foodService, 0 ) AS foodService,
+        coalesce( service, 0 ) AS service,
+        B.ofc
+        FROM
+        (
+        SELECT
+        A.store_cd,
+        A.acc_date,
+        sum(merchandising) as merchandising,
+        sum(foodService) as foodService,
+        sum(service) as service,
+        A.ofc
+        FROM (
+        SELECT
+        store_cd,
+        acc_date,
+        ofc,
+        case dep_name when 'Merchandising' then sale_amt_t end as merchandising ,
+        case dep_name when 'Food Service' then sale_amt_t end as foodService,
+        case dep_name when 'Service' then sale_amt_t end as service
+        FROM ia0000
+        ) as A GROUP BY a.store_cd,a.acc_date,ofc
+        ) AS B
+        ) AS T,
+        ma1000 ma1,
+        t_operator oper,
+        cm9060 cm1
+        WHERE
+        T.store_cd = ma1.store_cd
+        AND cm1.sp_id = '0000'
+        AND cm1.sp_value BETWEEN ma1.effective_start_date AND ma1.effective_end_date
+        AND T.ofc = oper.c_operatorcode
+        AND T.store_cd In
+        <foreach item="store" index="index" collection="classParamdto.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="classParamdto.startDate!=null and classParamdto.startDate!='' ">
+            <![CDATA[
+             AND T.acc_date >= #{classParamdto.startDate}
+            ]]>
+        </if>
+        <if test="classParamdto.endDate!=null and classParamdto.endDate!='' ">
+            <![CDATA[
+             AND T.acc_date <= #{classParamdto.endDate}
+            ]]>
+        </if>
+        <if test="classParamdto.am!=null and classParamdto.am!=''">
+            AND T.ofc = #{classParamdto.am}
+        </if>
+        <if test="classParamdto.storeCd!=null and classParamdto.storeCd!=''">
+            AND T.store_cd = #{classParamdto.storeCd}
+        </if>
+    </select>
+
+    <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.classifiedsalereport.clssifiedSaleParamReportDTO" resultMap="BaseItemResult">
+        SELECT
+        T.store_cd,
+        ma1.store_name,
+        T.acc_date AS sale_date,
+        T.merchandising,
+        T.foodService,
+        T.service,
+        oper.c_operatorcode,
+        oper.c_operatorname
+        FROM(
+        SELECT
+        B.store_cd,
+        B.acc_date ,
+        coalesce( merchandising, 0 ) AS merchandising,
+        coalesce( foodService, 0 ) AS foodService,
+        coalesce( service, 0 ) AS service,
+        B.ofc
+        FROM
+        (
+        SELECT
+        A.store_cd,
+        A.acc_date,
+        sum(merchandising) as merchandising,
+        sum(foodService) as foodService,
+        sum(service) as service,
+        A.ofc
+        FROM (
+        SELECT
+        store_cd,
+        acc_date,
+        ofc,
+        case dep_name when 'Merchandising' then sale_amt_t end as merchandising ,
+        case dep_name when 'Food Service' then sale_amt_t end as foodService,
+        case dep_name when 'Service' then sale_amt_t end as service
+        FROM ia0000
+        ) as A GROUP BY a.store_cd,a.acc_date,ofc
+        ) AS B
+        ) AS T,
+        ma1000 ma1,
+        t_operator oper,
+        cm9060 cm1
+        WHERE
+        T.store_cd = ma1.store_cd
+        AND cm1.sp_id = '0000'
+        AND cm1.sp_value BETWEEN ma1.effective_start_date AND ma1.effective_end_date
+        AND T.ofc = oper.c_operatorcode
+        AND T.store_cd In
+        <foreach item="store" index="index" collection="classParamdto.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="classParamdto.startDate!=null and classParamdto.startDate!='' ">
+            <![CDATA[
+             AND T.acc_date >= #{classParamdto.startDate}
+            ]]>
+        </if>
+        <if test="classParamdto.endDate!=null and classParamdto.endDate!='' ">
+            <![CDATA[
+             AND T.acc_date <= #{classParamdto.endDate}
+            ]]>
+        </if>
+        <if test="classParamdto.am!=null and classParamdto.am!=''">
+            AND T.ofc = #{classParamdto.am}
+        </if>
+        <if test="classParamdto.storeCd!=null and classParamdto.storeCd!=''">
+            AND T.store_cd = #{classParamdto.storeCd}
+        </if>
+        <if test="classParamdto.flg">
+            LIMIT ${classParamdto.rows} OFFSET ${classParamdto.limitStart}
+        </if>
+    </select>
+
+</mapper>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.materialPlanMapper" >
+
+    <resultMap id="BaseResultMap" type="cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100DTOC">
+        <result column="pi_date" property="piDate"></result>
+        <result column="pi_cd" property="piCd"></result>
+        <result column="pi_start_time" property="piStartTime"></result>
+        <result column="pi_end_time" property="piEndTime"></result>
+        <result column="store_cd" property="storeCd"></result>
+        <result column="store_name" property="storeName"></result>
+        <result column="pi_status" property="piStatus"></result>
+        <result column="pi_type" property="piType"></result>
+        <result column="pi_method" property="piMethod"></result>
+        <result column="remarks" property="remarks"></result>
+        <result column="create_user_id" property="createUserId"></result>
+    </resultMap>
+
+    <resultMap id="Pi0110ResultMap" type="cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0110DTOC">
+        <result column="pi_date" property="piDate"></result>
+        <result column="pi_cd" property="piCd"></result>
+        <result column="pma_cd" property="pmaCd"></result>
+        <result column="pma_name" property="pmaName"></result>
+    </resultMap>
+
+    <resultMap id="BaseItemResult" type="cn.com.bbut.iy.itemmaster.dto.pi0100c.StocktakeItemDTOC">
+        <result column="article_id" property="itemCode"></result>
+        <result column="article_name" property="itemName"></result>
+        <result column="barcode" property="barcode"></result>
+        <result column="sales_unit_id" property="itemUnit"></result>
+    </resultMap>
+
+
+    <select id="getfsInventoryParam" resultType="java.util.HashMap">
+        SELECT
+            c.code_value as codeValue,
+            c.code_name as codeName
+        FROM
+            cm9010 c
+        WHERE
+            c.code_type = #{type}
+            AND c.effective_sts = '10'
+    </select>
+
+    <!--    获取盘点计划主档数据-->
+    <select id="getPI0100ByPrimary" resultMap="BaseResultMap">
+        SELECT
+            concat(p1.create_ymd,p1.create_hms) AS create_ymd,
+            p1.pi_cd,
+            p1.store_cd,
+            concat(p1.store_cd,' ',p2.store_name) store_name,
+            p1.remarks,
+            /*p1.create_user_id*/
+	        P4.emp_name AS create_user_name
+        FROM
+            PI0155 P1,
+            ma1000 p2,
+            cm9060 p3,
+	        ma4200 p4
+        WHERE
+            P1.pi_cd = #{piCd}
+            and p3.sp_id = '0000'
+            and p1.store_cd = p2.store_cd
+            AND P1.create_user_id = P4.emp_num_id
+            and p3.sp_value BETWEEN p2.effective_start_date and p2.effective_end_date
+    </select>
+
+    <select id="getPmaList" resultType="java.util.HashMap">
+        SELECT
+            m.pma_cd AS pmaCd,
+            m.pma_name AS pmaName
+        FROM
+            ma0080 m
+        WHERE
+            m.effective_sts = '10'
+    </select>
+
+    <select id="selectCountByParam" resultType="int" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100ParamDTOC">
+        SELECT
+        COUNT (P.pi_cd)
+        FROM
+        pi0155 P,
+        ma1000 p1,
+        cm9060 p2,
+        ma4200 p3
+        <where>
+            p2.sp_id = '0000'
+            AND P.store_cd = p1.store_cd
+            AND P.create_user_id = P3.emp_num_id
+            AND p2.sp_value BETWEEN p1.effective_start_date
+            AND p1.effective_end_date
+            and P.store_cd IN
+            <foreach item="store" index="index" collection="pi0100Param.stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            <if test="pi0100Param.piCd != null and pi0100Param.piCd != ''">
+                and p.pi_cd like '%'|| #{pi0100Param.piCd} ||'%'
+            </if>
+            <if test="pi0100Param.piStartDate!=null and pi0100Param.piStartDate!=''">
+                <![CDATA[
+                and P.create_ymd >= #{pi0100Param.piStartDate}
+                ]]>
+            </if>
+            <if test="pi0100Param.piEndDate!=null and pi0100Param.piEndDate!=''">
+                <![CDATA[
+                and P.create_ymd <= #{pi0100Param.piEndDate}
+                ]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100ParamDTOC" resultMap="BaseResultMap">
+        SELECT
+        CONCAT(P.create_ymd,P.create_hms) AS create_ymd,
+        P.pi_cd,
+        p1.store_cd,
+        p1.store_name,
+        P3.emp_name AS create_user_name,
+        P.remarks
+        FROM
+        pi0155 P,
+        ma1000 p1,
+        cm9060 p2,
+        ma4200 p3
+        <where>
+            p2.sp_id = '0000'
+            AND P.store_cd = p1.store_cd
+            AND P.create_user_id = P3.emp_num_id
+            AND p2.sp_value BETWEEN p1.effective_start_date
+            AND p1.effective_end_date
+            and P.store_cd IN
+            <foreach item="store" index="index" collection="pi0100Param.stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            <if test="pi0100Param.piCd != null and pi0100Param.piCd != ''">
+                and p.pi_cd like '%'|| #{pi0100Param.piCd} ||'%'
+            </if>
+            <if test="pi0100Param.piStartDate!=null and pi0100Param.piStartDate!=''">
+                <![CDATA[
+                and P.create_ymd >= #{pi0100Param.piStartDate}
+                ]]>
+            </if>
+            <if test="pi0100Param.piEndDate!=null and pi0100Param.piEndDate!=''">
+                <![CDATA[
+                and P.create_ymd <= #{pi0100Param.piEndDate}
+                ]]>
+            </if>
+        </where>
+        ORDER BY P.create_ymd DESC
+        <if test="pi0100Param.flg">
+            LIMIT ${pi0100Param.rows} OFFSET ${pi0100Param.limitStart}
+        </if>
+    </select>
+
+</mapper>

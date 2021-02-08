@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.MenuMapper">
+
+	<select id="selectMenuByParam" parameterType="cn.com.bbut.iy.itemmaster.dto.base.MenuParamDTO" resultMap="BaseResultMap">
+		SELECT
+			A.ID,
+			A.PARENT_ID,
+			B.name AS PARENT_NAME,
+			A.NAME,
+			A.URL,
+			A.SORT,
+			A.GROUP_CODE
+		FROM
+		IY_M_MENU A LEFT JOIN IY_M_MENU B ON A.parent_id = B.id
+		<where>
+			<if test="param.name != null and param.name != ''">
+				and A.name = #{param.name}
+			</if>
+		</where>
+		ORDER BY id,parent_id
+		LIMIT ${param.rows} OFFSET ${param.limitStart}
+	</select>
+
+	<select id="selectCountByParam" resultType="int" parameterType="cn.com.bbut.iy.itemmaster.dto.base.MenuParamDTO">
+		SELECT
+		count(id)
+		FROM
+		IY_M_MENU
+		<where>
+			<if test="param.name != null and param.name != ''">
+				and name = #{param.name}
+			</if>
+		</where>
+	</select>
+
+</mapper>

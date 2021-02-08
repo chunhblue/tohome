@@ -1,0 +1,2078 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC
+        "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration>
+    <context id="itemmaster" targetRuntime="MyBatis3">
+        <property name="javaFileEncoding" value="UTF8"/>
+
+        <plugin type="cn.shiy.mybatis.generator.plugin.PaginationPlugin"/>
+        <plugin type="cn.shiy.mybatis.generator.plugin.AddClassAnnotationsPlugin">
+            <property name="annotationClass"
+                      value="lombok.Data,lombok.EqualsAndHashCode,lombok.AllArgsConstructor,lombok.NoArgsConstructor"/>
+            <property name="annotationString"
+                      value="@Data,@EqualsAndHashCode(callSuper = false),@AllArgsConstructor,@NoArgsConstructor"/>
+        </plugin>
+        <plugin type="cn.shiy.mybatis.generator.plugin.CustomMapperPlugin"/>
+        <plugin type="cn.shiy.mybatis.generator.plugin.FoundRowsPlugin"/>
+        <plugin type="cn.shiy.mybatis.generator.plugin.StopGetterSetterPlugin"/>
+
+        <commentGenerator>
+            <property name="suppressDate" value="true"/>
+        </commentGenerator>
+        <!--        <jdbcConnection driverClass="oracle.jdbc.driver.OracleDriver"-->
+        <!--                        connectionURL="jdbc:oracle:thin:@172.16.1.220:1521:orcl"-->
+        <!--                        userId="hys"-->
+        <!--                        password="hys01"/>-->
+        <jdbcConnection driverClass="org.postgresql.Driver"
+                        connectionURL="jdbc:postgresql://119.23.201.148/store_modify"
+                        userId="web"
+                        password="web"/>
+
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+
+        <!--<javaModelGenerator targetPackage="cn.com.bbut.iy.itemmaster.entity.base"-->
+        <!--targetProject="MAVEN">-->
+        <!--<property name="enableSubPackages" value="true"/>-->
+        <!--<property name="trimStrings" value="false"/>-->
+        <!--<property name="rootClass" value="cn.com.bbut.iy.itemmaster.entity.BaseEntity"/>-->
+        <!--</javaModelGenerator>-->
+
+        <!--<sqlMapGenerator targetPackage="sqlmap"-->
+        <!--targetProject="MAVEN">-->
+        <!--<property name="enableSubPackages" value="true"/>-->
+        <!--</sqlMapGenerator>-->
+
+        <!--<javaClientGenerator type="XMLMAPPER" targetPackage="cn.com.bbut.iy.itemmaster.dao"-->
+        <!--targetProject="MAVEN">-->
+        <!--<property name="enableSubPackages" value="false"/>-->
+        <!--</javaClientGenerator>-->
+
+
+        <!--修改了生成后的包路径-->
+        <javaModelGenerator targetPackage="cn.com.bbut.iy.itemmaster.entity" targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="false"/>
+        </javaModelGenerator>
+
+        <sqlMapGenerator targetPackage="mapper" targetProject="src/main/resources">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <javaClientGenerator type="XMLMAPPER" targetPackage="cn.com.bbut.iy.itemmaster.dao" targetProject="src/main/java">
+            <property name="enableSubPackages" value="false"/>
+        </javaClientGenerator>
+<!--                <table schema="" tableName="SA0005" domainObjectName="SA0005">-->
+<!--                    <property name="useActualColumnNames" value="true"/>-->
+<!--                    <columnOverride column="pay_cd" property="payCd" javaType="String"/>-->
+<!--                    <columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+<!--                    <columnOverride column="pos_id" property="posId" javaType="String"/>-->
+<!--                    <columnOverride column="pos_display" property="posDisplay" javaType="String"/>-->
+<!--                    <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--                    <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--                    <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--                    <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--                    <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--                    <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--                    <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--                    <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--                    <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--                    <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--                    <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--                </table>-->
+
+<!--                <table schema="" tableName="SA0000" domainObjectName="SA0000">-->
+<!--                    <property name="useActualColumnNames" value="true"/>-->
+<!--                    <columnOverride column="pay_cd" property="payCd" javaType="String"/>-->
+<!--                    <columnOverride column="pay_name" property="payName" javaType="String"/>-->
+<!--                    <columnOverride column="prInteger_name" property="printName" javaType="String"/>-->
+<!--                    <columnOverride column="change_attr" property="changeAttr" javaType="String"/>-->
+<!--                    <columnOverride column="pay_attr" property="payAttr" javaType="String"/>-->
+<!--                    <columnOverride column="pay_seq" property="paySeq" javaType="String"/>-->
+<!--                    <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--                    <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--                    <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--                    <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--                    <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--                    <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--                    <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--                    <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--                    <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--                    <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--                    <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--                </table>-->
+<!--        <table schema="" tableName="MA1040" domainObjectName="MA1040">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="license_cd" property="licenseCd" javaType="Integer"/>-->
+<!--            <columnOverride column="pma_cd" property="pmaCd" javaType="String"/>-->
+<!--            <columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+<!--            <columnOverride column="effective_start_date" property="effectiveStartDate" javaType="String"/>-->
+<!--            <columnOverride column="effective_end_date" property="effectiveEndDate" javaType="String"/>-->
+<!--            <columnOverride column="store_effective_start_date" property="storeEffectiveStartDate" javaType="String"/>-->
+<!--            <columnOverride column="store_effective_end_date" property="storeEffectiveEndDate" javaType="String"/>-->
+<!--            <columnOverride column="license_num" property="licenseNum" javaType="String"/>-->
+<!--            <columnOverride column="license_remark" property="licenseRemark" javaType="String"/>-->
+<!--            <columnOverride column="effective_sts" property="effectiveSts" javaType="String"/>-->
+<!--            <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--            <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--            <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--            <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--            <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--            <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--            <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--            <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--            <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--            <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--        </table>-->
+<!--        <table schema="" tableName="MA1020" domainObjectName="MA1020">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+<!--            <columnOverride column="additional_attribute_cd" property="additionalAttributeCd" javaType="String"/>-->
+<!--            <columnOverride column="attribute_select_cd" property="attributeSelectCd" javaType="String"/>-->
+<!--            <columnOverride column="effective_start_date" property="effectiveStartDate" javaType="String"/>-->
+<!--            <columnOverride column="effective_end_date" property="effectiveEndDate" javaType="String"/>-->
+<!--            <columnOverride column="additional_attribure_value" property="additionalAttribureValue" javaType="String"/>-->
+<!--            <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--            <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--            <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--            <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--            <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--            <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--            <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--            <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--            <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--            <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--        </table>-->
+<!--        <table schema="" tableName="MA0050" domainObjectName="MA0050">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="additional_attribute_cd" property="additionalAttributeCd" javaType="String"/>-->
+<!--            <columnOverride column="attribute_select_cd" property="attributeSelectCd" javaType="String"/>-->
+<!--            <columnOverride column="additional_attribute_name" property="additionalAttributeName" javaType="String"/>-->
+<!--            <columnOverride column="attribute_type" property="attributeType" javaType="String"/>-->
+<!--            <columnOverride column="attribute_select_name" property="attributeSelectName" javaType="String"/>-->
+<!--            <columnOverride column="effective_sts" property="effectiveSts" javaType="String"/>-->
+<!--            <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--            <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--            <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--            <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--            <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--            <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--            <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--            <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--            <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--            <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--        </table>-->
+
+<!--        <table schema="" tableName="t_audit_type" domainObjectName="AuditType">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="n_typeid" property="nTypeid" javaType="Integer"/>-->
+<!--            <columnOverride column="c_type_name" property="cTypeName" javaType="String"/>-->
+<!--            <columnOverride column="c_url" property="cUrl" javaType="String"/>-->
+<!--            <columnOverride column="c_stepname" property="cStepname" javaType="String"/>-->
+<!--            <columnOverride column="n_distinguish_typeid" property="nDistinguishTypeid" javaType="String"/>-->
+<!--            <columnOverride column="c_url2" property="cUrl2" javaType="String"/>-->
+<!--        </table>-->
+
+<!--        <table schema="" tableName="t_review_step" domainObjectName="ReviewStep">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="n_recordid" property="nRecordid" javaType="Integer"/>-->
+<!--            <columnOverride column="n_reviewid" property="nReviewid" javaType="Integer"/>-->
+<!--            <columnOverride column="c_step" property="cStep" javaType="Integer"/>-->
+<!--            <columnOverride column="c_stepname" property="cStepname" javaType="String"/>-->
+<!--            <columnOverride column="n_roleid" property="nRoleid" javaType="Integer"/>-->
+<!--            <columnOverride column="c_auditstatus" property="cAuditstatus" javaType="Integer"/>-->
+<!--            <columnOverride column="c_reserved_1" property="cReserved1" javaType="String"/>-->
+<!--            <columnOverride column="c_reserved_2" property="cReserved2" javaType="String"/>-->
+<!--            <columnOverride column="c_reserved_3" property="cReserved3" javaType="String"/>-->
+<!--            <columnOverride column="n_insert_user_id" property="nInsertUserId" javaType="Integer"/>-->
+<!--            <columnOverride column="n_update_user_id" property="nUpdateUserId" javaType="Integer"/>-->
+<!--            <columnOverride column="d_insert_time" property="dInsertTime" javaType="Date"/>-->
+<!--            <columnOverride column="d_update_time" property="dUpdateTime" javaType="Date"/>-->
+<!--            <columnOverride column="c_enable" property="cEnable" javaType="String"/>-->
+<!--        </table>-->
+
+<!--        <table schema="" tableName="t_review" domainObjectName="Review">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="n_reviewid" property="nReviewid" javaType="Integer"/>-->
+<!--            <columnOverride column="c_reviewcode" property="cReviewcode" javaType="String"/>-->
+<!--            <columnOverride column="n_typeid" property="nTypeid" javaType="Integer"/>-->
+<!--            <columnOverride column="c_reviewname" property="cReviewname" javaType="String"/>-->
+<!--            <columnOverride column="start_role" property="startRole" javaType="String"/>-->
+<!--            <columnOverride column="c_reserved_2" property="cReserved2" javaType="String"/>-->
+<!--            <columnOverride column="c_reserved_3" property="cReserved3" javaType="String"/>-->
+<!--            <columnOverride column="n_insert_user_id" property="nInsertUserId" javaType="Integer"/>-->
+<!--            <columnOverride column="n_update_user_id" property="nUpdateUserId" javaType="Integer"/>-->
+<!--            <columnOverride column="d_insert_time" property="dInsertTime" javaType="Date"/>-->
+<!--            <columnOverride column="d_update_time" property="dUpdateTime" javaType="Date"/>-->
+<!--            <columnOverride column="c_enable" property="cEnable" javaType="String"/>-->
+<!--            <columnOverride column="c_review_dep_cd" property="cReviewDepCd" javaType="String"/>-->
+<!--            <columnOverride column="c_review_pma_cd" property="cReviewPmaCd" javaType="String"/>-->
+<!--            <columnOverride column="c_review_region_cd" property="cReviewRegionCd" javaType="String"/>-->
+<!--        </table>-->
+
+<!--        <table schema="" tableName="ma4360" domainObjectName="MA4360">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="voucher_cd" property="voucherCd" javaType="String"/>-->
+<!--            <columnOverride column="article_id" property="articleId" javaType="String"/>-->
+<!--            <columnOverride column="barcode" property="barcode" javaType="String"/>-->
+<!--            <columnOverride column="sale_price" property="salePrice" javaType="BigDecimal"/>-->
+<!--            <columnOverride column="article_qty" property="articleQty" javaType="BigDecimal"/>-->
+<!--            <columnOverride column="remark " property="remark " javaType="String"/>-->
+
+<!--            <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--            <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--            <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--            <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--            <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--            <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--            <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--            <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--            <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--            <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--        </table>-->
+
+<!--        <table schema="" tableName="ma4350" domainObjectName="MA4350">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="voucher_cd" property="voucherCd" javaType="String"/>-->
+<!--            <columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+<!--            <columnOverride column="sale_date" property="saleDate" javaType="String"/>-->
+<!--            <columnOverride column="remark" property="remark" javaType="String"/>-->
+<!--            <columnOverride column="voucher_status" property="voucherStatus" javaType="String"/>-->
+<!--            <columnOverride column="audit_staff" property="auditStaff" javaType="String"/>-->
+<!--            <columnOverride column="audit_date" property="auditDate" javaType="Date"/>-->
+<!--            <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--            <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--            <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--            <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--            <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--            <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--            <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--            <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--            <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--            <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--        </table>-->
+<!--        <table schema="" tableName="ma4340" domainObjectName="MA4340">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="launching_time" property="launchingTime" javaType="String"/>-->
+<!--            <columnOverride column="start_order_date" property="startOrderDate" javaType="String"/>-->
+<!--            <columnOverride column="product_type" property="productType" javaType="String"/>-->
+<!--            <columnOverride column="vendor_id" property="vendorId" javaType="String"/>-->
+<!--            <columnOverride column="item_code" property="itemCode" javaType="String"/>-->
+<!--            <columnOverride column="barcode" property="barcode" javaType="String"/>-->
+<!--            <columnOverride column="product_name" property="productName" javaType="String"/>-->
+<!--            <columnOverride column="dep_cd" property="depCd" javaType="String"/>-->
+<!--            <columnOverride column="photo" property="photo" javaType="String"/>-->
+<!--            <columnOverride column="selling_price" property="sellingPrice" javaType="BigDecimal"/>-->
+<!--            <columnOverride column="orgin" property="orgin" javaType="String"/>-->
+<!--            <columnOverride column="shelf_life" property="shelfLife" javaType="String"/>-->
+<!--            <columnOverride column="moq" property="moq" javaType="String"/>-->
+<!--            <columnOverride column="moa" property="moa" javaType="String"/>-->
+<!--            <columnOverride column="posm" property="posm" javaType="String"/>-->
+<!--            <columnOverride column="description_vendor_id" property="descriptionVendorId" javaType="String"/>-->
+<!--            <columnOverride column="description_item_code" property="descriptionItemCode" javaType="String"/>-->
+<!--            <columnOverride column="description_barcode" property="descriptionBarcode" javaType="String"/>-->
+<!--            <columnOverride column="description_product_name" property="descriptionProductName" javaType="String"/>-->
+<!--            <columnOverride column="description_order" property="descriptionOrder" javaType="String"/>-->
+<!--            <columnOverride column="order_method" property="orderMethod" javaType="String"/>-->
+<!--            <columnOverride column="order_schedule" property="orderSchedule" javaType="String"/>-->
+<!--            <columnOverride column="display_position" property="displayPosition" javaType="String"/>-->
+<!--            <columnOverride column="brand" property="brand" javaType="String"/>-->
+<!--            <columnOverride column="bad_merchandise" property="badMerchandise" javaType="String"/>-->
+<!--            <columnOverride column="returnable" property="returnable" javaType="String"/>-->
+<!--            <columnOverride column="exchange_goods" property="exchangeGoods" javaType="String"/>-->
+<!--            <columnOverride column="sop" property="sop" javaType="String"/>-->
+<!--            <columnOverride column="selling_method" property="sellingMethod" javaType="String"/>-->
+<!--            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--            <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--            <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--        </table>-->
+<!--        <table schema="" tableName="ma4330" domainObjectName="MA4330">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="log_cd" property="logCd" javaType="String"/>-->
+<!--            <columnOverride column="inform_cd" property="informCd" javaType="String"/>-->
+<!--            <columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+<!--            <columnOverride column="log_type" property="logType" javaType="String"/>-->
+<!--            <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--            <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--            <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--            <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--            <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--            <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--            <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--            <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--            <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--            <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--        </table>-->
+<!--        <table schema="" tableName="ma4320" domainObjectName="MA4320">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="inform_cd" property="informCd" javaType="String"/>-->
+<!--            <columnOverride column="file_cd" property="fileCd" javaType="String"/>-->
+<!--            <columnOverride column="file_path" property="filePath" javaType="String"/>-->
+<!--            <columnOverride column="file_name" property="fileName" javaType="String"/>-->
+<!--            <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--            <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--            <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--            <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--            <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--            <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--            <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--            <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--            <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--            <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--        </table>-->
+<!--        <table schema="" tableName="ma4310" domainObjectName="MA4310">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="inform_cd" property="informCd" javaType="String"/>-->
+<!--            <columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+<!--            <columnOverride column="inform_reply_content" property="informReplyContent" javaType="String"/>-->
+<!--            <columnOverride column="inform_reply_date" property="informReplyDate" javaType="String"/>-->
+<!--            <columnOverride column="reply_user_id" property="replyUserId" javaType="String"/>-->
+<!--            <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--            <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--            <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--            <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--            <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--            <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--            <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--            <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--            <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--            <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--        </table>-->
+<!--        <table schema="" tableName="ma4300" domainObjectName="MA4300">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="inform_cd" property="informCd" javaType="String"/>-->
+<!--            <columnOverride column="inform_title" property="informTitle" javaType="String"/>-->
+<!--            <columnOverride column="inform_content" property="informContent" javaType="String"/>-->
+<!--            <columnOverride column="inform_start_date" property="informStartDate" javaType="String"/>-->
+<!--            <columnOverride column="inform_end_date" property="informEndDate" javaType="String"/>-->
+<!--            <columnOverride column="send_scope" property="sendScope" javaType="String"/>-->
+<!--            <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--            <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--            <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--            <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--            <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--            <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--            <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--            <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--            <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--            <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--        </table>-->
+<!--        <table schema="" tableName="sa0160" domainObjectName="SA0160">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+<!--            <columnOverride column="pos_id" property="posId" javaType="String"/>-->
+<!--            <columnOverride column="pos_name" property="posName" javaType="String"/>-->
+<!--            <columnOverride column="ip_address" property="ipAddress" javaType="String"/>-->
+<!--            <columnOverride column="mac_address" property="macAddress" javaType="String"/>-->
+<!--            <columnOverride column="active_sts" property="activeSts" javaType="String"/>-->
+<!--            <columnOverride column="online_time" property="onlineTime" javaType="Date"/>-->
+<!--            <columnOverride column="md_download_flg" property="mdDownloadFlg" javaType="String"/>-->
+<!--            <columnOverride column="price_chg_download_flg" property="priceChgDownloadFlg" javaType="String"/>-->
+<!--            <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--            <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--            <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--            <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--            <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--            <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--            <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--            <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--            <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--            <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--        </table>-->
+
+<!--        <table schema="" tableName="ma4190" domainObjectName="MA4190">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="pay_cd" property="payCd" javaType="String"/>-->
+<!--            <columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+<!--            <columnOverride column="pos_id" property="posId" javaType="String"/>-->
+<!--            <columnOverride column="pos_display" property="posDisplay" javaType="String"/>-->
+<!--            <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--            <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--            <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--            <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--            <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--            <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--            <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--            <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--            <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--            <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--        </table>-->
+
+<!--        <table schema="" tableName="ma4180" domainObjectName="MA4180">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="pay_cd" property="payCd" javaType="String"/>-->
+<!--            <columnOverride column="pay_name" property="payName" javaType="String"/>-->
+<!--            <columnOverride column="prInteger_name" property="printName" javaType="String"/>-->
+<!--            <columnOverride column="change_attr" property="changeAttr" javaType="String"/>-->
+<!--            <columnOverride column="pay_attr" property="payAttr" javaType="String"/>-->
+<!--            <columnOverride column="pay_seq" property="paySeq" javaType="String"/>-->
+<!--            <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--            <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--            <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--            <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--            <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--            <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--            <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--            <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--            <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--            <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--        </table>-->
+
+<!--        <table schema="" tableName="ma4170" domainObjectName="MA4170">-->
+<!--        <property name="useActualColumnNames" value="true"/>-->
+<!--        <columnOverride column="reason_cd" property="reasonCd" javaType="String"/>-->
+<!--        <columnOverride column="reason_name" property="reasonName" javaType="String"/>-->
+<!--        <columnOverride column="reason_type" property="reasonType" javaType="String"/>-->
+<!--        <columnOverride column="upload_flg" property="uploadFlg" javaType="String"/>-->
+<!--        <columnOverride column="upload_date" property="uploadDate" javaType="String"/>-->
+<!--        <columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+<!--        <columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+<!--        <columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+<!--        <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+<!--        <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+<!--        <columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+<!--        <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+<!--        <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+<!--        <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+<!--        <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+<!--        <columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+<!--        </table>-->
+
+<!--            <table schema="" tableName="sa0050" domainObjectName="SA0050">-->
+<!--                <property name="useActualColumnNames" value="true"/>-->
+<!--                <columnOverride column="cashier_id" property="cashierId" javaType="String"/>-->
+<!--                <columnOverride column="cashier_name" property="cashierName" javaType="String"/>-->
+<!--                <columnOverride column="duty" property="duty" javaType="String"/>-->
+<!--                <columnOverride column="cashier_level" property="cashierLevel" javaType="String"/>-->
+<!--                <columnOverride column="cashier_parameter" property="cashierParameter" javaType="String"/>-->
+<!--                <columnOverride column="cashier_password" property="cashierPassword" javaType="String"/>-->
+<!--                <columnOverride column="effective_sts" property="effectiveSts" javaType="String"/>-->
+<!--                <columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+<!--            </table>-->
+
+<!--            <table schema="" tableName="sa0055" domainObjectName="SA0055">-->
+<!--                <property name="useActualColumnNames" value="true"/>-->
+<!--                <columnOverride column="cashier_level" property="cashierLevel" javaType="String"/>-->
+<!--                <columnOverride column="level_name" property="levelName" javaType="String"/>-->
+<!--                <columnOverride column="cashier_parameter" property="cashierParameter" javaType="String"/>-->
+<!--                <columnOverride column="effective_sts" property="effectiveSts" javaType="String"/>-->
+<!--            </table>-->
+
+        <!--writed by lz start  column对应数据库 property对应生成类的字段名-->
+        <!-- PI0000 -->
+        <!--<table schema="" tableName="pi0000" domainObjectName="PI0000">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="acc_date" property="accDate" javaType="String"/>-->
+        <!--<columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+        <!--<columnOverride column="dep_cd" property="depCd" javaType="String"/>-->
+        <!--<columnOverride column="pma_cd" property="pmaCd" javaType="String"/>-->
+        <!--<columnOverride column="category_cd" property="categoryCd" javaType="String"/>-->
+        <!--<columnOverride column="sub_category_cd" property="subCategoryCd" javaType="String"/>-->
+        <!--<columnOverride column="pi_type" property="piType" javaType="String"/>-->
+        <!--<columnOverride column="pi_account_flg" property="piAccountFlg" javaType="String"/>-->
+        <!--<columnOverride column="pi_first_finish_flg" property="piFirstFinishFlg" javaType="String"/>-->
+        <!--<columnOverride column="pi_commit_flg" property="piCommitFlg" javaType="String"/>-->
+        <!--<columnOverride column="pi_status" property="piStatus" javaType="String"/>-->
+        <!--<columnOverride column="article_count" property="articleCount" javaType="Integer"/>-->
+        <!--<columnOverride column="upload_flg" property="uploadFlg" javaType="String"/>-->
+        <!--<columnOverride column="upload_date" property="uploadDate" javaType="String"/>-->
+        <!--<columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+        <!--<columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+        <!--<columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+        <!--<columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+        <!--<columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+        <!--<columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+        <!--<columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+        <!--<columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+        <!--<columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+        <!--<columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+        <!--<columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+        <!--</table>-->
+        <!-- PI0010 -->
+        <!--<table schema="" tableName="pi0010" domainObjectName="PI0010">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="acc_date" property="accDate" javaType="String"/>-->
+        <!--<columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+        <!--<columnOverride column="article_id" property="articleId" javaType="String"/>-->
+        <!--<columnOverride column="barcode" property="barCode" javaType="String"/>-->
+        <!--<columnOverride column="sales_unit_id" property="salesUnitId" javaType="String"/>-->
+        <!--<columnOverride column="dep_cd" property="depCd" javaType="String"/>-->
+        <!--<columnOverride column="pma_cd" property="pmaCd" javaType="String"/>-->
+        <!--<columnOverride column="category_cd" property="categoryCd" javaType="String"/>-->
+        <!--<columnOverride column="sub_category_cd" property="subCategoryCd" javaType="String"/>-->
+        <!--<columnOverride column="pi_qty_status" property="piQtyStatus" javaType="String"/>-->
+        <!--<columnOverride column="first_qty" property="firstQty" javaType="Integer"/>-->
+        <!--<columnOverride column="second_qty" property="secondQty" javaType="Integer"/>-->
+        <!--<columnOverride column="on_hand_qty" property="on_handQty" javaType="Integer"/>-->
+        <!--<columnOverride column="avg_cost_notax" property="avgCostNotax" javaType="Integer"/>-->
+        <!--<columnOverride column="sale_price" property="salePrice" javaType="Integer"/>-->
+        <!--<columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+        <!--<columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+        <!--<columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+        <!--<columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+        <!--<columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+        <!--<columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+        <!--<columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+        <!--<columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+        <!--<columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+        <!--<columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+        <!--<columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+        <!--</table>-->
+        <!-- ma0070 -->
+        <!--<table schema="" tableName="ma0070" domainObjectName="MA0070">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="dep_cd" property="depCd" javaType="String"/>-->
+        <!--<columnOverride column="dep_name" property="depName" javaType="String"/>-->
+        <!--<columnOverride column="effective_sts" property="effectiveSts" javaType="String"/>-->
+        <!--<columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+        <!--<columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+        <!--<columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+        <!--<columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+        <!--<columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+        <!--<columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+        <!--<columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+        <!--<columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+        <!--<columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+        <!--<columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+        <!--<columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+        <!--</table>-->
+        <!--<table schema="" tableName="ma0080" domainObjectName="MA0080">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="dep_cd" property="depCd" javaType="String"/>-->
+        <!--<columnOverride column="pma_cd" property="pmaCd" javaType="String"/>-->
+        <!--<columnOverride column="pma_name" property="pmName" javaType="String"/>-->
+        <!--<columnOverride column="effective_sts" property="effectiveSts" javaType="String"/>-->
+        <!--<columnOverride column="new_article_period" property="newArticlePeriod" javaType="Integer"/>-->
+        <!--<columnOverride column="good_sale_dms" property="goodSaleDms" javaType="Integer"/>-->
+        <!--<columnOverride column="no_sale_day" property="noSaleDay" javaType="Integer"/>-->
+        <!--<columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+        <!--<columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+        <!--<columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+        <!--<columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+        <!--<columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+        <!--<columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+        <!--<columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+        <!--<columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+        <!--<columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+        <!--<columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+        <!--<columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+        <!--</table>-->
+        <!--<table schema="" tableName="ma0090" domainObjectName="MA0090">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="dep_cd" property="depCd" javaType="String"/>-->
+        <!--<columnOverride column="pma_cd" property="pmaCd" javaType="String"/>-->
+        <!--<columnOverride column="category_cd" property="categoryCd" javaType="String"/>-->
+        <!--<columnOverride column="category_name" property="categoryName" javaType="String"/>-->
+        <!--<columnOverride column="effective_sts" property="effectiveSts" javaType="String"/>-->
+        <!--<columnOverride column="new_article_period" property="newArticlePeriod" javaType="Integer"/>-->
+        <!--<columnOverride column="good_sale_dms" property="goodSaleDms" javaType="Integer"/>-->
+        <!--<columnOverride column="no_sale_day" property="noSaleDay" javaType="Integer"/>-->
+        <!--<columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+        <!--<columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+        <!--<columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+        <!--<columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+        <!--<columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+        <!--<columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+        <!--<columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+        <!--<columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+        <!--<columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+        <!--<columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+        <!--<columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+        <!--</table>-->
+        <!--<table schema="" tableName="ma0100" domainObjectName="MA0100">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="dep_cd" property="depCd" javaType="String"/>-->
+        <!--<columnOverride column="pma_cd" property="pmaCd" javaType="String"/>-->
+        <!--<columnOverride column="category_cd" property="categoryCd" javaType="String"/>-->
+        <!--<columnOverride column="sub_category_cd" property="subCategoryCd" javaType="String"/>-->
+        <!--<columnOverride column="sub_category_name" property="subCategoryName" javaType="String"/>-->
+        <!--<columnOverride column="effective_sts" property="effectiveSts" javaType="String"/>-->
+        <!--<columnOverride column="new_article_period" property="newArticlePeriod" javaType="Integer"/>-->
+        <!--<columnOverride column="good_sale_dms" property="goodSaleDms" javaType="Integer"/>-->
+        <!--<columnOverride column="no_sale_day" property="noSaleDay" javaType="Integer"/>-->
+        <!--<columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+        <!--<columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+        <!--<columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+        <!--<columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+        <!--<columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+        <!--<columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+        <!--<columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+        <!--<columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+        <!--<columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+        <!--<columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+        <!--<columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+        <!--</table>-->
+        <!--<table schema="" tableName="od0000" domainObjectName="OD0000">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+        <!--<columnOverride column="order_id" property="orderId" javaType="String"/>-->
+        <!--<columnOverride column="org_order_id" property="orgOrderId" javaType="String"/>-->
+        <!--<columnOverride column="vendor_id" property="vendorId" javaType="String"/>-->
+        <!--<columnOverride column="delivery_type_cd" property="deliveryTypeCd" javaType="String"/>-->
+        <!--<columnOverride column="delivery_center_id" property="deliveryCenterId" javaType="String"/>-->
+        <!--<columnOverride column="delivery_area_cd" property="deliveryAreaCd" javaType="String"/>-->
+        <!--<columnOverride column="shipment" property="shipment" javaType="String"/>-->
+        <!--<columnOverride column="order_type" property="orderType" javaType="String"/>-->
+        <!--<columnOverride column="order_method" property="orderMethod" javaType="String"/>-->
+        <!--<columnOverride column="payment_type" property="paymentType" javaType="String"/>-->
+        <!--<columnOverride column="promotion_id" property="promotionId" javaType="String"/>-->
+        <!--<columnOverride column="order_date" property="orderDate" javaType="String"/>-->
+        <!--<columnOverride column="delivery_date" property="deliveryDate" javaType="String"/>-->
+        <!--<columnOverride column="expire_date" property="expireDate" javaType="String"/>-->
+        <!--<columnOverride column="receive_date" property="receiveDate" javaType="String"/>-->
+        <!--<columnOverride column="vendor_address" property="vendorAddress" javaType="String"/>-->
+        <!--<columnOverride column="store_address" property="storeAddress" javaType="String"/>-->
+        <!--<columnOverride column="order_sts" property="orderSts" javaType="String"/>-->
+        <!--<columnOverride column="nr_flg" property="nrFlg" javaType="String"/>-->
+        <!--<columnOverride column="order_remark" property="orderRemark" javaType="String"/>-->
+        <!--<columnOverride column="purchase_vat_cd" property="purchaseVatCd" javaType="String"/>-->
+        <!--<columnOverride column="tax_rate" property="taxRate" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="order_amt" property="orderAmt" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="order_tax" property="orderTax" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="receive_amt" property="receiveAmt" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="receive_tax" property="receiveTax" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="upload_flg" property="uploadFlg" javaType="String"/>-->
+        <!--<columnOverride column="upload_date" property="uploadDate" javaType="String"/>-->
+        <!--<columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+        <!--<columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+        <!--<columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+        <!--<columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+        <!--<columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+        <!--<columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+        <!--<columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+        <!--<columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+        <!--<columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+        <!--<columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+        <!--<columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+        <!--<columnOverride column="order_differentiate" property="orderDifferentiate" javaType="String"/>-->
+        <!--</table>-->
+        <!--<table schema="" tableName="od8030" domainObjectName="OD8030">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="return_id" property="returnId" javaType="String"/>-->
+        <!--<columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+        <!--<columnOverride column="order_date" property="orderDate" javaType="String"/>-->
+        <!--<columnOverride column="barcode" property="barcode" javaType="String"/>-->
+        <!--<columnOverride column="article_id" property="articleId" javaType="String"/>-->
+        <!--<columnOverride column="shipment_cd" property="shipmentCd" javaType="String"/>-->
+        <!--<columnOverride column="vendor_id" property="vendorId" javaType="String"/>-->
+        <!--<columnOverride column="receive_unit_id" property="receiveUnitId" javaType="String"/>-->
+        <!--<columnOverride column="order_qty" property="orderQty" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="order_nocharge_qty" property="orderNochargeQty" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="order_price" property="orderPrice" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="order_amount" property="orderAmount" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="upload_flg" property="uploadFlg" javaType="String"/>-->
+        <!--<columnOverride column="display_seq" property="displaySeq" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="upload_date" property="uploadDate" javaType="String"/>-->
+        <!--<columnOverride column="reason" property="reason" javaType="String"/>-->
+        <!--<columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+        <!--<columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+        <!--<columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+        <!--<columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+        <!--<columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+        <!--<columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+        <!--<columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+        <!--<columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+        <!--<columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+        <!--<columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+        <!--<columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+        <!--</table>-->
+        <!--<table schema="" tableName="ma1100" domainObjectName="MA1100">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="article_id" property="articleId" javaType="String"/>-->
+        <!--<columnOverride column="effective_start_date" property="effectiveStartDate" javaType="String"/>-->
+        <!--<columnOverride column="effective_end_date" property="effectiveEndDate" javaType="String"/>-->
+        <!--<columnOverride column="article_name" property="articleName" javaType="String"/>-->
+        <!--<columnOverride column="article_short_name" property="articleShortName" javaType="String"/>-->
+        <!--<columnOverride column="article_name_en" property="articleNameEn" javaType="String"/>-->
+        <!--<columnOverride column="article_short_name_en" property="articleShortNameEn" javaType="String"/>-->
+        <!--<columnOverride column="delivery_type_cd" property="deliveryTypeCd" javaType="String"/>-->
+        <!--<columnOverride column="dep_cd" property="depCd" javaType="String"/>-->
+        <!--<columnOverride column="pma_cd" property="pmaCd" javaType="String"/>-->
+        <!--<columnOverride column="category_cd" property="categoryCd" javaType="String"/>-->
+        <!--<columnOverride column="sub_category_cd" property="subCategoryCd" javaType="String"/>-->
+        <!--<columnOverride column="spec" property="spec" javaType="String"/>-->
+        <!--<columnOverride column="sales_unit_id" property="salesUnitId" javaType="String"/>-->
+        <!--<columnOverride column="brand" property="brand" javaType="String"/>-->
+        <!--<columnOverride column="grade" property="grade" javaType="String"/>-->
+        <!--<columnOverride column="production_location" property="productionLocation" javaType="String"/>-->
+        <!--<columnOverride column="pb_flg" property="pbFlg" javaType="String"/>-->
+        <!--<columnOverride column="especial_flg" property="especialFlg" javaType="String"/>-->
+        <!--<columnOverride column="article_weigh_flag" property="articleWeighFlag" javaType="String"/>-->
+        <!--<columnOverride column="article_type" property="articleType" javaType="String"/>-->
+        <!--<columnOverride column="article_new_flag" property="articleNewFlag" javaType="String"/>-->
+        <!--<columnOverride column="store_price_chg_flg" property="storePriceChgFlg" javaType="String"/>-->
+        <!--<columnOverride column="tag_type" property="tagType" javaType="String"/>-->
+        <!--<columnOverride column="season_cd" property="seasonCd" javaType="String"/>-->
+        <!--<columnOverride column="lifecycle_status" property="lifecycleStatus" javaType="String"/>-->
+        <!--<columnOverride column="recommend_reason_cd" property="recommendReasonCd" javaType="String"/>-->
+        <!--<columnOverride column="receive_unit_id" property="receiveUnitId" javaType="String"/>-->
+        <!--<columnOverride column="package_number" property="packageNumber" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="opl_method" property="oplMethod" javaType="String"/>-->
+        <!--<columnOverride column="min_display_qty" property="minDisplayQty" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="order_type" property="orderType" javaType="String"/>-->
+        <!--<columnOverride column="barcode_type" property="barcodeType" javaType="String"/>-->
+        <!--<columnOverride column="tenant_contract_no" property="tenantContractNo" javaType="String"/>-->
+        <!--<columnOverride column="sales_vat_cd" property="salesVatCd" javaType="String"/>-->
+        <!--<columnOverride column="purchase_vat_cd" property="purchaseVatCd" javaType="String"/>-->
+        <!--<columnOverride column="refer_purchase_price" property="referPurchasePrice" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="refer_sale_price" property="referSalePrice" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="preserve_type" property="preserveType" javaType="String"/>-->
+        <!--<columnOverride column="warranty_days" property="warrantyDays" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="receive_date_limit" property="receiveDateLimit" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="sale_date_limit" property="saleDateLimit" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="package_os_weight" property="packageOsWeight" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="package_os_size_length" property="packageOsSizeLength" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="package_os_size_width" property="packageOsSizeWidth" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="package_os_size_height" property="packageOsSizeHeight" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="package_is_weight" property="packageIsWeight" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="package_is_size_length" property="packageIsSizeLength" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="package_is_size_width" property="packageIsSizeWidth" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="package_is_size_height" property="packageIsSizeHeight" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+        <!--<columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+        <!--<columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+        <!--<columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+        <!--<columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+        <!--<columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+        <!--<columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+        <!--<columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+        <!--<columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+        <!--<columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+        <!--<columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+        <!--</table>-->
+        <!--<table schema="" tableName="ma0020" domainObjectName="MA0020">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="structure_level" property="structureLevel" javaType="String"/>-->
+        <!--<columnOverride column="structure_cd" property="structureCd" javaType="String"/>-->
+        <!--<columnOverride column="structure_name" property="structureName" javaType="String"/>-->
+        <!--<columnOverride column="admin_structure_cd" property="adminStructureCd" javaType="String"/>-->
+        <!--<columnOverride column="effective_sts" property="effectiveSts" javaType="String"/>-->
+        <!--<columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+        <!--<columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+        <!--<columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+        <!--<columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+        <!--<columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+        <!--<columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+        <!--<columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+        <!--<columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+        <!--<columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+        <!--<columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+        <!--<columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+        <!--</table>-->
+        <!--<table schema="" tableName="ma2000" domainObjectName="MA2000">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="vendor_id" property="vendorId" javaType="String"/>-->
+        <!--<columnOverride column="effective_start_date" property="effectiveStartDate" javaType="String"/>-->
+        <!--<columnOverride column="effective_end_date" property="effectiveEndDate" javaType="String"/>-->
+        <!--<columnOverride column="vendor_name" property="vendorName" javaType="String"/>-->
+        <!--<columnOverride column="vendor_name_short" property="vendorNameShort" javaType="String"/>-->
+        <!--<columnOverride column="behalf_vendor_id" property="behalfVendorId" javaType="String"/>-->
+        <!--<columnOverride column="business_type" property="businessType" javaType="String"/>-->
+        <!--<columnOverride column="trade_start_date" property="tradeStartDate" javaType="String"/>-->
+        <!--<columnOverride column="trade_end_date" property="tradeEndDate" javaType="String"/>-->
+        <!--<columnOverride column="order_flg" property="orderFlg" javaType="String"/>-->
+        <!--<columnOverride column="vendor_district_cd" property="vendorDistrictCd" javaType="String"/>-->
+        <!--<columnOverride column="vendor_address1" property="vendorAddress1" javaType="String"/>-->
+        <!--<columnOverride column="vendor_address2" property="vendorAddress2" javaType="String"/>-->
+        <!--<columnOverride column="vendor_tel_no" property="vendorTelNo" javaType="String"/>-->
+        <!--<columnOverride column="vendor_fax_no" property="vendorFaxNo" javaType="String"/>-->
+        <!--<columnOverride column="vendor_zip_code" property="vendorZipCode" javaType="String"/>-->
+        <!--<columnOverride column="admin_name" property="adminName" javaType="String"/>-->
+        <!--<columnOverride column="order_tel_no" property="orderTelNo" javaType="String"/>-->
+        <!--<columnOverride column="order_fax_no" property="orderFaxNo" javaType="String"/>-->
+        <!--<columnOverride column="district_cd" property="districtCd" javaType="String"/>-->
+        <!--<columnOverride column="order_address1" property="orderAddress1" javaType="String"/>-->
+        <!--<columnOverride column="order_address2" property="orderAddress2" javaType="String"/>-->
+        <!--<columnOverride column="order_admin_name" property="orderAdminName" javaType="String"/>-->
+        <!--<columnOverride column="min_order_amt_tax" property="minOrderAmtTax" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="order_send_method" property="orderSendMethod" javaType="String"/>-->
+        <!--<columnOverride column="supply_purchase_rate" property="supplyPurchaseRate" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="bad_discount_rate" property="badDiscountRate" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="shipment_flg" property="shipmentFlg" javaType="String"/>-->
+        <!--<columnOverride column="pay_type_cd" property="payTypeCd" javaType="String"/>-->
+        <!--<columnOverride column="pay_period_cd" property="payPeriodCd" javaType="String"/>-->
+        <!--<columnOverride column="pay_bank" property="payBank" javaType="String"/>-->
+        <!--<columnOverride column="pay_bank_account" property="payBankAccount" javaType="String"/>-->
+        <!--<columnOverride column="pay_account_name" property="payAccountName" javaType="String"/>-->
+        <!--<columnOverride column="pay_tax_no" property="payTaxNo" javaType="String"/>-->
+        <!--<columnOverride column="pay_currency_type" property="payCurrencyType" javaType="String"/>-->
+        <!--<columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+        <!--<columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+        <!--<columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+        <!--<columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+        <!--<columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+        <!--<columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+        <!--<columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+        <!--<columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+        <!--<columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+        <!--<columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+        <!--<columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+        <!--</table>-->
+        <!--<table schema="" tableName="cm9010" domainObjectName="CM9010">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="code_type" property="codeType" javaType="String"/>-->
+        <!--<columnOverride column="code_value" property="codeValue" javaType="String"/>-->
+        <!--<columnOverride column="code_name" property="codeName" javaType="String"/>-->
+        <!--<columnOverride column="default_value" property="defaultValue" javaType="String"/>-->
+        <!--<columnOverride column="effective_sts" property="effectiveSts" javaType="String"/>-->
+        <!--<columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+        <!--<columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+        <!--<columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+        <!--<columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+        <!--<columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+        <!--<columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+        <!--<columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+        <!--<columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+        <!--<columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+        <!--<columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+        <!--<columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+        <!--</table>-->
+        <!--<table schema="" tableName="od8020" domainObjectName="OD8020">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+        <!--<columnOverride column="order_date" property="orderDate" javaType="String"/>-->
+        <!--<columnOverride column="article_id" property="articleId" javaType="String"/>-->
+        <!--<columnOverride column="shipment_cd" property="shipmentCd" javaType="String"/>-->
+        <!--<columnOverride column="vendor_id" property="vendorId" javaType="String"/>-->
+        <!--<columnOverride column="receive_unit_id" property="receiveUnitId" javaType="String"/>-->
+        <!--<columnOverride column="order_qty" property="orderQty" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="order_nocharge_qty" property="orderNochargeQty" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="order_price" property="orderPrice" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="upload_flg" property="uploadFlg" javaType="String"/>-->
+        <!--<columnOverride column="upload_date" property="uploadDate" javaType="String"/>-->
+        <!--<columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+        <!--<columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+        <!--<columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+        <!--<columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+        <!--<columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+        <!--<columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+        <!--<columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+        <!--<columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+        <!--<columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+        <!--<columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+        <!--<columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+        <!--</table>-->
+        <!--<table schema="" tableName="od0010" domainObjectName="OD0010">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+        <!--<columnOverride column="order_id" property="orderId" javaType="String"/>-->
+        <!--<columnOverride column="serial_no" property="serialNo" javaType="String"/>-->
+        <!--<columnOverride column="article_id" property="articleId" javaType="String"/>-->
+        <!--<columnOverride column="barcode" property="barcode" javaType="String"/>-->
+        <!--<columnOverride column="vendor_id" property="vendorId" javaType="String"/>-->
+        <!--<columnOverride column="promotion_id" property="promotionId" javaType="String"/>-->
+        <!--<columnOverride column="order_unit" property="orderUnit" javaType="String"/>-->
+        <!--<columnOverride column="order_qty" property="orderQty" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="order_nocharge_qty" property="orderNochargeQty" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="order_price" property="orderPrice" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="order_amt" property="orderAmt" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="order_amt_notax" property="orderAmtNotax" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="order_tax" property="orderTax" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="receive_price" property="receivePrice" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="receive_qty" property="receiveQty" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="receive_nocharge_qty" property="receiveNochargeQty" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="receive_total_qty" property="receiveTotalQty" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="receive_total_amt" property="receiveTotalAmt" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="receive_total_amt_notax" property="receiveTotalAmtNotax" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="receive_tax" property="receiveTax" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="upload_flg" property="uploadFlg" javaType="String"/>-->
+        <!--<columnOverride column="upload_date" property="uploadDate" javaType="String"/>-->
+        <!--<columnOverride column="create_user_id" property="createUserId" javaType="String"/>-->
+        <!--<columnOverride column="create_ymd" property="createYmd" javaType="String"/>-->
+        <!--<columnOverride column="create_hms" property="createHms" javaType="String"/>-->
+        <!--<columnOverride column="update_user_id" property="updateUserId" javaType="String"/>-->
+        <!--<columnOverride column="update_ymd" property="updateYmd" javaType="String"/>-->
+        <!--<columnOverride column="update_hms" property="updateHms" javaType="String"/>-->
+        <!--<columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>-->
+        <!--<columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>-->
+        <!--<columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>-->
+        <!--<columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>-->
+        <!--<columnOverride column="nr_hms" property="nrHms" javaType="String"/>-->
+        <!--<columnOverride column="reason_id" property="reasonId" javaType="String"/>-->
+        <!--<columnOverride column="adjust_qty" property="adjustQty" javaType="BigDecimal"/>-->
+        <!--<columnOverride column="adjust_amt" property="adjustAmt" javaType="BigDecimal"/>-->
+        <!--</table>-->
+        <!--writed by lz end-->
+
+
+        <!-- 举例，存在自增id的表，先创建对应的sequence，当前表t_user的sequence是t_user_seq
+              无自增id的表，不考虑sequence的问题
+        <table schema="" tableName="T_USER" domainObjectName="User">
+            <property name="useActualColumnNames" value="true"/>
+            <generatedKey column="id" sqlStatement="select t_user_seq.nextval from dual"
+                          identity="true"/>
+            <columnOverride column="ID" property="id" javaType="Integer"/>
+            <columnOverride column="name" property="name" javaType="String"/>
+        </table>-->
+        <!-- 店铺
+       <table schema="" tableName="IY_STORE" domainObjectName="IyStore" >
+           <property name="useActualColumnNames" value="true"/>
+           <columnOverride column="COMPANY" property="company" javaType="String"/>
+           <columnOverride column="STORE" property="store" javaType="String"/>
+           <columnOverride column="ZONE" property="zone" javaType="String"/>
+           <columnOverride column="STORE_NAME" property="storeName" javaType="String"/>
+           <columnOverride column="STORE_OPEN_DATE" property="storeOpenDate" javaType="Integer"/>
+           <columnOverride column="STORE_CLOSE_DATE" property="storeCloseDate" javaType="Integer"/>
+           <columnOverride column="STORE_SALES_FLAG" property="storeSalesFlag" javaType="String"/>
+           <columnOverride column="STORE_ORGANAIZE" property="storeOrganaize" javaType="String"/>
+           <columnOverride column="STORE_SYSTEM_FROM" property="storeSystemFrom" javaType="Integer"/>
+           <columnOverride column="STORE_SYSTEM_TO" property="storeSystemTo" javaType="Integer"/>
+           <columnOverride column="STORE_EXIST_KBN" property="storeExistKbn" javaType="String"/>
+           <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+       </table>
+       -->
+        <!-- 职务
+       <table schema="" tableName="IY_POST" domainObjectName="IyPost" >
+           <columnOverride column="COMPANY" property="company" javaType="String"/>
+           <columnOverride column="POST_CODE" property="postCode" javaType="String"/>
+           <columnOverride column="POST_NAME" property="postName" javaType="String"/>
+       </table>
+        -->
+        <!-- 职种
+       <table schema="" tableName="IY_OCCUP" domainObjectName="IyOccup" >
+           <columnOverride column="COMPANY" property="company" javaType="String"/>
+           <columnOverride column="OCCUP_CODE" property="occupCode" javaType="String"/>
+           <columnOverride column="OCCUP_NAME" property="occupName" javaType="String"/>
+       </table>
+       -->
+
+        <!-- 默认授权表
+        <table schema="" tableName="IY_M_DEF_ASSIGNMENT" domainObjectName="IymDefAssignment" >
+                <property name="useActualColumnNames" value="true"/>
+             <generatedKey column="id" sqlStatement="select SEQ_DEF_ASSIGNMENT.currval from dual" identity="true"/>
+            <columnOverride column="ID" property="id" javaType="Integer"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="POST_CODE" property="postCode" javaType="String"/>
+            <columnOverride column="OCCUP_CODE" property="occupCode" javaType="String"/>
+            <columnOverride column="STORE" property="store" javaType="String"/>
+            <columnOverride column="ROLE_ID" property="roleId" javaType="Integer"/>
+            <columnOverride column="UPDATE_USERID" property="updateUserid" javaType="String" jdbcType="VARCHAR"/>
+            <columnOverride column="UPDATE_TIME" property="updateTime" javaType="java.util.Date" jdbcType="DATE"/>
+        </table>-->
+        <!-- 角色概述表
+         <table schema="" tableName="IY_M_ROLE_REMARK" domainObjectName="IymRoleRemark">
+             <property name="useActualColumnNames" value="true"/>
+             <columnOverride column="ROLE_ID" property="roleId" javaType="Integer"
+                             jdbcType="INTEGER"/>
+             <columnOverride column="REMARK" property="remark" javaType="String" jdbcType="VARCHAR"/>
+             <columnOverride column="UPDATE_TIME" property="updateTime" javaType="java.util.Date"
+                             jdbcType="DATE"/>
+             <columnOverride column="UPDATE_USERID" property="updateUserid" javaType="String"
+                             jdbcType="VARCHAR"/>
+         </table>
+         -->
+        <!-- 用户授权信息表
+        <table schema="" tableName="IY_M_ACTOR_ASSIGNMENT_INFO"
+               domainObjectName="IymActorAssignmentInfo">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="ACTOR_ASS_ID" property="roleId" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="FLG" property="flg" javaType="Integer" jdbcType="TINYINT"/>
+            <columnOverride column="START_DATE" property="startDate" javaType="java.util.Date"
+                            jdbcType="DATE"/>
+            <columnOverride column="END_DATE" property="endDate" javaType="java.util.Date"
+                            jdbcType="DATE"/>
+            <columnOverride column="UPDATE_TIME" property="updateTime" javaType="java.util.Date"
+                            jdbcType="DATE"/>
+            <columnOverride column="UPDATE_USERID" property="updateUserid" javaType="String"
+                            jdbcType="VARCHAR"/>
+            <columnOverride column="ASS_USER_ID" property="assUserId" javaType="String"
+                            jdbcType="VARCHAR"/>
+            <columnOverride column="STATUS" property="status" javaType="Integer"
+                            jdbcType="TINYINT"/>
+        </table>
+		-->
+        <!-- PDT 表
+        <table schema="" tableName="IY_DPT" domainObjectName="IyDpt">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DEPARTMENT" property="department" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="GRAND_DIV" property="grandDiv" javaType="String"/>
+            <columnOverride column="DPT_NAME_E" property="dptNamee" javaType="String"/>
+            <columnOverride column="DPT_NAME" property="dptName" javaType="String"/>
+            <columnOverride column="DPT_NAME_SRT_E" property="dptNameSrte" javaType="String"/>
+            <columnOverride column="DPT_NAME_SRT" property="dptNameSrt" javaType="String"/>
+            <columnOverride column="SEQ_NO" property="seqNo" javaType="String"/>
+            <columnOverride column="SALES_EXL_FLG" property="salesExlFlg" javaType="String"/>
+            <columnOverride column="SUBT_EXL_FLG" property="subtExlFlg" javaType="String"/>
+            <columnOverride column="DISC_EXL_FLG" property="discExlFlg" javaType="String"/>
+            <columnOverride column="ORDER_TYPE" property="orderType" javaType="String"/>
+            <columnOverride column="C_P_KBN" property="cpkbn" javaType="String"/>
+            <columnOverride column="DECREASE_RATE" property="decreaseRate" javaType="Integer"/>
+            <columnOverride column="TRN_COST_RATE" property="trnCostRate" javaType="Integer"/>
+            <columnOverride column="TENANT_KBN" property="tenantKbn" javaType="String"/>
+            <columnOverride column="TENANT" property="tenant" javaType="String"/>
+            <columnOverride column="LINE" property="line" javaType="String"/>
+            <columnOverride column="INV_TYPE" property="invType" javaType="String"/>
+            <columnOverride column="INV_CYCLE" property="invCycle" javaType="String"/>
+            <columnOverride column="TAX_FLG" property="taxFlg" javaType="String"/>
+            <columnOverride column="TAX_RATE" property="taxRate" javaType="Integer"/>
+            <columnOverride column="PRICE_RATE" property="priceRate" javaType="Integer"/>
+            <columnOverride column="STR_USE_FLG" property="strUseFlg" javaType="String"/>
+            <columnOverride column="DPT_CODE_TYPE" property="dptCodeType" javaType="String"/>
+            <columnOverride column="VAL_DATE" property="valDate" javaType="Integer"/>
+            <columnOverride column="TRAN_DATE" property="tranDate" javaType="Integer"/>
+            <columnOverride column="GEN_DATE" property="genDate" javaType="Integer"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>
+        -->
+        <!-- BM 编码表
+       <table schema="" tableName="IY_BM_CODE" domainObjectName="IyBmCode">
+           <property name="useActualColumnNames" value="true"/>
+           <columnOverride column="COMPANY" property="company" javaType="String"/>
+           <columnOverride column="BM_TYPE" property="bmType" javaType="String"/>
+           <columnOverride column="BM_CODE" property="bmCode" javaType="String"/>
+           <columnOverride column="UPDATE_DATE" property="updateDate" javaType="java.util.Date" jdbcType="DATE"/>
+       </table>
+       -->
+        <!-- 商品主挡表，
+       <table schema="" tableName="IY_ITEM_M" domainObjectName="IyItemM">
+            <property name="useActualColumnNames" value="true"/>
+             <columnOverride column="COMPANY" property="company" javaType="String"/>
+           <columnOverride column="ITEM_SYSTEM" property="itemSystem" javaType="String"/>
+           <columnOverride column="ITEM_NAME" property="itemName" javaType="String"/>
+           <columnOverride column="ITEM_NAME_E" property="itemNameE" javaType="String"/>
+           <columnOverride column="RECIEPT_NAME" property="recieptName" javaType="String"/>
+           <columnOverride column="ENTRY_BUYER" property="entryBuyer" javaType="String"/>
+           <columnOverride column="ITEM1" property="item1" javaType="String"/>
+           <columnOverride column="ITEM1_ENTRY_DATE" property="item1EntryDate" javaType="Integer"/>
+           <columnOverride column="ITEM2" property="item2" javaType="String"/>
+           <columnOverride column="ITEM2_ENTRY_DATE" property="item2EntryDate" javaType="Integer"/>
+           <columnOverride column="ITEM3" property="item3" javaType="String"/>
+           <columnOverride column="ITEM3_ENTRY_DATE" property="item3EntryDate" javaType="Integer"/>
+           <columnOverride column="ITEM4" property="item4" javaType="String"/>
+           <columnOverride column="ITEM4_ENTRY_DATE" property="item4EntryDate" javaType="Integer"/>
+           <columnOverride column="ITEM5" property="item5" javaType="String"/>
+           <columnOverride column="ITEM5_ENTRY_DATE" property="item5EntryDate" javaType="Integer"/>
+           <columnOverride column="ITEM_ORDER" property="itemOrder" javaType="String"/>
+           <columnOverride column="DPT" property="dpt" javaType="String"/>
+           <columnOverride column="LINE" property="line" javaType="String"/>
+           <columnOverride column="CLASS" property="clazz" javaType="String"/>
+           <columnOverride column="HINBAN" property="hinban" javaType="String"/>
+           <columnOverride column="COLOR" property="color" javaType="String"/>
+           <columnOverride column="SIZE1" property="size1" javaType="String"/>
+           <columnOverride column="SUB_CLASS1" property="subClass1" javaType="String"/>
+           <columnOverride column="SUB_CLASS2" property="subClass2" javaType="String"/>
+           <columnOverride column="AREA" property="area" javaType="String"/>
+           <columnOverride column="DELIVERY_LIMIT" property="deliveryLimit" javaType="String"/>
+           <columnOverride column="SALES_LIMIT" property="salesLimit" javaType="String"/>
+           <columnOverride column="TASTE_LIMIT" property="tasteLimit" javaType="String"/>
+           <columnOverride column="MAKER" property="maker" javaType="String"/>
+           <columnOverride column="ITEM_MAKER" property="itemMaker" javaType="String"/>
+           <columnOverride column="CONTRACT_AMOUNT" property="contractAmount" javaType="String"/>
+           <columnOverride column="CONTRACT_DATE_FROM" property="contractDateFrom" javaType="Integer"/>
+           <columnOverride column="CONTRACT_DATE_TO" property="contractDateTo" javaType="Integer"/>
+           <columnOverride column="COST" property="cost" javaType="Integer"/>
+           <columnOverride column="PRICE" property="price" javaType="Integer"/>
+           <columnOverride column="TAX_RATE" property="taxRate" javaType="Integer"/>
+           <columnOverride column="ORDER_TYPE" property="orderType" javaType="String"/>
+           <columnOverride column="TAG_TYPE" property="tagType" javaType="String"/>
+           <columnOverride column="DELIVERY_TYPE" property="deliveryType" javaType="String"/>
+           <columnOverride column="BUYING_TYPE" property="buyingType" javaType="String"/>
+           <columnOverride column="PCARD_TYPE" property="pcardType" javaType="String"/>
+           <columnOverride column="CONTRACT_NO1" property="contractNo1" javaType="String"/>
+           <columnOverride column="CONTRACT_NO2" property="contractNo2" javaType="String"/>
+           <columnOverride column="VENDOR" property="vendor" javaType="String"/>
+           <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+           <columnOverride column="BUY_TAX_RATE" property="buyTaxRate" javaType="Integer"/>
+           <columnOverride column="TAX_TYPE" property="taxType" javaType="String"/>
+           <columnOverride column="ITEM_ATTRIBUTE" property="itemAttribute" javaType="String"/>
+           <columnOverride column="BRAND" property="brand" javaType="String"/>
+           <columnOverride column="DESIGN" property="design" javaType="String"/>
+           <columnOverride column="FABRIC" property="fabric" javaType="String"/>
+           <columnOverride column="PATTERN" property="pattern" javaType="String"/>
+           <columnOverride column="STYLE" property="style" javaType="String"/>
+           <columnOverride column="LEAST_STOCK_AMOUNT" property="leastStockAmount" javaType="Integer"/>
+           <columnOverride column="SURFACE_NUM" property="surfaceNum" javaType="Integer"/>
+           <columnOverride column="DLMIN_NUM" property="dlminNum" javaType="Integer"/>
+           <columnOverride column="ITEM_NAME_EL" property="itemNameEl" javaType="String"/>
+           <columnOverride column="TEMPERATURE" property="temperature" javaType="String"/>
+           <columnOverride column="ITEM_SEASON" property="itemSeason" javaType="String"/>
+       </table>-->
+        <!-- 特殊授权表
+         -->
+        <!--<table schema="" tableName="IY_M_ACTOR_ASSIGNMENT"-->
+        <!--domainObjectName="IymActorAssignment">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<generatedKey column="ID" sqlStatement="select SEQ_ACTOR_ASSIGNMENT.currval from dual"-->
+        <!--identity="true"/>-->
+        <!--<columnOverride column="ID" property="id" javaType="Integer" jdbcType="INTEGER"/>-->
+        <!--<columnOverride column="ACTOR_ID" property="actorId" javaType="String"-->
+        <!--jdbcType="VARCHAR"/>-->
+        <!--<columnOverride column="ROLE_ID" property="roleId" javaType="Integer"-->
+        <!--jdbcType="INTEGER"/>-->
+        <!--</table>-->
+        <!-- BM商品正式Master数据表-头档
+        <table schema="" tableName="IY_BM" domainObjectName="IyBm">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="STORE" property="store" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="BM_TYPE" property="bmType" javaType="String"/>
+            <columnOverride column="BM_CODE" property="bmCode" javaType="String"/>
+            <columnOverride column="BM_NAME" property="bmName" javaType="String"/>
+            <columnOverride column="ITEM_PRICE" property="itemPrice" javaType="Integer"/>
+            <columnOverride column="BM_NUMBER" property="bmNumber" javaType="Integer"/>
+            <columnOverride column="BM_PRICE" property="bmNrice" javaType="Integer"/>
+            <columnOverride column="BM_EFF_FROM" property="bmEffFrom" javaType="Integer"/>
+            <columnOverride column="BM_EFF_TO" property="bmEffTo" javaType="Integer"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+            <columnOverride column="BM_DISCOUNT_RATE" property="bmDiscountRate" javaType="BigDecimal"/>
+            <columnOverride column="BM_GROSS" property="bmGross" javaType="String"/>
+            <columnOverride column="DPT_ALL" property="dptAll" javaType="String"/>
+            <columnOverride column="NUM_A" property="numA" javaType="Integer"/>
+            <columnOverride column="NUM_B" property="numB" javaType="Integer"/>
+        </table> -->
+        <!-- BM商品正式Master数据表-明细档
+        <table schema="" tableName="IY_BM_ITEM" domainObjectName="IyBmItem">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="BM_TYPE" property="bmType" javaType="String"/>
+            <columnOverride column="BM_CODE" property="bmCode" javaType="String"/>
+            <columnOverride column="ITEM" property="item" javaType="String"/>
+            <columnOverride column="PRICE" property="price" javaType="Integer"/>
+            <columnOverride column="PRICE_DISC" property="priceDisc" javaType="Integer"/>
+            <columnOverride column="DISC_RATE" property="discRate" javaType="BigDecimal"/>
+            <columnOverride column="PRICE2ND" property="price2nd" javaType="Integer"/>
+            <columnOverride column="AB_FLG" property="abFlg" javaType="String"/>
+            <columnOverride column="NUM_A" property="numA" javaType="Integer"/>
+            <columnOverride column="NUM_B" property="numB" javaType="Integer"/>
+        </table> -->
+        <!-- BM商品历史记录数据表-头档
+        <table schema="" tableName="IY_BM_HIS" domainObjectName="IyBmHis">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="NEW_NO" property="newNo" javaType="String"/>
+            <columnOverride column="NEW_NO_SUB" property="newNoSub" javaType="String"/>
+            <columnOverride column="STORE" property="store" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="BUYER" property="buyer" javaType="String"/>
+            <columnOverride column="BM_TYPE" property="bmType" javaType="String"/>
+            <columnOverride column="BM_CODE" property="bmCode" javaType="String"/>
+            <columnOverride column="BM_NAME" property="bmName" javaType="String"/>
+            <columnOverride column="ITEM_PRICE" property="itemPrice" javaType="Integer"/>
+            <columnOverride column="BM_NUMBER" property="bmNumber" javaType="Integer"/>
+            <columnOverride column="BM_PRICE" property="bmPrice" javaType="Integer"/>
+            <columnOverride column="BM_EFF_FROM" property="bmEffFrom" javaType="Integer"/>
+            <columnOverride column="BM_EFF_TO" property="bmEffTo" javaType="Integer"/>
+            <columnOverride column="BM_GROSS" property="bmGross" javaType="Integer"/>
+            <columnOverride column="NUM_A" property="numA" javaType="Integer"/>
+            <columnOverride column="NUM_B" property="numB" javaType="Integer"/>
+            <columnOverride column="DPT_FLG" property="dptFlg" javaType="String"/>
+            <columnOverride column="RIGHT_FLG" property="rightFlg" javaType="String"/>
+            <columnOverride column="CHECK_FLG" property="checkFlg" javaType="String"/>
+            <columnOverride column="OP_FLG" property="opFlg" javaType="String"/>
+            <columnOverride column="UPDATE_DATE" property="updateDate" javaType="Date" jdbcType="TIMESTAMP" />
+            <columnOverride column="USERID" property="userid" javaType="String"/>
+            <columnOverride column="USERNAME" property="username" javaType="String"/>
+            <columnOverride column="REJECTREASON" property="rejectreason" javaType="String"/>
+            <columnOverride column="FIRST_FLG" property="firstFlg" javaType="String"/>
+            <columnOverride column="BM_DISCOUNT_RATE" property="bmDiscountRate" javaType="BigDecimal"/>
+            <columnOverride column="DPT_ALL" property="dptAll" javaType="String"/>
+            <columnOverride column="NEW_FLG" property="newFlg" javaType="String"/>
+            <columnOverride column="UPDATE_FLG" property="updateFlg" javaType="String"/>
+        </table>-->
+        <!-- BM商品历史记录数据表-明细档
+        <table schema="" tableName="IY_BM_ITEM_HIS" domainObjectName="IyBmItemHis">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="NEW_NO" property="newNo" javaType="String"/>
+            <columnOverride column="NEW_NO_SUB" property="newNoSub" javaType="String"/>
+            <columnOverride column="BM_TYPE" property="bmType" javaType="String"/>
+            <columnOverride column="BM_CODE" property="bmCode" javaType="String"/>
+            <columnOverride column="ITEM" property="item" javaType="String"/>
+            <columnOverride column="PRICE" property="price" javaType="Integer"/>
+            <columnOverride column="PRICE_DISC" property="priceDisc" javaType="Integer"/>
+            <columnOverride column="DISC_RATE" property="discRate" javaType="BigDecimal"/>
+            <columnOverride column="PRICE2ND" property="price2nd" javaType="Integer"/>
+            <columnOverride column="AB_FLG" property="abFlg" javaType="String"/>
+            <columnOverride column="NUM_A" property="numA" javaType="Integer"/>
+            <columnOverride column="NUM_B" property="numB" javaType="Integer"/>
+            <columnOverride column="BM_ITEM_FLG" property="bmItemFlg" javaType="String"/>
+        </table>-->
+        <!-- BM商品审核数据表-头档
+        <table schema="" tableName="IY_BM_CK" domainObjectName="IyBmCk">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="NEW_NO" property="newNo" javaType="String"/>
+            <columnOverride column="STORE" property="store" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="BUYER" property="buyer" javaType="String"/>
+            <columnOverride column="BM_TYPE" property="bmType" javaType="String"/>
+            <columnOverride column="BM_CODE" property="bmCode" javaType="String"/>
+            <columnOverride column="BM_NAME" property="bmName" javaType="String"/>
+            <columnOverride column="ITEM_PRICE" property="itemPrice" javaType="Integer"/>
+            <columnOverride column="BM_NUMBER" property="bmNumber" javaType="Integer"/>
+            <columnOverride column="BM_PRICE" property="bmPrice" javaType="Integer"/>
+            <columnOverride column="BM_EFF_FROM" property="bmEffFrom" javaType="Integer"/>
+            <columnOverride column="BM_EFF_TO" property="bmEffTo" javaType="Integer"/>
+            <columnOverride column="BM_DISCOUNT_RATE" property="bmDiscountRate" javaType="BigDecimal"/>
+            <columnOverride column="BM_GROSS" property="bmGross" javaType="Integer"/>
+            <columnOverride column="NUM_A" property="numA" javaType="Integer"/>
+            <columnOverride column="NUM_B" property="numB" javaType="Integer"/>
+            <columnOverride column="DPT_FLG" property="dptFlg" javaType="String"/>
+            <columnOverride column="RIGHT_FLG" property="rightFlg" javaType="String"/>
+            <columnOverride column="CHECK_FLG" property="checkFlg" javaType="String"/>
+            <columnOverride column="OP_FLG" property="opFlg" javaType="String"/>
+            <columnOverride column="UPDATE_DATE" property="updateDate" javaType="Date" jdbcType="TIMESTAMP" />
+            <columnOverride column="USERID" property="userid" javaType="String"/>
+            <columnOverride column="REJECTREASON" property="rejectreason" javaType="String"/>
+            <columnOverride column="FIRST_FLG" property="firstFlg" javaType="String"/>
+            <columnOverride column="DPT_ALL" property="dptAll" javaType="String"/>
+            <columnOverride column="NEW_FLG" property="newFlg" javaType="String"/>
+            <columnOverride column="UPDATE_FLG" property="updateFlg" javaType="String"/>
+        </table>-->
+        <!-- BM商品审核数据表-明细档
+        <table schema="" tableName="IY_BM_ITEM_CK" domainObjectName="IyBmItemCk">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="NEW_NO" property="newNo" javaType="String"/>
+            <columnOverride column="BM_TYPE" property="bmType" javaType="String"/>
+            <columnOverride column="BM_CODE" property="bmCode" javaType="String"/>
+            <columnOverride column="ITEM" property="item" javaType="String"/>
+            <columnOverride column="PRICE" property="price" javaType="Integer"/>
+            <columnOverride column="PRICE_DISC" property="priceDisc" javaType="Integer"/>
+            <columnOverride column="DISC_RATE" property="discRate" javaType="BigDecimal"/>
+            <columnOverride column="PRICE2ND" property="price2nd" javaType="Integer"/>
+            <columnOverride column="AB_FLG" property="abFlg" javaType="String"/>
+            <columnOverride column="NUM_A" property="numA" javaType="Integer"/>
+            <columnOverride column="NUM_B" property="numB" javaType="Integer"/>
+            <columnOverride column="BM_ITEM_FLG" property="bmItemFlg" javaType="String"/>
+        </table>-->
+        <!-- 用户授权记录表
+        <table schema="" tableName="IY_M_ACTOR_ASSIGNMENT_RECORD"
+               domainObjectName="IymActorAssignmentRecord">
+            <property name="useActualColumnNames" value="true"/>
+            <generatedKey column="id"
+                          sqlStatement="select SEQ_ACTOR_ASSIGNMENT_RECOED.currval from dual"
+                          identity="true"/>
+            <columnOverride column="ID" property="id" javaType="Integer"/>
+            <columnOverride column="ACTOR_ASS_ID" property="actorAssId" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="OLD_USER_ID" property="oldUserId" javaType="String"/>
+            <columnOverride column="NEW_USER_ID" property="newUserId" javaType="String"/>
+            <columnOverride column="ROLE_ID" property="roleId" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="OPERATION_FLG" property="operationFlg" javaType="Integer"
+                            jdbcType="SMALLINT"/>
+            <columnOverride column="UPDATE_TIME" property="updateTime" javaType="java.util.Date"
+                            jdbcType="DATE"/>
+            <columnOverride column="UPDATE_USERID" property="updateUserid" javaType="String"
+                            jdbcType="VARCHAR"/>
+            <columnOverride column="START_TIME" property="startTime" javaType="java.util.Date"
+                            jdbcType="DATE"/>
+            <columnOverride column="END_TIME" property="endTime" javaType="java.util.Date"
+                            jdbcType="DATE"/>
+        </table>-->
+        <!-- 自动订货信息表
+        <table schema="" tableName="IY_AUTO_OD_CK" domainObjectName="IyAutoOdCk">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="NEW_NO" property="newNo" javaType="String"/>
+            <columnOverride column="STORE" property="store" javaType="String"/>
+            <columnOverride column="ITEM_SYSTEM" property="itemSystem" javaType="String"/>
+            <columnOverride column="ITEM1" property="item1" javaType="String"/>
+            <columnOverride column="AUTO_OD_FLG" property="autoOdFlg" javaType="String"/>
+            <columnOverride column="SAFE_STOCK" property="safeStock" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="java.util.Date" jdbcType="DATE"/>
+        </table>-->
+
+        <!-- 品牌表
+        <table schema="" tableName="IY_BRAND" domainObjectName="IyBrand">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="BRAND" property="brand" javaType="String"/>
+            <columnOverride column="BRAND_NAME" property="brandName" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>-->
+
+        <!-- 商品分类表
+        <table schema="" tableName="IY_CLASS" domainObjectName="IyClass">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="LINE" property="line" javaType="String"/>
+            <columnOverride column="CLASS" property="clazz" javaType="String"/>
+            <columnOverride column="CLASS_NAME" property="clazzName" javaType="String"/>
+            <columnOverride column="ORDER_FLG_MON" property="orderFlgMon" javaType="String"/>
+            <columnOverride column="ORDER_FLG_TUE" property="orderFlgTue" javaType="String"/>
+            <columnOverride column="ORDER_FLG_WED" property="orderFlgWed" javaType="String"/>
+            <columnOverride column="ORDER_FLG_THU" property="orderFlgThu" javaType="String"/>
+            <columnOverride column="ORDER_FLG_FRI" property="orderFlgFri" javaType="String"/>
+            <columnOverride column="ORDER_FLG_SAT" property="orderFlgSat" javaType="String"/>
+            <columnOverride column="ORDER_FLG_SUN" property="orderFlgSun" javaType="String"/>
+            <columnOverride column="RATE" property="rate" javaType="Integer"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>-->
+
+        <!-- 进货税率表
+        <table schema="" tableName="IY_CLASS_BUY_TAX_RATE" domainObjectName="IyClassBuyTaxRate">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="CLASS" property="clazz" javaType="String"/>
+            <columnOverride column="BUY_TAX_RATE" property="buyTaxRate" javaType="Integer"/>
+        </table>-->
+
+        <!-- 销售税率表
+        <table schema="" tableName="IY_CLASS_TAX_RATE" domainObjectName="IyClassTaxRate">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="CLASS" property="clazz" javaType="String"/>
+            <columnOverride column="TAX_RATE" property="taxRate" javaType="Integer"/>
+        </table>-->
+
+        <!-- 颜色表
+        <table schema="" tableName="IY_COLOR" domainObjectName="IyColor">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="COLOR" property="color" javaType="String"/>
+            <columnOverride column="COLOR_NAME" property="colorName" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>-->
+
+        <!-- 物流仓库表
+        <table schema="" tableName="IY_DEPO" domainObjectName="IyDepo">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="DEPO" property="depo" javaType="String"/>
+            <columnOverride column="DC_NAME" property="dcName" javaType="String"/>
+            <columnOverride column="DC_ADDRESS" property="dcAddress" javaType="String"/>
+            <columnOverride column="DC_TEL" property="dcTel" javaType="String"/>
+        </table>-->
+
+        <!--图案表
+        <table schema="" tableName="IY_DESIGN" domainObjectName="IyDesign">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="DESIGN" property="design" javaType="String"/>
+            <columnOverride column="DESIGN_NAME" property="designName" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>-->
+
+        <!--IY_EAN表
+        <table schema="" tableName="IY_EAN" domainObjectName="IyEan">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="ITEM_SYSTEM" property="itemSystem" javaType="String"/>
+            <columnOverride column="ITEM" property="item" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>-->
+
+        <!--材质表
+        <table schema="" tableName="IY_FABRIC" domainObjectName="IyFabric">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="FABRIC" property="fabric" javaType="String"/>
+            <columnOverride column="FABRIC_NAME" property="fabricName" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>-->
+
+        <!-- 控制信息表
+        <table schema="" tableName="IY_ITEM_C_CK" domainObjectName="IyItemCCk">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="NEW_NO" property="newNo" javaType="String"/>
+            <columnOverride column="NEW_TYPE" property="newType" javaType="String"/>
+            <columnOverride column="ITEM_SYSTEM" property="itemSystem" javaType="String"/>
+            <columnOverride column="STORE" property="store" javaType="String"/>
+            <columnOverride column="ENTRY_BUYER" property="entryBuyer" javaType="String"/>
+            <columnOverride column="DEPO" property="depo" javaType="String"/>
+            <columnOverride column="COST_NONTAX" property="costNontax" javaType="Integer"/>
+            <columnOverride column="COST_TAX" property="costTax" javaType="Integer"/>
+            <columnOverride column="COST_RATE" property="costRate" javaType="Integer"/>
+            <columnOverride column="PRICE_TAX" property="priceTax" javaType="Integer"/>
+            <columnOverride column="PRICE_NONTAX" property="priceNontax" javaType="Integer"/>
+            <columnOverride column="NEIRE" property="neire" javaType="Integer"/>
+            <columnOverride column="RANK" property="rank" javaType="String"/>
+            <columnOverride column="ORDER_DATE_FROM" property="orderDateFrom" javaType="Integer"/>
+            <columnOverride column="ORDER_DATE_TO" property="orderDateTo" javaType="Integer"/>
+            <columnOverride column="SALES_DATE_FROM" property="salesDateFrom" javaType="Integer"/>
+            <columnOverride column="SALES_DATE_TO" property="salesDateTo" javaType="Integer"/>
+            <columnOverride column="ORDER_UNIT" property="orderUnit" javaType="String"/>
+            <columnOverride column="UNIT_TYPE" property="unitType" javaType="String" jdbcType="VARCHAR"/>
+            <columnOverride column="CENTER" property="center" javaType="String"/>
+            <columnOverride column="CYCLE_MON" property="cycleMon" javaType="String"/>
+            <columnOverride column="CYCLE_TUE" property="cycleTue" javaType="String"/>
+            <columnOverride column="CYCLE_WED" property="cycleWed" javaType="String"/>
+            <columnOverride column="CYCLE_THU" property="cycleThu" javaType="String"/>
+            <columnOverride column="CYCLE_FRI" property="cycleFri" javaType="String"/>
+            <columnOverride column="CYCLE_SAT" property="cycleSat" javaType="String"/>
+            <columnOverride column="CYCLE_SUN" property="cycleSun" javaType="String"/>
+            <columnOverride column="TEIKAN_TYPE" property="teikanType" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+            <columnOverride column="DC_TYPE" property="dcType" javaType="String"/>
+            <columnOverride column="DC_RATE" property="dcRate" javaType="Integer"/>
+            <columnOverride column="MID_UNIT" property="midUnit" javaType="String"/>
+            <columnOverride column="COST_RATE_REASON" property="costRateReason" javaType="String" jdbcType="VARCHAR"/>
+            <columnOverride column="COST_TAX_OLD" property="costTaxOld" javaType="Integer"/>
+            <columnOverride column="PRICE_TAX_OLD" property="priceTaxOld" javaType="Integer"/>
+            <columnOverride column="COST_RATE_OLD" property="costRateOld" javaType="Integer"/>
+            <columnOverride column="ORDER_DATE_FROM_OLD" property="orderDateFromOld" javaType="Integer"/>
+            <columnOverride column="ORDER_DATE_TO_OLD" property="orderDateToOld" javaType="Integer"/>
+            <columnOverride column="SALES_DATE_FROM_OLD" property="salesDateFromOld" javaType="Integer"/>
+            <columnOverride column="SALES_DATE_TO_OLD" property="salesDateToOld" javaType="Integer"/>
+            <columnOverride column="COST_RATE_KEI" property="costRateKei" javaType="Integer"/>
+            <columnOverride column="DC_TYPE_OLD" property="dcTypeOld" javaType="String"/>
+        </table>-->
+
+        <!-- 商品基础信息表
+         <table schema="" tableName="IY_ITEM_M_CK" domainObjectName="IyItemMCk">
+              <property name="useActualColumnNames" value="true"/>
+             <columnOverride column="COMPANY" property="company" javaType="String"/>
+             <columnOverride column="NEW_NO" property="newNo" javaType="String"/>
+             <columnOverride column="ITEM_SYSTEM" property="itemSystem" javaType="String"/>
+             <columnOverride column="ITEM_NAME" property="itemName" javaType="String" jdbcType="VARCHAR"/>
+             <columnOverride column="ITEM_NAME_E" property="itemNameE" javaType="String"/>
+             <columnOverride column="RECIEPT_NAME" property="recieptName" javaType="String" jdbcType="VARCHAR"/>
+             <columnOverride column="ENTRY_BUYER" property="entryBuyer" javaType="String"/>
+             <columnOverride column="ITEM1" property="item1" javaType="String"/>
+             <columnOverride column="ITEM1_ENTRY_DATE" property="item1EntryDate" javaType="Integer"/>
+             <columnOverride column="ITEM2" property="item2" javaType="String"/>
+             <columnOverride column="ITEM2_ENTRY_DATE" property="item2EntryDate" javaType="Integer"/>
+             <columnOverride column="ITEM3" property="item3" javaType="String"/>
+             <columnOverride column="ITEM3_ENTRY_DATE" property="item3EntryDate" javaType="Integer"/>
+             <columnOverride column="ITEM4" property="item4" javaType="String"/>
+             <columnOverride column="ITEM4_ENTRY_DATE" property="item4EntryDate" javaType="Integer"/>
+             <columnOverride column="ITEM5" property="item5" javaType="String"/>
+             <columnOverride column="ITEM5_ENTRY_DATE" property="item5EntryDate" javaType="Integer"/>
+             <columnOverride column="ITEM_ORDER" property="itemOrder" javaType="String"/>
+             <columnOverride column="DPT" property="dpt" javaType="String"/>
+             <columnOverride column="LINE" property="line" javaType="String"/>
+             <columnOverride column="CLASS" property="clazz" javaType="String"/>
+             <columnOverride column="HINBAN" property="hinban" javaType="String"/>
+             <columnOverride column="COLOR" property="color" javaType="String"/>
+             <columnOverride column="SIZE1" property="size1" javaType="String"/>
+             <columnOverride column="SUB_CLASS1" property="subClass1" javaType="String"/>
+             <columnOverride column="SUB_CLASS2" property="subClass2" javaType="String"/>
+             <columnOverride column="AREA" property="area" javaType="String" jdbcType="VARCHAR"/>
+             <columnOverride column="DELIVERY_LIMIT" property="deliveryLimit" javaType="String"/>
+             <columnOverride column="SALES_LIMIT" property="salesLimit" javaType="String"/>
+             <columnOverride column="TASTE_LIMIT" property="tasteLimit" javaType="String"/>
+             <columnOverride column="MAKER" property="maker" javaType="String"/>
+             <columnOverride column="ITEM_MAKER" property="itemMaker" javaType="String"/>
+             <columnOverride column="CONTRACT_AMOUNT" property="contractAmount" javaType="String"/>
+             <columnOverride column="CONTRACT_DATE_FROM" property="contractDateFrom" javaType="Integer"/>
+             <columnOverride column="CONTRACT_DATE_TO" property="contractDateTo" javaType="Integer"/>
+             <columnOverride column="COST" property="cost" javaType="Integer"/>
+             <columnOverride column="PRICE" property="price" javaType="Integer"/>
+             <columnOverride column="TAX_RATE" property="taxRate" javaType="Integer"/>
+             <columnOverride column="ORDER_TYPE" property="orderType" javaType="String"/>
+             <columnOverride column="TAG_TYPE" property="tagType" javaType="String"/>
+             <columnOverride column="DELIVERY_TYPE" property="deliveryType" javaType="String"/>
+             <columnOverride column="BUYING_TYPE" property="buyingType" javaType="String"/>
+             <columnOverride column="PCARD_TYPE" property="pcardType" javaType="String"/>
+             <columnOverride column="CONTRACT_NO1" property="contractNo1" javaType="String"/>
+             <columnOverride column="CONTRACT_NO2" property="contractNo2" javaType="String"/>
+             <columnOverride column="VENDOR" property="vendor" javaType="String"/>
+             <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+             <columnOverride column="BUY_TAX_RATE" property="buyTaxRate" javaType="Integer"/>
+             <columnOverride column="TAX_TYPE" property="taxType" javaType="String"/>
+             <columnOverride column="ITEM_ATTRIBUTE" property="itemAttribute" javaType="String"/>
+             <columnOverride column="ITEM_SEASON" property="itemSeason" javaType="String"/>
+             <columnOverride column="BRAND" property="brand" javaType="String"/>
+             <columnOverride column="DESIGN" property="design" javaType="String"/>
+             <columnOverride column="FABRIC" property="fabric" javaType="String"/>
+             <columnOverride column="PATTERN" property="pattern" javaType="String"/>
+             <columnOverride column="STYLE" property="style" javaType="String"/>
+             <columnOverride column="LEAST_STOCK_AMOUNT" property="leastStockAmount" javaType="Integer"/>
+             <columnOverride column="SURFACE_NUM" property="surfaceNum" javaType="Integer"/>
+             <columnOverride column="DLMIN_NUM" property="dlminNum" javaType="Integer"/>
+             <columnOverride column="ITEM_NAME_EL" property="itemNameEl" javaType="String" jdbcType="VARCHAR"/>
+             <columnOverride column="TEMPERATURE" property="temperature" javaType="String"/>
+             <columnOverride column="ORDER_UNIT" property="orderUnit" javaType="String"/>
+             <columnOverride column="UNIT_TYPE" property="unitType" javaType="String" jdbcType="VARCHAR"/>
+             <columnOverride column="TEIKAN_TYPE" property="teikanType" javaType="String"/>
+             <columnOverride column="ITEM_TYPE" property="itemType" javaType="String"/>
+             <columnOverride column="ITEM_FLG" property="itemFlg" javaType="String"/>
+             <columnOverride column="CHECK_FLG" property="checkFlg" javaType="String"/>
+             <columnOverride column="OP_FLG" property="opFlg" javaType="String"/>
+             <columnOverride column="UPDATE_DATE" property="updateDate" javaType="java.util.Date" jdbcType="DATE"/>
+             <columnOverride column="USERID" property="userid" javaType="String"/>
+             <columnOverride column="REJECTREASON" property="rejectreason" javaType="String" jdbcType="VARCHAR"/>
+             <columnOverride column="NEW_FLG" property="newFlg" javaType="String"/>
+             <columnOverride column="UPDATE_FLG" property="updateFlg" javaType="String"/>
+             <columnOverride column="FIRST_FLG" property="firstFlg" javaType="String"/>
+             <columnOverride column="PIC_URL" property="picUrl" javaType="String" jdbcType="VARCHAR"/>
+         </table>-->
+
+        <!--IY_LINE表
+        <table schema="" tableName="IY_LINE" domainObjectName="IyLine">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="LINE" property="line" javaType="String"/>
+            <columnOverride column="LINE_NAME" property="lineName" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>-->
+
+        <!--生产厂家表
+        <table schema="" tableName="IY_MAKER" domainObjectName="IyMaker">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="MAKER" property="maker" javaType="String"/>
+            <columnOverride column="MAKER_NAME" property="makerName" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>-->
+
+        <!--式样表
+        <table schema="" tableName="IY_PATTERN" domainObjectName="IyPattern">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="PATTERN" property="pattern" javaType="String"/>
+            <columnOverride column="PATTERN_NAME" property="patternName" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>-->
+
+        <!--尺寸表
+        <table schema="" tableName="IY_SIZE" domainObjectName="IySize">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="SIZE1" property="size1" javaType="String"/>
+            <columnOverride column="SIZE_NAME" property="sizeName" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>-->
+
+        <!--IY_STYLE表
+        <table schema="" tableName="IY_STYLE" domainObjectName="IyStyle">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="STYLE" property="style" javaType="String"/>
+            <columnOverride column="STYLE_NAME" property="styleName" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>-->
+
+        <!--IY_VENDOR表
+        <table schema="" tableName="IY_VENDOR" domainObjectName="IyVendor">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="VENDOR" property="vendor" javaType="String"/>
+            <columnOverride column="VENDOR_NAME" property="vendorName" javaType="String"/>
+            <columnOverride column="CLS_PAT" property="clsPat" javaType="String"/>
+            <columnOverride column="PAY_PAT" property="payPat" javaType="String"/>
+            <columnOverride column="BUYING_TYPE" property="buyingType" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>-->
+
+        <!--IYED_STAFF表
+        <table schema="" tableName="IYED_STAFF" domainObjectName="IyedStaff">-->
+        <!--<property name="useActualColumnNames" value="true"/>-->
+        <!--<columnOverride column="PERSON_CODE" property="personCode"/>-->
+        <!--<columnOverride column="PERSON_NAME" property="personName"/>-->
+        <!--<columnOverride column="DPT" property="dpt"/>-->
+        <!--<columnOverride column="POST" property="post"/>-->
+        <!--</table>-->
+        <!-- 控制记录表
+        <table schema="" tableName="IY_ITEM_C" domainObjectName="IyItemC">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="ITEM_SYSTEM" property="itemSystem" javaType="String"/>
+            <columnOverride column="STORE" property="store" javaType="String"/>
+            <columnOverride column="ENTRY_BUYER" property="entryBuyer" javaType="String"/>
+            <columnOverride column="DEPO" property="depo" javaType="String"/>
+            <columnOverride column="COST_NONTAX" property="costNontax" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="COST_TAX" property="costTax" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="COST_RATE" property="costRate" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="PRICE_TAX" property="priceTax" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="PRICE_NONTAX" property="priceNontax" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="NEIRE" property="neire" javaType="Integer" jdbcType="INTEGER"/>
+            <columnOverride column="RANK" property="rank" javaType="String"/>
+            <columnOverride column="ORDER_DATE_FROM" property="orderDateFrom" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="ORDER_DATE_TO" property="orderDateTo" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="SALES_DATE_FROM" property="salesDateFrom" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="SALES_DATE_TO" property="salesDateTo" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="ORDER_UNIT" property="orderUnit" javaType="String"/>
+            <columnOverride column="UNIT_TYPE" property="unitType" javaType="String"/>
+            <columnOverride column="CENTER" property="center" javaType="String"/>
+            <columnOverride column="CYCLE_MON" property="cycleMon" javaType="String"/>
+            <columnOverride column="CYCLE_TUE" property="cycleTue" javaType="String"/>
+            <columnOverride column="CYCLE_WED" property="cycleWed" javaType="String"/>
+            <columnOverride column="CYCLE_THU" property="cycleThu" javaType="String"/>
+            <columnOverride column="CYCLE_FRI" property="cycleFri" javaType="String"/>
+            <columnOverride column="CYCLE_SAT" property="cycleSat" javaType="String"/>
+            <columnOverride column="CYCLE_SUN" property="cycleSun" javaType="String"/>
+            <columnOverride column="TEIKAN_TYPE" property="teikanType" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="DC_TYPE" property="dcType" javaType="String"/>
+            <columnOverride column="DC_RATE" property="dcRate" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="MID_UNIT" property="midUnit" javaType="String"/>
+        </table>
+        <table schema="" tableName="IY_ITEM_C_VENDOR" domainObjectName="IyItemCVendor">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="ITEM_SYSTEM" property="itemSystem" javaType="String"/>
+            <columnOverride column="STORE" property="store" javaType="String"/>
+            <columnOverride column="VENDOR" property="vendor" javaType="String"/>
+            <columnOverride column="MAKER" property="maker" javaType="String"/>
+        </table>
+        <table schema="" tableName="IY_ITEM_C_VENDOR_CK" domainObjectName="IyItemCVendorCk">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="NEW_NO" property="newNo" javaType="String"/>
+            <columnOverride column="NEW_TYPE" property="newType" javaType="String"/>
+            <columnOverride column="ITEM_SYSTEM" property="itemSystem" javaType="String"/>
+            <columnOverride column="STORE" property="store" javaType="String"/>
+            <columnOverride column="VENDOR" property="vendor" javaType="String"/>
+            <columnOverride column="MAKER" property="maker" javaType="String"/>
+            <columnOverride column="VENDOR_OLD" property="vendorOld" javaType="String"/>
+            <columnOverride column="MAKER_OLD" property="makerOld" javaType="String"/>
+            <columnOverride column="CHG_FLG" property="chgFlg" javaType="String"/>
+        </table>
+        <table schema="" tableName="IY_ITEM_C_VENDOR_HIS" domainObjectName="IyItemCVendorHis">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="NEW_NO" property="newNo" javaType="String"/>
+            <columnOverride column="NEW_NO_SUB" property="newNoSub" javaType="String"/>
+            <columnOverride column="NEW_TYPE" property="newType" javaType="String"/>
+            <columnOverride column="ITEM_SYSTEM" property="itemSystem" javaType="String"/>
+            <columnOverride column="STORE" property="store" javaType="String"/>
+            <columnOverride column="VENDOR" property="vendor" javaType="String"/>
+            <columnOverride column="MAKER" property="maker" javaType="String"/>
+        </table>
+        <table schema="" tableName="IY_ITEM_DATA_IKKATU" domainObjectName="IyItemDataIkkatu">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="ITEM1" property="item1" javaType="String"/>
+            <columnOverride column="ITEM_SYSTEM" property="itemSystem" javaType="String"/>
+            <columnOverride column="STORE" property="store" javaType="String"/>
+            <columnOverride column="ORDER_DATE_FROM" property="orderDateFrom" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="REASON_FLG" property="reasonFlg" javaType="String"/>
+            <columnOverride column="DEL_FLG" property="delFlg" javaType="String"/>
+            <columnOverride column="PAGE_NO" property="pageNo" javaType="String"/>
+            <columnOverride column="SEQ_NO" property="seqNo" javaType="String"/>
+            <columnOverride column="ENTRY_USER" property="entryUser" javaType="String"/>
+            <columnOverride column="ENTRY_DATE" property="entryDate" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="ENTRY_TIME" property="entryTime" javaType="Integer"
+                            jdbcType="INTEGER"/>
+        </table>
+
+        <table schema="" tableName="IY_00" domainObjectName="Iy00">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="DPT_NAME" property="dptName" javaType="String"/>
+            <columnOverride column="ZERO_SEQ" property="zeroSeq" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>
+
+        <table schema="" tableName="IY_20" domainObjectName="Iy20">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="DPT_NAME" property="dptName" javaType="String"/>
+            <columnOverride column="DPT_NO" property="dptNo" javaType="String"/>
+            <columnOverride column="DPT_SEQ" property="dptSeq" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+            <columnOverride column="MIN_NO" property="minNo" javaType="String"/>
+            <columnOverride column="MAX_NO" property="maxNo" javaType="String"/>
+        </table>
+
+        <table schema="" tableName="IY_21" domainObjectName="Iy21">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="CLASS" property="clazz" javaType="String"/>
+            <columnOverride column="HINBAN" property="hinban" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+        </table>
+
+        <table schema="" tableName="IY_22" domainObjectName="Iy22">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="DPT_NAME" property="dptName" javaType="String"/>
+            <columnOverride column="DPT_NO" property="dptNo" javaType="String"/>
+            <columnOverride column="DPT_SEQ" property="dptSeq" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+            <columnOverride column="MIN_NO" property="minNo" javaType="String"/>
+            <columnOverride column="MAX_NO" property="maxNo" javaType="String"/>
+        </table>
+
+        <table schema="" tableName="IY_23" domainObjectName="Iy23">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="DPT_NAME" property="dptName" javaType="String"/>
+            <columnOverride column="DPT_NO" property="dptNo" javaType="String"/>
+            <columnOverride column="DPT_SEQ" property="dptSeq" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+            <columnOverride column="MIN_NO" property="minNo" javaType="String"/>
+            <columnOverride column="MAX_NO" property="maxNo" javaType="String"/>
+        </table>
+
+        <table schema="" tableName="IY_24" domainObjectName="Iy24">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="DPT_NAME" property="dptName" javaType="String"/>
+            <columnOverride column="DPT_NO" property="dptNo" javaType="String"/>
+            <columnOverride column="DPT_SEQ" property="dptSeq" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+            <columnOverride column="MIN_NO" property="minNo" javaType="String"/>
+            <columnOverride column="MAX_NO" property="maxNo" javaType="String"/>
+        </table>
+
+        <table schema="" tableName="IY_25" domainObjectName="Iy25">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="DPT_NAME" property="dptName" javaType="String"/>
+            <columnOverride column="DPT_NO" property="dptNo" javaType="String"/>
+            <columnOverride column="DPT_SEQ" property="dptSeq" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+            <columnOverride column="MIN_NO" property="minNo" javaType="String"/>
+            <columnOverride column="MAX_NO" property="maxNo" javaType="String"/>
+        </table>-->
+
+
+        <!-- 商品基础信息表历史
+        <table schema="" tableName="IY_ITEM_M_HIS" domainObjectName="IyItemMHis">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="NEW_NO" property="newNo" javaType="String"/>
+            <columnOverride column="NEW_NO_SUB" property="newNoSub" javaType="String"/>
+            <columnOverride column="ITEM_SYSTEM" property="itemSystem" javaType="String"/>
+            <columnOverride column="ITEM_NAME" property="itemName" javaType="String"
+                            jdbcType="VARCHAR"/>
+            <columnOverride column="ITEM_NAME_E" property="itemNameE" javaType="String"/>
+            <columnOverride column="RECIEPT_NAME" property="recieptName" javaType="String"
+                            jdbcType="VARCHAR"/>
+            <columnOverride column="ENTRY_BUYER" property="entryBuyer" javaType="String"/>
+            <columnOverride column="ITEM1" property="item1" javaType="String"/>
+            <columnOverride column="ITEM1_ENTRY_DATE" property="item1EntryDate" javaType="Integer"/>
+            <columnOverride column="ITEM2" property="item2" javaType="String"/>
+            <columnOverride column="ITEM2_ENTRY_DATE" property="item2EntryDate" javaType="Integer"/>
+            <columnOverride column="ITEM3" property="item3" javaType="String"/>
+            <columnOverride column="ITEM3_ENTRY_DATE" property="item3EntryDate" javaType="Integer"/>
+            <columnOverride column="ITEM4" property="item4" javaType="String"/>
+            <columnOverride column="ITEM4_ENTRY_DATE" property="item4EntryDate" javaType="Integer"/>
+            <columnOverride column="ITEM5" property="item5" javaType="String"/>
+            <columnOverride column="ITEM5_ENTRY_DATE" property="item5EntryDate" javaType="Integer"/>
+            <columnOverride column="ITEM_ORDER" property="itemOrder" javaType="String"/>
+            <columnOverride column="DPT" property="dpt" javaType="String"/>
+            <columnOverride column="LINE" property="line" javaType="String"/>
+            <columnOverride column="CLASS" property="clazz" javaType="String"/>
+            <columnOverride column="HINBAN" property="hinban" javaType="String"/>
+            <columnOverride column="COLOR" property="color" javaType="String"/>
+            <columnOverride column="SIZE1" property="size1" javaType="String"/>
+            <columnOverride column="SUB_CLASS1" property="subClass1" javaType="String"/>
+            <columnOverride column="SUB_CLASS2" property="subClass2" javaType="String"/>
+            <columnOverride column="AREA" property="area" javaType="String" jdbcType="VARCHAR"/>
+            <columnOverride column="DELIVERY_LIMIT" property="deliveryLimit" javaType="String"/>
+            <columnOverride column="SALES_LIMIT" property="salesLimit" javaType="String"/>
+            <columnOverride column="TASTE_LIMIT" property="tasteLimit" javaType="String"/>
+            <columnOverride column="MAKER" property="maker" javaType="String"/>
+            <columnOverride column="ITEM_MAKER" property="itemMaker" javaType="String"/>
+            <columnOverride column="CONTRACT_AMOUNT" property="contractAmount" javaType="String"/>
+            <columnOverride column="CONTRACT_DATE_FROM" property="contractDateFrom"
+                            javaType="Integer"/>
+            <columnOverride column="CONTRACT_DATE_TO" property="contractDateTo" javaType="Integer"/>
+            <columnOverride column="COST" property="cost" javaType="Integer"/>
+            <columnOverride column="PRICE" property="price" javaType="Integer"/>
+            <columnOverride column="TAX_RATE" property="taxRate" javaType="Integer"/>
+            <columnOverride column="ORDER_TYPE" property="orderType" javaType="String"/>
+            <columnOverride column="TAG_TYPE" property="tagType" javaType="String"/>
+            <columnOverride column="DELIVERY_TYPE" property="deliveryType" javaType="String"/>
+            <columnOverride column="BUYING_TYPE" property="buyingType" javaType="String"/>
+            <columnOverride column="PCARD_TYPE" property="pcardType" javaType="String"/>
+            <columnOverride column="CONTRACT_NO1" property="contractNo1" javaType="String"/>
+            <columnOverride column="CONTRACT_NO2" property="contractNo2" javaType="String"/>
+            <columnOverride column="VENDOR" property="vendor" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"/>
+            <columnOverride column="BUY_TAX_RATE" property="buyTaxRate" javaType="Integer"/>
+            <columnOverride column="TAX_TYPE" property="taxType" javaType="String"/>
+            <columnOverride column="ITEM_ATTRIBUTE" property="itemAttribute" javaType="String"/>
+            <columnOverride column="ITEM_SEASON" property="itemSeason" javaType="String"/>
+            <columnOverride column="BRAND" property="brand" javaType="String"/>
+            <columnOverride column="DESIGN" property="design" javaType="String"/>
+            <columnOverride column="FABRIC" property="fabric" javaType="String"/>
+            <columnOverride column="PATTERN" property="pattern" javaType="String"/>
+            <columnOverride column="STYLE" property="style" javaType="String"/>
+            <columnOverride column="LEAST_STOCK_AMOUNT" property="leastStockAmount"
+                            javaType="Integer"/>
+            <columnOverride column="SURFACE_NUM" property="surfaceNum" javaType="Integer"/>
+            <columnOverride column="DLMIN_NUM" property="dlminNum" javaType="Integer"/>
+            <columnOverride column="ITEM_NAME_EL" property="itemNameEl" javaType="String"
+                            jdbcType="VARCHAR"/>
+            <columnOverride column="TEMPERATURE" property="temperature" javaType="String"/>
+            <columnOverride column="ORDER_UNIT" property="orderUnit" javaType="String"/>
+            <columnOverride column="UNIT_TYPE" property="unitType" javaType="String"
+                            jdbcType="VARCHAR"/>
+            <columnOverride column="TEIKAN_TYPE" property="teikanType" javaType="String"/>
+            <columnOverride column="ITEM_TYPE" property="itemType" javaType="String"/>
+            <columnOverride column="OP_FLG" property="opFlg" javaType="String"/>
+            <columnOverride column="UPDATE_DATE" property="updateDate" javaType="java.util.Date"
+                            jdbcType="DATE"/>
+            <columnOverride column="USERID" property="userid" javaType="String"/>
+            <columnOverride column="USERNAME" property="username" javaType="String"/>
+            <columnOverride column="VENDOR_OP" property="vendorOp" javaType="String"/>
+            <columnOverride column="REJECTREASON" property="rejectreason" javaType="String"
+                            jdbcType="VARCHAR"/>
+            <columnOverride column="NEW_FLG" property="newFlg" javaType="String"/>
+            <columnOverride column="UPDATE_FLG" property="updateFlg" javaType="String"/>
+            <columnOverride column="FIRST_FLG" property="firstFlg" javaType="String"/>
+        </table>
+        -->
+        <!--
+        <table schema="" tableName="IY_ITEM_C_HIS" domainObjectName="IyItemCHis">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="COMPANY" property="company" javaType="String"/>
+            <columnOverride column="NEW_NO" property="newNo" javaType="String"/>
+            <columnOverride column="NEW_NO_SUB" property="newNoSub" javaType="String"/>
+            <columnOverride column="NEW_TYPE" property="newType" javaType="String"/>
+            <columnOverride column="ITEM_SYSTEM" property="itemSystem" javaType="String"/>
+            <columnOverride column="STORE" property="store" javaType="String"/>
+            <columnOverride column="ENTRY_BUYER" property="entryBuyer" javaType="String"/>
+            <columnOverride column="DEPO" property="depo" javaType="String"/>
+            <columnOverride column="COST_NONTAX" property="costNontax" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="COST_TAX" property="costTax" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="COST_RATE" property="costRate" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="PRICE_TAX" property="priceTax" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="PRICE_NONTAX" property="priceNontax" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="NEIRE" property="neire" javaType="Integer" jdbcType="INTEGER"/>
+            <columnOverride column="RANK" property="rank" javaType="String"/>
+            <columnOverride column="ORDER_DATE_FROM" property="orderDateFrom" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="ORDER_DATE_TO" property="orderDateTo" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="SALES_DATE_FROM" property="salesDateFrom" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="SALES_DATE_TO" property="salesDateTo" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="ORDER_UNIT" property="orderUnit" javaType="String"/>
+            <columnOverride column="UNIT_TYPE" property="unitType" javaType="String"/>
+            <columnOverride column="CENTER" property="center" javaType="String"/>
+            <columnOverride column="CYCLE_MON" property="cycleMon" javaType="String"/>
+            <columnOverride column="CYCLE_TUE" property="cycleTue" javaType="String"/>
+            <columnOverride column="CYCLE_WED" property="cycleWed" javaType="String"/>
+            <columnOverride column="CYCLE_THU" property="cycleThu" javaType="String"/>
+            <columnOverride column="CYCLE_FRI" property="cycleFri" javaType="String"/>
+            <columnOverride column="CYCLE_SAT" property="cycleSat" javaType="String"/>
+            <columnOverride column="CYCLE_SUN" property="cycleSun" javaType="String"/>
+            <columnOverride column="TEIKAN_TYPE" property="teikanType" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="DC_TYPE" property="dcType" javaType="String"/>
+            <columnOverride column="DC_RATE" property="dcRate" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="MID_UNIT" property="midUnit" javaType="String"/>
+            <columnOverride column="COST_RATE_REASON" property="costRateReason" javaType="String"/>
+            <columnOverride column="COST_TAX_OLD" property="costTaxOld" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="PRICE_TAX_OLD" property="priceTaxOld" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="COST_RATE_OLD" property="costRateOld" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="ORDER_DATE_FROM_OLD" property="orderDateFromOld"
+                            javaType="Integer" jdbcType="INTEGER"/>
+            <columnOverride column="ORDER_DATE_TO_OLD" property="orderDateToOld" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="SALES_DATE_FROM_OLD" property="salesDateFromOld"
+                            javaType="Integer" jdbcType="INTEGER"/>
+            <columnOverride column="SALES_DATE_TO_OLD" property="salesDateToOld" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="COST_RATE_KEI" property="costRateKei" javaType="Integer"
+                            jdbcType="INTEGER"/>
+            <columnOverride column="DC_TYPE_OLD" property="dcTypeOld" javaType="String"/>
+            <columnOverride column="DC_TYPE_OLD" property="dcTypeOld" javaType="String"/>
+        </table>
+        <table schema="" tableName="IY_AUTO_OD" domainObjectName="IyAutoOd">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="STORE" property="store" javaType="String"/>
+            <columnOverride column="ITEM_SYSTEM" property="itemSystem" javaType="String"/>
+            <columnOverride column="ITEM1" property="item1" javaType="String"/>
+            <columnOverride column="AUTO_OD_FLG" property="autoOdFlg" javaType="String"/>
+            <columnOverride column="SAFE_STOCK" property="safeStock" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="java.util.Date"
+                            jdbcType="DATE"/>
+        </table>
+        <table schema="" tableName="IY_AUTO_OD_HIS" domainObjectName="IyAutoOdHis">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="NEW_NO" property="newNo" javaType="String"/>
+            <columnOverride column="NEW_NO_SUB" property="newNoSub" javaType="String"/>
+            <columnOverride column="STORE" property="store" javaType="String"/>
+            <columnOverride column="ITEM_SYSTEM" property="itemSystem" javaType="String"/>
+            <columnOverride column="ITEM1" property="item1" javaType="String"/>
+            <columnOverride column="AUTO_OD_FLG" property="autoOdFlg" javaType="String"/>
+            <columnOverride column="SAFE_STOCK" property="safeStock" javaType="String"/>
+            <columnOverride column="ONLINE_DATE" property="onlineDate" javaType="java.util.Date"
+                            jdbcType="DATE"/>
+        </table>-->
+        <!--<table schema="" tableName="ma1140" domainObjectName="MA1140">
+        <property name="useActualColumnNames" value="true"/>
+        <columnOverride column="article_id" property="articleId" javaType="String"/>
+        <columnOverride column="barcode" property="barcode" javaType="String"/>
+        <columnOverride column="effective_start_date" property="effectiveStartDate" javaType="String"/>
+        <columnOverride column="effective_end_date" property="effectiveEndDate" javaType="String"/>
+        <columnOverride column="create_user_id" property="createUserId" javaType="String"/>
+        <columnOverride column="create_ymd" property="createYMD" javaType="String"/>
+        <columnOverride column="create_hms" property="createHMS" javaType="String"/>
+        <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>
+        <columnOverride column="update_ymd" property="updateYMD" javaType="String"/>
+        <columnOverride column="update_hms" property="updateHMS" javaType="String"/>
+        <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>
+        <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>
+        <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>
+        <columnOverride column="nr_ymd" property="nrYMD" javaType="String"/>
+        <columnOverride column="nr_hms" property="nrHMS" javaType="String"/>
+        <columnOverride column="is_default" property="isDefault" javaType="String"/>
+        </table>-->
+        <!--<table schema="" tableName="ma8250" domainObjectName="MA8250">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="acc_date" property="accDate" javaType="String"/>
+            <columnOverride column="structure_cd" property="structureCd" javaType="String"/>
+            <columnOverride column="aqi7b" property="aqi7b" javaType="String"/>
+            <columnOverride column="aqi6b" property="aqi6b" javaType="String"/>
+            <columnOverride column="aqi5b" property="aqi5b" javaType="String"/>
+            <columnOverride column="aqi4b" property="aqi4b" javaType="String"/>
+            <columnOverride column="aqi3b" property="aqi3b" javaType="String"/>
+            <columnOverride column="aqi2b" property="aqi2b" javaType="String"/>
+            <columnOverride column="aqi1b" property="aqi1b" javaType="String"/>
+            <columnOverride column="aqi" property="aqi" javaType="String"/>
+            <columnOverride column="aqi1a" property="aqi1a" javaType="String"/>
+            <columnOverride column="aqi2a" property="aqi2a" javaType="String"/>
+            <columnOverride column="aqi3a" property="aqi3a" javaType="String"/>
+            <columnOverride column="aqi4a" property="aqi4a" javaType="String"/>
+            <columnOverride column="aqi5a" property="aqi5a" javaType="String"/>
+            <columnOverride column="aqi6a" property="aqi6a" javaType="String"/>
+            <columnOverride column="aqi7a" property="aqi7a" javaType="String"/>
+            <columnOverride column="create_user_id" property="createUserId" javaType="String"/>
+            <columnOverride column="create_ymd" property="createYMD" javaType="String"/>
+            <columnOverride column="create_hms" property="createHMS" javaType="String"/>
+            <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>
+            <columnOverride column="update_ymd" property="updateYMD" javaType="String"/>
+            <columnOverride column="update_hms" property="updateHMS" javaType="String"/>
+            <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>
+            <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>
+            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>
+            <columnOverride column="nr_ymd" property="nrYMD" javaType="String"/>
+            <columnOverride column="nr_hms" property="nrHMS" javaType="String"/>
+        </table>-->
+        <!--<table schema="" tableName="ma8260" domainObjectName="MA8260">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="acc_date" property="accDate" javaType="String"/>
+            <columnOverride column="pollution_level" property="pollutionLevel" javaType="String"/>
+            <columnOverride column="create_user_id" property="createUserId" javaType="String"/>
+            <columnOverride column="create_ymd" property="createYMD" javaType="String"/>
+            <columnOverride column="create_hms" property="createHMS" javaType="String"/>
+            <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>
+            <columnOverride column="update_ymd" property="updateYMD" javaType="String"/>
+            <columnOverride column="update_hms" property="updateHMS" javaType="String"/>
+            <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>
+            <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>
+            <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>
+            <columnOverride column="nr_ymd" property="nrYMD" javaType="String"/>
+            <columnOverride column="nr_hms" property="nrHMS" javaType="String"/>
+            <columnOverride column="structure_cd" property="structureCd" javaType="String"/>
+        </table>-->
+        <!--<table schema="" tableName="mb1000" domainObjectName="MB1000">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="store_cd" property="storeCd" javaType="String"/>
+            <columnOverride column="store_name" property="storeName" javaType="String"/>
+            <columnOverride column="id" property="Id" javaType="String"/>
+            <columnOverride column="invoice_no" property="invoiceNo" javaType="String"/>
+            <columnOverride column="business_date" property="businessDate" javaType="Date" jdbcType="TIMESTAMP"/>
+            <columnOverride column="trans_date" property="transDate" javaType="Date" jdbcType="TIMESTAMP"/>
+            <columnOverride column="receipt_no" property="receiptNo" javaType="String" />
+            <columnOverride column="amount" property="amount" javaType="BigDecimal" />
+            <columnOverride column="status" property="status" javaType="String" />
+            <columnOverride column="amount_ck" property="amountCk" javaType="BigDecimal" />
+            <columnOverride column="reference" property="reference" javaType="String" />
+            <columnOverride column="ref_date" property="refDate" javaType="java.util.Date" jdbcType="DATE"/>
+            <columnOverride column="create_user_id" property="createUserId" javaType="String" />
+            <columnOverride column="create_date" property="createDate" javaType="String" />
+        </table>-->
+        <!--<table schema="" tableName="mb1700" domainObjectName="Mb1700">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="request_id" property="requestId" javaType="String"/>
+            <columnOverride column="order_id" property="orderId" javaType="String"/>
+            <columnOverride column="request_date" property="requestDate" javaType="Date" jdbcType="TIMESTAMP"/>
+            <columnOverride column="trans_amount" property="transAmount" javaType="BigDecimal" />
+            <columnOverride column="partner_username" property="partnerUsername" javaType="String" />
+            <columnOverride column="shop_name" property="shopName" javaType="String"/>
+            <columnOverride column="create_user_id" property="createUserId" javaType="String" />
+            <columnOverride column="create_date" property="createDate" javaType="String" />
+        </table>-->
+        <!--<table schema="" tableName="mb1800" domainObjectName="Mb1800">
+            <property name="useActualColumnNames" value="true"/>
+            <columnOverride column="store_cd" property="storeCd" javaType="String"/>
+            <columnOverride column="store_name" property="storeName" javaType="String"/>
+            <columnOverride column="barcode" property="barcode" javaType="String"/>
+            <columnOverride column="trans_date" property="transDate" javaType="Date" jdbcType="TIMESTAMP" />
+            <columnOverride column="trans_cd" property="transCd" javaType="String" />
+            <columnOverride column="third_qty" property="thirdQty" javaType="BigDecimal"/>
+            <columnOverride column="third_amount" property="thirdAmount" javaType="BigDecimal"/>
+            <columnOverride column="ck_qty" property="ckQty" javaType="BigDecimal"/>
+            <columnOverride column="ck_amount" property="ckAmount" javaType="BigDecimal"/>
+            <columnOverride column="vary_qty" property="varyQty" javaType="BigDecimal"/>
+            <columnOverride column="vary_amount" property="varyAmount" javaType="BigDecimal"/>
+            <columnOverride column="create_user_id" property="createUserId" javaType="String" />
+            <columnOverride column="create_date" property="createDate" javaType="String" />
+            <columnOverride column="t_date" property="tDate" javaType="java.util.Date" jdbcType="DATE"/>
+        </table>-->
+                <!--<table schema="" tableName="mb0030" domainObjectName="Mb0030">
+                    <property name="useActualColumnNames" value="true"/>
+                    <columnOverride column="file_cd" property="fileCd" javaType="String"/>
+                    <columnOverride column="excel_group_cd" property="excelGroupCd" javaType="String"/>
+                    <columnOverride column="file_path" property="filePath" javaType="String"/>
+                    <columnOverride column="file_name" property="fileName" javaType="String"/>
+                    <columnOverride column="create_user_id" property="createUserId" javaType="String"/>
+                    <columnOverride column="create_ymd" property="createYmd" javaType="String"/>
+                    <columnOverride column="create_hms" property="createHms" javaType="String"/>
+                    <columnOverride column="update_user_id" property="updateUserId" javaType="String"/>
+                    <columnOverride column="update_ymd" property="updateYmd" javaType="String"/>
+                    <columnOverride column="update_hms" property="updateHms" javaType="String"/>
+                    <columnOverride column="update_screen_id" property="updateScreenId" javaType="String"/>
+                    <columnOverride column="update_ip_address" property="updateIpAddress" javaType="String"/>
+                    <columnOverride column="nr_update_flg" property="nrUpdateFlg" javaType="String"/>
+                    <columnOverride column="nr_ymd" property="nrYmd" javaType="String"/>
+                    <columnOverride column="nr_hms" property="nrHms" javaType="String"/>
+                </table>-->
+<!--        <table schema="" tableName="mb1200" domainObjectName="Mb1200">-->
+<!--            <property name="useActualColumnNames" value="true"/>-->
+<!--            <columnOverride column="store_cd" property="storeCd" javaType="String"/>-->
+<!--            <columnOverride column="store_name" property="storeName" javaType="String"/>-->
+<!--            <columnOverride column="date" property="transDate" javaType="String" />-->
+<!--            <columnOverride column="payoo_qty" property="payooQty" javaType="BigDecimal" />-->
+<!--            <columnOverride column="commission" property="commission" javaType="BigDecimal" />-->
+<!--            <columnOverride column="payoo_amount" property="payooAmount" javaType="BigDecimal"/>-->
+<!--            <columnOverride column="ck_qty" property="ckQty" javaType="BigDecimal"/>-->
+<!--            <columnOverride column="ck_amount" property="ckAmount" javaType="BigDecimal"/>-->
+<!--            <columnOverride column="vary" property="vary" javaType="BigDecimal"/>-->
+<!--            <columnOverride column="create_user_id" property="createUserId" javaType="String" />-->
+<!--            <columnOverride column="create_date" property="createDate" javaType="String" />-->
+<!--        </table>-->
+    </context>
+</generatorConfiguration>

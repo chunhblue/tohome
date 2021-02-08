@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.ReturnVendorMapper">
+    <!--退供应商一览条件查询-->
+    <select id="selectVQueryListBy" resultType="cn.com.bbut.iy.itemmaster.dto.returnOrder.returnVendor.RVListResult"
+            parameterType="cn.com.bbut.iy.itemmaster.dto.returnOrder.returnVendor.RVListParam" >
+        select distinct
+        a.order_date,
+        a.order_id,
+        a.org_order_id,
+        a.vendor_id,
+        d.vendor_name,
+        a.store_cd,
+        concat(a.store_cd,' ',e.store_name) store_name,
+        a.order_sts,
+        a.return_type,
+        a.create_ymd,a.create_hms,
+        a.review_status review_status,
+        f.review_status status,
+        (select sum(od0010.order_qty)+sum(od0010.order_nocharge_qty) from od0010 where a.order_id=od0010.order_id) order_qty,
+        (select sum(od0010.receive_qty)+sum(od0010.receive_nocharge_qty) from od0010 where a.order_id=od0010.order_id) receive_qty
+        from
+        od0000 a
+        left join od0010 b on b.order_id = a.order_id
+        left join ma2000 d on d.vendor_id = a.vendor_id and a.order_date BETWEEN d.effective_start_date AND d.effective_end_date
+        left join ma1000 e on e.store_cd = a.store_cd and a.order_date BETWEEN e.effective_start_date AND e.effective_end_date
+        left join od0005 f on a.order_id = f.order_id
+        where
+        a.order_type = '02'
+        and a.order_differentiate = '0' /*供应商退货*/
+        and B.store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="orderStartDate != null and orderStartDate != ''"   >
+            <![CDATA[
+      and  A.order_date>=#{orderStartDate}
+        ]]>
+        </if>
+        <if test="orderEndDate !=null  and orderEndDate != ''">
+            <![CDATA[
+      and #{orderEndDate}>= A.order_date
+        ]]>
+        </if>
+        <if test="orderId != null and orderId != ''" >
+            AND lower(A.order_id) like lower(CONCAT('%',#{orderId},'%'))
+        </if>
+        <if test="orgOrderId != null and orgOrderId != ''" >
+            AND lower(A.org_order_id) like lower(CONCAT('%',#{orgOrderId},'%'))
+        </if>
+        <if test="vendorId != null and vendorId != ''" >
+            AND lower(A.vendor_id) like lower(CONCAT('%',#{vendorId},'%'))
+        </if>
+        <if test="vendorName != null and vendorName != ''" >
+            AND lower(D.vendor_name) like lower(CONCAT('%',#{vendorName},'%'))
+        </if>
+        <if test="reviewStatus !=null">
+            and A.review_status = #{reviewStatus,jdbcType=INTEGER}
+        </if>
+        <if test="status !=null">
+            and f.review_status = #{status,jdbcType=INTEGER}
+        </if>
+        <if test=" returnType!=null">
+            and A.return_type = #{returnType}
+        </if>
+        <if test="reviewStatus ==null and returnSts != null">
+            and A.review_status in (10,20)
+        </if>
+        order by a.create_ymd desc,a.create_hms desc
+        <if test="flg and limitStart >= 0">
+            limit ${limitEnd} offset ${limitStart}
+        </if>
+    </select>
+    <select id="selectVQueryListCount" resultType="java.lang.Long"
+            parameterType="cn.com.bbut.iy.itemmaster.dto.returnOrder.returnVendor.RVListParam" >
+        select  count (returnCount.order_date)  FROM
+        (select distinct
+        a.order_date,
+        a.order_id,
+        a.org_order_id,
+        a.vendor_id,
+        d.vendor_name,
+        a.store_cd,
+        e.store_name,
+        a.order_sts,
+        a.return_type,
+        a.create_ymd,a.create_hms,
+        a.review_status review_status,
+        f.review_status status,
+        (select sum(od0010.order_qty)+sum(od0010.order_nocharge_qty) from od0010 where a.order_id=od0010.order_id)
+        order_qty,
+        (select sum(od0010.receive_qty)+sum(od0010.receive_nocharge_qty) from od0010 where a.order_id=od0010.order_id)
+        receive_qty
+        from
+        od0000 a
+        left join od0010 b on b.order_id = a.order_id
+        left join ma2000 d on d.vendor_id = a.vendor_id and a.order_date BETWEEN d.effective_start_date AND
+        d.effective_end_date
+        left join ma1000 e on e.store_cd = a.store_cd and a.order_date BETWEEN e.effective_start_date AND
+        e.effective_end_date
+        left join od0005 f on a.order_id = f.order_id
+        where
+        a.order_type = '02'
+        and a.order_differentiate = '0' /*供应商退货*/
+        and B.store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="orderStartDate != null and orderStartDate != ''">
+            <![CDATA[
+      and  A.order_date>=#{orderStartDate}
+        ]]>
+        </if>
+        <if test="orderEndDate !=null  and orderEndDate != ''">
+            <![CDATA[
+      and #{orderEndDate}>= A.order_date
+        ]]>
+        </if>
+        <if test="orderId != null and orderId != ''">
+            AND lower(A.order_id) like lower(CONCAT('%',#{orderId},'%'))
+        </if>
+        <if test="orgOrderId != null and orgOrderId != ''">
+            AND lower(A.org_order_id) like lower(CONCAT('%',#{orgOrderId},'%'))
+        </if>
+        <if test="vendorId != null and vendorId != ''">
+            AND lower(A.vendor_id) like lower(CONCAT('%',#{vendorId},'%'))
+        </if>
+        <if test="vendorName != null and vendorName != ''">
+            AND lower(D.vendor_name) like lower(CONCAT('%',#{vendorName},'%'))
+        </if>
+        <if test="reviewStatus !=null">
+            and A.review_status = #{reviewStatus,jdbcType=INTEGER}
+        </if>
+        <if test="status !=null">
+            and f.review_status = #{status,jdbcType=INTEGER}
+        </if>
+        <if test=" returnType!=null">
+            and A.return_type = #{returnType}
+        </if>
+        <if test="reviewStatus ==null and returnSts != null">
+            and A.review_status in (10,20)
+        </if>
+        order by a.create_ymd desc,a.create_hms desc
+    )as  returnCount
+    </select>
+    <!--退供应商一览条件查询总数-->
+    <select id="selectVQueryListCount1" resultType="java.lang.Long"
+            parameterType="cn.com.bbut.iy.itemmaster.dto.returnOrder.returnVendor.RVListParam" >
+        select count(*) from (select distinct
+        a.order_date,
+        a.order_id,
+        a.org_order_id,
+        a.vendor_id,
+        d.vendor_name,
+        a.store_cd,
+        e.store_name,
+        a.order_sts,
+        a.create_ymd,a.create_hms,
+        a.review_status review_status,
+        (select sum(od0010.order_qty)+sum(od0010.order_nocharge_qty) from od0010 where a.order_id=od0010.order_id)
+        order_qty,
+        (select sum(od0010.receive_qty) from od0010 where a.order_id=od0010.order_id) receive_qty
+        from
+        od0000 a
+        left join od0010 b on b.order_id = a.order_id
+        left join ma2000 d on d.vendor_id = a.vendor_id and a.order_date BETWEEN d.effective_start_date AND
+        d.effective_end_date
+        left join ma1000 e on e.store_cd = a.store_cd and a.order_date BETWEEN e.effective_start_date AND
+        e.effective_end_date
+        left join od0005 f on a.order_id = f.order_id
+        where
+        a.order_type = '02'
+        and a.order_differentiate = '0' /*供应商退货*/
+        and B.store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="orderStartDate != null and orderStartDate != ''">
+            <![CDATA[
+      and  A.order_date>=#{orderStartDate}
+        ]]>
+        </if>
+        <if test="orderEndDate !=null  and orderEndDate != ''">
+            <![CDATA[
+      and #{orderEndDate}>= A.order_date
+        ]]>
+        </if>
+        <if test="orderId != null and orderId != ''">
+            AND lower(A.order_id) like lower(CONCAT('%',#{orderId},'%'))
+        </if>
+        <if test="orgOrderId != null and orgOrderId != ''">
+            AND lower(A.org_order_id) like lower(CONCAT('%',#{orgOrderId},'%'))
+        </if>
+        <if test="vendorId != null and vendorId != ''">
+            AND lower(A.vendor_id) like lower(CONCAT('%',#{vendorId},'%'))
+        </if>
+        <if test="vendorName != null and vendorName != ''">
+            AND lower(D.vendor_name) like lower(CONCAT('%',#{vendorName},'%'))
+        </if>
+        <if test="reviewStatus !=null">
+            and A.review_status = #{reviewStatus,jdbcType=INTEGER}
+        </if>
+        <if test="reviewStatus ==null and returnSts != null">
+            and A.review_status in (10,20)
+        </if>
+        <if test="status !=null">
+            and f.review_status = #{status,jdbcType=INTEGER}
+        </if>
+        ) as returnCount
+    </select>
+
+    <!--退仓库详情根据单据编号查询头档-->
+    <select id="selectVHeadByOrderId"
+            resultType="cn.com.bbut.iy.itemmaster.dto.returnOrder.ReturnHeadResult" >
+        select
+        distinct
+        e.emp_name as create_by,
+        f.emp_name as modified_by,
+        concat(A.create_ymd,A.create_hms) as create_date,
+        A.order_date,
+        A.order_id,
+        A.org_order_id,
+        A.vendor_id,
+        C.vendor_name,
+        A.store_cd,
+        D.store_name,
+        A.return_type,
+        concat(A.update_ymd,A.update_hms) as update_date,
+        A.order_remark
+        from od0000 A
+        left join ma2000 C on C.vendor_id = A.vendor_id and A.order_date BETWEEN C.effective_start_date AND C.effective_end_date
+        left join ma1000 D on D.store_cd = A.store_cd and A.order_date BETWEEN D.effective_start_date AND D.effective_end_date
+        left join ma4200 e on A.create_user_id=e.emp_num_id
+        left join ma4200 f on f.emp_num_id=A.update_user_id
+        <where>
+            <if test="orderId != null and orderId != ''" >
+                and A.order_id = #{orderId}
+            </if>
+        </where>
+    </select>
+
+    <!--退仓库详情根据单据编号查询商品-->
+    <select id="getReturnItems"
+            resultType="cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.RWHItemsGridResult">
+        select distinct
+            a.barcode,
+            a.article_id,
+            b.article_name,
+            b.spec,
+            d.unit_id,
+            d.unit_name,
+            a.vendor_id,
+            a.order_price,
+            a.order_amt order_amount,
+            a.reason_id,
+            coalesce(a.order_qty,0) order_qty,
+            coalesce(a.order_nocharge_qty,0) order_nocharge_qty,
+            (select code_name from cm9010 where code_type='00400' and code_value = a.reason_id)as reason_name,
+            <choose>
+                <when test="flag != null and flag == '1'.toString()">
+                    coalesce(a.order_qty,0) AS receive_qty,
+                    coalesce(a.order_nocharge_qty,0) AS receive_nocharge_qty
+                </when>
+                <otherwise>
+                    coalesce(a.receive_qty,0) AS receive_qty,
+                    coalesce(a.receive_nocharge_qty,0) AS receive_nocharge_qty
+                </otherwise>
+            </choose>
+        from
+            od0000,od0010 a,ma1100 b
+        left join ma0220 d on d.unit_id = b.sales_unit_id and d.effective_sts = '10'
+        <where>
+            od0000.order_id = a.order_id
+            and b.article_id = a.article_id
+            and od0000.order_date BETWEEN b.effective_start_date AND b.effective_end_date
+            <if test="orderId != null and orderId != ''" >
+                and od0000.order_id = #{orderId}
+            </if>
+        </where>
+    </select>
+</mapper>

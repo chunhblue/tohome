@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.UnpackMapper">
+
+    <resultMap id="ReBasicInfo" type="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackDTO">
+        <id column="unpack_id" jdbcType="VARCHAR" property="unpackId" />
+        <id column="store_cd" jdbcType="VARCHAR" property="storeCd" />
+        <id column="parent_article_id" jdbcType="VARCHAR" property="parentArticleId" />
+        <result column="unpack_date" jdbcType="VARCHAR" property="unpackDate" />
+        <result column="barcode" jdbcType="VARCHAR" property="barcode" />
+        <result column="unit_qty" jdbcType="DECIMAL" property="unitQty" />
+        <result column="unpack_qty" jdbcType="DECIMAL" property="unpackQty" />
+        <result column="unpack_cost" jdbcType="DECIMAL" property="unpackCost" />
+        <result column="sales_price" jdbcType="DECIMAL" property="salesPrice" />
+        <result column="unpack_amt" jdbcType="DECIMAL" property="unpackAmt" />
+        <result column="unpack_type" jdbcType="VARCHAR" property="unpackType" />
+        <result column="remarks" jdbcType="VARCHAR" property="remarks" />
+        <result column="repackage_status" jdbcType="VARCHAR" property="repackageStatus" />
+        <result column="backup_status" jdbcType="VARCHAR" property="backupStatus" />
+        <result column="nr_flg" jdbcType="VARCHAR" property="nrFlg" />
+        <result column="store_name" jdbcType="VARCHAR" property="storeName" />
+        <result column="article_name" jdbcType="VARCHAR" property="articleName" />
+    </resultMap>
+
+    <resultMap id="ReDetails" type="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackDetailsDTO">
+        <id column="unpack_id" jdbcType="VARCHAR" property="unpackId" />
+        <id column="store_cd" jdbcType="VARCHAR" property="storeCd" />
+        <id column="parent_article_id" jdbcType="VARCHAR" property="parentArticleId" />
+        <id column="child_article_id" jdbcType="VARCHAR" property="childArticleId" />
+        <id column="serial_no" jdbcType="VARCHAR" property="serialNo" />
+        <result column="barcode" jdbcType="VARCHAR" property="barcode" />
+        <result column="unit_qty" jdbcType="DECIMAL" property="unitQty" />
+        <result column="unpack_qty" jdbcType="DECIMAL" property="unpackQty" />
+        <result column="unpack_cost" jdbcType="DECIMAL" property="unpackCost" />
+        <result column="sales_price" jdbcType="DECIMAL" property="salesPrice" />
+        <result column="article_name" jdbcType="VARCHAR" property="articleName" />
+    </resultMap>
+
+    <sql id="selectCondition">
+        <if test="unpackId != null and unpackId != ''">
+            AND lower(unpack_id) like lower(CONCAT('%',#{unpackId,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="parentArticleId != null and parentArticleId != ''">
+            AND lower(parent_article_id) like lower(CONCAT('%',#{parentArticleId,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="unpackStartDate != null and unpackStartDate != ''">
+            AND unpack_date >= #{unpackStartDate,jdbcType=VARCHAR}
+        </if>
+        <if test="unpackEndDate != null and unpackEndDate != ''">
+            AND #{unpackEndDate,jdbcType=VARCHAR} >= unpack_date
+        </if>
+    </sql>
+
+
+<!--    计数-->
+    <select id="selectCountByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackParamDTO" resultType="INT">
+        SELECT
+        COUNT (*)
+        FROM (
+        SELECT
+        unpack_id, MA1000.store_cd,MA1000.store_name, parent_article_id, unpack_date,
+        barcode, unpack_qty, unpack_amt, remarks
+        FROM
+        MA1220,MA1000
+        WHERE
+        MA1220.store_cd = MA1000.store_cd
+        and MA1220.unpack_date BETWEEN MA1000.effective_start_date AND MA1000.effective_end_date
+        and MA1220.store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <include refid="selectCondition"></include>
+        ) T
+        LEFT JOIN (
+        SELECT article_id, article_name, dep_cd, pma_cd, category_cd,sub_category_cd FROM MA1100
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.parent_article_id = T1.article_id;
+    </select>
+    <select id="selectCountByCondition1" parameterType="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackParamDTO" resultType="INT">
+        SELECT
+        count (*)
+        FROM (
+        SELECT
+        unpack_id, store_cd, parent_article_id, unpack_date,
+        barcode, unpack_qty, unpack_amt, remarks
+        FROM
+        MA1220
+        WHERE
+        store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <include refid="selectCondition"></include>
+        ) T
+        LEFT JOIN (
+        SELECT article_id, article_name, dep_cd, pma_cd, category_cd,sub_category_cd FROM MA1100
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.parent_article_id = T1.article_id
+    </select>
+<!--查询具体-->
+    <select id="selectListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackParamDTO" resultMap="ReBasicInfo">
+        SELECT
+        T.*, T1.article_name,T1.dep_cd, T1.pma_cd, T1.category_cd,T1.sub_category_cd
+        FROM (
+        SELECT
+        unpack_id, MA1000.store_cd,MA1000.store_name, parent_article_id, unpack_date,
+        barcode, unpack_qty, unpack_amt, remarks
+        FROM
+        MA1220,MA1000
+        WHERE
+        MA1220.store_cd = MA1000.store_cd
+        and MA1220.unpack_date BETWEEN MA1000.effective_start_date AND MA1000.effective_end_date
+        and MA1220.store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <include refid="selectCondition"></include>
+        ) T
+        LEFT JOIN (
+        SELECT article_id, article_name, dep_cd, pma_cd, category_cd,sub_category_cd FROM MA1100
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.parent_article_id = T1.article_id
+        ORDER BY T.unpack_date, T.unpack_id
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+
+    <!--  查询组合头档  -->
+    <select id="selectPackByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackParamDTO" resultMap="ReBasicInfo">
+        SELECT
+            T.*, CONCAT(T1.article_id, ' ', T1.article_name) AS article_name, T2.barcode
+        FROM (
+            SELECT
+                parent_article_id, effective_start_date AS unpack_date
+            FROM
+                MA1200
+            WHERE
+                parent_article_id = #{parentArticleId,jdbcType=VARCHAR}
+            AND #{unpackDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T
+        JOIN (
+            SELECT article_id, effective_start_date, article_name FROM MA1100
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.parent_article_id = T1.article_id
+        LEFT JOIN (
+            SELECT article_id, effective_start_date, barcode
+            FROM MA1140
+            WHERE is_default = '1'
+            AND #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T2
+        ON T1.article_id = T2.article_id AND T1.effective_start_date = T2.effective_start_date
+    </select>
+
+    <!--  查询拆包头档  -->
+    <select id="selectByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackParamDTO" resultMap="ReBasicInfo">
+        SELECT
+            T.*, CONCAT(T1.article_id, ' ', T1.article_name) AS article_name,
+            CONCAT(T2.store_cd, ' ', T2.store_name) AS store_name
+        FROM (
+            SELECT
+                unpack_id, store_cd, parent_article_id, unpack_date,
+                barcode, unpack_qty, unpack_amt, remarks
+            FROM
+                MA1220
+            WHERE
+                unpack_id = #{unpackId,jdbcType=VARCHAR}
+            AND store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND parent_article_id = #{parentArticleId,jdbcType=VARCHAR}
+        ) T
+        LEFT JOIN (
+            SELECT article_id, article_name FROM MA1100
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.parent_article_id = T1.article_id
+        LEFT JOIN (
+            SELECT store_cd, store_name FROM MA1000
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T2
+        ON T.store_cd = T2.store_cd
+    </select>
+
+    <!--  查询组合明细  -->
+    <select id="selectPackDetailsByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackParamDTO" resultMap="ReDetails">
+        SELECT distinct
+            T.*, T1.article_name, T2.barcode, T3.sale_price AS sales_price
+        FROM (
+            SELECT distinct
+                ma12.id AS serial_no, ma12.child_article_id, ma12.quantity AS unpack_qty,
+                ma12.quantity AS unit_qty, ma12.parent_article_id,ma22.vendor_id
+            FROM
+                MA1210 ma12
+                left join ma2240 ma22
+                on ma12.child_article_id = ma22.article_id and ma22.store_cd = #{storeCd,jdbcType=VARCHAR}
+            WHERE
+                parent_article_id = #{parentArticleId,jdbcType=VARCHAR}
+            AND effective_start_date = #{effectiveDate,jdbcType=VARCHAR}
+        ) T
+        JOIN (
+            SELECT article_id, effective_start_date, article_name FROM MA1100
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.child_article_id = T1.article_id
+        LEFT JOIN (
+            SELECT article_id, vendor_id,default_barcode barcode
+            FROM MA1110
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            and structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
+            (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd,jdbcType=VARCHAR}))
+        ) T2
+        ON T.child_article_id = T2.article_id AND T.vendor_id = T2.vendor_id
+        LEFT JOIN (
+            SELECT article_id, sale_price
+            FROM SK0000
+            WHERE store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND effective_date = #{unpackDate,jdbcType=VARCHAR}
+        ) T3
+        ON T.child_article_id = T3.article_id
+        ORDER BY T.serial_no
+    </select>
+
+    <!--  查询拆包明细  -->
+    <select id="selectDetailsByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackParamDTO" resultMap="ReDetails">
+        SELECT
+            T.*, T1.article_name
+        FROM (
+            SELECT
+                unpack_id, store_cd, parent_article_id, child_article_id, serial_no,
+                barcode, unit_qty, unpack_qty, sales_price
+            FROM
+                MA1230
+            WHERE
+                unpack_id = #{unpackId,jdbcType=VARCHAR}
+            AND store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND parent_article_id = #{parentArticleId,jdbcType=VARCHAR}
+        ) T
+        LEFT JOIN (
+            SELECT article_id, effective_start_date, article_name FROM MA1100
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.child_article_id = T1.article_id
+        ORDER BY T.serial_no
+    </select>
+
+    <insert id="insertUnpack" parameterType="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackDTO">
+        INSERT INTO MA1220 (
+            unpack_id, store_cd, parent_article_id, unpack_date, barcode, unpack_qty,
+            unpack_amt, remarks, create_user_id, create_ymd, create_hms
+        ) VALUES (
+            #{unpackId,jdbcType=VARCHAR}, #{storeCd,jdbcType=VARCHAR}, #{parentArticleId,jdbcType=VARCHAR},
+            #{unpackDate,jdbcType=VARCHAR}, #{barcode,jdbcType=VARCHAR}, #{unpackQty,jdbcType=NUMERIC},
+            #{unpackAmt,jdbcType=NUMERIC}, #{remarks,jdbcType=VARCHAR},
+            #{commonDTO.createUserId,jdbcType=VARCHAR},#{commonDTO.createYmd,jdbcType=VARCHAR},
+            #{commonDTO.createHms,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <insert id="insertDetails" parameterType="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackDetailsDTO">
+        INSERT INTO MA1230 (
+            unpack_id, store_cd, parent_article_id, child_article_id, serial_no, barcode,
+            unit_qty, unpack_qty, sales_price, create_user_id, create_ymd, create_hms
+        ) VALUES (
+            #{unpackId,jdbcType=VARCHAR}, #{storeCd,jdbcType=VARCHAR}, #{parentArticleId,jdbcType=VARCHAR},
+            #{childArticleId,jdbcType=VARCHAR},#{serialNo,jdbcType=VARCHAR}, #{barcode,jdbcType=VARCHAR},
+            #{unitQty,jdbcType=NUMERIC},#{unpackQty,jdbcType=NUMERIC},#{salesPrice,jdbcType=NUMERIC},
+            #{commonDTO.createUserId,jdbcType=VARCHAR},#{commonDTO.createYmd,jdbcType=VARCHAR},
+            #{commonDTO.createHms,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <update id="updateUnpack" parameterType="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackDTO">
+        UPDATE
+            MA1220
+        SET
+            unpack_qty = #{unpackQty,jdbcType=NUMERIC},
+            unpack_amt = #{unpackAmt,jdbcType=NUMERIC},
+            remarks = #{remarks,jdbcType=NUMERIC},
+            update_user_id = #{commonDTO.updateUserId,jdbcType=VARCHAR},
+            update_ymd = #{commonDTO.updateYmd,jdbcType=VARCHAR},
+            update_hms = #{commonDTO.updateHms,jdbcType=VARCHAR}
+        WHERE
+            unpack_id = #{unpackId,jdbcType=VARCHAR}
+        AND store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND parent_article_id = #{parentArticleId,jdbcType=VARCHAR}
+    </update>
+
+    <update id="updateDetails" parameterType="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackDetailsDTO">
+        UPDATE
+            MA1230
+        SET
+            unpack_qty = #{unpackQty,jdbcType=NUMERIC},
+            update_user_id = #{commonDTO.updateUserId,jdbcType=VARCHAR},
+            update_ymd = #{commonDTO.updateYmd,jdbcType=VARCHAR},
+            update_hms = #{commonDTO.updateHms,jdbcType=VARCHAR}
+        WHERE
+            unpack_id = #{unpackId,jdbcType=VARCHAR}
+        AND store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND parent_article_id = #{parentArticleId,jdbcType=VARCHAR}
+        AND child_article_id = #{childArticleId,jdbcType=VARCHAR}
+    </update>
+
+    <delete id="deleteUnpack" parameterType="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackParamDTO">
+        DELETE FROM MA1220
+        WHERE
+            unpack_id = #{unpackId,jdbcType=VARCHAR}
+        AND store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND parent_article_id = #{parentArticleId,jdbcType=VARCHAR}
+    </delete>
+
+    <delete id="deleteDetails" parameterType="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackParamDTO">
+        DELETE FROM MA1230
+        WHERE
+            unpack_id = #{unpackId,jdbcType=VARCHAR}
+        AND store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND parent_article_id = #{parentArticleId,jdbcType=VARCHAR}
+    </delete>
+
+</mapper>

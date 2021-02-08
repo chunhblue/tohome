@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.CM9070Mapper">
+    <resultMap id="BaseResultMap" type="cn.com.bbut.iy.itemmaster.dto.cm9070.Cm9070DTO">
+        <id column="SNG_WHICH_CODE" jdbcType="VARCHAR" property="sngWhichCode" />
+        <result column="ROWID" jdbcType="VARCHAR" property="rowId" />
+        <result column="SNG_PREFIX" jdbcType="VARCHAR" property="sngPrefix" />
+        <result column="SNG_POSTFIX" jdbcType="VARCHAR" property="sngPostfix" />
+        <result column="SNG_DATE_FORMAT" jdbcType="VARCHAR" property="sngDateFormat" />
+        <result column="SNG_CURRENT_MAX_NUMBER" jdbcType="DECIMAL" property="sngCurrentMaxNumber" />
+        <result column="SNG_NUMBER_WIDTH" jdbcType="DECIMAL" property="sngNumberWidth" />
+        <result column="SNG_NUMBER_GENERATE_TYPE" jdbcType="VARCHAR" property="sngNumberGenerateType" />
+        <result column="SNG_NUMBER_LEFTSTUFF" jdbcType="VARCHAR" property="sngNumberLeftstuff" />
+        <result column="SNG_MIN_NUMBER" jdbcType="DECIMAL" property="sngMinNumber" />
+        <result column="SNG_MAX_NUMBER" jdbcType="DECIMAL" property="sngMaxNumber" />
+        <result column="SNG_CUSTOMER_FIX_FLAG" jdbcType="VARCHAR" property="sngCustomerFixFlag" />
+        <result column="SNG_CUSTOMER_FIX_SITE" jdbcType="VARCHAR" property="sngCustomerFixSite" />
+        <result column="SNG_PARITY_BIT_FLAG" jdbcType="VARCHAR" property="sngParityBitFlag" />
+        <result column="SNG_CURRENT_DATE" jdbcType="CHAR" property="sngCurrentDate" />
+        <result column="CREATE_USER_ID" jdbcType="CHAR" property="commonDto.createUserId" />
+        <result column="CREATE_YMD" jdbcType="CHAR" property="commonDto.createYmd" />
+        <result column="CREATE_HMS" jdbcType="CHAR" property="commonDto.createHms" />
+        <result column="UPDATE_USER_ID" jdbcType="CHAR" property="commonDto.updateUserId" />
+        <result column="UPDATE_YMD" jdbcType="CHAR" property="commonDto.updateYmd" />
+        <result column="UPDATE_HMS" jdbcType="CHAR" property="commonDto.updateHms" />
+        <result column="UPDATE_SCREEN_ID" jdbcType="VARCHAR" property="commonDto.updateScreenId" />
+        <result column="UPDATE_IP_ADDRESS" jdbcType="VARCHAR" property="commonDto.updateIpAddress" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--    ROWID,SNG_WHICH_CODE, SNG_PREFIX, SNG_POSTFIX, SNG_DATE_FORMAT, SNG_CURRENT_MAX_NUMBER, -->
+        SNG_WHICH_CODE, SNG_PREFIX, SNG_POSTFIX, SNG_DATE_FORMAT, SNG_CURRENT_MAX_NUMBER,
+        SNG_NUMBER_WIDTH, SNG_NUMBER_GENERATE_TYPE, SNG_NUMBER_LEFTSTUFF, SNG_MIN_NUMBER,
+        SNG_MAX_NUMBER, SNG_CUSTOMER_FIX_FLAG, SNG_CUSTOMER_FIX_SITE, SNG_PARITY_BIT_FLAG,
+        SNG_CURRENT_DATE, CREATE_USER_ID, CREATE_YMD, CREATE_HMS, UPDATE_USER_ID, UPDATE_YMD,
+        UPDATE_HMS, UPDATE_SCREEN_ID, UPDATE_IP_ADDRESS
+    </sql>
+    <select id="Select" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from CM9070
+        where SNG_WHICH_CODE = #{asType,jdbcType=CHAR}
+    </select>
+    <update id="Update" parameterType="cn.com.bbut.iy.itemmaster.dto.cm9070.Cm9070DTO">
+    update CM9070
+    set SNG_CURRENT_MAX_NUMBER = #{sngCurrentMaxNumber,jdbcType=DECIMAL},
+      SNG_CURRENT_DATE = #{sngCurrentDate,jdbcType=CHAR}
+    where SNG_WHICH_CODE = #{sngWhichCode,jdbcType=VARCHAR}
+  </update>
+</mapper>

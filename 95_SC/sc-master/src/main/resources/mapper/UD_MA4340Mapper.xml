@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.MA4340Mapper">
+
+  <select id="getList" parameterType="cn.com.bbut.iy.itemmaster.dto.ma4340.Ma4340DetailParamDto" resultType="cn.com.bbut.iy.itemmaster.dto.ma4340.Ma4340DetailGridDto">
+    select ma4340.store_cd,ma1000.store_name,launching_time, start_order_date, product_type, vendor_id, item_code, barcode, product_name,
+    pma_name, photo, selling_price, orgin, shelf_life, moq, moa, posm, description_vendor_name,
+    description_item_code, description_barcode, description_product_name, description_order, order_method,
+    order_schedule, display_position, brand, bad_merchandise, returnable, exchange_goods,
+    sop, selling_method,ma4340.row_num,vendor_name
+    from ma4340
+    left join ma1000
+        on ma4340.store_cd = ma1000.store_cd
+            <![CDATA[
+                and ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
+                and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
+            ]]>
+    <where>
+        1=1
+      <if test="launchingTime != null and launchingTime != ''">
+        and ma4340.launching_time = #{launchingTime}
+      </if>
+      <if test="startOrderDate != null and startOrderDate != ''">
+        and ma4340.start_order_date = #{startOrderDate}
+      </if>
+      <if test="productType != null and productType != ''">
+        and lower(ma4340.product_type) like lower(CONCAT('%',#{productType},'%'))
+      </if>
+      /*通知进入 已读信息*/
+      <if test="informType == '1'.toString()">
+        and ma4340.row_num in (
+        select info_id from ma4370 where
+        inform_type = '1'
+        and inform_id in
+        (select inform_id from ma4380
+        where inform_type = '1'
+        and user_id = #{userId,jdbcType=VARCHAR}
+        and ma4380.inform_num = ma4370.inform_num
+        )
+        )
+      </if>
+      /*通知进入 未读信息*/
+      <if test="informType == '2'.toString()">
+        and ma4340.row_num in (
+        select info_id from ma4370 where
+        inform_type = '1'
+        /*通知天数*/
+        <![CDATA[
+          and effective_date<=#{businessDate,jdbcType=VARCHAR}
+          and #{businessDate,jdbcType=VARCHAR}<=to_char(to_date( effective_date, 'yyyymmdd' ) + CAST ( (select cm9060.sp_value from cm9060 where cm9060.sp_id = '1205') AS INT ), 'yyyymmdd' )
+          ]]>
+        and inform_id not in
+        (select inform_id from ma4380
+        where inform_type = '1'
+        and user_id = #{userId,jdbcType=VARCHAR}
+        and ma4380.inform_num = ma4370.inform_num
+        )
+        )
+      </if>
+      and ma4340.store_cd IN
+      <foreach item="store" index="index" collection="stores"
+               open="(" separator="," close=")">
+        #{store,jdbcType=VARCHAR}
+      </foreach>
+    </where>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limitStart >= 0">
+      limit ${limitEnd} offset ${limitStart}
+    </if>
+  </select>
+  <select id="getListCount" parameterType="cn.com.bbut.iy.itemmaster.dto.ma4340.Ma4340DetailParamDto" resultType="long">
+    select count(*)
+    from ma4340
+    <where>
+      1=1
+      <if test="launchingTime != null and launchingTime != ''">
+        and ma4340.launching_time = #{launchingTime}
+      </if>
+      <if test="startOrderDate != null and startOrderDate != ''">
+        and ma4340.start_order_date = #{startOrderDate}
+      </if>
+      <if test="productType != null and productType != ''">
+        and lower(ma4340.product_type) like lower(CONCAT('%',#{productType},'%'))
+      </if>
+      /*通知进入 已读信息*/
+      <if test="informType == '1'.toString()">
+        and ma4340.row_num in (
+        select info_id from ma4370 where
+        inform_type = '1'
+        and inform_id in
+        (select inform_id from ma4380
+        where inform_type = '1'
+        and user_id = #{userId,jdbcType=VARCHAR}
+        and ma4380.inform_num = ma4370.inform_num
+        )
+        )
+      </if>
+      /*通知进入 未读信息*/
+      <if test="informType == '2'.toString()">
+        and ma4340.row_num in (
+        select info_id from ma4370 where
+        inform_type = '1'
+        /*通知天数*/
+        <![CDATA[
+          and effective_date<=#{businessDate,jdbcType=VARCHAR}
+          and #{businessDate,jdbcType=VARCHAR}<=to_char(to_date( effective_date, 'yyyymmdd' ) + CAST ( (select cm9060.sp_value from cm9060 where cm9060.sp_id = '1205') AS INT ), 'yyyymmdd' )
+          ]]>
+        and inform_id not in
+        (select inform_id from ma4380
+        where inform_type = '1'
+        and user_id = #{userId,jdbcType=VARCHAR}
+        and ma4380.inform_num = ma4370.inform_num
+        )
+        )
+      </if>
+      and ma4340.store_cd IN
+      <foreach item="store" index="index" collection="stores"
+               open="(" separator="," close=")">
+        #{store,jdbcType=VARCHAR}
+      </foreach>
+    </where>
+  </select>
+</mapper>

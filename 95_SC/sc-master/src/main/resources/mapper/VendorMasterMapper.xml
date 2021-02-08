@@ -1,0 +1,521 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.VendorMasterMapper">
+
+    <resultMap id="ReMa2000" type="cn.com.bbut.iy.itemmaster.dto.vendor.VendorDTO">
+        <result column="vendor_id" property="vendorId" jdbcType="VARCHAR" />
+        <result column="effective_start_date" property="effectiveStartDate" jdbcType="VARCHAR" />
+        <result column="effective_end_date" property="effectiveEndDate" jdbcType="VARCHAR" />
+        <result column="vendor_name" property="vendorName" jdbcType="VARCHAR" />
+        <result column="vendor_name_short" property="vendorNameShort" jdbcType="VARCHAR" />
+        <result column="behalf_vendor_id" property="behalfVendorId" jdbcType="VARCHAR" />
+        <result column="business_type" property="businessType" jdbcType="VARCHAR" />
+        <result column="trade_start_date" property="tradeStartDate" jdbcType="VARCHAR" />
+        <result column="trade_end_date" property="tradeEndDate" jdbcType="VARCHAR" />
+        <result column="order_flg" property="orderFlg" jdbcType="VARCHAR" />
+        <result column="pma_cd" property="pmaCd" jdbcType="VARCHAR" />
+        <result column="dep_cd" property="depCd" jdbcType="VARCHAR" />
+        <result column="structure_cd" property="regionCd" jdbcType="VARCHAR" />
+        <result column="vendor_address1" property="vendorAddress1" jdbcType="VARCHAR" />
+        <result column="vendor_address2" property="vendorAddress2" jdbcType="VARCHAR" />
+        <result column="vendor_tel_no" property="vendorTelNo" jdbcType="VARCHAR" />
+        <result column="vendor_fax_no" property="vendorFaxNo" jdbcType="VARCHAR" />
+        <result column="vendor_zip_code" property="vendorZipCode" jdbcType="VARCHAR" />
+        <result column="admin_name" property="adminName" jdbcType="VARCHAR" />
+        <result column="vendor_email" property="vendorEmail" jdbcType="VARCHAR" />
+        <result column="order_tel_no" property="orderTelNo" jdbcType="VARCHAR" />
+        <result column="order_fax_no" property="orderFaxNo" jdbcType="VARCHAR" />
+        <result column="district_cd" property="districtCd" jdbcType="VARCHAR" />
+        <result column="order_address1" property="orderAddress1" jdbcType="VARCHAR" />
+        <result column="order_address2" property="orderAddress2" jdbcType="VARCHAR" />
+        <result column="order_email" property="orderEmail" jdbcType="VARCHAR" />
+        <result column="order_admin_name" property="orderAdminName" jdbcType="VARCHAR" />
+        <result column="order_admin_name_2" property="orderAdminName2" jdbcType="VARCHAR" />
+        <result column="order_admin_name_3" property="orderAdminName3" jdbcType="VARCHAR" />
+        <result column="min_order_amt_tax" property="minOrderAmtTax" jdbcType="DECIMAL" />
+        <result column="min_order_qty" property="minOrderQty" jdbcType="VARCHAR"/>
+        <result column="order_send_method" property="orderSendMethod" jdbcType="VARCHAR" />
+        <result column="supply_purchase_rate" property="supplyPurchaseRate" jdbcType="DECIMAL" />
+        <result column="bad_discount_rate" property="badDiscountRate" jdbcType="DECIMAL" />
+        <result column="shipment_flg" property="shipmentFlg" jdbcType="VARCHAR" />
+        <result column="pay_type_cd" property="payTypeCd" jdbcType="VARCHAR" />
+        <result column="pay_period_cd" property="payPeriodCd" jdbcType="VARCHAR" />
+        <result column="pay_bank" property="payBank" jdbcType="VARCHAR" />
+        <result column="pay_bank_account" property="payBankAccount" jdbcType="VARCHAR" />
+        <result column="pay_account_name" property="payAccountName" jdbcType="VARCHAR" />
+        <result column="branch" property="branch" jdbcType="VARCHAR" />
+        <result column="pay_tax_no" property="payTaxNo" jdbcType="VARCHAR" />
+        <result column="pay_currency_type" property="payCurrencyType" jdbcType="VARCHAR" />
+        <result column="pay_period_day" property="payPeriodDay" jdbcType="VARCHAR" />
+        <result column="contract_signed" property="contractSigned" jdbcType="CHAR" />
+        <result column="liquidation_agreement" property="liquidationAgreement" jdbcType="CHAR" />
+        <result column="license" property="license" jdbcType="CHAR" />
+        <result column="accounts_receivable" property="accountsReceivable" jdbcType="CHAR" />
+        <result column="bank_infomation" property="bankInformation" jdbcType="CHAR" />
+        <result column="addendum_signed" property="addendumSigned" jdbcType="CHAR" />
+        <result column="trading" property="trading" jdbcType="CHAR" />
+        <result column="authorization_letter" property="authorizationLetter" jdbcType="CHAR" />
+        <result column="listing_proposal" property="listingProposal" jdbcType="CHAR" />
+        <result column="others_check" property="othersCheck" jdbcType="CHAR" />
+        <result column="others" property="others" jdbcType="VARCHAR" />
+        <result column="payment_amount" property="paymentAmount" jdbcType="DECIMAL" />
+        <result column="collection_amount" property="collectionAmount" jdbcType="DECIMAL" />
+        <result column="total_amount" property="totalAmount" jdbcType="DECIMAL" />
+        <result column="deal_suspend_date" property="dealSuspendDate" jdbcType="CHAR" />
+        <result column="return_start_date" property="returnStartDate" jdbcType="CHAR" />
+        <result column="return_end_date" property="returnEndDate" jdbcType="CHAR" />
+        <result column="eliminate_date" property="eliminateDate" jdbcType="CHAR" />
+        <result column="payment_date" property="paymentDate" jdbcType="CHAR" />
+        <result column="processing_method" property="processingMethod" jdbcType="VARCHAR" />
+        <result column="eliminate_reason" property="eliminateReason" jdbcType="VARCHAR" />
+        <result column="upload_file_path" property="uploadFilePath" jdbcType="VARCHAR"/>
+        <result column="upload_file_name" property="uploadFileName" jdbcType="VARCHAR"/>
+        <result column="trading_term_no" property="tradingTermNo" jdbcType="VARCHAR"/>
+        <result column="trading_term_effective_start_date" property="tradingTermEffectiveStartDate" jdbcType="VARCHAR"/>
+        <result column="cutoff_time" property="cutoffTime" jdbcType="CHAR" />
+        <result column="business_reg_no" property="businessRegNo" jdbcType="VARCHAR" />
+        <result column="bank_country" property="bankCountry" jdbcType="VARCHAR" />
+        <result column="credit_limit" property="creditLimit" jdbcType="VARCHAR" />
+        <result column="keep_credit_limit" property="keepCreditLimit" jdbcType="VARCHAR" />
+        <result column="account_payable" property="accountPayable" jdbcType="VARCHAR" />
+        <result column="account_receivable" property="accountReceivable" jdbcType="VARCHAR" />
+        <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+        <result column="master_payment" property="masterPayment" jdbcType="VARCHAR" />
+        <result column="vendor_code_receivable" property="vendorCodeReceivable" jdbcType="VARCHAR" />
+        <result column="vendor_type" property="vendorType" jdbcType="VARCHAR" />
+        <result column="structure_name" property="regionName" jdbcType="VARCHAR" />
+        <result column="dep_name" property="topDepName" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="ReMa2010" type="cn.com.bbut.iy.itemmaster.dto.vendor.DeliveryTypeDTO">
+        <id column="vendor_id" property="vendorId" jdbcType="VARCHAR" />
+        <id column="ma_cd" property="maCd" jdbcType="VARCHAR" />
+        <id column="delivery_type_cd" property="deliveryTypeCd" jdbcType="VARCHAR" />
+        <id column="effective_start_date" property="effectiveStartDate" jdbcType="VARCHAR" />
+        <result column="effective_end_date" property="effectiveEndDate" jdbcType="VARCHAR" />
+        <result column="vendor_tel_no" property="vendorTelNo" jdbcType="VARCHAR" />
+        <result column="vendor_fax_no" property="vendorFaxNo" jdbcType="VARCHAR" />
+        <result column="district_cd" property="districtCd" jdbcType="VARCHAR" />
+        <result column="vendor_address1" property="vendorAddress1" jdbcType="VARCHAR" />
+        <result column="vendor_address2" property="vendorAddress2" jdbcType="VARCHAR" />
+        <result column="admin_name" property="adminName" jdbcType="VARCHAR" />
+        <result column="min_order_amt_tax" property="minOrderAmtTax" jdbcType="DECIMAL" />
+        <result column="order_send_method" property="orderSendMethod" jdbcType="VARCHAR" />
+        <result column="supply_purchase_rate" property="supplyPurchaseRate" jdbcType="DECIMAL" />
+        <result column="bad_discount_rate" property="badDiscountRate" jdbcType="DECIMAL" />
+        <result column="weekly_delivery_day" property="weeklyDeliveryDay" jdbcType="VARCHAR" />
+        <result column="shipment_flg" property="shipmentFlg" jdbcType="VARCHAR" />
+        <result column="structure_cd" property="structureCd" jdbcType="VARCHAR" />
+        <result column="structure_name" property="structureName" jdbcType="VARCHAR" />
+        <result column="region_cd" property="regionCd" jdbcType="VARCHAR" />
+        <result column="region_name" property="regionName" jdbcType="VARCHAR" />
+        <result column="order_type" property="orderType" jdbcType="VARCHAR" />
+        <result column="order_type_name" property="orderTypeName" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="ReMa2002" type="cn.com.bbut.iy.itemmaster.dto.vendor.Ma2002DTO">
+        <id column="VENDOR_ID" jdbcType="VARCHAR" property="vendorId" />
+        <id column="EFFECTIVE_START_DATE" jdbcType="VARCHAR" property="effectiveStartDate" />
+        <id column="STRUCTURE_CD" jdbcType="VARCHAR" property="structureCd" />
+        <result column="MIN_ORDER_QTY" jdbcType="NUMERIC" property="minOrderQty" />
+        <result column="MIN_ORDER_AMT" jdbcType="NUMERIC" property="minOrderAmtTax" />
+        <result column="STRUCTURE_NAME" jdbcType="VARCHAR" property="structureName" />
+    </resultMap>
+
+    <resultMap id="ReMa2003" type="cn.com.bbut.iy.itemmaster.dto.vendor.Ma2003DTO">
+        <id column="VENDOR_ID" jdbcType="VARCHAR" property="vendorId" />
+        <id column="EFFECTIVE_START_DATE" jdbcType="VARCHAR" property="effectiveStartDate" />
+        <id column="PMA_CD" jdbcType="VARCHAR" property="pmaCd" />
+        <result column="DEP_CD" jdbcType="VARCHAR" property="depCd" />
+        <result column="DEP_NAME" jdbcType="VARCHAR" property="depName" />
+        <result column="PMA_NAME" jdbcType="VARCHAR" property="pmaName" />
+    </resultMap>
+
+    <resultMap id="ReMa2004" type="cn.com.bbut.iy.itemmaster.dto.vendor.Ma2004DTO">
+        <result column="vendor_id" jdbcType="VARCHAR" property="vendorId" />
+        <result column="effective_start_date" jdbcType="CHAR" property="effectiveStartDate" />
+        <result column="structure_cd" jdbcType="VARCHAR" property="regionCd" />
+        <result column="pay_bank" jdbcType="VARCHAR" property="payBank" />
+        <result column="bank_code" jdbcType="VARCHAR" property="bankCode" />
+        <result column="pay_bank_account" jdbcType="VARCHAR" property="payBankAccount" />
+        <result column="pay_account_name" jdbcType="VARCHAR" property="payAccountName" />
+        <result column="branch" jdbcType="VARCHAR" property="branch" />
+        <result column="structure_name" jdbcType="VARCHAR" property="regionName" />
+        <result column="bank_country" jdbcType="VARCHAR" property="bankCountry" />
+    </resultMap>
+
+    <resultMap id="ReMa2005" type="cn.com.bbut.iy.itemmaster.dto.vendor.Ma2005DTO">
+        <result column="vendor_id" jdbcType="VARCHAR" property="vendorId" />
+        <result column="effective_start_date" jdbcType="CHAR" property="effectiveStartDate" />
+        <result column="product_group_cd" jdbcType="VARCHAR" property="productGroupCd" />
+        <result column="product_MOA" jdbcType="NUMERIC" property="productMOA" />
+        <result column="product_group_name" jdbcType="VARCHAR" property="productGroupName" />
+    </resultMap>
+
+    <resultMap id="ReMa2007" type="cn.com.bbut.iy.itemmaster.dto.vendor.Ma2007DTO">
+        <id column="vendor_id" jdbcType="VARCHAR" property="vendorId" />
+        <id column="effective_start_date" jdbcType="CHAR" property="effectiveStartDate" />
+        <id column="trading_term_no" jdbcType="VARCHAR" property="tradingTermNo" />
+        <id column="trading_term_start_date" jdbcType="CHAR" property="tradingTermStartDate" />
+        <result column="is_default" jdbcType="VARCHAR" property="isDefault" />
+    </resultMap>
+
+    <resultMap id="ReMa2008" type="cn.com.bbut.iy.itemmaster.dto.vendor.Ma2008DTO">
+        <result column="vendor_id" jdbcType="VARCHAR" property="vendorId" />
+        <result column="effective_start_date" jdbcType="CHAR" property="effectiveStartDate" />
+        <result column="mail_title" jdbcType="CHAR" property="mailTitle" />
+        <result column="product_group_cd" jdbcType="CHAR" property="productGroupCd" />
+        <result column="product_group_name" jdbcType="CHAR" property="productGroupName" />
+        <result column="email" jdbcType="CHAR" property="email" />
+        <result column="cc_email" jdbcType="CHAR" property="ccEmail" />
+        <result column="region_cd" jdbcType="CHAR" property="regionCd" />
+        <result column="region_name" jdbcType="CHAR" property="regionName" />
+        <result column="attn" jdbcType="VARCHAR" property="attn" />
+        <result column="po_email" jdbcType="VARCHAR" property="poEmail" />
+        <result column="order_address" jdbcType="VARCHAR" property="orderAddress" />
+        <result column="order_tel_no" jdbcType="VARCHAR" property="orderTelNo" />
+        <result column="order_fax_no" jdbcType="VARCHAR" property="orderFaxNo" />
+        <result column="order_admin_name" jdbcType="VARCHAR" property="orderAdminName" />
+        <result column="order_type" jdbcType="VARCHAR" property="orderType" />
+        <result column="order_type_name" jdbcType="VARCHAR" property="orderTypeName" />
+        <result column="structure_cd" jdbcType="VARCHAR" property="structureCd" />
+        <result column="structure_name" jdbcType="VARCHAR" property="structureName" />
+    </resultMap>
+
+    <resultMap id="ReMa2009" type="cn.com.bbut.iy.itemmaster.dto.vendor.Ma2009DTO">
+        <result column="vendor_id" jdbcType="VARCHAR" property="vendorId" />
+        <result column="effective_start_date" jdbcType="CHAR" property="effectiveStartDate" />
+        <result column="region_cd" jdbcType="CHAR" property="regionCd" />
+        <result column="region_name" jdbcType="VARCHAR" property="regionName" />
+        <result column="account_payable" jdbcType="VARCHAR" property="payable" />
+        <result column="account_receivable" jdbcType="VARCHAR" property="receivable" />
+    </resultMap>
+
+    <!--<if test="businessType != null and businessType != ''">
+            AND lower(business_type)  like concat('%',lower(#{businessType,jdbcType=VARCHAR}),'%')
+        </if>
+        <if test="businessTypeList != null and businessTypeList.size()>0">
+            AND lower(business_type)  in
+            <foreach item="businessType" collection="businessTypeList" open="(" separator="," close=")">
+                #{businessType,jdbcType=VARCHAR}
+            </foreach>
+        </if>
+        <if test="businessType != null and businessType != ''">
+            AND lower(business_type)  like concat('%',lower(#{businessType,jdbcType=VARCHAR}),'%')
+        </if>
+        -->
+    <sql id="selectCondition">
+        <if test="vendorId != null and vendorId != ''">
+            AND lower(vendor_id) like lower(CONCAT('%',#{vendorId,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="vendorName != null and vendorName != ''">
+            AND lower(vendor_name) like lower(CONCAT('%',#{vendorName,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="orderSendMethod != null and orderSendMethod != ''">
+            AND order_send_method = #{orderSendMethod,jdbcType=VARCHAR}
+        </if>
+        <if test="adminName != null and adminName != ''">
+            AND lower(order_admin_name) like lower(CONCAT('%',#{adminName,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="behalfVendorId != null and behalfVendorId != ''">
+            AND lower(behalf_vendor_id) like lower(CONCAT('%',#{behalfVendorId,jdbcType=VARCHAR},'%'))
+        </if>
+    </sql>
+
+    <select id="selectCountByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.vendor.VendorParamDTO" resultType="INT">
+        SELECT
+            COUNT(1)
+        FROM(
+            SELECT
+                vendor_id, effective_start_date,regexp_split_to_table(business_type,',') as business_type2
+            FROM
+                MA2000
+            WHERE
+                #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            <include refid="selectCondition"></include>
+        ) T
+        <if test="deliveryType != null and deliveryType != ''">
+            JOIN (
+                SELECT DISTINCT
+                    vendor_id, effective_start_date, delivery_type_cd
+                FROM
+                    MA2010
+                WHERE
+                    delivery_type_cd = #{deliveryType,jdbcType=VARCHAR}
+            ) T1
+            ON T.vendor_id = T1.vendor_id AND T.effective_start_date = T1.effective_start_date
+        </if>
+        <where>
+            <if test="businessType != null and businessType != ''">
+                #{businessType,jdbcType=VARCHAR} like concat('%',T.business_type2,'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.vendor.VendorParamDTO" resultMap="ReMa2000">
+        SELECT
+            T.*
+        FROM(
+            SELECT
+                vendor_id, effective_start_date, effective_end_date, vendor_name, vendor_name_short,
+                behalf_vendor_id, business_type, trade_start_date, trade_end_date, order_flg,
+                vendor_district_cd, vendor_address1, vendor_address2, vendor_tel_no, vendor_fax_no,
+                vendor_zip_code, vendor_email, order_admin_name as admin_name, order_send_method,
+                regexp_split_to_table(business_type,',') as business_type2,structure_cd
+            FROM
+                MA2000
+            WHERE
+                #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            <include refid="selectCondition"></include>
+        ) T
+        <if test="deliveryType != null and deliveryType != ''">
+            JOIN (
+                SELECT DISTINCT
+                    vendor_id, effective_start_date, delivery_type_cd,structure_cd
+                FROM
+                    MA2010
+                WHERE
+                    delivery_type_cd = #{deliveryType,jdbcType=VARCHAR}
+            ) T1
+            ON T.vendor_id = T1.vendor_id AND T.effective_start_date = T1.effective_start_date
+                and T.structure_cd = T1.structure_cd
+        </if>
+        <where>
+            <if test="businessType != null and businessType != ''">
+                #{businessType,jdbcType=VARCHAR} like concat('%',T.business_type2,'%')
+            </if>
+        </where>
+        ORDER BY T.effective_start_date DESC
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+
+    <select id="selectVendor" parameterType="cn.com.bbut.iy.itemmaster.dto.vendor.VendorParamDTO" resultMap="ReMa2000">
+        SELECT
+            T.*, T1.structure_name, T2.dep_name
+        FROM(
+            SELECT
+                vendor_id, effective_start_date, effective_end_date, vendor_name, vendor_name_short,
+                behalf_vendor_id, business_type, trade_start_date, trade_end_date, order_flg, pma_cd,
+                dep_cd, structure_cd, vendor_address1, vendor_address2, vendor_tel_no, vendor_fax_no,
+                vendor_zip_code, admin_name, vendor_email, order_tel_no, order_fax_no, district_cd,
+                order_address1, order_address2, order_email, order_admin_name,order_admin_name_2,
+                order_admin_name_3, min_order_amt_tax, min_order_qty,
+                order_send_method, supply_purchase_rate, bad_discount_rate, shipment_flg, pay_type_cd,
+                pay_period_cd, pay_bank, pay_bank_account, pay_account_name, branch, pay_tax_no,
+                pay_currency_type, pay_period_day, contract_signed, liquidation_agreement, license,
+                accounts_receivable, bank_infomation, addendum_signed, trading, authorization_letter,
+                listing_proposal, others_check, others, payment_amount, collection_amount, total_amount,
+                deal_suspend_date, return_start_date, return_end_date, eliminate_date, payment_date,
+                processing_method, eliminate_reason, upload_file_path, upload_file_name, trading_term_no,
+                trading_term_effective_start_date, cutoff_time, business_reg_no, bank_country,
+                credit_limit, keep_credit_limit, account_payable, account_receivable, remarks,
+                master_payment, vendor_code_receivable, vendor_type
+            FROM
+                MA2000
+            WHERE
+                vendor_id = #{vendorId,jdbcType=VARCHAR}
+            AND effective_start_date = #{effectiveStartDate,jdbcType=VARCHAR}
+        ) T
+        LEFT JOIN (
+            SELECT DISTINCT structure_cd, structure_name FROM MA0020 WHERE level = '0'
+        ) T1
+        ON T.structure_cd = T1.structure_cd
+        LEFT JOIN (
+            SELECT DISTINCT dep_cd, dep_name FROM MA0070
+        ) T2
+        ON T.dep_cd = T2.dep_cd
+    </select>
+
+    <select id="selectDeliveryType" parameterType="cn.com.bbut.iy.itemmaster.dto.vendor.VendorParamDTO" resultMap="ReMa2010">
+        SELECT
+            a.vendor_id, a.ma_cd, a.delivery_type_cd, a.effective_start_date, a.effective_end_date,
+            a.weekly_delivery_day, a.shipment_flg,a.structure_cd,b.structure_name,
+            a.order_type,c.code_name as order_type_name,a.region_cd,d.structure_name as region_name
+        FROM
+            MA2010 a
+            left join ma0020 b on a.structure_cd = b.structure_cd and b.structure_level = '2'
+            left join cm9010 c on a.order_type = c.code_value and c.code_type = '00900'
+            left join ma0020 d on a.region_cd = d.structure_cd and d.level = '0'
+        WHERE
+            a.vendor_id = #{vendorId,jdbcType=VARCHAR}
+        AND a.effective_start_date = #{effectiveStartDate,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectMa2002" parameterType="cn.com.bbut.iy.itemmaster.dto.vendor.VendorParamDTO" resultMap="ReMa2002">
+        SELECT
+            T.*, T1.structure_name
+        FROM (
+            SELECT
+                VENDOR_ID, EFFECTIVE_START_DATE, STRUCTURE_CD,
+                MIN_ORDER_QTY, MIN_ORDER_AMT
+            FROM
+                MA2002
+            WHERE
+                VENDOR_ID = #{vendorId,jdbcType=VARCHAR}
+            AND EFFECTIVE_START_DATE = #{effectiveStartDate,jdbcType=CHAR}
+        ) T
+        LEFT JOIN (
+            SELECT DISTINCT structure_cd, structure_name FROM MA0020 WHERE structure_level = '2'
+        ) T1
+        ON T.structure_cd = T1.structure_cd
+    </select>
+
+    <!--<select id="selectMa2003" parameterType="cn.com.bbut.iy.itemmaster.dto.vendor.VendorParamDTO" resultMap="ReMa2003">
+        SELECT
+            T.*, T1.PMA_NAME
+        FROM (
+            SELECT
+                VENDOR_ID, EFFECTIVE_START_DATE, DEP_CD, PMA_CD
+            FROM
+                MA2003
+            WHERE
+                VENDOR_ID = #{vendorId,jdbcType=CHAR}
+            AND EFFECTIVE_START_DATE = #{effectiveStartDate,jdbcType=CHAR}
+        ) T
+        LEFT JOIN (
+            SELECT DISTINCT DEP_CD, PMA_CD, PMA_NAME FROM MA0080
+        ) T1
+        ON T.DEP_CD = T1.DEP_CD AND T.PMA_CD = T1.PMA_CD
+    </select>-->
+
+    <select id="selectMa2003" parameterType="cn.com.bbut.iy.itemmaster.dto.vendor.VendorParamDTO" resultMap="ReMa2003">
+        SELECT
+            T.VENDOR_ID,
+            T.EFFECTIVE_START_DATE,
+            T2.PMA_NAME,
+            T.PMA_CD,
+            T1.DEP_NAME,
+            T.DEP_CD,
+            CAST ( T.dep_cd AS NUMERIC ) AS num_dep,
+            CAST ( T.pma_cd AS NUMERIC ) AS num_pma
+        FROM
+            MA2003 T
+            LEFT JOIN MA0070 T1 ON T.dep_cd = T1.dep_cd
+            LEFT JOIN MA0080 T2 ON T.pma_cd = T2.pma_cd
+        WHERE
+            T.VENDOR_ID = #{vendorId,jdbcType=CHAR}
+            AND EFFECTIVE_START_DATE = #{effectiveStartDate,jdbcType=CHAR}
+        ORDER BY
+            CAST ( T.dep_cd AS NUMERIC ),
+            CAST (
+            T.pma_cd AS NUMERIC)
+    </select>
+
+    <select id="selectMa2004" parameterType="cn.com.bbut.iy.itemmaster.dto.vendor.VendorParamDTO" resultMap="ReMa2004">
+        SELECT
+            T.*, T1.structure_name
+        FROM (
+            SELECT
+                vendor_id, effective_start_date, structure_cd, bank_code,
+                pay_bank, pay_bank_account, pay_account_name, branch, bank_country
+            FROM
+                MA2004
+            WHERE
+                VENDOR_ID = #{vendorId,jdbcType=VARCHAR}
+            AND EFFECTIVE_START_DATE = #{effectiveStartDate,jdbcType=CHAR}
+        ) T
+        LEFT JOIN (
+            SELECT DISTINCT structure_cd, structure_name FROM MA0020 WHERE level = '0'
+        ) T1
+        ON T.structure_cd = T1.structure_cd
+    </select>
+
+    <select id="selectMa2005" parameterType="cn.com.bbut.iy.itemmaster.dto.vendor.VendorParamDTO" resultMap="ReMa2005">
+        SELECT
+            T.*, ma0240.product_group_name
+        FROM (
+            SELECT
+                vendor_id, effective_start_date, product_group_cd, product_MOA
+            FROM
+                MA2005 T
+            WHERE
+                VENDOR_ID = #{vendorId,jdbcType=VARCHAR}
+            AND EFFECTIVE_START_DATE = #{effectiveStartDate,jdbcType=CHAR}
+        ) T
+        LEFT JOIN ma0240
+        ON T.product_group_cd = ma0240.product_group_cd
+    </select>
+
+    <select id="selectMa2007" parameterType="cn.com.bbut.iy.itemmaster.dto.vendor.VendorParamDTO" resultMap="ReMa2007">
+        SELECT
+            vendor_id,
+            effective_start_date,
+            trading_term_no,
+            trading_term_start_date,
+            is_default
+        FROM
+            MA2007
+        WHERE
+            VENDOR_ID = #{vendorId,jdbcType=VARCHAR}
+            AND effective_start_date = #{effectiveStartDate,jdbcType=CHAR}
+        ORDER BY
+            is_default DESC,
+            trading_term_no
+    </select>
+
+    <select id="selectMa2009" parameterType="cn.com.bbut.iy.itemmaster.dto.vendor.VendorParamDTO" resultMap="ReMa2009">
+        SELECT
+            a.vendor_id,
+            a.effective_start_date,
+            a.structure_cd as region_cd,
+            a.account_payable,
+            a.account_receivable,
+            b.structure_name as region_name
+        FROM
+            MA2009 a
+            left join ma0020 b on a.structure_cd = b.structure_cd and b.level = '0'
+        WHERE
+            a.vendor_id = #{vendorId,jdbcType=VARCHAR}
+            AND a.effective_start_date = #{effectiveStartDate,jdbcType=CHAR}
+        ORDER BY
+            a.structure_cd
+    </select>
+
+    <select id="selectMa2008" parameterType="cn.com.bbut.iy.itemmaster.dto.vendor.VendorParamDTO" resultMap="ReMa2008">
+        SELECT
+            ma1.vendor_id,
+            ma1.effective_start_date,
+            ma1.mail_title,
+            ma1.product_group_cd,
+            ma1.email,
+            ma1.cc_email,
+            ma1.region_cd,
+            ma2.structure_name as region_name,
+			ma3.product_group_name,
+			ma1.attn,
+            ma1.po_email,
+            ma1.order_address,
+            ma1.order_tel_no,
+            ma1.order_fax_no,
+            ma1.order_admin_name,
+            ma1.order_type,
+            d.code_name as order_type_name,
+            ma1.structure_cd,
+            c.structure_name
+        FROM
+            MA2008 ma1
+            left join ma0020 c on ma1.structure_cd = c.structure_cd and c.structure_level = '2'
+            left join cm9010 d on ma1.order_type = d.code_value and d.code_type = '00900'
+            left join MA0020 ma2 on ma2.level = '0' and ma1.region_cd = ma2.structure_cd
+			left join MA0240 ma3 on ma3.product_group_cd = ma1.product_group_cd
+        WHERE
+            ma1.vendor_id = #{vendorId,jdbcType=VARCHAR}
+            AND ma1.effective_start_date = #{effectiveStartDate,jdbcType=CHAR}
+    </select>
+
+    <select id="selectList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT vendor_id k, CONCAT(vendor_id,' ',vendor_name) AS v
+        FROM ma2000
+        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN EFFECTIVE_START_DATE AND EFFECTIVE_END_DATE
+        <if test="v!=null and v!=''">
+            AND (
+                lower(vendor_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                OR lower(vendor_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ORDER BY vendor_id
+    </select>
+
+</mapper>

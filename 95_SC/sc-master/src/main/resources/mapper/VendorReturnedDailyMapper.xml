@@ -1,0 +1,765 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.VendorReturnedDailyMapper">
+
+    <resultMap id="resultItemMap" type="cn.com.bbut.iy.itemmaster.dto.VendorReturnedDaily.VendorReturnedDailyDTO">
+        <result column="order_id" property="orderId"></result>
+        <result column="store_cd" property="storeCd"></result>
+        <result column="store_name" property="storeName"></result>
+        <result column="order_date" property="accDate"></result>
+        <result column="article_id" property="articleId"></result>
+        <result column="barcode" property="barcode"></result>
+        <result column="return_total_qty" property="returnTotalQty"></result>
+        <result column="return_qty" property="returnQty"></result>
+        <result column="return_total_amt" property="returnAmt"></result>
+        <result column="pma_cd" property="pmaCd"></result>
+        <result column="pma_name" property="pmaName"></result>
+        <result column="category_cd" property="categoryCd"></result>
+        <result column="category_name" property="categoryName"></result>
+        <result column="sub_category_cd" property="subCategoryCd"></result>
+        <result column="sub_category_name" property="subCategoryName"></result>
+        <result column="vendor_id" property="vendorId"></result>
+        <result column="vendor_name" property="vendorName"></result>
+        <result column="ofc" property="amCd"></result>
+        <result column="om" property="omCd"></result>
+        <result column="am_name" property="amName"></result>
+        <result column="om_name" property="omName"></result>
+        <result column="delivery_center_id" property="dc"></result>
+        <result column="emp_name" property="userName"></result>
+        <result column="order_remark" property="orderRemark"></result>
+        <result column="delivery_center_id" property="deliveryCenterId"/>
+        <result column="delivery_center_name" property="deliveryCenterName"/>
+    </resultMap>
+
+    <sql id="returnedDailyCondition">
+        <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">
+            AND A.order_date BETWEEN #{param.startDate} AND #{param.endDate}
+        </if>
+        <if test="param.depCd!=null and param.depCd!=''">
+            AND MA1.dep_cd = #{param.depCd}
+        </if>
+        <if test="param.pmaCd!=null and param.pmaCd!=''">
+            AND MA1.pma_cd = #{param.pmaCd}
+        </if>
+        <if test="param.categoryCd!=null and param.categoryCd!=''">
+            AND MA1.category_cd = #{param.categoryCd}
+        </if>
+        <if test="param.subCategoryCd!=null and param.subCategoryCd!=''">
+            AND MA1.sub_category_cd = #{param.subCategoryCd}
+        </if>
+<!--        <if test="param.articleId!=null and param.articleId!=''">-->
+<!--            AND lower(MA1.article_id) like lower(CONCAT('%',#{param.articleId},'%'))-->
+<!--        </if>-->
+<!--        <if test="param.articleName!=null and param.articleName!=''">-->
+<!--            AND lower(MA1.article_name) like lower(CONCAT('%',#{param.articleName},'%'))-->
+<!--        </if>-->
+        <if test="param.city!=null and param.city!=''">
+            AND MA2.zo_cd = #{param.city}
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            AND MA2.ofc = #{param.am}
+        </if>
+        <if test="param.om!=null and param.om!=''">
+            AND MA2.om = #{param.om}
+        </if>
+        <if test="param.orderId !=null and param.orderId !=''">
+            AND lower(C.order_id) like lower(CONCAT('%',#{param.orderId},'%'))
+        </if>
+    </sql>
+    <select id="search1" parameterType="cn.com.bbut.iy.itemmaster.dto.VendorReturnedDaily.VendorReturnedDailyParamDTO"
+            resultMap="resultItemMap">
+        drop table if exists tmp_return_day_table;
+        SELECT DISTINCT
+            A.order_date,
+            C.order_id,
+            C.article_id,
+            MA1.article_name,
+            MA1.article_name_en,
+            MA1.article_short_name,
+            MA1.article_short_name_en,
+            C.store_cd,
+            MA2.store_name,
+            MA1.pma_cd,
+            MA3.pma_name,
+            MA5.category_cd,
+            MA5.category_name,
+            MA6.sub_category_cd,
+            MA6.sub_category_name,
+            MA4.vendor_id,
+            MA4.vendor_name,
+            C.barcode,
+            COALESCE (c.receive_qty,0) AS return_qty,
+            COALESCE (c.receive_qty,0)+COALESCE(ret.ret_qty,0) as return_total_qty,/*退货数量 = 退货数量+更正数量*/
+            MA2.ofc,oper.c_operatorname as am_name,
+            MA2.om,oper1.c_operatorname as om_name,
+            ma7.emp_name,
+            A.order_remark
+            into tmp_return_day_table
+        FROM
+            OD0000 A,
+            od0010 C
+            LEFT JOIN ma4200 ma7 on C.create_user_id = ma7.emp_num_id
+            LEFT JOIN lateral(
+            select od0000.order_id,od0010.article_id,
+            sum(coalesce(od0010.correction_difference,0) - coalesce(C.receive_qty,0)) ret_qty /*更正数量*/
+            from od0000
+            left join od0010 on od0000.order_id = od0010.order_id
+            where od0000.order_type='08'
+            and od0000.review_status = '10'
+            and od0000.org_order_id = C.order_id
+            AND od0000.create_ymd || od0000.create_hms = ( SELECT MAX ( od1.create_ymd || od1.create_hms ) FROM od0000 od1 WHERE od1.order_id = od0000.order_id )
+            and od0010.article_id =C.article_id
+            GROUP BY od0000.order_id,od0010.article_id
+            ) ret on true
+            ,MA1100 MA1
+            LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+            LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+            LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+            MA1000 MA2
+            left join t_operator oper on ma2.ofc = oper.c_operatorcode
+            left join t_operator oper1 on ma2.om = oper1.c_operatorcode,
+            MA2000 MA4
+        WHERE
+            A.order_differentiate = '0'
+            AND A.order_type = '02'
+            AND A.order_sts = '04'
+            AND A.review_status = 20
+            AND A.order_id = C.order_id
+            AND C.article_id = MA1.article_id
+            AND #{param.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+            AND C.store_cd = MA2.store_cd
+            AND #{param.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+            AND C.vendor_id = MA4.vendor_id
+            AND #{param.businessDate} BETWEEN MA4.effective_start_date
+            AND MA4.effective_end_date
+            AND A.store_cd in
+            <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+             </foreach>
+        <if test="param.vendorCd!=null and param.vendorCd!=''">
+            AND lower(C.vendor_id) like lower(CONCAT('%',#{param.vendorCd},'%'))
+        </if>
+        <if test="param.vendorName!=null and param.vendorName!=''">
+            AND lower(MA4.vendor_name) like lower(CONCAT('%',#{param.vendorName},'%'))
+        </if>
+        <include refid="returnedDailyCondition"></include>;
+        CREATE  INDEX  articleNameIndex ON tmp_return_day_table  USING btree (article_name,article_name_en,article_short_name,article_short_name_en);
+        select
+        tmp.order_date,
+        tmp.order_id,
+        tmp.article_id,
+        tmp.article_name,
+        tmp.store_cd,
+        tmp.store_name,
+        tmp.pma_cd,
+        tmp.pma_name,
+        tmp.category_cd,
+        tmp.category_name,
+        tmp.sub_category_cd,
+        tmp.sub_category_name,
+        tmp.vendor_id,
+        tmp.vendor_name,
+        tmp.barcode,
+        tmp.return_qty,
+        tmp.return_total_qty,/*退货数量 = 退货数量+更正数量*/
+        tmp.am_name,
+        tmp.om_name,
+        tmp.emp_name,
+        tmp.order_remark
+        from tmp_return_day_table tmp
+        where 1=1
+        <if test="param.articleName !=null and param.articleName !=''">
+            AND concat(lower( tmp.article_id ),'',lower( tmp.article_name ),'',lower( tmp.article_name_en ),'',lower( tmp.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
+        </if>
+        <if test="param.barcode !=null and param.barcode !=''">
+            AND lower(tmp.barcode) like lower(CONCAT('%',#{param.barcode},'%'))
+        </if>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>;
+    </select>
+    <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.VendorReturnedDaily.VendorReturnedDailyParamDTO"
+            resultMap="resultItemMap">
+        SELECT DISTINCT
+            A.order_date,
+            C.order_id,
+            C.article_id,
+            MA1.article_name,
+            MA1.article_name_en,
+            MA1.article_short_name,
+            MA1.article_short_name_en,
+            C.store_cd,
+            MA2.store_name,
+            MA1.pma_cd,
+            MA3.pma_name,
+            MA5.category_cd,
+            MA5.category_name,
+            MA6.sub_category_cd,
+            MA6.sub_category_name,
+            MA4.vendor_id,
+            MA4.vendor_name,
+            C.barcode,
+            COALESCE (c.receive_qty,0) AS return_qty,
+            COALESCE (c.receive_qty,0)+COALESCE(ret.ret_qty,0) as return_total_qty,/*退货数量 = 退货数量+更正数量*/
+            MA2.ofc,oper.c_operatorname as am_name,
+            MA2.om,oper1.c_operatorname as om_name,
+            ma7.emp_name,
+            A.order_remark
+        FROM
+            OD0000 A,
+            od0010 C
+            LEFT JOIN ma4200 ma7 on C.create_user_id = ma7.emp_num_id
+            LEFT JOIN lateral(
+            select od0000.order_id,od0010.article_id,
+            sum(coalesce(od0010.correction_difference,0) - coalesce(C.receive_qty,0)) ret_qty /*更正数量*/
+            from od0000
+            left join od0010 on od0000.order_id = od0010.order_id
+            where od0000.order_type='08'
+            and od0000.review_status = '10'
+            and od0000.org_order_id = C.order_id
+            and od0010.article_id =C.article_id
+            GROUP BY od0000.order_id,od0010.article_id
+            ) ret on true
+            ,MA1100 MA1
+            LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+            LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+            LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+            MA1000 MA2
+            left join t_operator oper on ma2.ofc = oper.c_operatorcode
+            left join t_operator oper1 on ma2.om = oper1.c_operatorcode,
+            MA2000 MA4
+        WHERE
+            A.order_differentiate = '0'
+            AND A.order_type = '02'
+            AND A.order_sts = '04'
+            AND A.review_status = 20
+            AND A.order_id = C.order_id
+            AND C.article_id = MA1.article_id
+            AND #{param.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+            AND C.store_cd = MA2.store_cd
+            AND #{param.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+            AND C.vendor_id = MA4.vendor_id
+            AND #{param.businessDate} BETWEEN MA4.effective_start_date
+            AND MA4.effective_end_date
+            AND A.store_cd in
+            <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+             </foreach>
+        <if test="param.vendorCd!=null and param.vendorCd!=''">
+            AND lower(C.vendor_id) like lower(CONCAT('%',#{param.vendorCd},'%'))
+        </if>
+        <if test="param.vendorName!=null and param.vendorName!=''">
+            AND lower(MA4.vendor_name) like lower(CONCAT('%',#{param.vendorName},'%'))
+        </if>
+        <include refid="returnedDailyCondition"></include>
+        <if test="param.articleName !=null and param.articleName !=''">
+       AND concat(lower( MA1.article_id ),'',lower( MA1.article_name ),'',lower( MA1.article_name_en ),'',lower( MA1.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
+        </if>
+        <if test="param.barcode !=null and param.barcode !=''">
+            AND lower(MA1.barcode) like lower(CONCAT('%',#{param.barcode},'%'))
+        </if>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+
+
+    </select>
+
+    <select id="searchCount1" parameterType="cn.com.bbut.iy.itemmaster.dto.VendorReturnedDaily.VendorReturnedDailyParamDTO"
+        resultType="int">
+        drop table if exists tmp_return_day_table;
+        SELECT DISTINCT
+        A.order_date,
+        C.order_id,
+        C.article_id,
+        MA1.article_name,
+        MA1.article_name_en,
+        MA1.article_short_name,
+        MA1.article_short_name_en,
+        C.store_cd,
+        MA2.store_name,
+        MA1.pma_cd,
+        MA3.pma_name,
+        MA5.category_cd,
+        MA5.category_name,
+        MA6.sub_category_cd,
+        MA6.sub_category_name,
+        MA4.vendor_id,
+        MA4.vendor_name,
+        C.barcode,
+        COALESCE (c.receive_qty,0) AS return_qty,
+        COALESCE (c.receive_qty,0)+COALESCE(ret.ret_qty,0) as return_total_qty,/*退货数量 = 退货数量+更正数量*/
+        MA2.ofc,oper.c_operatorname as am_name,
+        MA2.om,oper1.c_operatorname as om_name,
+        ma7.emp_name,
+        A.order_remark
+        into tmp_return_day_table
+        FROM
+        OD0000 A,
+        od0010 C
+        LEFT JOIN ma4200 ma7 on C.create_user_id = ma7.emp_num_id
+        LEFT JOIN lateral(
+        select od0000.order_id,od0010.article_id,
+        sum(coalesce(od0010.correction_difference,0) - coalesce(C.receive_qty,0)) ret_qty /*更正数量*/
+        from od0000
+        left join od0010 on od0000.order_id = od0010.order_id
+        where od0000.order_type='08'
+        and od0000.review_status = '10'
+        and od0000.org_order_id = C.order_id
+        AND od0000.create_ymd || od0000.create_hms = ( SELECT MAX ( od1.create_ymd || od1.create_hms ) FROM od0000 od1 WHERE od1.order_id = od0000.order_id )
+        and od0010.article_id =C.article_id
+        GROUP BY od0000.order_id,od0010.article_id
+        ) ret on true
+        ,MA1100 MA1
+        LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+        LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+        LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+        MA1000 MA2
+        left join t_operator oper on ma2.ofc = oper.c_operatorcode
+        left join t_operator oper1 on ma2.om = oper1.c_operatorcode,
+        MA2000 MA4
+        WHERE
+        A.order_differentiate = '0'
+        AND A.order_type = '02'
+        AND A.order_sts = '04'
+        AND A.review_status = 20
+        AND A.order_id = C.order_id
+        AND C.article_id = MA1.article_id
+        AND #{param.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+        AND C.store_cd = MA2.store_cd
+        AND #{param.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+        AND C.vendor_id = MA4.vendor_id
+        AND #{param.businessDate} BETWEEN MA4.effective_start_date
+        AND MA4.effective_end_date
+        AND A.store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.vendorCd!=null and param.vendorCd!=''">
+            AND lower(C.vendor_id) like lower(CONCAT('%',#{param.vendorCd},'%'))
+        </if>
+        <if test="param.vendorName!=null and param.vendorName!=''">
+            AND lower(MA4.vendor_name) like lower(CONCAT('%',#{param.vendorName},'%'))
+        </if>
+        <include refid="returnedDailyCondition"></include>;
+        CREATE  INDEX  articleNameIndex ON tmp_return_day_table  USING btree (barcode,article_name,article_name_en,article_short_name,article_short_name_en);
+       select count(1) from
+       (select
+        tmp.order_date,
+        tmp.order_id,
+        tmp.article_id,
+        tmp.article_name,
+        tmp.store_cd,
+        tmp.store_name,
+        tmp.pma_cd,
+        tmp.pma_name,
+        tmp.category_cd,
+        tmp.category_name,
+        tmp.sub_category_cd,
+        tmp.sub_category_name,
+        tmp.vendor_id,
+        tmp.vendor_name,
+        tmp.barcode,
+        tmp.return_qty,
+        tmp.return_total_qty,/*退货数量 = 退货数量+更正数量*/
+        tmp.am_name,
+        tmp.om_name,
+        tmp.emp_name,
+        tmp.order_remark
+        from tmp_return_day_table tmp
+        where 1=1
+        <if test="param.articleName !=null and param.articleName !=''">
+            AND concat(lower( tmp.article_id ),'',lower( tmp.article_name ),'',lower( tmp.article_name_en ),'',lower(
+            tmp.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
+        </if>
+        <if test="param.barcode !=null and param.barcode !=''">
+            AND lower(tmp.barcode) like lower(CONCAT('%',#{param.barcode},'%'))
+        </if>) as tmp_alias
+    </select>
+    <select id="searchCount" parameterType="cn.com.bbut.iy.itemmaster.dto.VendorReturnedDaily.VendorReturnedDailyParamDTO"
+        resultType="int">
+        select   count(1) from (SELECT DISTINCT
+        A.order_date,
+        C.order_id,
+        C.article_id,
+        MA1.article_name,
+        MA1.article_name_en,
+        MA1.article_short_name,
+        MA1.article_short_name_en,
+        C.store_cd,
+        MA2.store_name,
+        MA1.pma_cd,
+        MA3.pma_name,
+        MA5.category_cd,
+        MA5.category_name,
+        MA6.sub_category_cd,
+        MA6.sub_category_name,
+        MA4.vendor_id,
+        MA4.vendor_name,
+        C.barcode,
+        COALESCE (c.receive_qty,0) AS return_qty,
+        COALESCE (c.receive_qty,0)+COALESCE(ret.ret_qty,0) as return_total_qty,/*退货数量 = 退货数量+更正数量*/
+        MA2.ofc,oper.c_operatorname as am_name,
+        MA2.om,oper1.c_operatorname as om_name,
+        ma7.emp_name,
+        A.order_remark
+        FROM
+        OD0000 A,
+        od0010 C
+        LEFT JOIN ma4200 ma7 on C.create_user_id = ma7.emp_num_id
+        LEFT JOIN lateral(
+        select od0000.order_id,od0010.article_id,
+        sum(coalesce(od0010.correction_difference,0) - coalesce(C.receive_qty,0)) ret_qty /*更正数量*/
+        from od0000
+        left join od0010 on od0000.order_id = od0010.order_id
+        where od0000.order_type='08'
+        and od0000.review_status = '10'
+        and od0000.org_order_id = C.order_id
+        and od0010.article_id =C.article_id
+        GROUP BY od0000.order_id,od0010.article_id
+        ) ret on true
+        ,MA1100 MA1
+        LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+        LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+        LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+        MA1000 MA2
+        left join t_operator oper on ma2.ofc = oper.c_operatorcode
+        left join t_operator oper1 on ma2.om = oper1.c_operatorcode,
+        MA2000 MA4
+        WHERE
+        A.order_differentiate = '0'
+        AND A.order_type = '02'
+        AND A.order_sts = '04'
+        AND A.review_status = 20
+        AND A.order_id = C.order_id
+        AND C.article_id = MA1.article_id
+        AND #{param.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+        AND C.store_cd = MA2.store_cd
+        AND #{param.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+        AND C.vendor_id = MA4.vendor_id
+        AND #{param.businessDate} BETWEEN MA4.effective_start_date
+        AND MA4.effective_end_date
+        AND A.store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.vendorCd!=null and param.vendorCd!=''">
+            AND lower(C.vendor_id) like lower(CONCAT('%',#{param.vendorCd},'%'))
+        </if>
+        <if test="param.vendorName!=null and param.vendorName!=''">
+            AND lower(MA4.vendor_name) like lower(CONCAT('%',#{param.vendorName},'%'))
+        </if>
+        <include refid="returnedDailyCondition"></include>
+        <if test="param.articleName !=null and param.articleName !=''">
+            AND concat(lower( MA1.article_id ),'',lower( MA1.article_name ),'',lower( MA1.article_name_en ),'',lower( MA1.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
+        </if>
+        <if test="param.barcode !=null and param.barcode !=''">
+            AND lower(MA1.barcode) like lower(CONCAT('%',#{param.barcode},'%'))
+        </if>)as tmp
+    </select>
+
+    <select id="getAMList" parameterType="java.lang.String" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT DISTINCT
+        B.c_operatorcode k,
+        CONCAT(B.c_operatorcode,' ',B.c_operatorname) v
+        FROM
+        MA1000 A,
+        t_operator B,
+        OD0000 C
+        WHERE
+        A.OFC = B.c_operatorcode
+        AND C.store_cd = A.store_cd
+        <if test="flag!=null and flag!=''">
+            AND C.order_differentiate = #{flag}
+            AND C.order_type = '02'
+        </if>
+        <if test="v!=null and v!=''">
+            AND (
+            lower(B.c_operatorcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(B.c_operatorcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+    </select>
+
+    <select id="getOMList" parameterType="java.lang.String" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT DISTINCT
+        B.c_operatorcode k,
+        CONCAT(B.c_operatorcode,' ',B.c_operatorname) v
+        FROM
+        MA1000 A,
+        t_operator B,
+        OD0000 C
+        WHERE
+        A.om = B.c_operatorcode
+        AND C.store_cd = A.store_cd
+        <if test="flag!=null and flag!=''">
+            AND C.order_differentiate = #{flag}
+            AND C.order_type = '02'
+        </if>
+        <if test="v!=null and v!=''">
+            AND (
+            lower(B.c_operatorcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(B.c_operatorcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+    </select>
+
+    <select id="dcDailySearch1" parameterType="cn.com.bbut.iy.itemmaster.dto.VendorReturnedDaily.VendorReturnedDailyParamDTO"
+            resultMap="resultItemMap">
+        SELECT DISTINCT
+        A.order_date,
+        C.order_id,
+        C.article_id,
+        MA1.article_name,
+        C.store_cd,
+        MA2.store_name,
+        MA1.pma_cd,
+        MA3.pma_name,
+        MA5.category_cd,
+        MA5.category_name,
+        MA6.sub_category_cd,
+        MA6.sub_category_name,
+        A.delivery_center_id AS delivery_center_id,
+        d.warehouse_name AS delivery_center_name,
+        C.barcode,
+        COALESCE (c.receive_qty,0) AS return_qty,
+        COALESCE (c.receive_qty,0)+COALESCE(ret.ret_qty,0) as return_total_qty,/*退货数量 = 退货数量+更正数量*/
+        MA2.ofc,oper.c_operatorname as am_name,
+        MA2.om,oper1.c_operatorname as om_name,
+        ma7.emp_name,
+        A.order_remark
+        FROM
+        OD0000 A
+        LEFT JOIN ma5321 d ON d.warehouse_no = A.delivery_center_id,
+        od0010 C
+        LEFT JOIN ma4200 ma7 on C.create_user_id = ma7.emp_num_id
+        LEFT JOIN lateral(
+        select od0000.order_id,od0010.article_id,
+        sum(coalesce(od0010.correction_difference,0) - coalesce(C.receive_qty,0)) ret_qty /*更正数量*/
+        from od0000
+        left join od0010 on od0000.order_id = od0010.order_id
+        where od0000.order_type='08'
+        and od0000.review_status = '10'
+        and od0000.org_order_id = C.order_id
+        AND od0000.create_ymd || od0000.create_hms = ( SELECT MAX ( od1.create_ymd || od1.create_hms ) FROM od0000 od1 WHERE od1.order_id = od0000.order_id )
+        and od0010.article_id =C.article_id
+        GROUP BY od0000.order_id,od0010.article_id
+        ) ret on true
+        ,MA1100 MA1
+        LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+        LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+        LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+        MA1000 MA2
+        left join t_operator oper on ma2.ofc = oper.c_operatorcode
+        left join t_operator oper1 on ma2.om = oper1.c_operatorcode
+        WHERE
+        A.order_differentiate = '1'
+        AND A.order_type = '02'
+        AND A.order_sts = '04'
+        AND A.review_status = 20
+        AND A.order_id = C.order_id
+        AND C.article_id = MA1.article_id
+        AND #{param.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+        AND C.store_cd = MA2.store_cd
+        AND #{param.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+        AND A.store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.deliveryCenterId != null and param.deliveryCenterId != ''" >
+            AND A.delivery_center_id = #{param.deliveryCenterId}
+        </if>
+        <include refid="returnedDailyCondition"></include>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+    <select id="dcDailySearch" parameterType="cn.com.bbut.iy.itemmaster.dto.VendorReturnedDaily.VendorReturnedDailyParamDTO"
+            resultMap="resultItemMap">
+        drop table  if exists tmp_vendor_return_dc;
+        SELECT DISTINCT
+        A.order_date,
+        C.order_id,
+        C.article_id,
+        MA1.article_name,
+        MA1.article_name_en,
+        MA1.article_short_name,
+        MA1.article_short_name_en,
+        C.store_cd,
+        MA2.store_name,
+        MA1.pma_cd,
+        MA3.pma_name,
+        MA5.category_cd,
+        MA5.category_name,
+        MA6.sub_category_cd,
+        MA6.sub_category_name,
+        A.delivery_center_id AS delivery_center_id,
+        d.warehouse_name AS delivery_center_name,
+        C.barcode,
+        COALESCE (c.receive_qty,0) AS return_qty,
+        COALESCE (c.receive_qty,0)+COALESCE(ret.ret_qty,0) as return_total_qty,/*退货数量 = 退货数量+更正数量*/
+        MA2.ofc,oper.c_operatorname as am_name,
+        MA2.om,oper1.c_operatorname as om_name,
+        ma7.emp_name,
+        A.order_remark
+        into tmp_vendor_return_dc
+        FROM
+        OD0000 A
+        LEFT JOIN ma5321 d ON d.warehouse_no = A.delivery_center_id,
+        od0010 C
+        LEFT JOIN ma4200 ma7 on C.create_user_id = ma7.emp_num_id
+        LEFT JOIN lateral(
+        select od0000.order_id,od0010.article_id,
+        sum(coalesce(od0010.correction_difference,0) - coalesce(C.receive_qty,0)) ret_qty /*更正数量*/
+        from od0000
+        left join od0010 on od0000.order_id = od0010.order_id
+        where od0000.order_type='08'
+        and od0000.review_status = '10'
+        and od0000.org_order_id = C.order_id
+        AND od0000.create_ymd || od0000.create_hms = ( SELECT MAX ( od1.create_ymd || od1.create_hms ) FROM od0000 od1 WHERE od1.order_id = od0000.order_id )
+        and od0010.article_id =C.article_id
+        GROUP BY od0000.order_id,od0010.article_id
+        ) ret on true
+        ,MA1100 MA1
+        LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+        LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+        LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+        MA1000 MA2
+        left join t_operator oper on ma2.ofc = oper.c_operatorcode
+        left join t_operator oper1 on ma2.om = oper1.c_operatorcode
+        WHERE
+        A.order_differentiate = '1'
+        AND A.order_type = '02'
+        AND A.order_sts = '04'
+        AND A.review_status = 20
+        AND A.order_id = C.order_id
+        AND C.article_id = MA1.article_id
+        AND #{param.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+        AND C.store_cd = MA2.store_cd
+        AND #{param.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+        AND A.store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.deliveryCenterId != null and param.deliveryCenterId != ''" >
+            AND A.delivery_center_id = #{param.deliveryCenterId}
+        </if>
+        <include refid="returnedDailyCondition"></include>;
+        CREATE  INDEX  articleNameToDcBarcodeIndex ON tmp_vendor_return_dc  USING btree (barcode,article_name,article_name_en,article_short_name,article_short_name_en);
+        select
+        tmp.order_date,
+        tmp.order_id,
+        tmp.article_id,
+        tmp.article_name,
+        tmp.article_name,
+        tmp.article_name_en,
+        tmp.article_short_name,
+        tmp.article_short_name_en,
+        tmp.store_cd,
+        tmp.store_name,
+        tmp.pma_cd,
+        tmp.pma_name,
+        tmp.category_cd,
+        tmp.category_name,
+        tmp.sub_category_cd,
+        tmp.sub_category_name,
+        tmp.delivery_center_id,
+        tmp.delivery_center_name,
+        tmp.barcode,
+        tmp.return_qty,
+        tmp.return_total_qty,/*退货数量 = 退货数量+更正数量*/
+        tmp.am_name,
+        tmp.om_name,
+        tmp.emp_name,
+        tmp.order_remark
+        from tmp_vendor_return_dc tmp
+        where 1=1
+        <if test="param.barcode !=null and param.barcode !=''">
+            AND lower(tmp.barcode) like lower(CONCAT('%',#{param.barcode},'%'))
+        </if>
+        <if test="param.articleName !=null and param.articleName !=''">
+            AND concat(lower( tmp.article_id ),'',lower( tmp.article_name ),'',lower( tmp.article_name_en ),'',lower(
+            tmp.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
+        </if>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+
+    <select id="dcDailySearchCount" parameterType="cn.com.bbut.iy.itemmaster.dto.VendorReturnedDaily.VendorReturnedDailyParamDTO"
+            resultType="int">
+        SELECT count(cc.*) from
+        (SELECT DISTINCT
+        A.order_date,
+        C.order_id,
+        C.article_id,
+        MA1.article_name,
+        C.store_cd,
+        MA2.store_name,
+        MA1.pma_cd,
+        MA3.pma_name,
+        MA5.category_cd,
+        MA5.category_name,
+        MA6.sub_category_cd,
+        MA6.sub_category_name,
+        A.delivery_center_id AS delivery_center_id,
+        d.warehouse_name AS delivery_center_name,
+        C.barcode,
+        COALESCE (c.receive_qty,0) AS return_qty,
+        COALESCE (c.receive_qty,0)+COALESCE(ret.ret_qty,0) as return_total_qty,/*退货数量 = 退货数量+更正数量*/
+        MA2.ofc,oper.c_operatorname as am_name,
+        MA2.om,oper1.c_operatorname as om_name,
+        ma7.emp_name,
+        A.order_remark
+        FROM
+        OD0000 A
+        LEFT JOIN ma5321 d ON d.warehouse_no = A.delivery_center_id,
+        od0010 C
+        LEFT JOIN ma4200 ma7 on C.create_user_id = ma7.emp_num_id
+        LEFT JOIN lateral(
+        select od0000.order_id,od0010.article_id,
+        sum(coalesce(od0010.correction_difference,0) - coalesce(C.receive_qty,0)) ret_qty /*更正数量*/
+        from od0000
+        left join od0010 on od0000.order_id = od0010.order_id
+        where od0000.order_type='08'
+        and od0000.review_status = '10'
+        and od0000.org_order_id = C.order_id
+        AND od0000.create_ymd || od0000.create_hms = ( SELECT MAX ( od1.create_ymd || od1.create_hms ) FROM od0000 od1 WHERE od1.order_id = od0000.order_id )
+        and od0010.article_id =C.article_id
+        GROUP BY od0000.order_id,od0010.article_id
+        ) ret on true
+        ,MA1100 MA1
+        LEFT JOIN MA0080 MA3 ON MA1.pma_cd = MA3.pma_cd
+        LEFT JOIN MA0090 MA5 ON MA1.category_cd = MA5.category_cd
+        LEFT JOIN MA0100 MA6 ON MA1.sub_category_cd = MA6.sub_category_cd,
+        MA1000 MA2
+        left join t_operator oper on ma2.ofc = oper.c_operatorcode
+        left join t_operator oper1 on ma2.om = oper1.c_operatorcode
+        WHERE
+        A.order_differentiate = '1'
+        AND A.order_type = '02'
+        AND A.order_sts = '04'
+        AND A.review_status = 20
+        AND A.order_id = C.order_id
+        AND C.article_id = MA1.article_id
+        AND #{param.businessDate} BETWEEN MA1.effective_start_date AND MA1.effective_end_date
+        AND C.store_cd = MA2.store_cd
+        AND #{param.businessDate} BETWEEN MA2.effective_start_date AND MA2.effective_end_date
+        AND A.store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.deliveryCenterId != null and param.deliveryCenterId != ''">
+            AND A.delivery_center_id = #{param.deliveryCenterId}
+        </if>
+        <include refid="returnedDailyCondition"></include>
+        ) cc
+    </select>
+</mapper>

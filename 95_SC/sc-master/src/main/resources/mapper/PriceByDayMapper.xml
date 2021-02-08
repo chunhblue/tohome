@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.PriceByDayMapper">
+
+    <resultMap id="ReBasicInfo" type="cn.com.bbut.iy.itemmaster.dto.priceByDay.PriceByDayDTO">
+        <id column="effective_date" jdbcType="VARCHAR" property="effectiveDate" />
+        <id column="article_id" jdbcType="VARCHAR" property="articleId" />
+        <id column="ma_cd" jdbcType="VARCHAR" property="maCd" />
+        <id column="store_type_cd" jdbcType="VARCHAR" property="storeTypeCd" />
+        <result column="vendor_id" jdbcType="VARCHAR" property="vendorId" />
+        <result column="store_cd" jdbcType="VARCHAR" property="storeCd" />
+        <result column="order_promotion_cd" jdbcType="VARCHAR" property="orderPromotionCd" />
+        <result column="order_price" jdbcType="DECIMAL" property="orderPrice" />
+        <result column="sale_promotion_cd" jdbcType="VARCHAR" property="salePromotionCd" />
+        <result column="sale_price" jdbcType="DECIMAL" property="sellingPrice" />
+        <result column="base_sale_price" jdbcType="DECIMAL" property="baseSalePrice" />
+        <result column="vendor_name" jdbcType="VARCHAR" property="vendorName" />
+        <result column="article_name" jdbcType="VARCHAR" property="articleName" />
+        <result column="article_name_en" jdbcType="VARCHAR" property="articleNameEn" />
+        <result column="barcode" jdbcType="VARCHAR" property="barcode" />
+        <result column="dep_cd" jdbcType="VARCHAR" property="depCd" />
+        <result column="dep_name" jdbcType="VARCHAR" property="depName" />
+        <result column="pma_cd" jdbcType="VARCHAR" property="pmaCd" />
+        <result column="pma_name" jdbcType="VARCHAR" property="pmaName" />
+        <result column="category_cd" jdbcType="VARCHAR" property="categoryCd" />
+        <result column="category_name" jdbcType="VARCHAR" property="categoryName" />
+        <result column="sub_category_cd" jdbcType="VARCHAR" property="subCategoryCd" />
+        <result column="sub_category_name" jdbcType="VARCHAR" property="subCategoryName" />
+        <result column="lifecycle_status" jdbcType="VARCHAR" property="lifecycleStatus" />
+        <result column="store_type_name" jdbcType="VARCHAR" property="storeTypeName" />
+        <result column="order_sts" jdbcType="VARCHAR" property="orderSts" />
+        <result column="selling_sts" jdbcType="VARCHAR" property="sellingSts" />
+        <result column="cost" jdbcType="DECIMAL" property="cost" />
+    </resultMap>
+
+    <sql id="selectCondition">
+        AND effective_date = #{effectiveDate,jdbcType=VARCHAR}
+        <if test="articleId != null and articleId != ''">
+            AND article_id LIKE CONCAT('%',#{articleId,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="barcode != null and barcode != ''">
+            AND barcode LIKE CONCAT('%',#{barcode,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="depCd != null and depCd != ''">
+            AND dep_cd = #{depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="pmaCd != null and pmaCd != ''">
+            AND pma_cd = #{pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="categoryCd != null and categoryCd != ''">
+            AND category_cd = #{categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="subCategoryCd != null and subCategoryCd != ''">
+            AND sub_category_cd = #{subCategoryCd,jdbcType=VARCHAR}
+        </if>
+    </sql>
+
+    <select id="selectCountByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.priceByDay.PriceByDayParamDTO" resultType="INT">
+        SELECT
+            COUNT (1)
+        FROM (
+            SELECT
+                M.effective_date, M.store_cd, M.vendor_id, M.article_id, M.ma_cd,
+                M.order_price, M.receive_price, M.sale_price, M1.store_name, M1.store_type_cd,
+                M2.vendor_name, M3.article_name, M3.article_name_en, M3.dep_cd, M3.pma_cd,
+                M3.category_cd, M3.sub_category_cd, M4.barcode,M5.base_sale_price
+            FROM (
+                SELECT
+                    effective_date, store_cd, vendor_id, article_id,
+                    ma_cd, order_price, receive_price, sale_price
+                FROM
+                    MA8160
+                WHERE effective_date = #{effectiveDate,jdbcType=VARCHAR}
+            ) M
+            JOIN (
+                SELECT
+                    store_cd, store_name,zo_cd, store_type_cd
+                FROM
+                    MA1000
+                WHERE #{effectiveDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            ) M1
+            ON M.store_cd = M1.store_cd
+            JOIN (
+                SELECT vendor_id, vendor_name
+                FROM MA2000
+                WHERE #{effectiveDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            ) M2
+            ON M.vendor_id = M2.vendor_id
+            JOIN (
+                SELECT
+                    article_id, effective_start_date, article_name,
+                    article_name_en, dep_cd, pma_cd, category_cd, sub_category_cd
+                FROM
+                    MA1100
+                WHERE
+                    #{effectiveDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            ) M3
+            ON M.article_id = M3.article_id
+            JOIN MA1130 M5
+                ON M5.article_id = M3.article_id
+                and M5.effective_start_date = M3.effective_start_date
+                and M5.ma_cd = M.ma_cd
+                and M5.structure_cd = M1.zo_cd
+            LEFT JOIN (
+                SELECT
+                    article_id, effective_start_date, barcode
+                FROM
+                    MA1140
+                WHERE is_default = '1'
+            ) M4
+            ON M3.article_id = M4.article_id AND M3.effective_start_date = M4.effective_start_date
+        ) T
+        <where>
+            1=1
+            <if test="articleId != null and articleId != ''">
+                AND T.article_id LIKE CONCAT('%',#{articleId,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="storeCd != null and storeCd != '' ">
+                AND T.store_cd = #{storeCd,jdbcType=VARCHAR}
+            </if>
+            <if test="articleName != null and articleName != ''">
+                AND LOWER(T.article_name) LIKE LOWER(CONCAT('%',#{articleName,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="barcode != null and barcode != ''">
+                AND T.barcode LIKE CONCAT('%',#{barcode,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="depCd != null and depCd != '' and depCd !='999'">
+                AND T.dep_cd = #{depCd,jdbcType=VARCHAR}
+            </if>
+            <if test="pmaCd != null and pmaCd != ''">
+                AND T.pma_cd = #{pmaCd,jdbcType=VARCHAR}
+            </if>
+            <if test="categoryCd != null and categoryCd != ''">
+                AND T.category_cd = #{categoryCd,jdbcType=VARCHAR}
+            </if>
+            <if test="subCategoryCd != null and subCategoryCd != ''">
+                AND T.sub_category_cd = #{subCategoryCd,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+    <!--<select id="selectCountByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.priceByDay.PriceByDayParamDTO" resultType="INT">
+        SELECT
+            COUNT(1)
+        FROM(
+            SELECT
+                M.effective_date, M.article_id, M.ma_cd, M.store_type_cd,
+                M1.dep_cd, M1.pma_cd, M1.category_cd, M1.sub_category_cd,M2.barcode
+            FROM
+                MA8160 M, MA1100 M1, MA1140 M2
+            WHERE
+                M2.is_default = '1'
+                AND M.article_id = M1.article_id
+                AND M.article_id = M2.article_id
+                AND M1.effective_start_date = M2.effective_start_date
+                AND M.effective_date BETWEEN M1.effective_start_date AND M1.effective_end_date
+        ) T
+        <if test="depCd != null and depCd != ''">
+            LEFT JOIN (
+                SELECT dep_cd AS temp1 FROM MA0070
+            ) T2
+            ON T.dep_cd = T2.temp1
+            <if test="pmaCd != null and pmaCd != ''">
+                LEFT JOIN (
+                    SELECT dep_cd AS temp2, pma_cd AS temp3 FROM MA0080
+                ) T3
+                ON T.dep_cd = T3.temp2 AND T.pma_cd = T3.temp3
+                <if test="categoryCd != null and categoryCd != ''">
+                    LEFT JOIN (
+                        SELECT dep_cd AS temp4, pma_cd AS temp5, category_cd AS temp6 FROM MA0090
+                    ) T4
+                    ON T.dep_cd = T4.temp4 AND T.pma_cd = T4.temp5 AND T.category_cd = T4.temp6
+                    <if test="subCategoryCd != null and subCategoryCd != ''">
+                        LEFT JOIN (
+                            SELECT dep_cd AS temp7, pma_cd AS temp8, category_cd AS temp9, sub_category_cd AS temp10 FROM MA0100
+                        ) T5
+                        ON T.dep_cd = T5.temp7 AND T.pma_cd = T5.temp8 AND T.category_cd = T5.temp9 AND T.sub_category_cd = T5.temp10
+                    </if>
+                </if>
+            </if>
+        </if>
+        WHERE 1 = 1
+        <include refid="selectCondition"></include>
+    </select>-->
+
+    <select id="selectListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.priceByDay.PriceByDayParamDTO" resultMap="ReBasicInfo">
+        SELECT
+            T.*, T1.store_type_name, T2.dep_name,
+            T3.pma_name, T4.category_name, T5.sub_category_name
+        FROM (
+            SELECT
+                M.effective_date, M.store_cd, M.vendor_id, M.article_id, M.ma_cd,
+                M.order_price, M.receive_price, M.sale_price, M1.store_name, M1.store_type_cd,
+                M2.vendor_name, M3.article_name, M3.article_name_en, M3.dep_cd, M3.pma_cd,
+                M3.category_cd, M3.sub_category_cd, M4.barcode,M5.base_sale_price
+            FROM (
+                SELECT
+                    effective_date, store_cd, vendor_id, article_id,
+                    ma_cd, order_price, receive_price, sale_price
+                FROM
+                    MA8160
+                WHERE
+                    effective_date = #{effectiveDate,jdbcType=VARCHAR}
+            ) M
+            JOIN (
+                SELECT
+                    store_cd, store_name,zo_cd, store_type_cd
+                FROM
+                    MA1000
+                WHERE #{effectiveDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            ) M1
+            ON M.store_cd = M1.store_cd
+            JOIN (
+                SELECT vendor_id, vendor_name
+                FROM MA2000
+                WHERE #{effectiveDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            ) M2
+            ON M.vendor_id = M2.vendor_id
+            JOIN (
+                SELECT
+                    article_id, effective_start_date, article_name,
+                    article_name_en, dep_cd, pma_cd, category_cd, sub_category_cd
+                FROM
+                    MA1100
+                WHERE
+                    #{effectiveDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            ) M3
+            ON M.article_id = M3.article_id
+            JOIN MA1130 M5
+                ON M5.article_id = M3.article_id
+                and M5.effective_start_date = M3.effective_start_date
+                and M5.ma_cd = M.ma_cd
+                and M5.structure_cd = M1.zo_cd
+            LEFT JOIN (
+                SELECT
+                    article_id, effective_start_date, barcode
+                FROM
+                    MA1140
+                WHERE is_default = '1'
+            ) M4
+            ON M3.article_id = M4.article_id AND M3.effective_start_date = M4.effective_start_date
+        ) T
+        LEFT JOIN (
+            SELECT store_type_cd, store_type_name FROM MA0030
+        ) T1
+        ON T.store_type_cd = T1.store_type_cd
+        LEFT JOIN (
+            SELECT dep_cd, dep_name FROM MA0070
+        ) T2
+        ON T.dep_cd = T2.dep_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, pma_name FROM MA0080
+        ) T3
+        ON T.dep_cd = T3.dep_cd AND T.pma_cd = T3.pma_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, category_cd, category_name FROM MA0090
+        ) T4
+        ON T.dep_cd = T4.dep_cd AND T.pma_cd = T4.pma_cd AND T.category_cd = T4.category_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, category_cd, sub_category_cd, sub_category_name FROM MA0100
+        ) T5
+        ON T.dep_cd = T5.dep_cd AND T.pma_cd = T5.pma_cd AND T.category_cd = T5.category_cd AND T.sub_category_cd = T5.sub_category_cd
+        <where>
+            1=1
+            <if test="articleId != null and articleId != ''">
+                AND T.article_id LIKE CONCAT('%',#{articleId,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="storeCd != null and storeCd != '' ">
+                AND T.store_cd = #{storeCd,jdbcType=VARCHAR}
+            </if>
+            <if test="articleName != null and articleName != ''">
+                AND LOWER(T.article_name) LIKE LOWER(CONCAT('%',#{articleName,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="barcode != null and barcode != ''">
+                AND T.barcode LIKE CONCAT('%',#{barcode,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="depCd != null and depCd != '' and depCd !='999'">
+                AND T.dep_cd = #{depCd,jdbcType=VARCHAR}
+            </if>
+            <if test="pmaCd != null and pmaCd != ''">
+                AND T.pma_cd = #{pmaCd,jdbcType=VARCHAR}
+            </if>
+            <if test="categoryCd != null and categoryCd != ''">
+                AND T.category_cd = #{categoryCd,jdbcType=VARCHAR}
+            </if>
+            <if test="subCategoryCd != null and subCategoryCd != ''">
+                AND T.sub_category_cd = #{subCategoryCd,jdbcType=VARCHAR}
+            </if>
+        </where>
+        ORDER BY T.effective_date, T.article_id
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+
+    <!--    <select id="selectListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.priceByDay.PriceByDayParamDTO" resultMap="ReBasicInfo">-->
+    <!--        SELECT-->
+    <!--            T.*, T1.store_type_name, T2.dep_name,-->
+    <!--            T3.pma_name, T4.category_name, T5.sub_category_name,-->
+    <!--            T6.code_name AS order_sts,-->
+    <!--            T7.code_name AS selling_sts-->
+    <!--        FROM(-->
+    <!--            SELECT-->
+    <!--                M.effective_date, M.article_id, M.ma_cd, M.store_type_cd, M.vendor_id,-->
+    <!--                M.sale_tax_type_cd, M.order_tax_type_cd, M.order_promotion_type,-->
+    <!--                M.order_promotion_cd, M.order_price, M.receive_price, M.sale_promotion_type,-->
+    <!--                M.sale_promotion_cd, M.sale_price, M2.barcode, M1.effective_start_date,-->
+    <!--                M1.article_name, M1.dep_cd, M1.pma_cd, M1.category_cd, M1.sub_category_cd,-->
+    <!--                M1.lifecycle_status-->
+    <!--            FROM-->
+    <!--                MA8160 M, MA1100 M1, MA1140 M2-->
+    <!--            WHERE-->
+    <!--                M2.is_default = '1'-->
+    <!--            AND M.article_id = M1.article_id-->
+    <!--            AND M.article_id = M2.article_id-->
+    <!--            AND M1.effective_start_date = M2.effective_start_date-->
+    <!--            AND M.effective_date BETWEEN M1.effective_start_date AND M1.effective_end_date-->
+    <!--            <include refid="selectCondition"></include>-->
+    <!--        ) T-->
+    <!--        LEFT JOIN (-->
+    <!--            SELECT store_type_cd, store_type_name FROM MA0030-->
+    <!--        ) T1-->
+    <!--        ON T.store_type_cd = T1.store_type_cd-->
+    <!--        LEFT JOIN (-->
+    <!--            SELECT dep_cd, dep_name FROM MA0070-->
+    <!--        ) T2-->
+    <!--        ON T.dep_cd = T2.dep_cd-->
+    <!--        LEFT JOIN (-->
+    <!--            SELECT dep_cd, pma_cd, pma_name FROM MA0080-->
+    <!--        ) T3-->
+    <!--        ON T.dep_cd = T3.dep_cd AND T.pma_cd = T3.pma_cd-->
+    <!--        LEFT JOIN (-->
+    <!--            SELECT dep_cd, pma_cd, category_cd, category_name FROM MA0090-->
+    <!--        ) T4-->
+    <!--        ON T.dep_cd = T4.dep_cd AND T.pma_cd = T4.pma_cd AND T.category_cd = T4.category_cd-->
+    <!--        LEFT JOIN (-->
+    <!--            SELECT dep_cd, pma_cd, category_cd, sub_category_cd, sub_category_name FROM MA0100-->
+    <!--        ) T5-->
+    <!--        ON T.dep_cd = T5.dep_cd AND T.pma_cd = T5.pma_cd AND T.category_cd = T5.category_cd AND T.sub_category_cd = T5.sub_category_cd-->
+    <!--        LEFT JOIN (-->
+    <!--            SELECT code_value, code_name FROM CM9010 WHERE code_type = '00045'-->
+    <!--        ) T6-->
+    <!--        ON T.order_promotion_type = T6.code_value-->
+    <!--        LEFT JOIN (-->
+    <!--            SELECT code_value, code_name FROM CM9010 WHERE code_type = '00045'-->
+    <!--        ) T7-->
+    <!--        ON T.sale_promotion_type = T7.code_value-->
+    <!--        ORDER BY T.effective_date, T.article_id-->
+    <!--        <if test="flg">-->
+    <!--            LIMIT ${rows} OFFSET ${limitStart}-->
+    <!--        </if>-->
+    <!--    </select>-->
+
+</mapper>

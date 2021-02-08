@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.inventoryQtyCorMapper" >
+
+    <resultMap id="GetListMap" type="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersGridDTO" >
+        <id column="store_cd" property="storeCd" jdbcType="CHAR" />
+        <id column="voucher_no" property="voucherNo" jdbcType="VARCHAR" />
+        <id column="voucher_type" property="voucherType" jdbcType="VARCHAR" />
+        <id column="voucher_date" property="voucherDate" jdbcType="CHAR" />
+    </resultMap>
+
+    <resultMap id="ReItemInfo" type="cn.com.bbut.iy.itemmaster.dto.inventory.ItemInfoDTO">
+        <result column="article_id" property="itemCode" jdbcType="VARCHAR" />
+        <result column="barcode" property="barcode" jdbcType="VARCHAR" />
+        <result column="spec" property="spec" jdbcType="VARCHAR" />
+        <result column="sales_unit_id" property="uom" jdbcType="VARCHAR" />
+        <result column="avg_cost_notax" property="avgCost" jdbcType="NUMERIC" />
+        <result column="order_tax_rate" property="taxRate" jdbcType="NUMERIC" />
+    </resultMap>
+    <!--收退货明细-->
+    <resultMap id="ReStoreInfo" type="cn.com.bbut.iy.itemmaster.dto.od0010_t.OD0010TDTO">
+        <result column="order_id" property="orderId" jdbcType="VARCHAR" />
+        <result column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <result column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <result column="receive_id" property="receiveId" jdbcType="VARCHAR" />
+        <result column="receive_qty" property="receiveQty" jdbcType="NUMERIC" />
+        <result column="order_qty" property="returnQty" jdbcType="NUMERIC" />
+        <result column="lastCorrectionDifference" property="last_correction_difference" jdbcType="NUMERIC" />
+        <result column="correctionDifference" property="correction_difference" jdbcType="NUMERIC" />
+    </resultMap>
+    <!--库存头档-->
+    <resultMap id="ReSk0010" type="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0010DTO">
+        <id column="store_cd" property="storeCd" jdbcType="CHAR" />
+        <id column="voucher_no" property="voucherNo" jdbcType="VARCHAR" />
+        <id column="voucher_type" property="voucherType" jdbcType="VARCHAR" />
+        <id column="voucher_no1" property="voucherNo1" jdbcType="VARCHAR" />
+    </resultMap>
+    <!--库存明细-->
+    <resultMap id="ReSk0020" type="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO">
+        <id column="store_cd" property="storeCd" jdbcType="CHAR" />
+        <id column="voucher_no" property="voucherNo" jdbcType="VARCHAR" />
+        <id column="voucher_type" property="voucherType" jdbcType="VARCHAR" />
+        <id column="voucher_date" property="voucherDate" jdbcType="CHAR" />
+        <id column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <result column="qty1" property="qty1" jdbcType="NUMERIC" />
+        <result column="qty2" property="qty2" jdbcType="NUMERIC" />
+    </resultMap>
+    <!--盘点-->
+    <resultMap id="resultItem" type="cn.com.bbut.iy.itemmaster.dto.stocktakeProcess.StocktakeProcessItemsDTO">
+        <result column="barcode" property="barcode"/>
+        <result column="article_id" property="articleId"/>
+        <result column="article_name" property="articleName"/>
+        <result column="sales_unit_id" property="uom"/>
+        <result column="spec" property="spec"/>
+        <result column="bad_qty" property="badQty"/>
+        <result column="on_hand_qty" property="onHandQty"/>
+        <result column="second_qty" property="secondQty"/>
+        <result column="c_qty" property="changeQty"/>
+        <result column="base_sale_price" property="baseSalePrice"/>
+    </resultMap>
+    
+    <select id="getVoucherHead" resultMap="ReSk0010">
+        select voucher_no,voucher_type,voucher_no1,store_cd
+                from sk0010
+                where voucher_no = #{voucherNo,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getTranferHeadList" resultMap="ReSk0010">
+        select voucher_no,voucher_type,voucher_no1,store_cd
+        from sk0010
+                where voucher_no1 = #{voucherNo1,jdbcType=VARCHAR}
+                and store_cd = #{storeCd,jdbcType=VARCHAR}
+                and voucher_type = #{voucherType,jdbcType=VARCHAR}
+                order by (create_ymd || create_hms) desc
+    </select>
+
+    <select id="getVoucherItemList" resultMap="ReSk0020">
+        select voucher_no,voucher_type,store_cd,article_id,coalesce(qty1,0) qty1,coalesce(qty2,0) qty2
+        from sk0020
+        where voucher_no = #{voucherNo, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getReturnItemList" resultMap="ReStoreInfo">
+        select order_id,store_cd,article_id,coalesce(order_qty,0) order_qty,coalesce(receive_qty,0) receive_qty,
+        coalesce(correction_difference,0) correction_difference, last_correction_difference
+        from od0010
+        where order_id = #{orderId, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getReceiveItemList" resultMap="ReStoreInfo">
+        select receive_id,store_cd,article_id,coalesce(receive_qty,0) receive_qty
+        from od0010_t
+        where receive_id = #{orderId, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getStockItemList" resultMap="resultItem">
+        SELECT
+            pi2.barcode,
+            pi1.article_id,
+            pi1.real_time_qty AS on_hand_qty,
+            pi1.c_qty,
+            pi2.bad_qty,
+            pi1.pi_qty AS second_qty,
+            coalesce(pi1.variance_qty,0) AS variance
+        FROM
+            pi0125 pi1
+            LEFT JOIN pi0120 pi2
+            ON pi1.store_cd = pi2.store_cd
+            AND pi1.pi_cd = pi2.pi_cd
+            AND pi1.pi_date = pi2.pi_date
+            AND pi1.article_id = pi2.article_id
+        WHERE
+            pi1.pi_cd = #{piCd}
+            AND pi1.store_cd = #{storeCd}
+            AND pi1.pi_qty IS NOT NULL
+        order by
+            pi1.variance_qty DESC
+    </select>
+</mapper>

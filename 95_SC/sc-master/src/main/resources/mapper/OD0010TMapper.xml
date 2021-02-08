@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.OD0010TMapper">
+
+	<resultMap id="ReOD0010TMap" type="cn.com.bbut.iy.itemmaster.dto.od0010_t.OD0010TDTO">
+		<id column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+		<id column="order_id" property="orderId" jdbcType="VARCHAR" />
+		<id column="serial_no" property="serialNo" jdbcType="VARCHAR" />
+		<id column="article_id" property="articleId" jdbcType="VARCHAR" />
+		<result column="barcode" property="barcode" jdbcType="VARCHAR" />
+		<result column="vendor_id" property="vendorId" jdbcType="VARCHAR" />
+		<result column="promotion_id" property="promotionId" jdbcType="VARCHAR" />
+		<result column="order_unit" property="orderUnit" jdbcType="VARCHAR" />
+		<result column="order_qty" property="orderQty" jdbcType="DECIMAL" />
+		<result column="order_nocharge_qty" property="orderNoChargeQty" jdbcType="DECIMAL" />
+		<result column="order_total_qty" property="orderTotalQty" jdbcType="DECIMAL" />
+		<result column="order_price" property="orderPrice" jdbcType="DECIMAL" />
+		<result column="order_amt" property="orderAmt" jdbcType="DECIMAL" />
+		<result column="order_amt_notax" property="orderAmtNoTax" jdbcType="DECIMAL" />
+		<result column="order_tax" property="orderTax" jdbcType="DECIMAL" />
+		<result column="receive_price" property="receivePrice" jdbcType="DECIMAL" />
+		<result column="receive_qty" property="receiveQty" jdbcType="DECIMAL" />
+		<result column="receive_nocharge_qty" property="receiveNoChargeQty" jdbcType="DECIMAL" />
+		<result column="receive_total_qty" property="receiveTotalQty" jdbcType="DECIMAL" />
+		<result column="receive_total_amt" property="receiveTotalAmt" jdbcType="DECIMAL" />
+		<result column="receive_total_amt_notax" property="receiveTotalAmtNoTax" jdbcType="DECIMAL" />
+		<result column="receive_tax" property="receiveTax" jdbcType="DECIMAL" />
+		<result column="article_name" property="articleName" jdbcType="VARCHAR" />
+		<result column="article_name_en" property="articleNameEn" jdbcType="VARCHAR" />
+		<result column="different_reasons" property="differenceReason" jdbcType="VARCHAR" />
+		<result column="difference_reason" property="differenceReason" jdbcType="VARCHAR" />
+		<result column="difference_reason_text" property="differenceReasonText" jdbcType="VARCHAR" />
+		<result column="tax_rate" property="taxRate" jdbcType="DECIMAL" />
+		<result column="is_free_item" property="isFreeItem" jdbcType="CHAR"/>
+		<result column="is_free_item_t" property="isFreeItemText" jdbcType="CHAR"/>
+	</resultMap>
+
+	<select id="selectDetail" resultMap="ReOD0010TMap" parameterType="cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TParamDTO">
+		SELECT
+			T.*, T1.article_name
+		FROM (
+			SELECT
+				OD0010_T.store_cd, OD0010_T.order_id, OD0010_T.serial_no, OD0010_T.article_id, OD0010_T.barcode,
+			    OD0010_T.vendor_id, OD0010_T.promotion_id,OD0010_T.order_unit, OD0010_T.order_qty,
+			    OD0010_T.order_nocharge_qty, OD0010_T.order_price, OD0010_T.order_amt, OD0010_T.order_tax,
+				OD0010_T.order_amt_notax, OD0010_T.receive_price, OD0010_T.receive_total_qty,
+				OD0010_T.receive_total_amt,OD0010_T.receive_total_amt_notax, OD0010_T.receive_tax,
+				OD0010_T.receive_qty, OD0010_T.receive_nocharge_qty,
+				reason.code_value difference_reason,concat(reason.code_value,' ',reason.code_name) difference_reason_text,
+                COALESCE(OD0010_T.order_qty,0) + COALESCE(OD0010_T.order_nocharge_qty,0) AS order_total_qty,
+                OD0010.tax_rate,OD0010_T.is_free_item,OD0010_T.is_free_item as is_free_item_t
+			FROM OD0010_T left join (select DISTINCT code_value,code_name from CM9010
+				where code_type='00560'
+				AND effective_sts = '10') reason
+				on OD0010_T.different_reasons = reason.code_value
+				left join OD0010
+				on OD0010.store_cd = OD0010_T.store_cd
+				and OD0010.order_id = OD0010_T.order_id
+				and OD0010.article_id = OD0010_T.article_id
+				and od0010.is_free_item = od0010_t.is_free_item
+			WHERE receive_id = #{receiveId,jdbcType=VARCHAR}
+		) T
+		LEFT JOIN (
+			SELECT article_id, article_name FROM MA1100
+			WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+		) T1
+		ON T.article_id = T1.article_id
+		ORDER BY T.serial_no
+	</select>
+
+	<delete id="deleteCopy"  parameterType="cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TDTO">
+		delete from OD0010_T where
+		store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND order_id = #{orderId,jdbcType=VARCHAR}
+	</delete>
+
+    <insert id="insertByCopy" parameterType="cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TDTO">
+        INSERT INTO
+			OD0010_T
+		SELECT
+		    #{receiveId,jdbcType=VARCHAR}, store_cd, serial_no, article_id, order_id,
+		    barcode, vendor_id, promotion_id, order_unit, order_qty, order_nocharge_qty,
+		    order_price, order_amt, order_amt_notax, order_tax, receive_price,
+		    coalesce(order_qty,0) AS receive_qty, coalesce(order_nocharge_qty,0) AS receive_nocharge_qty,
+		    (coalesce(order_qty,0) + coalesce(order_nocharge_qty,0)) AS receive_total_qty,
+		    order_amt_notax AS receive_total_amt_notax,
+		    order_amt AS receive_total_amt, order_tax AS receive_tax,upload_flg,null as update,null as different_reasons,
+		    is_free_item
+		FROM
+			OD0010
+		WHERE
+            store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND order_id = #{orderId,jdbcType=VARCHAR}
+    </insert>
+
+    <insert id="insertByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.od0010_t.OD0010TDTO">
+        INSERT INTO
+			OD0010_T
+		SELECT
+		    #{receiveId,jdbcType=VARCHAR}, store_cd, serial_no, article_id, order_id,
+		    barcode, vendor_id, promotion_id, order_unit, order_qty, order_nocharge_qty,
+		    order_price, order_amt, order_amt_notax, order_tax, receive_price,
+			#{receiveQty,jdbcType=DECIMAL},#{receiveNoChargeQty,jdbcType=DECIMAL},#{receiveTotalQty,jdbcType=DECIMAL},
+		    #{receiveTotalAmt,jdbcType=DECIMAL},
+            #{receiveTotalAmtNoTax,jdbcType=DECIMAL}, #{receiveTax,jdbcType=DECIMAL},
+            upload_flg,upload_date,#{differenceReason,jdbcType=VARCHAR},is_free_item
+		FROM
+			OD0010
+		WHERE
+            store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND order_id = #{orderId,jdbcType=VARCHAR}
+        AND serial_no = #{serialNo,jdbcType=VARCHAR}
+        AND article_id = #{articleId,jdbcType=VARCHAR}
+    </insert>
+
+	<update id="updateOldDetails" parameterType="cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TDTO">
+        UPDATE OD0010
+        SET
+            receive_qty = T.receive_qty,
+			receive_nocharge_qty = T.receive_nocharge_qty,
+			receive_total_qty = T.receive_total_qty,
+			receive_total_amt = T.receive_total_amt,
+			receive_total_amt_notax = T.receive_total_amt_notax,
+			receive_tax = T.receive_tax
+        FROM (
+			SELECT
+				store_cd, order_id, article_id,
+				SUM(receive_qty) AS receive_qty,
+				SUM(receive_nocharge_qty) AS receive_nocharge_qty,
+				SUM(receive_total_qty) AS receive_total_qty,
+				SUM(receive_total_amt) AS receive_total_amt,
+				SUM(receive_total_amt_notax) AS receive_total_amt_notax,
+				SUM(receive_tax) AS receive_tax,
+				different_reasons
+			FROM OD0010_T
+			WHERE
+				receive_id=#{receiveId,jdbcType=VARCHAR}
+			GROUP BY store_cd, order_id, article_id,different_reasons
+        ) T
+        WHERE
+        	OD0010.store_cd = T.store_cd
+		AND OD0010.order_id = T.order_id
+		AND OD0010.article_id = T.article_id
+    </update>
+
+	<!-- 修正传票获取原数据 -->
+	<select id="selectReceiveModify" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyParamDTO"
+			resultType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyDetailsDTO">
+		SELECT
+			T.*, T0.order_price AS orderPrice, T0.order_qty AS orderQty, T0.order_amt AS orderAmt,
+			T1.article_name, T1.article_name_en, T1.spec
+		FROM (
+			SELECT
+				store_cd AS storeCd, receive_id AS orderId, serial_no AS serialNo, article_id AS articleId,
+				barcode, vendor_id AS vendorId, order_unit AS orderUnit, receive_price AS rrOrderPrice,
+				receive_qty AS rrOrderQty, order_amt AS rrOrderAmt, order_id,order_nocharge_qty,receive_nocharge_qty,
+				is_free_item,
+				is_free_item as is_free_item_text
+			FROM OD0010_T
+			WHERE receive_id = #{orderId,jdbcType=VARCHAR}
+			AND store_cd = #{storeCd,jdbcType=VARCHAR}
+		) T
+		LEFT JOIN (
+			SELECT DISTINCT store_cd, order_id, article_id, order_price, order_qty, order_amt FROM OD0010
+		) T0
+		ON T.order_id = T0.order_id AND T.storeCd = T0.store_cd AND T.articleId = T0.article_id
+		LEFT JOIN (
+			SELECT article_id, article_name, article_name_en, spec FROM MA1100
+			WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+		) T1
+		ON T.articleId = T1.article_id
+		ORDER BY T.serialNo
+		LIMIT ${rows} OFFSET ${limitStart}
+	</select>
+
+	<select id="selectCountReceiveModify" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyParamDTO" resultType="INT" >
+        SELECT
+			count(*)
+		FROM (
+			SELECT
+				store_cd AS storeCd, receive_id AS orderId, serial_no AS serialNo, article_id AS articleId,
+				barcode, vendor_id AS vendorId, order_unit AS orderUnit, receive_price AS rrOrderPrice,
+				receive_qty AS rrOrderQty, order_amt AS rrOrderAmt, order_id,order_nocharge_qty,receive_nocharge_qty,
+				is_free_item,
+				is_free_item as is_free_item_text
+			FROM OD0010_T
+			WHERE receive_id = #{orderId,jdbcType=VARCHAR}
+			AND store_cd = #{storeCd,jdbcType=VARCHAR}
+		) T
+		LEFT JOIN (
+			SELECT DISTINCT store_cd, order_id, article_id, order_price, order_qty, order_amt FROM OD0010
+		) T0
+		ON T.order_id = T0.order_id AND T.storeCd = T0.store_cd AND T.articleId = T0.article_id
+		LEFT JOIN (
+			SELECT article_id, article_name, article_name_en, spec FROM MA1100
+			WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+		) T1
+		ON T.articleId = T1.article_id
+    </select>
+
+	<delete id="deleteByReceiveId">
+        DELETE FROM OD0010_T
+        WHERE receive_id = #{receiveId,jdbcType=VARCHAR}
+    </delete>
+
+</mapper>

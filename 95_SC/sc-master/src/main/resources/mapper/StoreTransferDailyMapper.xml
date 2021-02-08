@@ -1,0 +1,611 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.StoreTransferDailyMapper">
+
+    <resultMap id="resultItemMap" type="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO">
+        <id column="store_cd" property="storeCd" jdbcType="CHAR"/>
+        <id column="store_name" property="storeName" jdbcType="CHAR"/>
+        <id column="voucher_no" property="voucherNo" jdbcType="VARCHAR"/>
+        <id column="voucher_type" property="voucherType" jdbcType="VARCHAR"/>
+        <id column="voucher_date" property="voucherDate" jdbcType="CHAR"/>
+        <id column="article_id" property="articleId" jdbcType="VARCHAR"/>
+        <id column="store_cd1" property="storeCd1" jdbcType="CHAR"/>
+        <id column="adjust_reason" property="adjustReason" jdbcType="VARCHAR"/>
+        <result column="barcode" property="barcode" jdbcType="CHAR"/>
+        <result column="sales_unit_id" property="salesUnitId" jdbcType="VARCHAR"/>
+        <result column="qty1" property="qty1" jdbcType="NUMERIC"/>
+        <result column="qty2" property="qty2" jdbcType="NUMERIC"/>
+        <result column="price" property="price" jdbcType="NUMERIC"/>
+        <result column="price_notax" property="priceNoTax" jdbcType="NUMERIC"/>
+        <result column="amt_notax" property="amtNoTax" jdbcType="NUMERIC"/>
+        <result column="amt_tax" property="amtTax" jdbcType="NUMERIC"/>
+        <result column="amt" property="amt" jdbcType="NUMERIC"/>
+        <result column="upload_flg" property="uploadFlg" jdbcType="CHAR"/>
+        <result column="upload_date" property="uploadDate" jdbcType="CHAR"/>
+        <result column="display_seq" property="displaySeq" jdbcType="NUMERIC"/>
+        <result column="nr_update_flg" property="nrUpdateFlg" jdbcType="CHAR"/>
+        <result column="article_name" property="articleName" jdbcType="VARCHAR"/>
+        <result column="unit_name" property="uom" jdbcType="VARCHAR"/>
+        <result column="spec" property="spec" jdbcType="VARCHAR"/>
+        <result column="reason" property="adjustReasonText" jdbcType="VARCHAR"/>
+        <result column="dep_name" property="depName" jdbcType="VARCHAR"/>
+        <result column="dep_cd" property="depCd" jdbcType="VARCHAR"/>
+        <result column="pma_name" property="pmaName" jdbcType="VARCHAR"/>
+        <result column="pma_cd" property="pmaCd" jdbcType="VARCHAR"/>
+        <result column="category_name" property="categoryName" jdbcType="VARCHAR"/>
+        <result column="category_cd" property="categoryCd" jdbcType="VARCHAR"/>
+        <result column="sub_category_name" property="subCategoryName" jdbcType="VARCHAR"/>
+        <result column="sub_category_cd" property="subCategoryCd" jdbcType="VARCHAR"/>
+        <result column="c_operatorcode" property="amCd" jdbcType="VARCHAR"/>
+        <result column="c_operatorname" property="amName" jdbcType="VARCHAR"/>
+        <result column="default_barcode" property="barcode" jdbcType="VARCHAR"/>
+        <result column="to_store_name" property="storeName1" jdbcType="VARCHAR"/>
+        <result column="different_reasons" property="differenceReason" jdbcType="VARCHAR"/>
+        <result column="differ_reasons_text" property="differenceReasonText" jdbcType="VARCHAR"/>
+        <result column="tran_in_date" property="tranInDate" jdbcType="VARCHAR"/>
+    </resultMap>
+
+
+    <select id="getList" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+            resultMap="resultItemMap">
+        SELECT DISTINCT
+        T.store_cd,
+        T.article_id,
+        T6.default_barcode,
+        T1.sales_unit_id unit_name,
+        T.on_hand_qty AS qty1,
+        T.effective_date AS voucher_date,
+        T0.store_name,
+        oper.c_operatorcode,
+        oper.c_operatorname,
+        T1.article_name,
+        T1.article_name_en,
+        T1.article_short_name,
+        T1.article_short_name_en,
+        T1.dep_cd,
+        T1.pma_cd,
+        T1.category_cd,
+        T1.sub_category_cd,
+         concat(T1.dep_cd,' ',T2.dep_name) dep_name,
+        concat(T1.pma_cd,' ',T3.pma_name) pma_name,
+        concat(T1.category_cd,' ',T4.category_name) category_name,
+        concat(T1.sub_category_cd,' ',T5.sub_category_name) sub_category_name
+        FROM
+        SK0000 T,
+        ma1000 T0,
+        ma1100 T1,
+        ma0070 T2,
+        ma0080 T3,
+        ma0090 T4,
+        ma0100 T5,
+        ma1110 T6,
+        t_operator oper
+        <where>
+            AND T.effective_date = #{param.startDate}
+            AND T.article_id = T1.article_id
+            AND #{param.businessDate} BETWEEN T1.effective_start_date AND T1.effective_end_date
+            AND T.store_cd = T0.store_cd
+            AND #{param.businessDate} BETWEEN T0.effective_start_date AND T0.effective_end_date
+            AND oper.c_operatorcode = T0.ofc
+            AND T1.article_id = T6.article_id
+            AND T1.effective_start_date = T6.effective_start_date
+            AND T6.is_default = '1'
+            AND T1.dep_cd = T2.dep_cd
+            AND T1.pma_cd = T3.pma_cd
+            AND T1.category_cd = T4.category_cd
+            AND T1.sub_category_cd = T5.sub_category_cd
+            <if test="param.storeCd !=null and param.storeCd!='' ">
+                AND T.store_cd=#{param.storeCd,jdbcType=VARCHAR}
+            </if>
+            <if test="param.articleId != null and param.articleId != ''">
+                AND lower(T6.default_barcode) like lower(CONCAT('%',#{param.articleId,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="param.depCd != null and param.depCd != ''">
+                AND T1.dep_cd = #{param.depCd,jdbcType=VARCHAR}
+            </if>
+            <if test="param.pmaCd != null and param.pmaCd != ''">
+                AND T1.pma_cd = #{param.pmaCd,jdbcType=VARCHAR}
+            </if>
+            <if test="param.categoryCd != null and param.categoryCd != ''">
+                AND T1.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+            </if>
+            <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
+                AND T1.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+            </if>
+                <if test="param.articleName!=null and param.articleName!=''">
+                    AND concat(lower(T1.article_name),'',lower(T1.article_id),'',lower(T1.article_name_en),'',lower(T1.article_short_name_en)) like       lower(CONCAT('%',#{param.articleName},'%'))
+                </if>
+
+
+            <if test="param.am!=null and param.am!=''">
+                AND T0.ofc = #{param.am}
+            </if>
+        </where>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+      <select id="getListCount" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+              resultType="int">
+          select COUNT(H.*) from
+          (SELECT DISTINCT
+          T.store_cd,
+          T.article_id,
+          T6.default_barcode,
+          T.on_hand_qty AS qty1,
+          T.effective_date AS voucher_date,
+          T0.store_name,
+          oper.c_operatorcode,
+          oper.c_operatorname,
+          T1.article_name,
+          T1.article_name_en,
+          T1.article_short_name,
+          T1.article_short_name_en,
+          T1.dep_cd,
+          T1.pma_cd,
+          T1.category_cd,
+          T1.sub_category_cd,
+          concat(T1.dep_cd,' ',T2.dep_name) dep_name,
+          concat(T1.pma_cd,' ',T3.pma_name) pma_name,
+          concat(T1.category_cd,' ',T4.category_name) category_name,
+          concat(T1.sub_category_cd,' ',T5.sub_category_name) sub_category_name
+          FROM
+          SK0000 T,
+          ma1000 T0,
+          ma1100 T1,
+          ma0070 T2,
+          ma0080 T3,
+          ma0090 T4,
+          ma0100 T5,
+          ma1110 T6,
+          t_operator oper
+          <where>
+              AND T.effective_date = #{param.startDate}
+              AND T.article_id = T1.article_id
+              AND #{param.businessDate} BETWEEN T1.effective_start_date AND T1.effective_end_date
+              AND T.store_cd = T0.store_cd
+              AND #{param.businessDate} BETWEEN T0.effective_start_date AND T0.effective_end_date
+              AND oper.c_operatorcode = T0.ofc
+              AND T1.article_id = T6.article_id
+              AND T1.effective_start_date = T6.effective_start_date
+              AND T6.is_default = '1'
+              AND T1.dep_cd = T2.dep_cd
+              AND T1.pma_cd = T3.pma_cd
+              AND T1.category_cd = T4.category_cd
+              AND T1.sub_category_cd = T5.sub_category_cd
+              <if test="param.storeCd !=null and param.storeCd!='' ">
+                  AND T.store_cd=#{param.storeCd,jdbcType=VARCHAR}
+              </if>
+              <if test="param.articleId != null and param.articleId != ''">
+                  AND lower(T6.default_barcode) like lower(CONCAT('%',#{param.articleId,jdbcType=VARCHAR},'%'))
+              </if>
+              <if test="param.depCd != null and param.depCd != ''">
+                  AND T1.dep_cd = #{param.depCd,jdbcType=VARCHAR}
+              </if>
+              <if test="param.pmaCd != null and param.pmaCd != ''">
+                  AND T1.pma_cd = #{param.pmaCd,jdbcType=VARCHAR}
+              </if>
+              <if test="param.categoryCd != null and param.categoryCd != ''">
+                  AND T1.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+              </if>
+              <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
+                  AND T1.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+              </if>
+              <if test="param.articleName!=null and param.articleName!=''">
+                  AND concat(lower(T1.article_name),'',lower(T1.article_id),'',lower(T1.article_name_en),'',lower(T1.article_short_name_en)) like       lower(CONCAT('%',#{param.articleName},'%'))
+              </if>
+              <if test="param.am!=null and param.am!=''">
+                  AND T0.ofc = #{param.am}
+              </if>
+          </where>
+
+          )AS H
+      </select>
+    <select id="getListCount1" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+            resultType="int">
+        SELECT
+        COUNT(T.article_id)
+        FROM
+        SK0000 T,
+        ma1000 T0,
+        ma1100 T1,
+        ma0070 T2,
+        ma0080 T3,
+        ma0090 T4,
+        ma0100 T5,
+        ma1110 T6,
+        t_operator oper
+        <where>
+            AND T.effective_date = #{param.startDate}
+            AND T.article_id = T1.article_id
+            AND #{param.businessDate} BETWEEN T1.effective_start_date AND T1.effective_end_date
+            AND T.store_cd = T0.store_cd
+            AND #{param.businessDate} BETWEEN T0.effective_start_date AND T0.effective_end_date
+            AND oper.c_operatorcode = T0.ofc
+            AND T1.article_id = T6.article_id
+            AND T1.effective_start_date = T6.effective_start_date
+            AND T6.is_default = '1'
+            AND T1.dep_cd = T2.dep_cd
+            AND T1.pma_cd = T3.pma_cd
+            AND T1.category_cd = T4.category_cd
+            AND T1.sub_category_cd = T5.sub_category_cd
+            <if test="param.storeCd !=null and param.storeCd!='' ">
+                AND T.store_cd=#{param.storeCd,jdbcType=VARCHAR}
+            </if>
+            <if test="param.articleId != null and param.articleId != ''">
+                AND lower(T6.default_barcode) like lower(CONCAT('%',#{param.articleId,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="param.depCd != null and param.depCd != ''">
+                AND T1.dep_cd = #{param.depCd,jdbcType=VARCHAR}
+            </if>
+            <if test="param.pmaCd != null and param.pmaCd != ''">
+                AND T1.pma_cd = #{param.pmaCd,jdbcType=VARCHAR}
+            </if>
+            <if test="param.categoryCd != null and param.categoryCd != ''">
+                AND T1.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+            </if>
+            <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
+                AND T1.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+            </if>
+            <if test="param.articleName != null and param.articleName != ''">
+                AND lower(T1.article_name) like lower(CONCAT('%',#{param.articleName,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="param.am!=null and param.am!=''">
+                AND T0.ofc = #{param.am}
+            </if>
+        </where>
+    </select>
+
+    <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO"
+            resultMap="resultItemMap">
+        select tranferOut.* ,tranferIn.voucher_no as tran_in_no,tranferIn.voucher_date as tran_in_date,
+        tranferIn.qty1,tranferIn.differ_reasons_text from
+        (SELECT
+        T.voucher_no,
+        T.voucher_date,
+        T.article_id,
+        T.barcode,
+        T.sales_unit_id unit_name,
+        coalesce(T.qty2,0)-coalesce(lt.qty1,0) qty2,/*调拨数量-更正数量*/
+        coalesce(T.amt_notax,0)-coalesce(lt.amt_notax,0) amt_notax,/*调拨金额-更正金额*/
+        T.display_seq,
+        T4.store_cd,
+        concat(T4.store_cd,' ',T4.store_name) store_name,
+        T.store_cd1,
+        concat(T.store_cd1,' ',T6.store_name) to_store_name,
+        T1.article_name,
+        T1.spec,
+        CONCAT(T1.pma_cd,' ',T1.pma_name) AS pma_name,
+        T1.pma_cd,
+        T1.dep_cd,
+        CONCAT(T1.dep_cd,' ',T1.dep_name) AS dep_name,
+        T1.category_cd,
+        CONCAT(T1.category_cd,' ',T1.category_name) AS category_name,
+        T1.sub_category_cd,
+        CONCAT(T1.sub_category_cd,' ',T1.sub_category_name) AS sub_category_name,
+        CONCAT(T3.code_value,' ',T3.code_name) AS reason,
+        T5.c_operatorcode,
+        T5.c_operatorname
+        FROM
+        (  SELECT s2.* FROM sk0010 s1,sk0020 s2  WHERE s2.voucher_type = '502'
+        AND s1.voucher_no = s2.voucher_no AND s1.voucher_date = s2.voucher_date AND s1.review_status = 10
+        <if test="param.barcode!=null and param.barcode!=''">
+            AND lower(s2.barcode) like   lower(CONCAT('%',#{param.barcode},'%'))
+        </if> ) T
+        LEFT JOIN lateral(
+        SELECT s2.qty1,s2.amt_notax FROM sk0010 s1,sk0020 s2 WHERE s1.voucher_type = '505'
+        and s1.voucher_no = s2.voucher_no
+        and s1.voucher_type = s2.voucher_type
+        and T.voucher_no = s1.voucher_no1
+        and T.store_cd = s2.store_cd
+        and T.store_cd1 = s2.store_cd1
+        and T.article_id = s2.article_id
+        and s1.create_ymd||s1.create_hms = (select max(sk0010.create_ymd||sk0010.create_hms) from sk0010 where sk0010.voucher_no1 = T.voucher_no)
+        ) lt on true
+        LEFT JOIN (
+        SELECT
+        M.article_id,
+        M.effective_start_date,
+        M.effective_end_date,
+        M.article_name,
+        M.spec,
+        M.dep_cd,
+        B.dep_name,
+        M.category_cd,
+        D.category_name,
+        M.sub_category_cd,
+        E.sub_category_name,
+        C.pma_name,
+        C.pma_cd
+        FROM
+        ma1100 M,
+        ma0070 B,
+        ma0080 C,
+        ma0090 D,
+        ma0100 E
+        WHERE
+        M.pma_cd = C.pma_cd
+        AND M.category_cd = D.category_cd
+        AND M.sub_category_cd = E.sub_category_cd
+        AND M.dep_cd = B.dep_cd
+        <if test="param.articleName!=null and param.articleName!=''">
+            AND concat(lower(M.article_name),'',lower(M.article_id),'',lower(M.article_name_en),'',lower(M.article_short_name_en)) like       lower(CONCAT('%',#{param.articleName},'%'))
+        </if>
+        ) T1
+        ON T.article_id = T1.article_id
+        LEFT JOIN ( SELECT code_value, code_name FROM cm9010 WHERE code_type = '00236' ) T3
+        ON T.adjust_reason = T3.code_value
+        LEFT JOIN MA1000 T4 ON T.store_cd = T4.store_cd
+        LEFT JOIN MA1000 T6 ON T.store_cd1 = T6.store_cd
+        LEFT JOIN t_operator T5 ON T4.ofc = T5.c_operatorcode,
+        cm9060 D
+        WHERE
+        D.sp_id = '0000'
+        AND D.sp_value BETWEEN T1.effective_start_date AND T1.effective_end_date
+        AND D.sp_value BETWEEN T4.effective_start_date AND T4.effective_end_date
+        AND T.store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.storeCd1!=null and param.storeCd1!=''">
+            AND T.store_cd1 = #{param.storeCd1}
+        </if>
+        <if test="param.reason!=null and param.reason!=''">
+            AND T.adjust_reason = #{param.reason}
+        </if>
+        <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">
+            AND T.voucher_date BETWEEN #{param.startDate} AND #{param.endDate}
+        </if>
+        <if test="param.depCd!=null and param.depCd!=''">
+            AND T1.dep_cd = #{param.depCd}
+        </if>
+        <if test="param.pmaCd!=null and param.pmaCd!=''">
+            AND T1.pma_cd = #{param.pmaCd}
+        </if>
+        <if test="param.categoryCd!=null and param.categoryCd!=''">
+            AND T1.category_cd = #{param.categoryCd}
+        </if>
+        <if test="param.subCategoryCd!=null and param.subCategoryCd!=''">
+            AND T1.sub_category_cd = #{param.subCategoryCd}
+        </if>
+        <if test="param.city!=null and param.city!=''">
+            AND T4.zo_cd = #{param.city}
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            AND T4.ofc = #{param.am}
+        </if>
+        ) tranferOut left join (
+        SELECT
+        T.voucher_no,
+        T.voucher_no1,
+        T.voucher_date,
+        T.article_id,
+        T.barcode,
+        T.sales_unit_id unit_name,
+        coalesce(T.qty1,0)-coalesce(lt.qty1,0) qty1,/*调拨数量-更正数量*/
+        coalesce(T.amt_notax,0)-coalesce(lt.amt_notax,0) amt_notax,/*调拨金额-更正金额*/
+        T.display_seq,
+        T.different_reasons,
+        concat(T7.code_value, ' ', T7.code_name) AS differ_reasons_text,
+        T4.store_cd,
+        T4.store_name,
+        T.store_cd1,
+        T6.store_name AS to_store_name,
+        T1.article_name,
+        T1.spec,
+        CONCAT(T1.pma_cd,' ',T1.pma_name) AS pma_name,
+        T1.pma_cd,
+        T1.dep_cd,
+        CONCAT(T1.dep_cd,' ',T1.dep_name) AS dep_name,
+        T1.category_cd,
+        CONCAT(T1.category_cd,' ',T1.category_name) AS category_name,
+        T1.sub_category_cd,
+        CONCAT(T1.sub_category_cd,' ',T1.sub_category_name) AS sub_category_name,
+        CONCAT (T3.code_value,' ',T3.code_name) AS reason,
+        T5.c_operatorcode,
+        T5.c_operatorname
+        FROM
+        (  SELECT s1.voucher_no1, s2.* FROM sk0010 s1,sk0020 s2  WHERE s2.voucher_type = '501'
+        AND s1.voucher_no = s2.voucher_no AND s1.voucher_date = s2.voucher_date AND s1.review_status = 10
+        <if test="param.barcode!=null and param.barcode!=''">
+            AND lower(s2.barcode) like   lower(CONCAT('%',#{param.barcode},'%'))
+        </if>
+        ) T
+        LEFT JOIN lateral(
+        SELECT s2.qty1,s2.amt_notax FROM sk0010 s1,sk0020 s2 WHERE s1.voucher_type = '504'
+        and s1.voucher_no = s2.voucher_no
+        and s1.voucher_type = s2.voucher_type
+        and T.voucher_no = s1.voucher_no1
+        and T.store_cd = s2.store_cd
+        and T.store_cd1 = s2.store_cd1
+        and T.article_id = s2.article_id
+        and s1.create_ymd||s1.create_hms = (select max(sk0010.create_ymd||sk0010.create_hms) from sk0010 where sk0010.voucher_no1 = T.voucher_no)
+        ) lt on true
+        LEFT JOIN (
+        SELECT
+        M.article_id,
+        M.effective_start_date,
+        M.effective_end_date,
+        M.article_name,
+        M.spec,
+        M.dep_cd,
+        B.dep_name,
+        M.category_cd,
+        D.category_name,
+        M.sub_category_cd,
+        E.sub_category_name,
+        C.pma_name,
+        C.pma_cd
+        FROM
+        ma1100 M,
+        ma0070 B,
+        ma0080 C,
+        ma0090 D,
+        ma0100 E
+        WHERE
+        M.pma_cd = C.pma_cd
+        AND M.category_cd = D.category_cd
+        AND M.sub_category_cd = E.sub_category_cd
+        AND M.dep_cd = B.dep_cd
+        <if test="param.articleName!=null and param.articleName!=''">
+            AND concat(lower(M.article_name),'',lower(M.article_id),'',lower(M.article_name_en),'',lower(M.article_short_name_en)) like       lower(CONCAT('%',#{param.articleName},'%'))
+        </if>
+        ) T1
+        ON T.article_id = T1.article_id
+        LEFT JOIN ( SELECT code_value, code_name FROM cm9010 WHERE code_type = '00236' ) T3
+        ON T.adjust_reason = T3.code_value
+        LEFT JOIN MA1000 T4 ON T.store_cd = T4.store_cd
+        LEFT JOIN MA1000 T6 ON T.store_cd1 = T6.store_cd
+        LEFT JOIN t_operator T5 ON T4.ofc = T5.c_operatorcode
+        LEFT JOIN (
+        SELECT code_value, code_name
+        FROM cm9010
+        WHERE code_type = '00550'
+        ) T7
+        ON T.different_reasons = T7.code_value,
+        cm9060 D
+        WHERE
+        D.sp_id = '0000'
+        AND D.sp_value BETWEEN T1.effective_start_date AND T1.effective_end_date
+        AND D.sp_value BETWEEN T4.effective_start_date AND T4.effective_end_date
+        AND T.store_cd1 IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.storeCd1!=null and param.storeCd1!=''">
+            AND T.store_cd = #{param.storeCd1}
+        </if>
+        <if test="param.reason!=null and param.reason!=''">
+            AND T.adjust_reason = #{param.reason}
+        </if>
+<!--        <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">-->
+<!--            AND T.voucher_date BETWEEN #{param.startDate} AND #{param.endDate}-->
+<!--        </if>-->
+        <if test="param.depCd!=null and param.depCd!=''">
+            AND T1.dep_cd = #{param.depCd}
+        </if>
+        <if test="param.pmaCd!=null and param.pmaCd!=''">
+            AND T1.pma_cd = #{param.pmaCd}
+        </if>
+        <if test="param.categoryCd!=null and param.categoryCd!=''">
+            AND T1.category_cd = #{param.categoryCd}
+        </if>
+        <if test="param.subCategoryCd!=null and param.subCategoryCd!=''">
+            AND T1.sub_category_cd = #{param.subCategoryCd}
+        </if>
+        <if test="param.city!=null and param.city!=''">
+            AND T4.zo_cd = #{param.city}
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            AND T4.ofc = #{param.am}
+        </if>
+        ) tranferIn
+        on tranferOut.voucher_no = tranferIn.voucher_no1 and tranferOut.article_id = tranferIn.article_id
+        ORDER BY
+        tranferOut.voucher_date DESC
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+
+    <select id="searchCount" parameterType="cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO" resultType="int">
+        SELECT
+        count(*)
+        FROM
+        (  SELECT s2.* FROM sk0010 s1,sk0020 s2  WHERE s2.voucher_type = '502'
+        AND s1.voucher_no = s2.voucher_no AND s1.voucher_date = s2.voucher_date AND s1.review_status = 10
+        <if test="param.barcode!=null and param.barcode!=''">
+            AND lower(s2.barcode) like   lower(CONCAT('%',#{param.barcode},'%'))
+        </if>
+      ) T
+        LEFT JOIN lateral(
+        SELECT s2.qty1,s2.amt_notax FROM sk0010 s1,sk0020 s2 WHERE s1.voucher_type = '505'
+        and s1.voucher_no = s2.voucher_no
+        and s1.voucher_type = s2.voucher_type
+        and T.voucher_no = s1.voucher_no1
+        and T.store_cd = s2.store_cd
+        and T.store_cd1 = s2.store_cd1
+        and T.article_id = s2.article_id
+        and s1.create_ymd||s1.create_hms = (select max(sk0010.create_ymd||sk0010.create_hms) from sk0010 where sk0010.voucher_no1 = T.voucher_no)
+        ) lt on true
+        LEFT JOIN (
+        SELECT
+        M.article_id,
+        M.effective_start_date,
+        M.effective_end_date,
+        M.article_name,
+        M.spec,
+        M.dep_cd,
+        B.dep_name,
+        M.category_cd,
+        D.category_name,
+        M.sub_category_cd,
+        E.sub_category_name,
+        C.pma_name,
+        C.pma_cd
+        FROM
+        ma1100 M,
+        ma0070 B,
+        ma0080 C,
+        ma0090 D,
+        ma0100 E
+        WHERE
+        M.pma_cd = C.pma_cd
+        AND M.category_cd = D.category_cd
+        AND M.sub_category_cd = E.sub_category_cd
+        AND M.dep_cd = B.dep_cd
+        <if test="param.articleName!=null and param.articleName!=''">
+            AND concat(lower(M.article_name),'',lower(M.article_id),'',lower(M.article_name_en),'',lower(M.article_short_name_en)) like       lower(CONCAT('%',#{param.articleName},'%'))
+        </if>
+        ) T1
+        ON T.article_id = T1.article_id
+        LEFT JOIN ( SELECT code_value, code_name FROM cm9010 WHERE code_type = '00236' ) T3
+        ON T.adjust_reason = T3.code_value
+        LEFT JOIN MA1000 T4 ON T.store_cd = T4.store_cd
+        LEFT JOIN MA1000 T6 ON T.store_cd1 = T6.store_cd
+        LEFT JOIN t_operator T5 ON T4.ofc = T5.c_operatorcode,
+        cm9060 D
+        WHERE
+        D.sp_id = '0000'
+        AND D.sp_value BETWEEN T1.effective_start_date AND T1.effective_end_date
+        AND D.sp_value BETWEEN T4.effective_start_date AND T4.effective_end_date
+        AND T.store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.storeCd1!=null and param.storeCd1!=''">
+            AND T.store_cd1 = #{param.storeCd1}
+        </if>
+        <if test="param.reason!=null and param.reason!=''">
+            AND T.adjust_reason = #{param.reason}
+        </if>
+        <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">
+            AND T.voucher_date BETWEEN #{param.startDate} AND #{param.endDate}
+        </if>
+        <if test="param.depCd!=null and param.depCd!=''">
+            AND T1.dep_cd = #{param.depCd}
+        </if>
+        <if test="param.pmaCd!=null and param.pmaCd!=''">
+            AND T1.pma_cd = #{param.pmaCd}
+        </if>
+        <if test="param.categoryCd!=null and param.categoryCd!=''">
+            AND T1.category_cd = #{param.categoryCd}
+        </if>
+        <if test="param.subCategoryCd!=null and param.subCategoryCd!=''">
+            AND T1.sub_category_cd = #{param.subCategoryCd}
+        </if>
+        <if test="param.articleId!=null and param.articleId!=''">
+            AND lower(T.article_id) like lower(CONCAT('%',#{param.articleId},'%'))
+        </if>
+        <if test="param.city!=null and param.city!=''">
+            AND T4.zo_cd = #{param.city}
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            AND T4.ofc = #{param.am}
+        </if>
+    </select>
+
+</mapper>

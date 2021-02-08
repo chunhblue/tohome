@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.audit.ReviewBeanMapper">
+	<resultMap type="cn.com.bbut.iy.itemmaster.dto.audit.ReviewBean" id="ReReview">
+		<result column="N_REVIEWID" property="NReviewid"/>
+		<result column="C_REVIEWCODE" property="CReviewCode" jdbcType="VARCHAR"/>
+		<result column="N_TYPEID" property="NTypeid" jdbcType="SMALLINT"/>
+		<result column="START_ROLE" property="startRole" jdbcType="VARCHAR"/>
+		<result column="C_TYPE_NAME" property="CReviewType" jdbcType="VARCHAR"/>
+		<result column="C_REVIEWNAME" property="CReviewName" jdbcType="VARCHAR"/>
+		<result column="N_DISTINGUISH_TYPEID" property="NDistinguishTypeId" jdbcType="VARCHAR"/>
+		<result column="C_ENABLE" property="status" jdbcType="BOOLEAN"/>
+	</resultMap>
+
+	<resultMap type="cn.com.bbut.iy.itemmaster.dto.audit.ReviewTypeDTO" id="ReReviewType">
+		<result column="n_typeid" property="NTypeid" jdbcType="SMALLINT"/>
+		<result column="c_type_name" property="CTypeName" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<select id="selectReviewType" resultMap="ReReviewType">
+		SELECT n_typeid, c_type_name
+		FROM T_AUDIT_TYPE
+		WHERE n_typeid != 0
+	</select>
+
+	<select id="selectByCondition" resultMap="ReReview">
+		SELECT
+		R.N_REVIEWID, R.C_REVIEWCODE, R.N_TYPEID, R.START_ROLE, T.C_TYPE_NAME,
+		R.C_REVIEWNAME, R.C_ENABLE, T.N_DISTINGUISH_TYPEID
+		FROM
+		T_REVIEW R, T_AUDIT_TYPE T
+		WHERE C_ENABLE = '1'
+		AND T.N_TYPEID = R.N_TYPEID
+		AND R.N_TYPEID != 0
+		<if test="code != null and code != ''">
+			AND R.C_REVIEWCODE like CONCAT('%',#{code},'%')
+		</if>
+		<if test="name != null and name != ''">
+			AND R.C_REVIEWNAME like CONCAT('%',#{name},'%')
+		</if>
+		<if test="nDistinguishTypeId != null and nDistinguishTypeId != ''">
+			AND T.N_DISTINGUISH_TYPEID = #{nDistinguishTypeId}
+		</if>
+		<if test="type != 0">
+			AND R.N_TYPEID  = #{type,jdbcType=SMALLINT}
+		</if>
+		ORDER BY N_REVIEWID
+	</select>
+
+	<select id="selectByType" resultMap="ReReview">
+		SELECT
+			R.N_REVIEWID, R.C_REVIEWCODE, R.N_TYPEID, R.START_ROLE, T.C_TYPE_NAME,
+			R.C_REVIEWNAME, R.C_ENABLE, T.N_DISTINGUISH_TYPEID
+		FROM
+			T_REVIEW R, T_AUDIT_TYPE T
+		WHERE C_ENABLE = '1'
+		AND R.N_TYPEID  = #{type,jdbcType=SMALLINT}
+		AND T.N_TYPEID = R.N_TYPEID
+		ORDER BY N_REVIEWID
+	</select>
+
+	<select id="selectById" resultMap="ReReview">
+		SELECT
+			R.N_REVIEWID, R.C_REVIEWCODE, R.N_TYPEID, R.START_ROLE, T.C_TYPE_NAME,
+			R.C_REVIEWNAME, R.C_ENABLE, T.N_DISTINGUISH_TYPEID
+		FROM
+			T_REVIEW R, T_AUDIT_TYPE T
+		WHERE C_ENABLE = '1'
+		AND R.N_REVIEWID = #{reviewid}
+		AND T.N_TYPEID = R.N_TYPEID
+	</select>
+
+	<select id="selectReviewByCode" resultType="int">
+		SELECT COUNT(1) FROM T_REVIEW
+		WHERE C_ENABLE = '1' AND C_REVIEWCODE = #{code}
+	</select>
+
+	<select id="selectMaxID" resultType="int">
+		SELECT COALESCE(MAX(N_REVIEWID),0) FROM T_REVIEW
+	</select>
+
+	<select id="selectStatusByReviewid" resultType="int">
+		SELECT COUNT(1)
+		FROM
+			${tableName}
+		WHERE N_REVIEWID = #{reviewId,jdbcType=SMALLINT} AND REVIEW_STATUS != 10
+	</select>
+
+	<insert id="insertReview" parameterType="cn.com.bbut.iy.itemmaster.dto.audit.ReviewBean"
+			useGeneratedKeys="true" keyProperty="nReviewid">
+		INSERT INTO T_REVIEW
+			(C_REVIEWCODE, N_TYPEID, START_ROLE, C_REVIEWNAME, C_ENABLE)
+		VALUES
+			(#{cReviewCode}, #{nTypeid,jdbcType=SMALLINT}, #{startRole,jdbcType=VARCHAR},
+			#{cReviewName}, 1)
+	</insert>
+
+	<update id="updateReview">
+		UPDATE T_REVIEW
+		SET
+		C_ENABLE = #{updateBean.status, jdbcType=VARCHAR},
+		C_REVIEWNAME = #{updateBean.cReviewName}
+		WHERE
+		N_REVIEWID = #{updateBean.nReviewid}
+	</update>
+
+	<update id="invalidReview">
+		UPDATE T_REVIEW SET C_ENABLE = '0' WHERE N_REVIEWID = #{nReviewid}
+	</update>
+</mapper>

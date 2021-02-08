@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.TransferModMapper">
+
+    <resultMap id="ReBasicInfo" type="cn.com.bbut.iy.itemmaster.entity.SK0010">
+        <id column="store_cd" property="storeCd" jdbcType="CHAR" />
+        <id column="voucher_no" property="voucherNo" jdbcType="VARCHAR" />
+        <id column="voucher_type" property="voucherType" jdbcType="VARCHAR" />
+        <id column="voucher_date" property="voucherDate" jdbcType="CHAR" />
+        <id column="store_cd1" property="storeCd1" jdbcType="CHAR" />
+        <result column="voucher_no1" property="voucherNo1" jdbcType="VARCHAR" />
+        <result column="voucher_sts" property="voucherSts" jdbcType="VARCHAR" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="tax_rate" property="taxRate" jdbcType="NUMERIC" />
+        <result column="voucher_amt_notax" property="voucherAmtNoTax" jdbcType="NUMERIC" />
+        <result column="voucher_tax" property="voucherTax" jdbcType="NUMERIC" />
+        <result column="voucher_amt" property="voucherAmt" jdbcType="NUMERIC" />
+        <result column="upload_flg" property="uploadFlg" jdbcType="CHAR" />
+        <result column="upload_date" property="uploadDate" jdbcType="CHAR" />
+        <result column="create_user_id" property="createUserId" jdbcType="VARCHAR" />
+        <result column="create_ymd" property="createYmd" jdbcType="CHAR" />
+        <result column="create_hms" property="createHms" jdbcType="CHAR" />
+        <result column="update_user_id" property="updateUserId" jdbcType="VARCHAR" />
+        <result column="update_ymd" property="updateYmd" jdbcType="CHAR" />
+        <result column="update_hms" property="updateHms" jdbcType="CHAR" />
+        <result column="update_screen_id" property="updateScreenId" jdbcType="VARCHAR" />
+        <result column="update_ip_address" property="updateIpAddress" jdbcType="VARCHAR" />
+        <result column="nr_update_flg" property="nrUpdateFlg" jdbcType="CHAR" />
+        <result column="nr_ymd" property="nrYmd" jdbcType="CHAR" />
+        <result column="nr_hms" property="nrHms" jdbcType="CHAR" />
+        <result column="n_reviewid" property="reviewId" jdbcType="VARCHAR" />
+        <result column="review_status" property="reviewSts" jdbcType="VARCHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <result column="store_name_1" property="storeName1" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="ReDetails" type="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO">
+        <id column="store_cd" property="storeCd" jdbcType="CHAR" />
+        <id column="voucher_no" property="voucherNo" jdbcType="VARCHAR" />
+        <id column="voucher_type" property="voucherType" jdbcType="VARCHAR" />
+        <id column="voucher_date" property="voucherDate" jdbcType="CHAR" />
+        <id column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <id column="store_cd1" property="storeCd1" jdbcType="CHAR" />
+        <id column="adjust_reason" property="adjustReason" jdbcType="VARCHAR" />
+        <result column="barcode" property="barcode" jdbcType="CHAR" />
+        <result column="sales_unit_id" property="salesUnitId" jdbcType="VARCHAR" />
+        <result column="qty1" property="qty1" jdbcType="NUMERIC" />
+        <result column="qty2" property="qty2" jdbcType="NUMERIC" />
+        <result column="price" property="price" jdbcType="NUMERIC" />
+        <result column="price_notax" property="priceNoTax" jdbcType="NUMERIC" />
+        <result column="amt_notax" property="amtNoTax" jdbcType="NUMERIC" />
+        <result column="amt_tax" property="amtTax" jdbcType="NUMERIC" />
+        <result column="amt" property="amt" jdbcType="NUMERIC" />
+        <result column="upload_flg" property="uploadFlg" jdbcType="CHAR" />
+        <result column="upload_date" property="uploadDate" jdbcType="CHAR" />
+        <result column="display_seq" property="displaySeq" jdbcType="NUMERIC" />
+        <result column="nr_update_flg" property="nrUpdateFlg" jdbcType="CHAR" />
+        <result column="article_name" property="articleName" jdbcType="VARCHAR" />
+        <result column="article_name_en" property="articleNameEn" jdbcType="VARCHAR" />
+        <result column="spec" property="spec" jdbcType="VARCHAR" />
+        <result column="reason" property="adjustReasonText" jdbcType="VARCHAR" />
+<!--        <result column="actual_qty" property="actualQty" jdbcType="NUMERIC" />-->
+        <result column="actual_amt" property="actualAmt" jdbcType="NUMERIC" />
+        <result column="tax_rate" property="taxRate" jdbcType="NUMERIC" />
+    </resultMap>
+
+    <select id="selectSk0010" resultMap="ReBasicInfo" parameterType="cn.com.bbut.iy.itemmaster.entity.SK0010Key">
+        SELECT
+            T.*, CONCAT(T1.store_cd, ' ', T1.store_name) AS store_name,
+            CONCAT(T2.store_cd, ' ', T2.store_name) AS store_name_1
+        FROM (
+            SELECT * FROM sk0010
+            WHERE
+                store_cd = #{storeCd,jdbcType=CHAR}
+            AND voucher_no = #{voucherNo,jdbcType=VARCHAR}
+            AND voucher_type = #{voucherType,jdbcType=VARCHAR}
+            <if test="voucherDate != null and voucherDate!=''">
+                AND voucher_date = #{voucherDate,jdbcType=CHAR}
+            </if>
+            <if test="storeCd1 != null and storeCd1!=''">
+                AND store_cd1 = #{storeCd1,jdbcType=CHAR}
+            </if>
+        ) T
+        LEFT JOIN (
+            SELECT store_cd, store_name FROM ma1000
+            WHERE (SELECT sp_value FROM CM9060 WHERE sp_id = '0000')
+            BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.store_cd = T1.store_cd
+        LEFT JOIN (
+            SELECT store_cd, store_name FROM ma1000
+            WHERE (SELECT sp_value FROM CM9060 WHERE sp_id = '0000')
+            BETWEEN effective_start_date AND effective_end_date
+        ) T2
+        ON T.store_cd1 = T2.store_cd
+    </select>
+
+    <select id="selectSk0020" resultMap="ReDetails" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO">
+        SELECT
+            T.*, T1.article_name, T1.article_name_en, T1.spec
+        FROM (
+            SELECT
+                S.store_cd, S.voucher_no, S.voucher_type, S.voucher_date, S.article_id, S.store_cd1,
+                S.barcode, S.sales_unit_id, S.price_notax, S.tax_rate,  S.display_seq,
+                S.adjust_reason,
+                <choose>
+                    <when test="voucherType == '504'.toString() or voucherType == '505'.toString()">
+                        S1.qty1, S1.qty2,
+                        <if test="voucherType == '504'.toString()">
+                            coalesce(S.actual_qty,S1.qty1) as actualQty
+                        </if>
+                        <if test="voucherType == '505'.toString()">
+                            coalesce(S.actual_qty,S1.qty2) as actualQty
+                        </if>
+                    </when>
+                    <otherwise>
+                        S.qty1, S.qty2,
+                        <if test="voucherType == '501'.toString()">
+                            coalesce(S.actual_qty,S.qty1) as actualQty
+                        </if>
+                        <if test="voucherType == '502'.toString()">
+                            coalesce(S.actual_qty,S.qty2) as actualQty
+                        </if>
+                    </otherwise>
+                </choose>
+            FROM sk0020 S
+            <if test="voucherType == '504'.toString() or voucherType == '505'.toString()">
+                JOIN (
+                    SELECT article_id, qty1, qty2
+                    FROM SK0020 WHERE voucher_no = (
+                        SELECT voucher_no1 FROM SK0010 WHERE voucher_no = #{voucherNo,jdbcType=VARCHAR}
+                    )
+                ) S1
+                ON S.article_id = S1.article_id
+            </if>
+            WHERE
+                S.store_cd = #{storeCd,jdbcType=CHAR}
+            AND S.voucher_no = #{voucherNo,jdbcType=VARCHAR}
+            AND S.voucher_type = #{voucherType,jdbcType=VARCHAR}
+            AND S.voucher_date = #{voucherDate,jdbcType=CHAR}
+            AND S.store_cd1 = #{storeCd1,jdbcType=CHAR}
+        ) T
+        LEFT JOIN (
+            SELECT article_id, article_name, article_name_en, spec FROM ma1100
+            WHERE (SELECT sp_value FROM CM9060 WHERE sp_id = '0000')
+            BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.article_id = T1.article_id
+        ORDER BY display_seq
+    </select>
+
+    <select id="selectOrgOrder" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT voucher_no AS k, voucher_no AS v
+        FROM SK0010
+        WHERE store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND voucher_date between to_char(TO_DATE(#{businessDate,jdbcType=VARCHAR},'yyyyMMdd')-INTERVAL'62 day','yyyyMMdd') and #{businessDate,jdbcType=VARCHAR}
+        <choose>
+            <when test="type == '504'.toString()">
+                AND review_status = 10
+                AND voucher_type = '501'
+            </when>
+            <when test="type == '505'.toString()">
+                AND voucher_type = '502'
+                AND voucher_no IN (
+                    SELECT DISTINCT voucher_no1 FROM SK0010
+                    WHERE voucher_type = '501'
+                    AND review_status = 10
+                )
+            </when>
+            <otherwise>
+                AND 1 = 2
+            </otherwise>
+        </choose>
+        <if test="v!=null and v!=''">
+            AND LOWER(voucher_no) LIKE LOWER(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+        </if>
+    </select>
+
+</mapper>

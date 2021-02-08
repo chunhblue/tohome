@@ -1,0 +1,27 @@
+logging:
+  file:
+    max-size: 10MB
+    max-history: 10
+  level:
+    root: INFO
+    cn.com.bbut: INFO
+    cn.com.bbut.iy.itemmaster.dao: DEBUG
+    org.springframework: INFO
+    com.ibatis: INFO
+
+freemarker:
+    cache: false
+    settings.template_update_delay: 0
+
+# 线程池
+threadpool:
+  coresize : 5
+  maxsize : 10
+  queuesize : 10
+  keepalivesec : 5
+
+#spring:
+#  security:
+#    user:
+#      name: check
+#      password: check

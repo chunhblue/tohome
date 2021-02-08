@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.IyItemMMapper">
+  	<select id="selectItemInfoFromC" resultType="cn.com.bbut.iy.itemmaster.dto.base.ItemStoreDTO" parameterType="java.util.Map" >
+		select 
+			c.item_system as itemSystem,
+			c.store as store,
+			c.PRICE_TAX as priceTax,
+			c.COST_TAX as costTax
+		  from iy_item_c c
+		 where c.item_system = #{itemSystem}
+		   and c.store = #{store}
+	</select>
+</mapper>

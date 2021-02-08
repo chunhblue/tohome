@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.InvoiceEntryMapper">
+
+    <resultMap id="invoiceResult" type="cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceEntryDTO">
+        <result column="store_cd" property="storeNo"></result>
+        <result column="receiptNo" property="receiptNo"></result>
+        <result column="date" property="date"></result>
+        <result column="amt" property="amt"></result>
+    </resultMap>
+
+    <resultMap id="invoiceItemResult" type="cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceItemsDTO">
+        <result column="article_id" property="articleId"></result>
+        <result column="article_name" property="articleName"></result>
+        <result column="qty" property="qty"></result>
+        <result column="amt" property="amt"></result>
+        <result column="num" property="num"></result>
+    </resultMap>
+
+    <resultMap id="listResultMap" type="cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceDataDTO">
+        <result column="acc_id" property="accId"></result>
+        <result column="acc_date" property="accDate"></result>
+        <result column="store_cd" property="storeNo"></result>
+        <result column="store_name" property="storeName"></result>
+        <result column="customer_name" property="customerName"></result>
+        <result column="company_name" property="companyName"></result>
+        <result column="tax" property="tax"></result>
+        <result column="address" property="address"></result>
+        <result column="phone" property="phone"></result>
+        <result column="email" property="email"></result>
+        <result column="phone2" property="phone2"></result>
+        <result column="email2" property="email2"></result>
+        <result column="receipt_no" property="receiptNo"></result>
+        <result column="amt" property="amt"></result>
+        <result column="statusName" property="statusName"></result>
+        <result column="status" property="status"></result>
+        <result column="issue_user_id" property="issueUserId"></result>
+        <result column="issue_ymd" property="issueYmd"></result>
+        <result column="issue_hms" property="issueHms"></result>
+        <result column="create_user_id" property="createUserId"></result>
+        <result column="create_ymd" property="createYmd"></result>
+        <result column="create_hms" property="createHms"></result>
+    </resultMap>
+
+    <update id="updateStatus" parameterType="cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceDataDTO">
+        UPDATE SA0230 SET
+            status = #{param.status},
+            issue_user_id = #{param.issueUserId},
+            issue_ymd = #{param.issueYmd},
+            issue_hms = #{param.issueHms},
+            update_user_id = #{param.updateUserId},
+            update_ymd = #{param.updateYmd},
+            update_hms = #{param.updateHms}
+        WHERE
+            acc_id = #{param.accId}
+            AND store_cd = #{param.storeNo}
+    </update>
+
+    <select id="getInvoiceByReceiptNo" resultMap="invoiceResult">
+        SELECT
+        A.store_cd,
+        A.tran_serial_no AS receiptNo,
+        A.tran_date AS date,
+        A.sale_amount AS amt,
+        B.num
+        FROM
+        SA0010 A,
+        (
+        SELECT
+        count (S.tran_serial_no) as num
+        FROM
+        SA0010 S
+        WHERE
+        S.store_cd = #{storeNo}
+        AND S.tran_serial_no in
+        <foreach collection="list" item="receiptNo" open="(" separator="," close=")">
+            CAST(#{receiptNo} AS integer)
+        </foreach>
+        AND S.tran_type = 'sale'
+        AND S.sale_type = '0'
+        ) B
+        WHERE
+        A.store_cd = #{storeNo}
+        AND A.tran_serial_no in
+        <foreach collection="list" item="receiptNo" open="(" separator="," close=")">
+            CAST(#{receiptNo} AS integer)
+        </foreach>
+        AND A.tran_type = 'sale'
+        AND A.sale_type = '0'
+        ORDER BY
+        acc_date
+        LIMIT ${rows} OFFSET ${limitStart}
+    </select>
+
+    <select id="getData" parameterType="java.lang.String" resultMap="listResultMap">
+         SELECT
+            A.acc_id,
+            A.acc_date,
+            A.store_cd,
+            A.customer_name,
+            A.company_name,
+            A.tax,
+            A.address,
+            A.phone,
+            A.email,
+            A.phone2,
+            A.email2,
+            A.receipt_no,
+            A.amt,
+            A.status,
+            C.emp_name AS issue_user_id,
+            A.issue_ymd,
+            A.issue_hms,
+            B.emp_name AS create_user_id,
+            A.create_ymd,
+            A.create_hms
+        FROM
+            sa0230 A
+            LEFT JOIN MA4200 B ON A.create_user_id = B.emp_num_id
+            LEFT JOIN MA4200 C ON A.issue_user_id = C.emp_num_id
+        WHERE
+            A.acc_id = #{accId}
+            AND A.store_cd = #{storeNo}
+        limit 1
+    </select>
+
+
+    <select id="searchList" parameterType="cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceEntryDTO" resultMap="listResultMap">
+        SELECT
+        A.acc_id,
+        CONCAT(A.create_ymd,A.create_hms) AS acc_date,
+        ma1000.store_cd,
+        ma1000.store_name,
+        A.customer_name,
+        A.company_name,
+        A.tax,
+        A.address,
+        A.phone,
+        A.email,
+        A.phone2,
+        A.email2,
+        A.receipt_no,
+        A.amt,
+        B.code_name AS statusName,
+        A.status,
+        A.issue_user_id,
+        A.issue_ymd,
+        A.issue_hms,
+        A.create_user_id,
+        A.create_ymd,
+        A.create_hms,
+        C.num
+        FROM
+        sa0230 A,
+        CM9010 B,
+        MA1000,
+        (
+        SELECT
+        COUNT (A.acc_id) AS num
+        FROM
+        sa0230 A,
+        MA1000,
+        CM9010 B
+        WHERE
+        B.code_type = '00540'
+        AND B.code_value = A.status
+        AND ma1000.store_cd = A.store_cd
+        AND A.acc_date BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
+        AND A.store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">
+            AND A.acc_date BETWEEN #{param.startDate} AND #{param.endDate}
+        </if>
+        <if test="param.status!=null and param.status!=''">
+            AND A.status = #{param.status}
+        </if>
+        <if test="param.customerName!=null and param.customerName!=''">
+            AND lower(A.customer_name) like lower(CONCAT('%',#{param.customerName},'%'))
+        </if>
+        <if test="param.phone!=null and param.phone!=''">
+            AND lower(A.phone) like lower(CONCAT('%',#{param.phone},'%'))
+        </if>
+        ) C
+        WHERE
+        B.code_type = '00540'
+        AND ma1000.store_cd = A.store_cd
+        AND A.acc_date BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
+        AND B.code_value = A.status
+        AND A.store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">
+            AND A.acc_date BETWEEN #{param.startDate} AND #{param.endDate}
+        </if>
+        <if test="param.status!=null and param.status!=''">
+            AND A.status = #{param.status}
+        </if>
+        <if test="param.customerName!=null and param.customerName!=''">
+            AND lower(A.customer_name) like lower(CONCAT('%',#{param.customerName},'%'))
+        </if>
+        <if test="param.phone!=null and param.phone!=''">
+            AND lower(A.phone) like lower(CONCAT('%',#{param.phone},'%'))
+        </if>
+        ORDER BY
+        acc_date
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+
+    <select id="searchInvoice" parameterType="cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceEntryDTO" resultMap="invoiceResult">
+        SELECT
+        A.store_cd,
+        A.tran_serial_no AS receiptNo,
+        A.tran_date AS date,
+        A.sale_amount AS amt,
+        B.num
+        FROM
+        SA0010 A,
+        (
+        SELECT
+        count (S.tran_serial_no) as num
+        FROM
+        SA0010 S
+        WHERE
+        1=1
+        <if test="param.storeNo!=null and param.storeNo!=''">
+            AND S.store_cd = #{param.storeNo}
+        </if>
+        <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">
+            AND S.acc_date BETWEEN #{param.startDate} AND #{param.endDate}
+        </if>
+        <if test="param.receiptNo!=null and param.receiptNo!=''">
+            AND cast(tran_serial_no AS VARCHAR) like concat('%',#{param.receiptNo},'%')
+        </if>
+        AND S.tran_type = 'sale'
+        AND S.sale_type = '0'
+        ) B
+        WHERE
+        1=1
+        <if test="param.storeNo!=null and param.storeNo!=''">
+            AND A.store_cd = #{param.storeNo}
+        </if>
+        <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">
+            AND A.acc_date BETWEEN #{param.startDate} AND #{param.endDate}
+        </if>
+        <if test="param.receiptNo!=null and param.receiptNo!=''">
+            AND cast(tran_serial_no AS VARCHAR) like concat('%',#{param.receiptNo},'%')
+        </if>
+        AND A.tran_type = 'sale'
+        AND A.sale_type = '0'
+        ORDER BY
+        acc_date
+        LIMIT ${param.rows} OFFSET ${param.limitStart}
+    </select>
+
+    <select id="searchInvoiceItem" parameterType="cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceEntryDTO" resultMap="invoiceItemResult">
+        SELECT
+            C.article_id,
+            C.article_name,
+            B.sale_qty AS qty,
+            B.sale_amount AS amt,
+            E.num
+        FROM
+            SA0010 A,
+            SA0020 B,
+            MA1100 C,
+            CM9060 D,
+            (
+               SELECT
+                    COUNT (B.article_id) AS num
+                FROM
+                    SA0010 A,
+                    SA0020 B,
+                    MA1100 C,
+                    CM9060 D
+                WHERE
+                    A.tran_serial_no = CAST(#{param.receiptNo} AS integer)
+                    AND A.store_cd = #{param.storeNo}
+                    AND D.sp_id = '0000'
+                    AND A.tran_serial_no = B.tran_serial_no
+                    AND A.store_cd = B.store_cd
+                    AND B.article_id = C.article_id
+                    AND D.sp_value BETWEEN C.effective_start_date AND C.effective_end_date
+                    AND B.detail_type = 's'
+            ) E
+        WHERE
+            A.tran_serial_no = CAST(#{param.receiptNo} AS integer)
+            AND A.store_cd = #{param.storeNo}
+            AND D.sp_id = '0000'
+            AND A.tran_serial_no = B.tran_serial_no
+            AND A.store_cd = B.store_cd
+            AND B.article_id = C.article_id
+            AND D.sp_value BETWEEN C.effective_start_date AND C.effective_end_date
+            AND B.detail_type = 's'
+        ORDER BY
+            B.sale_seq_no
+        LIMIT ${param.rows} OFFSET ${param.limitStart}
+    </select>
+
+    <select id="selectMaxCount" resultType="int">
+        SELECT max(cast(acc_id as int)) FROM sa0230 s
+    </select>
+
+    <insert id="insertInvoice" parameterType="cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceDataDTO">
+        INSERT INTO SA0230(
+            acc_id,
+            acc_date,
+            store_cd,
+            customer_name,
+            company_name ,
+            tax,
+            address,
+            phone,
+            phone2,
+            email,
+            email2,
+            receipt_no,
+            amt,
+            status,
+            create_user_id,
+            create_ymd,
+            create_hms
+        ) VALUES (
+            #{param.accId},
+            #{param.accDate},
+            #{param.storeNo},
+            #{param.customerName},
+            #{param.companyName},
+            #{param.tax},
+            #{param.address},
+            #{param.phone},
+            #{param.phone2},
+            #{param.email},
+            #{param.email2},
+            #{param.receiptNo},
+            #{param.amt},
+            #{param.status},
+            #{param.createUserId},
+            #{param.createYmd},
+            #{param.createHms}
+        )
+    </insert>
+</mapper>

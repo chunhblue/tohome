@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.IyBmCkMapper">
+<sql id="bm_ck_common_where">
+		<if test="newFlg != null">
+     		and  bm.new_flg=#{newFlg}
+     	</if>
+      	<if test="updateFlg != null">
+     		and  bm.update_flg=#{updateFlg}
+     	</if>
+      	<if test="checkFlg != null">
+     		and  bm.check_flg=#{checkFlg}
+     	</if>
+      	<if test="div != null">
+     		   and ( regexp_instr(bm.dpt_all,#{div})> 0)
+     	</if>
+      	<if test="dpt != null">
+     		   and ( regexp_instr(bm.dpt_all, #{dpt})> 0)
+     	</if>
+      	<if test="bmBePart != null">
+     		<if test="identity == 1">
+     			<if test="bmBePart == 0">
+	      			and  bm.dpt_flg=0
+	      		</if>
+	      		<if test="bmBePart != 0">
+	      			and  (bm.dpt_flg=1 or bm.dpt_flg=2)
+	      		</if>
+     		</if>
+     		<if test="identity == 2">
+	      		<if test="bmBePart == 0">
+	      			and  (bm.dpt_flg=0 or bm.dpt_flg=1)
+	      		</if>
+	      		<if test="bmBePart != 0">
+	      			and  bm.dpt_flg=2
+	      		</if>
+     		</if>
+     	</if>
+      	<if test="bmType != null">
+     		and  bm.bm_type=#{bmType}
+     	</if>
+      	<if test="bmCode != null">
+     		and  bm.bm_code=#{bmCode}
+     	</if>
+      	<if test="itemCode != null">
+     		 and item.bm_type=bm.bm_type
+   			 and item.bm_code=bm.bm_code
+   			 and trim(item.item)=#{itemCode}
+     	</if>
+      	<if test="sellStartDate != null">
+     		<![CDATA[and  bm.bm_eff_from>=#{sellStartDate}]]>
+     	</if>
+      	<if test="sellEndDate != null">
+     		<![CDATA[and  bm.bm_eff_to<=#{sellEndDate}]]>
+     	</if>
+     	<if test="resources != null">
+     	 and 
+           ( 
+         			<foreach collection="resources" item="res_group" separator="or" index="index">
+         				( 1=1
+         					<if test="res_group.dpt != null">
+	                 and   <![CDATA[ regexp_instr(bm.dpt_all,#{res_group.dpt}) > 0]]>
+         					</if>
+         					<if test="res_group.store != null">
+	                 and     bm.store=#{res_group.store}
+         					</if>
+         					
+         				)
+         			
+               </foreach>       
+           )
+     	</if>
+</sql>
+
+	<!-- list画面检索sql，得到ck数据量 -->
+ <select id="getBmCkCountByJsonParam" resultType="java.lang.Long" parameterType="cn.com.bbut.iy.itemmaster.dto.bm.BmJsonParamDTO">
+	select count(*) from (
+ 		select 
+		        bm.bm_type as bmType,
+		       	bm.bm_code as bmCode
+		  from 
+		       	iy_bm_ck bm
+		       	<if test="itemCode != null">
+     				,iy_bm_item_ck item
+     			</if>
+		  where 1=1
+		        <include refid="bm_ck_common_where" />	
+		  group 
+		  		by bm.bm_type,
+		  		bm.bm_code
+		 )
+ </select>
+	<!-- 得到指定的bm类型和code的bm数量 04类型 -->
+ <select id="getBmCkNumberTypeFour" resultType="java.lang.Integer" parameterType="string">
+ 
+  	select  max(c.num_a)
+          from iy_bm_item_ck c
+         where 
+         	c.bm_type = #{bmType}
+           and c.bm_code = #{bmCode}
+         group by c.bm_type, c.bm_code
+
+ </select>
+	<!-- 得到指定的bm类型和code的bm数量 -->
+ <select id="getBmCkNumber" resultType="java.lang.Integer" parameterType="string">
+ 	select count(*)
+  	from (select c.bm_type, c.bm_code, c.item
+          from iy_bm_item_ck c
+         where 
+         c.bm_type = #{bmType}
+           and c.bm_code = #{bmCode}
+         group by c.bm_type, c.bm_code, c.item)
+
+ </select>
+	<!-- list画面检索sql，得到ck表的数据 -->
+ <select id="getBmCkDataByJsonParam" resultType="cn.com.bbut.iy.itemmaster.dto.bm.BmListGridDataDTO" parameterType="cn.com.bbut.iy.itemmaster.dto.bm.BmJsonParamDTO">
+	select * from (
+			select row_number() over() as od, tt.*
+			  from (
+					select 
+				        bm.bm_type as bmType,
+				        bm.bm_type as bmTypeText,
+				       	bm.bm_code as bmCode,
+				       	count(bm.company) as bmCount,
+				       	max(bm.bm_eff_from) as startDate,
+				       	max(bm.bm_number) as bmNumber,
+				       	max(bm.bm_eff_to) as endDate,
+				       	max(bm.dpt) as createDpt,
+				       	max(bm.BM_GROSS) as bmGross,
+				       	max(bm.buyer) as buyer,
+				       	max(ff.person_name) as buyerName,
+				       	max(bm.num_a) as numA,
+		            	max(bm.num_b) as numB,
+		            	max(bm.DPT_ALL) as dptAll,
+		            	max(bm.RIGHT_FLG) as rightFlg,
+		            	max(bm.FIRST_FLG) as firstFlg,
+				       	max(bm.check_flg) as checkFlg,
+				       	max(bm.check_flg) as checkFlgText,
+						max(bm.OP_FLG) as opFlg,
+						max(bm.OP_FLG) as opFlgText,
+						max(bm.NEW_Flg) as newFlg,
+						max(bm.NEW_Flg) as newFlgText,
+		            	bm.bm_type||'#'||bm.bm_code  as trKey,
+				       	max(bm.rejectreason) as rejectreason
+				  from 
+				       	iy_bm_ck bm,
+				       	iyed_staff ff
+				       	<if test="itemCode != null">
+		     				,iy_bm_item_ck item
+		     			</if>
+				  where
+				  		1=1
+				       	and bm.buyer=ff.person_code
+				       	<include refid="bm_ck_common_where" />
+				  group 
+				  		by bm.bm_type,
+				  		bm.bm_code
+					<if test="orderByClause != null">
+			            order by ${orderByClause}
+			        </if>
+			        ) tt
+			) ttt
+			<if test="limitStart != null">
+				<![CDATA[ WHERE ttt.od >${limitStart} ]]>
+				<![CDATA[ and  ttt.od <=${limitEnd}]]>
+			</if>
+	</select>
+	
+	<!-- 得到商品部长的代审核的数据量-->
+ <select id="getSecretaryCheckCount" resultType="cn.com.bbut.iy.itemmaster.dto.bm.BmListGridDataDTO">
+	select 
+            bm.bm_type as bmType,
+            bm.bm_code as bmCode,
+            max(FIRST_FLG) as forstFlg
+      from 
+            iy_bm_ck bm
+      where
+          1=1
+          <if test="checkFlg != null">
+     		and bm.check_flg=#{checkFlg}
+     	</if>
+          <if test="rightFlg != null">
+           and regexp_instr(bm.RIGHT_FLG, #{rightFlg}) > 0  
+     	</if>
+          <if test="resources != null">
+     	 and 
+           ( 
+         	<foreach collection="resources" item="res_group" separator="or" index="index">
+    		 <if test="res_group != null">
+               <![CDATA[ regexp_instr(bm.dpt_all,#{res_group}) > 0]]>
+    		  </if>
+           </foreach>       
+           )
+     	</if>
+      group 
+          by bm.bm_type,
+          bm.bm_code
+ </select>
+		<!-- 根据参数得到正式表中excel导出的数据-->
+	<select id="getBmOutExcelData" resultType="cn.com.bbut.iy.itemmaster.dto.bm.BmOutExcel" parameterType="cn.com.bbut.iy.itemmaster.dto.bm.BmJsonParamDTO">
+		select * from (
+					select row_number() over() as od, tt.*
+					  from (
+				select
+					t.dpt as createDpt,
+			       t.check_flg as checkFlg,
+			        t.new_flg as newFlg,
+			       t.update_flg as updateFlg,
+			       t.op_flg as opFlg,
+			       t.bm_type as bmType,
+			       t.bm_code as bmCode,
+			       t.buyer as buyer,
+			       ff.person_name as buyerName,
+			       t.bm_eff_from as startDate,
+			       t.bm_eff_to as endDate,
+			       t.bm_discount_rate as bmDiscountRate,
+			       t.bm_number as bmCount,
+			       t.bm_price as bmPrice,
+			       tc.store as store,
+			       m.dpt as itemDpt,
+			       tc.item as itemCode,
+			       trim(m.item_name) as itemName,
+			       m.item_system as itemSystem,
+			       tc.price as itemPrice,
+			       tc.price_disc as itemPriceDisc,
+			       t.bm_gross as itemGross,
+			       tc.num_a as numA,
+			       tc.num_b as numB,
+			       tc.bm_item_flg as bmItemFlg,
+			       t.rejectreason as rejectreason
+			  from iy_bm_item_ck tc
+			  left join iy_item_m m
+			    on trim(m.item1) = trim(tc.item)
+			 , iy_bm_ck t
+			  left join iyed_staff ff
+			    on ff.person_code = t.buyer
+			
+			 where t.bm_type = tc.bm_type
+			   and t.bm_code = tc.bm_code
+			   and t.store = tc.store
+			   
+			   <if test="newFlg != null">
+		     		and  t.new_flg=#{newFlg}
+		     	</if>
+		      	<if test="updateFlg != null">
+		     		and  t.update_flg=#{updateFlg}
+		     	</if>
+		      	<if test="checkFlg != null">
+		     		and  t.check_flg=#{checkFlg}
+		     	</if>
+		      	<if test="div != null">
+		     		   and ( regexp_instr(t.dpt_all,#{div})> 0)
+		     	</if>
+		      	<if test="dpt != null">
+		     		   and ( regexp_instr(t.dpt_all, #{dpt})> 0)
+		     	</if>
+		      	<if test="bmBePart != null">
+		     		<if test="identity == 1">
+		     			<if test="bmBePart == 0">
+			      			and  t.dpt_flg=0
+			      		</if>
+			      		<if test="bmBePart != 0">
+			      			and  (t.dpt_flg=1 or t.dpt_flg=2)
+			      		</if>
+		     		</if>
+		     		<if test="identity == 2">
+			      		<if test="bmBePart == 0">
+			      			and  (t.dpt_flg=0 or t.dpt_flg=1)
+			      		</if>
+			      		<if test="bmBePart != 0">
+			      			and  t.dpt_flg=2
+			      		</if>
+		     		</if>
+		     	</if>
+		      	<if test="bmType != null">
+		     		and  t.bm_type=#{bmType}
+		     	</if>
+		      	<if test="bmCode != null">
+		     		and  t.bm_code=#{bmCode}
+		     	</if>
+		      	<if test="itemCode != null">
+		   			 and trim(tc.item)=#{itemCode}
+		     	</if>
+		      	<if test="sellStartDate != null">
+		     		<![CDATA[and  t.bm_eff_from>=#{sellStartDate}]]>
+		     	</if>
+		      	<if test="sellEndDate != null">
+		     		<![CDATA[and  t.bm_eff_to<=#{sellEndDate}]]>
+		     	</if>
+		     	<if test="resources != null">
+		     	 and 
+		           ( 
+		         			<foreach collection="resources" item="res_group" separator="or" index="index">
+		         				( 1=1
+		         					<if test="res_group.dpt != null">
+			                 and   <![CDATA[ regexp_instr(t.dpt_all,#{res_group.dpt}) > 0]]>
+		         					</if>
+		         					<if test="res_group.store != null">
+			                 and     t.store=#{res_group.store}
+		         					</if>
+		         					
+		         				)
+		         			
+		               </foreach>       
+		           )
+		     	</if>
+	 					order by t.bm_type,t.bm_code,tc.store, tc.item
+					        ) tt
+			) ttt
+			<if test="limitStart != null">
+				<![CDATA[ WHERE ttt.od >${limitStart} ]]>
+				<![CDATA[ and  ttt.od <=${limitEnd}]]>
+			</if>
+	</select>
+</mapper>

@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.ReconciliationMngMapper">
+
+    <resultMap id="ReMap" type="cn.com.bbut.iy.itemmaster.dto.ReconciliationMng.ReconciliationMngDto">
+        <result column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <result column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <result column="article_name" property="articleName" jdbcType="VARCHAR" />
+        <result column="trans_date" property="transDate" jdbcType="VARCHAR" />
+        <result column="barcode" property="barcode" jdbcType="VARCHAR" />
+        <result column="ckQty" property="ckQty" jdbcType="NUMERIC" />
+        <result column="ckAmount" property="ckAmount" jdbcType="NUMERIC" />
+        <result column="third_qty" property="thirdQty" jdbcType="NUMERIC" />
+        <result column="third_amount" property="thirdAmount" jdbcType="NUMERIC" />
+        <result column="document_recon_cd" property="documentReconCd" jdbcType="VARCHAR" />
+        <result column="document_recon_name" property="documentReconName" jdbcType="VARCHAR" />
+        <result column="excel_group_cd" property="excelGroupCd" jdbcType="VARCHAR" />
+        <result column="excel_group_name" property="excelGroupName" jdbcType="VARCHAR" />
+        <result column="vary_qty" property="varyQty" jdbcType="NUMERIC" />
+        <result column="vary_amount" property="varyAmount" jdbcType="NUMERIC" />
+    </resultMap>
+
+    <sql id="selectCondition">
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+    </sql>
+
+    <select id="selectMb1200List" parameterType="cn.com.bbut.iy.itemmaster.dto.ReconciliationMng.ReconciliationMngParamDto"
+            resultMap="ReMap">
+        SELECT
+        store_cd,store_name,
+        date trans_date,
+        payoo_qty as third_qty,
+        payoo_amount as third_amount,
+        ck_qty ckQty,
+        ck_amount ckAmount,
+        vary_qty,vary_amount
+        FROM
+        mb1200
+        where
+        date between #{transStrartDate,jdbcType=VARCHAR} and #{transEndDate,jdbcType=VARCHAR}
+        and store_cd in
+        <include refid="selectCondition"></include>
+        <if test="flg and limitStart >= 0">
+            limit ${limitEnd} offset ${limitStart}
+        </if>
+    </select>
+
+    <select id="selectCountMb1200List" parameterType="cn.com.bbut.iy.itemmaster.dto.ReconciliationMng.ReconciliationMngParamDto" resultType="int">
+        SELECT
+        count(*)
+        FROM mb1200
+        where
+        date between #{transStrartDate,jdbcType=VARCHAR} and #{transEndDate,jdbcType=VARCHAR}
+        and store_cd in
+        <include refid="selectCondition"></include>
+    </select>
+
+    <select id="selectListByCondition" parameterType="String" resultMap="ReMap">
+        SELECT distinct
+        sa0020.store_cd,
+        to_char(sa0020.sale_date,'yyyyMMdd') trans_date,
+        sa0020.article_id,
+        sa0020.barcode,
+        sa0020.pos_id posId,
+        sa0020.tran_serial_no tranSerialNo,
+        sa0020.sale_seq_no saleSeqNo,
+        sa0020.sale_qty ckQty,
+        sa0020.sale_amount ckAmount
+        FROM
+        sa0020
+        WHERE
+        sa0020.detail_type = 's'
+        ORDER BY
+        sale_seq_no ASC
+    </select>
+
+    <select id="selectListForMb1200" resultMap="ReMap">
+        SELECT distinct
+        sa0020.store_cd,
+        to_char(sa0020.sale_date,'yyyyMMdd') trans_date,
+        ma1000.store_name,
+        sum(sa0020.sale_qty) ckQty,
+        sum(sa0020.sale_amount) ckAmount
+        FROM
+        sa0020,ma1000
+        WHERE
+        sa0020.detail_type = 's'
+        and sa0020.store_cd = ma1000.store_cd
+        and #{businessDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date and ma1000.effective_end_date
+        and sa0020.store_cd in
+        <foreach collection="dbStores" item="item" index="index" open="(" separator="," close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+        group by sa0020.store_cd,trans_date,ma1000.store_name
+        ORDER BY
+        sa0020.store_cd,trans_date ASC
+    </select>
+
+    <select id="getMb1200List" resultType="cn.com.bbut.iy.itemmaster.entity.Mb1200">
+        select
+        store_cd,
+        store_name,
+        date as transDate
+        from mb1200 where
+        store_cd in
+        <foreach collection="stores" item="item" index="index" open="(" separator="," close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+    </select>
+
+    <delete id="deleteMb1200ByCondition">
+        delete from mb1200
+        where (store_cd || ' ' || date) in
+        <foreach collection="storeDates" item="item" index="index" open="(" separator="," close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+
+
+    <select id="getMb0010" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select document_recon_cd k,document_recon_name v
+        from mb0010
+        where EFFECTIVE_STS='10'
+        <if test="v!=null and v!=''">
+            AND (
+            lower(document_recon_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(document_recon_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ORDER BY document_recon_cd
+    </select>
+
+    <select id="getMb0020" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select excel_group_cd k,excel_group_name v
+        from mb0020
+        where EFFECTIVE_STS='10'
+        AND mb0020.document_recon_cd = #{documentReconCd,jdbcType=VARCHAR}
+        <if test="v!=null and v!=''">
+            AND (
+            lower(excel_group_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(excel_group_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ORDER BY excel_group_cd
+    </select>
+
+    <insert id="insertMb1700" parameterType="cn.com.bbut.iy.itemmaster.entity.Mb1700">
+        INSERT INTO public.mb1700(
+        request_id,order_id,request_date,trans_amount,partner_username,shop_name,create_user_id,
+        create_ymd_hms,ck_qty,ck_amount,vary_qty,vary_amount
+        )
+        VALUES
+        <foreach collection="list" item="mb1700" index="index" separator=",">
+            (
+            #{mb1700.requestId},
+            #{mb1700.orderId},
+            #{mb1700.requestDate},
+            coalesce(#{mb1700.transAmount},0),
+            #{mb1700.partnerUsername},
+            #{mb1700.shopName},
+            #{mb1700.createUserId},
+            to_char(NOW(),'yyyyMMddhhmmss'),
+            coalesce(#{mb1700.ckQty},0),
+            coalesce(#{mb1700.ckAmount},0),
+            coalesce(#{mb1700.varyQty},0),
+            coalesce(#{mb1700.varyAmount},0)
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertExcelToMb1200" parameterType="cn.com.bbut.iy.itemmaster.entity.Mb1200">
+        insert into public.mb1200(
+        store_cd,store_name,date,payoo_qty,commission,payoo_amount,ck_qty,ck_amount,vary_qty,
+        create_user_id,create_ymd_hms,vary_amount
+        ) values
+        <foreach collection="mb1200List" item="mb1200" index="index" separator=",">(
+            #{mb1200.storeCd},
+            #{mb1200.storeName},
+            #{mb1200.transDate},
+            coalesce(#{mb1200.payooQty},0),
+            coalesce(#{mb1200.commission},0),
+            coalesce(#{mb1200.payooAmount},0),
+            coalesce(#{mb1200.ckQty},0),
+            coalesce(#{mb1200.ckAmount},0),
+            coalesce(#{mb1200.varyQty},0),
+            #{mb1200.createUserId},
+            to_char(NOW(),'yyyyMMddhhmmss'),
+            coalesce(#{mb1200.varyAmount},0)
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectListForMb1300" parameterType="String" resultMap="ReMap">
+        SELECT distinct
+        sa0020.store_cd,
+        to_char(sa0020.sale_date,'yyyyMMdd') trans_date,
+        sa0020.article_id,
+        ma1100.article_name,
+        sum(sa0020.sale_qty) ckQty,
+        sum(sa0020.sale_amount) ckAmount
+        FROM
+        sa0020,ma1100
+        WHERE
+        sa0020.detail_type = 's'
+        and ma1100.article_id = sa0020.article_id
+        and #{businessDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date and ma1100.effective_end_date
+        and sa0020.store_cd in
+        <foreach collection="dbStores" item="item" index="index" open="(" separator="," close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+        group by sa0020.store_cd,trans_date,sa0020.article_id,ma1100.article_name
+        ORDER BY
+        sa0020.store_cd,trans_date,article_id ASC
+    </select>
+
+    <select id="getMb1300List" resultType="cn.com.bbut.iy.itemmaster.entity.Mb1300">
+        select
+        store_cd,
+        business_date,
+        item_code
+        from mb1300 where
+        (store_cd || ' ' || item_code) in
+        <foreach collection="storeItems" item="item" index="index" open="(" separator="," close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+    </select>
+
+    <insert id="insertExcelToMb1300" parameterType="cn.com.bbut.iy.itemmaster.entity.Mb1300">
+        insert into public.mb1300(
+        store_cd,business_date,item_code,item_name,ck_qty,ck_amount,payoo_qty,pucharse_amt,payoo_amount,
+        vary_qty,commission_vat,commission,create_user_id,create_ymd_hms,vary_amount
+        ) values
+        <foreach collection="mb1300List" item="mb1300" index="index" separator=",">(
+            #{mb1300.storeCd},
+            #{mb1300.businessDate},
+            #{mb1300.itemCode},
+            #{mb1300.itemName},
+            coalesce(#{mb1300.ckQty},0),
+            coalesce(#{mb1300.ckAmount},0),
+            coalesce(#{mb1300.payooQty},0),
+            coalesce(#{mb1300.pucharseAmt},0),
+            coalesce(#{mb1300.payooAmount},0),
+            coalesce(#{mb1300.varyQty},0),
+            coalesce(#{mb1300.commissionVat},0),
+            coalesce(#{mb1300.commission},0),
+            #{mb1300.createUserId},
+            to_char(NOW(),'yyyyMMddhhmmss'),
+            coalesce(#{mb1300.varyAmount},0)
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteMb1300ByCondition">
+        delete from mb1300
+        where (store_cd || ' ' || business_date || ' ' || item_code) in
+        <foreach collection="storeDateItems" item="item" index="index" open="(" separator="," close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+
+    <select id="selectMb1300List" parameterType="cn.com.bbut.iy.itemmaster.dto.ReconciliationMng.ReconciliationMngParamDto"
+            resultMap="ReMap">
+        SELECT
+        mb1300.store_cd,ma1000.store_name,
+        mb1300.business_date trans_date,
+        mb1300.item_code article_id,
+        mb1300.item_name article_name,
+        T.barcode,
+        mb1300.payoo_qty as third_qty,
+        payoo_amount as third_amount,
+        ck_qty ckQty,
+        ck_amount ckAmount,
+        vary_qty,vary_amount
+        FROM
+        mb1300
+        LEFT JOIN (
+        SELECT ma1110.article_id,ma1110.default_barcode barcode,ma1110.vendor_id from ma1110,ma2240,mb1300 mb13
+        where  #{businessDate,jdbcType=VARCHAR}
+        BETWEEN ma1110.effective_start_date AND ma1110.effective_end_date
+        and ma1110.article_id = ma2240.article_id and ma2240.store_cd = mb13.store_cd
+        and ma1110.vendor_id = ma2240.vendor_id
+        and ma1110.structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
+        (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = mb13.store_cd))
+        ) T
+        ON T.article_id = mb1300.item_code ,
+        ma1000
+        where
+        mb1300.store_cd = ma1000.store_cd
+        and mb1300.business_date between #{transStrartDate,jdbcType=VARCHAR} and #{transEndDate,jdbcType=VARCHAR}
+        and #{businessDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date and ma1000.effective_end_date
+        and mb1300.store_cd in
+        <include refid="selectCondition"></include>
+        <if test="flg and limitStart >= 0">
+            limit ${limitEnd} offset ${limitStart}
+        </if>
+    </select>
+
+    <select id="selectCountMb1300List" parameterType="cn.com.bbut.iy.itemmaster.dto.ReconciliationMng.ReconciliationMngParamDto" resultType="int">
+        SELECT
+        count(*)
+        FROM
+        mb1300,ma1000
+        where
+        mb1300.store_cd = ma1000.store_cd
+        and business_date between #{transStrartDate,jdbcType=VARCHAR} and #{transEndDate,jdbcType=VARCHAR}
+        and #{businessDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date and ma1000.effective_end_date
+        and mb1300.store_cd in
+        <include refid="selectCondition"></include>
+    </select>
+
+    <select id="getMb1700List" resultType="cn.com.bbut.iy.itemmaster.entity.Mb1700">
+        select
+        shop_name,
+        request_date,
+        request_id
+        from mb1700 where
+        (shop_name || ' ' || request_id) in
+        <foreach collection="storeItems" item="item" index="index" open="(" separator="," close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+    </select>
+
+    <delete id="deleteMb1700ByCondition">
+        delete from mb1700
+        where (shop_name || ' ' || request_date || ' ' || request_id) in
+        <foreach collection="storeDateItems" item="item" index="index" open="(" separator="," close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+
+    <select id="selectMb1700List" parameterType="cn.com.bbut.iy.itemmaster.dto.ReconciliationMng.ReconciliationMngParamDto"
+            resultMap="ReMap">
+        SELECT
+        mb1700.shop_name,ma1000.store_name,
+        mb1700.request_date trans_date,
+        mb1700.request_id article_id,
+        ma1100.article_name,
+        T.barcode,
+        trans_amount as third_amount,
+        ck_qty ckQty,
+        ck_amount ckAmount,
+        vary_qty,vary_amount
+        FROM
+        mb1700
+        LEFT JOIN (
+        SELECT ma1110.article_id,ma1110.default_barcode barcode,ma1110.vendor_id from ma1110,ma2240,mb1700 mb17
+        where  #{businessDate,jdbcType=VARCHAR}
+        BETWEEN ma1110.effective_start_date AND ma1110.effective_end_date
+        and ma1110.article_id = ma2240.article_id and ma2240.store_cd = mb17.shop_name
+        and ma1110.vendor_id = ma2240.vendor_id
+        and ma1110.structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
+        (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = mb17.shop_name))
+        ) T
+        ON T.article_id = mb1700.request_id,
+        ma1000,ma1100
+        where
+        mb1700.shop_name = ma1000.store_cd
+        and request_date between #{transStrartDate,jdbcType=VARCHAR} and #{transEndDate,jdbcType=VARCHAR}
+        and #{businessDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date and ma1000.effective_end_date
+        and mb1700.request_id = ma1100.article_id
+        and #{businessDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date and ma1100.effective_end_date
+        and mb1700.shop_name in
+        <include refid="selectCondition"></include>
+        <if test="flg and limitStart >= 0">
+            limit ${limitEnd} offset ${limitStart}
+        </if>
+    </select>
+
+    <select id="selectCountMb1700List" parameterType="cn.com.bbut.iy.itemmaster.dto.ReconciliationMng.ReconciliationMngParamDto" resultType="int">
+        SELECT
+        count (*)
+        FROM
+        mb1700 ,
+        ma1000,ma1100
+        where
+        mb1700.shop_name = ma1000.store_cd
+        and mb1700.request_date between #{transStrartDate,jdbcType=VARCHAR} and #{transEndDate,jdbcType=VARCHAR}
+        and #{businessDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date and ma1000.effective_end_date
+        and mb1700.request_id = ma1100.article_id
+        and #{businessDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date and ma1100.effective_end_date
+        and mb1700.shop_name in
+        <include refid="selectCondition"></include>
+    </select>
+</mapper>

@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.MRoleStoreMapper" >
+
+    <resultMap id="baseResult" type="cn.com.bbut.iy.itemmaster.dto.base.role.RoleStoreDTO" >
+        <result column="region_cd" property="regionCd" jdbcType="VARCHAR" />
+        <result column="region_name" property="regionName" jdbcType="VARCHAR" />
+        <result column="city_cd" property="cityCd" jdbcType="VARCHAR" />
+        <result column="city_name" property="cityName" jdbcType="VARCHAR" />
+        <result column="district_cd" property="districtCd" jdbcType="VARCHAR" />
+        <result column="district_name" property="districtName" jdbcType="VARCHAR" />
+        <result column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <result column="serial_no" property="serialNo" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <select id="selectListById" parameterType="java.lang.Integer" resultMap="baseResult">
+        SELECT
+            m.*,
+            CASE WHEN m.region_cd='999999' THEN 'All Region'
+                ELSE CONCAT(m1.structure_cd, ' ', m1.structure_name) END AS region_name,
+            CASE WHEN m.city_cd='999999' THEN 'All City'
+                ELSE CONCAT(m2.structure_cd, ' ', m2.structure_name) END AS city_name,
+            CASE WHEN m.district_cd='999999' THEN 'All District'
+                ELSE CONCAT(m3.structure_cd, ' ', m3.structure_name) END AS district_name,
+            CASE WHEN m.store_cd='999999' THEN 'All Store'
+                ELSE CONCAT(m4.structure_cd, ' ', m4.structure_name) END AS store_name
+        FROM (
+            SELECT * FROM M_ROLE_STORE WHERE role_id = #{roleId,jdbcType=INTEGER}
+        ) m
+        LEFT JOIN (
+            SELECT structure_cd, structure_name FROM MA0020 WHERE effective_sts = '10' and level = '0'
+        ) m1
+        ON m.region_cd = m1.structure_cd
+        LEFT JOIN (
+            SELECT structure_cd, structure_name FROM MA0020 WHERE effective_sts = '10' and level = '1'
+        ) m2
+        ON m.city_cd = m2.structure_cd
+        LEFT JOIN (
+            SELECT structure_cd, structure_name FROM MA0020 WHERE effective_sts = '10' and level = '2'
+        ) m3
+        ON m.district_cd = m3.structure_cd
+        LEFT JOIN (
+            SELECT structure_cd, structure_name FROM MA0020 WHERE effective_sts = '10' and level = '3'
+        ) m4
+        ON m.store_cd = m4.structure_cd
+        ORDER BY m.serial_no
+    </select>
+
+    <insert id="insertRecord" parameterType="cn.com.bbut.iy.itemmaster.dto.base.role.RoleStoreDTO">
+        INSERT INTO
+        M_ROLE_STORE
+        VALUES
+        <foreach item="dto" index="index" collection="list"
+                 open="(" separator="," close=")">
+            #{roleId,jdbcType=INTEGER},
+            #{dto.regionCd,jdbcType=VARCHAR},
+            #{dto.cityCd,jdbcType=VARCHAR},
+            #{dto.districtCd,jdbcType=VARCHAR},
+            #{dto.storeCd,jdbcType=VARCHAR},
+            #{dto.serialNo,jdbcType=VARCHAR}
+        </foreach>
+    </insert>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        DELETE FROM M_ROLE_STORE
+        WHERE role_id = #{roleId,jdbcType=INTEGER}
+    </delete>
+
+    <!-- 根据角色查询Store权限 -->
+    <select id="selectStoreByRole" resultMap="baseResult">
+        SELECT
+        m.*, m1.region_name, m2.city_name, m3.district_name, m4.store_name
+        FROM (
+        SELECT * FROM M_ROLE_STORE WHERE role_id IN
+        <foreach item="roleId" index="index" collection="roleIds"
+                 open="(" separator="," close=")">
+            #{roleId,jdbcType=INTEGER}
+        </foreach>
+        ) m
+        LEFT JOIN (
+        SELECT structure_cd, CONCAT(structure_cd, ' ', structure_name) AS region_name
+        FROM MA0020 WHERE effective_sts = '10' and level = '0'
+        ) m1
+        ON m.region_cd = m1.structure_cd
+        LEFT JOIN (
+        SELECT structure_cd, CONCAT(structure_cd, ' ', structure_name) AS city_name
+        FROM MA0020 WHERE effective_sts = '10' and level = '1'
+        ) m2
+        ON m.city_cd = m2.structure_cd
+        LEFT JOIN (
+        SELECT structure_cd, CONCAT(structure_cd, ' ', structure_name) AS district_name
+        FROM MA0020 WHERE effective_sts = '10' and level = '2'
+        ) m3
+        ON m.district_cd = m3.structure_cd
+        LEFT JOIN (
+        SELECT structure_cd, CONCAT(structure_cd, ' ', structure_name) AS store_name
+        FROM MA0020 WHERE effective_sts = '10' and level = '3'
+        ) m4
+        ON m.store_cd = m4.structure_cd
+    </select>
+
+    <!-- 条件查询拥有店铺权限 -->
+    <select id="selectByCondition" resultMap="baseResult"
+            parameterType="cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam">
+        SELECT * FROM M_ROLE_STORE
+        WHERE role_id IN
+        <foreach item="roleId" index="index" collection="dto.roleIds"
+                 open="(" separator="," close=")">
+            #{roleId,jdbcType=INTEGER}
+        </foreach>
+        <if test="dto.regionCd!=null and dto.regionCd!=''">
+            AND (
+            region_cd = #{dto.regionCd,jdbcType=VARCHAR}
+            OR region_cd = '999999'
+            )
+            <if test="dto.cityCd!=null and dto.cityCd!=''">
+                AND (
+                city_cd = #{dto.cityCd,jdbcType=VARCHAR}
+                OR city_cd = '999999'
+                )
+                <if test="dto.districtCd!=null and dto.districtCd!=''">
+                    AND (
+                    district_cd = #{dto.districtCd,jdbcType=VARCHAR}
+                    OR district_cd = '999999'
+                    )
+                    <if test="dto.storeCd!=null and dto.storeCd!=''">
+                        AND (
+                        store_cd = #{dto.storeCd,jdbcType=VARCHAR}
+                        OR store_cd = '999999'
+                        )
+                    </if>
+                </if>
+            </if>
+        </if>
+    </select>
+
+    <select id="selectListByAllCode" resultMap="baseResult" parameterType="java.lang.String" >
+        SELECT * FROM M_ROLE_STORE
+        WHERE role_id IN
+        <foreach item="roleId" index="index" collection="roleIds"
+                 open="(" separator="," close=")">
+            #{roleId,jdbcType=INTEGER}
+        </foreach>
+        AND (
+        region_cd = '999999' OR city_cd = '999999'
+        OR district_cd = '999999' OR store_cd = '999999'
+        )
+    </select>
+
+    <select id="selectRegionByRoleId" parameterType="cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam"
+            resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT
+        m.region_cd k, CONCAT(m1.structure_cd,' ',m1.structure_name) AS v
+        FROM (
+        SELECT DISTINCT region_cd FROM M_ROLE_STORE
+        WHERE role_id IN
+        <foreach item="roleId" index="index" collection="dto.roleIds"
+                 open="(" separator="," close=")">
+            #{roleId,jdbcType=INTEGER}
+        </foreach>
+        ) m
+        LEFT JOIN (
+        SELECT structure_cd, structure_name FROM MA0020
+        WHERE effective_sts = '10' and level = '0'
+        <if test="dto.v!=null and dto.v!=''">
+            AND (
+            lower(structure_cd) like lower(CONCAT('%',#{dto.v,jdbcType=VARCHAR},'%'))
+            OR lower(structure_name) like lower(CONCAT('%',#{dto.v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ) m1
+        ON m.region_cd = m1.structure_cd
+    </select>
+
+    <select id="selectCityByRoleId" parameterType="cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam"
+            resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT
+        m.city_cd k, CONCAT(m1.structure_cd,' ',m1.structure_name) AS v
+        FROM (
+        SELECT DISTINCT city_cd FROM M_ROLE_STORE
+        WHERE
+        region_cd = #{dto.regionCd,jdbcType=VARCHAR}
+        AND role_id IN
+        <foreach item="roleId" index="index" collection="dto.roleIds"
+                 open="(" separator="," close=")">
+            #{roleId,jdbcType=INTEGER}
+        </foreach>
+        ) m
+        LEFT JOIN (
+        SELECT structure_cd, structure_name FROM MA0020
+        WHERE effective_sts = '10' and level = '1'
+        <if test="dto.v!=null and dto.v!=''">
+            AND (
+            lower(structure_cd) like lower(CONCAT('%',#{dto.v,jdbcType=VARCHAR},'%'))
+            OR lower(structure_name) like lower(CONCAT('%',#{dto.v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ) m1
+        ON m.city_cd = m1.structure_cd
+    </select>
+
+    <select id="selectDistrictByRoleId" parameterType="cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam"
+            resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT
+        m.district_cd k, CONCAT(m1.structure_cd,' ',m1.structure_name) AS v
+        FROM (
+        SELECT DISTINCT district_cd FROM M_ROLE_STORE
+        WHERE
+        region_cd = #{dto.regionCd,jdbcType=VARCHAR}
+        AND city_cd = #{dto.cityCd,jdbcType=VARCHAR}
+        AND role_id IN
+        <foreach item="roleId" index="index" collection="dto.roleIds"
+                 open="(" separator="," close=")">
+            #{roleId,jdbcType=INTEGER}
+        </foreach>
+        ) m
+        LEFT JOIN (
+        SELECT structure_cd, structure_name FROM MA0020
+        WHERE effective_sts = '10' and level = '2'
+        <if test="dto.v!=null and dto.v!=''">
+            AND (
+            lower(structure_cd) like lower(CONCAT('%',#{dto.v,jdbcType=VARCHAR},'%'))
+            OR lower(structure_name) like lower(CONCAT('%',#{dto.v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ) m1
+        ON m.district_cd = m1.structure_cd
+    </select>
+
+    <select id="selectStoreByRoleId" parameterType="cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam"
+            resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT
+        m.store_cd k, CONCAT(m1.structure_cd,' ',m1.structure_name) AS v
+        FROM (
+        SELECT DISTINCT store_cd FROM M_ROLE_STORE
+        WHERE
+        region_cd = #{dto.regionCd,jdbcType=VARCHAR}
+        AND city_cd = #{dto.cityCd,jdbcType=VARCHAR}
+        AND district_cd = #{dto.districtCd,jdbcType=VARCHAR}
+        AND role_id IN
+        <foreach item="roleId" index="index" collection="dto.roleIds"
+                 open="(" separator="," close=")">
+            #{roleId,jdbcType=INTEGER}
+        </foreach>
+        ) m
+        LEFT JOIN (
+        SELECT structure_cd, structure_name FROM MA0020
+        WHERE effective_sts = '10' and level = '3'
+        <if test="dto.v!=null and dto.v!=''">
+            AND (
+            lower(structure_cd) like lower(CONCAT('%',#{dto.v,jdbcType=VARCHAR},'%'))
+            OR lower(structure_name) like lower(CONCAT('%',#{dto.v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ) m1
+        ON m.store_cd = m1.structure_cd
+    </select>
+</mapper>

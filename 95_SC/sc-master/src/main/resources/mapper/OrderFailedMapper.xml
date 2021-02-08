@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.OrderFailedMapper">
+
+    <resultMap id="FailedGridResultMap" type="cn.com.bbut.iy.itemmaster.dto.orderFailed.OrderFailedGridDTO">
+        <id column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <id column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <id column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <id column="order_date" property="orderDate" jdbcType="VARCHAR" />
+        <id column="delivery_date" property="deliveryDate" jdbcType="VARCHAR" />
+        <id column="shipment_cd" property="shipmentCd" jdbcType="VARCHAR" />
+        <id column="order_method" property="orderMethod" jdbcType="VARCHAR" />
+        <id column="order_input_type" property="orderInputType" jdbcType="VARCHAR" />
+        <id column="vendor_id" property="vendorId" jdbcType="VARCHAR" />
+        <id column="order_input_id" property="orderInputId" jdbcType="VARCHAR" />
+        <result column="preserve_type" property="preserveType" jdbcType="VARCHAR" />
+        <result column="receive_unit_id" property="receiveUnitId" jdbcType="VARCHAR" />
+        <result column="order_qty" property="orderQty" jdbcType="DECIMAL" />
+        <result column="order_nocharge_qty" property="orderNoChargeQty" jdbcType="DECIMAL" />
+        <result column="order_price" property="orderPrice" jdbcType="DECIMAL" />
+        <result column="order_unit_qty" property="orderUnitQty" jdbcType="DECIMAL" />
+        <result column="order_batch_qty" property="orderBatchQty" jdbcType="DECIMAL" />
+        <result column="max_order_qty" property="maxOrderQty" jdbcType="DECIMAL" />
+        <result column="min_order_qty" property="minOrderQty" jdbcType="DECIMAL" />
+        <result column="barcode" property="barcode" jdbcType="VARCHAR" />
+        <result column="dep_cd" property="depCd" jdbcType="VARCHAR" />
+        <result column="pma_cd" property="pmaCd" jdbcType="VARCHAR" />
+        <result column="category_cd" property="categoryCd" jdbcType="VARCHAR" />
+        <result column="sub_category_cd" property="subCategoryCd" jdbcType="VARCHAR" />
+        <result column="purchase_vat_cd" property="purchaseVatCd" jdbcType="VARCHAR" />
+        <result column="purchase_tax_rate" property="purchaseTaxRate" jdbcType="DECIMAL" />
+        <result column="order_tax" property="orderTax" jdbcType="DECIMAL" />
+        <result column="order_amt" property="orderAmt" jdbcType="DECIMAL" />
+        <result column="order_amt_notax" property="orderAmtNoTax" jdbcType="DECIMAL" />
+        <result column="ma_cd" property="maCd" jdbcType="VARCHAR" />
+        <result column="ma_name" property="maName" jdbcType="VARCHAR" />
+        <result column="delivery_type_cd" property="deliveryTypeCd" jdbcType="VARCHAR" />
+        <result column="delivery_type_name" property="deliveryTypeName" jdbcType="VARCHAR" />
+        <result column="delivery_area_id" property="deliveryAreaId" jdbcType="VARCHAR" />
+        <result column="delivery_area_name" property="deliveryAreaName" jdbcType="VARCHAR" />
+        <result column="delivery_center_id" property="deliveryCenterId" jdbcType="VARCHAR" />
+        <result column="delivery_center_name" property="deliveryCenterName" jdbcType="VARCHAR" />
+        <result column="vendor_name" property="vendorName" jdbcType="VARCHAR" />
+        <result column="delivery_order" property="deliveryOrder" jdbcType="DECIMAL" />
+        <result column="invoice_no" property="invoiceNo" jdbcType="VARCHAR" />
+        <result column="invoice_line_no" property="invoiceLineNo" jdbcType="VARCHAR" />
+        <result column="order_error_cd" property="orderErrorCd" jdbcType="VARCHAR" />
+        <result column="article_name" property="articleName" jdbcType="VARCHAR" />
+        <result column="create_user_id" property="commonDTO.createUserId" jdbcType="VARCHAR" />
+        <result column="create_ymd" property="commonDTO.createYmd" jdbcType="VARCHAR" />
+        <result column="create_hms" property="commonDTO.createHms" jdbcType="VARCHAR" />
+        <result column="update_user_id" property="commonDTO.updateUserId" jdbcType="VARCHAR" />
+        <result column="update_ymd" property="commonDTO.updateYmd" jdbcType="VARCHAR" />
+        <result column="update_hms" property="commonDTO.updateHms" jdbcType="VARCHAR" />
+        <result column="update_screen_id" property="commonDTO.updateScreenId" jdbcType="VARCHAR" />
+        <result column="update_ip_address" property="commonDTO.updateIpAddress" jdbcType="VARCHAR" />
+        <result column="method_name" property="methodName" jdbcType="VARCHAR" />
+        <result column="order_error_name" property="failedReason" jdbcType="VARCHAR" />
+        <result column="order_uom" property="orderUom" jdbcType="VARCHAR" />
+        <result column="order_gap_qty" property="orderGapQuantity" jdbcType="DECIMAL" />
+        <result column="order_gap_amt" property="orderGapAmount" jdbcType="DECIMAL" />
+        <result column="min_order_amt" property="minOrderAmt" jdbcType="DECIMAL" />
+        <result column="total_order_qty" property="totalOrderQty" jdbcType="DECIMAL" />
+        <result column="total_order_amt" property="totalOrderAmt" jdbcType="DECIMAL" />
+        <result column="order_id" property="orderId" jdbcType="VARCHAR" />
+        <result column="unit_name" property="unitName" jdbcType="VARCHAR" />
+        <result column="emp_name" property="createUserId" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="selectFailedCondition">
+        <where>
+            <if test="orderStartDate != null and orderStartDate != ''">
+                AND order_date >= #{orderStartDate,jdbcType=VARCHAR}
+            </if>
+            <if test="orderEndDate != null and orderEndDate != ''">
+                AND #{orderEndDate,jdbcType=VARCHAR} >= order_date
+            </if>
+            <if test="failedReason != null and failedReason != ''">
+                AND order_error_cd = #{failedReason,jdbcType=VARCHAR}
+            </if>
+            <if test="barcode != null and barcode != ''">
+                AND lower(barcode) like lower(CONCAT('%',#{barcode,jdbcType=VARCHAR},'%'))
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectFailedList" resultMap="FailedGridResultMap" parameterType="cn.com.bbut.iy.itemmaster.dto.orderFailed.OrderFailedParamDTO">
+    SELECT
+    T.*,
+    T1.code_name AS method_name,
+    T2.code_name AS order_error_name,
+    T3.unit_name AS order_uom
+    FROM (
+    SELECT * FROM OD8040
+    <include refid="selectFailedCondition"></include>
+    )T
+    LEFT JOIN (
+    SELECT code_type, code_value, code_name
+    FROM CM9010 WHERE code_type = '00065'
+    ) T1
+    ON T.order_method = T1.code_value
+    LEFT JOIN (
+    SELECT code_type, code_value, code_name
+    FROM CM9010 WHERE code_type = '00075'
+    ) T2
+    ON T.order_error_cd = T2.code_value
+    LEFT JOIN (
+    SELECT unit_id, unit_name FROM MA0220
+    ) T3
+    ON T.receive_unit_id = T3.unit_id
+    ORDER BY order_date DESC
+    <if test="flg">
+        LIMIT ${rows} OFFSET ${limitStart}
+    </if>
+</select>
+
+    <select id="selectFailedCount" resultType="INT" parameterType="cn.com.bbut.iy.itemmaster.dto.orderFailed.OrderFailedParamDTO">
+        SELECT COUNT(1) FROM OD8040
+        <include refid="selectFailedCondition"></include>
+    </select>
+
+    <select id="VendorOrderFailedList" resultMap="FailedGridResultMap" parameterType="cn.com.bbut.iy.itemmaster.dto.orderFailed.OrderFailedParamDTO">
+        SELECT distinct T
+        .*,T2.vendor_name,
+        T3.store_name,ma4200.emp_name,
+        T6.code_name AS method_name,
+        COALESCE ( T4.total_order_qty, 0 ) AS total_order_qty,
+        COALESCE ( T4.total_order_amt, 0 ) AS total_order_amt,
+        T5.min_order_qty,
+        t5.min_order_amt,
+        T4.total_order_qty - T5.min_order_qty AS order_gap_qty,
+        T4.total_order_amt - T5.min_order_amt AS order_gap_amt
+        FROM od0010 o1,ma4200,ma1100,
+        (
+        SELECT DISTINCT
+        store_cd,order_id,order_date,review_status,vendor_id,delivery_date,A.order_method,A.order_type,A.create_user_id
+        FROM
+        OD0000 A
+        WHERE
+        A.order_date = #{orderDate,jdbcType=VARCHAR} AND A.order_differentiate = '0'
+        )
+        AS T LEFT JOIN ( SELECT vendor_id, vendor_name FROM MA2000 ) T2 ON T.vendor_id = T2.vendor_id
+        LEFT JOIN ( SELECT store_cd, store_name, zo_cd FROM MA1000 ) T3 ON T.store_cd = T3.store_cd
+        LEFT JOIN (SELECT DISTINCT
+        A.order_id,SUM ( A.order_qty ) total_order_qty,SUM ( A.order_amt ) total_order_amt
+        FROM
+        od0010 A GROUP BY A.order_id
+        ) T4 ON T.order_id = T4.order_id
+        LEFT JOIN ( SELECT DISTINCT effective_start_date, vendor_id, min_order_qty, min_order_amt FROM MA2002
+        ) T5 ON T.vendor_id = T5.vendor_id
+        LEFT JOIN ( SELECT code_type, code_value, code_name FROM CM9010 WHERE code_type = '00065' ) T6 ON T.order_method = T6.code_value
+        <where>
+            o1.order_id = T.order_id and o1.store_cd = T.store_cd and o1.vendor_id = T.vendor_id
+            and o1. article_id= ma1100.article_id
+            AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
+            and T.create_user_id = ma4200.emp_num_id
+            and (total_order_qty &lt; T5.min_order_qty OR total_order_amt &lt; T5.min_order_amt)
+            <if test="vendorInfo != null and vendorInfo != ''">
+                AND (
+                lower(T.vendor_id) like lower(CONCAT('%',#{vendorInfo,jdbcType=VARCHAR},'%'))
+                or lower(T2.vendor_name) like lower(CONCAT('%',#{vendorInfo,jdbcType=VARCHAR},'%'))
+                )
+            </if>
+            <if test="barcode != null and barcode != ''">
+                AND lower(o1.barcode) like lower(CONCAT('%',#{barcode,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="ItemInfo != null and ItemInfo != ''">
+                AND (
+                lower(o1.article_id) like lower(CONCAT('%',#{ItemInfo,jdbcType=VARCHAR},'%'))
+                or lower(ma1100.article_name) like lower(CONCAT('%',#{ItemInfo,jdbcType=VARCHAR},'%'))
+                )
+            </if>
+            <if test="createUserId != null and createUserId != ''">
+                AND (
+                lower(ma4200.emp_num_id) like lower(CONCAT('%',#{createUserId,jdbcType=VARCHAR},'%'))
+                or lower(ma4200.emp_name) like lower(CONCAT('%',#{createUserId,jdbcType=VARCHAR},'%'))
+                )
+            </if>
+        </where>
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+
+    <select id="VendorOrderFailedCount" resultType="INT" parameterType="cn.com.bbut.iy.itemmaster.dto.orderFailed.OrderFailedParamDTO">
+        SELECT
+        COUNT(distinct (T.store_cd, T.order_id))
+        FROM od0010 o1,ma4200,ma1100,
+        (
+        SELECT DISTINCT
+        store_cd,order_id,order_date,review_status,vendor_id,delivery_date,A.order_method,A.order_type,A.create_user_id
+        FROM
+        OD0000 A
+        WHERE
+        A.order_date = #{orderDate,jdbcType=VARCHAR} AND A.order_differentiate = '0'
+        )
+        AS T LEFT JOIN ( SELECT vendor_id, vendor_name FROM MA2000 ) T2 ON T.vendor_id = T2.vendor_id
+        LEFT JOIN ( SELECT store_cd, store_name, zo_cd FROM MA1000 ) T3 ON T.store_cd = T3.store_cd
+        LEFT JOIN (SELECT DISTINCT
+        A.order_id,SUM ( A.order_qty ) total_order_qty,SUM ( A.order_amt ) total_order_amt
+        FROM
+        od0010 A GROUP BY A.order_id
+        ) T4 ON T.order_id = T4.order_id
+        LEFT JOIN ( SELECT DISTINCT effective_start_date, vendor_id, min_order_qty, min_order_amt FROM MA2002
+        ) T5 ON T.vendor_id = T5.vendor_id
+        LEFT JOIN ( SELECT code_type, code_value, code_name FROM CM9010 WHERE code_type = '00065' ) T6 ON T.order_method = T6.code_value
+        <where>
+            o1.order_id = T.order_id and o1.store_cd = T.store_cd and o1.vendor_id = T.vendor_id
+            and o1. article_id= ma1100.article_id
+            AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
+            and T.create_user_id = ma4200.emp_num_id
+            and (total_order_qty &lt; T5.min_order_qty OR total_order_amt &lt; T5.min_order_amt)
+            <if test="vendorInfo != null and vendorInfo != ''">
+                AND (
+                lower(T.vendor_id) like lower(CONCAT('%',#{vendorInfo,jdbcType=VARCHAR},'%'))
+                or lower(T2.vendor_name) like lower(CONCAT('%',#{vendorInfo,jdbcType=VARCHAR},'%'))
+                )
+            </if>
+            <if test="barcode != null and barcode != ''">
+                AND lower(o1.barcode) like lower(CONCAT('%',#{barcode,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="ItemInfo != null and ItemInfo != ''">
+                AND (
+                lower(o1.article_id) like lower(CONCAT('%',#{ItemInfo,jdbcType=VARCHAR},'%'))
+                or lower(ma1100.article_name) like lower(CONCAT('%',#{ItemInfo,jdbcType=VARCHAR},'%'))
+                )
+            </if>
+            <if test="createUserId != null and createUserId != ''">
+                AND (
+                lower(ma4200.emp_num_id) like lower(CONCAT('%',#{createUserId,jdbcType=VARCHAR},'%'))
+                or lower(ma4200.emp_name) like lower(CONCAT('%',#{createUserId,jdbcType=VARCHAR},'%'))
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="getDetaildata" resultMap="FailedGridResultMap" parameterType="cn.com.bbut.iy.itemmaster.dto.orderFailed.OrderFailedParamDTO">
+        SELECT DISTINCT
+        od0010.barcode,
+        od0010.article_id,
+        ma1100.article_name,
+        od0010.vendor_id,
+        od0010.order_unit purchase_unit_id,
+        od0010.order_price,
+        ma1100.converter,
+        ma1100.spec,
+        ma1110.order_batch_qty,
+        ma1110.min_order_amt_tax,
+        /*最低订货金额*/
+        ma1110.min_order_qty,
+        /*进货税率*/
+        ma1110.order_tax_type_cd,
+        /*税率cd*/
+        ma1100.min_display_qty,
+        od0010.order_unit AS unit_id,
+        ma0220.unit_name,
+        od0010.order_qty AS order_qty,
+        od0010.order_nocharge_qty
+        FROM
+        ma1000,
+        ma1100,
+        ma1110,
+        od0010
+        LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id
+        WHERE
+        ma1100.article_id = od0010.article_id
+        AND ma1000.store_cd = od0010.store_cd
+        AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date
+        AND ma1000.effective_end_date
+        AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date
+        AND ma1100.effective_end_date
+        AND ma1100.article_id = ma1110.article_id
+        AND ma1100.effective_start_date = ma1110.effective_start_date
+        AND ma1110.structure_cd = (
+        SELECT
+        admin_structure_cd
+        FROM
+        MA0020
+        WHERE
+        structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = od0010.store_cd AND effective_sts = '10' )
+        AND effective_sts = '10'
+        )
+        AND od0010.vendor_id = ma1110.vendor_id
+        AND od0010.vendor_id = #{vendorId,jdbcType=VARCHAR}
+        AND od0010.order_id =#{orderId,jdbcType=VARCHAR};
+    </select>
+
+    <select id="getDetaildataCount" resultType="INT" parameterType="cn.com.bbut.iy.itemmaster.dto.orderFailed.OrderFailedParamDTO">
+        SELECT COUNT(1)
+        FROM
+        ma1000,ma1100,ma1110,od0010
+        LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id
+        WHERE
+        ma1100.article_id = od0010.article_id
+        AND ma1000.store_cd = od0010.store_cd
+        AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date
+        AND ma1000.effective_end_date
+        AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date
+        AND ma1100.effective_end_date
+        AND ma1100.article_id = ma1110.article_id
+        AND ma1100.effective_start_date = ma1110.effective_start_date
+        AND ma1110.structure_cd = (
+        SELECT
+        admin_structure_cd
+        FROM
+        MA0020
+        WHERE
+        structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = od0010.store_cd AND effective_sts = '10' )
+        AND effective_sts = '10'
+        )
+        AND od0010.vendor_id = ma1110.vendor_id
+        AND od0010.vendor_id = #{vendorId,jdbcType=VARCHAR}
+        AND od0010.order_id =#{orderId,jdbcType=VARCHAR};
+    </select>
+</mapper>

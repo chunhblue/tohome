@@ -1,0 +1,102 @@
+.select-div{
+	position: absolute;
+	top:32px;
+	padding:10px 5px 5px;
+	left:0px;
+	width:100%;
+	border:1px solid #ccc;
+	border-top:none;
+	border-bottom-left-radius:5px;
+	border-bottom-right-radius:5px;
+	box-shadow:0 0 10px rgba(6, 6, 6, 0.1);
+	z-index:999;
+	background-color: #fff;  
+}
+.auto-msg{
+	background-color:#ff8008;
+	color:#fff;
+	position: absolute;
+	bottom:32px;
+	padding:5px;
+	left:0px;
+	display:none;
+	width:100%;
+	border:1px solid #ccc;
+	border-bottom:none;
+	border-top-left-radius:5px;
+	border-top-right-radius:5px;
+	box-shadow:0 0 10px rgba(6, 6, 6, 0.1);  
+}
+.select-div ul{
+	position: static;
+   display: block;
+   margin-bottom: 5px;
+   clear: left;
+   padding:0;
+}
+.select-div .select-item-box li{
+	display:block;
+	clear:both;
+	list-style-type:none;
+	line-height:25px;
+	font-size:12px;
+	text-align:left;
+	padding:1px;
+	border-bottom:1px dashed #ddd;
+}
+.select-div .select-item-box li:hover,
+.select-div .select-item-box li.selected{
+	/*
+	background-color:#f1f1f1;
+	border-top-left-radius:5px;
+	border-top-right-radius:5px;
+	*/
+	}
+	.select-div .select-item-box li a{
+		padding-left:10px;
+		display:block;
+		text-decoration:none;
+	}
+	.select-div .select-item-box li a:hover,
+	.select-div .select-item-box li a:focus,
+	.select-div .select-item-box li a.selected:hover,
+	.select-div .select-item-box li a.selected{
+		background-color:#f1f1f1;
+		border-radius:3px;
+		color:#ff8008;
+	}
+	.auto-pager{
+		padding-top:5px;
+		border-top:1px solid #eee;
+    text-align: center;
+	}
+	.auto-count{
+		margin:0 10px;
+}
+.aotu-pos{
+		    position: relative;
+	}
+	.aotu-pos .form-control{
+		padding-right:60px;
+	}
+	.aotu-pos .auto-but{
+		width:20px;
+	    position: absolute;
+	    right: 25px;
+	    top: 0;
+	    height: 30px;
+        text-align: center;
+        line-height: 30px;
+	}
+	.aotu-pos i{
+		width:20px;
+		position: absolute;
+		right: 10px;
+		top: 0;
+		height: 30px;
+		text-align: center;
+		line-height: 30px;
+	}
+	.aotu-pos .auto-but+.auto-but{
+	  right: 5px;
+	}

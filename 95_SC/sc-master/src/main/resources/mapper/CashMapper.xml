@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.CashMapper">
+
+    <resultMap id="ResultMap" type="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail">
+        <result column="pay_id" property="payId" jdbcType="VARCHAR" />
+        <result column="pay_cd" property="payCd" jdbcType="VARCHAR" />
+        <result column="pay_name" property="payName" jdbcType="VARCHAR" />
+        <result column="pay_date" property="payDate" jdbcType="VARCHAR" />
+        <result column="user_id" property="userId" jdbcType="VARCHAR" />
+        <result column="user_name" property="userName" jdbcType="VARCHAR" />
+        <result column="pay_in_amt" property="payInAmt" jdbcType="NUMERIC" />
+        <result column="pay_in_amt_0" property="payInAmt0" jdbcType="NUMERIC" />
+        <result column="pay_in_amt_1" property="payInAmt1" jdbcType="NUMERIC" />
+        <result column="pay_in_amt_2" property="payInAmt2" jdbcType="NUMERIC" />
+        <result column="pay_in_amt_3" property="additional" jdbcType="NUMERIC" />
+        <result column="pay_in_amt_4" property="offsetClaim" jdbcType="NUMERIC" />
+        <result column="pay_amt" property="payAmt" jdbcType="NUMERIC" />
+        <result column="pay_amt_0" property="payAmt0" jdbcType="NUMERIC" />
+        <result column="pay_amt_1" property="payAmt1" jdbcType="NUMERIC" />
+        <result column="pay_amt_2" property="payAmt2" jdbcType="NUMERIC" />
+        <result column="pay_amt_3" property="payAmt3" jdbcType="NUMERIC" />
+        <result column="pay_amt_4" property="payAmt4" jdbcType="NUMERIC" />
+        <result column="pay_amt_5" property="payAmt5" jdbcType="NUMERIC" />
+        <result column="shift" property="shift" jdbcType="CHAR" />
+        <result column="pos_id" property="posId" jdbcType="VARCHAR" />
+        <result column="cash_cd" property="cashCd" jdbcType="VARCHAR" />
+        <result column="cash_name" property="cashName" jdbcType="VARCHAR" />
+        <result column="cash_qty" property="cashQty" jdbcType="NUMERIC" />
+        <result column="am" property="am" jdbcType="NUMERIC" />
+        <result column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <result column="ofc" property="ofc" jdbcType="VARCHAR" />
+        <result column="c_operatorname" property="amName" jdbcType="VARCHAR" />
+        <result column="review_status" property="reviewSts" jdbcType="INTEGER" />
+        <result column="cash_split_flag" property="cashSplitFlag" jdbcType="VARCHAR" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="voucher_no" property="voucherNo" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="Shift_Sa0010_Where">
+        where
+        tran_type = 'sale'
+        and sale_type = '0'
+        and acc_date=#{payDate,jdbcType=VARCHAR}
+        and store_cd=#{storeCd,jdbcType=VARCHAR}
+    </sql>
+
+    <sql id="Shift_Sa0030_Where">
+        where
+        tran_type = 'sale'
+        and sale_type = '0'
+        and voucher_date=#{payDate,jdbcType=VARCHAR}
+        and store_cd=#{storeCd,jdbcType=VARCHAR}
+    </sql>
+
+    <select id="getCashDetailyList" resultMap="ResultMap">
+        select sa0170.pay_id,sa0170.pay_date,sa0170.user_id,sa0170.user_name,sa0170.shift,sa0170.pos_id,sa0170.review_status,
+                T.store_cd,T.store_name,T.ofc,T.c_operatorname,sa0170.pay_in_amt,
+               (select COALESCE(sum(case pay_cd when '01' then pay_in_amt end),0) as pay_in_amt_0 from sa0180 where sa0170.pay_id=sa0180.pay_id),/*shift1*/
+               (select COALESCE(sum(case pay_cd when '02' then pay_in_amt end),0) as pay_in_amt_1 from sa0180 where sa0170.pay_id=sa0180.pay_id),/*shift2*/
+               (select COALESCE(sum(case pay_cd when '03' then pay_in_amt end),0) as pay_in_amt_2 from sa0180 where sa0170.pay_id=sa0180.pay_id),/*shift3*/
+               (select COALESCE(sum(case pay_cd when '04' then pay_in_amt end),0) as pay_in_amt_3 from sa0180 where sa0170.pay_id=sa0180.pay_id),/*Additional*/
+               (select COALESCE(sum(case pay_cd when '05' then pay_in_amt end),0) as pay_in_amt_4 from sa0180 where sa0170.pay_id=sa0180.pay_id) /*Offset Claim*/
+               from sa0170,
+               (SELECT  DISTINCT MA1000.store_cd,MA1000.store_name,MA1000.ofc,t_operator.c_operatorcode,t_operator.c_operatorname from MA1000,SA0170,t_operator WHERE SA0170.store_cd=MA1000.STORE_CD
+                AND MA1000.ofc=t_operator.c_operatorcode
+                 ) AS T
+                where sa0170.store_cd IN
+                <foreach item="store" index="index" collection="stores"
+                         open="(" separator="," close=")">
+                    #{store,jdbcType=VARCHAR}
+                </foreach>
+                and sa0170.pay_sts='10'
+                and T.store_cd=sa0170.store_cd
+                <if test="vStartDate!=null and vStartDate!=''">
+                    <![CDATA[
+                    and sa0170.pay_date >= #{vStartDate,jdbcType=VARCHAR}
+                    ]]>
+                </if>
+                <if test="vEndDate!=null and vEndDate!=''">
+                    <![CDATA[
+                    and sa0170.pay_date <= #{vEndDate,jdbcType=VARCHAR}
+                    ]]>
+                </if>
+                <if test="am !='' and am !=null">
+                    AND T.c_operatorcode=#{am,jdbcType=VARCHAR}
+                </if>
+               order by pay_date,user_id
+    </select>
+
+
+    <select id="getCustomerQty" resultType="java.lang.Integer">
+        select COUNT(*) from sa0010
+        <include refid="Shift_Sa0010_Where" />
+    </select>
+
+    <select id="getPayAmt" resultMap="ResultMap">
+        select t1.amount+t2.amount pay_amt,
+        pay_0.pay_amt_0+pay1_0.pay_amt_0 pay_amt_0,
+        pay_1.pay_amt_1+pay1_1.pay_amt_1 pay_amt_1,
+        pay_2.pay_amt_2+pay1_2.pay_amt_2 pay_amt_2
+        from
+        /*应收金额 = 销售金额-舍去金额*/
+        (select sum(COALESCE(sa0010.sale_amount,0)-COALESCE(sa0010.over_amount,0)) amount from sa0010
+            <include refid="Shift_Sa0010_Where" />
+        ) t1,
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1
+        when pay_cd2='01' then pay_amount2
+        when pay_cd3='01' then pay_amount3
+        when pay_cd4='01' then pay_amount4
+        end),0) as pay_amt_0 from sa0010
+        <include refid="Shift_Sa0010_Where" />
+        /*--早班*/
+        <![CDATA[
+            and to_number(to_char(tran_date,'hh24'),'99') >= 6
+            and to_number(to_char(tran_date,'hh24'),'99') < 14
+            ]]>
+        ) pay_0,
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1
+        when pay_cd2='01' then pay_amount2
+        when pay_cd3='01' then pay_amount3
+        when pay_cd4='01' then pay_amount4
+        end),0) as pay_amt_1 from sa0010
+        <include refid="Shift_Sa0010_Where" />
+        /*--中班*/
+        <![CDATA[
+            and to_number(to_char(tran_date,'hh24'),'99') >= 14
+            and to_number(to_char(tran_date,'hh24'),'99') < 22
+            ]]>
+        ) pay_1,
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1
+        when pay_cd2='01' then pay_amount2
+        when pay_cd3='01' then pay_amount3
+        when pay_cd4='01' then pay_amount4
+        end),0) as pay_amt_2 from sa0010
+        <include refid="Shift_Sa0010_Where" />
+        /*--晚班*/
+        <![CDATA[
+            and (to_number(to_char(tran_date,'hh24'),'99') < 6
+            or to_number(to_char(tran_date,'hh24'),'99') >= 22)
+            ]]>
+        ) pay_2,
+        (select COALESCE(sum(sa0030.sale_amount-sa0030.over_amount+sa0030.spill_amount),0) amount from sa0030
+            <include refid="Shift_Sa0030_Where" />
+        ) t2,
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1
+        when pay_cd2='01' then pay_amount2
+        when pay_cd3='01' then pay_amount3
+        when pay_cd4='01' then pay_amount4
+        end),0) as pay_amt_0 from sa0030
+        <include refid="Shift_Sa0030_Where" />
+        /*--早班*/
+        <![CDATA[
+            and to_number(to_char(tran_date,'hh24'),'99') >= 6
+            and to_number(to_char(tran_date,'hh24'),'99') < 14
+            ]]>
+        ) pay1_0,
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1
+        when pay_cd2='01' then pay_amount2
+        when pay_cd3='01' then pay_amount3
+        when pay_cd4='01' then pay_amount4
+        end),0) as pay_amt_1 from sa0030
+        <include refid="Shift_Sa0030_Where" />
+        /*--中班*/
+        <![CDATA[
+            and to_number(to_char(tran_date,'hh24'),'99') >= 14
+            and to_number(to_char(tran_date,'hh24'),'99') < 22
+            ]]>
+        ) pay1_1,
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1
+        when pay_cd2='01' then pay_amount2
+        when pay_cd3='01' then pay_amount3
+        when pay_cd4='01' then pay_amount4
+        end),0) as pay_amt_2 from sa0030
+        <include refid="Shift_Sa0030_Where" />
+        /*--晚班*/
+        <![CDATA[
+            and (to_number(to_char(tran_date,'hh24'),'99') < 6
+            or to_number(to_char(tran_date,'hh24'),'99') >= 22)
+            ]]>
+        ) pay1_2
+    </select>
+
+    <select id="getUserName" parameterType="string" resultType="string">
+        select cashier_name as user_name from sa0050
+        where cashier_id=#{userId,jdbcType=VARCHAR} and effective_sts='10';
+    </select>
+
+    <select id="getCashierList" parameterType="string" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select
+            cashier_id as k,
+            concat(cashier_id,' ',cashier_name) as v
+        from
+            sa0050
+        where
+            1=1
+        <if test="v!=null and v!=''">
+            and (
+            lower(cashier_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            or lower(cashier_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        <if test="storeCd!=null and storeCd!=''">
+            and store_cd = #{storeCd,jdbcType=VARCHAR}
+        </if>
+         and effective_sts='10';
+    </select>
+
+    <select id="getCashList" resultMap="ResultMap">
+        select cash_cd,cash_name from sa0200 where effective_sts='10' order by cash_cd
+    </select>
+
+    <select id="getCashListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail" resultMap="ResultMap">
+        select cash_cd,cash_name,shift1,shift2,shift3
+        from sa0190
+        where pay_id=#{payId,jdbcType=VARCHAR}
+        and pay_date=#{payDate,jdbcType=VARCHAR}
+        and store_cd=#{storeCd,jdbcType=VARCHAR}
+        order by cash_cd
+    </select>
+
+    <select id="getPayList" resultMap="ResultMap">
+        select pay_cd,pay_name from sa0169 where effective_sts='10' order by pay_cd
+    </select>
+
+    <select id="getPayListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail" resultMap="ResultMap">
+        select
+        pay_cd,pay_name,pay_in_amt,
+        difference_reason differenceReasonCd,difference_reason differenceReason,
+        difference_amount payAmtDiff
+        from sa0180
+        where pay_id=#{payId,jdbcType=VARCHAR}
+        and pay_date=#{payDate,jdbcType=VARCHAR}
+        and store_cd=#{storeCd,jdbcType=VARCHAR}
+        order by pay_cd
+    </select>
+
+    <select id="getCashDetail" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail" resultMap="ResultMap">
+        select store_cd,pay_id,pay_date,upload_flg from sa0170
+        where user_id=#{userId,jdbcType=VARCHAR}
+        and pay_date=#{payDate,jdbcType=VARCHAR}
+        and store_cd=#{storeCd,jdbcType=VARCHAR}
+        and shift=#{shift,jdbcType=VARCHAR}
+        and pos_id=#{posId,jdbcType=VARCHAR}
+        and cash_split_flag=#{cashSplitFlag,jdbcType=VARCHAR}
+        <if test="voucherNo != null and voucherNo != ''">
+           and pay_id = null
+        </if>
+        limit 1
+    </select>
+
+    <select id="selectBaseInfo" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail" resultMap="ResultMap">
+        select
+            T.store_cd, CONCAT(T1.store_cd,' ',T1.store_name,' ',T1.store_name_en) AS store_name,
+            T.pay_id, T.pay_date, T.upload_flg, T.cash_split_flag, T.user_id,
+            T.user_name, T.shift, T.pos_id, T.review_status,T.remark,T.voucher_no
+        from sa0170 T
+        left join(
+            select store_cd, store_name,store_name_en from ma1000
+            where #{businessDate,jdbcType=VARCHAR}
+            between effective_start_date and effective_end_date
+        ) T1
+        on T.store_cd = T1.store_cd
+        where T.pay_date=#{payDate,jdbcType=VARCHAR}
+        and T.store_cd=#{storeCd,jdbcType=VARCHAR}
+        and T.pay_id=#{payId,jdbcType=VARCHAR}
+    </select>
+
+    <insert id="insertSa0170" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail">
+        insert into sa0170(store_cd,pay_id,pay_date,user_id,user_name,cash_split_flag,shift,pos_id,pay_in_amt,pay_sts,upload_flg,create_user_id,create_ymd,create_hms,update_user_id,update_ymd,update_hms,remark,voucher_no)
+        select #{storeCd,jdbcType=VARCHAR},#{payId,jdbcType=VARCHAR},#{payDate,jdbcType=VARCHAR},#{userId,jdbcType=VARCHAR},#{userName,jdbcType=VARCHAR},#{cashSplitFlag,jdbcType=VARCHAR}
+                ,#{shift,jdbcType=VARCHAR},#{posId,jdbcType=VARCHAR}
+                ,sum(sa0180.pay_in_amt),'10','0',#{updateUserId,jdbcType=VARCHAR},#{updateYmd,jdbcType=VARCHAR},#{updateHms,jdbcType=VARCHAR},#{updateUserId,jdbcType=VARCHAR},#{updateYmd,jdbcType=VARCHAR},#{updateHms,jdbcType=VARCHAR},remark,#{voucherNo,jdbcType=VARCHAR}
+        from sa0180 where sa0180.store_cd=#{storeCd,jdbcType=VARCHAR} and pay_id=#{payId,jdbcType=VARCHAR} and pay_date=#{payDate,jdbcType=VARCHAR} GROUP BY sa0180.remark
+--          and tran_cash_qtyserial_no='1';
+    </insert>
+    <insert id="insertSa0180" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail">
+        insert into sa0180 (store_cd,pay_id,pay_date,tran_serial_no,pay_cd,pay_name,pay_in_amt,difference_reason,difference_amount,create_user_id,create_ymd,create_hms,update_user_id,update_ymd,update_hms,remark)
+        select #{storeCd,jdbcType=VARCHAR},#{payId,jdbcType=VARCHAR},#{payDate,jdbcType=VARCHAR},'1',#{payCd,jdbcType=VARCHAR},#{payName,jdbcType=VARCHAR},
+        #{payInAmt,jdbcType=NUMERIC}, #{differenceReasonCd,jdbcType=VARCHAR}, #{payAmtDiff,jdbcType=NUMERIC},#{updateUserId,jdbcType=VARCHAR},#{updateYmd,jdbcType=VARCHAR},#{updateHms,jdbcType=VARCHAR},
+        #{updateUserId,jdbcType=VARCHAR},#{updateYmd,jdbcType=VARCHAR},#{updateHms,jdbcType=VARCHAR},#{remark,jdbcType=VARCHAR};
+    </insert>
+
+    <insert id="insertSa0190" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail">
+        insert into sa0190 (store_cd,pay_id,pay_date,tran_serial_no,cash_cd,cash_name,create_user_id,create_ymd,create_hms,update_user_id,update_ymd,update_hms,shift1,shift2,shift3)
+        values (#{storeCd,jdbcType=VARCHAR},#{payId,jdbcType=VARCHAR},#{payDate,jdbcType=VARCHAR},'1',#{cashCd,jdbcType=VARCHAR},#{cashName,jdbcType=VARCHAR},
+        #{updateUserId,jdbcType=VARCHAR},#{updateYmd,jdbcType=VARCHAR},#{updateHms,jdbcType=VARCHAR},#{updateUserId,jdbcType=VARCHAR},#{updateYmd,jdbcType=VARCHAR},
+        #{updateHms,jdbcType=VARCHAR},#{shift1,jdbcType=NUMERIC},#{shift2,jdbcType=NUMERIC},#{shift3,jdbcType=NUMERIC});
+     </insert>
+
+    <update id="updateSa0170" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail">
+        update  sa0170
+        set pay_in_amt=(select sum(sa0180.pay_in_amt) from sa0180 where sa0180.store_cd=#{storeCd,jdbcType=VARCHAR} and pay_id=#{payId,jdbcType=VARCHAR} and pay_date=#{payDate,jdbcType=VARCHAR} and tran_serial_no='1'),
+        update_user_id=#{updateUserId,jdbcType=VARCHAR},update_ymd=#{updateYmd,jdbcType=VARCHAR},update_hms=#{updateHms,jdbcType=VARCHAR}
+        where store_cd=#{storeCd,jdbcType=VARCHAR} and pay_id=#{payId,jdbcType=VARCHAR} and pay_date=#{payDate,jdbcType=VARCHAR};
+    </update>
+
+    <update id="updateSa0180" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail">
+        update sa0180
+        set pay_in_amt=#{payInAmt,jdbcType=NUMERIC},difference_reason=#{differenceReasonCd,jdbcType=VARCHAR},difference_amount=#{payAmtDiff,jdbcType=NUMERIC},
+        update_user_id=#{updateUserId,jdbcType=VARCHAR},update_ymd=#{updateYmd,jdbcType=VARCHAR},update_hms=#{updateHms,jdbcType=VARCHAR}
+        where store_cd=#{storeCd,jdbcType=VARCHAR} and pay_id=#{payId,jdbcType=VARCHAR} and pay_date=#{payDate,jdbcType=VARCHAR} and pay_cd=#{payCd,jdbcType=VARCHAR};
+    </update>
+
+    <update id="updateSa0190" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail">
+        update sa0190
+        set shift1= #{shift1,jdbcType=NUMERIC},shift2= #{shift2,jdbcType=NUMERIC},shift3= #{shift3,jdbcType=NUMERIC},
+        update_user_id=#{updateUserId,jdbcType=VARCHAR},update_ymd=#{updateYmd,jdbcType=VARCHAR},update_hms=#{updateHms,jdbcType=VARCHAR}
+        where store_cd=#{storeCd,jdbcType=VARCHAR} and pay_id=#{payId,jdbcType=VARCHAR} and pay_date=#{payDate,jdbcType=VARCHAR} and cash_cd=#{cashCd,jdbcType=VARCHAR};
+     </update>
+
+    <select id="getDetailBypayId" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail">
+        select store_cd,pay_date,cash_split_flag,user_name,shift,pos_id from sa0170
+        where pay_id=#{payId,jdbcType=VARCHAR}
+        limit 1
+    </select>
+
+    <select id="getStaff" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select
+        cashier_id k, CONCAT(cashier_id,' ',cashier_name) v
+        from sa0050
+        where
+        effective_sts='10'
+        <if test="v!=null and v!=''">
+            AND (
+            lower(cashier_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(cashier_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        and store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+    </select>
+
+    <select id="getPayListByVoucherNo" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail" resultMap="ResultMap">
+        SELECT
+            sa0169.pay_cd,sa0169.pay_name,
+            ( CASE WHEN op0040.expense_type = sa0169.pay_cd THEN expense_amt ELSE 0 END ) AS pay_in_amt,
+            '' as differenceReasonCd,'' as differenceReason,
+          (CASE WHEN op0040.expense_type = sa0169.pay_cd THEN expense_amt ELSE 0 END) AS payAmtDiff
+        FROM
+            op0040,sa0169
+        WHERE
+            voucher_no=#{voucherNo,jdbcType=VARCHAR}
+            and acc_date=#{payDate,jdbcType=VARCHAR}
+            and store_cd=#{storeCd,jdbcType=VARCHAR}
+            and sa0169.pay_name = 'shift1'
+        UNION
+        SELECT
+            sa0169.pay_cd,sa0169.pay_name,
+            ( CASE WHEN op0040.expense_type = sa0169.pay_cd THEN expense_amt ELSE 0 END ) AS pay_in_amt,
+            '' as differenceReasonCd,'' as differenceReason,
+          (CASE WHEN op0040.expense_type = sa0169.pay_cd THEN expense_amt ELSE 0 END) AS payAmtDiff
+        FROM
+            op0040,sa0169
+        WHERE
+            voucher_no=#{voucherNo,jdbcType=VARCHAR}
+            and acc_date=#{payDate,jdbcType=VARCHAR}
+            and store_cd=#{storeCd,jdbcType=VARCHAR}
+            and sa0169.pay_name = 'shift2'
+        UNION
+        SELECT
+            sa0169.pay_cd,sa0169.pay_name,
+            ( CASE WHEN op0040.expense_type = sa0169.pay_cd THEN expense_amt ELSE 0 END ) AS pay_in_amt,
+            '' as differenceReasonCd,'' as differenceReason,
+          (CASE WHEN op0040.expense_type = sa0169.pay_cd THEN expense_amt ELSE 0 END) AS payAmtDiff
+        FROM
+            op0040,sa0169
+        WHERE
+            voucher_no=#{voucherNo,jdbcType=VARCHAR}
+            and acc_date=#{payDate,jdbcType=VARCHAR}
+            and store_cd=#{storeCd,jdbcType=VARCHAR}
+            and sa0169.pay_name = 'shift3'
+        UNION SELECT sa0169.pay_cd,sa0169.pay_name,
+        ( CASE WHEN op0040.expense_type = sa0169.pay_cd THEN expense_amt ELSE 0 END ) as pay_in_amt,
+            '' as differenceReasonCd,
+            '' as differenceReason,
+            ( CASE WHEN op0040.expense_type = sa0169.pay_cd THEN expense_amt ELSE 0 END ) as payAmtDiff
+            FROM op0040,sa0169 where voucher_no=#{voucherNo,jdbcType=VARCHAR}
+            and acc_date=#{payDate,jdbcType=VARCHAR} and store_cd=#{storeCd,jdbcType=VARCHAR} and sa0169.pay_cd = '04'
+        UNION SELECT sa0169.pay_cd,sa0169.pay_name,
+        ( CASE WHEN op0040.expense_type = sa0169.pay_cd THEN expense_amt ELSE 0 END ) as pay_in_amt,
+         '' as differenceReasonCd,
+            '' as differenceReason,
+            ( CASE WHEN op0040.expense_type = sa0169.pay_cd THEN expense_amt ELSE 0 END ) as payAmtDiff
+            FROM op0040,sa0169 where
+            voucher_no=#{voucherNo,jdbcType=VARCHAR}
+            and acc_date=#{payDate,jdbcType=VARCHAR} and store_cd=#{storeCd,jdbcType=VARCHAR} and sa0169.pay_cd = '05'
+            order by pay_cd
+    </select>
+    <select id="getPayListByVoucherList" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail" resultMap="ResultMap">
+        SELECT
+            sa0000.pay_cd,sa0000.pay_name,
+            ( CASE WHEN op0040.pay_type_id = sa0000.pay_cd THEN expense_amt ELSE 0 END ) AS pay_in_amt,
+            '' as differenceReasonCd,'' as differenceReason,
+          (CASE WHEN op0040.pay_type_id = sa0000.pay_cd THEN expense_amt ELSE 0 END) AS payAmtDiff
+        FROM
+            op0040,sa0000
+        WHERE
+            voucher_no=#{voucherNo,jdbcType=VARCHAR}
+            and acc_date=#{payDate,jdbcType=VARCHAR}
+            and store_cd=#{storeCd,jdbcType=VARCHAR}
+            and sa0000.pay_name = 'Cash'
+        UNION
+        SELECT
+            sa0000.pay_cd,sa0000.pay_name,
+            ( CASE WHEN op0040.pay_type_id = sa0000.pay_cd THEN expense_amt ELSE 0 END ) AS pay_in_amt,
+            '' as differenceReasonCd,'' as differenceReason,
+          (CASE WHEN op0040.pay_type_id = sa0000.pay_cd THEN expense_amt ELSE 0 END) AS payAmtDiff
+        FROM
+            op0040,sa0000
+        WHERE
+            voucher_no=#{voucherNo,jdbcType=VARCHAR}
+            and acc_date=#{payDate,jdbcType=VARCHAR}
+            and store_cd=#{storeCd,jdbcType=VARCHAR}
+            and sa0000.pay_name = 'Card Payment'
+        UNION
+        SELECT
+            sa0000.pay_cd,sa0000.pay_name,
+            ( CASE WHEN op0040.pay_type_id = sa0000.pay_cd THEN expense_amt ELSE 0 END ) AS pay_in_amt,
+            '' as differenceReasonCd,'' as differenceReason,
+          (CASE WHEN op0040.pay_type_id = sa0000.pay_cd THEN expense_amt ELSE 0 END) AS payAmtDiff
+        FROM
+            op0040,sa0000
+        WHERE
+            voucher_no=#{voucherNo,jdbcType=VARCHAR}
+            and acc_date=#{payDate,jdbcType=VARCHAR}
+            and store_cd=#{storeCd,jdbcType=VARCHAR}
+            and sa0000.pay_name = 'E-Voucher'
+        UNION
+        SELECT
+            sa0000.pay_cd,sa0000.pay_name,
+            ( CASE WHEN op0040.pay_type_id = sa0000.pay_cd THEN expense_amt ELSE 0 END ) AS pay_in_amt,
+            '' as differenceReasonCd,'' as differenceReason,
+          (CASE WHEN op0040.pay_type_id = sa0000.pay_cd THEN expense_amt ELSE 0 END) AS payAmtDiff
+        FROM
+            op0040,sa0000
+        WHERE
+            voucher_no=#{voucherNo,jdbcType=VARCHAR}
+            and acc_date=#{payDate,jdbcType=VARCHAR}
+            and store_cd=#{storeCd,jdbcType=VARCHAR}
+            and sa0000.pay_name = 'Momo'
+        UNION
+        SELECT
+            sa0000.pay_cd,sa0000.pay_name,
+            ( CASE WHEN op0040.pay_type_id = sa0000.pay_cd THEN expense_amt ELSE 0 END ) AS pay_in_amt,
+            '' as differenceReasonCd,'' as differenceReason,
+          (CASE WHEN op0040.pay_type_id = sa0000.pay_cd THEN expense_amt ELSE 0 END) AS payAmtDiff
+        FROM
+            op0040,sa0000
+        WHERE
+            voucher_no=#{voucherNo,jdbcType=VARCHAR}
+            and acc_date=#{payDate,jdbcType=VARCHAR}
+            and store_cd=#{storeCd,jdbcType=VARCHAR}
+            and sa0000.pay_name = 'Payoo'
+        UNION
+        SELECT
+            sa0000.pay_cd,sa0000.pay_name,
+            ( CASE WHEN op0040.pay_type_id = sa0000.pay_cd THEN expense_amt ELSE 0 END ) AS pay_in_amt,
+            '' as differenceReasonCd,'' as differenceReason,
+          (CASE WHEN op0040.pay_type_id = sa0000.pay_cd THEN expense_amt ELSE 0 END) AS payAmtDiff
+        FROM
+            op0040,sa0000
+        WHERE
+
+	        voucher_no=#{voucherNo,jdbcType=VARCHAR}
+            and acc_date=#{payDate,jdbcType=VARCHAR}
+            and store_cd=#{storeCd,jdbcType=VARCHAR}
+			and sa0000.pay_name = 'Viettel'
+        UNION SELECT sa0000.pay_cd,sa0000.pay_name, coalesce(additional,0) as pay_in_amt,'' as differenceReasonCd,
+            '' as differenceReason,coalesce((additional-0),0) as payAmtDiff
+            FROM op0040,sa0000 where voucher_no=#{voucherNo,jdbcType=VARCHAR}
+            and acc_date=#{payDate,jdbcType=VARCHAR} and store_cd=#{storeCd,jdbcType=VARCHAR} and sa0000.pay_cd = '07'
+        UNION SELECT sa0000.pay_cd,sa0000.pay_name, coalesce(offset_claim,0) as pay_in_amt,'' as differenceReasonCd,
+            '' as differenceReason,coalesce((offset_claim-0)) as payAmtDiff
+            FROM op0040,sa0000 where
+            voucher_no=#{voucherNo,jdbcType=VARCHAR}
+            and acc_date=#{payDate,jdbcType=VARCHAR} and store_cd=#{storeCd,jdbcType=VARCHAR} and sa0000.pay_cd = '08'
+            order by pay_cd
+    </select>
+</mapper>

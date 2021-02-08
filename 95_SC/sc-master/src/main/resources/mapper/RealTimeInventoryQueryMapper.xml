@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+    <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+    <mapper namespace="cn.com.bbut.iy.itemmaster.dao.RealTimeInventoryQueryMapper" >
+        <resultMap id="InventoryMap" type="cn.com.bbut.iy.itemmaster.dto.rtInventory.RTInventoryQueryDTO">
+
+            <id column="article_id" property="itemCode" jdbcType="VARCHAR" />
+            <id column="barcode" property="itemBarcode" jdbcType="VARCHAR" />
+            <result column="article_name" property="itemName" jdbcType="VARCHAR" />
+            <result column="spec" property="specification" jdbcType="VARCHAR" />
+            <result column="sales_unit_id" property="uom" jdbcType="VARCHAR" />
+            <result column="on_hand_qty" property="onHandQty" jdbcType="NUMERIC" />
+            <result column="sale_qty" property="saleQty" jdbcType="NUMERIC" />
+            <result column="receive_qty" property="receiveQty" jdbcType="NUMERIC" />
+            <result column="adjust_qty" property="adjustQty" jdbcType="NUMERIC" />
+            <result column="realtime_qty" property="realtimeQty" jdbcType="NUMERIC" />
+            <result column="on_order_qty" property="onOrderQty" jdbcType="NUMERIC" />
+            <result column="realtime_qty" property="realtimeQty" jdbcType="NUMERIC" />
+            <result column="scrap_qty" property="scrapQty" jdbcType="NUMERIC" />
+            <result column="transfer_qty" property="transferQty" jdbcType="NUMERIC" />
+            <result column="store_return_qty" property="storeReturnQty" jdbcType="NUMERIC" />
+            <result column="return_corr_qty" property="returnCorrQty" jdbcType="NUMERIC" />
+            <result column="rec_corr_qty" property="receiveCorrQty" jdbcType="NUMERIC" />
+            <result column="transfer_in_qty" property="transferInQty" jdbcType="NUMERIC" />
+            <result column="transfer_out_qty" property="transferOutQty" jdbcType="NUMERIC" />
+
+            <result column="voucher_sts_name" property="stsName" jdbcType="VARCHAR" />
+            <result column="voucher_sts" property="voucherSts" jdbcType="VARCHAR" />
+            <result column="order_id" property="orderId" jdbcType="VARCHAR" />
+            <result column="order_sts" property="orderSts" jdbcType="VARCHAR" />
+            <result column="oc" property="oc" jdbcType="VARCHAR" />
+            <result column="oc_name" property="ocName" jdbcType="VARCHAR" />
+            <result column="ofc" property="ofc" jdbcType="VARCHAR" />
+            <result column="ofc_name" property="ofcName" jdbcType="VARCHAR" />
+            <result column="om" property="om" jdbcType="VARCHAR" />
+            <result column="om_name" property="omName" jdbcType="VARCHAR" />
+            <result column="dep_name" property="depName" jdbcType="VARCHAR" />
+            <result column="pma_name" property="pmaName" jdbcType="VARCHAR" />
+            <result column="category_name" property="categoryName" jdbcType="VARCHAR" />
+            <result column="sub_category_name" property="subCategoryName" jdbcType="VARCHAR" />
+            <result column="vendor_id" property="vendorId" jdbcType="VARCHAR" />
+            <result column="vendor_name" property="vendorName" jdbcType="VARCHAR" />
+        </resultMap>
+
+    <resultMap id="saveInventoryMap" type="cn.com.bbut.iy.itemmaster.dto.rtInventory.SaveInventoryQty">
+        <id column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <result column="dep_cd" property="depCd" jdbcType="VARCHAR" />
+        <result column="pma_cd" property="pmaCd" jdbcType="VARCHAR" />
+        <result column="category_cd" property="categoryCd" jdbcType="VARCHAR" />
+        <result column="sub_category_cd" property="subCategoryCd" jdbcType="VARCHAR" />
+        <result column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <result column="warehous_date" property="warehousDate" jdbcType="VARCHAR" />
+        <result column="stock_qty_bi" property="bIStockQty" jdbcType="NUMERIC" />
+        <result column="stock_amt_bi" property="bIStockAmt" jdbcType="NUMERIC" />
+        <result column="avg_cost_notax" property="avgCostNotax" jdbcType="NUMERIC" />
+    </resultMap>
+
+        <select id="InventoryQueryBy" resultMap="InventoryMap" parameterType="cn.com.bbut.iy.itemmaster.dto.rtInventory.RTInventoryQueryParamDTO">
+            SELECT
+        ma1100.article_id,
+        T.default_barcode barcode,
+        ma1100.article_name,
+        ma1100.spec,
+        ma1100.sales_unit_id,
+        ma0070.dep_name,
+        ma0080.pma_name,
+        ma0090.category_name,
+        ma0100.sub_category_name,
+        T.vendor_id,
+        ma2000.vendor_name,
+        iv.article_id iv_article_id,
+        T.article_id AS t_article_id,
+            ofc.ofc,
+            ofc.ofc_name,
+            oc.oc,
+            oc.oc_name,
+            om.om,
+            om.om_name
+    FROM
+            (SELECT  t_operator.c_operatorcode AS ofc,t_operator.c_operatorname ofc_name FROM MA1000  LEFT JOIN t_operator  on  t_operator.c_operatorcode=MA1000.ofc
+            where MA1000.store_cd=#{storeCd,jdbcType=VARCHAR}
+            <if test="ofcCode !=null and ofcCode!=''">
+               AND t_operator.c_operatorcode=#{ofcCode,jdbcType=VARCHAR}
+            </if>
+            ) AS ofc,
+            (SELECT  t_operator.c_operatorcode AS oc,t_operator.c_operatorname oc_name FROM MA1000  LEFT JOIN t_operator  on  t_operator.c_operatorcode=MA1000.oc
+
+            where MA1000.store_cd=#{storeCd,jdbcType=VARCHAR}
+            <if test="ocCode !=null and ocCode!=''">
+                AND t_operator.c_operatorcode=#{ocCode,jdbcType=VARCHAR}
+            </if>
+
+            ) AS oc,
+            (SELECT  t_operator.c_operatorcode AS om,t_operator.c_operatorname om_name FROM MA1000  LEFT JOIN t_operator  on  t_operator.c_operatorcode=MA1000.om
+
+            where MA1000.store_cd=#{storeCd,jdbcType=VARCHAR}
+            <if test="omCode !=null and omCode!=''">
+                AND t_operator.c_operatorcode=#{omCode,jdbcType=VARCHAR}
+            </if>
+            ) AS om,
+        ma1100
+        INNER JOIN sk0000_today iv ON iv.article_id = ma1100.article_id
+        AND iv.store_cd = #{storeCd,jdbcType=VARCHAR}
+        LEFT JOIN ma2240 on ma2240.article_id = iv.article_id and ma2240.store_cd = #{storeCd,jdbcType=VARCHAR}
+        LEFT JOIN (select  DISTinct  ma1110.default_barcode,MA1110.article_id,MA1110.vendor_id,structure_cd  FROM MA1110  WHERE
+            1=1
+            <if test="stockDate != null and stockDate != ''">
+                AND  #{stockDate} between ma1110.effective_start_date  AND ma1110.effective_end_date
+            </if>
+            and ma1110.structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
+            (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd,jdbcType=VARCHAR}))
+        ) AS T
+       ON  iv.article_id = T.article_id and T.vendor_id = ma2240.vendor_id
+       left join ma2000
+            on T.vendor_id = ma2000.vendor_id
+        left join ma0070 on ma1100.dep_cd = ma0070.dep_cd
+        left join ma0080 on ma1100.pma_cd = ma0080.pma_cd
+        left join ma0090 on ma1100.category_cd = ma0090.category_cd
+        left join ma0100 on ma1100.sub_category_cd = ma0100.sub_category_cd
+       WHERE
+            iv.store_cd = #{storeCd,jdbcType=VARCHAR}
+           <if test="stockDate != null and stockDate != ''">
+                AND  #{stockDate} between ma1100.effective_start_date and ma1100.effective_end_date
+            </if>
+            <if test="depId != null and depId != ''">
+                AND ma1100.dep_cd = #{depId}  /*部门*/
+            </if>
+            <if test="pmaId != null and pmaId != ''">
+                AND ma1100.pma_cd = #{pmaId} /*大分类*/
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                AND ma1100.category_cd = #{categoryId} /*中分类*/
+            </if>
+            <if test="subCategoryId != null and subCategoryId != ''">
+                AND ma1100.sub_category_cd = #{subCategoryId} /*小分类*/
+            </if>
+            <if test="itemCode != null and itemCode != ''">
+                AND ma1100.article_id LIKE CONCAT('%',#{itemCode,jdbcType=VARCHAR},'%') /*商品条码*/
+            </if>
+            <if test="itemBarcode != null and itemBarcode != ''">
+                AND T.default_barcode LIKE CONCAT('%',#{itemBarcode,jdbcType=VARCHAR},'%') /*商品条码*/
+            </if>
+            <if test="vendorId != null and vendorId != ''">
+                AND T.vendor_id = #{vendorId,jdbcType=VARCHAR}
+            </if>
+            AND ma1100.article_id not in (select  parent_article_id  from  ma1200)
+         ORDER BY
+          ma1100.article_id ASC
+            <if test="flg">
+                LIMIT ${rows} OFFSET ${limitStart}
+            </if>
+        </select>
+
+        <select id="selectCountByCondition" resultType="long" parameterType="cn.com.bbut.iy.itemmaster.dto.rtInventory.RTInventoryQueryParamDTO">
+            select count(A.*)
+            from
+            (SELECT
+            ma1100.article_id,
+            T.default_barcode barcode,
+            ma1100.article_name,
+            ma1100.spec,
+            ma1100.sales_unit_id,
+            ma0070.dep_name,
+            ma0080.pma_name,
+            ma0090.category_name,
+            ma0100.sub_category_name,
+            T.vendor_id,
+            ma2000.vendor_name,
+            iv.article_id iv_article_id,
+            T.article_id AS t_article_id
+            FROM
+            ma1100
+            INNER JOIN sk0000_today iv ON iv.article_id = ma1100.article_id
+            AND iv.store_cd = #{storeCd,jdbcType=VARCHAR}
+            LEFT JOIN ma2240 on ma2240.article_id = iv.article_id and ma2240.store_cd = #{storeCd,jdbcType=VARCHAR}
+            LEFT JOIN (select  DISTinct  ma1110.default_barcode,MA1110.article_id,MA1110.vendor_id,structure_cd  FROM MA1110  WHERE
+            1=1
+            <if test="stockDate != null and stockDate != ''">
+                AND  #{stockDate} between ma1110.effective_start_date  AND ma1110.effective_end_date
+            </if>
+            and ma1110.structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
+            (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd,jdbcType=VARCHAR}))
+            ) AS T
+            ON  iv.article_id = T.article_id and T.vendor_id = ma2240.vendor_id
+            left join ma2000
+                on T.vendor_id = ma2000.vendor_id
+            left join ma0070 on ma1100.dep_cd = ma0070.dep_cd
+            left join ma0080 on ma1100.pma_cd = ma0080.pma_cd
+            left join ma0090 on ma1100.category_cd = ma0090.category_cd
+            left join ma0100 on ma1100.sub_category_cd = ma0100.sub_category_cd
+            WHERE
+            iv.store_cd = #{storeCd,jdbcType=VARCHAR}
+            <if test="stockDate != null and stockDate != ''">
+                AND  #{stockDate} between ma1100.effective_start_date and ma1100.effective_end_date
+            </if>
+            <if test="depId != null and depId != ''">
+                AND ma1100.dep_cd = #{depId}  /*部门*/
+            </if>
+            <if test="pmaId != null and pmaId != ''">
+                AND ma1100.pma_cd = #{pmaId} /*大分类*/
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                AND ma1100.category_cd = #{categoryId} /*中分类*/
+            </if>
+            <if test="subCategoryId != null and subCategoryId != ''">
+                AND ma1100.sub_category_cd = #{subCategoryId} /*小分类*/
+            </if>
+            <if test="itemCode != null and itemCode != ''">
+                AND ma1100.article_id LIKE CONCAT('%',#{itemCode,jdbcType=VARCHAR},'%') /*商品条码*/
+            </if>
+            <if test="itemBarcode != null and itemBarcode != ''">
+                AND T.default_barcode LIKE CONCAT('%',#{itemBarcode,jdbcType=VARCHAR},'%') /*商品条码*/
+            </if>
+            <if test="vendorId != null and vendorId != ''">
+                AND T.vendor_id = #{vendorId,jdbcType=VARCHAR}
+            </if>
+            AND ma1100.article_id not in (select  parent_article_id  from  ma1200)
+            ORDER BY
+            ma1100.article_id ASC)AS A
+        </select>
+
+    <select id="InventoryEsQuery" resultMap="InventoryMap" parameterType="cn.com.bbut.iy.itemmaster.dto.rtInventory.RTInventoryQueryParamDTO">
+        SELECT
+        ma1100.article_id,
+        T.default_barcode barcode,
+        ma1100.article_name,
+        ma1100.spec,
+        ma1100.sales_unit_id,
+        ma0070.dep_name,
+        ma0080.pma_name,
+        ma0090.category_name,
+        ma0100.sub_category_name,
+        T.vendor_id,
+        ma2000.vendor_name,
+        ofc.ofc,
+        ofc.ofc_name,
+        oc.oc,
+        oc.oc_name,
+        om.om,
+        om.om_name
+        FROM
+        (SELECT  t_operator.c_operatorcode AS ofc,t_operator.c_operatorname ofc_name FROM MA1000  LEFT JOIN t_operator  on  t_operator.c_operatorcode=MA1000.ofc
+        where MA1000.store_cd=#{storeCd,jdbcType=VARCHAR}
+        ) AS ofc,
+        (SELECT  t_operator.c_operatorcode AS oc,t_operator.c_operatorname oc_name FROM MA1000  LEFT JOIN t_operator  on  t_operator.c_operatorcode=MA1000.oc
+        where MA1000.store_cd=#{storeCd,jdbcType=VARCHAR}
+        ) AS oc,
+        (SELECT  t_operator.c_operatorcode AS om,t_operator.c_operatorname om_name FROM MA1000  LEFT JOIN t_operator  on  t_operator.c_operatorcode=MA1000.om
+        where MA1000.store_cd=#{storeCd,jdbcType=VARCHAR}
+        ) AS om,
+        ma1000,
+        ma1100
+        LEFT JOIN ma2240 on ma2240.article_id = ma1100.article_id and ma2240.store_cd = #{storeCd,jdbcType=VARCHAR}
+        LEFT JOIN (select  DISTinct  ma1110.default_barcode,MA1110.article_id,MA1110.vendor_id,structure_cd  FROM MA1110  WHERE
+        1=1
+        <if test="stockDate != null and stockDate != ''">
+            AND  #{stockDate} between ma1110.effective_start_date  AND ma1110.effective_end_date
+        </if>
+        and ma1110.structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
+        (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd,jdbcType=VARCHAR}))
+        ) AS T
+        ON  ma1100.article_id = T.article_id and T.vendor_id = ma2240.vendor_id
+        left join ma2000
+        on T.vendor_id = ma2000.vendor_id
+        left join ma0070 on ma1100.dep_cd = ma0070.dep_cd
+        left join ma0080 on ma1100.pma_cd = ma0080.pma_cd
+        left join ma0090 on ma1100.category_cd = ma0090.category_cd
+        left join ma0100 on ma1100.sub_category_cd = ma0100.sub_category_cd
+        WHERE
+        ma1000.store_cd = #{storeCd,jdbcType=VARCHAR}
+        <if test="stockDate != null and stockDate != ''">
+            AND  #{stockDate} between ma1100.effective_start_date and ma1100.effective_end_date
+        </if>
+        AND ma1100.article_id in
+        <foreach item="itemCode" index="index" collection="articles"
+                 open="(" separator="," close=")">
+             #{itemCode,jdbcType=VARCHAR}
+        </foreach>
+        ORDER BY
+        ma1100.article_id ASC
+    </select>
+
+    <select id="getMoreInformation" resultMap="saveInventoryMap">
+        select article_id,dep_cd,pma_cd,category_cd,sub_category_cd from ma1100
+        where #{businessDate,jdbcType=VARCHAR} between effective_start_date and effective_end_date
+        and article_id in
+        <foreach item="articleId" index="index" collection="articles"
+                 open="(" separator="," close=")">
+            #{articleId,jdbcType=VARCHAR}
+        </foreach>
+        ORDER BY
+        article_id ASC
+    </select>
+
+    <select id="getBIDate" resultMap="saveInventoryMap">
+        SELECT
+	       to_char(warehous_dafte,'yyyyMMdd') as warehous_date,
+	        store_cd,item_cd as article_id,coalesce(stock_qty,0) as stock_qty_bi,coalesce(stock_amt,0) as stock_amt_bi
+        FROM
+            store_item_warehous_ck
+        WHERE
+            store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND item_cd in
+        <foreach item="articleId" index="index" collection="articles"
+                 open="(" separator="," close=")">
+            #{articleId,jdbcType=VARCHAR}
+        </foreach>
+            order by article_id,warehous_date ASC
+    </select>
+
+    <select id="getBIDetailInfo" resultMap="saveInventoryMap">
+        SELECT
+	        to_char(warehous_date,'yyyyMMdd') as warehous_date,
+	        store_cd,item_cd as article_id,coalesce(stock_qty,0) as stock_qty_bi,coalesce(stock_amt,0) as stock_amt_bi
+        FROM
+            store_item_warehous_ck
+        WHERE
+            store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND item_cd = #{articleId,jdbcType=VARCHAR}
+            AND to_char(warehous_date,'yyyyMMdd') = #{warehousDate,jdbcType=VARCHAR}
+    </select>
+
+    <delete id="deleteBiInventory" >
+        delete from store_item_warehous_ck where
+        store_cd = #{storeCd,jdbcType=VARCHAR}
+        and (item_cd || ':' || to_char(warehous_date,'yyyyMMdd')) in
+        <foreach item="item" index="index" collection="deleteAllList"
+                 open="(" separator="," close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+    </delete>
+
+    <update id="updateBiInventory">
+        update store_item_warehous_ck set
+            stock_qty = #{gapsQty},stock_amt = #{gapsAmt}
+        where
+            item_cd = #{articleId,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=VARCHAR}
+            and to_char(warehous_date,'yyyyMMdd') = #{warehousDate,jdbcType=VARCHAR}
+    </update>
+
+    <select id="selectAvgCost" resultMap="saveInventoryMap">
+        select store_cd,article_id,coalesce(avg_cost_notax,0) avg_cost_notax from sk0000_today
+        where effective_date = #{businessDate,jdbcType=VARCHAR}
+             and store_cd = #{storeCd,jdbcType=VARCHAR}
+             and article_id in
+        <foreach item="articleId" index="index" collection="articles"
+                 open="(" separator="," close=")">
+            #{articleId,jdbcType=VARCHAR}
+        </foreach>
+    </select>
+
+    <insert id="addBitemWarehousCk"
+            parameterType="cn.com.bbut.iy.itemmaster.dto.rtInventory.StoreItemWarehousCk">
+        INSERT INTO public.store_item_warehous_ck(
+        warehous_date,company_cd,store_cd,item_cd,stock_qty,stock_amt,warehous_days,year_month,using_flag
+        )
+        VALUES
+        <foreach collection="list" item="storeItemWarehousCk" index="index" separator=",">
+            (
+            to_date(#{storeItemWarehousCk.warehousDate},'yyyy-MM-dd'),
+            #{storeItemWarehousCk.companyCd},
+            #{storeItemWarehousCk.storeCd},
+            #{storeItemWarehousCk.articleId},
+            #{storeItemWarehousCk.stockQty},
+            #{storeItemWarehousCk.stockAmt},
+            #{storeItemWarehousCk.warehousDays},
+            #{storeItemWarehousCk.yearMonth},
+            #{storeItemWarehousCk.usingFlag}
+            )
+        </foreach>
+        ON CONFLICT (warehous_date,company_cd,store_cd,item_cd,using_flag)
+        do update set stock_qty = store_item_warehous_ck.stock_qty+EXCLUDED.stock_qty,
+        stock_amt = store_item_warehous_ck.stock_amt+EXCLUDED.stock_amt
+    </insert>
+
+    <insert id="addRtQtyListToEs"
+            parameterType="cn.com.bbut.iy.itemmaster.dto.rtInventory.SaveInventoryQty">
+        INSERT INTO public.sk0030(
+        store_cd,article_id,detail_type,in_es_time,create_ymd_hms,in_es_flg,dep_cd,pma_cd,category_cd,sub_category_cd,
+        sale_qty,on_hand_qty,on_order_qty,write_off_qty,return_qty,adjustment_qty,transfer_out_qty,transfer_in_qty,
+        receive_qty,receive_corr_qty,return_corr_qty,transfer_out_corr_qty,transfer_in_corr_qty
+        )
+        VALUES
+        <foreach collection="list" item="saveInQty" index="index" separator=",">
+            (
+            #{saveInQty.storeCd},
+            #{saveInQty.articleId},
+            #{saveInQty.detailType},
+            NOW()::TIMESTAMP,
+            to_char(NOW(),'yyyyMMddhhmmss'),
+            '0',
+            #{saveInQty.depCd},
+            #{saveInQty.pmaCd},
+            #{saveInQty.categoryCd},
+            #{saveInQty.subCategoryCd},
+            coalesce(#{saveInQty.saleQty},0),
+            coalesce(#{saveInQty.onHandQty},0),
+            coalesce(#{saveInQty.onOrderQty},0),
+            coalesce(#{saveInQty.writeOffQty},0),
+            coalesce(#{saveInQty.returnQty},0),
+            coalesce(#{saveInQty.adjustmentQty},0),
+            coalesce(#{saveInQty.transferOutQty},0),
+            coalesce(#{saveInQty.transferInQty},0),
+            coalesce(#{saveInQty.receiveQty},0),
+            coalesce(#{saveInQty.receiveCorrQty},0),
+            coalesce(#{saveInQty.returnCorrQty},0),
+            coalesce(#{saveInQty.transferOutCorrQty},0),
+            coalesce(#{saveInQty.transferInCorrQty},0)
+            )
+        </foreach>
+    </insert>
+    </mapper>

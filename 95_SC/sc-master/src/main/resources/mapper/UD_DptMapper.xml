@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.IyDptMapper">
+    <select id="selectDptByStore" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO"
+            parameterType="string">
+		select substr(store,3,5) as k,TRIM(substr(store,3,5)||' '||store_name) as v
+        FROM IY_STORE 
+          Where store_name not like '%*%'
+                and store_name not like '%＊%'
+                and store_name not like '%未使用%'
+                and store not like '__0__'
+                and store in (select store from iyed_staff)
+                and (substr(store,3,5) like #{param} or store_name like #{param})
+          Order by store
+	</select>
+	<select id="getDptNameByStore" resultType="cn.com.bbut.iy.itemmaster.dto.base.LabelDTO" parameterType="string">
+		select 
+			substr(store,3,5) as code,
+			TRIM(store_name) as name,
+			TRIM(substr(store,3,5)||' '||store_name) as codeName
+        FROM IY_STORE 
+          Where store_name not like '%*%'
+                and store_name not like '%＊%'
+                and store_name not like '%未使用%'
+                and store not like '__0__'
+                and store in (select store from iyed_staff)
+                and (substr(store,3,5) = #{dpt})
+          Order by store
+	</select>
+	<select id="selectDptByStaff" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" parameterType="string">
+		SELECT distinct B.MMCBA52_SECTION1 k,
+              B.MMCBA52_SECTION1 ||' '||TRIM(A.STORE_NAME) v
+              FROM IY_STORE A, MMCBA52_STAFF B
+               WHERE A.STORE = '00' || B.MMCBA52_STRCD
+               and (A.store  like '008__'
+               or A.store  like '009__')
+               and ( B.MMCBA52_SECTION1 like #{param} or A.STORE_NAME like #{param})
+	</select>
+	<select id="getDptNameByStaff" resultType="cn.com.bbut.iy.itemmaster.dto.base.LabelDTO" parameterType="string">
+		SELECT 
+              distinct B.MMCBA52_SECTION1 as code,
+              TRIM(A.STORE_NAME) as name,
+              B.MMCBA52_SECTION1 ||' '||TRIM(A.STORE_NAME) as codeName
+              FROM IY_STORE A, MMCBA52_STAFF B
+               WHERE A.STORE = '00' || B.MMCBA52_STRCD
+               and (A.store  like '008__'
+               or A.store  like '009__')
+               and B.MMCBA52_SECTION1 = #{dpt}
+	</select>
+	<select id="selectDptByTen" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" parameterType="string">
+		select dpt k,
+				TRIM(dpt||' '||dpt_name) v
+	  	from
+	   		iy_dpt_ten where dpt like #{param} or dpt_name like #{param}
+	</select>
+	<select id="getDptNameByTen" resultType="cn.com.bbut.iy.itemmaster.dto.base.LabelDTO" parameterType="string">
+		select  dpt as code,
+				TRIM(dpt_name) as name,
+				TRIM(dpt||' '||dpt_name) as codeName
+	  	from
+	   		iy_dpt_ten where dpt = #{dpt}
+	</select>
+    <select id="getDptsInResource" parameterType="java.util.Map"
+            resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select
+        dpt as k, dpt || ' ' || dpt_name as v
+        from iy_dpt
+        where sales_exl_flg = 0
+        and dpt_code_type = 0
+        and (
+        <if test="name!=null and name!=''">
+            dpt_name like #{name}
+        </if>
+        <if test="name!=null and name!='' and dpt!=null and dpt!=''">
+            or
+        </if>
+        <if test="dpt!=null and dpt!=''">
+            DPT like #{dpt}
+        </if>
+        )
+        and (${condition})
+
+    </select>
+    <!-- 取得事业部：带资源 -->
+    <select id="getDivisionByPrmission" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO"  parameterType="java.util.ArrayList">
+		  select 
+		      	  t.grand_div as k,
+		          t.dpt_name as v
+		    from 
+		    	iy_dpt t
+		    where 
+		    	1=1 
+		    <if test="list != null and list.size>0">
+		    	and (
+			    	<foreach collection="list" item="item" separator="or" index="index">
+				    		t.dpt=concat(substr(#{item},-1,1),'99')
+					</foreach>   
+			   	 )
+		   	 </if>
+		    and substr(t.department,-1,1)='9'  and t.grand_div!='009'
+		    order by t.grand_div
+		    
+	</select>
+	<!-- 取得部：带资源 -->
+    <select id="getDepartmentByPrmission" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO"  parameterType="java.util.Map">
+		   select 
+              t.department as k,
+              t.dpt_name as v
+	        from 
+	          iy_dpt t
+	        where 
+	          1=1 
+	          	and t.grand_div!='007'
+				and substr(t.department,-1,1)!='9' and substr(t.dpt,-1,1)='9' and t.grand_div!='007'
+				<if test="division != null and division !=''">
+		           	and t.grand_div=#{division}
+				</if>
+				<if test="resource != null and resource.size>0">
+		    	and (
+			    	<foreach collection="resource" item="item" separator="or" index="index">
+	              		 t.department=#{item}
+					</foreach>   
+			   	 )
+		   	 </if>
+		    order by t.grand_div
+	</select>
+	<!-- 取得DPT：带资源 -->
+    <select id="getDptByPrmission" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO"  parameterType="java.util.Map">
+		   select 
+		   	  t.dpt as k,
+  			  t.dpt_name as v  
+	        from 
+	          iy_dpt t
+	        where 
+	          1=1 
+				<if test="division != null and division !=''">
+		           	and t.grand_div=#{division}
+				</if>
+				<if test="department != null and department !=''">
+		           	and t.department=#{department}
+				</if>
+	          	and substr(t.dpt,-1,1)!='9'
+				<if test="resource != null and resource.size>0">
+		    	and (
+			    	<foreach collection="resource" item="item" separator="or" index="index">
+	              		 t.dpt=#{item}
+					</foreach>   
+			   	 )
+		   	 </if>
+		    order by t.grand_div,t.department
+	</select>
+    
+    
+    
+</mapper>

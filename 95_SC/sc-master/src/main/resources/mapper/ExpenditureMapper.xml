@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.ExpenditureMapper">
+
+    <resultMap id="ReResultMap" type="cn.com.bbut.iy.itemmaster.dto.expenditure.ExpenditureDTO" >
+        <id column="acc_date" property="accDate" jdbcType="VARCHAR" />
+        <id column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <id column="voucher_no" property="voucherNo" jdbcType="VARCHAR" />
+        <result column="dep_cd" property="depCd" jdbcType="VARCHAR" />
+        <result column="record_sts" property="recordSts" jdbcType="VARCHAR" />
+        <result column="pay_type_id" property="payTypeId" jdbcType="VARCHAR" />
+        <result column="item_id" property="itemId" jdbcType="VARCHAR" />
+        <result column="description" property="description" jdbcType="VARCHAR" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="expense_amt" property="expenseAmt" jdbcType="DECIMAL" />
+        <result column="user_id" property="userId" jdbcType="VARCHAR" />
+        <result column="create_user" property="createUser" jdbcType="VARCHAR" />
+        <result column="create_ymd" property="createYmd" jdbcType="VARCHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <result column="dep_name" property="depName" jdbcType="VARCHAR" />
+        <result column="pay_name" property="payName" jdbcType="VARCHAR" />
+        <result column="item_name" property="itemName" jdbcType="VARCHAR" />
+        <result column="user_name" property="userName" jdbcType="VARCHAR" />
+        <result column="status_name" property="statusName" jdbcType="VARCHAR" />
+        <result column="additional" property="additional" jdbcType="DECIMAL" />
+        <result column="offset_claim" property="offsetClaim" jdbcType="DECIMAL" />
+    </resultMap>
+
+    <sql id="selectCondition">
+        <if test="businessStartDate != null and businessStartDate != ''">
+            AND acc_date >= #{businessStartDate,jdbcType=VARCHAR}
+        </if>
+        <if test="businessEndDate != null and businessEndDate != ''">
+            AND #{businessEndDate,jdbcType=VARCHAR} >= acc_date
+        </if>
+        <if test="expenditureCd != null and expenditureCd != ''">
+            AND voucher_no LIKE CONCAT('%',#{expenditureCd,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="department != null and department != ''">
+            AND dep_cd = #{department,jdbcType=VARCHAR}
+        </if>
+        <if test="paymentType != null and paymentType != ''">
+            AND pay_type_id = #{paymentType,jdbcType=VARCHAR}
+        </if>
+        <if test="expenditureSubject != null and expenditureSubject != ''">
+            AND item_id = #{expenditureSubject,jdbcType=VARCHAR}
+        </if>
+        <if test="expenditureStatus != null and expenditureStatus != ''">
+            AND record_sts = #{expenditureStatus,jdbcType=VARCHAR}
+        </if>
+        <if test="operator != null and operator != ''">
+            AND user_id = #{operator,jdbcType=VARCHAR}
+        </if>
+        <if test="status != null and status != ''">
+            AND OP0040.review_status = CAST(#{status,jdbcType=VARCHAR} AS NUMERIC)
+        </if>
+    </sql>
+
+    <select id="selectCountByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.expenditure.ExpenditureParamDTO" resultType="INT">
+        SELECT
+        COUNT(*)
+        FROM
+        OP0040,ma1000
+        WHERE
+        ma1000.store_cd = OP0040.store_cd
+        AND OP0040.acc_date BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
+        and OP0040.store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <include refid="selectCondition"></include>
+    </select>
+
+    <select id="selectListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.expenditure.ExpenditureParamDTO" resultMap="ReResultMap">
+        SELECT
+        T.*, T1.dep_name, T2.pay_name, T3.item_name, T4.user_name,
+        T5.code_name AS status_name, T6.emp_name AS create_user
+        FROM (
+        SELECT
+        acc_date, voucher_no, dep_cd, record_sts, pay_type_id,
+        item_id, description, remark, expense_amt,expense_type, user_id, OP0040.create_user_id,
+        ma1000.store_cd,
+        ma1000.store_name,
+        OP0040.review_status status,
+        concat(OP0040.create_ymd,OP0040.create_hms) create_ymd
+        FROM
+        OP0040,ma1000
+        WHERE
+        ma1000.store_cd = OP0040.store_cd
+        AND OP0040.acc_date BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
+        and OP0040.store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <include refid="selectCondition"></include>
+        ) T
+        LEFT JOIN (
+        SELECT dep_cd, dep_name FROM MA0070 WHERE effective_sts = '10'
+        ) T1
+        ON T.dep_cd = T1.dep_cd
+        LEFT JOIN (
+        SELECT pay_cd, pay_name FROM SA0000 WHERE effective_sts = '10'
+        ) T2
+        ON T.pay_type_id = T2.pay_cd
+        LEFT JOIN (
+        SELECT item_id, item_name FROM MA1060 WHERE effective_sts = '10'
+        ) T3
+        ON T.item_id = T3.item_id
+        LEFT JOIN ( SELECT emp_num_id user_id, emp_name user_name FROM MA4200 ) T4 ON T.user_id = T4.user_id
+        LEFT JOIN (
+        SELECT code_value, code_name FROM CM9010 WHERE code_type = '00225' AND effective_sts = '10'
+        ) T5
+        ON T.record_sts = T5.code_value
+        LEFT JOIN (
+        SELECT emp_num_id, emp_name FROM ma4200
+        ) T6
+        ON T.create_user_id = T6.emp_num_id
+        ORDER BY T.acc_date DESC, T.voucher_no
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+
+    <select id="selectByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.expenditure.ExpenditureParamDTO" resultMap="ReResultMap">
+        SELECT
+            T.*, T1.store_name,t3.emp_name user_name
+        FROM (
+            SELECT
+                acc_date, store_cd, voucher_no, dep_cd, record_sts, pay_type_id,
+                item_id, description, remark, expense_amt, user_id,expense_type
+            FROM
+                OP0040
+            WHERE
+                acc_date = #{accDate,jdbcType=VARCHAR}
+            AND store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND voucher_no = #{voucherNo,jdbcType=VARCHAR}
+        ) T
+         LEFT JOIN MA4200 t3 ON t3.emp_num_id=t.user_id
+        LEFT JOIN (
+            SELECT
+                store_cd, store_name
+            FROM
+                MA1000
+            WHERE
+                #{businessStartDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T1
+        ON T.store_cd = T1.store_cd
+    </select>
+
+    <update id="updateRecord" parameterType="cn.com.bbut.iy.itemmaster.dto.expenditure.ExpenditureDTO">
+        UPDATE
+            OP0040
+        SET
+            dep_cd = #{depCd,jdbcType=VARCHAR},
+            record_sts = #{recordSts,jdbcType=VARCHAR},
+            pay_type_id = #{payTypeId,jdbcType=VARCHAR},
+            item_id = #{itemId,jdbcType=VARCHAR},
+            description = #{description,jdbcType=VARCHAR},
+            remark = #{remark,jdbcType=VARCHAR},
+            expense_amt = #{expenseAmt,jdbcType=NUMERIC},
+            expense_type = #{expenseType,jdbcType=CHAR},
+            user_id = #{userId,jdbcType=VARCHAR},
+            update_user_id = #{updateUser,jdbcType=VARCHAR},
+            update_ymd = #{updateYmd,jdbcType=VARCHAR},
+            update_hms = #{updateHms,jdbcType=VARCHAR}
+        WHERE
+            acc_date = #{accDate,jdbcType=VARCHAR}
+        AND store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND voucher_no = #{voucherNo,jdbcType=VARCHAR}
+    </update>
+
+    <insert id="insertRecord" parameterType="cn.com.bbut.iy.itemmaster.dto.expenditure.ExpenditureDTO">
+        INSERT INTO OP0040 (
+            acc_date, store_cd, voucher_no, dep_cd, record_sts, pay_type_id, item_id,
+            description, remark, expense_amt,expense_type,user_id, create_user_id, create_ymd, create_hms
+        ) VALUES (
+            #{accDate,jdbcType=VARCHAR},
+            #{storeCd,jdbcType=VARCHAR},
+            #{voucherNo,jdbcType=VARCHAR},
+            #{depCd,jdbcType=VARCHAR},
+            #{recordSts,jdbcType=VARCHAR},
+            #{payTypeId,jdbcType=VARCHAR},
+            #{itemId,jdbcType=VARCHAR},
+            #{description,jdbcType=VARCHAR},
+            #{remark,jdbcType=VARCHAR},
+            #{expenseAmt,jdbcType=NUMERIC},
+            #{expenseType,jdbcType=CHAR},
+            #{userId,jdbcType=VARCHAR},
+            #{createUser,jdbcType=VARCHAR},
+            #{createYmd,jdbcType=VARCHAR},
+            #{createHms,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <delete id="deleteRecord" parameterType="cn.com.bbut.iy.itemmaster.dto.expenditure.ExpenditureParamDTO">
+        DELETE FROM OP0040
+        WHERE
+            acc_date = #{accDate,jdbcType=VARCHAR}
+        AND store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND voucher_no = #{voucherNo,jdbcType=VARCHAR}
+    </delete>
+
+    <select id="selectCountByVoucherNo" parameterType="String" resultType="INT">
+        SELECT
+            COUNT(1)
+        FROM
+            OP0040
+        WHERE
+            voucher_no = #{voucherNo,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getExpenditureList" parameterType="string" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select
+        voucher_no as k,voucher_no as v
+        from OP0040 where
+        1=1
+        and acc_date = #{accDate,jdbcType=VARCHAR}
+        and store_cd = #{storeCd,jdbcType=VARCHAR}
+        <if test="v!=null and v!=''">
+            and lower(voucher_no) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+        </if>
+        and review_status='10';
+    </select>
+
+    <select id="getFundEntryData" parameterType="string" resultType="cn.com.bbut.iy.itemmaster.dto.expenditure.ExpenditureDTO">
+        select voucher_no,expense_amt,expense_type from op0040
+        where store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND acc_date = #{accDate,jdbcType=VARCHAR}
+            AND voucher_no = #{voucherNo,jdbcType=VARCHAR};
+    </select>
+
+    <select id="getDescription" parameterType="string" resultType="cn.com.bbut.iy.itemmaster.dto.expenditure.ExpenditureDTO">
+        SELECT acc_date,store_cd,voucher_no,description FROM OP0040
+        WHERE
+            store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND acc_date = #{accDate,jdbcType=VARCHAR}
+            AND voucher_no = #{voucherNo,jdbcType=VARCHAR};
+    </select>
+    <select id="getOperator" parameterType="string" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT   distinct
+        a.emp_num_id k,
+        concat(a.emp_name,' ',emp_num_id) v from ma4200 a left join  ma4160 b on a.job_type_cd=b.job_type_cd where position>=4
+        <if test="storeCd  !=null and storeCd != ''">
+            AND  a.store_cd=#{storeCd}
+        </if>
+        <if test="v!=null and v!=''">
+            AND (
+            lower(a.emp_num_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(a.emp_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+    </select>
+
+
+
+
+
+</mapper>

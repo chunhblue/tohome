@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.SA0000Mapper">
+
+  <select id="getList" parameterType="cn.com.bbut.iy.itemmaster.dto.paymentMode.SA0000DetailParamDto" resultType="cn.com.bbut.iy.itemmaster.dto.paymentMode.SA0000DetailGridDto">
+    SELECT T.*, T1.emp_name AS update_user_name
+    FROM (
+      select pay_cd,pay_name,pay_name_print,interface_sts,interface_address,
+      update_user_id, update_ymd||update_hms as update_date,review_status
+      from sa0000
+      <where>
+        <if test="payCd != null and payCd != ''">
+          AND lower(pay_cd) like lower(CONCAT('%',#{payCd},'%'))
+        </if>
+        <if test="payName != null and payName !=''">
+          AND lower(pay_name) like lower(CONCAT('%',#{payName},'%'))
+        </if>
+        <if test="reviewStatus != null">
+          AND review_status = #{reviewStatus,jdbcType=INTEGER}
+        </if>
+      </where>
+    ) T
+    LEFT JOIN (
+        SELECT emp_num_id, emp_name FROM ma4200
+    )T1
+    ON T.update_user_id = T1.emp_num_id
+    <if test="orderByClause != null">
+    </if>
+    ORDER BY T.pay_cd
+    <if test="limitStart >= 0">
+      limit ${limitEnd} offset ${limitStart}
+    </if>
+  </select>
+  <select id="getListCount" parameterType="cn.com.bbut.iy.itemmaster.dto.paymentMode.SA0000DetailParamDto" resultType="long">
+    select count(*)
+    from sa0000
+    <where>
+      <if test="payCd != null and payCd != ''">
+        AND lower(pay_cd) like lower(CONCAT('%',#{payCd},'%'))
+      </if>
+      <if test="payName != null and payName !=''">
+        AND lower(pay_name) like lower(CONCAT('%',#{payName},'%'))
+      </if>
+      <if test="reviewStatus != null">
+        AND review_status = #{reviewStatus,jdbcType=INTEGER}
+      </if>
+    </where>
+  </select>
+
+  <select id="getDetailList" resultType="cn.com.bbut.iy.itemmaster.dto.paymentMode.SA0005DetailGridDto">
+    select
+    pay_cd, store_cd, pos_id, pos_display,record_status,
+    (select code_name from cm9010
+    where cm9010.code_type='00385'
+    and cm9010.code_value=sa0005.pos_display
+    ) as pos_display_name,
+    (select store_name from ma1000
+    where
+    <![CDATA[
+        ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
+    ]]>
+    and ma1000.store_cd = sa0005.store_cd) as store_name,
+    (select pos_name from sa0160
+    where sa0160.store_cd= sa0005.store_cd
+    and sa0160.pos_id= sa0005.pos_id
+    ) as pos_name
+    from sa0005
+    where
+    <if test="payCd != null and payCd !=''">
+      pay_cd = #{payCd,jdbcType=VARCHAR}
+    </if>
+    order by sa0005.store_cd,sa0005.pos_id
+  </select>
+  <select id="getDelDetailList" resultType="cn.com.bbut.iy.itemmaster.dto.paymentMode.SA0005DetailGridDto">
+    select
+    pay_cd, sa0005.store_cd, pos_id, pos_display,sa0005.create_user_id,sa0005.create_ymd,sa0005.create_hms,MA4200.emp_name,
+    (select code_name from cm9010
+    where cm9010.code_type='00385'
+    and cm9010.code_value=sa0005.pos_display
+    ) as pos_display_name,
+    (select store_name from ma1000
+    where
+    <![CDATA[
+        ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
+    ]]>
+    and ma1000.store_cd = sa0005.store_cd) as store_name,
+    (select pos_name from sa0160
+    where sa0160.store_cd= sa0005.store_cd
+    and sa0160.pos_id= sa0005.pos_id
+    ) as pos_name
+    from sa0005_delete_record sa0005,ma4200
+    where
+    <if test="payCd != null and payCd !=''">
+      pay_cd = #{payCd,jdbcType=VARCHAR}
+    </if>
+    AND sa0005.create_user_id=MA4200.emp_num_id
+    order by sa0005.store_cd,sa0005.pos_id
+  </select>
+  <select id="getdetailList" resultType="cn.com.bbut.iy.itemmaster.dto.sa0005.SA0005ParamDTO">
+    select
+    distinct
+    pay_cd, sa0005.store_cd, pos_id, pos_display,sa0005.create_user_id,sa0005.create_ymd,sa0005.create_hms,sa0005.record_status,
+    (select code_name from cm9010
+    where cm9010.code_type='00385'
+    and cm9010.code_value=sa0005.pos_display
+    ) as pos_display_name,
+    (select store_name from ma1000
+    where
+    <![CDATA[
+        ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
+    ]]>
+    and ma1000.store_cd = sa0005.store_cd) as store_name,
+    (select pos_name from sa0160
+    where sa0160.store_cd= sa0005.store_cd
+    and sa0160.pos_id= sa0005.pos_id
+    ) as pos_name
+    from sa0005_delete_record sa0005,ma4200
+    where
+    1=1
+    <if test="payCd != null and payCd !=''">
+    AND   pay_cd = #{payCd,jdbcType=VARCHAR}
+    </if>
+    order by sa0005.store_cd,sa0005.pos_id
+  </select>
+  <select id="getPayNameList" resultType="cn.com.bbut.iy.itemmaster.dto.paymentMode.SA0005DetailGridDto">
+    select
+    pay_cd, store_cd, pos_id, pos_display,
+    (select code_name from cm9010
+    where cm9010.code_type='00385'
+    and cm9010.code_value=sa0005.pos_display
+    ) as pos_display_name,
+    (select store_name from ma1000
+    where
+    <![CDATA[
+        ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
+        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
+    ]]>
+    and ma1000.store_cd = sa0005.store_cd) as store_name,
+    (select pos_name from sa0160
+    where sa0160.store_cd= sa0005.store_cd
+    and sa0160.pos_id= sa0005.pos_id
+    ) as pos_name,
+    (select sa0000.pay_name  from sa0000 where sa0000.pay_cd=sa0005.pay_cd
+   ) AS pay_name
+    from sa0005
+    <where>
+      <if test="storeCd != null and storeCd !=''">
+        sa0005.store_cd = #{storeCd,jdbcType=VARCHAR}
+      </if>
+    </where>
+    order by sa0005.store_cd,sa0005.pos_id
+  </select>
+  <select id="getChargeByPayment" resultType="int">
+    	select count(*) from sa0000
+    	    where substr(sa0000.pay_parameter,0,2) = '1'
+          <if test="payCd!=null">
+    	    and sa0000.pay_cd not in(#{payCd,jdbcType=VARCHAR})
+          </if>
+  </select>
+</mapper>

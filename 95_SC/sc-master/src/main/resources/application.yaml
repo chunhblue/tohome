@@ -1,0 +1,164 @@
+spring.profiles.active: ${profileActive}
+
+logging.file: ${logDir}/${logFile}.log
+
+server:
+  servlet:
+    context-path: ${m.syspath}
+    session:
+      timeout: 20m
+  tomcat:
+    max-threads: 200
+    max-http-post-size: 2MB
+    uri-encoding: UTF-8
+    max-swallow-size: 5MB
+
+spring:
+#  redis:
+#    port: ${m.redis.port}
+#    database: ${m.redis.database}
+#    host: ${m.redis.host}
+#    password: ${m.redis.password}
+#    lettuce:
+#      pool:
+#        max-active: 8
+#        max-wait: 5m
+#        max-idle: 8
+#        min-idle: 1
+#    timeout: 5000ms
+  #  application:
+  #    name: e-receipts-web
+  mvc:
+    view:
+      prefix: /templates/
+      suffix: .ftl
+    static-path-pattern: /static/**
+  freemarker:
+    cache: false
+    settings.template_update_delay: 0
+    check-template-location: true
+    charset: UTF-8
+    content-type: text/html
+    expose-request-attributes: true
+    expose-session-attributes: false
+    expose-spring-macro-helpers: true
+    prefix:
+    suffix: .ftl
+    template-loader-path: classpath:/templates/
+  #  jmx:
+  #    enabled: false
+  messages:
+    basename: pagecontent,stats,errormessage,git
+  resources:
+    static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/
+  datasource:
+    url: ${m.jdbc.url}
+    type: com.zaxxer.hikari.HikariDataSource
+    username: ${m.jdbc.username}
+    password: ${m.jdbc.password}
+#    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 2000
+      validation-timeout: 3000
+      maximum-pool-size: ${m.jdbc.maximumpoolsize}
+      minimum-idle: ${m.jdbc.minimumidle}
+      is-auto-commit: false
+      pool-name: masterPool
+  mail:
+    port: 465
+    host: ${m.mail.host}
+    username: ${m.mail.username}
+    password: ${m.mail.password}
+    properties.mail.smtp:
+      auth: true
+      socketFactory:
+        port: 465
+        class: javax.net.ssl.SSLSocketFactory
+        fallback: false
+      starttls:
+        enable: ture
+        required: true
+    protocol: smtp
+    default-encoding: utf-8
+  http:
+    encoding:
+      force: true
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 500MB
+  session:
+    store-type: redis
+  cache:
+    type: redis
+    redis:
+      use-key-prefix: true
+
+mybatis:
+  type-aliases-package: cn.com.bbut.iy.itemmaster.entity
+  mapper-locations: classpath*:/mapper/*Mapper.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    default-fetch-size: 100
+    default-statement-timeout: 30
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: /monitoring
+  endpoint:
+    health:
+      show-details: "always"
+
+s.common.tx.enabled: true
+
+iy:
+  excel:
+    fileDir: ${m.excel.exportDir}
+    trans-pool:
+      corePoolSize: 10
+      maxPoolSize: 20
+      keepAliveSeconds: 60
+      queueCapacity: 100
+    wait-pool:
+      corePoolSize: 10
+      maxPoolSize: 100
+      keepAliveSeconds: 60
+      queueCapacity: 0
+
+  cache-redis:
+    host: ${m.cache-redis.host}
+    port: ${m.cache-redis.port}
+    database: ${m.cache-redis.database}
+    password: ${m.cache-redis.password}
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: 5000
+        max-idle: 8
+        min-idle: 1
+    timeout: 5000
+  session-redis:
+    host: ${m.session-redis.host}
+    port: ${m.session-redis.port}
+    database: ${m.session-redis.database}
+    password: ${m.session-redis.password}
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: 5000
+        max-idle: 8
+        min-idle: 1
+    timeout: 5000
+
+  timecheck:
+    enabled: ${m.timecheck.enabled}
+
+file:
+  fileDir: ${m.uploadDir}
+
+esUrl:
+  inventoryUrl: ${m.inventoryUrlDir}
+

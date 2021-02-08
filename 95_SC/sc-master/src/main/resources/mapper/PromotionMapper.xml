@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.PromotionMapper">
+
+    <resultMap id="ReBasicInfo" type="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionDTO">
+        <id column="PROMOTION_CD" jdbcType="VARCHAR" property="promotionCd" />
+        <result column="PROMOTION_NAME" jdbcType="VARCHAR" property="promotionName" />
+        <result column="PROMOTION_START_DATE" jdbcType="VARCHAR" property="promotionStartDate" />
+        <result column="PROMOTION_END_DATE" jdbcType="VARCHAR" property="promotionEndDate" />
+        <result column="PROMOTION_START_TIME" jdbcType="CHAR" property="promotionStartTime" />
+        <result column="PROMOTION_END_TIME" jdbcType="CHAR" property="promotionEndTime" />
+        <result column="PROMOTION_WEEK_CYCLE" jdbcType="CHAR" property="promotionWeekCycle" />
+        <result column="PROMOTION_PROMPT_FLG" jdbcType="CHAR" property="promotionPromptFlg" />
+        <result column="PROMOTION_PROMPT_NAME" jdbcType="VARCHAR" property="promotionPromptName" />
+        <result column="DEP_CD" jdbcType="VARCHAR" property="depCd" />
+        <result column="STRUCTURE_CD" jdbcType="VARCHAR" property="regionCd" />
+        <result column="EFFECTIVE_DATE" jdbcType="VARCHAR" property="effectiveDate" />
+        <result column="PROMOTION_DIFF" jdbcType="VARCHAR" property="promotionDiff" />
+        <result column="PROMOTION_TYPE" jdbcType="VARCHAR" property="promotionType" />
+        <result column="PROMOTION_ALLOT_TYPE" jdbcType="VARCHAR" property="promotionAllotType" />
+        <result column="EFFECTIVE_STS" jdbcType="VARCHAR" property="effectiveSts" />
+        <result column="DEP_NAME" jdbcType="VARCHAR" property="depName" />
+        <result column="STRUCTURE_NAME" jdbcType="VARCHAR" property="regionName" />
+    </resultMap>
+
+    <resultMap id="ReMa4060" type="cn.com.bbut.iy.itemmaster.dto.promotion.Ma4060DTO">
+        <id column="PROMOTION_CD" jdbcType="VARCHAR" property="promotionCd" />
+        <id column="PROMOTION_TERM_GROUP" jdbcType="VARCHAR" property="promotionTermGroup" />
+        <result column="PROMOTION_TERM_QTY" jdbcType="DECIMAL" property="promotionTermQty" />
+        <result column="PROMOTION_TERM_AMT" jdbcType="DECIMAL" property="promotionTermAmt" />
+        <result column="PROMOTION_VALUE" jdbcType="DECIMAL" property="promotionValue" />
+        <result column="PROMOTION_ALLOT_VALUE" jdbcType="DECIMAL" property="promotionAllotValue" />
+        <result column="EFFECTIVE_STS" jdbcType="VARCHAR" property="effectiveSts" />
+    </resultMap>
+
+    <resultMap id="ReMa4070" type="cn.com.bbut.iy.itemmaster.dto.promotion.Ma4070DTO">
+        <id column="PROMOTION_CD" jdbcType="VARCHAR" property="promotionCd" />
+        <id column="PROMOTION_TERM_GROUP" jdbcType="VARCHAR" property="promotionTermGroup" />
+        <id column="ARTICLE_ID" jdbcType="VARCHAR" property="articleId" />
+        <result column="EFFECTIVE_STS" jdbcType="VARCHAR" property="effectiveSts" />
+        <result column="BARCODE" jdbcType="VARCHAR" property="barcode" />
+        <result column="ARTICLE_NAME" jdbcType="VARCHAR" property="articleName" />
+        <result column="SUB_CATEGORY_CD"  jdbcType="CHAR" property="subCategoryCd"/>
+        <result column="SUB_CATEGORY_NAME" jdbcType="VARCHAR" property="subCategoryName" />
+        <result column="REFER_SALE_PRICE" jdbcType="DECIMAL" property="articleSalePrice" />
+        <result column="DISPLAY_SEQ" jdbcType="DECIMAL" property="displaySeq"/>
+    </resultMap>
+
+    <resultMap id="ReMa4080" type="cn.com.bbut.iy.itemmaster.dto.promotion.Ma4080DTO">
+        <result column="PROMOTION_CD" jdbcType="VARCHAR" property="promotionCd" />
+        <result column="PROMOTION_TERM_GROUP" jdbcType="VARCHAR" property="promotionTermGroup" />
+        <result column="SUB_CATEGORY_CD" jdbcType="CHAR" property="subCategoryCd" />
+        <result column="PMA_CD" jdbcType="CHAR" property="pmaCd" />
+        <result column="DEP_CD" jdbcType="CHAR" property="depCd" />
+        <result column="CATEGORY_CD" jdbcType="CHAR" property="categoryCd" />
+        <result column="DISPLAY_SEQ" jdbcType="DECIMAL" property="displaySeq" />
+        <result column="EFFECTIVE_STS" jdbcType="VARCHAR" property="effectiveSts" />
+        <result column="dep_name" jdbcType="VARCHAR" property="depName" />
+        <result column="pma_name" jdbcType="VARCHAR" property="pmaName" />
+        <result column="category_name" jdbcType="VARCHAR" property="categoryName" />
+        <result column="sub_category_name" jdbcType="VARCHAR" property="subCategoryName" />
+    </resultMap>
+
+    <resultMap id="ReMa4081" type="cn.com.bbut.iy.itemmaster.dto.promotion.Ma4081DTO">
+        <result column="PROMOTION_CD" jdbcType="VARCHAR" property="promotionCd" />
+        <result column="PROMOTION_TERM_GROUP" jdbcType="CHAR" property="promotionTermGroup" />
+        <result column="DEP_CD" jdbcType="VARCHAR" property="depCd" />
+        <result column="PMA_CD" jdbcType="VARCHAR" property="pmaCd" />
+        <result column="CATEGORY_CD" jdbcType="VARCHAR" property="categoryCd" />
+        <result column="SUB_CATEGORY_CD" jdbcType="VARCHAR" property="subCategoryCd" />
+        <result column="ARTICLE_ID" jdbcType="CHAR" property="articleId" />
+        <result column="ARTICLE_NAME" jdbcType="VARCHAR" property="articleName" />
+        <result column="DISPLAY_SEQ" jdbcType="DECIMAL" property="displaySeq" />
+        <result column="EFFECTIVE_STS" jdbcType="VARCHAR" property="effectiveSts" />
+        <result column="dep_name" jdbcType="VARCHAR" property="depName" />
+        <result column="pma_name" jdbcType="VARCHAR" property="pmaName" />
+        <result column="category_name" jdbcType="VARCHAR" property="categoryName" />
+        <result column="sub_category_name" jdbcType="VARCHAR" property="subCategoryName" />
+    </resultMap>
+
+    <resultMap id="ReMa4085" type="cn.com.bbut.iy.itemmaster.dto.promotion.Ma4085DTO">
+        <id column="PROMOTION_CD" jdbcType="VARCHAR" property="promotionCd" />
+        <id column="PROMOTION_TERM_GROUP" jdbcType="VARCHAR" property="promotionTermGroup" />
+        <id column="BRAND_CD" jdbcType="CHAR" property="brandCd" />
+        <result column="BRAND_NAME" jdbcType="VARCHAR" property="brandName" />
+        <result column="DISPLAY_SEQ" jdbcType="DECIMAL" property="displaySeq" />
+        <result column="EFFECTIVE_STS" jdbcType="VARCHAR" property="effectiveSts" />
+    </resultMap>
+
+    <resultMap id="ReMa4086" type="cn.com.bbut.iy.itemmaster.dto.promotion.Ma4086DTO">
+        <result column="PROMOTION_CD" jdbcType="VARCHAR" property="promotionCd" />
+        <result column="PROMOTION_TERM_GROUP" jdbcType="CHAR" property="promotionTermGroup" />
+        <result column="BRAND_CD" jdbcType="CHAR" property="brandCd" />
+        <result column="DEP_CD" jdbcType="VARCHAR" property="depCd" />
+        <result column="PMA_CD" jdbcType="VARCHAR" property="pmaCd" />
+        <result column="CATEGORY_CD" jdbcType="VARCHAR" property="categoryCd" />
+        <result column="SUB_CATEGORY_CD" jdbcType="VARCHAR" property="subCategoryCd" />
+        <result column="ARTICLE_ID" jdbcType="CHAR" property="articleId" />
+        <result column="ARTICLE_NAME" jdbcType="VARCHAR" property="articleName" />
+        <result column="DISPLAY_SEQ" jdbcType="DECIMAL" property="displaySeq" />
+        <result column="EFFECTIVE_STS" jdbcType="VARCHAR" property="effectiveSts" />
+        <result column="BRAND_NAME" jdbcType="VARCHAR" property="brandName" />
+        <result column="dep_name" jdbcType="VARCHAR" property="depName" />
+        <result column="pma_name" jdbcType="VARCHAR" property="pmaName" />
+        <result column="category_name" jdbcType="VARCHAR" property="categoryName" />
+        <result column="sub_category_name" jdbcType="VARCHAR" property="subCategoryName" />
+    </resultMap>
+
+    <resultMap id="ReMa4090" type="cn.com.bbut.iy.itemmaster.dto.promotion.Ma4090DTO">
+        <id column="PROMOTION_CD" jdbcType="VARCHAR" property="promotionCd" />
+        <id column="MA_CD" jdbcType="CHAR" property="maCd" />
+        <id column="STORE_TYPE_CD" jdbcType="CHAR" property="storeTypeCd" />
+        <result column="SERIAL" jdbcType="VARCHAR" property="serial" />
+        <result column="DISPLAY_SEQ" jdbcType="DECIMAL" property="displaySeq" />
+        <result column="EFFECTIVE_STS" jdbcType="CHAR" property="effectiveSts" />
+        <result column="MA_NAME" jdbcType="CHAR" property="maName" />
+        <result column="STRUCTURE_NAME" jdbcType="CHAR" property="storeTypeName" />
+    </resultMap>
+
+    <resultMap id="ReMa4100" type="cn.com.bbut.iy.itemmaster.dto.promotion.Ma4100DTO">
+        <id column="PROMOTION_CD" jdbcType="VARCHAR" property="promotionCd" />
+        <id column="STORE_CD" jdbcType="CHAR" property="storeCd" />
+        <result column="SERIAL" jdbcType="VARCHAR" property="serial"/>
+        <result column="EXCEPT_TYPE" jdbcType="CHAR" property="exceptType"/>
+        <result column="DISPLAY_SEQ" jdbcType="DECIMAL" property="displaySeq" />
+        <result column="EFFECTIVE_STS" jdbcType="CHAR" property="effectiveSts" />
+        <result column="STORE_NAME" jdbcType="VARCHAR" property="storeName" />
+        <result column="MA_NAME" jdbcType="VARCHAR" property="maName" />
+        <result column="MA_CD" jdbcType="VARCHAR" property="maCd" />
+        <result column="STORE_TYPE_NAME" jdbcType="VARCHAR" property="storeTypeName" />
+        <result column="STORE_TYPE_CD" jdbcType="VARCHAR" property="storeTypeCd" />
+        <result column="CITY_NAME" jdbcType="VARCHAR" property="cityName" />
+        <result column="DISTRICT_NAME" jdbcType="VARCHAR" property="districtName" />
+    </resultMap>
+
+    <sql id="selectCondition">
+        <where>
+            <if test="promotionCd != null and promotionCd != ''">
+                AND PROMOTION_CD LIKE CONCAT('%',#{promotionCd,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="promotionName != null and promotionName != ''">
+                AND PROMOTION_NAME LIKE CONCAT('%',#{promotionName,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="promotionStartDate != null and promotionStartDate != ''">
+                AND PROMOTION_START_DATE >= #{promotionStartDate,jdbcType=VARCHAR}
+            </if>
+            <if test="promotionEndDate != null and promotionEndDate != ''">
+                AND #{promotionEndDate,jdbcType=VARCHAR} >= PROMOTION_START_DATE
+            </if>
+            <if test="storeList != null and storeList.size() != 0">
+                AND ma4040.structure_cd IN (
+                select DISTINCT admin_structure_cd from ma0020 where structure_cd in(
+                select admin_structure_cd from ma0020 where structure_cd in(
+                select admin_structure_cd from ma0020 where structure_cd in
+                <foreach item="store" index="index" collection="storeList"
+                         open="(" separator="," close=")">
+                    #{store,jdbcType=VARCHAR}
+                </foreach>
+                )
+                )
+                )
+            </if>
+            --     审核通过的数据
+            AND ma4040.review_status = 10
+        </where>
+    </sql>
+
+    <select id="selectCountByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO" resultType="INT">
+        SELECT
+            COUNT(1)
+        FROM
+            MA4040
+        <include refid="selectCondition"></include>
+    </select>
+
+    <select id="selectListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO" resultMap="ReBasicInfo">
+        SELECT
+            PROMOTION_CD,
+            PROMOTION_NAME,
+            PROMOTION_START_DATE,
+            PROMOTION_END_DATE
+        FROM
+            MA4040
+        <include refid="selectCondition"></include>
+        ORDER BY PROMOTION_CD
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+
+    <select id="selectPromotion" parameterType="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO" resultMap="ReBasicInfo">
+        SELECT
+            T.*,
+            T1.PROMOTION_DIFF, T1.PROMOTION_TYPE, T1.PROMOTION_ALLOT_TYPE,
+            T2.dep_name, T3.structure_name
+        FROM(
+            SELECT
+                PROMOTION_CD, PROMOTION_NAME, PROMOTION_START_DATE, PROMOTION_END_DATE,
+                PROMOTION_START_TIME, PROMOTION_END_TIME, PROMOTION_WEEK_CYCLE,
+                PROMOTION_PROMPT_FLG, PROMOTION_PROMPT_NAME, DEP_CD, STRUCTURE_CD,
+                EFFECTIVE_DATE, EFFECTIVE_STS
+            FROM
+                MA4040
+            WHERE
+                PROMOTION_CD = #{promotionCd,jdbcType=VARCHAR}
+        ) T
+        LEFT JOIN (
+            SELECT
+                PROMOTION_CD, PROMOTION_DIFF, PROMOTION_TYPE, PROMOTION_ALLOT_TYPE
+            FROM
+                MA4050
+            WHERE
+                PROMOTION_CD = #{promotionCd,jdbcType=VARCHAR}
+        ) T1
+        ON T.PROMOTION_CD = T1.PROMOTION_CD
+        LEFT JOIN (
+            SELECT dep_cd, dep_name FROM MA0070
+        ) T2
+        ON T.DEP_CD = T2.dep_cd
+        LEFT JOIN (
+            SELECT structure_cd, structure_name FROM MA0020 WHERE level = '0'
+        ) T3
+        ON T.STRUCTURE_CD = T3.structure_cd
+    </select>
+
+    <select id="selectMa4060" parameterType="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO" resultMap="ReMa4060">
+        SELECT
+			PROMOTION_CD, PROMOTION_TERM_GROUP, PROMOTION_TERM_QTY,
+			PROMOTION_TERM_AMT, PROMOTION_VALUE, PROMOTION_ALLOT_VALUE,
+			EFFECTIVE_STS
+		FROM
+		    MA4060
+		WHERE
+		    PROMOTION_CD = #{promotionCd,jdbcType=VARCHAR}
+  		ORDER BY PROMOTION_TERM_GROUP
+    </select>
+
+    <select id="selectMa4070" parameterType="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO" resultMap="ReMa4070">
+        SELECT
+            T.*,
+            T1.ARTICLE_NAME,
+            T1.REFER_SALE_PRICE,
+            T2.SUB_CATEGORY_NAME
+        FROM (
+            SELECT
+                M.PROMOTION_CD, M.PROMOTION_TERM_GROUP, M.ARTICLE_ID, M.BARCODE,
+                M.DISPLAY_SEQ, M.EFFECTIVE_STS, M1.EFFECTIVE_DATE
+            FROM
+                MA4070 M, MA4040 M1
+            WHERE
+                M.PROMOTION_CD = #{promotionCd,jdbcType=VARCHAR}
+            AND M.PROMOTION_CD = M1.PROMOTION_CD
+        ) T
+        LEFT JOIN (
+            SELECT
+                ARTICLE_ID, ARTICLE_NAME, EFFECTIVE_START_DATE, EFFECTIVE_END_DATE, REFER_SALE_PRICE,
+                DEP_CD, PMA_CD, CATEGORY_CD, SUB_CATEGORY_CD
+            FROM
+                MA1100
+        ) T1
+        ON T.ARTICLE_ID = T1.ARTICLE_ID AND T.EFFECTIVE_DATE BETWEEN T1.EFFECTIVE_START_DATE AND T1.EFFECTIVE_END_DATE
+        LEFT JOIN (
+            SELECT DEP_CD, PMA_CD, CATEGORY_CD, SUB_CATEGORY_CD, SUB_CATEGORY_NAME
+            FROM MA0100
+        ) T2
+        ON T1.DEP_CD = T2.DEP_CD AND T1.PMA_CD = T2.PMA_CD AND T1.CATEGORY_CD = T2.CATEGORY_CD AND T1.SUB_CATEGORY_CD = T2.SUB_CATEGORY_CD
+        ORDER BY T.DISPLAY_SEQ
+    </select>
+
+    <select id="selectMa4080" parameterType="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO" resultMap="ReMa4080">
+        SELECT
+            T.*,
+            T2.dep_name, T3.pma_name, T4.category_name, T5.sub_category_name
+        FROM (
+            SELECT
+                PROMOTION_CD, PROMOTION_TERM_GROUP, DISPLAY_SEQ, EFFECTIVE_STS,
+                DEP_CD, PMA_CD, CATEGORY_CD, SUB_CATEGORY_CD
+            FROM
+                MA4080
+            WHERE
+                 PROMOTION_CD = #{promotionCd,jdbcType=VARCHAR}
+        ) T
+        LEFT JOIN (
+            SELECT dep_cd, dep_name FROM MA0070
+        ) T2
+        ON T.dep_cd = T2.dep_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, pma_name FROM MA0080
+        ) T3
+        ON T.dep_cd = T3.dep_cd AND T.pma_cd = T3.pma_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, category_cd, category_name FROM MA0090
+        ) T4
+        ON T.dep_cd = T4.dep_cd AND T.pma_cd = T4.pma_cd AND T.category_cd = T4.category_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, category_cd, sub_category_cd, sub_category_name FROM MA0100
+        ) T5
+        ON T.dep_cd = T5.dep_cd AND T.pma_cd = T5.pma_cd AND T.category_cd = T5.category_cd AND T.sub_category_cd = T5.sub_category_cd
+  		ORDER BY T.DISPLAY_SEQ
+    </select>
+
+    <select id="selectMa4081" parameterType="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO" resultMap="ReMa4081">
+        SELECT
+            T.*, T1.ARTICLE_NAME,
+            T2.dep_name, T3.pma_name, T4.category_name, T5.sub_category_name
+        FROM (
+            SELECT
+                M.PROMOTION_CD, M.PROMOTION_TERM_GROUP, M.DISPLAY_SEQ, M.EFFECTIVE_STS,
+                M.DEP_CD, M.PMA_CD, M.CATEGORY_CD, M.SUB_CATEGORY_CD, M.ARTICLE_ID,
+                M1.EFFECTIVE_DATE
+            FROM
+                MA4081 M, MA4040 M1
+            WHERE
+                M.PROMOTION_CD = #{promotionCd,jdbcType=VARCHAR}
+            AND M.PROMOTION_CD = M1.PROMOTION_CD
+        ) T
+        LEFT JOIN (
+            SELECT
+                ARTICLE_ID, ARTICLE_NAME, EFFECTIVE_START_DATE, EFFECTIVE_END_DATE
+            FROM
+                MA1100
+        ) T1
+        ON T.ARTICLE_ID = T1.ARTICLE_ID AND T.EFFECTIVE_DATE BETWEEN T1.EFFECTIVE_START_DATE AND T1.EFFECTIVE_END_DATE
+        LEFT JOIN (
+            SELECT dep_cd, dep_name FROM MA0070
+        ) T2
+        ON T.dep_cd = T2.dep_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, pma_name FROM MA0080
+        ) T3
+        ON T.dep_cd = T3.dep_cd AND T.pma_cd = T3.pma_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, category_cd, category_name FROM MA0090
+        ) T4
+        ON T.dep_cd = T4.dep_cd AND T.pma_cd = T4.pma_cd AND T.category_cd = T4.category_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, category_cd, sub_category_cd, sub_category_name FROM MA0100
+        ) T5
+        ON T.dep_cd = T5.dep_cd AND T.pma_cd = T5.pma_cd AND T.category_cd = T5.category_cd AND T.sub_category_cd = T5.sub_category_cd
+  		ORDER BY T.DISPLAY_SEQ
+    </select>
+
+    <select id="selectMa4085" parameterType="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO" resultMap="ReMa4085">
+        SELECT
+            T.*, T1.BRAND_NAME
+        FROM (
+            SELECT
+                PROMOTION_CD, PROMOTION_TERM_GROUP, BRAND_CD, DISPLAY_SEQ, EFFECTIVE_STS
+            FROM
+                MA4085
+            WHERE
+                PROMOTION_CD = #{promotionCd,jdbcType=VARCHAR}
+        ) T
+		LEFT JOIN (
+		    SELECT BRAND_CD, BRAND_NAME FROM MA0230
+		) T1
+		ON T.BRAND_CD = T1.BRAND_CD
+  		ORDER BY T.DISPLAY_SEQ
+    </select>
+
+    <select id="selectMa4086" parameterType="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO" resultMap="ReMa4086">
+        SELECT
+            T.*, T1.ARTICLE_NAME, T6.BRAND_NAME,
+            T2.dep_name, T3.pma_name, T4.category_name, T5.sub_category_name
+        FROM (
+            SELECT
+                M.PROMOTION_CD, M.PROMOTION_TERM_GROUP, M.BRAND_CD, M.DISPLAY_SEQ,
+                M.DEP_CD, M.PMA_CD, M.CATEGORY_CD, M.SUB_CATEGORY_CD, M.ARTICLE_ID,
+                M.EFFECTIVE_STS, M1.EFFECTIVE_DATE
+            FROM
+                MA4086 M, MA4040 M1
+            WHERE
+                M.PROMOTION_CD = #{promotionCd,jdbcType=VARCHAR}
+            AND M.PROMOTION_CD = M1.PROMOTION_CD
+        ) T
+        LEFT JOIN (
+            SELECT
+                ARTICLE_ID, ARTICLE_NAME, EFFECTIVE_START_DATE, EFFECTIVE_END_DATE
+            FROM
+                MA1100
+        ) T1
+        ON T.ARTICLE_ID = T1.ARTICLE_ID AND T.EFFECTIVE_DATE BETWEEN T1.EFFECTIVE_START_DATE AND T1.EFFECTIVE_END_DATE
+        LEFT JOIN (
+            SELECT dep_cd, dep_name FROM MA0070
+        ) T2
+        ON T.dep_cd = T2.dep_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, pma_name FROM MA0080
+        ) T3
+        ON T.dep_cd = T3.dep_cd AND T.pma_cd = T3.pma_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, category_cd, category_name FROM MA0090
+        ) T4
+        ON T.dep_cd = T4.dep_cd AND T.pma_cd = T4.pma_cd AND T.category_cd = T4.category_cd
+        LEFT JOIN (
+            SELECT dep_cd, pma_cd, category_cd, sub_category_cd, sub_category_name FROM MA0100
+        ) T5
+        ON T.dep_cd = T5.dep_cd AND T.pma_cd = T5.pma_cd AND T.category_cd = T5.category_cd AND T.sub_category_cd = T5.sub_category_cd
+		LEFT JOIN (
+		    SELECT BRAND_CD, BRAND_NAME FROM MA0230
+		) T6
+		ON T.BRAND_CD = T6.BRAND_CD
+  		ORDER BY T.DISPLAY_SEQ
+    </select>
+
+    <select id="selectMa4090" parameterType="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO" resultMap="ReMa4090">
+        SELECT
+            row_number() OVER () as SERIAL,
+            T.*, T1.STRUCTURE_NAME, T2.MA_NAME
+        FROM (
+            SELECT
+                PROMOTION_CD, MA_CD, STORE_TYPE_CD, DISPLAY_SEQ
+            FROM
+                MA4090
+            WHERE
+                PROMOTION_CD = #{promotionCd,jdbcType=VARCHAR}
+            ORDER BY DISPLAY_SEQ
+        ) T
+        LEFT JOIN (
+            SELECT STRUCTURE_CD, STRUCTURE_NAME
+            FROM MA0020
+            WHERE STRUCTURE_LEVEL = '2'
+        ) T1
+        ON T.STORE_TYPE_CD = T1.STRUCTURE_CD
+        LEFT JOIN (
+            SELECT MA_CD, MA_NAME FROM MA0200
+        ) T2
+        ON T.MA_CD = T2.MA_CD
+    </select>
+
+    <select id="selectMa4100" parameterType="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO" resultMap="ReMa4100">
+        SELECT
+            row_number() OVER () as SERIAL,
+            T.*,
+            T1.STORE_NAME,
+            T2.STRUCTURE_NAME AS CITY_NAME,
+            T3.STRUCTURE_NAME AS DISTRICT_NAME
+        FROM (
+            SELECT
+                M.PROMOTION_CD, M.STORE_CD, M.EXCEPT_TYPE, M.DISPLAY_SEQ,
+                M.EFFECTIVE_STS, M1.EFFECTIVE_DATE
+            FROM
+                MA4100 M, MA4040 M1
+            WHERE
+                M.PROMOTION_CD = #{promotionCd,jdbcType=VARCHAR}
+            AND M.PROMOTION_CD = M1.PROMOTION_CD
+        ) T
+        LEFT JOIN (
+            SELECT
+                STORE_CD, STORE_NAME, EFFECTIVE_START_DATE, EFFECTIVE_END_DATE,
+                ZO_CD, DO_CD
+            FROM MA1000
+        ) T1
+        ON T.STORE_CD = T1.STORE_CD AND T.EFFECTIVE_DATE BETWEEN T1.EFFECTIVE_START_DATE AND T1.EFFECTIVE_END_DATE
+        LEFT JOIN (
+            SELECT STRUCTURE_CD, STRUCTURE_NAME
+            FROM MA0020
+            WHERE STRUCTURE_LEVEL = '2'
+        ) T2
+        ON T1.ZO_CD = T2.STRUCTURE_CD
+        LEFT JOIN (
+            SELECT STRUCTURE_CD, STRUCTURE_NAME, ADMIN_STRUCTURE_CD
+            FROM MA0020
+            WHERE STRUCTURE_LEVEL = '3'
+        ) T3
+        ON T1.DO_CD = T3.STRUCTURE_CD AND T1.ZO_CD = T3.ADMIN_STRUCTURE_CD
+        ORDER BY T.DISPLAY_SEQ
+    </select>
+
+</mapper>

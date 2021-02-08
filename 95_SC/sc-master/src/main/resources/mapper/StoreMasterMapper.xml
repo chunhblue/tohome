@@ -1,0 +1,663 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.StoreMasterMapper">
+    <resultMap id="BaseResultMap" type="cn.com.bbut.iy.itemmaster.dto.store.StoreInfoDTO">
+        <result column="STORE_CD" jdbcType="VARCHAR" property="storeCd" />
+        <result column="EFFECTIVE_START_DATE" jdbcType="VARCHAR" property="effectiveStartDate" />
+        <result column="EFFECTIVE_END_DATE" jdbcType="VARCHAR" property="effectiveEndDate" />
+        <result column="STORE_NAME" jdbcType="VARCHAR" property="storeName" />
+        <result column="STORE_NAME_SHORT" jdbcType="VARCHAR" property="storeNameShort" />
+        <result column="CORP_CD" jdbcType="VARCHAR" property="corpCd" />
+        <result column="ZO_CD" jdbcType="VARCHAR" property="zoCd" />
+        <result column="DO_CD" jdbcType="VARCHAR" property="doCd" />
+        <result column="OFC" jdbcType="VARCHAR" property="ofc" />
+        <result column="OM" jdbcType="VARCHAR" property="om" />
+        <result column="oc" jdbcType="VARCHAR" property="oc" />
+        <result column="SM" jdbcType="VARCHAR" property="sm" />
+        <result column="MA_CD" jdbcType="VARCHAR" property="maCd" />
+        <result column="STRUCTURE_CD" jdbcType="VARCHAR" property="structureCd" />
+        <result column="STORE_TYPE_CD" jdbcType="VARCHAR" property="storeTypeCd" />
+        <result column="OPEN_DATE" jdbcType="VARCHAR" property="openDate" />
+        <result column="CLOSE_DATE" jdbcType="VARCHAR" property="closeDate" />
+        <result column="RENOVATION_START_DATE" jdbcType="VARCHAR" property="renovationStartDate" />
+        <result column="RENOVATION_END_DATE" jdbcType="VARCHAR" property="renovationEndDate" />
+        <result column="ORIGINAL_OPEN_DATE" jdbcType="VARCHAR" property="originalOpenDate" />
+        <result column="OLD_STORE_CD" jdbcType="VARCHAR" property="oldStoreCd" />
+        <result column="STORE_OWNER_NAME" jdbcType="VARCHAR" property="storeOwnerName" />
+        <result column="DISTRICT_CD" jdbcType="VARCHAR" property="districtCd" />
+        <result column="DISTRICT_NAME" jdbcType="VARCHAR" property="districtName" />
+        <result column="STORE_ADDRESS_1" jdbcType="VARCHAR" property="storeAddress1" />
+        <result column="STORE_ADDRESS_2" jdbcType="VARCHAR" property="storeAddress2" />
+        <result column="STORE_ZIP_CD" jdbcType="VARCHAR" property="storeZipCd" />
+        <result column="STORE_PHONE_NO" jdbcType="VARCHAR" property="storePhoneNo" />
+        <result column="STORE_FAX_NO" jdbcType="VARCHAR" property="storeFaxNo" />
+        <result column="STORE_PHONE_NO2" jdbcType="VARCHAR" property="storePhoneNo2" />
+        <result column="STORE_FAX_NO2" jdbcType="VARCHAR" property="storeFaxNo2" />
+        <result column="LICENSE_TYPE" jdbcType="VARCHAR" property="licenseType" />
+        <result column="STORE_SCOPE" jdbcType="VARCHAR" property="storeScope" />
+        <result column="SELLING_FLOOR_SPACE" jdbcType="DECIMAL"	property="sellingFloorSpace" />
+        <result column="BACKROOM_AREA" jdbcType="DECIMAL" property="backroomArea" />
+        <result column="SITTING_AREA" jdbcType="DECIMAL" property="sittingArea" />
+        <result column="NUM_OF_POS" jdbcType="DECIMAL" property="numOfPos" />
+        <result column="NUM_OF_SCALE" jdbcType="DECIMAL" property="numOfScale" />
+        <result column="NUM_OF_LABEL" jdbcType="DECIMAL" property="numOfLabel" />
+        <result column="BIZ_HOURS_FROM" jdbcType="VARCHAR" property="bizHoursFrom" />
+        <result column="BIZ_HOURS_TO" jdbcType="VARCHAR" property="bizHoursTo" />
+        <result column="SHELVES_TYPE" jdbcType="VARCHAR" property="shelvesType" />
+        <!-- 手动增加 -->
+        <result column="SYSTEM_START_DATE" jdbcType="VARCHAR" property="systemStartDate" />
+        <result column="SYSTEM_END_DATE" jdbcType="VARCHAR" property="systemEndDate" />
+        <result column="TEST_ORDER_START_DATE" jdbcType="VARCHAR" property="testOrderStartDate" />
+        <result column="TEST_ORDER_END_DATE" jdbcType="VARCHAR" property="testOrderEndDate" />
+        <result column="ORDER_START_DATE" jdbcType="VARCHAR" property="orderStartDate" />
+        <result column="ORDER_END_DATE" jdbcType="VARCHAR" property="orderEndDate" />
+        <result column="SALE_START_DATE" jdbcType="VARCHAR" property="saleStartDate" />
+        <result column="SALE_END_DATE" jdbcType="VARCHAR" property="saleEndDate" />
+        <result column="SP_DB_SERVER" jdbcType="VARCHAR" property="spDbServer" />
+        <result column="STORE_EMAIL" jdbcType="VARCHAR" property="storeEmail" />
+        <result column="STORE_MANAGER_EMAIL" jdbcType="VARCHAR" property="storeManagerEmail" />
+        <!-- 手动增加 -->
+        <result column="ISMAX" jdbcType="VARCHAR" property="isMax" />
+
+        <!-- add by zhangtao start 20140306 为了取得行政区域全称 -->
+        <result column="CITY_NAME" jdbcType="VARCHAR" property="cityName"/>
+        <result column="PROVINCE_NAME" jdbcType="VARCHAR" property="provinceName"/>
+        <!-- add by zhangtao end -->
+
+        <!-- add by ZhongYH start 20190507  获取流程名称 -->
+        <result column="C_REVIEWNAME" property="reviewName"/>
+        <result column="REVIEW_STATUS" property="operationStatus"/>
+        <result column="N_REVIEWID" property="processSelection"/>
+        <result column="CREATE_USER_ID" jdbcType="VARCHAR" property="createUserId" />
+        <!-- add by ZhongYH end -->
+
+        <result column="UPLOAD_FILE_PATH" property="uploadFilePath" jdbcType="VARCHAR"/>
+        <result column="UPLOAD_FILE_NAME" property="uploadFileName" jdbcType="VARCHAR"/>
+
+        <!-- add by ty 20191223 start -->
+        <result column="store_type" property="storeType" jdbcType="VARCHAR"/>
+        <result column="total_leased_area" jdbcType="DECIMAL" property="totalLeasedArea" />
+        <result column="trading_area" jdbcType="DECIMAL" property="tradingArea" />
+        <result column="total_storage_area" jdbcType="DECIMAL" property="totalStorageArea" />
+        <result column="seat_area" jdbcType="DECIMAL" property="seatArea" />
+        <result column="out_seat_area" jdbcType="VARCHAR" property="outSeatArea" />
+        <result column="unused_levels" jdbcType="DECIMAL" property="unusedLevels" />
+        <result column="chiller_doors" jdbcType="DECIMAL" property="chillerDoors" />
+        <result column="racks_one" jdbcType="DECIMAL" property="racksOne" />
+        <result column="racks_two" jdbcType="DECIMAL" property="racksTwo" />
+        <result column="qty_open_case" jdbcType="DECIMAL" property="qtyOpenCase" />
+        <result column="len_open_case" jdbcType="DECIMAL" property="lenOpenCase" />
+        <result column="len_check_counter" jdbcType="DECIMAL" property="lenCheckCounter" />
+        <!-- add by ty end -->
+        <result column="province" jdbcType="VARCHAR" property="province" />
+        <result column="district" jdbcType="VARCHAR" property="district" />
+        <result column="ward" jdbcType="VARCHAR" property="ward" />
+        <result column="store_size_group" jdbcType="VARCHAR" property="storeSizeGroup" />
+        <result column="store_frontage_length" jdbcType="DECIMAL" property="storeFrontageLength" />
+        <!-- add by lch 20200806 start -->
+        <result column="store_group_cd" jdbcType="VARCHAR" property="storeGroupCd" />
+        <result column="store_group_name" jdbcType="VARCHAR" property="storeGroupName" />
+        <result column="store_type_name" jdbcType="VARCHAR" property="storeTypeName" />
+        <!-- add by lch 20200806 end -->
+        <result column="ai_ref_store" jdbcType="VARCHAR" property="referenceStoreCd" />
+        <result column="store_name_en" jdbcType="VARCHAR" property="storeNameEn" />
+
+        <result column="seating_area" jdbcType="DECIMAL" property="seatingArea" />
+        <result column="storage_area" jdbcType="DECIMAL" property="storageArea" />
+        <result column="total_store_area" jdbcType="DECIMAL" property="totalStoreArea" />
+
+        <result column="store_area" jdbcType="DECIMAL" property="storeArea" />
+        <result column="sharing_area" jdbcType="DECIMAL" property="sharingArea" />
+        <result column="sub_lease_area" jdbcType="DECIMAL" property="subLeaseArea" />
+        <result column="idle_area" jdbcType="DECIMAL" property="idleArea" />
+
+        <result column="lease_start_date" jdbcType="VARCHAR" property="leaseStartDate" />
+        <result column="lease_end_date" jdbcType="VARCHAR" property="leaseEndDate" />
+        <result column="name_of_landlord" jdbcType="VARCHAR" property="nameOfLandlord" />
+        <result column="landlord_address" jdbcType="VARCHAR" property="landlordAddress" />
+        <result column="phone_number_1" jdbcType="VARCHAR" property="phoneNumber1" />
+        <result column="phone_number_2" jdbcType="VARCHAR" property="phoneNumber2" />
+        <result column="property_email" jdbcType="VARCHAR" property="propertyEmail" />
+        <result column="rent" jdbcType="VARCHAR" property="rent" />
+        <result column="deposit_amount" jdbcType="VARCHAR" property="depositAmount" />
+        <result column="comments" jdbcType="VARCHAR" property="comments" />
+        <result column="attention" jdbcType="VARCHAR" property="attention" />
+    </resultMap>
+
+    <select id="selectListByCondition" resultType="cn.com.bbut.iy.itemmaster.dto.store.StoreGridDTO">
+        SELECT
+        T.store_cd, T.store_name, C.corp_name, C.corp_person_name, T.effective_start_date, n_reviewid,
+        T.review_status, T.create_user_id, Z.structure_name as zo_name, D.structure_name as do_name,
+        U.c_operatorname as user_name, M.ma_name, S.store_type_name,S1.store_group_name, Q.code_name as qtype_code_name,
+        T.zo_cd , T.effective_end_date , ST.code_name as store_type,
+        T.open_date,T.close_date,SSG.code_name as storeSizeGroupName,T.attribute_select_name as currentLocation
+        FROM
+        ( SELECT
+        MA.store_scope, MA.license_type, MA.zo_cd, do_cd, MA.store_type_cd, MA.store_group_cd,
+        MA.ofc, corp_cd, MA.effective_start_date,
+        MA.n_reviewid, MA.review_status, MA.create_user_id, MA.ma_cd, MA.store_cd, MA.store_name, MA.effective_end_date,
+        MA.store_type, Ma.open_date,MA.close_date,Ma.store_size_group,c.attribute_select_name
+        FROM
+        MA1000 MA
+        LEFT JOIN
+        (select
+        b.store_cd,b.effective_start_date,c.attribute_select_name
+        from
+        ma1020 b,ma0050 c
+        where
+        c.additional_attribute_cd = b.additional_attribute_cd
+        and c.attribute_select_cd = b.attribute_select_cd and c.attribute_type = '00') c
+        on MA.store_cd = c.store_cd and MA.effective_start_date = c.effective_start_date
+        <where>
+            and MA.REVIEW_STATUS = 10
+            /*业务日期内生效*/
+            and #{businessDate,jdbcType=VARCHAR} BETWEEN MA.effective_start_date AND MA.effective_end_date
+            <if test="storeCd !=null and storeCd!='' ">
+                and MA.store_cd like CONCAT('%',#{storeCd,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="storeName !=null and storeName!='' ">
+                and MA.store_name like CONCAT('%',#{storeName,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="corpCd !=null and corpCd !=''">
+                and MA.CORP_CD = #{corpCd,jdbcType=VARCHAR}
+            </if>
+            <if test="zoCd !=null and zoCd !=''">
+                and MA.ZO_CD = #{zoCd,jdbcType=VARCHAR}
+            </if>
+            <if test="doCd !=null and doCd !='' ">
+                and MA.DO_CD = #{doCd,jdbcType=VARCHAR}
+            </if>
+            <if test="ofc !=null and ofc !='' ">
+                and MA.OFC = #{ofc,jdbcType=VARCHAR}
+            </if>
+            <if test="maCd !=null and maCd !='' ">
+                and MA.MA_CD = #{maCd,jdbcType=VARCHAR}
+            </if>
+            <if test="storeTypeCd !=null and storeTypeCd !=''">
+                and MA.STORE_TYPE_CD = #{storeTypeCd,jdbcType=VARCHAR}
+            </if>
+            <if test="storeGroupCd !=null and storeGroupCd !=''">
+                and MA.STORE_GROUP_CD = #{storeGroupCd,jdbcType=VARCHAR}
+            </if>
+            <if test="licenseType !=null and licenseType !=''">
+                and MA.LICENSE_TYPE = #{licenseType,jdbcType=VARCHAR}
+            </if>
+            <if test="storeScope !=null and storeScope !=''">
+                and MA.STORE_SCOPE = #{storeScope,jdbcType=VARCHAR}
+            </if>
+            <if test="province !=null and province !=''">
+                and MA.PROVINCE = #{province,jdbcType=VARCHAR}
+            </if>
+            <if test="district !=null and district !=''">
+                and MA.DISTRICT = #{district,jdbcType=VARCHAR}
+            </if>
+            <if test="ward !=null and ward !=''">
+                and MA.WARD = #{ward,jdbcType=VARCHAR}
+            </if>
+            <if test="storeType !=null and storeType !=''">
+                and MA.store_type = #{storeType,jdbcType=VARCHAR}
+            </if>
+            and MA.store_cd IN
+            <foreach item="store" index="index" collection="stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+        </where>
+        ) T
+        <if test="currentLocation != null and currentLocation != ''">
+            join
+            (
+            SELECT DISTINCT STORE_CD, EFFECTIVE_START_DATE FROM MA1020
+            WHERE ADDITIONAL_ATTRIBURE_VALUE = 0
+            AND ADDITIONAL_ATTRIBUTE_CD = '00'
+            AND ATTRIBUTE_SELECT_CD = #{currentLocation,jdbcType=VARCHAR}
+            )MA1
+            ON T.STORE_CD = MA1.STORE_CD
+            AND T.EFFECTIVE_START_DATE = MA1.EFFECTIVE_START_DATE
+        </if>
+        <if test="surroundings != null and surroundings != ''">
+            join
+            (
+            SELECT DISTINCT STORE_CD, EFFECTIVE_START_DATE FROM MA1020
+            WHERE ADDITIONAL_ATTRIBURE_VALUE = 1
+            AND ADDITIONAL_ATTRIBUTE_CD = '00'
+            AND ATTRIBUTE_SELECT_CD = #{surroundings,jdbcType=VARCHAR}
+            )MA2
+            ON T.STORE_CD = MA2.STORE_CD
+            AND T.EFFECTIVE_START_DATE = MA2.EFFECTIVE_START_DATE
+        </if>
+        left join
+        (select STRUCTURE_NAME,STRUCTURE_CD from MA0020 where STRUCTURE_LEVEL='1' and ADMIN_STRUCTURE_CD='000001') Z
+        on T.ZO_CD = Z.STRUCTURE_CD
+
+        left join
+        (select STRUCTURE_NAME,STRUCTURE_CD,ADMIN_STRUCTURE_CD from MA0020 where STRUCTURE_LEVEL='2'
+        ) D
+        on T.DO_CD = D.STRUCTURE_CD  and T.ZO_CD=D.ADMIN_STRUCTURE_CD
+
+        left join
+        (select MA_CD,MA_NAME from MA0200 where EFFECTIVE_STS='10') M
+        on T.MA_CD= M.MA_CD
+
+        left join
+        (select CODE_VALUE,CODE_NAME from CM9010 where EFFECTIVE_STS='10' and CODE_TYPE='00140') Q
+        on T.LICENSE_TYPE=Q.CODE_VALUE
+
+        left join
+        (select CODE_VALUE,CODE_NAME from CM9010 where EFFECTIVE_STS='10' and CODE_TYPE='00475') SSG
+        on T.store_size_group=SSG.CODE_VALUE
+
+        left join
+        (select CODE_VALUE,CODE_NAME from CM9010 where EFFECTIVE_STS='10' and CODE_TYPE='00500') ST
+        on T.STORE_TYPE=ST.CODE_VALUE
+
+        left join
+        (select STORE_TYPE_CD,STORE_TYPE_NAME from MA0030 where EFFECTIVE_STS='10' ) S
+        on T.STORE_TYPE_CD =S.STORE_TYPE_CD
+
+        left join
+        (select STORE_GROUP_CD,STORE_GROUP_NAME from MA0035 where EFFECTIVE_STS='10' ) S1
+        on T.STORE_GROUP_CD =S1.STORE_GROUP_CD
+
+        left join
+        (SELECT distinct c_operatorcode, c_operatorname FROM t_operator) U
+        on T.OFC= U.c_operatorcode
+
+        left join
+        (select CORP_CD,CORP_PERSON_NAME,CORP_NAME from MA0010 where EFFECTIVE_STS='10') C
+        on T.CORP_CD= C.CORP_CD
+        ORDER BY T.STORE_CD
+        <if test="flg and limitStart >= 0">
+            limit ${limitEnd} offset ${limitStart}
+        </if>
+    </select>
+
+    <select id="selectCountByCondition" resultType="long">
+        SELECT
+        COUNT (*)
+        FROM
+        ( SELECT
+        MA.store_scope, MA.license_type, MA.zo_cd, do_cd, MA.store_type_cd, MA.ofc, corp_cd, MA.effective_start_date,
+        MA.n_reviewid, MA.review_status, MA.create_user_id, MA.ma_cd, MA.store_cd, MA.store_name, MA.effective_end_date,
+        MA.store_type, Ma.open_date,MA.close_date,Ma.store_size_group,c.attribute_select_name
+        FROM
+        MA1000 MA
+        LEFT JOIN
+        (select
+        b.store_cd,b.effective_start_date,c.attribute_select_name
+        from
+        ma1020 b,ma0050 c
+        where
+        c.additional_attribute_cd = b.additional_attribute_cd
+        and c.attribute_select_cd = b.attribute_select_cd and c.attribute_type = '00') c
+        on MA.store_cd = c.store_cd and MA.effective_start_date = c.effective_start_date
+        <where>
+            and MA.REVIEW_STATUS = 10
+            /*业务日期内生效*/
+            and #{businessDate,jdbcType=VARCHAR} BETWEEN MA.effective_start_date AND MA.effective_end_date
+            <if test="storeCd !=null and storeCd!='' ">
+                and MA.STORE_CD like CONCAT('%',#{storeCd,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="corpCd !=null and corpCd !=''">
+                and MA.CORP_CD = #{corpCd,jdbcType=VARCHAR}
+            </if>
+            <if test="zoCd !=null and zoCd !=''">
+                and MA.ZO_CD = #{zoCd,jdbcType=VARCHAR}
+            </if>
+            <if test="doCd !=null and doCd !='' ">
+                and MA.DO_CD = #{doCd,jdbcType=VARCHAR}
+            </if>
+            <if test="ofc !=null and ofc !='' ">
+                and MA.OFC = #{ofc,jdbcType=VARCHAR}
+            </if>
+            <if test="maCd !=null and maCd !='' ">
+                and MA.MA_CD = #{maCd,jdbcType=VARCHAR}
+            </if>
+            <if test="storeTypeCd !=null and storeTypeCd !=''">
+                and MA.STORE_TYPE_CD = #{storeTypeCd,jdbcType=VARCHAR}
+            </if>
+            <if test="storeGroupCd !=null and storeGroupCd !=''">
+                and MA.STORE_GROUP_CD = #{storeGroupCd,jdbcType=VARCHAR}
+            </if>
+            <if test="licenseType !=null and licenseType !=''">
+                and MA.LICENSE_TYPE = #{licenseType,jdbcType=VARCHAR}
+            </if>
+            <if test="storeScope !=null and storeScope !=''">
+                and MA.STORE_SCOPE = #{storeScope,jdbcType=VARCHAR}
+            </if>
+            <if test="province !=null and province !=''">
+                and MA.PROVINCE = #{province,jdbcType=VARCHAR}
+            </if>
+            <if test="district !=null and district !=''">
+                and MA.DISTRICT = #{district,jdbcType=VARCHAR}
+            </if>
+            <if test="ward !=null and ward !=''">
+                and MA.WARD = #{ward,jdbcType=VARCHAR}
+            </if>
+            <if test="storeType !=null and storeType !=''">
+                and MA.store_type = #{storeType,jdbcType=VARCHAR}
+            </if>
+            and MA.store_cd IN
+            <foreach item="store" index="index" collection="stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+        </where>
+        ) T
+        <if test="currentLocation != null and currentLocation != ''">
+            join
+            (
+            SELECT DISTINCT STORE_CD, EFFECTIVE_START_DATE FROM MA1020
+            WHERE ADDITIONAL_ATTRIBURE_VALUE = 0
+            AND ADDITIONAL_ATTRIBUTE_CD = '00'
+            AND ATTRIBUTE_SELECT_CD = #{currentLocation,jdbcType=VARCHAR}
+            )MA1
+            ON T.STORE_CD = MA1.STORE_CD
+            AND T.EFFECTIVE_START_DATE = MA1.EFFECTIVE_START_DATE
+        </if>
+        <if test="surroundings != null and surroundings != ''">
+            join
+            (
+            SELECT DISTINCT STORE_CD, EFFECTIVE_START_DATE FROM MA1020
+            WHERE ADDITIONAL_ATTRIBURE_VALUE = 1
+            AND ADDITIONAL_ATTRIBUTE_CD = '00'
+            AND ATTRIBUTE_SELECT_CD = #{surroundings,jdbcType=VARCHAR}
+            )MA2
+            ON T.STORE_CD = MA2.STORE_CD
+            AND T.EFFECTIVE_START_DATE = MA2.EFFECTIVE_START_DATE
+        </if>
+    </select>
+    <select id="getStoreInfo" resultMap="BaseResultMap">
+        SELECT DISTINCT
+        T.STORE_CD,
+        T.EFFECTIVE_START_DATE,
+        T.EFFECTIVE_END_DATE,
+        T.STORE_NAME,
+        T.STORE_NAME_SHORT,
+--         T.CORP_CD,
+        (select CORP_NAME from MA0010 where EFFECTIVE_STS='10' and T.CORP_CD= CORP_CD limit 1) CORP_CD,
+--         T.ZO_CD,
+        (select STRUCTURE_NAME from MA0020 where T.ZO_CD = STRUCTURE_CD limit 1) ZO_CD,
+--         T.DO_CD,
+        (select STRUCTURE_NAME from MA0020 where T.DO_CD = STRUCTURE_CD limit 1) DO_CD,
+--         T.OFC,
+        (SELECT distinct c_operatorname FROM t_operator where T.OFC= c_operatorcode limit 1) OFC,
+--         T.OM,
+        (SELECT distinct c_operatorname FROM t_operator where T.OM= c_operatorcode limit 1) OM,
+        T.SM,
+--         (SELECT distinct c_operatorname FROM t_operator where T.SM= c_operatorcode limit 1) SM,
+--         T.MA_CD,
+        (select MA_NAME from MA0200 where EFFECTIVE_STS='10' and T.MA_CD= MA_CD limit 1) MA_CD,
+        T.STRUCTURE_CD,
+--         T.STORE_TYPE_CD,
+        (select STORE_TYPE_NAME from MA0030 where EFFECTIVE_STS='10' and T.STORE_TYPE_CD =trim(STORE_TYPE_CD) limit 1) STORE_TYPE_CD,
+        T.OPEN_DATE,
+        T.CLOSE_DATE,
+        T.RENOVATION_START_DATE,
+        T.RENOVATION_END_DATE,
+        T.ORIGINAL_OPEN_DATE,
+        T.OLD_STORE_CD,
+        T.STORE_OWNER_NAME,
+        T.DISTRICT_CD,
+        T2.DISTRICT_NAME,
+        T.STORE_ADDRESS_1,
+        T.STORE_ADDRESS_2,
+        T.STORE_ZIP_CD,
+        T.STORE_PHONE_NO,
+        T.STORE_FAX_NO,
+        T.STORE_PHONE_NO2,
+        T.STORE_FAX_NO2,
+--         T.LICENSE_TYPE,
+        (select CODE_NAME from CM9010 where EFFECTIVE_STS='10' and CODE_TYPE='00140' and T.LICENSE_TYPE=CODE_VALUE) LICENSE_TYPE,
+        T.STORE_SCOPE,
+        T.SELLING_FLOOR_SPACE,
+        T.BACKROOM_AREA,
+        T.SITTING_AREA,
+        T.NUM_OF_POS,
+        T.NUM_OF_SCALE,
+        T.NUM_OF_LABEL,
+        T.BIZ_HOURS_FROM,
+        T.BIZ_HOURS_TO,
+        T.SHELVES_TYPE,
+        T.CREATE_USER_ID,
+        T.CREATE_YMD,
+        T.CREATE_HMS,
+        T.UPDATE_USER_ID,
+        T.UPDATE_YMD,
+        T.UPDATE_HMS,
+        T.UPDATE_SCREEN_ID,
+        T.UPDATE_IP_ADDRESS,
+        SYSTEM_START_DATE,
+        SYSTEM_END_DATE,
+        TEST_ORDER_START_DATE,
+        TEST_ORDER_END_DATE,
+        ORDER_START_DATE,
+        ORDER_END_DATE,
+        SALE_START_DATE,
+        SALE_END_DATE,
+        SP_DB_SERVER,
+        T.N_REVIEWID,
+        T.REVIEW_STATUS,
+        T.STORE_EMAIL,
+        T.STORE_MANAGER_EMAIL,
+        T.UPLOAD_FILE_PATH,
+        T.UPLOAD_FILE_NAME,
+--         T.STORE_TYPE,
+        (select store_group_name from ma0035 where STORE_GROUP_CD=T.store_group_cd limit 1) store_group_name,
+        T.total_leased_area,
+        T.trading_area,
+        T.total_storage_area,
+        T.seat_area,
+        T.out_seat_area,
+        (select CODE_NAME from CM9010 where EFFECTIVE_STS='10' and CODE_TYPE='00085' and T.STORE_TYPE=CODE_VALUE limit 1) STORE_TYPE,
+        T.unused_levels,
+        T.chiller_doors,
+        T.racks_one,
+        T.racks_two,
+        T.qty_open_case,
+        T.len_open_case,
+        T.len_check_counter,
+--         T.province,
+        (SELECT address_name FROM ma0025 where T.province= address_cd and address_level = '0' limit 1) province,
+--         T.district,
+        (SELECT address_name FROM ma0025 where T.district= address_cd and address_level = '1' limit 1) district,
+--         T.ward,
+        (SELECT address_name FROM ma0025 where T.ward= address_cd and address_level = '2' limit 1) ward,
+--         T.store_size_group,
+        (select CODE_NAME from CM9010 where EFFECTIVE_STS='10' and CODE_TYPE='00475' and T.store_size_group=CODE_VALUE limit 1) store_size_group,
+        T.store_frontage_length,
+--         T.oc
+        (SELECT distinct c_operatorname FROM t_operator where T.oc= c_operatorcode limit 1) oc,
+		T.ai_ref_store,
+		T.store_name_en,
+		T.seating_area,
+		T.storage_area,
+		T.total_store_area,
+		T.store_area,
+		T.sharing_area,
+		T.sub_lease_area,
+		T.idle_area,
+		T.lease_start_date,
+		T.lease_end_date,
+		T.name_of_landlord,
+		T.landlord_address,
+		T.phone_number_1,
+		T.phone_number_2,
+		T.property_email,
+		T.rent,
+		T.deposit_amount,
+		T.comments,
+		T.attention
+        FROM
+        MA1000 T
+        LEFT JOIN MA1010 T1
+        ON T.STORE_CD = T1.STORE_CD
+        LEFT JOIN (
+        SELECT T3.DISTRICT_CD,
+        T1.DISTRICT_NAME || ' ' || T2.DISTRICT_NAME || ' ' ||
+        T3.DISTRICT_NAME AS DISTRICT_NAME
+        FROM (SELECT T.DISTRICT_CD, T.ADMIN_DISTRICT_CD, T.DISTRICT_NAME
+        FROM MA0210 T
+        WHERE T.DISTRICT_LEVEL = '3') T3,
+        (SELECT T.DISTRICT_CD, T.ADMIN_DISTRICT_CD, T.DISTRICT_NAME
+        FROM MA0210 T
+        WHERE T.DISTRICT_LEVEL = '2') T2,
+        (SELECT T.DISTRICT_CD, T.ADMIN_DISTRICT_CD, T.DISTRICT_NAME
+        FROM MA0210 T
+        WHERE T.DISTRICT_LEVEL = '1') T1
+        WHERE T3.ADMIN_DISTRICT_CD = T2.DISTRICT_CD
+        AND T2.ADMIN_DISTRICT_CD = T1.DISTRICT_CD
+        ) T2
+        ON T.DISTRICT_CD = T2.DISTRICT_CD
+
+        WHERE
+        T.STORE_CD = #{storeCd,jdbcType=VARCHAR}
+        AND T.EFFECTIVE_START_DATE  = #{effectiveStartDate,jdbcType=VARCHAR}
+        limit 1
+    </select>
+
+    <select id="getLicenseInfo" resultType="cn.com.bbut.iy.itemmaster.entity.MA1040">
+        select
+        license_cd,
+        (select CODE_NAME from CM9010 where EFFECTIVE_STS='10' and CODE_TYPE='00422' and ma1040.pma_cd=CODE_VALUE) license_type,
+        store_cd, license_num,effective_start_date,
+        effective_end_date,store_effective_start_date,
+        store_effective_end_date,license_remark
+        from ma1040
+        <where>
+            <if test="storeCd != null and storeCd !=''">
+                and store_cd = #{storeCd,jdbcType=VARCHAR}
+            </if>
+            <if test="effectiveStartDate != null and effectiveStartDate !=''">
+                and STORE_EFFECTIVE_START_DATE = #{effectiveStartDate,jdbcType=CHAR}
+            </if>
+        </where>
+    </select>
+    <select id="getAccountingInfo" resultType="cn.com.bbut.iy.itemmaster.dto.store.MA1050GridDTO">
+        select ma0400.accounting_item_cd,ma0400.accounting_item_name,
+        ma1050.store_cd,ma1050.account_cd,ma1050.account_cd,ma0500.account_name,
+        ma1050.effective_sts
+        from ma0400
+        left join ma1050 on ma0400.accounting_item_cd=ma1050.accounting_item_cd
+        left join ma0500 on ma0500.account_cd=ma1050.account_cd
+        <where>
+            ma0400.effective_sts = '10'
+            <if test="storeCd != null and storeCd !=''">
+                and ma1050.store_cd=#{storeCd,jdbcType=VARCHAR}
+            </if>
+            <if test="effectiveStartDate != null and effectiveStartDate !=''">
+                and ma1050.EFFECTIVE_START_DATE=#{effectiveStartDate,jdbcType=CHAR}
+            </if>
+        </where>
+    </select>
+    <select id="getCompetitorInfo" resultType="cn.com.bbut.iy.itemmaster.dto.store.MA1060GridDTO">
+        select
+        competitor_tab_cd,
+        store_cd,
+        ma1065.competitor_id,ma1400.competitor_name,
+        address,distance_ck,
+        (select CODE_NAME from CM9010 where EFFECTIVE_STS='10' and CODE_TYPE='00480' and ma1065.approx_open=CODE_VALUE) approx_open,
+        open_date,remarks,
+        effective_start_date,
+        effective_end_date
+        from ma1065 left join ma1400 on ma1065.competitor_id = ma1400.competitor_id
+        <where>
+            <if test="storeCd != null and storeCd !=''">
+                and ma1065.store_cd = #{storeCd,jdbcType=VARCHAR}
+            </if>
+            <if test="effectiveStartDate != null and effectiveStartDate !=''">
+                and ma1065.EFFECTIVE_START_DATE = #{effectiveStartDate,jdbcType=CHAR}
+            </if>
+        </where>
+    </select>
+
+    <select id="getMa0010" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT
+        CORP_CD AS k,
+        CORP_NAME AS v
+        FROM MA0010
+        where   EFFECTIVE_STS='10'
+        ORDER BY CORP_CD
+    </select>
+    <select id="getMa0200" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select MA_CD k,MA_NAME v
+         from MA0200
+            where EFFECTIVE_STS='10'
+        ORDER BY MA_CD
+    </select>
+    <select id="getMa0030" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select STORE_TYPE_CD k,STORE_TYPE_NAME v
+         from MA0030
+            where EFFECTIVE_STS='10'
+        <if test="v!=null and v!=''">
+            AND (
+            lower(STORE_TYPE_CD) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(STORE_TYPE_NAME) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ORDER BY STORE_TYPE_CD
+    </select>
+
+    <select id="getMa0035" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+    select STORE_GROUP_CD k,STORE_GROUP_NAME v
+    from MA0035
+    where EFFECTIVE_STS='10'
+    AND MA0035.STORE_TYPE_CD = #{storeTypeCd,jdbcType=VARCHAR}
+    <if test="v!=null and v!=''">
+        AND (
+        lower(STORE_GROUP_CD) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+        OR lower(STORE_GROUP_NAME) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+        )
+    </if>
+    ORDER BY STORE_GROUP_CD
+</select>
+
+    <select id="getClusterByStoreCd" resultMap="BaseResultMap">
+        select MA0030.STORE_TYPE_CD,MA0030.STORE_TYPE_NAME
+        from MA0030,MA1000
+        where MA0030.EFFECTIVE_STS='10'
+        AND MA1000.STORE_TYPE_CD = TRIM(MA0030.STORE_TYPE_CD)
+        AND MA1000.STORE_CD = #{storeCd,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getGroupByStoreCd" resultMap="BaseResultMap">
+        select MA0035.STORE_GROUP_CD,MA0035.STORE_GROUP_NAME
+        from MA0035,MA1000
+        where MA0035.EFFECTIVE_STS='10'
+        AND MA1000.STORE_GROUP_CD = TRIM(MA0035.STORE_GROUP_CD)
+        AND MA1000.STORE_CD = #{storeCd,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getMa0025" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select
+        address_cd k,address_name v
+        from
+        ma0025
+        <where>
+            <if test="level!=null and level!=''">
+                and address_level = #{level,jdbcType=VARCHAR}
+                <if test="adminAddressCd != null and adminAddressCd != ''">
+                    and admin_address_cd = #{adminAddressCd}
+                </if>
+            </if>
+            <if test="v!=null and v!=''">
+                AND (
+                lower(address_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                OR lower(address_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                )
+            </if>
+            and effective_sts = '10'
+        </where>
+        order by address_cd
+    </select>
+    <select id="getMa0050" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT attribute_select_cd k,attribute_select_name v
+        FROM ma0050
+        <where>
+            and effective_sts = '10'
+            <if test="attributeType!=null and attributeType!=''">
+              and  attribute_type = #{attributeType,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+</mapper>
