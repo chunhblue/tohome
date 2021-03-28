@@ -33,6 +33,9 @@
 		<result column="tax_rate" property="taxRate" jdbcType="DECIMAL" />
 		<result column="is_free_item" property="isFreeItem" jdbcType="CHAR"/>
 		<result column="is_free_item_t" property="isFreeItemText" jdbcType="CHAR"/>
+		<result column="hht_receive_qty" property="hhtReceiveQty" jdbcType="DECIMAL"/>
+		<result column="var_qty" property="varQty" jdbcType="DECIMAL"/>
+		<result column="delivery_qty" property="deliveryQty" jdbcType="DECIMAL"/>
 	</resultMap>
 
 	<select id="selectDetail" resultMap="ReOD0010TMap" parameterType="cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TParamDTO">
@@ -45,20 +48,30 @@
 			    OD0010_T.order_nocharge_qty, OD0010_T.order_price, OD0010_T.order_amt, OD0010_T.order_tax,
 				OD0010_T.order_amt_notax, OD0010_T.receive_price, OD0010_T.receive_total_qty,
 				OD0010_T.receive_total_amt,OD0010_T.receive_total_amt_notax, OD0010_T.receive_tax,
-				OD0010_T.receive_qty, OD0010_T.receive_nocharge_qty,
+				coalesce(OD0010_T.receive_qty,od0011.order_qty) receive_qty,
+				 OD0010_T.receive_nocharge_qty,
 				reason.code_value difference_reason,concat(reason.code_value,' ',reason.code_name) difference_reason_text,
                 COALESCE(OD0010_T.order_qty,0) + COALESCE(OD0010_T.order_nocharge_qty,0) AS order_total_qty,
-                OD0010.tax_rate,OD0010_T.is_free_item,OD0010_T.is_free_item as is_free_item_t
+                OD0010.tax_rate,OD0010_T.is_free_item,OD0010_T.is_free_item as is_free_item_t,
+                OD0020.hht_receive_qty,COALESCE(OD0010_T.receive_qty,0)-COALESCE(OD0020.hht_receive_qty,0) var_qty,
+                od0011.order_qty as delivery_qty
 			FROM OD0010_T left join (select DISTINCT code_value,code_name from CM9010
 				where code_type='00560'
 				AND effective_sts = '10') reason
 				on OD0010_T.different_reasons = reason.code_value
+				left join od0011
+			on OD0010_T.order_id = od0011.delivery_order_id
+			and od0010_t.article_id = od0011.article_id
+			and od0010_t.store_cd = od0011.store_cd
 				left join OD0010
 				on OD0010.store_cd = OD0010_T.store_cd
 				and OD0010.order_id = OD0010_T.order_id
 				and OD0010.article_id = OD0010_T.article_id
 				and od0010.is_free_item = od0010_t.is_free_item
-			WHERE receive_id = #{receiveId,jdbcType=VARCHAR}
+				left join OD0020 on OD0010.store_cd = OD0020.store_cd
+				and OD0010.order_id = OD0020.order_id
+				and OD0010.article_id = OD0020.article_id
+			WHERE od0010_t.receive_id = #{receiveId,jdbcType=VARCHAR}
 		) T
 		LEFT JOIN (
 			SELECT article_id, article_name FROM MA1100
@@ -153,7 +166,7 @@
 			SELECT
 				store_cd AS storeCd, receive_id AS orderId, serial_no AS serialNo, article_id AS articleId,
 				barcode, vendor_id AS vendorId, order_unit AS orderUnit, receive_price AS rrOrderPrice,
-				receive_qty AS rrOrderQty, order_amt AS rrOrderAmt, order_id,order_nocharge_qty,receive_nocharge_qty,
+				receive_qty AS rrOrderQty, receive_qty AS rrOrderQty1,order_amt AS rrOrderAmt, order_id,order_nocharge_qty,receive_nocharge_qty,
 				is_free_item,
 				is_free_item as is_free_item_text
 			FROM OD0010_T
@@ -161,9 +174,9 @@
 			AND store_cd = #{storeCd,jdbcType=VARCHAR}
 		) T
 		LEFT JOIN (
-			SELECT DISTINCT store_cd, order_id, article_id, order_price, order_qty, order_amt FROM OD0010
+			SELECT DISTINCT store_cd, order_id, article_id, order_price, order_qty, order_amt,is_free_item FROM OD0010
 		) T0
-		ON T.order_id = T0.order_id AND T.storeCd = T0.store_cd AND T.articleId = T0.article_id
+		ON T.order_id = T0.order_id AND T.storeCd = T0.store_cd AND T.articleId = T0.article_id and T.is_free_item = T0.is_free_item
 		LEFT JOIN (
 			SELECT article_id, article_name, article_name_en, spec FROM MA1100
 			WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
@@ -188,9 +201,9 @@
 			AND store_cd = #{storeCd,jdbcType=VARCHAR}
 		) T
 		LEFT JOIN (
-			SELECT DISTINCT store_cd, order_id, article_id, order_price, order_qty, order_amt FROM OD0010
+			SELECT DISTINCT store_cd, order_id, article_id, order_price, order_qty, order_amt ,is_free_item FROM OD0010
 		) T0
-		ON T.order_id = T0.order_id AND T.storeCd = T0.store_cd AND T.articleId = T0.article_id
+		ON T.order_id = T0.order_id AND T.storeCd = T0.store_cd AND T.articleId = T0.article_id and T.is_free_item = T0.is_free_item
 		LEFT JOIN (
 			SELECT article_id, article_name, article_name_en, spec FROM MA1100
 			WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date

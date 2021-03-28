@@ -24,6 +24,7 @@ define('informEdit', function () {
 		a_city = null,
 		a_district = null,
 		a_store = null,
+		num = 1,
 		common=null;
 	const KEY = 'NOTIFICATIONS_MANAGEMENT';
 	var m = {
@@ -86,12 +87,32 @@ define('informEdit', function () {
 		$("#cityRefresh").attr("disabled",true).css("pointer-events","none");
 		$("#districtRefresh").attr("disabled",true).css("pointer-events","none");
 		$("#storeRefresh").attr("disabled",true).css("pointer-events","none");
+		$("#cityRefresh").hide();
+		$("#cityRemove").hide();
+		$("#districtRefresh").hide();
+		$("#districtRemove").hide();
+		$("#storeRefresh").hide();
+		$("#storeRemove").hide();
 
 		// 输入框事件绑定
 		a_region = $("#a_region").myAutomatic({
 			url: systemPath + "/organizationalStructure/getStructureByLevel?level=0",
 			ePageSize: 10,
 			startCount: 0,
+			cleanInput:function(self){
+				$.myAutomatic.cleanSelectObj(a_city);
+				$.myAutomatic.cleanSelectObj(a_district);
+				$.myAutomatic.cleanSelectObj(a_store);
+				$("#a_city").attr("disabled", true);
+				$("#a_district").attr("disabled", true);
+				$("#a_store").attr("disabled", true);
+				$("#cityRefresh").hide();
+				$("#cityRemove").hide();
+				$("#districtRefresh").hide();
+				$("#districtRemove").hide();
+				$("#storeRefresh").hide();
+				$("#storeRemove").hide();
+			},
 			selectEleClick: function (thisObj) {
 				$.myAutomatic.cleanSelectObj(a_city);
 				$.myAutomatic.cleanSelectObj(a_district);
@@ -99,30 +120,42 @@ define('informEdit', function () {
 				$("#a_city").attr("disabled", true);
 				$("#a_district").attr("disabled", true);
 				$("#a_store").attr("disabled", true);
-				$("#cityRefresh").attr("disabled",true).css("pointer-events","none");
-				$("#districtRefresh").attr("disabled",true).css("pointer-events","none");
-				$("#storeRefresh").attr("disabled",true).css("pointer-events","none");
 				if (thisObj.attr("k") != null && thisObj.attr("k") != "" && thisObj.attr("k") != "999999") {
 					$("#a_city").attr("disabled", false);
 					$("#cityRefresh").attr("disabled",false).css("pointer-events","auto");
+					// 2021/02/23
+					$("div[name='resStoreRow']").each(function (i, ev) {
+						$("#storeFlgVal").val(num);
+						++num;
+					})
 				}
 				var rinput = thisObj.attr("k");
 				// 替换子级查询参数
 				var str = "&level=1&parentId=" + rinput;
 				$.myAutomatic.replaceParam(a_city, str);
+				$("#cityRefresh").show();
+				$("#cityRemove").show();
 			}
 		});
 		a_city = $("#a_city").myAutomatic({
 			url: systemPath + "/organizationalStructure/getStructureByLevel",
 			ePageSize: 10,
 			startCount: 0,
+			cleanInput:function(self){
+				$.myAutomatic.cleanSelectObj(a_district);
+				$.myAutomatic.cleanSelectObj(a_store);
+				$("#a_district").attr("disabled", true);
+				$("#a_store").attr("disabled", true);
+				$("#districtRefresh").hide();
+				$("#districtRemove").hide();
+				$("#storeRefresh").hide();
+				$("#storeRemove").hide();
+			},
 			selectEleClick: function (thisObj) {
 				$.myAutomatic.cleanSelectObj(a_district);
 				$.myAutomatic.cleanSelectObj(a_store);
 				$("#a_district").attr("disabled", true);
 				$("#a_store").attr("disabled", true);
-				$("#districtRefresh").attr("disabled",true).css("pointer-events","none");
-				$("#storeRefresh").attr("disabled",true).css("pointer-events","none");
 				if (thisObj.attr("k") != null && thisObj.attr("k") != "" && thisObj.attr("k") != "999999") {
 					$("#a_district").attr("disabled", false);
 					$("#districtRefresh").attr("disabled",false).css("pointer-events","auto");
@@ -131,16 +164,23 @@ define('informEdit', function () {
 				// 替换子级查询参数
 				var str = "&level=2&parentId=" + cinput;
 				$.myAutomatic.replaceParam(a_district, str);
+				$("#districtRefresh").show();
+				$("#districtRemove").show();
 			}
 		});
 		a_district = $("#a_district").myAutomatic({
 			url: systemPath + "/organizationalStructure/getStructureByLevel",
 			ePageSize: 10,
 			startCount: 0,
+			cleanInput:function(self){
+				$.myAutomatic.cleanSelectObj(a_store);
+				$("#a_store").attr("disabled", true);
+				$("#storeRefresh").hide();
+				$("#storeRemove").hide();
+			},
 			selectEleClick: function (thisObj) {
 				$.myAutomatic.cleanSelectObj(a_store);
 				$("#a_store").attr("disabled", true);
-				$("#storeRefresh").attr("disabled",true).css("pointer-events","none");
 				if (thisObj.attr("k") != null && thisObj.attr("k") != "" && thisObj.attr("k") != "999999") {
 					$("#a_store").attr("disabled", false);
 					$("#storeRefresh").attr("disabled",false).css("pointer-events","auto");
@@ -149,38 +189,14 @@ define('informEdit', function () {
 				// 替换子级查询参数
 				var str = "&level=3&parentId=" + dinput;
 				$.myAutomatic.replaceParam(a_store, str);
+				$("#storeRefresh").show();
+				$("#storeRemove").show();
 			}
 		});
 		a_store = $("#a_store").myAutomatic({
 			url: systemPath + "/organizationalStructure/getStructureByLevel",
 			ePageSize: 10,
 			startCount: 0,
-		});
-
-		// 选值栏位清空按钮事件绑定
-		$("#regionRemove").on("click", function (e) {
-			$.myAutomatic.cleanSelectObj(a_city);
-			$.myAutomatic.cleanSelectObj(a_district);
-			$.myAutomatic.cleanSelectObj(a_store);
-			$("#a_city").attr("disabled", true);
-			$("#a_district").attr("disabled", true);
-			$("#a_store").attr("disabled", true);
-			$("#cityRefresh").attr("disabled",true).css("pointer-events","none");
-			$("#districtRefresh").attr("disabled",true).css("pointer-events","none");
-			$("#storeRefresh").attr("disabled",true).css("pointer-events","none");
-		});
-		$("#cityRemove").on("click", function (e) {
-			$.myAutomatic.cleanSelectObj(a_district);
-			$.myAutomatic.cleanSelectObj(a_store);
-			$("#a_district").attr("disabled", true);
-			$("#a_store").attr("disabled", true);
-			$("#districtRefresh").attr("disabled",true).css("pointer-events","none");
-			$("#storeRefresh").attr("disabled",true).css("pointer-events","none");
-		});
-		$("#districtRemove").on("click", function (e) {
-			$.myAutomatic.cleanSelectObj(a_store);
-			$("#a_store").attr("disabled", true);
-			$("#storeRefresh").attr("disabled",true).css("pointer-events","none");
 		});
 
 		// 添加按钮事件
@@ -195,19 +211,19 @@ define('informEdit', function () {
 			var dinputName = $("#a_district").attr("v");
 			var sinputName = $("#a_store").attr("v");
 
-			if (rinput == null || rinput == "") {
+			if (rinput == null || rinput === "") {
 				rinput = "999999";
 				rinputName = "All Region";
 			}
-			if (cinput == null || cinput == "") {
+			if (cinput == null || cinput === "") {
 				cinput = "999999";
 				cinputName = "All City";
 			}
-			if (dinput == null || dinput == "") {
+			if (dinput == null || dinput === "") {
 				dinput = "999999";
 				dinputName = "All District";
 			}
-			if (sinput == null || sinput == "") {
+			if (sinput == null || sinput === "") {
 				sinput = "999999";
 				sinputName = "All Store";
 			}
@@ -218,38 +234,82 @@ define('informEdit', function () {
 				var city = $(this).find("input[name='cityRes']").val();
 				var district = $(this).find("input[name='districtRes']").val();
 				var store = $(this).find("input[name='storeRes']").val();
+				// modify by lch 2021/02/23
 				// 已选择 All Region
-				if(region == '999999'){
+				if(region === '999999'){
+					_common.prompt("Has the full store permission, cannot submit!", 5, "info");/* 已经拥有全店铺权限，不可提交 */
+					count++;
+					return false;
+				}
+				if(rinput === '999999' && region != null){
 					_common.prompt("Has the full store permission, cannot submit!", 5, "info");/* 已经拥有全店铺权限，不可提交 */
 					count++;
 					return false;
 				}
 				// 已选择 NationWide：包含南北区，如果子级选择全部，则效果等同于All Region
-				if(region == '000001' && city == '999999'){
+				if(region === '000001' && city === '999999'){
 					_common.prompt("Has the full store permission, cannot submit!", 5, "info");/* 已经拥有全店铺权限，不可提交 */
 					count++;
 					return false;
 				}
-				// 大区相同，城市已选择All City
-				if (region == rinput && city == '999999') {
-					_common.prompt("Already has the permission of the entire store in the region, cannot submit!", 5, "info");/* 已经拥有该大区全店铺权限，不可提交 */
+				if(rinput === '000001' && cinput === '999999' && city != null){
+					_common.prompt("Has the full store permission, cannot submit!", 5, "info");/* 已经拥有全店铺权限，不可提交 */
 					count++;
 					return false;
 				}
+				// 大区相同或大区选择000001，城市已选择All City
+				if ((region === rinput || region==='000001') && city === '999999') {
+					_common.prompt("Already has the permission of the entire store in the City, cannot submit!", 5, "info");/* 已经拥有该大区全店铺权限，不可提交 */
+					count++;
+					return false;
+				}
+				// 大区相同或大区输入框选择000001，城市已选择All City 且大区和城市输入框同在南方或北方
+				if ((region === rinput || rinput==='000001') && city === '999999'
+						&& ((region!=='000002' && cinput.substring(0,1) === 'N') || (region!=='000003' && cinput.substring(0,1) === 'S'))) {
+					_common.prompt("Already has the permission of the entire store in the City, cannot submit!", 5, "info");/* 已经拥有该大区全店铺权限，不可提交 */
+					count++;
+					return false;
+				}
+				// 大区相同或大区输入框选择000001，城市输入框已选择All City 且大区和城市输入框同在南方或北方
+				if ((region === rinput || region==='000001') && cinput === '999999'
+					&& ((rinput!=='000002' && city.substring(0,1) === 'N') || (rinput!=='000003' && city.substring(0,1) === 'S'))) {
+					_common.prompt("Already has the permission of the entire store in the City, cannot submit!", 5, "info");/* 已经拥有该大区全店铺权限，不可提交 */
+					count++;
+					return false;
+				}
+				// 大区相同或大区输入框选择000001，城市已选择All City
+				if ((region === rinput || rinput==='000001') && cinput === '999999') {
+					_common.prompt("Already has the permission of the entire store in the City, cannot submit!", 5, "info");/* 已经拥有该大区全店铺权限，不可提交 */
+					count++;
+					return false;
+				}
+
 				// 大区、城市相同，区域已选择All District
-				if (region == rinput && city == cinput && district == '999999') {
-					_common.prompt("Already has the permission of the entire store in the city, cannot submit!", 5, "info");/* 已经拥有该城市全店铺权限，不可提交 */
+				if (city === cinput && district === '999999') {
+					_common.prompt("Already has the permission of the entire store in the district, cannot submit!", 5, "info");/* 已经拥有该城市全店铺权限，不可提交 */
 					count++;
 					return false;
 				}
+				if (city === cinput && dinput === '999999' && district != null) {
+					_common.prompt("Already has the permission of the entire store in the district, cannot submit!", 5, "info");/* 已经拥有该城市全店铺权限，不可提交 */
+					count++;
+					return false;
+				}
+
 				// 大区、城市、区域相同，店铺已选择All District
-				if (region == rinput && city == cinput && district == dinput && store == '999999') {
+				if (city === cinput && district === dinput && store === '999999') {
 					_common.prompt("Already has the permission of the entire store in the district, cannot submit!", 5, "info");/* 已经拥有该区域全店铺权限，不可提交 */
 					count++;
 					return false;
 				}
+				if (city === cinput && district === dinput && sinput === '999999' && store != null) {
+					_common.prompt("Already has the permission of the entire store in the district, cannot submit!", 5, "info");/* 已经拥有该区域全店铺权限，不可提交 */
+					count++;
+					return false;
+				}
+
 				// 选择相同店铺
-				if (region == rinput && city == cinput && district == dinput && store == sinput) {
+				if (city === cinput && district === dinput && store === sinput) {
 					_common.prompt("The selected resource group is the same as the selected resource group and cannot be submitted!", 5, "info");/* 选择的资源组与已选的资源组重复，不可提交 */
 					count++;
 					return false;
@@ -259,7 +319,12 @@ define('informEdit', function () {
 				return;
 			}
 			// 添加、显示
-			store_index = $("#storeFlgVal").val() + 1;
+			var storeFlgVal = $("#storeFlgVal").val();
+			if(storeFlgVal != null && storeFlgVal!== ''){
+				store_index = parseInt(storeFlgVal) + 1;
+			}else {
+				store_index = storeFlgVal + 1;
+			}
 			var resourceGroup = "<div class='row' name='resStoreRow'>" +
 				"    <div class='col-xs-12 col-sm-12 col-md-11 col-lg-11'>" +
 				"        <div class='form-horizontal'>" +
@@ -303,21 +368,13 @@ define('informEdit', function () {
 			$("#storeSplitLine").before(resourceGroup);
 			// 重置栏位，准备下一次选值
 			$.myAutomatic.cleanSelectObj(a_region);
-			$.myAutomatic.cleanSelectObj(a_city);
-			$.myAutomatic.cleanSelectObj(a_district);
-			$.myAutomatic.cleanSelectObj(a_store);
-			$("#a_city").attr("disabled", true);
-			$("#a_district").attr("disabled", true);
-			$("#a_store").attr("disabled", true);
-			$("#cityRefresh").attr("disabled",true).css("pointer-events","none");
-			$("#districtRefresh").attr("disabled",true).css("pointer-events","none");
-			$("#storeRefresh").attr("disabled",true).css("pointer-events","none");
+
 		})
 
 		// 绑定删除按钮事件
 		$("#resStore").on("click", "a[id*='delStoreResource']", function (e) {
 			var aId;
-			if (e.target.tagName == "A") {
+			if (e.target.tagName === "A") {
 				aId = $(e.target).attr("id");
 			} else {
 				aId = $(e.target).parent().attr("id");
@@ -819,6 +876,8 @@ define('informEdit', function () {
 			}else {
 				m.inform_content.css("border-color","#CCCCCC");
 			}
+
+
 			var roleDetail = [],fileDetail = [];
 			// var storeDetail = [];
 			// $("#zgGridTtable>.zgGrid-tbody tr").each(function () {

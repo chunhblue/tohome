@@ -133,18 +133,26 @@ public class PermissionCode implements Serializable {
     /** 收货登录(自送供应商) 导出权限 */
     public static final String CODE_SC_V_RECEIPT_EXPORT = "SC-V-RECEIPT-006";
 
-    /** 配送差异查询及调整 查看权限 */
+    /** 订单配送差异查询及调整 查看权限 */
     public static final String CODE_SC_DIFFERENCE_VIEW = "SC-DIFFERENCE-001";
-    /** 配送差异查询及调整 编辑权限 */
+    /** 订单配送差异查询及调整 编辑权限 */
     public static final String CODE_SC_DIFFERENCE_EDIT = "SC-DIFFERENCE-002";
-    /** 配送差异查询及调整 新增权限 */
+    /** 订单配送差异查询及调整 新增权限 */
     public static final String CODE_SC_DIFFERENCE_ADD = "SC-DIFFERENCE-003";
-    /** 配送差异查询及调整 列表查看权限 */
+    /** 订单配送差异查询及调整 列表查看权限 */
     public static final String CODE_SC_DIFFERENCE_LIST_VIEW = "SC-DIFFERENCE-004";
-    /** 配送差异查询及调整 导出权限 */
+    /** 订单配送差异查询及调整 导出权限 */
     public static final String CODE_SC_DIFFERENCE_EXPORT = "SC-DIFFERENCE-005";
-    /** 配送差异查询及调整 打印权限 */
+    /** 订单配送差异查询及调整 打印权限 */
     public static final String CODE_SC_DIFFERENCE_PRINT = "SC-DIFFERENCE-006";
+
+
+    /** 发货单配送差异查询及调整 查看列表权限 */
+    public static final String CODE_SC_SHOP_DIFFER_VIEW_LIST = "SC-SHOP-DIFFER-001";
+    /** 发货单配送差异查询及调整 查看明细权限 */
+    public static final String CODE_SC_SHOP_DIFFER_VIEW = "SC-SHOP-DIFFER-002";
+    /** 发货单配送差异查询及调整 导出权限 */
+    public static final String CODE_SC_SHOP_DIFFER_EXPORT = "SC-SHOP-DIFFER-003";
 
     /** Store Order and Receiving(From Vendor) 查看权限 */
     public static final String CODE_SC_DETAILS_VIEW = "SC-DETAILS-001";
@@ -850,6 +858,9 @@ public class PermissionCode implements Serializable {
     /** 门店库存日报 导出权限 */
     public static final String CODE_SC_INVENTORY_EXPORT = "SC-INVENTORY-003";
 
+    /*HHT Summy-HHT Report 查看权限*/
+    public static final String CODE_SC_HHT_VIEW = "SC-DC-HHT-DAILY-001";
+
     /** 每日顾客退货明细 查看一览权限 */
     public static final String CODE_SC_RETURNS_LIST_VIEW = "SC-RETURNS-001";
     /** 每日顾客退货明细 打印权限 */
@@ -906,4 +917,30 @@ public class PermissionCode implements Serializable {
     public static final String SC_RECONCILE_EXPORT = "SC-RECONCILE-001";
     /** Reconciliation Management 列表查看权限 */
     public static final String SC_RECONCILE_LIST_VIEW = "SC-RECONCILE-002";
+
+    /** Stamp Summary Report 列表查看权限 */
+    public static final String CODE_SC_STAMP_SUMMARY_LIST_VIEW = "SC-SUMMARY-REP-001";
+    /** Stamp Summary Report 打印权限 */
+    public static final String CODE_SC_STAMP_SUMMARY_PRINT = "SC-SUMMARY-REP-002";
+    /** Stamp Summary Report 导出权限 */
+    public static final String CODE_SC_STAMP_SUMMARY_EXPORT = "SC-SUMMARY-REP-003";
+
+    /** Stamp Detail Report 列表查看权限 */
+    public static final String CODE_SC_STAMP_DETAIL_LIST_VIEW = "SC-SUMMARY-REP-001";
+    /** Stamp Detail Report 导出权限 */
+    public static final String CODE_SC_STAMP_DETAIL_EXPORT = "SC-SUMMARY-REP-002";
+
+    /** Store Staff Attendance Detail Report HCM 列表查看权限 */
+    public static final String CODE_SC_STAFF_ATTENDANCE_LIST_VIEW = "SC-STAFF-DAILY-001";
+    /** Store Staff Attendance Detail Report HCM 导出权限 */
+    public static final String CODE_SC_STAFF_ATTENDANCE__EXPORT = "SC-STAFF-DAILY-002";
+
+    /** Clearance Of Inventory Entry 列表查看权限 */
+    public static final String CODE_SC_ST_CLEAR_LIST_VIEW = "SC-ST-CLEAR-001";
+    /** Clearance Of Inventory Entry 新增权限 */
+    public static final String CODE_SC_ST_CLEAR_ADD = "SC-ST-CLEAR-002";
+    /** Clearance Of Inventory Entry 导入权限 */
+    public static final String CODE_SC_ST_CLEAR_IMPORT = "SC-ST-CLEAR-003";
+
+
 }

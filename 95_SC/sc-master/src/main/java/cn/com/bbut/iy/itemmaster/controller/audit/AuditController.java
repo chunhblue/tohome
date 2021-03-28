@@ -88,10 +88,10 @@ public class AuditController extends BaseAction {
                                     HttpServletRequest request, HttpSession session) {
         User u = this.getUser(session);
         AjaxResultDto ard = ajaxRepeatSubmitCheck(request, session);
-        if (!ard.isSuccess()) {
-            ard.setToKen(ard.getToKen());
-            return ard;
-        }
+//        if (!ard.isSuccess()) {
+//            ard.setToKen(ard.getToKen());
+//            return ard;
+//        }
         if(StringUtils.isBlank(storeCd)){
             storeCd = "000000";
         }
@@ -497,7 +497,6 @@ public class AuditController extends BaseAction {
 
                 if(subMax == nowSubNo){
                     auditStep.setCAuditstatus(99);
-                    auditServiceImpl.updateAuditStatus(auditStep);
                     if(detailType != null){
                         boolean checkFlg = reNewalMsg(detailType,auditStep.getStoreCd(),auditStep.getCRecordCd());
                         if(!checkFlg){
@@ -506,6 +505,7 @@ public class AuditController extends BaseAction {
                             return _return;
                         }
                     }
+                    auditServiceImpl.updateAuditStatus(auditStep);
                     _flag = "10";
                 }else if(subMax > nowSubNo){
                     flag = true;
@@ -621,10 +621,10 @@ public class AuditController extends BaseAction {
                         // 添加时间
                         notificationBean.setCNotificationTime(now);
 
-//                        int addNotification = notificationServiceImpl.addNotification(notificationBean);
-//                        if(addNotification > 0){
-//                            log.debug("-------------------------审核更新 + 生成新流程、通知 OK-------------------------");
-//                        }
+                        int addNotification = notificationServiceImpl.addNotification(notificationBean);
+                        if(addNotification > 0){
+                            log.debug("-------------------------审核更新 + 生成新流程、通知 OK-------------------------");
+                        }
                     }
                 }else{
                     _return.setMessage("upt");
@@ -966,7 +966,7 @@ public class AuditController extends BaseAction {
      * @param recordCd
      * @return
      */
-    private boolean reNewalMsg(String detailType,String storeCd,String recordCd){
+    private boolean reNewalMsg(String detailType, String storeCd, String recordCd){
         boolean checkFlg = true;
         List<OD0010TDTO> _reDetailsList = null;
         List<Sk0020DTO> _sk0020List = null;

@@ -312,8 +312,14 @@ public class InventoryVouchersServiceImpl implements InventoryVouchersService {
     @Override
     public GridDataDTO<Sk0020DTO> getSk0020(Sk0020ParamDTO sk0020) {
         String inEsTime = cm9060Service.getValByKey("1206");
+        if(sk0020.getVoucherType().equals("603")){
+          sk0020.setCodeType("00236");
+        }else if(sk0020.getVoucherType().equals("501")||sk0020.getVoucherType().equals("502")){
+            sk0020.setCodeType("00235");
+        }
         GridDataDTO<Sk0020DTO> data = new GridDataDTO<Sk0020DTO>();
         List<Sk0020DTO> _list = inventoryVouchersMapper.selectListSk0020(sk0020);
+        System.out.println(_list);
         if(_list == null || _list.equals("")){
             log.info("<<<<<<<<<<_list is null");
         }else {
@@ -397,6 +403,8 @@ public class InventoryVouchersServiceImpl implements InventoryVouchersService {
         return inventoryVouchersMapper.getOutStoreList(v,zoCd, businessDate);
     }
 
+
+
     /**
      * 商品自动下拉
      */
@@ -404,6 +412,12 @@ public class InventoryVouchersServiceImpl implements InventoryVouchersService {
     public List<AutoCompleteDTO> getItemList(String storeCd, String v) {
         String businessDate = getBusinessDate();
         return inventoryVouchersMapper.getItemList(storeCd, v, businessDate);
+    }
+
+    @Override
+    public List<AutoCompleteDTO> getInventoryItemList(String storeCd, String v) {
+        String businessDate = getBusinessDate();
+        return inventoryVouchersMapper.getInventoryItemList(storeCd, v, businessDate);
     }
 
     @Override
@@ -438,8 +452,8 @@ public class InventoryVouchersServiceImpl implements InventoryVouchersService {
     }
 
     @Override
-    public List<AutoCompleteDTO> detailReason(String generalLevelCd, String v) {
-        return inventoryVouchersMapper.getMa8360(generalLevelCd,v);
+    public List<AutoCompleteDTO> detailReason( String v,int num) {
+        return inventoryVouchersMapper.getMa8360(v,num);
     }
     @Override
     public List<AutoCompleteDTO> Reasondetail(String v) {
@@ -520,6 +534,11 @@ public class InventoryVouchersServiceImpl implements InventoryVouchersService {
     @Override
     public Map<String, Object> Total(Sk0020ParamDTO sk0020) {
         Integer sumQty1=0;
+        if(sk0020.getVoucherType().equals("603")){
+            sk0020.setCodeType("00236");
+        }else if(sk0020.getVoucherType().equals("501")||sk0020.getVoucherType().equals("502")){
+            sk0020.setCodeType("00235");
+        }
         Cm9060 dto = cm9060Mapper.selectByPrimaryKey("0000");
         sk0020.setBusinessDate(dto.getSpValue());
         int totalArticle = inventoryVouchersMapper.selectSumArticle(sk0020);

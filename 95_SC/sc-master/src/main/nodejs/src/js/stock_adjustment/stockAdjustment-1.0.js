@@ -70,7 +70,7 @@ define('stockAdjustment', function () {
 			m.main_box.hide();
 		}
 		// 加载下拉列表
-		getSelectValue();
+		// getSelectValue();
     	// 根据登录人的不同身份权限来设定画面的现实样式
 		initPageBytype(m.identity.val());
 		// 初始化店铺运营组织检索
@@ -109,7 +109,6 @@ define('stockAdjustment', function () {
 		m.sourceVoucherNo.val(obj.sourceVoucherNo);
 		m.voucherNo.val(obj.voucherNo);
 		$.myAutomatic.setValueTemp(am,obj.am,obj.amName);
-		$.myAutomatic.setValueTemp(generalReason,obj.generalReason,obj.generalReasonName);
 		$.myAutomatic.setValueTemp(reason,obj.reason,obj.reasonName);
 		// 设置组织架构回显
 		_common.setAutomaticVal(obj);
@@ -136,11 +135,10 @@ define('stockAdjustment', function () {
 		obj.districtName=$('#aDistrict').attr('v');
 		obj.storeName=$('#aStore').attr('v');
 		obj.amName=$('#am').attr('v');
-		obj.generalReasonName=$('#generalReason').attr('v');
-		obj.reasonName=$('#reason').attr('v');
 		obj.voucherStartDate=m.bf_start_date.val();
 		obj.voucherEndDate=m.bf_end_date.val();
 		obj.page=tableGrid.getting("page");
+		obj.reasonName=$('#reason').attr('v');
 		obj.flg='0';
 		sessionStorage.setItem(KEY,JSON.stringify(obj));
 	}
@@ -152,22 +150,6 @@ define('stockAdjustment', function () {
 			ePageSize:10,
 			startCount:0,
 		});
-		generalReason = $("#generalReason").myAutomatic({
-			url:url_root+"/inventoryVoucher/generalReason",
-			ePageSize: 10,
-			startCount: 0,
-			cleanInput: function() {
-				$.myAutomatic.replaceParam(reason,null);
-				// $.myAutomatic.cleanSelectObj(reason);
-			},
-			selectEleClick: function (thisObj) {
-				if (thisObj.attr("k") !== null && thisObj.attr("k") !== "") {
-					$.myAutomatic.cleanSelectObj(reason);
-					var strm ="&generalLevelCd="+ m.generalReason.attr('k');
-					$.myAutomatic.replaceParam(reason,strm);
-				}
-			},
-		});
 
 		reason=$("#reason").myAutomatic({
 			url:url_root+"/inventoryVoucher/detailReason",
@@ -176,30 +158,7 @@ define('stockAdjustment', function () {
 			cleanInput:function () {
 
 			},
-			selectEleClick:function (thisObj) {
-				if (thisObj.attr("k") !== null && thisObj.attr("k") !== "") {
-					var strm ="&generalLevelCd="+ m.reason.attr('k');
-					getGeneralLevelCd(strm);
-				}
-			}
 		})
-	}
-	function getGeneralLevelCd(strm) {
-     $.myAjaxs({
-		 url:url_root+"/inventoryVoucher/getGeneralLevel",
-		 async:true,
-		 cache:false,
-		 type :"get",
-		 data :strm,
-		 dataType:"json",
-		 success:function (result) {
-			 $.myAutomatic.setValueTemp(generalReason,result.generalLevelCd,result.generalLevelReason);
-		 },
-		 error:function (e) {
-
-		 }
-
-	 })
 	}
     // 表格内按钮事件
     var table_event = function(){
@@ -361,23 +320,6 @@ define('stockAdjustment', function () {
 			$("#bf_end_date").focus();
 			return false;
 		}
-
-		if (m.generalReason.attr("v")!=null && m.generalReason.attr("v")!=""){
-			if (m.reason.attr("k")==null || m.reason.attr("k")==""){
-				_common.prompt("Please enter a reason!",3,"info");
-				$("#reason").css("border-color","red");
-				$("#reason").focus();
-				return false;
-				}else {
-				$("#reason").css("border-color", "#CCC");
-			}
-			}
-		if (m.reason.attr("k")!=null && m.reason.attr("k")!=""){
-			if (m.generalReason.attr("k")==null || m.generalReason.attr("k")==""){
-				var strm ="&generalLevelCd="+ m.reason.attr('k');
-				getGeneralLevelCd(strm);
-			}
-		}
 		return true;
     }
 
@@ -401,9 +343,7 @@ define('stockAdjustment', function () {
 			reviewSts:m.dj_status.val()||'-1',
             voucherType:'604',
             am:$('#am').attr('k'),
-			generalReason:$('#generalReason').attr('k'),
-			//reason:$('#reason').attr('k'),
-			reason:$('#reason').attr('hidek'),
+			reason:$('#reason').attr('k'),
         };
         m.searchJson.val(JSON.stringify(searchJsonStr));
     }

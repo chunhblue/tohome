@@ -541,9 +541,12 @@ public class ReconciliationMngServiceImpl  extends ImportExcelBaseService implem
             //开始读取数据
             if(StringUtils.isNotBlank(isWhscode)){
                 mb1300.setStoreCd(super.getCellValue(sheet, row, 0));
+                if(row.getCell(1).getDateCellValue() == null){
+                    continue;
+                }
                 String da = createDate.format(row.getCell(1).getDateCellValue());
                 mb1300.setBusinessDate(da);
-                mb1300.setItemCode(super.getCellValue(sheet, row, 2));
+                mb1300.setBarcode(super.getCellValue(sheet, row, 2));
                 mb1300.setItemName(super.getCellValue(sheet, row, 3));
                 BigDecimal payooQty=new BigDecimal(super.getCellValue(sheet, row, 6));
                 mb1300.setPayooQty(payooQty);
@@ -562,7 +565,7 @@ public class ReconciliationMngServiceImpl  extends ImportExcelBaseService implem
                 for (Mb1300 mbNew : newList) {
                     if (mbNew.getStoreCd().equals(mbOld.getStoreCd())
                             && mbNew.getBusinessDate().equals(mbOld.getBusinessDate())
-                            && mbNew.getItemCode().equals(mbOld.getItemCode())) {
+                            && mbNew.getBarcode().equals(mbOld.getBarcode())) {
                         mbNew.setPayooQty(mbNew.getPayooQty().add(mbOld.getPayooQty()));
                         mbNew.setPayooAmount(mbNew.getPayooAmount().add(mbOld.getPayooAmount()));
                         dbStores.add(mbOld.getStoreCd());
@@ -581,15 +584,16 @@ public class ReconciliationMngServiceImpl  extends ImportExcelBaseService implem
                 for(Mb1300 mb1300 : newList){
                     if(mb1300.getStoreCd().equals(recdto.getStoreCd())
                             && mb1300.getBusinessDate().equals(recdto.getTransDate())
-                            && mb1300.getItemCode().equals(recdto.getArticleId())){
+                            && mb1300.getBarcode().equals(recdto.getBarcode())){
                         mb1300.setCkAmount(recdto.getCkAmount());
                         mb1300.setVaryQty(mb1300.getPayooQty().subtract(recdto.getCkQty()));
                         mb1300.setVaryAmount(mb1300.getPayooAmount().subtract(recdto.getCkAmount()));
                         mb1300.setCkQty(recdto.getCkQty());
                         mb1300.setCreateUserId(userId);
+                        mb1300.setItemCode(recdto.getArticleId());
                         mb1300.setItemName(recdto.getArticleName());
                         insertList.add(mb1300);
-                        storeItems.add(recdto.getStoreCd()+" "+recdto.getArticleId());
+                        storeItems.add(recdto.getStoreCd()+" "+recdto.getBarcode());
                     }
                 }
             }
@@ -601,8 +605,9 @@ public class ReconciliationMngServiceImpl  extends ImportExcelBaseService implem
                         for(Mb1300 mbIn : insertList){
                             if(mbIn.getStoreCd().equals(mbDb.getStoreCd())
                                     && mbIn.getBusinessDate().equals(mbDb.getBusinessDate())
-                                    && mbIn.getItemCode().equals(mbDb.getItemCode())){
-                                storeDateItems.add(mbIn.getStoreCd()+" "+mbIn.getBusinessDate()+" "+mbIn.getItemCode());
+                                    && mbIn.getItemCode().equals(mbDb.getItemCode())
+                                    && mbIn.getBarcode().equals(mbDb.getBarcode())){
+                                storeDateItems.add(mbIn.getStoreCd()+" "+mbIn.getBusinessDate()+" "+mbIn.getItemCode()+" "+mbIn.getBarcode());
                             }
                         }
                     }

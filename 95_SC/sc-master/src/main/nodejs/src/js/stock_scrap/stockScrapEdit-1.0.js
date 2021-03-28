@@ -439,6 +439,7 @@ define('stockScrapEdit', function () {
 		}else {$("#item_input").css("border-color","#CCC");}
 
 		temp = reThousands($("#item_input_tamount").val());
+		var temp1 = $("#item_input_tamount").val();
 		if(temp == null || $.trim(temp)==""){
 			_common.prompt("The quantity cannot be empty!",3,"error");
 			$("#item_input_tamount").css("border-color","red");
@@ -451,22 +452,25 @@ define('stockScrapEdit', function () {
 			return false;
 		}else {
 			let reg = /^[0-9]*$/;
-			if(!reg.test(temp)){
-				_common.prompt("The quantity can only be integers!",3,"error");
-				$("#item_input_tamount").css("border-color","red");
+			if (!reg.test(temp)|| temp1.indexOf(",")>0) {
+				_common.prompt("The quantity can only be integers!", 3, "error");
+				$("#item_input_tamount").css("border-color", "red");
 				$("#item_input_tamount").focus();
 				return false;
 			}else {
-				let handQty = m.on_hand_qty.val()||0;
-				if(parseInt(temp) > parseInt(handQty)){
-					_common.prompt("Transfer Quantity cannot be more than actual stock quantity!",3,"error");
-					$("#item_input_tamount").css("border-color","red");
-					$("#item_input_tamount").focus();
-					return false;
-				}else{
-					$("#item_input_tamount").css("border-color","#CCC");
-				}
+				$("#item_input_tamount").css("border-color", "#CCC");
 			}
+			// else {
+			// 	let handQty = m.on_hand_qty.val()||0;
+			// 	if(parseInt(temp) > parseInt(handQty)){
+			// 		_common.prompt("Transfer Quantity cannot be more than actual stock quantity!",3,"error");
+			// 		$("#item_input_tamount").css("border-color","red");
+			// 		$("#item_input_tamount").focus();
+			// 		return false;
+			// 	}else{
+			// 		$("#item_input_tamount").css("border-color","#CCC");
+			// 	}
+			// }
 		}
 		temp = m.adjustReason.attr("k");
 		if(temp == null || $.trim(temp)==""){
@@ -482,19 +486,31 @@ define('stockScrapEdit', function () {
     var but_event = function(){
 
 		$("#item_input_tamount").blur(function () {
-			$("#item_input_tamount").val(toThousands(this.value));
+			let reg = /^-?[1-9]\d*$/;
+			if (!reg.test( this.value)|| this.value.indexOf(",")<0){
+				$("#item_input_tamount").val(toThousands(this.value));
+			}
 		});
-
 		//光标进入，去除金额千分位，并去除小数后面多余的0
 		$("#item_input_tamount").focus(function(){
-			$("#item_input_tamount").val(reThousands(this.value));
+			let reg = /^-?[1-9]\d*$/;
+			if (!reg.test( this.value)|| this.value.indexOf(",")<0){
+				$("#item_input_tamount").val(toThousands(this.value));
+			}
 		});
-
 		// 重置按钮
 		m.resetBtn.on("click",function(){
 			$("#vstore").css("border-color","#CCC");
 			_common.myConfirm("Are you sure you want to reset?",function(result){
 				if(result=="true"){
+					$("#zgGridTtable_tbody").each(function () {
+						var trList = $("#zgGridTtable_tbody  tr:not(:last)");
+						trList.remove();
+						if ("#zgGridTtable_tbody  tr:last"){
+							$(this).find('td[tag=total_item]').text("total Item:0");
+							$(this).find('td[tag=total_qty1]').text("total qty:0");
+						}
+					})
 					getBusinessDate();
 					m.tf_cd.val("");
 					m.dj_status.val("1");
@@ -896,6 +912,7 @@ define('stockScrapEdit', function () {
 			selectEleClick: function (thisObject) {
 				clearDialog(false);
 				let _storeCd = $("#vstore").attr('k');
+				$.myAutomatic.setValueTemp(itemInput,thisObject.attr("k"),thisObject.text());
 				let _itemId = thisObject.attr('k');
 				if(!!_storeCd && !!_itemId){
 					checkParent(_itemId, function(res){
@@ -1057,8 +1074,8 @@ define('stockScrapEdit', function () {
 		var total = "<tr style='text-align:right' id='total_qty'><td></td><td></td><td></td><td></td>" +
 			"<td>Total:</td>" +
 			// "<td style='text-align:left' id='total_item'> total ItemSku:"+"<span id='span_item'>"+td_toItemQty+"</span>"+"</td>" +
-			"<td style='text-align:right' id='total_item'> Total Item:"+td_toItemQty+"</td>" +
-			"<td style='text-align:right' id='total_qty'> Total qty:"+td_toalQty+"</td>" +
+			"<td style='text-align:right' tag='total_item' id='total_item'> Total Item:"+td_toItemQty+"</td>" +
+			"<td style='text-align:right' tag='total_qty1' id='total_qty1'> Total qty:"+td_toalQty+"</td>" +
 			"<td></td>"+
 			"<td></td>"+
 			"</tr>";

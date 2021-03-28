@@ -234,10 +234,20 @@ define('receiptEdit', function () {
 			$("#receiveNochargeQty").val(cols['receiveNochargeQty']);
 			$("#modifyQty").val(cols['modifyQty']);
 			$("#modifyNochargeQty").val(cols['modifyNochargeQty']);
+
 			if($("#returnType").val()==='10'){
-				 switchOver('0');
-				 // getItemInfo(cols['articleId']);
+				switchOver('0');
+				// getItemInfo(cols['articleId']);
 			}
+			if (m.modificationType.val()=="07"){
+				$("#reOrderQty").hide();
+				$("#rOrderQty").show();
+			}
+			if (m.modificationType.val()=="08"){
+				$("#reOrderQty").show();
+				$("#rOrderQty").hide();
+			}
+
 			$("#InventoryQty").val(cols['realtimeQty']);
 			$('#update_dialog').attr("flg","view");
 			$('#update_dialog').modal("show");
@@ -281,6 +291,14 @@ define('receiptEdit', function () {
 				switchOver('0');
 				// getItemInfo(cols['articleId']);
 			}
+			if (m.modificationType.val()=="07"){
+				$("#reOrderQty").hide();
+				$("#rOrderQty").show();
+			}
+			if (m.modificationType.val()=="08"){
+				$("#reOrderQty").show();
+				$("#rOrderQty").hide();
+			}
 			$("#InventoryQty").val(cols['realtimeQty']);
 			$('#update_dialog').attr("flg","upt");
 			$('#update_dialog').modal("show");
@@ -292,6 +310,13 @@ define('receiptEdit', function () {
     	// 修正类型下拉改变事件
     	m.modificationType.on("change",function(){
 			let _type = m.modificationType.val();
+			if (_type=="07"){
+				tableGrid.showColumn("rrOrderQty");
+				tableGrid.hideColumn("rrOrderQty1");
+			}else {
+				tableGrid.showColumn("rrOrderQty1");
+				tableGrid.hideColumn("rrOrderQty");
+			}
 			let _val = $("#storeCd").attr("k");
 			// 替换查询参数
 			let str = "&type=" + _type + "&storeCd=" + _val;
@@ -589,7 +614,7 @@ define('receiptEdit', function () {
 	var verifyDialogSearch = function(){
 		let reg = /^[0-9]*$/;
 		let _temp = reThousands($("#modifyQty").val());
-		if(_temp == null || $.trim(_temp)==""){
+		if(_temp == null || $.trim(_temp)===""){
 			_common.prompt("Modification Quantity cannot be empty",2,"Info");
 			$("#modifyQty").css("border-color","red");
 			$("#modifyQty").focus();
@@ -605,16 +630,17 @@ define('receiptEdit', function () {
 		}else{
 			$("#modifyQty").css("border-color","#CCCCCC");
 		}
-		if($("#returnType").val() === '10'){
-			if(_temp>parseInt(reThousands($("#InventoryQty").val()))){//不得大于库存数量
-				_common.prompt("Modification Quantity can not be greater than Inventory Quantity!",2,"Info");
-				$("#modifyQty").css("border-color","red");
-				$("#modifyQty").focus();
-				return false;
-			} else {
-				$("#modifyQty").css("border-color","#CCCCCC");
-			}
-		}else {
+		// if($("#returnType").val() === '20'){
+		// 	var tmp = _temp - reThousands($("#rrOrderQty").val());
+		// 	if(tmp>parseInt(reThousands($("#InventoryQty").val()))){//修正差异数量不得大于库存数量
+		// 		_common.prompt("Modification Quantity can not be greater than Inventory Quantity!",2,"Info");
+		// 		$("#modifyQty").css("border-color","red");
+		// 		$("#modifyQty").focus();
+		// 		return false;
+		// 	} else {
+		// 		$("#modifyQty").css("border-color","#CCCCCC");
+		// 	}
+		// }else {
 			if(_temp>9999999999){//不得大于最高数量
 				_common.prompt("Modification Quantity can not be greater than 9,999,999,999!",5,"Info");
 				$("#modifyQty").css("border-color","red");
@@ -623,7 +649,7 @@ define('receiptEdit', function () {
 			} else {
 				$("#modifyQty").css("border-color","#CCCCCC");
 			}
-		}
+		// }
 
 		return true;
 	}
@@ -773,7 +799,7 @@ define('receiptEdit', function () {
 			param:paramGrid,
 			localSort: true,
 			colNames:["Item Barcode","Item Code","Item Name","Item English Name","Item Type","Item Type","Specification","UOM","Inventory Query","Amount",
-				"Price","Order Qty","Order Free Qty","Amount","Price","Receipt/Return Qty","Received/Returned Free Qty","Modification Qty","Modified Free Qty"],
+				"Price","Order Qty","Order Free Qty","Amount","Price","Receipt Qty ","Return Qty","Received/Returned Free Qty","Correct Qty","Modified Free Qty"],
 			colModel:[
 				{name:"barcode",type:"text",text:"right",width:"100",ishide:false,css:""},
 				{name:"articleId",type:"text",text:"right",width:"80",ishide:false,css:""},
@@ -791,6 +817,7 @@ define('receiptEdit', function () {
 				{name:"rrOrderAmt",type:"text",ishide:true,getCustomValue:getString0},
 				{name:"rrOrderPrice",type:"text",ishide:true,getCustomValue:getString0},
 				{name:"rrOrderQty",type:"text",text:"right",width:"120",ishide:false,css:"",getCustomValue:getThousands},
+				{name:"rrOrderQty1",type:"text",text:"right",width:"120",ishide:false,css:"",getCustomValue:getThousands},
 				{name:"receiveNochargeQty",type:"text",text:"right",width:"180",ishide:true,css:"",getCustomValue:getThousands},
 				{name:"modifyQty",type:"text",text:"right",width:"110",ishide:false,getCustomValue:getThousands},
 				{name:"modifyNochargeQty",type:"text",text:"right",width:"110",ishide:true,getCustomValue:getThousands}
@@ -817,6 +844,13 @@ define('receiptEdit', function () {
 					} else {
 						tableGrid.hideColumn("isFreeItemText");
 					}
+				}
+				if (m.modificationType.val() == "07") {
+					tableGrid.showColumn("rrOrderQty");
+					tableGrid.hideColumn("rrOrderQty1");
+				} else {
+					tableGrid.showColumn("rrOrderQty1");
+					tableGrid.hideColumn("rrOrderQty");
 				}
 				/* 统计功能 */
 				var sum_BuilingdArea = $("#zgGridTable").getCol('orderPrice', false, 'sum');

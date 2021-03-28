@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 /**
  * MM促销记录对象
  *
@@ -54,5 +56,11 @@ public class PromotionDTO extends GridDataDTO {
     private String effectiveSts;
 
     private CommonDTO commonDTO;
+
+    private BigDecimal perTransactionQty;
+
+    private BigDecimal reqdBillAmount;
+
+    private BigDecimal billValueDiscount;
 
 }

@@ -71,7 +71,7 @@ define('auditRejected', function () {
                 for (var i = 0; i < result.length; i++) {
                     var optionValue = result[i].k;
                     var optionText = result[i].v;
-                    m.typeId.append(new Option(optionText, optionValue));
+                    m.typeId.append(new Option(optionValue+" "+optionText, optionValue));
                 }
             },
             error : function(e){

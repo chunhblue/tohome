@@ -1,9 +1,7 @@
 package cn.com.bbut.iy.itemmaster.dao;
 
-import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100DTOC;
-import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100ParamDTOC;
-import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0110DTOC;
-import cn.com.bbut.iy.itemmaster.dto.pi0100c.StocktakeItemDTOC;
+import cn.com.bbut.iy.itemmaster.dto.pi0100.ItemInStoreDto;
+import cn.com.bbut.iy.itemmaster.dto.pi0100c.*;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -62,4 +60,5 @@ public interface CustEntryPlanMapper {
 
     List<PI0100DTOC> getPrintData(@Param("pi0100Param") PI0100ParamDTOC pi0100Param);
 
+    List<CostOfDTO> getAllItem(@Param("param")ItemInStoreDto param);
 }

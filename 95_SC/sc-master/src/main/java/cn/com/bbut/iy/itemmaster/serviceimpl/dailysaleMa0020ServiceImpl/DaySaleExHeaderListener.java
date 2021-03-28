@@ -30,10 +30,18 @@ public class DaySaleExHeaderListener implements ExEventListener {
 
         // 二号标题
         String row1 = "";
+        String row2="";
+        if (param.getTypeDate().equals("2")) {
+            row2 = "NO.,Store No.,Store Name,Date,Customer Count,6h-8h,8h-10h,10h-12h,12h-14h,Shift1," +
+                    "14h-16h,16h-18h,18h-20h,20h-22h,Shift2,22h-24h,0h-2h,2h-4h,4h-6h,Shift3,Total Amt,Area Manager Name";
+        }
+        if (param.getTypeDate().equals("1")){
+            row2 = "NO.,Store No.,Store Name,Date,Customer Count,12h-14h,14h-16h,16h-18h,18h-20h,Shift1," +
+                    "20h-22h,22h-24h,0h-2h,2h-4h,Shift2,4h-6h,6h-8h,8h-10h,10h-12h,Shift3,Total Amt,Area Manager Name";
+        }
 
         // 列标题
-        String row2 = "NO.,Store No.,Store Name,Date,Customer Count,6h-8h,8h-10h,10h-12h,12h-14h,morning shift," +
-                "14h-16h,16h-18h,18h-20h,20h-22h,middle shift,22h-24h,0h-2h,2h-4h,4h-6h,night shift,Total Amt,Area Manager Name";
+
         String[] titles = row2.split(",");
 
         // 开始拼接excel头信息

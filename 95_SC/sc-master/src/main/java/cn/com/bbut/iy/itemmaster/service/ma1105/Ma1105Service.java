@@ -24,4 +24,8 @@ public interface Ma1105Service {
     List<String> getSubShelf(String storeCd,String shelf);
 
     Ma1105 getStoreInfo(String storeCd);
+
+    int updateShelfToMa1105(String storeCd);
+
+    int countPogName(String excelName,String storeCd);
 }

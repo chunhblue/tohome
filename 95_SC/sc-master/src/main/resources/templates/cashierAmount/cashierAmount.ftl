@@ -75,7 +75,7 @@
 [#--		<div class="shade"></div>--]
 [#--	</div>--]
 <!--导航  收银员收款金额登录-->
-[@common.nav "HOME&Sale&Cashier Shift Report Entry"][/@common.nav]
+[@common.nav "HOME&Sale&Cash Balancing Entry"][/@common.nav]
 <div class="container-fluid" id="main_box">
 	<div class="row">
 		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -133,9 +133,9 @@
 									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" hidden>
 										<select id="shift" class="form-control input-sm" nextele="">
 											<option value="">-- All/Please Select --</option>
-											<option value="00">Morning Shift</option>
-											<option value="01">Middle Shift</option>
-											<option value="02">Night Shift</option>
+											<option value="00">Shift1</option>
+											<option value="01">Shift2</option>
+											<option value="02">Shift3</option>
 										</select>
 									</div>
 									<label for="posId" hidden class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null">POS No.</label>

@@ -247,7 +247,6 @@
       )
     </foreach>
   </insert>
-
    <select id="queryExport" resultMap="BaseItemResult">
        SELECT
             M3.article_id,
@@ -272,7 +271,6 @@
             AND C4.sp_value BETWEEN M3.effective_start_date
             AND M3.effective_end_date
    </select>
-
     <select id="getPrintData" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100DTOC" resultMap="BaseResultMap">
         SELECT
         P.pi_cd,
@@ -318,4 +316,19 @@
         </where>
         ORDER BY P.create_ymd DESC
     </select>
+    <select id="getAllItem" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.ItemInStoreDto" resultType="cn.com.bbut.iy.itemmaster.dto.pi0100c.CostOfDTO">
+        SELECT
+        *
+        from pi0170
+        where 1=1
+        <if test="param.articleId != null and param.articleId != ''">
+            AND lower(pi0170.article_id) like lower(CONCAT('%',#{param.articleId },'%'))
+        </if>
+        <if test="param.barcode != null and param.barcode != ''">
+            AND lower(pi0170.barcode) like lower(CONCAT('%',#{param.barcode },'%'))
+        </if>
+    </select>
+
+
+
 </mapper>

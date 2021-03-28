@@ -230,7 +230,8 @@
 						</div>
 
 						<div class="form-group">
-							<label for="rrOrderQty" class="col-sm-2 col-lg-5 control-label">Receipt/Return Quantity</label>
+							<label for="rrOrderQty"  id="reOrderQty" class="col-sm-2 col-lg-5 control-label">Return Quantity</label>
+							<label for="rrOrderQty" id="rOrderQty" class="col-sm-2 col-lg-5 control-label">Receipt Quantity</label>
 							<div class="col-sm-6">
 								<input type="text" id="rrOrderQty" readonly="true" class="form-control input-sm">
 							</div>

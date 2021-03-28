@@ -168,6 +168,14 @@ define('goodsSaleDayReport' , function (){
         });
     };
 
+    // 格式化日期
+    var formatDateTime = function (dateStr) {
+        if (dateStr == null || dateStr === '') {
+            return '';
+        }
+        return new Date(dateStr).Format('dd/MM/yyyy hh:mm:ss')
+    };
+
     /**
      * 分页获取数据
      * @param page 当前页数
@@ -198,7 +206,7 @@ define('goodsSaleDayReport' , function (){
                         let tempTrHtml = '<tr style="text-align: center;">' +
                             '<td style="text-align: left" title="'+item.storeCd+'">' + isEmpty(item.storeCd) + '</td>' +
                             '<td style="text-align: left" title="'+item.storeName+'">' + isEmpty(item.storeName) + '</td>' +
-                            '<td style="text-align: center" title="'+ isEmpty(item.saleDate)+'">' + isEmpty(item.saleDate) + '</td>' +
+                            '<td style="text-align: center" title="'+ formatDateTime(item.tranDate)+'">' + formatDateTime(item.tranDate) + '</td>' +
                             '<td style="text-align: left" title=" '+item.depName+' ">' + isEmpty(item.depName) + '</td>' +
                             '<td style="text-align: left" title="'+item.pmaName+'">' + isEmpty(item.pmaName) + '</td>' +
                             '<td style="text-align: left" title="'+item.categoryName+'">' + isEmpty(item.categoryName) + '</td>' +

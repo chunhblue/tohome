@@ -200,7 +200,7 @@
 							<div class="wire"></div>
 							<button id="search_btn" type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-search icon-right"></span>Inquire</button>
 							<button id="reset_btn" type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-refresh icon-right"></span>Reset</button>
-							<button id="export_btn" type="button" class="btn btn-primary btn-sm" disabled><span class="glyphicon glyphicon-export icon-right"></span>Export</button>
+							<button id="export_btn" type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-export icon-right"></span>Export</button>
 						</div>
 
 					</div>
@@ -216,6 +216,7 @@
 				<li class="active"><a href="#card1" data-toggle="tab">Item(Stocktaking Done)</a></li>
 				<li><a href="#card2" data-toggle="tab">Item(Out of Stock in Store)</a></li>
 				<li><a href="#card3" data-toggle="tab">Item(Out of Stock in Financially)</a></li>
+				<li><a href="#card4" data-toggle="tab">Exception Item</a></li>
 			</ul>
 		</div>
 
@@ -233,6 +234,11 @@
 			<div class="tab-pane" id="card3">
 				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 					<table id="zgGridTtable3"></table>
+				</div>
+			</div>
+			<div class="tab-pane" id="card4">
+				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+					<table id="zgGridTtable4"></table>
 				</div>
 			</div>
 		</div>

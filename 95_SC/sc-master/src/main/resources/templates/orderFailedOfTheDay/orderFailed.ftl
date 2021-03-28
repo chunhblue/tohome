@@ -80,7 +80,7 @@
                                 <div class="form-group">
                                     <label for="orderDate"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null">Order Date</label>
                                     <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
-                                        <input id="orderDate"  nextele="" placeholder="Order Date" class="form-control input-sm select-date" type="text" value="" disabled="disabled">
+                                        <input id="orderDate"  nextele="" placeholder="Order Date" class="form-control input-sm select-date" type="text" value="">
                                     </div>
                                     <label for="articleId"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Vendor Code/Name</label>
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">

@@ -21,6 +21,9 @@
         <result column="EFFECTIVE_STS" jdbcType="VARCHAR" property="effectiveSts" />
         <result column="DEP_NAME" jdbcType="VARCHAR" property="depName" />
         <result column="STRUCTURE_NAME" jdbcType="VARCHAR" property="regionName" />
+        <result column="per_transaction_qty" jdbcType="VARCHAR" property="perTransactionQty" />
+        <result column="reqd_bill_amount" jdbcType="VARCHAR" property="reqdBillAmount" />
+        <result column="bill_value_discount" jdbcType="VARCHAR" property="billValueDiscount" />
     </resultMap>
 
     <resultMap id="ReMa4060" type="cn.com.bbut.iy.itemmaster.dto.promotion.Ma4060DTO">
@@ -133,6 +136,34 @@
         <result column="DISTRICT_NAME" jdbcType="VARCHAR" property="districtName" />
     </resultMap>
 
+    <resultMap id="ReMa4150" type="cn.com.bbut.iy.itemmaster.dto.promotion.Ma4150DTO">
+        <result column="promotion_cd" jdbcType="VARCHAR" property="promotionCd" />
+        <result column="article_id" jdbcType="VARCHAR" property="articleId" />
+        <result column="city_cd" jdbcType="VARCHAR" property="cityCd" />
+        <result column="city_name" jdbcType="VARCHAR" property="cityName" />
+        <result column="ma_cd" jdbcType="VARCHAR" property="maCd" />
+        <result column="ma_name" jdbcType="VARCHAR" property="maName" />
+        <result column="selling_price" jdbcType="DECIMAL" property="sellingPrice" />
+        <result column="promotion_price" jdbcType="DECIMAL" property="promotionPrice" />
+        <result column="display_seq" jdbcType="DECIMAL" property="displaySeq" />
+        <result column="article_name" jdbcType="VARCHAR" property="articleName" />
+    </resultMap>
+
+    <resultMap id="ReMa4155" type="cn.com.bbut.iy.itemmaster.dto.promotion.Ma4155DTO">
+        <result column="promotion_cd" jdbcType="CHAR" property="promotionCd" />
+        <result column="article_id" jdbcType="CHAR" property="articleId" />
+        <result column="city_cd" jdbcType="CHAR" property="cityCd" />
+        <result column="city_name" jdbcType="CHAR" property="cityName" />
+        <result column="ma_cd" jdbcType="CHAR" property="maCd" />
+        <result column="ma_name" jdbcType="CHAR" property="maName" />
+        <result column="selling_price" jdbcType="DECIMAL" property="sellingPrice" />
+        <result column="promotion_price" jdbcType="DECIMAL" property="promotionPrice" />
+        <result column="display_seq" jdbcType="DECIMAL" property="displaySeq" />
+        <result column="article_name" jdbcType="VARCHAR" property="articleName" />
+        <result column="reqd_qty" jdbcType="DECIMAL" property="reqdQty" />
+        <result column="is_promotion" jdbcType="VARCHAR" property="isPromotion" />
+    </resultMap>
+
     <sql id="selectCondition">
         <where>
             <if test="promotionCd != null and promotionCd != ''">
@@ -158,6 +189,8 @@
                 </foreach>
                 )
                 )
+                union all
+                select '000001'
                 )
             </if>
             --     审核通过的数据
@@ -198,7 +231,8 @@
                 PROMOTION_CD, PROMOTION_NAME, PROMOTION_START_DATE, PROMOTION_END_DATE,
                 PROMOTION_START_TIME, PROMOTION_END_TIME, PROMOTION_WEEK_CYCLE,
                 PROMOTION_PROMPT_FLG, PROMOTION_PROMPT_NAME, DEP_CD, STRUCTURE_CD,
-                EFFECTIVE_DATE, EFFECTIVE_STS
+                EFFECTIVE_DATE, EFFECTIVE_STS,per_transaction_qty,reqd_bill_amount,
+                bill_value_discount
             FROM
                 MA4040
             WHERE
@@ -239,14 +273,18 @@
         SELECT
             T.*,
             T1.ARTICLE_NAME,
-            T1.REFER_SALE_PRICE,
+            T3.base_sale_price as REFER_SALE_PRICE,
             T2.SUB_CATEGORY_NAME
         FROM (
             SELECT
                 M.PROMOTION_CD, M.PROMOTION_TERM_GROUP, M.ARTICLE_ID, M.BARCODE,
-                M.DISPLAY_SEQ, M.EFFECTIVE_STS, M1.EFFECTIVE_DATE
+                M.DISPLAY_SEQ, M.EFFECTIVE_STS, M1.EFFECTIVE_DATE,a.structure_name as cityName,
+                b.ma_name as maName,M.ma_cd,M.city_cd
             FROM
-                MA4070 M, MA4040 M1
+                MA4070 M
+                left join ma0020 a on M.city_cd = a.structure_cd and a.structure_level = '2'
+                left join ma0200 b on M.ma_cd = b.ma_cd and b.effective_sts = '10',
+                MA4040 M1
             WHERE
                 M.PROMOTION_CD = #{promotionCd,jdbcType=VARCHAR}
             AND M.PROMOTION_CD = M1.PROMOTION_CD
@@ -264,6 +302,8 @@
             FROM MA0100
         ) T2
         ON T1.DEP_CD = T2.DEP_CD AND T1.PMA_CD = T2.PMA_CD AND T1.CATEGORY_CD = T2.CATEGORY_CD AND T1.SUB_CATEGORY_CD = T2.SUB_CATEGORY_CD
+        left join ma1130 T3 on T1.ARTICLE_ID = T3.ARTICLE_ID and T1.EFFECTIVE_START_DATE = T3.EFFECTIVE_START_DATE
+        where T3.ma_cd = T.ma_cd and T3.structure_cd = T.city_cd
         ORDER BY T.DISPLAY_SEQ
     </select>
 
@@ -430,7 +470,7 @@
 
     <select id="selectMa4100" parameterType="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO" resultMap="ReMa4100">
         SELECT
-            row_number() OVER () as SERIAL,
+            row_number() OVER (ORDER BY T.DISPLAY_SEQ) as SERIAL,
             T.*,
             T1.STORE_NAME,
             T2.STRUCTURE_NAME AS CITY_NAME,
@@ -465,6 +505,46 @@
         ) T3
         ON T1.DO_CD = T3.STRUCTURE_CD AND T1.ZO_CD = T3.ADMIN_STRUCTURE_CD
         ORDER BY T.DISPLAY_SEQ
+    </select>
+
+    <select id="getMMPromotionPattern" resultType="java.lang.String">
+        select
+	        promotion_diff
+		from ma4050
+		where promotion_cd = #{promotionCd,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getMa4150" parameterType="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO" resultMap="ReMa4150">
+        select a.promotion_cd,a.article_id,a.city_cd,d.structure_name as city_name,a.ma_cd,e.ma_name,
+               a.selling_price,a.promotion_price,a.display_seq,b.article_name
+        from ma4150 a
+             left join ma0020 d on a.city_cd = d.structure_cd and d.structure_level = '2'
+             left join ma0200 e on a.ma_cd = e.ma_cd and e.effective_sts = '10',
+             ma1100 b,
+             ma4040 c
+        where
+            a.promotion_cd = #{promotionCd,jdbcType=VARCHAR}
+            and a.promotion_cd = c.promotion_cd
+            and a.article_id = b.article_id
+            and c.create_ymd between b.effective_start_date and b.effective_end_date
+        order by a.article_id,a.display_seq
+    </select>
+
+    <select id="getMa4155" parameterType="cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO" resultMap="ReMa4155">
+        select a.promotion_cd,a.article_id,d.structure_name as city_name,a.ma_cd,e.ma_name,
+               a.selling_price,a.promotion_price,a.display_seq,b.article_name,a.reqd_qty,a.is_promotion
+        from ma4155 a
+             left join ma0020 d on a.city_cd = d.structure_cd and d.structure_level = '2'
+             left join ma0200 e on a.ma_cd = e.ma_cd and e.effective_sts = '10',
+             ma1100 b,
+             ma4040 c
+        where
+            a.promotion_cd = #{promotionCd,jdbcType=VARCHAR}
+            and a.promotion_cd = c.promotion_cd
+            and a.article_id = b.article_id
+            and c.create_ymd between b.effective_start_date and b.effective_end_date
+            and a.is_promotion = #{isPromotion,jdbcType=VARCHAR}
+        order by a.article_id,a.display_seq
     </select>
 
 </mapper>

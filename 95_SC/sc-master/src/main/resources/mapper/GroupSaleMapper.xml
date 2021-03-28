@@ -60,15 +60,11 @@
                 COALESCE((A.return_amt_t - A.return_amt_notax_t),0) AS return_tax_t,
                 COALESCE((A.sale_amt_t - A.sale_cost_t),0) AS gross_margin,
                 CASE WHEN A.sale_cost_t = 0 OR A.sale_cost_t IS NULL THEN 0
-                    ELSE ROUND(( A.sale_amt_t - A.sale_cost_t ) / A.sale_cost_t, 4 ) END AS gross_margin_rate,
-                C.vendor_id
+                    ELSE ROUND(( A.sale_amt_t - A.sale_cost_t ) / A.sale_cost_t, 4 ) END AS gross_margin_rate
             FROM
                 SK3000 A,
-                MA1200 B,
-                ma2240 C
+                MA1200 B
             WHERE A.article_id = B.parent_article_id
-            AND A.store_cd = C.store_cd
-            AND B.parent_article_id = C.article_id
         <if test="storeCd != null and storeCd != ''">
             AND A.store_cd = #{storeCd,jdbcType=VARCHAR}
         </if>
@@ -95,10 +91,11 @@
         LEFT JOIN (
         SELECT article_id,default_barcode barcode,vendor_id from ma1110 where  #{businessDate,jdbcType=VARCHAR}
         BETWEEN effective_start_date AND effective_end_date
+        and is_default = '1'
         and structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
         (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd,jdbcType=VARCHAR}))
         ) T3
-        ON T.article_id = T3.article_id AND T3.vendor_id  = T.vendor_id
+        ON T.article_id = T3.article_id
         ORDER BY T.acc_date DESC, T.article_id
     </select>
 

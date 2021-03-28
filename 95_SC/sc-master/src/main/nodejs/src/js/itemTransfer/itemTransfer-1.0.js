@@ -140,7 +140,7 @@ define('itemTransfer', function () {
     var initAutomatic = function(){
         //原因
         reason=$("#reason").myAutomatic({
-            url:url_root+"/cm9010/getResonCode",
+            url:url_root+"/cm9010/getReasonCode",
             ePageSize:10,
             startCount:0,
         })

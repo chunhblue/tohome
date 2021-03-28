@@ -422,14 +422,14 @@ define('difference', function () {
             loadCompleteEvent:function(self){
                 selectTrTemp = null;//清空选择的行
 
-                if(checkValue == '0'){
-                    $('#query_type_text').text('Vendor Code');
-                    tableGrid.hideColumn("deliveryCenterId,deliveryCenterName");
-                    tableGrid.showColumn("vendorId,vendorName");
-                }else{
+                if(checkValue === '1'){
                     $('#query_type_text').text('DC No.');
                     tableGrid.hideColumn("vendorId,vendorName");
                     tableGrid.showColumn("deliveryCenterId,deliveryCenterName");
+                }else{ // checkValue初始默认为null,显示vendor
+                    $('#query_type_text').text('Vendor Code');
+                    tableGrid.hideColumn("deliveryCenterId,deliveryCenterName");
+                    tableGrid.showColumn("vendorId,vendorName");
                 }
                 return self;
             },

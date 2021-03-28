@@ -142,7 +142,12 @@
             <if test="vendorId != null and vendorId != ''">
                 AND T.vendor_id = #{vendorId,jdbcType=VARCHAR}
             </if>
-            AND ma1100.article_id not in (select  parent_article_id  from  ma1200)
+            AND ma1100.article_id not in (select  parent_article_id  from  ma1200
+            where 1=1
+            <if test="stockDate != null and stockDate != ''">
+                AND  #{stockDate} between ma1200.effective_start_date  AND ma1200.effective_end_date
+            </if>
+            )
          ORDER BY
           ma1100.article_id ASC
             <if test="flg">
@@ -213,7 +218,11 @@
             <if test="vendorId != null and vendorId != ''">
                 AND T.vendor_id = #{vendorId,jdbcType=VARCHAR}
             </if>
-            AND ma1100.article_id not in (select  parent_article_id  from  ma1200)
+            AND ma1100.article_id not in (select  parent_article_id  from  ma1200
+            where 1=1
+            <if test="stockDate != null and stockDate != ''">
+                AND  #{stockDate} between ma1200.effective_start_date  AND ma1200.effective_end_date
+            </if>)
             ORDER BY
             ma1100.article_id ASC)AS A
         </select>

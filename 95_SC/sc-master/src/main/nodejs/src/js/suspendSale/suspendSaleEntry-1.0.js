@@ -506,7 +506,6 @@ define('suspendSaleEntry', function () {
             let articleId = m.articleId.attr("k");
             let accDate = subfmtDate(m.acc_date.val());
             let changeId = m.changeId.val();
-            let barcode = m.barcode.val();
             let oldPrice = m.oldPrice.val();
             if (articleId == null || articleId === "") {
                 _common.prompt("Please select a item first!", 5, "error");/*请选择店铺*/
@@ -534,7 +533,7 @@ define('suspendSaleEntry', function () {
                     changeId: changeId,
                     serialNo: $(this).find('td[tag=serialNo]').text(),//序号
                     storeCd: $(this).find('td[tag=storeCd]').text(),//商品码
-                    barcode: barcode,//条码
+                    barcode: $(this).find('td[tag=barcode]').text(),//条码
                     oldPrice: reThousands(oldPrice),//当前价格
                     newPrice: "-1",// 暂停销售, 价格 -1
                 }

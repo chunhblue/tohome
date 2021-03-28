@@ -44,6 +44,8 @@ define('cashierDetail', function () {
         articleShortName: null,//商品名
         payType: null,//支付类型
         calType: null,
+        saleSerialNo: null, // 电子小票编号
+        totalAmount:null,
         payAmt: null//支付金额
     }
     // 创建js对象
@@ -97,10 +99,11 @@ define('cashierDetail', function () {
             var endDate = subfmtDate(m.sale_end_date.val());
             var posId = m.posId.val().trim();
             var cashierId = m.cashierId.val().trim();
+            var saleSerialNo = m.saleSerialNo.val();
             var shift = m.shift.val().trim();
             var payType, calType, payAmt;
             paramGrid = "storeCd=" + storeCd + "&startDate=" + startDate + "&endDate="
-                + endDate + "&cashierId=" + cashierId + "&shift=" + shift + "&posId=" + posId;
+                + endDate + "&cashierId=" + cashierId + "&shift=" + shift + "&posId=" + posId+ "&saleSerialNo="+saleSerialNo;
             if ((m.payType.val() != null && m.payType.val() !== '')  || (m.payAmt.val() != null && m.payAmt.val() !== '')) {
                 payType = m.payType.val().trim();
                 calType = m.calType.val().trim();
@@ -142,16 +145,18 @@ define('cashierDetail', function () {
         });
         //检索按钮点击事件
         m.search.on("click", function () {
+
             if (verifySearch()) {
                 var storeCd = $("#aStore").attr("k");
                 var startDate = subfmtDate(m.sale_start_date.val());
                 var endDate = subfmtDate(m.sale_end_date.val());
                 var posId = m.posId.val().trim();
                 var cashierId = m.cashierId.val().trim();
+                var saleSerialNo = m.saleSerialNo.val();
                 var shift = m.shift.val().trim();
                 var payType, calType, payAmt;
                 paramGrid = "storeCd=" + storeCd + "&startDate=" + startDate + "&endDate="
-                    + endDate + "&cashierId=" + cashierId + "&shift=" + shift + "&posId=" + posId;
+                    + endDate + "&cashierId=" + cashierId + "&shift=" + shift + "&posId=" + posId + "&saleSerialNo="+saleSerialNo;
                 if ((m.payType.val() != null && m.payType.val() !== '') || (m.payAmt.val() != null && m.payAmt.val() !== '')) {
                     payType = m.payType.val().trim();
                     calType = m.calType.val().trim();
@@ -168,6 +173,18 @@ define('cashierDetail', function () {
                 tableGrid.loadData(null);
                 $("#payDetailTable > .zgGrid-tbody").empty();
                 $("#itemDetailTable > .zgGrid-tbody").empty();
+                $.myAjaxs({
+                    url:url_left+"/getTotalAmount",
+                    async: true,
+                    cache: false,
+                    type: "post",
+                    data:paramGrid,
+                    dataType: "json",
+                    success:function (result) {
+                          m.totalAmount.val(toThousands(result.data));
+                    }
+                })
+
             }
         });
 
@@ -188,13 +205,9 @@ define('cashierDetail', function () {
             $("#aStore").css("border-color", "#CCC");
             selectTrTemp = null;
             _common.clearTable();
+            m.totalAmount.val("");
         });
 
-        // $('input[type=number]').keypress(function (e) {
-        //     if (!String.fromCharCode(e.keyCode).match(/[0-9\.]/)) {
-        //         return false;
-        //     }
-        // });
 
         m.payAmt.blur(function(){
             m.payAmt.val(toThousands(this.value));
@@ -233,7 +246,7 @@ define('cashierDetail', function () {
         });
     }
 
-    //获取pos机号下拉
+    //获取pos机号下拉（从sa0160取的posId）
     var getSelectPosId = function (storeCd, val) {
         if (storeCd != null && storeCd != '') {
             $.myAjaxs({
@@ -353,7 +366,7 @@ define('cashierDetail', function () {
         tableGrid = $("#zgGridTtable").zgGrid({
             title: "Selling List(Click a record to view the item details.)",
             param: paramGrid,
-            colNames: ["Store No.", "Tran Serial No", "Acc Date", "Sales Date", "POS No.", "Cashier", "Shift", "Receipt No.", "Selling Time", "Membership ID", "Subtotal", "Discount", "Total"],
+            colNames: ["Store No.", "Tran Serial No", "Acc Date", "Sales Date", "POS No.", "Cashier", "Shift", "Receipt No.", "Selling Time", "Membership ID", "Subtotal",  "Over Amount", "Total"],
             colModel: [
                 {name: "storeCd", type: "text", text: "right", width: "100", ishide: true, css: ""},
                 {name: "tranSerialNo", type: "text", text: "right", width: "100", ishide: true, css: ""},
@@ -388,13 +401,13 @@ define('cashierDetail', function () {
                 selectTrTemp = null;//清空选择的行
                 return self;
             },
+
             eachTrClick: function (trObj, tdObj) {//正常左侧点击
                 selectTrTemp = trObj;
                 trClick_table();
             },
         });
     }
-
     //表格初始化-支付类型样式
     var initTable2 = function () {
         tableGrid1 = $("#payDetailTable").zgGrid({

@@ -33,6 +33,8 @@ public class PI0100DTOC extends GridDataDTO {
     private String updateYmd;
     private String updateHms;
     private String createUserName;
+    private String articleId;
+    private String barcode;
     // 明细
     private List<PI0110DTOC> details;
 

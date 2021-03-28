@@ -142,7 +142,7 @@ define('receipt', function () {
             let businessDate = $("#businessDate").val();
             // let businessDate = new Date().Format('yyyyMMdd');
 
-            if (_result.data==null&&piDate != businessDate) {
+            if (_result.data==null&&piDate !== businessDate) {
                 // 请在盘点当天完成
                 _common.prompt("Please complete the entry on the day of stocktaking!",5,"error");
                 return;
@@ -171,7 +171,7 @@ define('receipt', function () {
                 _common.prompt("Daily settlement, cannot stocktaking!",5,"error");
                 return;
             }
-            let auditFlg = _result.data == 5 || _result.data == 6 || _result.data == 10 || _result.data == null;
+            let auditFlg = _result.data === 5 || _result.data === 6 ||  _result.data == null;
             // 判断审核状态
             if(auditFlg){
                 saveParamToSession();
@@ -539,7 +539,7 @@ define('receipt', function () {
                 let cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,piDate,piStatusCode");
                 _common.getRecordStatus(cols['piCd'],m.typeId.val(),function (result) {
                     _result = result;
-                    $('#importFiles').prop('disabled',_result.data!=null);
+                    $('#importFiles').prop('disabled',(_result.data!=null));
                 });
             },
             buttonGroup:[

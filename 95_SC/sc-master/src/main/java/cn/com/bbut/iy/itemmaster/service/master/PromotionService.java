@@ -65,4 +65,14 @@ public interface PromotionService {
      * 查询促销例外店铺设定
      */
     GridDataDTO<Ma4100DTO> getMa4100(PromotionParamDTO dto);
+
+    /**
+     * 查询直接促销
+     */
+    GridDataDTO<Ma4150DTO> getMa4150(PromotionParamDTO param);
+
+    /**
+     * 查询bill value
+     */
+    GridDataDTO<Ma4155DTO> getMa4155(PromotionParamDTO param);
 }

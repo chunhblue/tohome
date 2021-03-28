@@ -666,7 +666,7 @@ define('vouchersList', function () {
 			}
 		});
 		reason=$("#reason").myAutomatic({
-			url:url_root+"/cm9010/getResonCode",
+			url:url_root+"/cm9010/getAllReasonCode",
 			ePageSize:10,
 			startCount:0,
 		})

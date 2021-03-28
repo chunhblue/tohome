@@ -85,4 +85,9 @@ public class CashierDetailParam  extends GridParamDTO {
     /** 权限包含的所有店铺编号 */
     private Collection<String> stores;
 
+    /**
+     * 销售流水号
+     */
+    private String saleSerialNo;
+
 }

@@ -138,11 +138,9 @@
 										<input id="od_date" placeholder="Order Date" class="form-control input-sm select-date" type="text" value="">
 									</div>
 
-									<label for="orderType"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Order Type</label>
-									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-										<select id="orderType" class="form-control input-sm">
-											<option value="">-- All/Please Select --</option>
-										</select>
+									<label for="orderType" hidden class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Order Type</label>
+									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" hidden>
+										<input id="orderType" class="form-control input-sm" type="text" value="">
 									</div>
 
 									<label for="reviewSts"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">PO Status</label>

@@ -297,5 +297,7 @@
 <input type="hidden" id="reviewId" value="${reviewId!}">
 <input type="hidden" id="searchJson" value=""/>
 <input type="hidden" id="orderDiff" value=""/>
+<input type="hidden" id="articleId" value=""/>
+<input type="hidden" id="isFreeItem" value=""/>
 </body>
 </html>

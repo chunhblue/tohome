@@ -88,7 +88,7 @@
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <div class="form-horizontal">
                                 <div class="form-group">
-                                    <label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null">Document Date</label>
+                                    <label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null" style="white-space: nowrap">Document Date</label>
                                     <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
                                         <input id="ud_start_date"  nextele="ud_end_date" placeholder="Start Date" class="form-control input-sm select-date" type="text" value="">
                                     </div>
@@ -107,7 +107,8 @@
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                                         <input type="text" id="pog_name" class="form-control input-sm">
                                     </div>
-
+                                </div><!-- form-group -->
+                                <div class="form-group">
                                     <label for="aStore" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null">Store</label>[#-- 店铺 --]
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                                         <div class="aotu-pos">
@@ -116,7 +117,19 @@
                                             <a id="storeRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
                                         </div>
                                     </div>
-                                </div><!-- form-group -->
+
+                                    <label for="reviewStatus"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space:nowrap">Document Status</label>
+                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+                                        <select id="reviewStatus" class="form-control input-sm" nextele="reviewStatus">
+                                            <option value="">-- All/Please Select --</option>
+                                            <option value="1">Pending</option>
+                                            <option value="5">Rejected</option>
+                                            <option value="6">Withdrawn</option>
+                                            <option value="7">Expired</option>
+                                            <option value="10">Approved</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">

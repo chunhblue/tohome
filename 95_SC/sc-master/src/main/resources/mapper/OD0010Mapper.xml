@@ -869,7 +869,8 @@
         </if>
           AND A.order_date BETWEEN D.effective_start_date AND D.effective_end_date
           AND A.order_id = E.order_id
-          and a.store_cd IN
+          AND COALESCE(E.total_order_qty,0)-COALESCE(E.total_receive_qty,0) !=0
+          AND a.store_cd IN
           <foreach item="store" index="index" collection="stores"
                    open="(" separator="," close=")">
             #{store,jdbcType=VARCHAR}
@@ -944,6 +945,7 @@
       </if>
       AND A.order_date BETWEEN D.effective_start_date AND D.effective_end_date
       AND A.order_id = E.order_id
+      AND COALESCE(E.total_order_qty,0)-COALESCE(E.total_receive_qty,0) !=0
       and a.store_cd IN
       <foreach item="store" index="index" collection="stores"
                open="(" separator="," close=")">
@@ -1287,4 +1289,182 @@
         select store_cd,order_id,article_id,correction_difference,last_correction_difference
         from od0010 where order_id = #{orderId,jdbcType=VARCHAR};
   </select>
+
+  <!-- 发货单，收货单差异条件查询一览 -->
+  <select id="selectShopDiffByCondition" resultType="cn.com.bbut.iy.itemmaster.dto.difference.DifferenceListResult"
+          parameterType="cn.com.bbut.iy.itemmaster.dto.difference.DifferenceListParam">
+    SELECT
+    A.order_id,
+    A.delivery_order_id,
+    A.delivery_date,
+    B.update_ymd receive_date,
+    B.receive_id,
+    D.store_cd,
+    D.store_name,
+    A.vendor_id AS deliveryCenterId,
+    G.warehouse_name AS deliveryCenterName,
+    COALESCE(E.total_order_qty,0) AS total_order_qty,
+    COALESCE(F.total_receive_qty,0) AS total_receive_qty,
+    COALESCE(E.total_order_qty,0)-COALESCE(F.total_receive_qty,0) AS totalAmt,
+    A.create_ymd
+    FROM
+    od0001 A,
+    od0000_t B,
+    (SELECT receive_id,order_id,MAX (CONCAT(create_ymd,create_hms)) create_ymdhms
+    FROM od0000_t GROUP BY receive_id,order_id) C,
+    MA1000 D,
+    MA5321 G,
+    (SELECT delivery_order_id, SUM (order_qty) total_order_qty
+    FROM od0011  GROUP BY delivery_order_id) E,
+    (SELECT receive_id, SUM ( receive_qty ) total_receive_qty
+    FROM od0010_t  GROUP BY receive_id) F
+    WHERE
+    1=1
+    AND A.order_id = B.order_id
+    AND B.order_id = C.order_id
+    AND B.review_status = 20
+    AND B.create_ymd = LEFT (C.create_ymdhms,8)
+    AND B.create_hms = RIGHT (C.create_ymdhms,6)
+    AND A.store_cd = D.store_cd
+    AND A.vendor_id = G.warehouse_no
+    AND A.delivery_date BETWEEN D.effective_start_date AND D.effective_end_date
+    AND A.order_id = E.delivery_order_id
+    AND B.receive_id = F.receive_id
+    AND COALESCE(E.total_order_qty,0)-COALESCE(F.total_receive_qty,0) !=0
+    AND a.store_cd IN
+    <foreach item="store" index="index" collection="stores"
+             open="(" separator="," close=")">
+      #{store,jdbcType=VARCHAR}
+    </foreach>
+    <if test="dc != null and dc != ''" >
+      and lower(a.vendor_id) like lower(CONCAT('%',#{dc},'%'))
+    </if>
+    <if test="orderId != null and orderId != ''" >
+      and lower(a.order_id) like lower(CONCAT('%',#{orderId},'%'))
+    </if>
+    <if test="deliveryOrderId != null and deliveryOrderId != ''" >
+      and lower(a.delivery_order_id) like lower(CONCAT('%',#{deliveryOrderId},'%'))
+    </if>
+    <if test="deliveryStartDate != null and deliveryStartDate != ''" >
+      and a.delivery_date >=  #{deliveryStartDate}
+    </if>
+    <if test="deliveryEndDate != null and deliveryEndDate != ''" >
+      and #{deliveryEndDate} >= a.delivery_date
+    </if>
+    <if test="receiveStartDate != null and receiveStartDate != ''" >
+      and b.update_ymd >=  #{receiveStartDate}
+    </if>
+    <if test="receiveEndDate != null and receiveEndDate != ''" >
+      and #{receiveEndDate} >= b.update_ymd
+    </if>
+    order by order_date desc
+    <if test="flg and limitStart >= 0">
+      limit ${rows} offset ${limitStart}
+    </if>
+  </select>
+
+  <select id="selectShopDiffByConditionCount" resultType="java.lang.Long" parameterType="cn.com.bbut.iy.itemmaster.dto.difference.DifferenceListParam" >
+    SELECT
+    count(*)
+    FROM
+    od0001 A,
+    od0000_t B,
+    (SELECT receive_id,order_id,MAX (CONCAT(create_ymd,create_hms)) create_ymdhms
+        FROM od0000_t GROUP BY receive_id,order_id) C,
+    MA1000 D,
+    MA5321 G,
+    (SELECT delivery_order_id, SUM (order_qty) total_order_qty
+        FROM od0011  GROUP BY delivery_order_id) E,
+    (SELECT receive_id, SUM ( receive_qty ) total_receive_qty
+        FROM od0010_t  GROUP BY receive_id) F
+    WHERE
+    1=1
+    AND A.order_id = B.order_id
+    AND B.order_id = C.order_id
+    AND B.review_status = 20
+    AND B.create_ymd = LEFT (C.create_ymdhms,8)
+    AND B.create_hms = RIGHT (C.create_ymdhms,6)
+    AND A.store_cd = D.store_cd
+    AND A.vendor_id = G.warehouse_no
+    AND A.delivery_date BETWEEN D.effective_start_date AND D.effective_end_date
+    AND A.order_id = E.delivery_order_id
+    AND B.receive_id = F.receive_id
+    AND COALESCE(E.total_order_qty,0)-COALESCE(F.total_receive_qty,0) !=0
+    AND a.store_cd IN
+    <foreach item="store" index="index" collection="stores"
+             open="(" separator="," close=")">
+      #{store,jdbcType=VARCHAR}
+    </foreach>
+    <if test="dc != null and dc != ''" >
+      and lower(a.vendor_id) like lower(CONCAT('%',#{dc},'%'))
+    </if>
+    <if test="orderId != null and orderId != ''" >
+      and lower(a.order_id) like lower(CONCAT('%',#{orderId},'%'))
+    </if>
+    <if test="deliveryOrderId != null and deliveryOrderId != ''" >
+      and lower(a.delivery_order_id) like lower(CONCAT('%',#{deliveryOrderId},'%'))
+    </if>
+    <if test="deliveryStartDate != null and deliveryStartDate != ''" >
+      and a.delivery_date >=  #{deliveryStartDate}
+    </if>
+    <if test="deliveryEndDate != null and deliveryEndDate != ''" >
+      and #{deliveryEndDate} >= a.delivery_date
+    </if>
+    <if test="receiveStartDate != null and receiveStartDate != ''" >
+      and b.update_ymd >=  #{receiveStartDate}
+    </if>
+    <if test="receiveEndDate != null and receiveEndDate != ''" >
+      and #{receiveEndDate} >= b.update_ymd
+    </if>
+  </select>
+
+  <select id="selectShopDiffByOrderId" resultType="cn.com.bbut.iy.itemmaster.dto.difference.DifferenceItemsResult" parameterType="cn.com.bbut.iy.itemmaster.dto.difference.DifferenceListParam">
+    SELECT DISTINCT T.barcode, A.article_id, d.article_name, e.unit_name, A.order_tax
+	, A.order_qty, f.receive_qty
+	, COALESCE(A.order_qty, 0) - COALESCE(f.receive_qty, 0) AS adjustQty
+FROM od0011 A
+	LEFT JOIN od0001 b ON b.order_id = A.delivery_order_id
+	LEFT JOIN ma1100 d ON d.article_id = A.article_id
+	LEFT JOIN ma0220 e ON e.unit_id = d.sales_unit_id
+	LEFT JOIN (
+	SELECT
+		order_id,
+		article_id,
+		receive_qty
+	FROM
+		od0010_t
+	) f on A.delivery_order_id = f.order_id and A.article_id = f.article_id
+	LEFT JOIN (
+		SELECT ma11.article_id, ma11.vendor_id, ma11.default_barcode AS barcode, ma22.store_cd, ma11.structure_cd
+		FROM ma1110 ma11, ma2240 ma22
+		WHERE ma11.vendor_id = ma22.vendor_id
+			AND ma11.article_id = ma22.article_id
+			AND #{businessDate,jdbcType=VARCHAR} BETWEEN ma11.effective_start_date AND ma11.effective_end_date
+	) T
+	ON A.store_cd = T.store_cd
+		AND A.article_id = T.article_id
+		AND T.structure_cd = (
+			SELECT ma2.admin_structure_cd
+			FROM ma0020 ma2
+			WHERE ma2.structure_cd = (
+				SELECT ma1.admin_structure_cd
+				FROM ma0020 ma1
+				WHERE ma1.structure_cd = A.store_cd
+			)
+		)
+WHERE 1 = 1
+	AND a.delivery_order_id = #{orderId}
+    limit ${limitEnd} offset ${limitStart}
+    </select>
+
+  <!--差异商品-->
+  <select id="selectShopDiffByOrderIdCount" resultType="java.lang.Long" parameterType="cn.com.bbut.iy.itemmaster.dto.difference.DifferenceListParam">
+    SELECT DISTINCT
+        COUNT (A.*)
+    FROM
+        od0011 A
+    WHERE
+        1 = 1
+        AND a.delivery_order_id = #{orderId}
+    </select>
 </mapper>

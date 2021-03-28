@@ -258,7 +258,7 @@
        AND concat(lower( MA1.article_id ),'',lower( MA1.article_name ),'',lower( MA1.article_name_en ),'',lower( MA1.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
         </if>
         <if test="param.barcode !=null and param.barcode !=''">
-            AND lower(MA1.barcode) like lower(CONCAT('%',#{param.barcode},'%'))
+            AND lower(c.barcode) like lower(CONCAT('%',#{param.barcode},'%'))
         </if>
         <if test="param.flg">
             LIMIT ${param.rows} OFFSET ${param.limitStart}
@@ -458,7 +458,7 @@
             AND concat(lower( MA1.article_id ),'',lower( MA1.article_name ),'',lower( MA1.article_name_en ),'',lower( MA1.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
         </if>
         <if test="param.barcode !=null and param.barcode !=''">
-            AND lower(MA1.barcode) like lower(CONCAT('%',#{param.barcode},'%'))
+            AND lower(c.barcode) like lower(CONCAT('%',#{param.barcode},'%'))
         </if>)as tmp
     </select>
 
@@ -758,6 +758,13 @@
         </foreach>
         <if test="param.deliveryCenterId != null and param.deliveryCenterId != ''">
             AND A.delivery_center_id = #{param.deliveryCenterId}
+        </if>
+        <if test="param.barcode !=null and param.barcode !=''">
+            AND lower(c.barcode) like lower(CONCAT('%',#{param.barcode},'%'))
+        </if>
+        <if test="param.articleName !=null and param.articleName !=''">
+            AND concat(lower( c.article_id ),'',lower(  MA1.article_name ),'',lower( MA1.article_name_en ),'',lower(
+            MA1.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
         </if>
         <include refid="returnedDailyCondition"></include>
         ) cc

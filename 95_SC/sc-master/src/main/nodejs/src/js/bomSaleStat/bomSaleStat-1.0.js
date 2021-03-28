@@ -174,6 +174,13 @@ define('groupSale', function () {
 		});
 	}
 
+	var isEmpty = function (str) {
+		if (str == null || str === undefined || str === '') {
+			return '';
+		}
+		return str;
+	};
+
 	// 生成表格
 	var getTrVal = function(data){
 		if(data==null||data.length==0){return false;}
@@ -203,12 +210,12 @@ define('groupSale', function () {
 			var re = data[i];
 			_str = _str + "<tr>" +
 				"<td>" + fmtIntDate(re.accDate) + "</td>" +
-				"<td>" + re.storeCd + "</td>" +
-				"<td  style='text-align:left'>" + re.storeName + "</td>" +
-				"<td>" + re.barcode + "</td>" +
-				"<td>" + re.articleId + "</td>" +
-				"<td style='text-align:left'>" + re.articleName + "</td>" +
-				"<td>" + re.salesUnit + "</td>" +
+				"<td>" + isEmpty(re.storeCd) + "</td>" +
+				"<td  style='text-align:left'>" + isEmpty(re.storeName) + "</td>" +
+				"<td>" + isEmpty(re.barcode) + "</td>" +
+				"<td>" + isEmpty(re.articleId) + "</td>" +
+				"<td style='text-align:left'>" + isEmpty(re.articleName) + "</td>" +
+				"<td>" + isEmpty(re.salesUnit) + "</td>" +
 				"<td>"+ toThousands(re.saleQtyT) +"</td>" +
 				"<td>" + toThousands(re.saleAmtT) + "</td>" +
 				"<td>" + toThousands(re.saleTaxT) + "</td>" +

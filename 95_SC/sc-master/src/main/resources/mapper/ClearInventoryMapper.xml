@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.clearInventory.ClearInventoryMapper">
+
+    <sql id="Example_Where_Clause">
+        <if test="param.articleId != null and param.articleId != ''">
+            AND lower(b.article_id) like lower(concat('%',#{param.articleId},'%'))
+        </if>
+        <if test="param.articleName != null and param.articleName != ''">
+            AND lower(b.article_name) like lower(concat('%',#{param.articleName},'%'))
+        </if>
+        <if test="param.depCd != null and param.depCd != ''">
+            AND b.dep_cd = #{param.depCd}
+        </if>
+        <if test="param.pmaCd != null and param.pmaCd != ''">
+            AND b.pma_cd = #{param.pmaCd}
+        </if>
+        <if test="param.categoryCd != null and param.categoryCd != ''">
+            AND b.category_cd = #{param.categoryCd}
+        </if>
+        <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
+            AND b.sub_category_cd = #{param.subCategoryCd}
+        </if>
+    </sql>
+
+    <!--将数据存进临时表-->
+    <insert id="insertTempTable">
+        CREATE TEMP TABLE ${tempTableName} AS
+        <foreach collection="list" item="item" index="index" separator="UNION ALL">
+            SELECT #{item.articleId,jdbcType=VARCHAR} as article_id
+        </foreach>
+    </insert>
+
+    <!--利用临时表补充在库量-->
+    <select id="getItemInfo" resultType="cn.com.bbut.iy.itemmaster.dto.clearInventory.ClearInventoryDTO">
+        SELECT
+            #{businessDate} as accDate,
+            a.article_id,
+            sum(c.on_hand_qty) as on_hand_qty
+        FROM
+            ${tempTableName} a,
+            sk0000_today c
+        WHERE
+            a.article_id = c.article_id
+            AND c.effective_date = #{businessDate}
+        GROUP BY a.article_id
+    </select>
+
+    <insert id="insertToDB">
+        INSERT INTO sk0100(
+            acc_date, article_id, on_hand_qty,
+            create_user_id, create_ymd, create_hms
+        ) VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (
+            #{item.accDate},
+            #{item.articleId},
+            #{item.onHandQty},
+            #{item.createUserId},
+            #{item.createYmd},
+            #{item.createHms}
+            )
+        </foreach>
+    </insert>
+
+    <!--根据主键删除记录-->
+    <delete id="deleteByKey">
+        <if test="list != null and list.size >0">
+            DELETE FROM sk0100 WHERE acc_date = #{businessDate} AND article_id IN (
+            <foreach collection="list" item="item" index="index" separator="," >
+                 #{item.articleId}
+            </foreach>
+            )
+        </if>
+    </delete>
+
+    <select id="searchCount" resultType="int">
+        SELECT
+            count(a.*)
+        FROM
+            sk0100 a,
+            ma1100 b
+        WHERE
+            a.article_id = b.article_id
+            AND COALESCE(NULLIF(TRIM(a.upload_flg), ''), '0') != '1'
+            AND a.acc_date = #{businessDate}
+        <include refid="Example_Where_Clause"></include>
+    </select>
+
+    <select id="search" resultType="cn.com.bbut.iy.itemmaster.dto.clearInventory.ClearInventoryDTO">
+        SELECT
+            a.acc_date as accDate,
+            a.article_id as articleId,
+            b.article_name as articleName,
+            b.spec as spec,
+            b.sales_unit_id as uom,
+            a.on_hand_qty as onHandQty
+        FROM
+            sk0100 a,
+            ma1100 b
+        WHERE
+            a.article_id = b.article_id
+            AND COALESCE(NULLIF(TRIM(a.upload_flg), ''), '0') != '1'
+            AND a.acc_date = #{businessDate}
+        <include refid="Example_Where_Clause"></include>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+
+    <select id="getItemList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT DISTINCT
+            a.article_id as k,
+            concat(a.article_id,' ',a.article_name) as v
+        FROM
+            ma1100 a,
+            sk0000_today b
+        <where>
+            a.article_id = b.article_id
+            and b.effective_date = #{bsDate}
+            <if test="v!=null and v!=''">
+                AND (
+                    lower(a.article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                    OR lower(a.article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                )
+            </if>
+        </where>
+        GROUP BY
+            b.article_id,
+            a.article_id,
+            a.article_name
+    </select>
+
+    <select id="getArticle" resultType="cn.com.bbut.iy.itemmaster.dto.clearInventory.ClearInventoryDTO">
+        SELECT
+            a.article_id as articleId,
+            a.article_name as articleName,
+            a.spec,
+            a.sales_unit_id as uom,
+            SUM(b.on_hand_qty) as onHandQty
+        FROM
+            ma1100 a,
+            sk0000_today b
+        WHERE
+            a.article_id = b.article_id
+            AND b.effective_date = #{bsDate}
+            AND a.article_id = #{articleId}
+        GROUP BY
+            a.article_id,
+            a.article_name,
+            a.spec,
+            a.sales_unit_id
+        LIMIT 1
+    </select>
+
+    <insert id="insert">
+        INSERT INTO sk0100(
+        acc_date, article_id, on_hand_qty,
+        create_user_id, create_ymd, create_hms
+        ) VALUES (
+            #{param.accDate},
+            #{param.articleId},
+            #{param.onHandQty},
+            #{param.createUserId},
+            #{param.createYmd},
+            #{param.createHms}
+        ) ON CONFLICT (acc_date,article_id) DO UPDATE SET
+			on_hand_qty =  #{param.onHandQty},
+			update_user_id = #{param.createUserId},
+			update_ymd = #{param.createYmd},
+			update_hms = #{param.createHms}
+    </insert>
+</mapper>

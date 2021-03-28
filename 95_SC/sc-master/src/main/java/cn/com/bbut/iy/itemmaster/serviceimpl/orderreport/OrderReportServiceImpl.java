@@ -41,9 +41,11 @@ private OrderReportMapper orderReportMapper;
             item.setArticleId(param.getArticleId());
             item.setArticleName(param.getArticleName());
             item.setDepCd(param.getDepCd());
+            item.setPmaCd(param.getPmaCd());
             item.setCategoryCd(param.getCategoryCd());
             item.setSubCategoryCd(param.getSubCategoryCd());
             item.setAm(param.getAm());
+            item.setBarcode(param.getBarcode());
             List<OrderReportDTO> addItem = orderReportMapper.getItemInfo(item);
             for (OrderReportDTO dtoam : addItem) {
                 dtoam.setOrderDate(formatDate(item.getOrderDate()));

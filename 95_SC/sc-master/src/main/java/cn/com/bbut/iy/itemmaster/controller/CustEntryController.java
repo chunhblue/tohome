@@ -9,6 +9,8 @@ import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.ReturnDTO;
 import cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam;
+import cn.com.bbut.iy.itemmaster.dto.pi0100.ItemInStoreDto;
+import cn.com.bbut.iy.itemmaster.dto.pi0100c.CostOfDTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100DTOC;
 import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100ParamDTOC;
 import cn.com.bbut.iy.itemmaster.dto.pi0100c.StocktakeItemDTOC;
@@ -77,7 +79,7 @@ public class CustEntryController extends BaseAction{
     @RequestMapping(method = RequestMethod.GET)
     @Permission(codes = { PermissionCode.CODE_SC_COST_ENTRY_LIST_VIEW})
     public ModelAndView  CustOfEntry(HttpServletRequest request, HttpSession session,
-                                       Map<String, ?> model,String enterFlag,String piCdParam) {
+                                       Map<String, ?> model,String enterFlag,String piCdParam,String createBy,String piDateParam,String storeCd,String storeName) {
         User u = this.getUser(session);
         log.debug("User:{} 进入盘点结果一览画面", u.getUserId());
         ModelAndView mv = new ModelAndView("costdataentryLd/costPlanEntry");
@@ -86,6 +88,10 @@ public class CustEntryController extends BaseAction{
         mv.addObject("useMsg", "费用录入一览画面");
         mv.addObject("enterFlag",enterFlag); // 操作状态
         mv.addObject("piCdParam",piCdParam);
+        mv.addObject("ParamstoreCd", storeCd);
+        mv.addObject("ParamstoreName", storeName);
+        mv.addObject("piDateParam", piDateParam);
+        mv.addObject("createBy", createBy);
         mv.addObject("typeId", ConstantsAudit.TYPE_CUST_STOCK);
         mv.addObject("reviewId", ConstantsAudit.REVIEW_CUST_STOCK);
         this.saveToken(request);
@@ -105,7 +111,7 @@ public class CustEntryController extends BaseAction{
             PermissionCode.CODE_SC_COST_ENTRY_EDIT,
             PermissionCode.CODE_SC_COST_ENTRY_VIEW,
     })
-    public ModelAndView stocktakeDataEdit(String enterFlag,String piCdParam,HttpServletRequest request, HttpSession session,
+    public ModelAndView stocktakeDataEdit(String enterFlag,String piCdParam,String createBy,String piDateParam,String storeCd,String storeName,HttpServletRequest request, HttpSession session,
                                           Map<String, ?> model) {
         User u = this.getUser(session);
         log.debug("User:{} 进入费用录入编辑画面", u.getUserId());
@@ -116,6 +122,10 @@ public class CustEntryController extends BaseAction{
         mv.addObject("identity", 1);
         mv.addObject("enterFlag", enterFlag);
         mv.addObject("piCdParam", piCdParam);
+        mv.addObject("ParamstoreCd", storeCd);
+        mv.addObject("ParamstoreName", storeName);
+        mv.addObject("piDateParam", piDateParam);
+        mv.addObject("createBy", createBy);
         mv.addObject("useMsg", "费用录入编辑画面");
         mv.addObject("typeId", ConstantsAudit.TYPE_CUST_STOCK);
         mv.addObject("reviewId", ConstantsAudit.REVIEW_CUST_STOCK);
@@ -124,13 +134,39 @@ public class CustEntryController extends BaseAction{
     }
     @GetMapping("/getData")
     @ResponseBody
-    public ReturnDTO getData(String piCd, HttpServletRequest request, HttpSession session) {
-        PI0100DTOC pi0100c = custOfEntryService.getData(piCd);
+    public ReturnDTO getData(String piCd,String storeCd,String  createUser,String createYmd, HttpServletRequest request, HttpSession session) {
+        PI0100DTOC pioC=new PI0100DTOC();
+        pioC.setPiCd(piCd);
+        pioC.setCreateUserId(createUser);
+        pioC.setCreateYmd(createYmd);
+        pioC.setCreateYmd(storeCd);
+//        PI0100DTOC pi0100c = custOfEntryService.getData(piCd);
+        PI0100DTOC pi0100c = custOfEntryService.getDataPio(pioC);
         if (pi0100c==null) {
             return new ReturnDTO(false,"Query result is empty!");
         }
         return new ReturnDTO(true,"Query successful!",pi0100c);
     }
+
+    @GetMapping("/getInData")
+    @ResponseBody
+    public ReturnDTO getDataIn(String piCd,String storeCd,String  createUser,String createYmd, String articleId,String  barcode,HttpServletRequest request, HttpSession session) {
+        PI0100DTOC pioC=new PI0100DTOC();
+        pioC.setPiCd(piCd);
+        pioC.setCreateUserId(createUser);
+        pioC.setCreateYmd(createYmd);
+        pioC.setCreateYmd(storeCd);
+        pioC.setArticleId(articleId);
+        pioC.setBarcode(barcode);
+//        PI0100DTOC pi0100c = custOfEntryService.getData(piCd);
+        PI0100DTOC pi0100c = custOfEntryService.getDataPioIn(pioC);
+        if (pi0100c==null) {
+            return new ReturnDTO(false,"Query result is empty!");
+        }
+        return new ReturnDTO(true,"Query successful!",pi0100c);
+    }
+
+
     /**
      * 获得盘点计划中分类数据下的商品数据
      */
@@ -289,6 +325,50 @@ public class CustEntryController extends BaseAction{
             return stores;
         }
         // 只选择了一部分参数，生成查询参数，后台查询
+        MRoleStoreParam dto = new MRoleStoreParam();
+        dto.setRegionCd(param.getRegionCd());
+        dto.setCityCd(param.getCityCd());
+        dto.setDistrictCd(param.getDistrictCd());
+        stores = (Collection<String>) session.getAttribute(Constants.SESSION_STORES);
+        dto.setStoreCds(stores);
+        return mRoleStoreService.getStoreByChoose(dto);
+    }
+
+
+    @GetMapping("/getStoreCustItem")
+    @ResponseBody
+    public GridDataDTO<CostOfDTO> getCustItem(String searchJson , int page, int rows,
+                                              HttpServletRequest request, HttpSession session) {
+        Gson gson = new Gson();
+        ItemInStoreDto param = gson.fromJson(searchJson, ItemInStoreDto.class);
+        // 获取当前角色店铺权限
+        Collection<String> stores = getStores(session, param);
+        if(stores.size() == 0){
+            log.info(">>>>>>>>>>>>>>>>>>>>> get stores is null");
+            return new GridDataDTO<CostOfDTO>();
+        }
+        param.setStores(stores);
+//        param.setPage(page);
+        param.setRows(rows);
+//        param.setLimitStart((page - 1)*rows);
+        GridDataDTO<CostOfDTO> data = custOfEntryPlanService.storeAllItem(param);
+        return data;
+    }
+
+    private Collection<String> getStores(HttpSession session, ItemInStoreDto param){
+        Collection<String> stores = new ArrayList<>();
+        // 画面未选择，直接返回所有权限店铺
+        if(StringUtils.isEmpty(param.getRegionCd()) && StringUtils.isEmpty(param.getCityCd())
+                && StringUtils.isEmpty(param.getDistrictCd()) && StringUtils.isEmpty(param.getStoreCd())){
+            stores = (Collection<String>) session.getAttribute(Constants.SESSION_STORES);
+            return stores;
+        }
+        // 画面选择完成，返回已选择店铺
+        if(!StringUtils.isEmpty(param.getStoreCd())){
+            stores.add(param.getStoreCd());
+            return stores;
+        }
+        // 只选择了一部分参数，生成查询参数，后台查询判断
         MRoleStoreParam dto = new MRoleStoreParam();
         dto.setRegionCd(param.getRegionCd());
         dto.setCityCd(param.getCityCd());

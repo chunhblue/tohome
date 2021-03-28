@@ -37,12 +37,20 @@ public class Cm9010Controller extends BaseAction {
         }
         return cm9010Service.getList(codeValue);
     }
-    @RequestMapping(value = "/getResonCode")
+    @RequestMapping(value = "/getReasonCode")
     @ResponseBody
     public List<AutoCompleteDTO> getResonValue(HttpSession session, HttpServletRequest req,String v){
         List<AutoCompleteDTO> reason = cm9010Service.getReason(v);
         return  reason;
     }
+
+    @RequestMapping(value = "/getAllReasonCode")
+    @ResponseBody
+    public List<AutoCompleteDTO> getAllResonValue(HttpSession session, HttpServletRequest req,String v){
+        List<AutoCompleteDTO> reason = cm9010Service.getAllReason(v);
+        return  reason;
+    }
+
     @RequestMapping(value = "/getWriteOffReasonValue")
     @ResponseBody
     public List<AutoCompleteDTO> getResonWriteOffValue(HttpSession session, HttpServletRequest req,String v){

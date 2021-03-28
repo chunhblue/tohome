@@ -100,6 +100,7 @@
         </if>
         AND #{dto.orderDate,jdbcType=VARCHAR} BETWEEN 	ma1100.effective_start_date AND MA1100.effective_end_date
         AND ma1100.aging_stock_returnable='1'
+        AND MA1100.INVENTORY_item='1'
         <if test="dto.v!=null and dto.v!=''">
             AND (
             lower(ma1100.article_id) like lower(CONCAT('%',#{dto.v,jdbcType=VARCHAR},'%'))

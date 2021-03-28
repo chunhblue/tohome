@@ -1,13 +1,16 @@
 package cn.com.bbut.iy.itemmaster.serviceimpl.audit;
 
 import cn.com.bbut.iy.itemmaster.constant.ConstantsAudit;
+import cn.com.bbut.iy.itemmaster.dao.Ma1105Mapper;
 import cn.com.bbut.iy.itemmaster.dao.OD0000Mapper;
 import cn.com.bbut.iy.itemmaster.dao.OD0000TMapper;
 import cn.com.bbut.iy.itemmaster.dao.OD0010TMapper;
 import cn.com.bbut.iy.itemmaster.dao.audit.AuditBeanMapper;
 import cn.com.bbut.iy.itemmaster.dto.audit.AuditBean;
 import cn.com.bbut.iy.itemmaster.dto.base.CommonDTO;
+import cn.com.bbut.iy.itemmaster.dto.ma1105.Ma1104Dto;
 import cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TDTO;
+import cn.com.bbut.iy.itemmaster.entity.base.Ma1105;
 import cn.com.bbut.iy.itemmaster.entity.od0000.OD0000;
 import cn.com.bbut.iy.itemmaster.entity.od0000.OD0000Example;
 import cn.com.bbut.iy.itemmaster.service.audit.IAuditService;
@@ -19,7 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +45,8 @@ public class AuditServiceImpl implements IAuditService {
     private OD0000TMapper od0000TMapper;
     @Autowired
     private OD0010TMapper od0010TMapper;
+    @Autowired
+    private Ma1105Mapper ma1105Mapper;
 
     /**
      * 根据主键查询
@@ -199,6 +206,33 @@ public class AuditServiceImpl implements IAuditService {
                 }
             }
             flg = auditBeanMapper.modifyRecordStatus(table,key,recordCd,status,reviewId,userId,date,time);
+            if("ma1106".equals(table)){
+                // 获取POG的信息
+                Ma1104Dto pogInfo = ma1105Mapper.getPOGInformation(recordCd);
+                pogInfo.setReviewStatus(new BigDecimal(status));
+                if(status == 10){
+                    pogInfo.setIsExpired("0");
+                }else {
+                    pogInfo.setIsExpired("1");
+                }
+
+                // 更新ma1104的状态
+                ma1105Mapper.updatePOGAuditStatus(pogInfo);
+                if(status == 10){
+                    // 使之前上传货架的状态失效
+                    ma1105Mapper.updatePOGIsExpiredStatus(pogInfo);
+                    List<Ma1105> getExamples = ma1105Mapper.getTempShelf(recordCd);
+                    if(getExamples.size()>0){
+                        //删除已有货架的数据
+                        ma1105Mapper.deleteMa1105Byshelf(getExamples);
+                    }
+                    // 导入数据
+                    ma1105Mapper.insertShelfToMall05(recordCd);
+                }
+                if(status != 1){
+                    ma1105Mapper.deleteShelf(recordCd);
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
             flg = -1;
@@ -264,5 +298,10 @@ public class AuditServiceImpl implements IAuditService {
             auditNum = auditBeanMapper.checkAuditByUserIdAndPosition(storeCd,userId,position) ;
         }
         return auditNum;
+    }
+
+    @Override
+    public String getCorrType(String reTableName, String recordCd,Integer typeId) {
+        return auditBeanMapper.getCorrType(reTableName,recordCd,typeId);
     }
 }

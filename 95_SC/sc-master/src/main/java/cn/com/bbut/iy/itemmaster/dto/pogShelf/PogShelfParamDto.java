@@ -21,6 +21,8 @@ public class PogShelfParamDto  extends GridParamDTO {
 
     private String endDate;
 
+    private String reviewStatus;
+
     private int limitStart;
 
     // 分页

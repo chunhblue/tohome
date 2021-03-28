@@ -28,153 +28,122 @@
     </sql>
 
     <select id="getItemList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
-        SELECT
-        ma2.article_id AS k,
-        CONCAT(ma2.article_id,' ',ma2.article_name) AS v
+        SELECT DISTINCT
+            ma1.article_id AS k,
+            CONCAT(ma1.article_id,' ',ma1.article_name) AS v
         FROM
-        ma8300 ma1,
-        ma1100 ma2
-        WHERE
-        ma2.article_id = ma1.article_id
-        AND ma2.effective_start_date = ma1.effective_start_date
-        <if test="v!=null and v!=''">
-            AND (
-            lower(ma2.article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-            OR lower(ma2.article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-            )
-        </if>
+            ma8300 ma1
+        <where>
+            <if test="v!=null and v!=''">
+                (
+                lower(ma1.article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                OR lower(ma1.article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                )
+            </if>
+        </where>
     </select>
 
     <select id="searchCount" resultType="java.lang.Integer">
         SELECT
         count (a.*)
         FROM
-        (SELECT distinct
-        ma1.store_cd AS storeCd,
-        ma3.store_name AS storeName,
-        ma1.article_id AS articleId,
-        ma11.default_barcode barcode,
-        ma22.vendor_id,
-        ma2.article_name AS articleName,
-        ma1.old_price AS oldPrice,
-        ma1.new_price AS newPrice,
-        ma2.name_en_price_label AS priceLabelEnName,
-        ma2.name_vn_price_label AS priceLabelVnName,
-        ma1.effective_start_date AS effectiveStartDate,
-        ma07.dep_cd,
-        concat(ma07.dep_cd,' ',ma07.dep_name) dep_name,
-        ma08.pma_cd,
-        concat(ma08.pma_cd,' ',ma08.pma_name) pma_name,
-        ma09.category_cd,
-        concat(ma09.category_cd,' ',ma09.category_name) category_name,
-        ma01.sub_category_cd,
-        concat(ma01.sub_category_cd,' ',ma01.sub_category_name) sub_category_name
+        (
+        SELECT DISTINCT
+            ma1.store_cd AS storeCd,
+            ma3.store_name AS storeName,
+            ma1.article_id AS articleId,
+            ma1.barcode,
+            ma1.article_name AS articleName,
+            ma1.old_price AS oldPrice,
+            ma1.new_price AS newPrice,
+            ma1.name_en_price_label AS priceLabelEnName,
+            ma1.name_vn_price_label AS priceLabelVnName,
+            ma1.effective_start_date AS effectiveStartDate,
+            ma07.dep_cd,
+            concat ( ma07.dep_cd, ' ', ma07.dep_name ) dep_name,
+            ma08.pma_cd,
+            concat ( ma08.pma_cd, ' ', ma08.pma_name ) pma_name,
+            ma09.category_cd,
+            concat ( ma09.category_cd, ' ', ma09.category_name ) category_name,
+            ma01.sub_category_cd,
+            concat ( ma01.sub_category_cd, ' ', ma01.sub_category_name ) sub_category_name
         FROM
-        ma8300 ma1,
-        ma1100 ma2,
-        ma1000 ma3,
-        ma0070 ma07,
-        ma0080 ma08,
-        ma0090 ma09,
-        ma0100 ma01,
-        ma2240 ma22,
-        ma1110 ma11
+            ma8300 ma1,
+            ma1000 ma3,
+            ma0070 ma07,
+            ma0080 ma08,
+            ma0090 ma09,
+            ma0100 ma01
         WHERE
-        ma2.article_id = ma1.article_id
-        AND ma2.effective_start_date = ma1.effective_start_date
-        AND ma3.store_cd = ma1.store_cd
-        AND #{param.businessDate} BETWEEN ma3.effective_start_date
-        AND ma3.effective_end_date
-        AND ma22.article_id = ma1.article_id
-        AND ma22.store_cd = ma1.store_cd
-        AND ma2.pma_cd=ma08.pma_cd
-        AND ma2.dep_cd = ma07.dep_cd
-        AND ma2.category_cd = ma09.category_cd
-        AND ma2.sub_category_cd = ma01.sub_category_cd
-        AND ma1.article_id = ma11.article_id
-        AND ma22.vendor_id = ma11.vendor_id
-        AND #{param.businessDate} BETWEEN ma11.effective_start_date
-        AND ma11.effective_end_date
-        and ma11.structure_cd in (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd in
-        (SELECT ma1.admin_structure_cd FROM ma0020 ma1,ma8300 ma83 WHERE ma1.structure_cd = ma83.store_cd))
+            ma3.store_cd = ma1.store_cd
+            AND ma1.pma_cd = ma08.pma_cd
+            AND ma1.dep_cd = ma07.dep_cd
+            AND ma1.category_cd = ma09.category_cd
+            AND ma1.sub_category_cd = ma01.sub_category_cd
         <if test="param.depCd!=null and param.depCd!=''">
-            AND ma2.dep_cd = #{param.depCd}
+            AND ma1.dep_cd = #{param.depCd}
         </if>
         <if test="param.pmaCd!=null and param.pmaCd!=''">
-            AND ma2.pma_cd = #{param.pmaCd}
+            AND ma1.pma_cd = #{param.pmaCd}
         </if>
         <if test="param.categoryCd != null and param.categoryCd != ''">
-            and ma2.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+            and ma1.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
         </if>
         <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
-            and ma2.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+            and ma1.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
         </if>
         <include refid="Example_Where_Clause"/>) a
     </select>
 
     <select id="search" resultType="cn.com.bbut.iy.itemmaster.dto.priceLabel.PriceLabelDTO">
-        SELECT
-        distinct
-        ma1.store_cd AS storeCd,
-        ma3.store_name AS storeName,
-        ma1.article_id AS articleId,
-        ma11.default_barcode barcode,
-        ma22.vendor_id,
-        ma2.article_name AS articleName,
-        ma1.old_price AS oldPrice,
-        ma1.new_price AS newPrice,
-        ma2.name_en_price_label AS priceLabelEnName,
-        ma2.name_vn_price_label AS priceLabelVnName,
-        ma1.effective_start_date AS effectiveStartDate,
-        ma07.dep_cd,
-        concat(ma07.dep_cd,' ',ma07.dep_name) dep_name,
-        ma08.pma_cd,
-        concat(ma08.pma_cd,' ',ma08.pma_name) pma_name,
-        ma09.category_cd,
-        concat(ma09.category_cd,' ',ma09.category_name) category_name,
-        ma01.sub_category_cd,
-        concat(ma01.sub_category_cd,' ',ma01.sub_category_name) sub_category_name
+        SELECT DISTINCT
+            ma1.store_cd AS storeCd,
+            ma3.store_name AS storeName,
+            ma1.article_id AS articleId,
+            ma1.barcode,
+            ma1.article_name AS articleName,
+            ma1.old_price AS oldPrice,
+            ma1.new_price AS newPrice,
+            ma1.name_en_price_label AS priceLabelEnName,
+            ma1.name_vn_price_label AS priceLabelVnName,
+            ma1.effective_start_date AS effectiveStartDate,
+            ma07.dep_cd,
+            concat ( ma07.dep_cd, ' ', ma07.dep_name ) dep_name,
+            ma08.pma_cd,
+            concat ( ma08.pma_cd, ' ', ma08.pma_name ) pma_name,
+            ma09.category_cd,
+            concat ( ma09.category_cd, ' ', ma09.category_name ) category_name,
+            ma01.sub_category_cd,
+            concat ( ma01.sub_category_cd, ' ', ma01.sub_category_name ) sub_category_name
         FROM
-        ma8300 ma1,
-        ma1100 ma2,
-        ma1000 ma3,
-        ma0070 ma07,
-        ma0080 ma08,
-        ma0090 ma09,
-        ma0100 ma01,
-        ma2240 ma22,
-        ma1110 ma11
+            ma8300 ma1,
+            ma1000 ma3,
+            ma0070 ma07,
+            ma0080 ma08,
+            ma0090 ma09,
+            ma0100 ma01
         WHERE
-        ma2.article_id = ma1.article_id
-        AND ma2.effective_start_date = ma1.effective_start_date
-        AND ma3.store_cd = ma1.store_cd
-        AND #{param.businessDate} BETWEEN ma3.effective_start_date
-        AND ma3.effective_end_date
-        AND ma22.article_id = ma1.article_id
-        AND ma22.store_cd = ma1.store_cd
-        AND ma2.pma_cd=ma08.pma_cd
-        AND ma2.dep_cd = ma07.dep_cd
-        AND ma2.category_cd = ma09.category_cd
-        AND ma2.sub_category_cd = ma01.sub_category_cd
-        AND ma1.article_id = ma11.article_id
-        AND ma22.vendor_id = ma11.vendor_id
-        AND #{param.businessDate} BETWEEN ma11.effective_start_date
-        AND ma11.effective_end_date
-        and ma11.structure_cd in (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd in
-        (SELECT ma1.admin_structure_cd FROM ma0020 ma1,ma8300 ma83 WHERE ma1.structure_cd = ma83.store_cd))
+            ma3.store_cd = ma1.store_cd
+            AND ma1.pma_cd = ma08.pma_cd
+            AND ma1.dep_cd = ma07.dep_cd
+            AND ma1.category_cd = ma09.category_cd
+            AND ma1.sub_category_cd = ma01.sub_category_cd
         <if test="param.depCd!=null and param.depCd!=''">
-            AND ma2.dep_cd = #{param.depCd}
+            AND ma1.dep_cd = #{param.depCd}
         </if>
         <if test="param.pmaCd!=null and param.pmaCd!=''">
-            AND ma2.pma_cd = #{param.pmaCd}
+            AND ma1.pma_cd = #{param.pmaCd}
         </if>
         <if test="param.categoryCd != null and param.categoryCd != ''">
-            and ma2.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+            and ma1.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
         </if>
         <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
-            and ma2.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+            and ma1.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
         </if>
         <include refid="Example_Where_Clause"/>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
     </select>
 
 </mapper>

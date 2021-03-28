@@ -794,11 +794,11 @@ define('orderDcEdit', function () {
 						barcode:$(this).find('td[tag=barcode]').text(),
 						orderUnit:$(this).find('td[tag=unitId]').text(),//订货单位
 						orderQty:parseInt(reThousands($(this).find('td[tag=orderQty]').text())),//订购数量
-						purchaseVatCd:reThousands($(this).find('td[tag=purchaseVatCd]').text()),//税区分CD
-						taxRate:parseInt(reThousands($(this).find('td[tag=taxRate]').text())),//税率
+						purchaseVatCd:$(this).find('td[tag=purchaseVatCd]').text(),//税区分CD
+						taxRate:parseFloat($(this).find('td[tag=taxRate]').text()),//税率
 						orderNochargeQty:parseInt(reThousands($(this).find('td[tag=orderNochargeQty]').text())),//搭赠数量
-						orderPrice: parseInt(reThousands($(this).find('td[tag=orderPrice]').text())),//订货单价（不含税）
-						orderAmtNotax: parseInt(reThousands($(this).find('td[tag=orderTotalAmt]').text())),//订货价格（不含税）
+						orderPrice: parseFloat(reThousands($(this).find('td[tag=orderPrice]').text())),//订货单价（不含税）
+						orderAmtNotax: parseFloat(reThousands($(this).find('td[tag=orderTotalAmt]').text())),//订货价格（不含税）
 						isFreeItem:'0',
 						// orderAmt: reThousands($(this).find('td[tag=orderTotalAmt]').text()),//订货价格（页面暂不含税）
 					}
@@ -837,7 +837,7 @@ define('orderDcEdit', function () {
 				orderType:$("#orderType").val(),
 				orderDate:subfmtDate($("#od_date").val()),
 				orderRemark:$("#orderRemark").val(),
-				orderAmt:reThousands($("#order_total_amt").val()),//总订货价格（页面暂不含税）
+				orderAmtNotax:reThousands($("#order_total_amt").val()),//总订货价格（页面暂不含税）
 				orderDifferentiate:"1",//dc订货
 				orderDetailJson:orderDetail,
 				use:m.use.val(),
@@ -1071,29 +1071,18 @@ define('orderDcEdit', function () {
 				break;
 			case "2"://新增
 				var businessDate = m.businessDate.val();
-				if(businessDate!=null&&businessDate!=''){
+				if(businessDate!=null&&businessDate!==''){
 					businessDate = fmtIntDate(businessDate);
 					m.od_date.val(businessDate);
 					m.od_date.attr("disabled","disabled");
 				}
-				var addInterval = setInterval(function () {
-					var reviewStsLen=m.reviewSts.find("option").length;
-					var orderTypeLen=m.orderType.find("option").length;
-					if(orderTypeLen>1&&reviewStsLen>1){
-						//订单状态默认订单待收
-						m.reviewSts.val("1");
-						//订单类型默认进货
-						m.orderType.val("01");
-						//下拉选项禁用
-						m.orderType.attr("disabled","disabled");
-						clearInterval(addInterval);//停止
-					}
-				}, 200); //启动
-				setTimeout(function () {
-					clearInterval(addInterval);//停止
-				},2000);
+				//订单状态默认订单待收
+				m.reviewSts.val("1");
+				//订单类型默认进货
+				m.orderType.val("01");
+				//下拉选项禁用
+				m.orderType.attr("disabled","disabled");
 				m.approvalBut.prop("disabled",true);
-				break;
 		}
 	}
 
@@ -1112,7 +1101,7 @@ define('orderDcEdit', function () {
 						var interval = setInterval(function () {
 							var reviewStsLen=m.reviewSts.find("option").length;
 							var orderTypeLen=m.orderType.find("option").length;
-							if(orderTypeLen>1&&reviewStsLen>1){
+							if(orderTypeLen>=1&&reviewStsLen>1){
 								m.orderType.val(result.data.orderType);
 								m.reviewSts.val(result.data.reviewStatus);
 								clearInterval(interval);//停止

@@ -823,8 +823,8 @@
             </if>
         </select>
 
-        <select id="getItemList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
-        select distinct a.k k, a.v v FROM
+        <select id="getItemList1" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+         select distinct a.k k, a.v v FROM
             (select article_id k, CONCAT(article_id,' ',article_name) v from ma8040
             where structure_cd = (
                 select admin_structure_cd from ma0020
@@ -834,6 +834,7 @@
                 )
             )
             and effective_date = #{businessDate,jdbcType=VARCHAR}
+            AND MA8040.inventory_item='1'
             and (
                 lower(article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
                 or lower(article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
@@ -852,13 +853,203 @@
                 or lower(article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
             )
             ) a ,sk0000_today s WHERE a.k = s.article_id
-            AND s.store_cd = #{storeCd,jdbcType=VARCHAR}
-       AND s.effective_date = #{businessDate,jdbcType=VARCHAR}
-        AND  s.article_id not in  (select  temp.parent_article_id from (select ma1200.parent_article_id, count(ma1210.child_article_id) as item_sku
-            FROM ma1200  left join ma1210 on ma1200.parent_article_id=ma1210.parent_article_id  where 1=1  GROUP BY ma1200.parent_article_id) as temp
-            where 1=1  <![CDATA[and temp.item_sku<1 ]]>
+
+               AND s.store_cd = #{storeCd,jdbcType=VARCHAR}
+             AND s.effective_date = #{businessDate,jdbcType=VARCHAR}
+             AND  s.article_id not in  (select  temp.parent_article_id from (select ma1200.parent_article_id, count(ma1210.child_article_id) as item_sku
+            FROM ma1200  left join ma1210 on ma1200.parent_article_id=ma1210.parent_article_id and ma1200.effective_start_date = ma1210.effective_start_date
+            and #{businessDate,jdbcType=VARCHAR} BETWEEN ma1200.effective_start_date and ma1200.effective_end_date
+             where 1=1  GROUP BY ma1200.parent_article_id) as temp
+            where 1=1  <![CDATA[and temp.item_sku<=1 ]]>
             )
             ;
+        </select>
+        <select id="getItemList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+            SELECT DISTINCT
+            a.k k,
+            a.inventory_item,
+            a.v v
+            FROM
+            (
+            SELECT
+            article_id k,
+            MA8040.inventory_item,
+            CONCAT( article_id, ' ', article_name ) v
+            FROM
+            ma8040
+
+            left join
+            (SELECT
+            article_id k,
+            CONCAT( article_id, ' ', article_name ) v
+            FROM
+            ma8050
+            WHERE
+            structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd = 'SG0240' ) )
+             and (
+                lower(article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                or lower(article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )) as B
+            ON
+            MA8040.article_id=b.k
+
+            WHERE
+            structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd = 'SG0240' ) )
+            AND effective_date = #{businessDate,jdbcType=VARCHAR}
+            AND MA8040.inventory_item = '1'
+
+             and (
+                lower(article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                or lower(article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+            ) a,
+            sk0000_today s
+            WHERE
+            a.k = s.article_id
+            AND s.store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND s.effective_date = #{businessDate,jdbcType=VARCHAR}
+            AND s.article_id NOT IN (
+            SELECT
+            temp.parent_article_id
+            FROM
+            (
+            SELECT
+            ma1200.parent_article_id,
+            count( ma1210.child_article_id ) AS item_sku
+            FROM
+            ma1200
+            LEFT JOIN ma1210 ON ma1200.parent_article_id = ma1210.parent_article_id
+            AND ma1200.effective_start_date = ma1210.effective_start_date
+            AND #{businessDate,jdbcType=VARCHAR} BETWEEN ma1200.effective_start_date
+            AND ma1200.effective_end_date
+            WHERE
+            1 = 1
+            GROUP BY
+            ma1200.parent_article_id
+            ) AS temp
+            WHERE
+            1 = 1
+            <![CDATA[and temp.item_sku<=1 ]]>
+            );
+
+        </select>
+
+
+
+        <select id="getInventoryItemList1" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select distinct a.k k, a.v v FROM
+            (select article_id k, CONCAT(article_id,' ',article_name) v from ma8040
+            where structure_cd = (
+                select admin_structure_cd from ma0020
+                where structure_cd = (
+                    select admin_structure_cd from ma0020
+                    where structure_cd = #{storeCd,jdbcType=VARCHAR}
+                )
+            )
+            and effective_date = #{businessDate,jdbcType=VARCHAR}
+            AND MA8040.inventory_item='1'
+            and (
+                lower(article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                or lower(article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+            union
+            select article_id k, CONCAT(article_id,' ',article_name) v from ma8050
+            where structure_cd = (
+                select admin_structure_cd from ma0020
+                where structure_cd = (
+                    select admin_structure_cd from ma0020
+                    where structure_cd = #{storeCd,jdbcType=VARCHAR}
+                )
+            )
+            and (
+                lower(article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                or lower(article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+            ) a,sk0000_today s WHERE a.k = s.article_id
+               AND s.store_cd = #{storeCd,jdbcType=VARCHAR}
+              AND s.effective_date = #{businessDate,jdbcType=VARCHAR}
+             AND  s.article_id not in  (select  temp.parent_article_id from (select ma1200.parent_article_id, count(ma1210.child_article_id) as item_sku
+            FROM ma1200  left join ma1210 on ma1200.parent_article_id=ma1210.parent_article_id and ma1200.effective_start_date = ma1210.effective_start_date
+            and #{businessDate,jdbcType=VARCHAR} BETWEEN ma1200.effective_start_date and ma1200.effective_end_date
+             where 1=1  GROUP BY ma1200.parent_article_id) as temp
+            where 1=1  <![CDATA[and temp.item_sku<=1 ]]>
+            )
+            AND  s.article_id not in  (
+           SELECT ma1170.formula_id
+           FROM
+         ma1170
+             WHERE
+           #{businessDate,jdbcType=VARCHAR} BETWEEN ma1170.effective_start_date
+        AND ma1170.effective_end_date
+            )
+            ;
+        </select>
+        <select id="getInventoryItemList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+            SELECT DISTINCT A
+            .K K,
+            A.v v,
+            A.inventory_item
+            FROM
+            (
+            SELECT
+            article_id K,
+            CONCAT ( article_id, ' ', article_name ) v ,
+            MA8040.inventory_item
+            FROM
+            ma8040
+            left join(
+            SELECT
+            article_id K,
+            CONCAT ( article_id, ' ', article_name ) v
+            FROM
+            ma8050
+            WHERE
+            structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd = 'SG8811' ) )
+             and (
+                lower(article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                or lower(article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+            )
+            AS B
+            on ma8040.article_id=B.K
+            WHERE
+            structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd = #{storeCd,jdbcType=VARCHAR} ) )
+            AND effective_date = #{businessDate,jdbcType=VARCHAR}
+            AND MA8040.inventory_item='1'
+            and (
+                lower(article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                or lower(article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+            ) A,
+            sk0000_today s
+            WHERE
+            A.K = s.article_id
+            AND s.store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND s.effective_date = #{businessDate,jdbcType=VARCHAR}
+            AND s.article_id NOT IN (
+            SELECT TEMP
+            .parent_article_id
+            FROM
+            (
+            SELECT
+            ma1200.parent_article_id,
+            COUNT ( ma1210.child_article_id ) AS item_sku
+            FROM
+            ma1200
+            LEFT JOIN ma1210 ON ma1200.parent_article_id = ma1210.parent_article_id
+            AND ma1200.effective_start_date = ma1210.effective_start_date
+            AND #{businessDate,jdbcType=VARCHAR} BETWEEN ma1200.effective_start_date
+            AND ma1200.effective_end_date
+            WHERE
+            1 = 1
+            GROUP BY
+            ma1200.parent_article_id
+            ) AS TEMP
+            WHERE
+            1 = 1
+            <![CDATA[and temp.item_sku<=1 ]]>
+            )
+            AND s.article_id NOT IN ( SELECT ma1170.formula_id FROM ma1170 WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN ma1170.effective_start_date AND ma1170.effective_end_date );
         </select>
 
         <insert id="insertSk0010" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0010DTO" >
@@ -936,7 +1127,7 @@
             ) T1
             on T.article_id = T1.article_id and T.voucher_date between T1.effective_start_date and T1.effective_end_date
             left join (
-                select code_value, code_name from cm9010 where code_type = '00236'
+                select code_value, code_name from cm9010 where code_type = #{codeType,jdbcType=VARCHAR}
             ) T3
             on T.adjust_reason = T3.code_value
             left join(
@@ -1452,6 +1643,7 @@
             ) T4
             on T.different_reasons = T4.code_value) B on A.voucher_no = B.voucher_no
             and A.adjust_reason = B.adjust_reason and A.voucher_date = B.voucher_date
+            and A.display_seq=B.display_seq
         </select>
 
         <select id="getMa8350" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
@@ -1470,8 +1662,11 @@
         <select id="getMa8360" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
             select detailed_level_cd k,general_level_cd hidey,concat(detailed_level_cd,' ',detailed_level_reason) v,detailed_level_cd hidek
             from MA8360
-            where EFFECTIVE_STS='10'
-            and general_level_cd = #{generalLevelCd,jdbcType=VARCHAR}
+            where
+            1=1
+            <if test="num==0">
+            and EFFECTIVE_STS='10'
+            </if>
             <if test="v!=null and v!=''">
                 AND (
                 lower(detailed_level_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))

@@ -106,31 +106,31 @@ public class PriceLabelController extends BaseAction {
      */
     @RequestMapping("/print/getPrintData")
     @ResponseBody
-//    public List<PriceLabelParamDTO> getPrintData(String searchJson, HttpServletRequest request, HttpSession session,String params) {
-    public List<PriceLabelParamDTO> getPrintData(HttpServletRequest request, HttpSession session,String params) {
-//        if (searchJson==null|| StringUtils.isEmpty(searchJson)) {
-//            return new ArrayList<PriceLabelParamDTO>();
-//        }
-//        Gson gson = new Gson();
-//        PriceLabelParamDTO param = gson.fromJson(searchJson, PriceLabelParamDTO.class);
-//        // 获取当前角色店铺权限
-//        Collection<String> stores = getStores(session, param);
-//        if(stores.size() == 0){
-//            log.info(">>>>>>>>>>>>>>>>>>>>> get stores is null");
-//            return new ArrayList<PriceLabelParamDTO>();
-//        }
-//        param.setStores(stores);
-        // 打印不需要分页
-//        param.setFlg(false);
-//        List<PriceLabelDTO> list = priceLabelService.getPrintData(param);
+    public List<PriceLabelDTO> getPrintData(HttpServletRequest request, HttpSession session,String searchJson) {
 
-        Gson gson1 = new Gson();
-        List<PriceLabelParamDTO> _list = gson1.fromJson(params, new TypeToken<List<PriceLabelParamDTO>>(){}.getType());
-
-        if (_list == null) {
-            return new ArrayList<PriceLabelParamDTO>();
+        if (searchJson==null|| StringUtils.isEmpty(searchJson)) {
+            return new ArrayList<PriceLabelDTO>();
         }
-        return _list;
+
+        Gson gson = new Gson();
+        PriceLabelParamDTO param = gson.fromJson(searchJson, PriceLabelParamDTO.class);
+
+        // 获取当前角色店铺权限
+        Collection<String> stores = getStores(session, param);
+        if(stores.size() == 0){
+            log.info(">>>>>>>>>>>>>>>>>>>>> get stores is null");
+            return new ArrayList<PriceLabelDTO>();
+        }
+
+        param.setStores(stores);
+        // 打印不需要分页
+        param.setFlg(false);
+        List<PriceLabelDTO> list = priceLabelService.getPrintData(param);
+
+        if (list == null) {
+            return new ArrayList<PriceLabelDTO>();
+        }
+        return list;
     }
 
     /**

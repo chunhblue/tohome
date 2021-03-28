@@ -69,7 +69,7 @@
 
 
 <!--导航-->
-[@common.nav "HOME&Operation&Cost Item Adjustment Management"][/@common.nav]
+[@common.nav "HOME&Operation&Store Expense Item Stock Management"][/@common.nav]
 <div class="container-fluid" id="main_box">
     <!--row 分割-->
     <div class="row">
@@ -177,7 +177,12 @@
 <input type="hidden" id="piCdParam" value="${piCdParam!}"/>
 <input type="hidden" id="toKen" value="${toKen!}"/>
 <input type="hidden" id="typeId" value="${typeId!}">
-<input type="hidden" id="reviewId" value="${reviewId!''}">
+<input type="hidden" id="reviewId" value="${reviewId!}">
+<input type="hidden" id="ParamstoreCd" value="${ParamstoreCd!}">
+<input type="hidden" id="ParamstoreName" value="${ParamstoreName!}">
+<input type="hidden" id="piDateParam" value="${piDateParam!}">
+<input type="hidden" id="create_By" value="${createBy!}">
+<input type="hidden" id="searchJson1" value="">
 [@permission code="SC-COST-ENTRY-001"]<input type="hidden" class="permission-verify" id="addBut" value="${displayVar!}" />[/@permission]
 [@permission code="SC-COST-ENTRY-002"]<input type="hidden" class="permission-verify" id="editBut" value="${displayVar!}" />[/@permission]
 [@permission code="SC-COST-ENTRY-003"]<input type="hidden" class="permission-verify" id="viewBut" value="${displayVar!}" />[/@permission]

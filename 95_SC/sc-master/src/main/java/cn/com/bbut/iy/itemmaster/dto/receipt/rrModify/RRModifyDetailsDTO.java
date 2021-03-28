@@ -76,6 +76,7 @@ public class RRModifyDetailsDTO extends GridDataDTO {
     /* 收货/退货数据 */
     private BigDecimal rrOrderPrice;
     private BigDecimal rrOrderQty;
+    private BigDecimal rrOrderQty1;
     private BigDecimal rrOrderAmt;
 
     private BigDecimal modifyQty;  // 修正数量

@@ -126,7 +126,6 @@ define('pogShelfListView', function () {
 
     //请求单据商品信息
     var flushItems = function () {
-        //Ajax请求商品
         setParamJson();
         paramGrid = "searchJson=" + m.searchJson.val();
         tableGrid.setting("url", url_left +"/getDetailData");

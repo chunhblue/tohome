@@ -34,6 +34,8 @@ public class PromotionParamDTO extends GridParamDTO {
 
     private String promotionEndDate;
 
+    private String isPromotion;
+
     /** 大区CD */
     private String regionCd;
     /** 城市CD */

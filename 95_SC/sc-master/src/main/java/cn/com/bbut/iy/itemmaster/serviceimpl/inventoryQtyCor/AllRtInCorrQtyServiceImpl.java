@@ -5,6 +5,7 @@ import cn.com.bbut.iy.itemmaster.dto.inventory.Sk0010DTO;
 import cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO;
 import cn.com.bbut.iy.itemmaster.dto.od0010_t.OD0010TDTO;
 import cn.com.bbut.iy.itemmaster.dto.stocktakeProcess.StocktakeProcessItemsDTO;
+import cn.com.bbut.iy.itemmaster.entity.od0000.OD0000;
 import cn.com.bbut.iy.itemmaster.service.inventoryQtyCor.AllRtInCorrQtyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +85,7 @@ public class AllRtInCorrQtyServiceImpl implements AllRtInCorrQtyService {
      */
     @Override
     public List<OD0010TDTO> getReturnItemList(String orderId) {
-        return inventoryQtyCorMapper.getReturnItemList(orderId);
+        return inventoryQtyCorMapper.getReItemList(orderId);
     }
 
     /**
@@ -98,23 +99,50 @@ public class AllRtInCorrQtyServiceImpl implements AllRtInCorrQtyService {
         return inventoryQtyCorMapper.getReceiveItemList(orderId);
     }
 
+
     @Override
     public List<OD0010TDTO> getReCorrItemList(String orderId) {
-        List<OD0010TDTO> list = inventoryQtyCorMapper.getReturnItemList(orderId);
-        for(int i=0;i<list.size();i++){
-            OD0010TDTO od0010TDTO = list.get(i);
-            if(od0010TDTO.getLastCorrectionDifference() == null){
-                od0010TDTO.setLastCorrectionDifference(od0010TDTO.getReceiveQty());
-            }
-            // 本次修正数量-上次修正数量
-            BigDecimal variance = od0010TDTO.getCorrectionDifference().subtract(od0010TDTO.getLastCorrectionDifference());
-            if(variance.equals(BigDecimal.ZERO)) {
-                list.remove(i);
+        List<OD0010TDTO> newOd0010List = new ArrayList<>();
+        OD0000 od0000 = inventoryQtyCorMapper.getReCorrHead(orderId);
+        // 获取退货修正原单号
+        String orgorderId = od0000.getOrgOrderId();
+        List<OD0000> corrHeadList = inventoryQtyCorMapper.getReCorrList(orgorderId);
+        if(corrHeadList.size()>0){
+            if(corrHeadList.size()>1){
+                String oldCorrOrderId = corrHeadList.get(1).getOrderId();
+                List<OD0010TDTO> oidOd0010List = inventoryQtyCorMapper.getReItemList(oldCorrOrderId);
+
+                String newCorrOrderId = corrHeadList.get(0).getOrderId();
+                newOd0010List = inventoryQtyCorMapper.getReItemList(newCorrOrderId);
+                for(int i=0;i<newOd0010List.size();i++){
+                    for(OD0010TDTO oldItem:oidOd0010List){
+                        if(newOd0010List.get(i).getArticleId().equals(oldItem.getArticleId())){
+                            BigDecimal varyQty = newOd0010List.get(i).getCorrectionDifference().subtract(oldItem.getCorrectionDifference());
+                            if(varyQty.equals(BigDecimal.ZERO)) {
+                                newOd0010List.remove(i);
+                            }else {
+                                newOd0010List.get(i).setReceiveQty(varyQty);
+                            }
+                        }
+                    }
+                }
+                return newOd0010List;
             }else {
-                od0010TDTO.setReceiveQty(variance);
+                String newCorrOrderId = corrHeadList.get(0).getOrderId();
+                newOd0010List = inventoryQtyCorMapper.getReItemList(newCorrOrderId);
+                for(int i=0;i<newOd0010List.size();i++){
+                    OD0010TDTO dto = newOd0010List.get(i);
+                    BigDecimal varyQty = dto.getCorrectionDifference().subtract(dto.getReceiveQty());
+                    if(varyQty.equals(BigDecimal.ZERO)) {
+                        newOd0010List.remove(dto);
+                    }else {
+                        dto.setReceiveQty(varyQty);
+                    }
+                }
             }
+            return newOd0010List;
         }
-        return list;
+        return newOd0010List;
     }
 
     /**
@@ -126,6 +154,9 @@ public class AllRtInCorrQtyServiceImpl implements AllRtInCorrQtyService {
     @Override
     public List<StocktakeProcessItemsDTO> getStockItemList(String piCd, String storeCd) {
         //
-        return inventoryQtyCorMapper.getStockItemList(piCd,storeCd);
+        List<StocktakeProcessItemsDTO> list = inventoryQtyCorMapper.getStockItemList(piCd,storeCd);
+        // 更新上次盘点差异数量
+        inventoryQtyCorMapper.updateStockLastVariance(piCd,storeCd);
+        return list;
     }
 }

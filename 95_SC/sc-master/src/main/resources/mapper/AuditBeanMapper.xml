@@ -191,4 +191,22 @@
 		and user_code = #{userId,jdbcType=VARCHAR}
 		and position = #{position,jdbcType=NUMERIC}
 	</select>
+	
+	<select id="getCorrType" resultType="String">
+		select
+		<if test="typeId == 16">
+			order_type
+		</if>
+		<if test="typeId == 17">
+			voucher_type
+		</if>
+		from ${tableName}
+		where 1 = 1
+		<if test="typeId == 16">
+			and order_id = #{recordCd}
+		</if>
+		<if test="typeId == 17">
+			and voucher_no = #{recordCd}
+		</if>
+	</select>
 </mapper>

@@ -245,15 +245,6 @@
                                         <input type="text" id="itemName" class="form-control input-sm">
                                     </div>
 
-                                    <label for="generalReason" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">General Reason</label>
-                                    <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
-                                        <div class="aotu-pos">
-                                            <input type="text"
-                                                   class="form-control my-automatic input-sm" autocomplete="off" id="generalReason">
-                                            <a id="generalReasonRefresh" href="javascript:void(0);" title="Refresh" class="auto-but glyphicon glyphicon-refresh refresh"></a>
-                                            <a id="generalReasonRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
-                                        </div>
-                                    </div>
                                     <label for="adjustmentReason" class="col-sm-1 control-label" style="white-space: nowrap">Adjustment Reason</label>
                                     <div class="col-sm-2">
                                         <div class="aotu-pos">
@@ -315,7 +306,6 @@
                             <th title="Barcode">Barcode</th>
                             <th title="UOM">UOM</th>
                             <th title="Adjustment Quantity">Adjustment Quantity</th>
-                            <th title="General Reason">General Reason</th>
                             <th title="Adjustment Reason">Adjustment Reason</th>
                             <th title="Are Manager Code">Are Manager Code</th>
                             <th title="Are Manager Name">Are Manager Name</th>

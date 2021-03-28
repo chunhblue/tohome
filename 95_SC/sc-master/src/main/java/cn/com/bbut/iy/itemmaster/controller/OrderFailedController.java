@@ -5,10 +5,14 @@ import cn.com.bbut.iy.itemmaster.constant.Constants;
 import cn.com.bbut.iy.itemmaster.constant.PermissionCode;
 import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
+import cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam;
 import cn.com.bbut.iy.itemmaster.dto.orderFailed.OrderFailedGridDTO;
 import cn.com.bbut.iy.itemmaster.dto.orderFailed.OrderFailedParamDTO;
+import cn.com.bbut.iy.itemmaster.dto.priceLabel.PriceLabelDTO;
+import cn.com.bbut.iy.itemmaster.dto.priceLabel.PriceLabelParamDTO;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
+import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
 import cn.com.bbut.iy.itemmaster.service.order.OrderFailedService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
 import cn.shiy.common.baseutil.Container;
@@ -24,6 +28,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -40,6 +45,8 @@ public class OrderFailedController extends BaseAction {
 
     @Autowired
     private OrderFailedService service;
+    @Autowired
+    private MRoleStoreService mRoleStoreService;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_FAILED_ORDER";
     private final String EXCEL_EXPORT_NAME = "Failed Order List.xlsx";
@@ -83,7 +90,14 @@ public class OrderFailedController extends BaseAction {
         if(param == null){
             param = new OrderFailedParamDTO();
         }
+        // 获取当前角色店铺权限
+        Collection<String> stores = getStores(session, param);
+        if(stores.size() == 0){
+            log.info(">>>>>>>>>>>>>>>>>>>>> get stores is null");
+            return new GridDataDTO<OrderFailedGridDTO>();
+        }
 
+        param.setStores(stores);
         param.setPage(page);
         param.setRows(rows);
         param.setLimitStart((page - 1)*rows);
@@ -107,12 +121,50 @@ public class OrderFailedController extends BaseAction {
             log.info("导出查询参数为空");
             return null;
         }
+        Gson gson = new Gson();
+        OrderFailedParamDTO param = gson.fromJson(searchJson, OrderFailedParamDTO.class);
+        if(param == null){
+            param = new OrderFailedParamDTO();
+        }
+        // 获取当前角色店铺权限
+        Collection<String> stores = getStores(session, param);
+        if(stores.size() == 0){
+            log.info(">>>>>>>>>>>>>>>>>>>>> get stores is null");
+            return null;
+        }
         // 设置参数对象
         ExcelParam exParam = new ExcelParam();
         exParam.setParam(searchJson);
+        exParam.setStores(stores);
         exParam.setPCode(PermissionCode.CODE_SC_OD_FAILED_EXPORT);
         exParam.setExFileName(EXCEL_EXPORT_NAME);
         ExService service = Container.getBean("failedExService", ExService.class);
         return ExportUtil.export(EXCEL_EXPORT_KEY, request, service, exParam);
+    }
+
+    /**
+     * 根据画面选择，获取Store权限
+     */
+    private Collection<String> getStores(HttpSession session, OrderFailedParamDTO param){
+        Collection<String> stores = new ArrayList<>();
+        // 画面未选择，直接返回所有权限店铺
+        if(StringUtils.isEmpty(param.getRegionCd()) && StringUtils.isEmpty(param.getCityCd())
+                && StringUtils.isEmpty(param.getDistrictCd()) && StringUtils.isEmpty(param.getStoreCd())){
+            stores = (Collection<String>) session.getAttribute(Constants.SESSION_STORES);
+            return stores;
+        }
+        // 画面选择完成，返回已选择店铺
+        if(StringUtils.isNotBlank(param.getStoreCd())){
+            stores.add(param.getStoreCd());
+            return stores;
+        }
+        // 只选择了一部分参数，生成查询参数，后台查询判断
+        MRoleStoreParam dto = new MRoleStoreParam();
+        dto.setRegionCd(param.getRegionCd());
+        dto.setCityCd(param.getCityCd());
+        dto.setDistrictCd(param.getDistrictCd());
+        stores = (Collection<String>) session.getAttribute(Constants.SESSION_STORES);
+        dto.setStoreCds(stores);
+        return mRoleStoreService.getStoreByChoose(dto);
     }
 }

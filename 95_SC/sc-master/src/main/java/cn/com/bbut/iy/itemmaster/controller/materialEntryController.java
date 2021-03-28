@@ -8,8 +8,11 @@ import cn.com.bbut.iy.itemmaster.constant.PermissionCode;
 import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.ReturnDTO;
+import cn.com.bbut.iy.itemmaster.dto.inventory.ItemInfoDTO;
 import cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam;
+import cn.com.bbut.iy.itemmaster.dto.pi0100.ItemInStoreDto;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO;
+import cn.com.bbut.iy.itemmaster.dto.pi0100c.MaterialDTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100DTOC;
 import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100ParamDTOC;
 import cn.com.bbut.iy.itemmaster.dto.pi0100c.StocktakeItemDTOC;
@@ -38,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @ClassName matelEntryController
@@ -96,7 +100,7 @@ public class materialEntryController extends BaseAction {
             PermissionCode.CODE_SC_MATEL_ENTRY_EDIT,
             PermissionCode.CODE_SC_MATEL_ENTRY_VIEW,
     })
-    public ModelAndView stocktakeDataEdit(String enterFlag,String piCdParam,String piDateParam, HttpServletRequest request, HttpSession session,
+    public ModelAndView stocktakeDataEdit(String enterFlag,String piCdParam,String createBy,String piDateParam,String storeCd,String storeName, HttpServletRequest request, HttpSession session,
                                           Map<String, ?> model) {
         User u = this.getUser(session);
         log.debug("User:{} 进入原材料编辑画面", u.getUserId());
@@ -107,7 +111,10 @@ public class materialEntryController extends BaseAction {
         mv.addObject("identity", 1);
         mv.addObject("enterFlag", enterFlag);
         mv.addObject("piCdParam", piCdParam);
+        mv.addObject("ParamstoreCd", storeCd);
+        mv.addObject("ParamstoreName", storeName);
         mv.addObject("piDateParam", piDateParam);
+        mv.addObject("createBy", createBy);
         mv.addObject("useMsg", "原材料编辑画面");
         mv.addObject("typeId", ConstantsAudit.TYPE_MATERIAL_STOCK);
         mv.addObject("reviewId", ConstantsAudit.REVIEW_MATERIAL_STOCK);
@@ -117,8 +124,15 @@ public class materialEntryController extends BaseAction {
 
     @GetMapping("/getData")
     @ResponseBody
-    public ReturnDTO getData(String piCd,HttpServletRequest request, HttpSession session) {
-        PI0100DTOC invenData = materialentryService.getInvenData(piCd);
+    public ReturnDTO getData(String piCd,String storeCd,String  createUser,String createYmd, HttpServletRequest request, HttpSession session) {
+        PI0100DTOC pioC=new PI0100DTOC();
+        pioC.setPiCd(piCd);
+        pioC.setCreateUserId(createUser);
+        pioC.setCreateYmd(createYmd);
+        pioC.setCreateYmd(storeCd);
+
+//        PI0100DTOC invenData = materialentryService.getInvenData(piCd);
+        PI0100DTOC invenData = materialentryService.getInvenDataPio(pioC);
         if (invenData==null) {
             return new ReturnDTO(false,"Query result is empty!");
         }
@@ -154,6 +168,7 @@ public class materialEntryController extends BaseAction {
         Gson gson = new Gson();
         // 明细
         List<StocktakeItemDTOC> stocktakeItemList = gson.fromJson(_record, new TypeToken<List<StocktakeItemDTOC>>(){}.getType());
+
         // 头档
         PI0100DTOC item = gson.fromJson(_data, PI0100DTOC.class);
         if (item.getPiCd()==null||StringUtils.isEmpty(item.getPiCd())) {
@@ -166,7 +181,6 @@ public class materialEntryController extends BaseAction {
         }
 
         PI0100DTOC result = materialentryService.insertData(stocktakeItemList,item,request,session,detailType);
-
         if (result!=null) {
             if(result.getPiCd() == null){
                 return new ReturnDTO(false,"Inventory data saved failed！");
@@ -206,6 +220,28 @@ public class materialEntryController extends BaseAction {
         return data;
     }
 
+
+    @GetMapping("/getStoreAllItem")
+    @ResponseBody
+    public GridDataDTO<MaterialDTO> getStoreAllItem(String searchJson , int page, int rows,
+                                                    HttpServletRequest request, HttpSession session) {
+        Gson gson = new Gson();
+        ItemInStoreDto param = gson.fromJson(searchJson, ItemInStoreDto.class);
+        // 获取当前角色店铺权限
+        Collection<String> stores = getStores(session, param);
+        if(stores.size() == 0){
+            log.info(">>>>>>>>>>>>>>>>>>>>> get stores is null");
+            return new GridDataDTO<MaterialDTO>();
+        }
+        param.setStores(stores);
+        param.setPage(page);
+        param.setRows(rows);
+        param.setLimitStart((page - 1)*rows);
+        GridDataDTO<MaterialDTO> data = materialentryService.storeAllItem(param);
+        return data;
+    }
+
+
     /**
      * 导出查询结果
      *
@@ -243,7 +279,7 @@ public class materialEntryController extends BaseAction {
     /**
      * 根据画面选择，获取Store权限
      */
-    private Collection<String> getStores(HttpSession session,PI0100ParamDTOC param){
+    private Collection<String> getStores(HttpSession session, ItemInStoreDto param){
         Collection<String> stores = new ArrayList<>();
         // 画面未选择，直接返回所有权限店铺
         if(StringUtils.isEmpty(param.getRegionCd()) && StringUtils.isEmpty(param.getCityCd())
@@ -265,5 +301,29 @@ public class materialEntryController extends BaseAction {
         dto.setStoreCds(stores);
         return mRoleStoreService.getStoreByChoose(dto);
     }
-
+    /**
+     * 根据画面选择，获取Store权限
+     */
+    private Collection<String> getStores(HttpSession session,PI0100ParamDTOC param){
+        Collection<String> stores = new ArrayList<>();
+        // 画面未选择，直接返回所有权限店铺
+        if(StringUtils.isEmpty(param.getRegionCd()) && StringUtils.isEmpty(param.getCityCd())
+                && StringUtils.isEmpty(param.getDistrictCd()) && StringUtils.isEmpty(param.getStoreCd())){
+            stores = (Collection<String>) session.getAttribute(Constants.SESSION_STORES);
+            return stores;
+        }
+        // 画面选择完成，返回已选择店铺
+        if(!StringUtils.isEmpty(param.getStoreCd())){
+            stores.add(param.getStoreCd());
+            return stores;
+        }
+        // 只选择了一部分参数，生成查询参数，后台查询判断
+        MRoleStoreParam dto = new MRoleStoreParam();
+        dto.setRegionCd(param.getRegionCd());
+        dto.setCityCd(param.getCityCd());
+        dto.setDistrictCd(param.getDistrictCd());
+        stores = (Collection<String>) session.getAttribute(Constants.SESSION_STORES);
+        dto.setStoreCds(stores);
+        return mRoleStoreService.getStoreByChoose(dto);
+    }
 }

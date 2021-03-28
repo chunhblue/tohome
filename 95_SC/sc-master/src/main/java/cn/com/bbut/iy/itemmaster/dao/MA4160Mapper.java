@@ -19,4 +19,11 @@ public interface MA4160Mapper extends MA4160GenMapper {
      * @return
      */
     int getMaxPositionByuserId(@Param("userId")String userId);
+
+    /**
+     * 查看是否拥有财务权限
+     * @param userId
+     * @return
+     */
+    int countFinancePosition(@Param("userId")String userId);
 }

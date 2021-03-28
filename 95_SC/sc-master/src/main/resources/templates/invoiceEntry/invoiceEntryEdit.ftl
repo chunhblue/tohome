@@ -139,7 +139,7 @@
 								</div>
 
 								<div class="form-group">
-									<label for="department" class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">TAX CODE</label>
+									<label for="department" class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label not-null">TAX CODE</label>
 									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 										<input type="text" id="tax" class="form-control input-sm">
 									</div>
@@ -213,14 +213,21 @@
 											<a id="storeRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
 										</div>
 									</div>
-
-									<label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">The Receipt Number</label>
-									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-										<div class="aotu-pos good-select">
-											<input type="text" id="searchReceiptNo" class="form-control input-sm">
+								</div>
+								<div class="form-group ">
+										<label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">The Receipt Number</label>
+										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+											<div class="aotu-pos good-select">
+												<input type="text" id="searchReceiptNo" class="form-control input-sm">
+											</div>
+										</div>
+									    <label for=""  class="col-xs-12 col-sm-4 col-md-2 col-lg-3 control-label" style="white-space: nowrap">Pos Id</label>
+										<div id="posID" class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+											<select id="posId" class="form-control input-sm" nextele="" autocomplete="off" disabled="disabled">
+												<option value="">-- All/Please Select --</option>
+											</select>
 										</div>
 									</div>
-								</div>
 							</div>
 						</div>
 

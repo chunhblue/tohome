@@ -14,8 +14,11 @@ import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.excel.TransSession;
 import cn.com.bbut.iy.itemmaster.service.RealTimeInventoryQueryService;
 import cn.com.bbut.iy.itemmaster.serviceimpl.CM9060ServiceImpl;
+import cn.com.bbut.iy.itemmaster.serviceimpl.RealTimeInventoryQueryServiceImpl;
 import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -99,95 +102,23 @@ public class RealtimeExServiceImpl implements ExService {
      * @param curRow
      */
     private void createExcelBody(Sheet sheet, int curRow, RTInventoryQueryParamDTO rTParamDTO) {
-        List<RTInventoryQueryDTO> _list;
         String inEsTime = cm9060Service.getValByKey("1206");
         Cm9060 dto =  cm9060Mapper.selectByPrimaryKey("0000");
 
         rTParamDTO.setBusinessDate(dto.getSpValue());
+        List<String> articleIdList = new ArrayList<>();
+        List<RTInventoryQueryDTO> _list = realTimeInventoryQueryMapper.InventoryQueryBy(rTParamDTO);
+        try {
+            // List转jackJosn字符串
+            String articleIdListJson = new ObjectMapper().writeValueAsString(articleIdList);
 
-        String itemCode = rTParamDTO.getItemCode();
-        String depId = rTParamDTO.getDepId();
-        String pmaId = rTParamDTO.getPmaId();
-        String categoryId = rTParamDTO.getCategoryId();
-        String subCategoryId = rTParamDTO.getSubCategoryId();
-        String barcode = rTParamDTO.getItemBarcode();
-        if(barcode == null || "".equals(barcode)) {
-            barcode = "*";
-        }
-        if(itemCode == null || "".equals(itemCode)){
-            itemCode = "*";
-        }
-        if(depId == null || "".equals(depId)){
-            depId = "*";
-        }
-        if(pmaId == null || "".equals(pmaId)){
-            pmaId = "*";
-        }
-        if(categoryId == null || "".equals(categoryId)){
-            categoryId = "*";
-        }
-        if(subCategoryId == null || "".equals(subCategoryId)){
-            subCategoryId = "*";
-        }
-
-        // Area Manager、Operation Manager、Vendor Code/Name是否为空
-        if((rTParamDTO.getOfcCode() != null && !rTParamDTO.getOfcCode().equals(""))
-                || (rTParamDTO.getOcCode() != null && !rTParamDTO.getOcCode().equals(""))
-                || (rTParamDTO.getVendorId() != null && !rTParamDTO.getVendorId().equals(""))
-                || (rTParamDTO.getItemBarcode() != null && !rTParamDTO.getItemBarcode().equals("")))
-        {
-          _list = realTimeInventoryQueryMapper.InventoryQueryBy(rTParamDTO);
-            for(RTInventoryQueryDTO rtDto :_list) {
-
-                //拼接url，转义参数
-//                String connUrl = inventoryUrl + "GetRelTimeInventory/" + rTParamDTO.getStoreCd() + "/"
-//                        + rtDto.getItemCode() + "/*/*/*/*/" + inEsTime+"/*/*";
-                //拼接url，转义参数
-                String connUrl = inventoryUrl + "GetRelTimeInventory/" + rTParamDTO.getStoreCd() + "/" + itemCode
-                        + "/" + depId + "/" + pmaId + "/" + categoryId + "/" + subCategoryId + "/" + inEsTime + "/*/*";
-                String urlData = realTimeInventoryQueryService.getConnUrlData(connUrl);
-                Gson gson = new Gson();
-
-
-                // 获取第一层的信息
-                ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData, new TypeToken<List<RtInvContent>>() {
-                }.getType());
-
-                RtInvContent rtInvContent = rtInvContent2.get(0);
-                if (rtInvContent == null) {
-                    rtInvContent = new RtInvContent();
-                }
-                String content = rtInvContent.getContent();
-                // 获取第二层的信息
-                ArrayList<RealTimeDto> realTimeDto2 = gson.fromJson(content, new TypeToken<List<RealTimeDto>>() {
-                }.getType());
-                RealTimeDto realTimeDto = realTimeDto2.get(0);
-                if (realTimeDto == null) {
-                    realTimeDto = new RealTimeDto();
-                }
-                rtDto.setAdjustQty(realTimeDto.getAdjustment_qty()); // 当日库存调整数量
-                rtDto.setTransferOutQty(realTimeDto.getTransfer_out_qty().add(realTimeDto.getTransfer_out_corr_qty()));//调拨--调出数量+调出修正
-                rtDto.setOnHandQty(realTimeDto.getOn_hand_qty());// 昨日库存数量
-                rtDto.setSaleQty(realTimeDto.getSale_qty());// 当日销售数量
-                rtDto.setScrapQty(realTimeDto.getWrite_off_qty());//报废数量
-                rtDto.setTransferInQty(realTimeDto.getTransfer_in_qty().add(realTimeDto.getTransfer_in_corr_qty()));//调拨--调入数量+调入修正
-                rtDto.setStoreReturnQty(realTimeDto.getReturn_qty().add(realTimeDto.getReturn_corr_qty()));//退货数量 + 退货更正数量
-                rtDto.setOnOrderQty(realTimeDto.getOn_order_qty());// 在途数量
-                rtDto.setReceiveQty(realTimeDto.getReceive_qty().add(realTimeDto.getReceive_corr_qty()));// 当日收货数量 + 收货更正数量
-                // 计算实时库存数量
-                BigDecimal rTimeQty = realTimeDto.getOn_hand_qty().add(realTimeDto.getReceive_qty().add(realTimeDto.getReceive_corr_qty()))
-                        .add(realTimeDto.getAdjustment_qty()).subtract(realTimeDto.getTransfer_out_qty().add(realTimeDto.getTransfer_out_corr_qty()))
-                        .subtract(realTimeDto.getSale_qty()).subtract(realTimeDto.getWrite_off_qty()).add(realTimeDto.getTransfer_in_qty().add(realTimeDto.getTransfer_in_corr_qty()))
-                        .subtract(realTimeDto.getReturn_qty().add(realTimeDto.getReturn_corr_qty())).add(realTimeDto.getOn_order_qty());
-                rtDto.setRealtimeQty(rTimeQty);
+            String connUrl = inventoryUrl + "GetRelTimeInventory/"+"/"+rTParamDTO.getStoreCd()
+                    +"/*/*/*/*/*/" + inEsTime+"/*/*";
+            String urlData = RealTimeInventoryQueryServiceImpl.RequestPost(articleIdListJson,connUrl);
+            if(urlData == null || "".equals(urlData)){
+                log.info("Failed to connect to live inventory data！");
+                return ;
             }
-
-        }else {
-            //拼接url，转义参数
-            String connUrl = inventoryUrl + "GetRelTimeInventory/"+rTParamDTO.getStoreCd()+"/"+ itemCode
-                    +"/"+depId+"/"+ pmaId+"/"+categoryId+"/"+subCategoryId+"/"+ inEsTime+"/*/*";
-            String urlData = realTimeInventoryQueryService.getConnUrlData(connUrl);
-
             Gson gson = new Gson();
             // 获取第一层的信息
             ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
@@ -197,44 +128,34 @@ public class RealtimeExServiceImpl implements ExService {
                 rtInvContent = new RtInvContent();
             }
             String content = rtInvContent.getContent();
-            // 获取第二层的信息（多条）
+            // 获取第二层的信息
             ArrayList<RealTimeDto> realTimeDto2 = gson.fromJson(content,new TypeToken<List<RealTimeDto>>() {}.getType());
-            ArrayList itemCodeList = new ArrayList();
-            for(int i=0;i<realTimeDto2.size();i++){
-                RealTimeDto realTimeDto = realTimeDto2.get(i);
-                if(realTimeDto == null){
-                    realTimeDto = new RealTimeDto();
-                }
-                itemCodeList.add(realTimeDto.getArticle_id());
-            }
-            Collection<String> articles = itemCodeList;
-            rTParamDTO.setArticles(articles);
-            _list = realTimeInventoryQueryMapper.InventoryEsQuery(rTParamDTO);
-            for(RTInventoryQueryDTO rtDto : _list) {
-                String _itemCode = rtDto.getItemCode();
-                for (RealTimeDto realTimeDto : realTimeDto2) {
-                    if (_itemCode.equals(realTimeDto.getArticle_id())) {
-                        rtDto.setAdjustQty(realTimeDto.getAdjustment_qty()); // 当日库存调整数量
-                        rtDto.setTransferOutQty(realTimeDto.getTransfer_out_qty().add(realTimeDto.getTransfer_out_corr_qty()));//调拨--调出数量+调出修正
-                        rtDto.setOnHandQty(realTimeDto.getOn_hand_qty());// 昨日库存数量
-                        rtDto.setSaleQty(realTimeDto.getSale_qty());// 当日销售数量
-                        rtDto.setScrapQty(realTimeDto.getWrite_off_qty());//报废数量
-                        rtDto.setTransferInQty(realTimeDto.getTransfer_in_qty().add(realTimeDto.getTransfer_in_corr_qty()));//调拨--调入数量+调入修正
-                        rtDto.setStoreReturnQty(realTimeDto.getReturn_qty().add(realTimeDto.getReturn_corr_qty()));//退货数量 + 退货更正数量
-                        rtDto.setOnOrderQty(realTimeDto.getOn_order_qty());// 在途数量
-                        rtDto.setReceiveQty(realTimeDto.getReceive_qty().add(realTimeDto.getReceive_corr_qty()));// 当日收货数量 + 收货更正数量
-                        // 计算实时库存数量
-                        BigDecimal rTimeQty = realTimeDto.getOn_hand_qty().add(realTimeDto.getReceive_qty().add(realTimeDto.getReceive_corr_qty()))
-                                .add(realTimeDto.getAdjustment_qty()).subtract(realTimeDto.getTransfer_out_qty().add(realTimeDto.getTransfer_out_corr_qty()))
-                                .subtract(realTimeDto.getSale_qty()).subtract(realTimeDto.getWrite_off_qty()).add(realTimeDto.getTransfer_in_qty().add(realTimeDto.getTransfer_in_corr_qty()))
-                                .subtract(realTimeDto.getReturn_qty().add(realTimeDto.getReturn_corr_qty()));
-                        rtDto.setRealtimeQty(rTimeQty);
+            if(realTimeDto2.size()>0) {
+                for (RTInventoryQueryDTO rtDto : _list) {
+                    for (RealTimeDto realTimeDto : realTimeDto2) {
+                        if (realTimeDto.getArticle_id().equals(rtDto.getItemCode())) {
+                            rtDto.setAdjustQty(realTimeDto.getAdjustment_qty()); // 当日库存调整数量
+                            rtDto.setTransferOutQty(realTimeDto.getTransfer_out_qty().add(realTimeDto.getTransfer_out_corr_qty()));//调拨--调出数量+调出修正
+                            rtDto.setOnHandQty(realTimeDto.getOn_hand_qty());// 昨日库存数量
+                            rtDto.setSaleQty(realTimeDto.getSale_qty());// 当日销售数量
+                            rtDto.setScrapQty(realTimeDto.getWrite_off_qty());//报废数量
+                            rtDto.setTransferInQty(realTimeDto.getTransfer_in_qty().add(realTimeDto.getTransfer_in_corr_qty()));//调拨--调入数量+调入修正
+                            rtDto.setStoreReturnQty(realTimeDto.getReturn_qty().add(realTimeDto.getReturn_corr_qty()));//退货数量 + 退货更正数量
+                            rtDto.setOnOrderQty(realTimeDto.getOn_order_qty());// 在途数量
+                            rtDto.setReceiveQty(realTimeDto.getReceive_qty().add(realTimeDto.getReceive_corr_qty()));// 当日收货数量 + 收货更正数量
+                            // 计算实时库存数量
+                            BigDecimal rTimeQty = realTimeDto.getOn_hand_qty().add(realTimeDto.getReceive_qty().add(realTimeDto.getReceive_corr_qty()))
+                                    .add(realTimeDto.getAdjustment_qty()).subtract(realTimeDto.getTransfer_out_qty().add(realTimeDto.getTransfer_out_corr_qty()))
+                                    .subtract(realTimeDto.getSale_qty()).subtract(realTimeDto.getWrite_off_qty()).add(realTimeDto.getTransfer_in_qty().add(realTimeDto.getTransfer_in_corr_qty()))
+                                    .subtract(realTimeDto.getReturn_qty().add(realTimeDto.getReturn_corr_qty()));
+                            rtDto.setRealtimeQty(rTimeQty);
+                        }
                     }
                 }
             }
-
-            }
-
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         // 查询数据
        // List<RTInventoryQueryDTO> _list = mapper.InventoryQueryBy(jsonParam);

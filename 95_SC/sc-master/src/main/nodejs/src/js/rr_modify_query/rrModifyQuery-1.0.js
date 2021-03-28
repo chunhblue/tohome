@@ -145,7 +145,7 @@ define('receipt', function () {
                 var cols = tableGrid.getSelectColValue(selectTrTemp,"storeCd,orderId,orgOrderId");
                 //获取数据审核状态
                 _common.getRecordStatus(cols["orderId"],m.typeId.val(),function (result) {
-                    if(result.success||result.data==10){
+                    if(result.success){
                         /*//验证订货日是否为当前业务日
                         _common.checkBusinessDate(tempTrOrderDate,null,function (result) {
                             if(result.success){

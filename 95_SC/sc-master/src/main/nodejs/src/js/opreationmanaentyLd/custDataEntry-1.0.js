@@ -57,6 +57,12 @@ define('custDataEntry', function () {
         audit_affirm:null,
         typeId:null,
         i_storeCd:null,
+        piDateParam:null,
+        ParamstoreCd:null,
+        ParamstoreName: null,
+        create_By:null,
+        searchJson1:null,
+        main_box:null,
         reviewId:null
     }
     // 创建js对象
@@ -79,30 +85,36 @@ define('custDataEntry', function () {
         initTable1();
         //表格内按钮事件
         table_event();
-        if (m.enterFlag.val()) {
-            // 获取数据
-            getData(m.piCdParam.val());
-            if (m.enterFlag.val() == 'view') {
-                setDisable(true);
-                //检查是否允许审核
-                _common.checkRole(m.piCdParam.val(),m.typeId.val(),function (success) {
-                    if(success){
-                        m.approvalBut.prop("disabled",false);
-                    }else{
-                        m.approvalBut.prop("disabled",true);
-                    }
-                });
-                // $("#saveBut").prop("disabled", false);
-                // $("#addPlanDetails").prop("disabled", false);
-                // $("#updatePlanDetails").prop("disabled", false);
-                // $("#deletePlanDetails").prop("disabled", false);
-                // $("#remarks").prop("disabled", false);
-            }
-        }
+        initPage();
+
         //审核事件
         approval_event();
     }
+     var initPage=function () {
+         if (m.enterFlag.val()) {
+             $("#store").attr("disabled",true);
+             // 获取数据
+             getData(m.piCdParam.val());
+             if (m.enterFlag.val()=="update"){
+                 $("#updatePlanDetails").show();
+             }
+             if (m.enterFlag.val() == 'view') {
+                 $("#updatePlanDetails").hide();
+                 setDisable(true);
+                 //检查是否允许审核
+                 _common.checkRole(m.piCdParam.val(),m.typeId.val(),function (success) {
+                     if(success){
+                         m.approvalBut.prop("disabled",false);
+                     }else{
+                         m.approvalBut.prop("disabled",true);
+                     }
+                 });
+             }
 
+         }else {
+             $("#updatePlanDetails").hide();
+         }
+     }
     // 保存导入的商品到表格里
     var addItemList = function (list) {
         if (!list) {
@@ -124,16 +136,15 @@ define('custDataEntry', function () {
                 i=i+1
             }
             htmls += '<tr data-index="'+item.rowIndex+'">' +
-                '<td tag="#" width="50" title="'+(num+i)+'" align="center" tdindex="zgGridTtable_num">'+(num+i)+'</td>'+
                 '<td tag="barcode" width="130" title="'+item.barcode+'" align="center" tdindex="zgGridTtable_barcode">'+item.barcode+'</td>' +
                 '<td tag="articleId" width="130" title="'+item.articleId+'" align="center" tdindex="zgGridTtable_articleId">'+item.articleId+'</td>' +
                 '<td tag="articleName" width="130" title="'+item.articleName+'" align="left" tdindex="zgGridTtable_articleName">'+item.articleName+'</td>' +
                 '<td tag="uom" width="130" title="'+item.uom+'" align="left" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
                 '<td tag="qty" width="130" title="'+toThousands(item.qty)+'" align="right" tdindex="zgGridTtable_qty">'+toThousands(item.qty)+'</td>' +
                 '<td tag="stockQty" width="130" title="'+toThousands(item.stockQty)+'" align="right" tdindex="zgGridTtable_stockQty">'+toThousands(item.stockQty)+'</td>' +
-                '<td tag="lastUpdateTime" width="130" title="'+lastUpdateTime+'" align="center" tdindex="zgGridTtable_lastUpdateTime">'+lastUpdateTime+'</td>' +
-                '<td tag="note" width="130" title="'+isEmpty(item.note)+'" align="center" tdindex="zgGridTtable_note">'+isEmpty(item.note)+'</td>' +
-                '</tr>';
+                // '<td tag="lastUpdateTime" width="130" title="'+lastUpdateTime+'" align="center" tdindex="zgGridTtable_lastUpdateTime">'+lastUpdateTime+'</td>' +
+                // '<td tag="note" width="130" title="'+isEmpty(item.note)+'" align="center" tdindex="zgGridTtable_note">'+isEmpty(item.note)+'</td>' +
+              '</tr>';
             dataForm.push(item);
 
         });
@@ -152,7 +163,7 @@ define('custDataEntry', function () {
             let articleName = $('#a_article').attr("v");
             let uom = $('#uom').val();
             let qty = $('#qty').val();
-            let stockQty = $('#inventoryQty').val();
+            let stockQty = toThousands($('#inventoryQty').val());
             let lastUpdateTime = new Date().Format("dd/MM/yyyy hh:mm:ss");
             let note = $('#note').val();
 
@@ -197,15 +208,14 @@ define('custDataEntry', function () {
                         rowindex = parseInt(trId.substring(trId.indexOf("_") + 1, trId.indexOf("_") + 2)) + 1;
                     }
                     var html = '<tr data-index="' + obj.rowIndex + '">' +
-                        '<td tag="#" width="50" title="'+num+'" align="center" tdindex="zgGridTtable_num">'+num+'</td>'+
                         '<td tag="barcode" width="130" title="' + barcode + '" align="center" id="zgGridTtable_' + rowindex + '_tr_barcode" tdindex="zgGridTtable_barcode">' + barcode + '</td>' +
                         '<td tag="articleId" width="130" title="' + articleId + '" align="center" id="zgGridTtable_' + rowindex + '_tr_articleId" tdindex="zgGridTtable_articleId">' + articleId + '</td>' +
                         '<td tag="articleName" width="130" title="' + articleName + '" align="left" id="zgGridTtable_' + rowindex + '_tr_articleName" tdindex="zgGridTtable_articleName">' + articleName + '</td>' +
                         '<td tag="uom" width="80" title="' + uom + '" align="left" id="zgGridTtable_' + rowindex + '_tr_uom" tdindex="zgGridTtable_uom">' + uom + '</td>' +
                         '<td tag="qty" width="80" title="' + qty + '" align="right" id="zgGridTtable_' + rowindex + '_tr_qty" tdindex="zgGridTtable_qty">' + qty + '</td>' +
                         '<td tag="stockQty" width="80" title="' + stockQty + '" align="right" id="zgGridTtable_' + rowindex + '_tr_stockQty" tdindex="zgGridTtable_stockQty">' + stockQty + '</td>' +
-                        '<td tag="lastUpdateTime" width="130" title="'+lastUpdateTime+'" align="center" id="zgGridTtable_'+rowindex+'_tr_lastUpdateTime" tdindex="zgGridTtable_lastUpdateTime">'+lastUpdateTime+'</td>' +
-                        '<td tag="note" width="130" title="'+isEmpty(note)+'" align="left" id="zgGridTtable_'+rowindex+'_tr_note" tdindex="zgGridTtable_note">'+isEmpty(note)+'</td>' +
+                        // '<td tag="lastUpdateTime" width="130" title="'+lastUpdateTime+'" align="center" id="zgGridTtable_'+rowindex+'_tr_lastUpdateTime" tdindex="zgGridTtable_lastUpdateTime">'+lastUpdateTime+'</td>' +
+                        // '<td tag="note" width="130" title="'+isEmpty(note)+'" align="left" id="zgGridTtable_'+rowindex+'_tr_note" tdindex="zgGridTtable_note">'+isEmpty(note)+'</td>' +
                         '</tr>';
                     tableGrid.append(html);
 
@@ -337,7 +347,7 @@ define('custDataEntry', function () {
                 $('#articleId').val(record.articleId);
                 $('#uom').val(record.uom);
                 $('#qty').val(record.qty);
-                $('#inventoryQty').val(record.stockQty);
+                $('#inventoryQty').val(toThousands(record.stockQty));
                 $('#lastUpdateTime').val(record.lastUpdateTime);
                 $('#note').val(record.note);
             }
@@ -383,9 +393,103 @@ define('custDataEntry', function () {
                 top.location = url_left;
             }
         });
+        if(!m.enterFlag.val()){
+            //是否有冻结列的标记
+            var freeze = tableGrid.getting("freezeIndex");
+            //重写选择背景变色事件
+            tableGrid.find("tbody").unbind('mousedown').on('mousedown','td', function (e) {
+                var thisObj = $(this),
+                    thisParent = $(this).parent();
+                if(3 == e.which){ //鼠标右键
+                    thisParent.addClass("info").siblings().removeClass("info");
+                    var eachTrRightclickFun = $.isFunction(tableGrid.getting("eachTrRightclick")) ? true : false;
+                    if(eachTrRightclickFun){
+                        tableGrid.getting("eachTrRightclick").call(this,thisParent,thisObj);
+                    }
+                    if(freeze>=0){
+                        var freeToTr = thisParent.prop("id");
+                        $("#"+freeToTr+"_free").addClass("info").siblings().removeClass("info");
+                    }
+                }else if(1 == e.which){ //鼠标左键
+                    var cols = tableGrid.getSelectColValue(thisParent,"articleId");
+                    var articleId = $(selectTrTemp).find('td[tag=articleId]').text();
+                    if(cols["articleId"] != articleId && $('#grid_orderQty').length == 1){
+                        var flg = checkOrderQty();
+                        if(flg){
+                            //还原表格中的input框
+                            let qty = toThousands($('#grid_orderQty').val().trim());
+                            $(selectTrTemp).find('td[tag=qty]').text(qty);
+                        }else{
+                            let qty = $('#grid_orderQty').attr("oldValue");
+                            $(selectTrTemp).find('td[tag=qty]').text(qty);
+                            return false;
+                        }
+                    }
+                    //改变背景颜色
+                    thisParent.addClass("info").siblings().removeClass("info");
+                    if(freeze>=0){
+                        var freeToTr = thisParent.prop("id");
+                        $("#"+freeToTr+"_free").addClass("info").siblings().removeClass("info");
+                    }
+                    $(".zgGrid-modal").hide();
+                    var eachTrClickFun = $.isFunction(tableGrid.getting("eachTrClick")) ? true : false;
+                    if(eachTrClickFun){
+                        tableGrid.getting("eachTrClick").call(this,thisParent,thisObj);
+                    }
+                }
+            });
+            // //光标移出
+            m.main_box.on("blur","#grid_orderQty",function(){
+                $("#grid_orderQty").val(this.value);
+                // var flg = checkOrderQty();
+                // if(flg){
+                // 	//还原表格中的input框
+                // 	var orderQty = toThousands($('#grid_orderQty').val().trim());
+                // 	$(selectTrTemp).find('td[tag=orderQty]').text(orderQty);
+                // }else{
+                // 	return false;
+                // }
+            });
+
+            //光标进入，去除金额千分位，并去除小数后面多余的0
+            m.main_box.on("focus","#grid_orderQty",function(){
+                $("#grid_orderQty").val(this.value);
+            })
+
+            //回车保存
+            m.main_box.on("keydown","#grid_orderQty",function(e){
+                if(e.keyCode==13){
+                    var flg = checkOrderQty();
+                    if(flg){
+                        //还原表格中的input框
+                        var qty = toThousands($('#grid_orderQty').val().trim());
+                        $(selectTrTemp).find('td[tag=qty]').text(qty);
+                    }else{
+                        let qty = $('#grid_orderQty').attr("oldValue");
+                        $(selectTrTemp).find('td[tag=qty]').text(qty);
+                        return false;
+                    }
+                }
+            })
+        }
 
     }
-
+    //  3/20开始
+    var checkOrderQty = function () {
+        var qty = reThousands($('#grid_orderQty').val().trim());
+        var qty1 = $('#grid_orderQty').val().trim();
+        var reg = /((^[1-9]\d*)|^0)(\.\d+)?$/;
+        if(!reg.test(qty) || qty1.indexOf(",")>0){
+            _common.prompt("Please enter with correct data type!",3,"info");
+            $('#grid_orderQty').focus();
+            return false;
+        }
+        return true;
+    }
+    var addInputValue=function () {
+        var cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,qty,stockQty");
+        $(selectTrTemp).find('td[tag=qty]').text("").append("<input type='text' class='form-control my-automatic input-sm' id='grid_orderQty' oldValue='"+cols["qty"]+"' value='"+cols["qty"]+"'>");
+    }
     var loading_close = function () {
         $(".loading-mask-div").fadeOut(100,function(){
             $(".init-loading-box").fadeOut(200);
@@ -481,13 +585,21 @@ define('custDataEntry', function () {
 
     //画面按钮点击事件
     var but_event = function () {
-        $("#qty").blur(function () {
-            $("#qty").val(toThousands(this.value));
-        });
+        var reg = /((^[1-9]\d*)|^0)(\.\d+)?$/;
 
-        //光标进入，去除金额千分位，并去除小数后面多余的0
-        $("#qty").focus(function(){
-            $("#qty").val(reThousands(this.value));
+        $("#qty").blur(function () {
+         var qty= $("#qty").val();
+            if(reg.test(qty) || qty.indexOf(",")<0){
+                $("#qty").val(toThousands(this.value));
+          }
+        });
+        //
+        // //光标进入，去除金额千分位，并去除小数后面多余的0
+        $("#qty").focus(function () {
+            var qty= $("#qty").val();
+            if(reg.test(qty) || qty.indexOf(",")<0){
+                $("#qty").val(toThousands(this.value));
+            }
         });
 
         m.cancel.on("click",function () {
@@ -513,18 +625,42 @@ define('custDataEntry', function () {
             }else {
                 $('#store').css("bordor-color","#CCC")
             }
-            if (dataForm.length<1) {
-                _common.prompt("Please enter the inventory data!",5,"error");/*请录入费用录入商品数据*/
-                return;
+            if (!m.enterFlag.val()) {
+                $("#zgGridTtable>.zgGrid-tbody tr").each(function () {
+                    var _articleId = $(this).find('td[tag=articleId]').text();
+                    var barcode = $(this).find('td[tag=barcode]').text();
+                    var articleName = $(this).find('td[tag=articleName]').text();
+                    var uom = $(this).find('td[tag=uom]').text();
+                    var qty = $(this).find('td[tag=qty]').text();
+                    var stockQty = $(this).find('td[tag=stockQty]').text();
+                    var obj = {
+                        'barcode': barcode,
+                        'articleId': _articleId,
+                        'articleName': articleName,
+                        'uom': uom,
+                        'qty': qty,
+                        'stockQty': stockQty,
+                        'rowIndex': uuid(), // 设置一个唯一标识
+                    }
+                    if (obj.qty != 0) {
+                        dataForm.push(obj);
+                    }
+
+                });
+                if (dataForm.length < 1) {
+                    _common.prompt("Please enter the inventory data!", 5, "error");/*请录入费用录入商品数据*/
+                    return;
+                }
+                // 头档信息
+
             }
-            // 头档信息
             let data = {
                 'piCd': piCd,
                 'remarks': remarks,
                 'storeCd': storeCd,
             }
             dataForm.forEach(function (item) {
-                item.qty=reThousands(item.qty);
+                item.qty = reThousands(item.qty);
                 delete item.articleName;
             });
             var record = encodeURIComponent(JSON.stringify(dataForm));
@@ -571,7 +707,35 @@ define('custDataEntry', function () {
 
         // 输入商品id定位功能
         m.searchItemBtn.on('click',function () {
-            searchItem();
+            let storeCd = m.store.attr('k');
+            let articleId=m.searchItemInp.val();
+            let barcode=m.searchItemBcd.val();
+            if (!storeCd){
+                _common.prompt("Please enter the Store!",5,"error");/*请录入费用录入商品数据*/
+                $('#store').focus();
+                $('#store').css("border-color","red");
+                return;
+            }else {
+                $('#store').css("border-color","#CCC");
+            }
+
+
+         if (m.enterFlag.val()=="view" || m.enterFlag.val()=="update"){
+             getDataIn(m.piCdParam.val());
+            }else {
+             var searchJsonStr={
+                 storeCd:$("#store").attr("k"),
+                 articleId:articleId,
+                 barcode:barcode,
+             }
+             m.searchJson1.val(JSON.stringify(searchJsonStr));
+             paramGrid = "searchJson="+ m.searchJson1.val();
+             tableGrid.setting("url",url_left+"/getStoreCustItem");
+             tableGrid.setting("param", paramGrid);
+             tableGrid.setting("page", 1);
+             tableGrid.loadData(null);
+         }
+            // searchItem();
         });
 
         // 商品重置
@@ -650,15 +814,25 @@ define('custDataEntry', function () {
             return null;
         }
         let obj = {
-            'barcode': $($(selectTrTemp[0]).find('td')[1]).text(),
-            'articleId': $($(selectTrTemp[0]).find('td')[2]).text(),
-            'articleName': $($(selectTrTemp[0]).find('td')[3]).text(),
-            'uom': $($(selectTrTemp[0]).find('td')[4]).text(),
-            'qty': $($(selectTrTemp[0]).find('td')[5]).text(),
-            'stockQty': $($(selectTrTemp[0]).find('td')[6]).text(),
-            'lastUpdateTime': $($(selectTrTemp[0]).find('td')[7]).text(),
-            'note': $($(selectTrTemp[0]).find('td')[8]).text(),
+            'barcode': $($(selectTrTemp[0]).find('td')[0]).text(),
+            'articleId': $($(selectTrTemp[0]).find('td')[1]).text(),
+            'articleName': $($(selectTrTemp[0]).find('td')[2]).text(),
+            'uom': $($(selectTrTemp[0]).find('td')[3]).text(),
+            'qty': $($(selectTrTemp[0]).find('td')[4]).text(),
+            'stockQty': $($(selectTrTemp[0]).find('td')[5]).text(),
+            // 'lastUpdateTime': $($(selectTrTemp[0]).find('td')[7]).text(),
+            // 'note': $($(selectTrTemp[0]).find('td')[8]).text(),
         }
+        // let obj = {
+        //     'barcode': $($(selectTrTemp[0]).find('td')[1]).text(),
+        //     'articleId': $($(selectTrTemp[0]).find('td')[2]).text(),
+        //     'articleName': $($(selectTrTemp[0]).find('td')[3]).text(),
+        //     'uom': $($(selectTrTemp[0]).find('td')[4]).text(),
+        //     'qty': $($(selectTrTemp[0]).find('td')[5]).text(),
+        //     'stockQty': $($(selectTrTemp[0]).find('td')[6]).text(),
+        //     'lastUpdateTime': $($(selectTrTemp[0]).find('td')[7]).text(),
+        //     'note': $($(selectTrTemp[0]).find('td')[8]).text(),
+        // }
         return obj;
     }
 
@@ -689,24 +863,27 @@ define('custDataEntry', function () {
             clearAll();
             return;
         }
-
+        m.piCd.val(piCd);
+        $("#create_user").val(m.create_By.val());
+        $("#create_ymd").val(m.piDateParam.val());
+        $.myAutomatic.setValueTemp(a_store,m.ParamstoreCd.val(),m.ParamstoreCd.val()+' '+m.ParamstoreName.val());//赋值
         $.myAjaxs({
             url: url_left + "/getData",
             async: true,
             cache: false,
             type: "get",
-            data: "piCd=" + piCd,
+            data: "piCd=" + piCd+"&storeCd="+$("#store").attr("k")+"&createUser="+$("#create_user").val()+"&createYmd="+$("#create_ymd").val(),
             dataType: "json",
             success: function (result) {
                 if (result.success) {
                     var record = result.o;
                     dataForm = [];
-                    $("#piCd").val(record.piCd);
-                    $("#create_ymd").val(_common.formatCreateDate(record.createYmd));
-                    $("#create_user").val(record.createUserName);
+                    // $("#piCd").val(record.piCd);
+                    // $("#create_ymd").val(_common.formatCreateDate(record.createYmd));
+                    // $("#create_user").val(record.createUserName);
                     $("#remarks").val(record.remarks);
                     m.i_storeCd.val(record.storeCd);
-                    $.myAutomatic.setValueTemp(a_store, record.storeCd, record.storeName);//赋值
+                    // $.myAutomatic.setValueTemp(a_store, record.storeCd, record.storeName);//赋值
                     dataForm=record.itemList;
                     // 封装明细数据
                     var trList = $("#zgGridTtable  tr:not(:first)");
@@ -720,15 +897,15 @@ define('custDataEntry', function () {
                         item.rowIndex=uuid();
                         var num = $("#zgGridTtable>.zgGrid-tbody").find("tr").length + 1;
                         var html = '<tr data-index="'+item.rowIndex+'">' +
-                            '<td tag="#" width="50" title="'+num+'" align="center" tdindex="zgGridTtable_num">'+num+'</td>'+
+                            // '<td tag="#" width="50" title="'+num+'" align="center" tdindex="zgGridTtable_num">'+num+'</td>'+
                             '<td tag="barcode" width="130" title="'+item.barcode+'" align="center" id="zgGridTtable_'+rowindex+'_tr_barcode" tdindex="zgGridTtable_barcode">'+item.barcode+'</td>' +
                             '<td tag="articleId" width="130" title="'+item.articleId+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId" tdindex="zgGridTtable_articleId">'+item.articleId+'</td>' +
                             '<td tag="articleName" width="130" title="'+item.articleName+'" align="left" id="zgGridTtable_'+rowindex+'_tr_articleName" tdindex="zgGridTtable_articleName">'+item.articleName+'</td>' +
                             '<td tag="uom" width="80" title="'+item.uom+'" align="left" id="zgGridTtable_'+rowindex+'_tr_uom" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
                             '<td tag="qty" width="80" title="'+toThousands(item.qty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_qty" tdindex="zgGridTtable_qty">'+toThousands(item.qty)+'</td>' +
                             '<td tag="stockQty" width="80" title="'+toThousands(item.stockQty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_stockQty" tdindex="zgGridTtable_stockQty">'+toThousands(item.stockQty)+'</td>' +
-                            '<td tag="lastUpdateTime" width="130" title="'+formatDateAndTime(item.lastUpdateTime)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_lastUpdateTime" tdindex="zgGridTtable_lastUpdateTime">'+formatDateAndTime(item.lastUpdateTime)+'</td>' +
-                            '<td tag="note" width="130" title="'+isEmpty(item.note)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_note" tdindex="zgGridTtable_note">'+isEmpty(item.note)+'</td>' +
+                            // '<td tag="lastUpdateTime" width="130" title="'+formatDateAndTime(item.lastUpdateTime)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_lastUpdateTime" tdindex="zgGridTtable_lastUpdateTime">'+formatDateAndTime(item.lastUpdateTime)+'</td>' +
+                            // '<td tag="note" width="130" title="'+isEmpty(item.note)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_note" tdindex="zgGridTtable_note">'+isEmpty(item.note)+'</td>' +
                             '</tr>';
                         item.lastUpdateTime=formatDateAndTime(item.lastUpdateTime);
                         tableGrid.append(html);
@@ -737,7 +914,65 @@ define('custDataEntry', function () {
             }
         });
     };
+    var getDataIn = function (piCd) {
+        if (!piCd) {
+            clearAll();
+            return;
+        }
+        let articleId=m.searchItemInp.val();
+        let barcode=m.searchItemBcd.val();
+        m.piCd.val(piCd);
+        $("#create_user").val(m.create_By.val());
+        $("#create_ymd").val(m.piDateParam.val());
 
+        $.myAutomatic.setValueTemp(a_store,m.ParamstoreCd.val(),m.ParamstoreCd.val()+' '+m.ParamstoreName.val());//赋值
+        $.myAjaxs({
+            url: url_left + "/getInData",
+            async: true,
+            cache: false,
+            type: "get",
+            data: "piCd=" + piCd+"&storeCd="+$("#store").attr("k")+"&createUser="+$("#create_user").val()+"&createYmd="+$("#create_ymd").val()+"&articleId="+articleId+"&barcode="+barcode,
+            dataType: "json",
+            success: function (result) {
+                if (result.success) {
+                    var record = result.o;
+                    dataForm = [];
+                    // $("#piCd").val(record.piCd);
+                    // $("#create_ymd").val(_common.formatCreateDate(record.createYmd));
+                    // $("#create_user").val(record.createUserName);
+                    $("#remarks").val(record.remarks);
+                    m.i_storeCd.val(record.storeCd);
+                    // $.myAutomatic.setValueTemp(a_store, record.storeCd, record.storeName);//赋值
+                    dataForm=record.itemList;
+                    // 封装明细数据
+                    var trList = $("#zgGridTtable  tr:not(:first)");
+                    trList.remove();
+                    dataForm.forEach(function (item) {
+                        var rowindex = 0;
+                        var trId = $("#zgGridTtable>.zgGrid-tbody tr:last").attr("id");
+                        if(trId!=null&&trId!=''){
+                            rowindex = parseInt(trId.substring(trId.indexOf("_")+1,trId.indexOf("_")+2))+1;
+                        }
+                        item.rowIndex=uuid();
+                        var num = $("#zgGridTtable>.zgGrid-tbody").find("tr").length + 1;
+                        var html = '<tr data-index="'+item.rowIndex+'">' +
+                            // '<td tag="#" width="50" title="'+num+'" align="center" tdindex="zgGridTtable_num">'+num+'</td>'+
+                            '<td tag="barcode" width="130" title="'+item.barcode+'" align="center" id="zgGridTtable_'+rowindex+'_tr_barcode" tdindex="zgGridTtable_barcode">'+item.barcode+'</td>' +
+                            '<td tag="articleId" width="130" title="'+item.articleId+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId" tdindex="zgGridTtable_articleId">'+item.articleId+'</td>' +
+                            '<td tag="articleName" width="130" title="'+item.articleName+'" align="left" id="zgGridTtable_'+rowindex+'_tr_articleName" tdindex="zgGridTtable_articleName">'+item.articleName+'</td>' +
+                            '<td tag="uom" width="80" title="'+item.uom+'" align="left" id="zgGridTtable_'+rowindex+'_tr_uom" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
+                            '<td tag="qty" width="80" title="'+toThousands(item.qty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_qty" tdindex="zgGridTtable_qty">'+toThousands(item.qty)+'</td>' +
+                            '<td tag="stockQty" width="80" title="'+toThousands(item.stockQty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_stockQty" tdindex="zgGridTtable_stockQty">'+toThousands(item.stockQty)+'</td>' +
+                            // '<td tag="lastUpdateTime" width="130" title="'+formatDateAndTime(item.lastUpdateTime)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_lastUpdateTime" tdindex="zgGridTtable_lastUpdateTime">'+formatDateAndTime(item.lastUpdateTime)+'</td>' +
+                            // '<td tag="note" width="130" title="'+isEmpty(item.note)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_note" tdindex="zgGridTtable_note">'+isEmpty(item.note)+'</td>' +
+                            '</tr>';
+                        item.lastUpdateTime=formatDateAndTime(item.lastUpdateTime);
+                        tableGrid.append(html);
+                    });
+                }
+            }
+        });
+    };
     // 清空值
     var clearAll = function () {
         $("#piCd").val('');
@@ -900,7 +1135,7 @@ define('custDataEntry', function () {
         tableGrid = $("#zgGridTtable").zgGrid({
             title: "Details",
             param: paramGrid,
-            colNames: ["Item Barcode", "Item Code", "Item Name", "UOM", "Qty","Inventory Qty","Last Update Time","Notes"],
+            colNames: ["Item Barcode", "Item Code", "Item Name", "UOM", "Qty","Inventory Qty"],
             colModel: [
                 {
                     name: "barcode",
@@ -949,33 +1184,13 @@ define('custDataEntry', function () {
                     ishide: false,
                     getCustomValue:getThousands
                 },
-                {
-                    name: "lastUpdateTime",
-                    type: "text",
-                    text: "left",
-                    width: "130",
-                    ishide: false,
-                    css: "",
-                    getCustomValue:formatDate
-                },
-                {
-                    name: "note",
-                    type: "text",
-                    text: "left",
-                    width: "130",
-                    ishide: false,
-                    css: ""
-                }
             ],//列内容
-            lineNumber:true,
             traverseData: dataForm,
             width: "max",//宽度自动
             page: 1,//当前页
             height: 300,
             rowPerPage: 10,//每页数据量
             isPage: false,//是否需要分页
-            isCheckbox: false,
-            freezeHeader:true,
             loadEachBeforeEvent: function (trObj) {
                 tempTrObjValue = {};
                 return trObj;
@@ -984,29 +1199,36 @@ define('custDataEntry', function () {
                 return resData;
             },
             loadCompleteEvent: function (self) {
+                if (!m.enterFlag.val()){
+                    tableGrid.find("tr").on('dblclick', function (e) {
+                        addInputValue();
+                    });
+                    return self;
+                }
+                return self;
             },
             eachTrClick: function (trObj, tdObj) {//正常左侧点击
                 selectTrTemp = trObj;
             },
             buttonGroup: [
-                {
-                    butType: "add",
-                    butId: "addPlanDetails",
-                    butText: "Add",
-                    butSize: ""
-                },
+                // {
+                //     butType: "add",
+                //     butId: "addPlanDetails",
+                //     butText: "Add",
+                //     butSize: ""
+                // },
                 {
                     butType: "update",
                     butId: "updatePlanDetails",
                     butText: "Modify",
                     butSize: ""
                 },
-                {
-                    butType: "upload",
-                    butId: "importFiles",
-                    butText: "Import Result",
-                    butSize: ""
-                },
+                // {
+                //     butType: "upload",
+                //     butId: "importFiles",
+                //     butText: "Import Result",
+                //     butSize: ""
+                // },
                 /*{
                     butType: "delete",
                     butId: "deletePlanDetails",

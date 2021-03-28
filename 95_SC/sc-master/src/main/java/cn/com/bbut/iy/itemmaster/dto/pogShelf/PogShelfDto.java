@@ -21,6 +21,12 @@ public class PogShelfDto  extends GridDataDTO {
 
     private String storeName;
 
+    private String reviewStatus;
+
+    private String reviewStatusName;
+
+    private String isExpired;
+
     private String createTime;
 
     private String createUserName;

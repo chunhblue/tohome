@@ -247,8 +247,8 @@
 							</div>
 
 							<div class="form-group">
-								<label for="generalReason" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label not-null">General Reason</label>
-								<div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
+								<label for="generalReason" hidden class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label not-null">General Reason</label>
+								<div class="col-xs-12 col-sm-4 col-md-3 col-lg-3" hidden>
 									<div class="aotu-pos">
 										<input type="text"
 											   class="form-control my-automatic input-sm" autocomplete="off" id="generalReason">
@@ -267,7 +267,7 @@
 							</div>
 
 							<div class="form-group" id="exp">
-								<label for="expenditureNo" id="expenditureCode" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label not-null" style="white-space: nowrap">Expenditure No.</label>
+								<label for="expenditureNo" id="expenditureCode" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label" style="white-space: nowrap">Expenditure No.</label>
 								<div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
 									<div class="aotu-pos good-select">
 										<input type="text" class="form-control my-automatic input-sm" id="expenditureNo">

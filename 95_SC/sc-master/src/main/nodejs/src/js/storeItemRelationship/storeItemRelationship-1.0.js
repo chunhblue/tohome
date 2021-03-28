@@ -174,10 +174,11 @@ define('storeItemRelationship', function () {
 					success: function (result) {
 						if (result.success) {
 							$("#approval_dialog").modal("hide");
-							//更新主档审核状态值
+							//更新主档审核状态值modifyRecordStatus
 							//_common.modifyRecordStatus(auditStepId,auditStatus);
 							m.approvalBut.prop("disabled", true);
 							_common.prompt("Saved Successfully!", 3, "success");// 保存审核信息成功
+							// updateShelf();
 						} else {
 							m.approvalBut.prop("disabled", false);
 							_common.prompt("Saved Failure!", 5, "error");// 保存审核信息失败
@@ -188,7 +189,29 @@ define('storeItemRelationship', function () {
 				});
 			})
 		})
-	}
+	};
+
+    var updateShelf = function () {
+		$.myAjaxs({
+			url: url_left + "/updateShelf",
+			async: true,
+			cache: false,
+			type: "post",
+			data: {
+				storeCd: $("#aStore").attr("k")
+			},
+			dataType: "json",
+			success: function (result) {
+				if (result.success) {
+					m.approvalBut.prop("disabled", true);
+					_common.prompt("Saved Successfully!", 3, "success");// 保存审核信息成功
+				} else {
+					m.approvalBut.prop("disabled", false);
+					_common.prompt("Saved Shelf Failure!", 5, "error");// 保存审核信息失败
+				}
+			}
+		});
+	};
 
 	// 初始化下拉列表
 	function initSelectValue(){
@@ -577,7 +600,8 @@ define('storeItemRelationship', function () {
 		tableGrid = $("#zgGridTtable").zgGrid({
     		title:"Query Result",
     		param:paramGrid,
-    		colNames:["Store No.","Store Name","Store Cluster","Store Group","Shelf","Sub-Shelf","Product Type","Location","Item Code","Product Name","Category","Sub Category","V. Facing","H. Facing","D. Facing","Total Facing","Date Created"],
+    		colNames:["Store No.","Store Name","Store Cluster","Store Group","Shelf","Sub-Shelf","Product Type","Location",
+				"Item Code","Product Name","Category","Sub Category","V. Facing","H. Facing","D. Facing","Total Facing","POG Name","Date Created"],
     		colModel:[
 				{name:"storeCd",type:"text",text:"right",width:"100",ishide:false,css:""},
 				{name:"storeName",type:"text",text:"left",width:"200",ishide:false,css:""},
@@ -589,13 +613,14 @@ define('storeItemRelationship', function () {
 	          	{name:"loc",type:"text",text:"right",width:"100",ishide:false,css:""},
 	          	{name:"itemCode",type:"text",text:"right",width:"130",ishide:false,css:""},
 	          	{name:"productName",type:"text",text:"left",width:"130",ishide:false,css:""},
-				{name:"categoryName",type:"text",text:"left",width:"150",ishide:false,css:""},
-				{name:"subCategoryName",type:"text",text:"left",width:"150",ishide:false,css:""},
-	          	{name:"vfacing",type:"text",text:"right",width:"100",ishide:false,css:""},
-				{name:"hfacing",type:"text",text:"right",width:"100",ishide:false,css:""},
-				{name:"dfacing",type:"text",text:"right",width:"100",ishide:false,css:""},
-				{name:"totalFacing",type:"text",text:"right",width:"120",ishide:false,css:""},
-				{name:"createDate",type:"text",text:"center",width:"150",ishide:false,css:"",getCustomValue:dateFmt}
+				{name:"categoryName",type:"text",text:"left",width:"130",ishide:false,css:""},
+				{name:"subCategoryName",type:"text",text:"left",width:"130",ishide:false,css:""},
+	          	{name:"vfacing",type:"text",text:"right",width:"90",ishide:false,css:""},
+				{name:"hfacing",type:"text",text:"right",width:"90",ishide:false,css:""},
+				{name:"dfacing",type:"text",text:"right",width:"90",ishide:false,css:""},
+				{name:"totalFacing",type:"text",text:"right",width:"90",ishide:false,css:""},
+				{name:"excelName",type:"text",text:"left",width:"150",ishide:false,css:""},
+				{name:"createDate",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue:dateFmt}
 			],//列内容
 			width:"max",//宽度自动
 			page:1,//当前页

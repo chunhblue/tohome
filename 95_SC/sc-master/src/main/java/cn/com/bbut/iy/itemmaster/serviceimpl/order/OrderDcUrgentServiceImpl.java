@@ -342,6 +342,7 @@ public class OrderDcUrgentServiceImpl implements OrderDcUrgentService {
         String expireDate = this.getExpireDate(param.getStoreCd(),param.getOrderDate());
         param.setExpireDate(expireDate);
         param.setDeliveryDate(expireDate);
+        BigDecimal orderAmt = BigDecimal.ZERO;
         // 保存订货明细
         if(StringUtils.isNotBlank(orderDetailJson)){
             List<OD0010> od0010List = new Gson().fromJson(orderDetailJson, new TypeToken<List<OD0010>>(){}.getType());
@@ -363,12 +364,13 @@ public class OrderDcUrgentServiceImpl implements OrderDcUrgentService {
                         od0010.setOrderTax(articleOrderTax);//设置税额
                         od0010.setOrderAmt(od0010.getOrderAmtNotax().add(articleOrderTax));//设置含税金额
                     }
+                    orderAmt = orderAmt.add(od0010.getOrderAmt());
                     // 收货价即订货价
                     od0010.setReceivePrice(od0010.getOrderPrice());
                     od0010Mapper.insertSelective(od0010);
                 }
+                param.setOrderAmt(orderAmt); // 计算含税金额
                 param.setOrderTax(orderTax);//设置税额
-                param.setOrderAmt(param.getOrderAmt().add(orderTax));//设置含税金额
                 // 保存订货头档
                 od0000Mapper.insertSelective(param);
             }else{
@@ -440,7 +442,7 @@ public class OrderDcUrgentServiceImpl implements OrderDcUrgentService {
                     od0010Mapper.insertSelective(od0010);
                 }
                 param.setOrderTax(orderTax);//设置税额
-                param.setOrderAmt(param.getOrderAmt().add(orderTax));//设置含税金额
+                param.setOrderAmt(param.getOrderAmtNotax().add(orderTax));//设置含税金额
                 //修改订货头档
                 od0000Mapper.updateByPrimaryKeySelective(param);
             }else{

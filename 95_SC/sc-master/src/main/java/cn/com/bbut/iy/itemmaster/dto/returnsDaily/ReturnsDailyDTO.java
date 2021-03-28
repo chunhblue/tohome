@@ -15,6 +15,7 @@ public class ReturnsDailyDTO {
     private String barcode;
     // 销售日期
     private String saleDate;
+    private String tranDate;
     // pos机号
     private String posId;
     // 销售流水号
@@ -33,6 +34,8 @@ public class ReturnsDailyDTO {
     private String amCd;
     // 区域经理 名称
     private String amName;
+
+    private String nonSaleType;
 
     // 支付方式1
     private String payCd1;

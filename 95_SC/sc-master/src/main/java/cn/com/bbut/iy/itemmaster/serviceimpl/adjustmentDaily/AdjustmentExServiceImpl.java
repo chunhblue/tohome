@@ -142,13 +142,6 @@ public class AdjustmentExServiceImpl implements ExService {
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
             setCellValue(cell, ls.getAdjustmentQty());
 
-//            cell = row.createCell(curCol++);
-//            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
-//            setCellValue(cell, ls.getAdjustmentAmt());
-
-            cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
-            setCellValue(cell, ls.getGeneralReasonText());
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));

@@ -694,14 +694,14 @@ define('bankPayIn', function () {
 
 	//画面按钮点击事件
 	var but_event = function(){
-		$("#payAmt").blur(function () {
-			$("#payAmt").val(toThousands(this.value));
-		});
-
-		//光标进入，去除金额千分位，并去除小数后面多余的0
-		$("#payAmt").focus(function(){
-			$("#payAmt").val(reThousands(this.value));
-		});
+		// $("#payAmt").blur(function () {
+		// 	$("#payAmt").val(toThousands(this.value));
+		// });
+		//
+		// //光标进入，去除金额千分位，并去除小数后面多余的0
+		// $("#payAmt").focus(function(){
+		// 	$("#payAmt").val(reThousands(this.value));
+		// });
 
 		//清空日期
 		m.clear_bs_date.on("click",function(){
@@ -808,8 +808,8 @@ define('bankPayIn', function () {
 				payPerson=updatePerson;
 			}
 			//金额正则
-			var reg = /((^[1-9]\d*)|^0)(\.\d{0,2}){0,1}$/;
-			var payAmt = _common.reThousands(m.payAmt.val().trim());
+			var reg = /((^[1-9]\d*)|^0)(\,\.\d{0,2}){0,1}$/;
+			var payAmt = m.payAmt.val().trim();
 			if(isNull(payAmt)){
 				m.payAmt.focus();
 				$("#payAmt").css("border-color","red");
@@ -871,7 +871,7 @@ define('bankPayIn', function () {
 						storeCd:storeCd,
 						accDate:subfmtDate(accDate),
 						payPerson:payPerson,
-						payAmt:payAmt,
+						payAmt:_common.reThousands(payAmt),
 						description:description,
 						deltaNo:deltaNo,
 						fileDetailJson:fileDetailJson,

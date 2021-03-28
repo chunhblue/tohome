@@ -5,10 +5,10 @@ import cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO;
 import cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO;
 import cn.com.bbut.iy.itemmaster.entity.SK0010;
 import cn.com.bbut.iy.itemmaster.entity.SK0010Key;
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
  
 @Repository
@@ -35,4 +35,6 @@ public interface TransferModMapper {
                                          @Param("businessDate") String businessDate,
                                          @Param("type") String type,
                                          @Param("v") String v);
+
+    List<SK0010> getCorrList(@Param("voucherNos") Collection<String> voucherNos, @Param("type")String type);
 }

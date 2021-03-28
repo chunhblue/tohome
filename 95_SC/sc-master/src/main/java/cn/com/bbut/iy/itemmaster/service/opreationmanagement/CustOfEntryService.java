@@ -17,4 +17,8 @@ public interface CustOfEntryService {
     PI0100DTOC getData(String piCd);
 
     PI0100DTOC insertData(List<StocktakeItemDTOC> stocktakeItemList, PI0100DTOC item, HttpServletRequest request, HttpSession session);
+
+    PI0100DTOC getDataPio(PI0100DTOC pioC);
+
+    PI0100DTOC getDataPioIn(PI0100DTOC pioC);
 }

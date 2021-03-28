@@ -156,7 +156,7 @@
         AND voucher_date between to_char(TO_DATE(#{businessDate,jdbcType=VARCHAR},'yyyyMMdd')-INTERVAL'62 day','yyyyMMdd') and #{businessDate,jdbcType=VARCHAR}
         <choose>
             <when test="type == '504'.toString()">
-                AND review_status = 10
+                /*AND review_status = 10*/
                 AND voucher_type = '501'
             </when>
             <when test="type == '505'.toString()">
@@ -164,7 +164,7 @@
                 AND voucher_no IN (
                     SELECT DISTINCT voucher_no1 FROM SK0010
                     WHERE voucher_type = '501'
-                    AND review_status = 10
+                    /*AND review_status = 10*/
                 )
             </when>
             <otherwise>
@@ -176,4 +176,13 @@
         </if>
     </select>
 
+    <select id="getCorrList" resultMap="ReBasicInfo">
+        select store_cd,voucher_no,voucher_type,store_cd,review_status,voucher_no1,create_ymd,create_hms from sk0010
+        where voucher_no1 in
+        <foreach collection="voucherNos" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and voucher_type = #{type,jdbcType=VARCHAR}
+        /*and review_status = 10*/
+    </select>
 </mapper>

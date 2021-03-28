@@ -562,7 +562,7 @@ define('stockScrap', function () {
 	// 请求加载下拉列表
 	function getSelectValue(){
 		// 加载select
-		initSelectOptions("Document Status","dj_status", "00430");
+		// initSelectOptions("Document Status","dj_status", "00430");
         //原因
         reason=$("#reason").myAutomatic({
             url:url_root+"/cm9010/getWriteOffReasonValue",

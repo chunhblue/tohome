@@ -521,48 +521,52 @@
     </select>
     <select id="selectByDto" resultType="cn.com.bbut.iy.itemmaster.dto.electronicReceipt.ElectronicReceiptParam"
             resultMap="BaseResultMap">
-        select distinct sa0060.receipt_content from sa0060 left join sa0010 on sa0060.acc_date=sa0010.acc_date
-        where 1=1
-        AND SA0060.pos_id = sa0010.pos_id
+        select distinct
+            a.receipt_content
+        from
+            sa0060 a,
+            sa0010 b
+        where
+            a.pos_id = b.pos_id
+            and a.acc_date = b.acc_date
+            and a.pos_id = b.pos_id
+            and a.tran_serial_no = b.tran_serial_no
         <if test="dto.posNo!=null and dto.posNo!=''">
-            AND SA0060.pos_id=#{dto.posNo}
+            and a.pos_id=#{dto.posNo}
         </if>
         <if test="dto.storeCd!='' and dto.storeCd!=null">
-            and SA0060.store_cd=#{dto.storeCd}
+            and a.store_cd=#{dto.storeCd}
         </if>
         <if test="dto.tranType!=null and dto.tranType!=''">
-            AND SA0010.tran_type=#{dto.tranType}
+            and b.tran_type=#{dto.tranType}
         </if>
         <if test="dto.saleStartDate!=null and dto.saleStartDate!=''">
-
-            AND SA0060.acc_date>=#{dto.saleStartDate}
+            and a.acc_date>=#{dto.saleStartDate}
         </if>
         <if test="dto.saleEndDate!=null and dto.saleEndDate!=''">
-
-            AND #{dto.saleEndDate}>=SA0060.acc_date
+            and #{dto.saleEndDate}>=a.acc_date
         </if>
         <if test="dto.saleNo!=null and dto.saleNo!=''">
-
-            AND #{dto.saleNo}=SA0060.sale_serial_no
+            and #{dto.saleNo}=a.sale_serial_no
         </if>
         <if test="dto.articleId!=null and dto.articleId!=''">
-
-          SA0060.receipt_content like (CONCAT('%',#{articleId},'%')
+          a.receipt_content like (CONCAT('%',#{articleId},'%')
         </if>
-        AND sa0060.store_cd IN
+        and a.store_cd IN
         <foreach item="store" index="index" collection="dto.stores"
                  open="(" separator="," close=")">
             #{store,jdbcType=VARCHAR}
         </foreach>
     </select>
+
     <select id="getItem" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" parameterType="java.lang.String">
        select distinct SA0020.article_id  k,
        MA1100.article_name v
-       from SA0020  left join  ma1100  ON
-       SA0020.article_id=MA1100.article_id
-       AND SA0020.pma_cd=MA1100.pma_cd
-       AND SA0020.category_cd=MA1100.category_cd
-       where 1=1
+       from SA0020, ma1100
+       where
+        SA0020.article_id=MA1100.article_id
+        AND SA0020.pma_cd=MA1100.pma_cd
+        AND SA0020.category_cd=MA1100.category_cd
        <if test="posId !='' and posId !=null">
           AND sa0020.pos_id=#{posId}
        </if>

@@ -75,6 +75,7 @@ define('stockAdjustmentEdit', function () {
 		audit_cancel:null,
 		audit_affirm:null,
 		typeId:null,
+		input_store:null,
 		reviewId:null
 	}
 	// 创建js对象
@@ -151,6 +152,12 @@ define('stockAdjustmentEdit', function () {
 				return false;
 			}else {$("#vstore").css("border-color","#CCC");}
 			let cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,spec,priceNoTax,taxRate,qty1,generalReason,generalReasonText,adjustReason,adjustReasonText");
+			var attribute1 = $(selectTrTemp[0]).find('td').eq(4).text();
+			if (attribute1==="Total:"){
+				_common.prompt("Please select the effective data to modify!", 5, "error");
+				$("#update_dialog").hide();
+				return false;
+			}
 			$("#item_input_cd").val(cols['barcode']);
 			$.myAutomatic.setValueTemp(itemInput,cols['articleId'],cols['articleName']);
 			$("#item_input_uom").val(cols['uom']);
@@ -185,6 +192,12 @@ define('stockAdjustmentEdit', function () {
 				return false;
 			}else{
 				let cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,spec,priceNoTax,qty1,generalReason,generalReasonText,adjustReasonText");
+				var attribute1 = $(selectTrTemp[0]).find('td').eq(4).text();
+				if (attribute1==="Total:"){
+					_common.prompt("Please select the effective data to view!", 5, "error");
+					$("#update_dialog").hide();
+					return false;
+				}
 				$("#item_input_cd").val(cols['barcode']);
 				$.myAutomatic.setValueTemp(itemInput,cols['articleId'],cols['articleName']);
 				$("#item_input_uom").val(cols['uom']);
@@ -195,14 +208,14 @@ define('stockAdjustmentEdit', function () {
 				$.myAutomatic.setValueTemp(adjustReason,'',cols['adjustReasonText']);
 				setDialogDisable(true);
                 let strs = tableGrid.getSelectColValue(selectTrTemp,"expenditureNoText,description");
-					$.myAutomatic.setValueTemp(expenditureNo,'',strs['expenditureNoText']);
-					let accDate = subfmtDate(m.tf_date.val());
-					let storeCd = $("#vstore").attr("k");
-					getDescription($("#expenditureNo").attr("k"),storeCd,accDate);
-					setMinDialogDisable(true);
-					$("#description").val(strs['description']);
-					$("#expenditureNo_refresh").hide();
-					$("#expenditureNo_clear").hide();
+				$.myAutomatic.setValueTemp(expenditureNo,'',strs['expenditureNoText']);
+				let accDate = subfmtDate(m.tf_date.val());
+				let storeCd = $("#vstore").attr("k");
+				getDescription($("#expenditureNo").attr("k"),storeCd,accDate);
+				setMinDialogDisable(true);
+				$("#description").val(strs['description']);
+				$("#expenditureNo_refresh").hide();
+				$("#expenditureNo_clear").hide();
 				$('#update_dialog').attr("flg","view");
 				$('#update_dialog').modal("show");
 				// 查询实时库存
@@ -290,8 +303,8 @@ define('stockAdjustmentEdit', function () {
 		$("#item_input_price").prop("disabled", flag);
 		$("#tax_rate").prop("disabled", flag);
 		$("#item_input_tamount").prop("disabled", flag);
-		$("#generalReason").prop("disabled", flag);
-		// $("#adjustReason").prop("disabled", flag);
+		// $("#generalReason").prop("disabled", flag);
+		$("#adjustReason").prop("disabled", flag);
 		$("#dialog_affirm").prop("disabled", flag);
 		$("#expenditureCode").hide();
 		$("#expenditureNo").hide();
@@ -301,17 +314,13 @@ define('stockAdjustmentEdit', function () {
 		if(flag){
 			$("#itemRefresh").hide();
 			$("#itemRemove").hide();
-			// $("#reasonRefresh").hide();
-			// $("#reasonRemove").hide();
-			$("#generalReasonRefresh").hide();
-			$("#generalReasonRemove").hide();
+			$("#reasonRefresh").hide();
+			$("#reasonRemove").hide();
 		}else{
 			$("#itemRefresh").show();
 			$("#itemRemove").show();
 			$("#reasonRefresh").show();
 			$("#reasonRemove").show();
-			$("#generalReasonRefresh").show();
-			$("#generalReasonRemove").show();
 		}
 	};
 
@@ -463,44 +472,49 @@ define('stockAdjustmentEdit', function () {
 			$("#item_input").css("border-color","#CCCCCC");
 		}
 		let handQty = reThousands(m.inventoryQty.val());
-		if(parseInt(handQty) <= 0){
-			_common.prompt("Target item is out of stock, cannot transfer out!",3,"info");
+		/*if(parseInt(handQty) <= 0){
+			_common.prompt("Target item is out of stock, cannot adjust!",3,"info");
 			$("#actualQty").prop("disabled", true);
 			//1/29
 			return false;
+		}else {*/
+		temp = reThousands($("#item_input_tamount").val());
+		var temp1 = $("#item_input_tamount").val();
+		if(temp == null || $.trim(temp)==""){
+			_common.prompt("The adjustment quantity cannot be empty!",3,"error");
+			$("#item_input_tamount").css("border-color","red");
+			$("#item_input_tamount").focus();
+			return false;
+		}else if(temp == '0'){
+			_common.prompt("The adjustment quantity cannot be 0!",3,"error");
+			$("#item_input_tamount").css("border-color","red");
+			$("#item_input_tamount").focus();
+			return false;
+		}else if(temp > 999999){ //check
+			_common.prompt("The adjustment quantity cannot be more than 999,999!",3,"error");
+			$("#item_input_tamount").css("border-color","red");
+			$("#item_input_tamount").focus();
+			return false;
 		}else {
-			temp = reThousands($("#item_input_tamount").val());
-			if(temp == null || $.trim(temp)==""){
-				_common.prompt("The quantity cannot be empty!",3,"error");
-				$("#item_input_tamount").css("border-color","red");
-				$("#item_input_tamount").focus();
-				return false;
-			}else if(temp == '0'){
-				_common.prompt("Transfer Quantity cannot be 0!",3,"error");
-				$("#item_input_tamount").css("border-color","red");
-				$("#item_input_tamount").focus();
-				return false;
-			}else if(temp > 999999){ //check
-				_common.prompt("The Adjustment Quantity cannot be more than 999,999!",3,"error");
-				$("#item_input_tamount").css("border-color","red");
+			let reg = /^-?[1-9]\d*$/;
+			if (!reg.test(temp)|| temp1.indexOf(",")>0) {
+				_common.prompt("The quantity can only be integers!", 3, "error");
+				$("#item_input_tamount").css("border-color", "red");
 				$("#item_input_tamount").focus();
 				return false;
 			}else {
-				let reg = /^-?[1-9]\d*$/;
-				if (!reg.test(temp)) {
-					_common.prompt("The quantity can only be integers!", 3, "error");
-					$("#item_input_tamount").css("border-color", "red");
-					$("#item_input_tamount").focus();
-					return false;
-				} else if (parseInt(temp) > parseInt(handQty)) {
-					_common.prompt("Tranfer Out Qty cannot be more than actual stock quantity!", 3, "error");
-					$("#item_input_tamount").css("border-color", "red");
-					$("#item_input_tamount").focus();
-					return false;
-				} else {
-					$("#item_input_tamount").css("border-color", "#CCC");
-				}
+				$("#item_input_tamount").css("border-color", "#CCC");
 			}
+			/*if(parseInt(temp) < 0){
+                if (Math.abs(parseInt(temp)) > parseInt(handQty)) {
+                    _common.prompt("Reduction of adjustment quantity cannot be more than actual stock quantity!", 3, "error");
+                    $("#item_input_tamount").css("border-color", "red");
+                    $("#item_input_tamount").focus();
+                    return false;
+                } else {
+                    $("#item_input_tamount").css("border-color", "#CCC");
+                }
+            }*/
 		}
 		temp = m.adjustReason.val();
 
@@ -524,12 +538,17 @@ define('stockAdjustmentEdit', function () {
 	// 画面按钮点击事件
 	var but_event = function(){
 		$("#item_input_tamount").blur(function () {
-			$("#item_input_tamount").val(toThousands(this.value));
+			let reg = /^-?[1-9]\d*$/;
+			if (!reg.test( this.value)|| this.value.indexOf(",")<0){
+				$("#item_input_tamount").val(toThousands(this.value));
+			}
 		});
-
 		//光标进入，去除金额千分位，并去除小数后面多余的0
 		$("#item_input_tamount").focus(function(){
-			$("#item_input_tamount").val(reThousands(this.value));
+			let reg = /^-?[1-9]\d*$/;
+			if (!reg.test( this.value)|| this.value.indexOf(",")<0){
+				$("#item_input_tamount").val(toThousands(this.value));
+			}
 		});
 
 		// 重置按钮
@@ -537,6 +556,14 @@ define('stockAdjustmentEdit', function () {
 			_common.myConfirm("Are you sure you want to reset?",function(result){
 				$("#vstore").css("border-color","#CCC");
 				if(result=="true"){
+					$("#zgGridTtable_tbody").each(function () {
+						var trList = $("#zgGridTtable_tbody  tr:not(:last)");
+						trList.remove();
+						if ("#zgGridTtable_tbody  tr:last"){
+							$(this).find('td[tag=total_item2]').text("total Item:0");
+							$(this).find('td[tag=total_qty1]').text("total qty:0");
+						}
+					})
 					getBusinessDate();
 					m.tf_cd.val("");
 					m.dj_status.val("1");
@@ -710,6 +737,7 @@ define('stockAdjustmentEdit', function () {
 				}
 			}
 			_common.myConfirm("Are you sure you want to submit?",function(result){
+
 				if(result == "true"){
 					if(flg=='add'){
 						let rowindex = 0;
@@ -729,7 +757,7 @@ define('stockAdjustmentEdit', function () {
 							'<td align="right" width="110" tag="qty1" title="'+m.item_input_tamount.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_qty1" tdindex="zgGridTtable_qty1">'+m.item_input_tamount.val()+'</td>' +
 							'<td align="right" width="110" tag="inventoryQty" title="'+m.inventoryQty.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_inventoryQty" tdindex="zgGridTtable_inventoryQty">'+m.inventoryQty.val()+'</td>' +
 							'<td align="left" tag="generalReason" style="display: none;" title="'+m.generalReason.attr("k")+'" align="center" id="zgGridTtable_'+rowindex+'_tr_generalReason" tdindex="zgGridTtable_generalReason">'+m.generalReason.attr("k")+'</td>' +
-							'<td align="left" width="150" tag="generalReasonText" title="'+m.generalReason.attr("v")+'" align="center" id="zgGridTtable_'+rowindex+'_tr_generalReasonText" tdindex="zgGridTtable_generalReasonText">'+m.generalReason.attr("v")+'</td>' +
+							'<td align="left" tag="generalReasonText" style="display: none;" title="'+m.generalReason.attr("v")+'" align="center" id="zgGridTtable_'+rowindex+'_tr_generalReasonText" tdindex="zgGridTtable_generalReasonText">'+m.generalReason.attr("v")+'</td>' +
 							'<td align="left" tag="adjustReason" style="display: none;" title="'+adjustReasonNum(m.adjustReason.attr("v"))+'" align="center" id="zgGridTtable_'+rowindex+'_tr_adjustReason" tdindex="zgGridTtable_adjustReason">'+adjustReasonNum(m.adjustReason.attr("v"))+'</td>' +
 							'<td align="left" width="150" tag="adjustReasonText" title="'+m.adjustReason.attr("v")+'" align="center" id="zgGridTtable_'+rowindex+'_tr_adjustReasonText" tdindex="zgGridTtable_adjustReasonText">'+m.adjustReason.attr("v")+'</td>' +
 							'<td align="left" width="130" tag="expenditureNo" style="display: none;" title="'+m.expenditureNo.attr("k")+'" align="center" id="zgGridTtable_'+rowindex+'_tr_expenditureNo" tdindex="zgGridTtable_expenditureNo">'+m.expenditureNo.attr("k")+'</td>' +
@@ -937,7 +965,7 @@ define('stockAdjustmentEdit', function () {
 			cleanInput: function() {
 				$.myAutomatic.replaceParam(adjustReason,null);
 				// $.myAutomatic.cleanSelectObj(adjustReason);
-				// $("#adjustReason").prop("disabled","true");
+				// $("#adjustReason").prop("disabled",true);
 				// $("#reasonRefresh").hide();
 				// $("#reasonRemove").hide();
 			},
@@ -967,14 +995,16 @@ define('stockAdjustmentEdit', function () {
 			selectEleClick: function (thisObj) {
 				if (thisObj.attr('v') !== null && thisObj.attr('v') !== "") {
 
-						let accDate = subfmtDate(m.tf_date.val());
-						let storeCd = $("#vstore").attr("k");
-						$.myAutomatic.replaceParam(expenditureNo,"&accDate="+accDate+"&storeCd="+storeCd);
-						$("#expenditureCode").show();
-						$("#expenditureNo").show();
-						$("#expenditureNo_refresh").show();
-						$("#expenditureNo_clear").show();
-					   var strm ="&generalLevelCd="+ m.adjustReason.attr('k');
+					let accDate = subfmtDate(m.tf_date.val());
+					let storeCd = $("#vstore").attr("k");
+					$("#expenditureCode").show();
+					$("#expenditureNo").show();
+					$("#expenditureNo").prop("disabled",false);
+					$("#expenditureNo_refresh").show();
+					$("#expenditureNo_clear").show();
+					$.myAutomatic.replaceParam(expenditureNo,"&accDate="+accDate+"&storeCd="+storeCd);
+
+					var strm ="&generalLevelCd="+ m.adjustReason.attr('k');
 					getGeneralLevelCd(strm);
 					// alert(adjustNum(thisObj.attr('v')))
 				}
@@ -1005,7 +1035,7 @@ define('stockAdjustmentEdit', function () {
 		});
 
 		itemInput = $("#item_input").myAutomatic({
-			url: url_root+"/inventoryVoucher/getItemList",
+			url: url_root+"/inventoryVoucher/inventoryItemList",
 			ePageSize: 5,
 			startCount: 3,
 			cleanInput: function() {
@@ -1014,10 +1044,13 @@ define('stockAdjustmentEdit', function () {
 			selectEleClick: function (thisObject) {
 				clearDialog(false);
 				let _storeCd = $("#vstore").attr('k');
+				$.myAutomatic.setValueTemp(itemInput,thisObject.attr("k"),thisObject.text());
 				let _itemId = thisObject.attr('k');
 				if(!!_storeCd && !!_itemId){
 					checkParent(_itemId, function(res){
 						if(res.success){
+
+							// 2021/3/26占时注解
 							getItemInfoByItem(_storeCd, _itemId,function(res){
 								if(res.success){
 									$("#item_input_cd").val(res.o.barcode);
@@ -1170,7 +1203,7 @@ define('stockAdjustmentEdit', function () {
 				{name:"qty1",type:"text",text:"right",width:"110",ishide:false,css:"",getCustomValue:getThousands},
 				{name:"inventoryQty",type:"text",text:"right",width:"110",ishide:false,css:"",getCustomValue:getThousands},
 				{name:"generalReason",type:"text",text:"left",ishide:true},
-				{name:"generalReasonText",type:"text",text:"left",width:"150",ishide:false,css:""},
+				{name:"generalReasonText",type:"text",text:"left",width:"150",ishide:true,css:""},
 				{name:"adjustReason",type:"text",text:"left",ishide:true},
 				{name:"adjustReasonText",type:"text",text:"left",width:"150",ishide:false,css:""},
 				{name:"expenditureNo",type:"text",text:"left",width:"130",ishide:true},
@@ -1235,6 +1268,8 @@ define('stockAdjustmentEdit', function () {
 	}
 	var total = function () {
 		$("#total_qty").remove();
+		$("#total_qty1").val("");
+		$("#total_item").val("");
 		let td_toItemQty = $("#totalItemQty").val();
 		let td_toalQty = $("#totalQty").val();
 		var total = "<tr style='text-align:right' id='total_qty'>" +
@@ -1242,9 +1277,9 @@ define('stockAdjustmentEdit', function () {
 			"<td width='120'></td><td width='110'></td><td width='180'></td>" +
 			"<td width='100'>Total:</td>" +
 			// "<td style='text-align:left' id='total_item'> total ItemSku:"+"<span id='span_item'>"+td_toItemQty+"</span>"+"</td>" +
-			"<td width='100' style='text-align:right' id='total_item'> total Item:"+td_toItemQty+"</td>" +
-			"<td width='110' style='text-align:right' id='total_qty'> total qty:"+td_toalQty+"</td>" +
-			"<td width='110'></td><td width='150'></td><td width='150'></td>" +
+			"<td width='100' style='text-align:right' tag='total_item2'  id='total_item'> total Item:"+td_toItemQty+"</td>" +
+			"<td width='110' style='text-align:right' tag='total_qty1' id='total_qty1'> total qty:"+td_toalQty+"</td>" +
+			"<td width='110'></td><td width='150'></td>" +
 			"</tr>";
 
 		$("#zgGridTtable_tbody").append(total);

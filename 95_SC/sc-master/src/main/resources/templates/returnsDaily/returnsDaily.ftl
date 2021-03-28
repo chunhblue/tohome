@@ -158,7 +158,7 @@
 [#--		<div class="shade"></div>--]
 [#--	</div>--]
 <!--导航-->
-[@common.nav "HOME&Report&Customer Refund Daily Report"][/@common.nav]
+[@common.nav "HOME&Report&Non Sale Daily Report"][/@common.nav]
 <div class="container-fluid" id="main_box">
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -270,9 +270,9 @@
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                                         <select id="shift" class="form-control input-sm" nextele="">
                                             <option value="">-- All/Please Select --</option>
-                                            <option value="00">morning shift</option>
-                                            <option value="01">middle shift</option>
-                                            <option value="02">night shift</option>
+                                            <option value="00">Shift1</option>
+                                            <option value="01">Shift2</option>
+                                            <option value="02">Shift3</option>
                                         </select>
                                     </div>
                                     [#--商品id--]
@@ -305,20 +305,7 @@
                                             <a id="amRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
                                         </div>
                                     </div>
-                                    <label for="storeCd"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Store No.</label>
-                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-                                        <div class="aotu-pos">
-                                            <input type="text" class="form-control my-automatic input-sm" id="storeCd">
-                                        </div>
-                                    </div>
-                                    <label for="storeName"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Store Name</label>
-                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-                                        <div class="aotu-pos">
-                                            <input type="text" class="form-control my-automatic input-sm" id="storeName">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
+                                    
                                     <label for="totalAmt"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Total Amount</label>
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                                         <div  class="myDiv" style="width:40%;">
@@ -355,7 +342,7 @@
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="text-align: center">
                     [#--每日顾客退货明细表--]
-                    <span style="font-size: 25px;font-weight: bold">Customer Refund Daily Report</span>
+                    <span style="font-size: 25px;font-weight: bold">Non Sale Daily Report</span>
                 </div>
             </div>
             <div class="row">
@@ -381,7 +368,8 @@
                             <th title="Date">Date</th>
                             <th title="POS No.">POS No.</th>
                             <th title="Receipt No.">Receipt<br> No.</th>
-                            <th title="Refund Quantity">Refund<br> Quantity </th>
+                            <th title="Non Sale Type">Non Sale<br> Type</th>
+                            <th title="Quantity">Quantity </th>
                             <th title="Selling Price">Selling<br>  Price </th>
                             <th title="Total Amount">Total<br> Amount </th>
                             <th title="Cash">Cash</th>

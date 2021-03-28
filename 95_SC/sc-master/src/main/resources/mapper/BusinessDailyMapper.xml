@@ -7,104 +7,196 @@
             and store_cd=#{storeCd,jdbcType=VARCHAR}
             /*正常销售*/
             and tran_type = 'sale'
-            and sale_type = '0'
+
     </sql>
+
+    <select id="getGrossSaleAmount" resultType="String">
+     select
+        /*销售金额 = 实际销售额-折扣金额(折扣金额为负)*/
+        COALESCE(sum(COALESCE(sa0010.sale_amount,0)-COALESCE(sa0010.discount_amount,0)+COALESCE(sa0010.spill_amount,0)),0) gross_sale_amount /*销售毛额*/
+        from sa0010
+        <where>
+            1=1
+            <![CDATA[
+                and sa0010.tran_date >= TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+            <![CDATA[
+                and (sa0010.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+            and sa0010.store_cd=#{storeCd,jdbcType=VARCHAR}
+            and (sa0010.tran_type = 'sale' or sa0010.tran_type = 'return')
+        </where>
+    </select>
 
     <select id="getSaleData" resultType="cn.com.bbut.iy.itemmaster.dto.businessDaily.BusinessDailyDto">
         select
-            /*销售金额 = 实际销售额-折扣金额*/
-            sum(COALESCE(sa0010.sale_amount,0)-COALESCE(sa0010.discount_amount,0)) gross_sale_amount,
-             /*COALESCE(sum(sa0010.gross_sale_amount),0) gross_sale_amount,*/ /*销售毛额*/
-            COALESCE(sum(sa0010.discount_amount),0) discount_amount,/*折扣金额*/
-            /*应收金额 = 实际销售额-舍去金额*/
-            sum(COALESCE(sa0010.sale_amount,0)-COALESCE(sa0010.over_amount,0)) sale_amount,
-             /*COALESCE(sum(sa0010.sale_amount),0) sale_amount,*/ /*实际销售额*/
-            COALESCE(sum(sa0010.spill_amount),0) spill_amount,/*溢收金额*/
-            COALESCE((select sum(sa0020.sale_amount) from sa0020,sa0010,ma1100
-                where sa0020.acc_date = #{payDate,jdbcType=VARCHAR}
-                AND sa0020.store_cd = #{storeCd,jdbcType=VARCHAR}
-                AND sa0010.store_cd = sa0020.store_cd
-                AND sa0010.acc_date = sa0020.acc_date
-                AND sa0010.tran_serial_no = sa0020.tran_serial_no
-                AND sa0010.pos_id = sa0020.pos_id
-                /*正常销售*/
-                and sa0010.tran_type = 'sale'
-                and sa0010.sale_type = '0'
-                /*有效销售*/
-                AND sa0020.detail_type = 's'
-                AND sa0020.detail_void = '0'
+        COALESCE(sum(sa0010.discount_amount),0) discount_amount,/*折扣金额*/
+        /*应收金额 = 实际销售额-舍去金额*/
+        sum(COALESCE(sa0010.sale_amount,0)-COALESCE(sa0010.over_amount,0)) sale_amount,
+        /*COALESCE(sum(sa0010.sale_amount),0) sale_amount,*/ /*实际销售额*/
+        COALESCE(sum(sa0010.spill_amount),0) spill_amount,/*溢收金额*/
+        COALESCE(sum(sa0010.over_amount),0) over_amount,/*舍去金额*/
+        COALESCE((select sum(sa0020.sale_amount)
+        from sa0020,sa0010,ma1100
+        where
+        1=1
+        <![CDATA[
+                and sa0010.tran_date >= TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+        <![CDATA[
+                and (sa0010.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+        AND sa0020.store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND sa0010.store_cd = sa0020.store_cd
+        AND sa0010.acc_date = sa0020.acc_date
+        AND sa0010.tran_serial_no = sa0020.tran_serial_no
+        AND sa0010.pos_id = sa0020.pos_id
+        /*正常销售*/
+        and sa0010.tran_type = 'sale'
+        /*有效销售*/
+        AND sa0020.detail_type = 's'
+        AND sa0020.detail_void = '0'
 
-                AND sa0010.acc_date BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
-                AND ma1100.article_id = sa0020.article_id
-                /*AND sa0020.dep_cd = '03'*/
-                /*AND sa0020.pma_cd = '19'*/
-                AND ma1100.dep_cd = '03'
-                AND ma1100.pma_cd = '19'
-            ),0) service_amount,/*服务费用*/
-            COALESCE((select sum(sa0020.sale_amount) from sa0020,sa0010,ma1100
-                where sa0020.acc_date = #{payDate,jdbcType=VARCHAR}
-                AND sa0020.store_cd = #{storeCd,jdbcType=VARCHAR}
-                AND sa0010.store_cd = sa0020.store_cd
-                AND sa0010.acc_date = sa0020.acc_date
-                AND sa0010.tran_serial_no = sa0020.tran_serial_no
-                AND sa0010.pos_id = sa0020.pos_id
-                /*正常销售*/
-                and sa0010.tran_type = 'sale'
-                and sa0010.sale_type = '0'
-                /*有效销售*/
-                AND sa0020.detail_type = 's'
-                AND sa0020.detail_void = '0'
+        AND #{businessDate} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
+        AND ma1100.article_id = sa0020.article_id
+        /*AND sa0020.dep_cd = '03'*/
+        /*AND sa0020.pma_cd = '19'*/
+        AND ma1100.dep_cd = '03'
+        AND ma1100.pma_cd = '19'
+        ),0) service_amount,/*服务费用*/
+        COALESCE((select sum(sa0020.sale_amount) from sa0020,sa0010,ma1100
+        where
+        1=1
+        <![CDATA[
+                and sa0010.tran_date >= TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+        <![CDATA[
+                and (sa0010.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+        AND sa0020.store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND sa0010.store_cd = sa0020.store_cd
+        AND sa0010.acc_date = sa0020.acc_date
+        AND sa0010.tran_serial_no = sa0020.tran_serial_no
+        AND sa0010.pos_id = sa0020.pos_id
+        /*正常销售*/
+        and sa0010.tran_type = 'sale'
+        /*有效销售*/
+        AND sa0020.detail_type = 's'
+        AND sa0020.detail_void = '0'
 
-                AND sa0010.acc_date BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
-                AND ma1100.article_id = sa0020.article_id
-                /*AND sa0020.dep_cd = '03'*/
-                /*AND sa0020.pma_cd = '19'*/
-                /*AND sa0020.category_cd = '30'*/
-                AND ma1100.dep_cd = '03'
-                AND ma1100.pma_cd = '19'
-                AND ma1100.category_cd = '46'
-            ),0) charge_amount,/*充值费用*/
-            COALESCE((select sum(sa0020.sale_amount) from sa0020,sa0010,ma1100
-                where sa0020.acc_date = #{payDate,jdbcType=VARCHAR}
-                AND sa0020.store_cd = #{storeCd,jdbcType=VARCHAR}
-                AND sa0010.store_cd = sa0020.store_cd
-                AND sa0010.acc_date = sa0020.acc_date
-                AND sa0010.tran_serial_no = sa0020.tran_serial_no
-                AND sa0010.pos_id = sa0020.pos_id
-                /*正常退货*/
-                and sa0010.tran_type = 'return'
-                and sa0010.sale_type = '0'
-                /*有效退货*/
-                AND sa0020.detail_type = 'r'
-                AND sa0020.detail_void = '0'
+        AND #{businessDate} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
+        AND ma1100.article_id = sa0020.article_id
+        /*AND sa0020.dep_cd = '03'*/
+        /*AND sa0020.pma_cd = '19'*/
+        /*AND sa0020.category_cd = '30'*/
+        AND ma1100.dep_cd = '03'
+        AND ma1100.pma_cd = '19'
+        AND ma1100.category_cd = '46'
+        ),0) charge_amount,/*充值费用*/
+        COALESCE((select sum(sa0020.sale_amount) from sa0020,sa0010,ma1100
+        where
+        1=1
+        <![CDATA[
+                and sa0010.tran_date >= TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+        <![CDATA[
+                and (sa0010.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+        AND sa0020.store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND sa0010.store_cd = sa0020.store_cd
+        AND sa0010.acc_date = sa0020.acc_date
+        AND sa0010.tran_serial_no = sa0020.tran_serial_no
+        AND sa0010.pos_id = sa0020.pos_id
+        /*正常退货*/
+        and sa0010.tran_type = 'return'
+        /*有效退货*/
+        AND sa0020.detail_type = 'r'
+        AND sa0020.detail_void = '0'
 
-                AND sa0010.acc_date BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
-                AND ma1100.article_id = sa0020.article_id
-                /*AND sa0020.dep_cd = '03'*/
-                /*AND sa0020.pma_cd = '19'*/
-                /*AND sa0020.category_cd = '30'*/
-                AND ma1100.dep_cd = '03'
-                AND ma1100.pma_cd = '19'
-                AND ma1100.category_cd = '46'
-            ),0) charge_refund_amount/*退款充值费用*/
-         from sa0010
+        AND #{businessDate} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
+        AND ma1100.article_id = sa0020.article_id
+        /*AND sa0020.dep_cd = '03'*/
+        /*AND sa0020.pma_cd = '19'*/
+        /*AND sa0020.category_cd = '30'*/
+        AND ma1100.dep_cd = '03'
+        AND ma1100.pma_cd = '19'
+        AND ma1100.category_cd = '46'
+        ),0) charge_refund_amount/*退款充值费用*/
+        from sa0010
         <where>
-            sa0010.acc_date = #{payDate,jdbcType=VARCHAR}
+            1=1
+            <![CDATA[
+                and sa0010.tran_date >= TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+            <![CDATA[
+                and (sa0010.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
             and sa0010.store_cd=#{storeCd,jdbcType=VARCHAR}
             /*正常销售*/
             and sa0010.tran_type = 'sale'
-            and sa0010.sale_type = '0'
+        </where>
+    </select>
+
+    <select id="getRefundAmount" resultType="String">
+        select
+        /*实际退款金额 = 退款额-舍去金额*/
+        COALESCE(sum(COALESCE(sa0010.sale_amount,0)-COALESCE(sa0010.over_amount,0)),0) refund_amount
+        from sa0010
+        <where>
+            1=1
+            <![CDATA[
+                and sa0010.tran_date >= TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+            <![CDATA[
+                and (sa0010.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+            and sa0010.store_cd=#{storeCd,jdbcType=VARCHAR}
+            and sa0010.tran_type = 'return'
         </where>
     </select>
 
     <select id="getPayInAmt" resultType="cn.com.bbut.iy.itemmaster.dto.businessDaily.PaymentAmtDto">
         select
-            a.pay_cd,sum(b.sale_amount) payInAmt
-        from sa0000 a,sa0010 b
+            COALESCE(sum(case when b.pay_cd1='01' then b.pay_amount1-change_amount
+            when b.pay_cd2='01' then b.pay_amount2-change_amount
+            when b.pay_cd3='01' then b.pay_amount3-change_amount
+            when b.pay_cd4='01' then b.pay_amount4-change_amount
+            end),0) as payInAmt0,
+            COALESCE(sum(case when b.pay_cd1='02' then b.pay_amount1
+            when b.pay_cd2='02' then b.pay_amount2
+            when b.pay_cd3='02' then b.pay_amount3
+            when b.pay_cd4='02' then b.pay_amount4
+            end),0) as payInAmt1,
+            COALESCE(sum(case when b.pay_cd1='03' then b.pay_amount1
+            when b.pay_cd2='03' then b.pay_amount2
+            when b.pay_cd3='03' then b.pay_amount3
+            when b.pay_cd4='03' then b.pay_amount4
+            end),0) as payInAmt2,
+            COALESCE(sum(case when b.pay_cd1='04' then b.pay_amount1
+            when b.pay_cd2='04' then b.pay_amount2
+            when b.pay_cd3='04' then b.pay_amount3
+            when b.pay_cd4='04' then b.pay_amount4
+            end),0) as payInAmt3,
+            COALESCE(sum(case when b.pay_cd1='06' then b.pay_amount1
+            when b.pay_cd2='06' then b.pay_amount2
+            when b.pay_cd3='06' then b.pay_amount3
+            when b.pay_cd4='06' then b.pay_amount4
+            end),0) as payInAmt4,
+            COALESCE(sum(case when b.pay_cd1='07' then b.pay_amount1
+            when b.pay_cd2='07' then b.pay_amount2
+            when b.pay_cd3='07' then b.pay_amount3
+            when b.pay_cd4='07' then b.pay_amount4
+            end),0) as payInAmt5
+        from sa0010 b
         where
-            a.pay_cd = b.pay_cd1 and b.tran_type = 'sale' and b.sale_type = '0'
-            and b.store_cd = #{storeCd,jdbcType=VARCHAR} and b.acc_date = #{payDate,jdbcType=VARCHAR}
-        group by a.pay_cd
+            b.tran_type = 'sale'
+            and b.store_cd = #{storeCd,jdbcType=VARCHAR}
+            <![CDATA[
+                and b.tran_date >= TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+                 <![CDATA[
+                and b.tran_date  < ((TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS'))+INTERVAL'1 day')
+                ]]>
     </select>
 
     <select id="getExpenditureAmt" resultType="cn.com.bbut.iy.itemmaster.dto.businessDaily.ExpenditureAmtDto">
@@ -180,22 +272,26 @@
         from
         ma0090 left join
             (
-            SELECT sum(sa0020.sale_amount) sale_amount,ma1100.dep_cd,ma1100.pma_cd,ma1100.category_cd FROM sa0020,sa0010,ma1100
-                where sa0020.acc_date = #{payDate,jdbcType=VARCHAR}
+            SELECT sum(COALESCE(sa0020.sale_amount,0)-COALESCE(sa0020.discount_amount,0)) sale_amount,
+            sa0020.pma_cd,sa0020.category_cd
+            FROM sa0010,sa0020
+            where
+                1=1
+                <![CDATA[
+                and sa0010.tran_date >= TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                 and (sa0010.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
                 AND sa0020.store_cd = #{storeCd,jdbcType=VARCHAR}
                 AND sa0010.store_cd = sa0020.store_cd
                 AND sa0010.acc_date = sa0020.acc_date
                 AND sa0010.tran_serial_no = sa0020.tran_serial_no
                 AND sa0010.pos_id = sa0020.pos_id
                 /*正常销售*/
-                and sa0010.tran_type = 'sale'
-                and sa0010.sale_type = '0'
+                and (sa0010.tran_type = 'sale' or sa0010.tran_type = 'return')
                 /*有效销售*/
-                and sa0020.detail_type = 's'
+                and (sa0020.detail_type = 's' or sa0020.detail_type = 'r')
                 and sa0020.detail_void = '0'
-                AND sa0010.acc_date BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
-                AND ma1100.article_id = sa0020.article_id
-                GROUP BY ma1100.dep_cd,ma1100.pma_cd,ma1100.category_cd
+               group by sa0020.pma_cd,sa0020.category_cd
             ) s1 on s1.pma_cd = ma0090.pma_cd and s1.category_cd = ma0090.category_cd
         where ma0090.effective_sts='10'
         order by categoryCd
@@ -209,20 +305,28 @@
             from sa0010
             where
             tran_type = 'sale'
-            and sale_type = '0'
-            and acc_date=#{accDate,jdbcType=VARCHAR}
+
+            <![CDATA[
+                and tran_date >= TO_TIMESTAMP(#{accDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                 and (tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{accDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
             and store_cd=#{storeCd,jdbcType=VARCHAR}),
-            /*现金小计*/
-            (select COALESCE(sum(case when pay_cd1='01' then pay_amount1
-            when pay_cd2='01' then pay_amount2
-            when pay_cd3='01' then pay_amount3
-            when pay_cd4='01' then pay_amount4
+            /*今日现金小计*/
+            (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-change_amount
+            when pay_cd2='01' then pay_amount2-change_amount
+            when pay_cd3='01' then pay_amount3-change_amount
+            when pay_cd4='01' then pay_amount4-change_amount
             end),0) as cash_amount from sa0010
-                where acc_date = #{accDate,jdbcType=VARCHAR}
+                where
+                1=1
+            <![CDATA[
+                and tran_date >= TO_TIMESTAMP(#{accDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                 and (tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{accDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
                 and store_cd = #{storeCd,jdbcType=VARCHAR}
                 /*正常销售*/
                 and tran_type = 'sale'
-                and sale_type = '0'
+
             ),
             /*昨日留存周转金 = 昨日现金小计-昨日缴款*/
             (select COALESCE(sum(case when pay_cd1='01' then pay_amount1
@@ -231,11 +335,15 @@
             when pay_cd4='01' then pay_amount4
             end),0) as cash_amount from sa0010
                 where
-                acc_date = to_char( to_date( #{accDate,jdbcType=VARCHAR}, 'yyyymmdd' ) -1, 'yyyymmdd' )
+                1=1
+            <![CDATA[
+                and tran_date >= (TO_TIMESTAMP(#{accDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')- INTERVAL'1 day')
+                 and (tran_date - INTERVAL'1 day') < (TO_TIMESTAMP(#{accDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')- INTERVAL'1 day')
+                ]]>
                 and store_cd = #{storeCd,jdbcType=VARCHAR}
                 /*正常销售*/
                 and tran_type = 'sale'
-                and sale_type = '0'
+
             ) - (
             select COALESCE(sum(pay_amt),0) from op0060
             where acc_date = to_char( to_date( #{accDate,jdbcType=VARCHAR}, 'yyyymmdd' ) -1, 'yyyymmdd' )
@@ -243,25 +351,43 @@
             ) retention_amount
     </select>
 
-     <select id="getcountCustomer" resultType="INT">
-         select COUNT(*)
-         FROM sa0010
-         WHERE tran_type = 'sale' and sale_type = '0'  and acc_date=#{accDate} and store_cd=#{storeCd} /*--早班*/
-         and to_number(to_char(tran_date,'hh24'),'99') <![CDATA[ >= ]]> 6
-         and to_number(to_char(tran_date,'hh24'),'99') <![CDATA[ < ]]> 14
-     </select>
-    <select id="getLastMonthSalesAmount" resultType="INT">
-        SELECT
-/*销售金额 = 实际销售额-折扣金额*/
-	 COALESCE(SUM (
-	COALESCE (sa0010.sale_amount, 0 ) - COALESCE ( sa0010.discount_amount, 0 )),0) gross_sale_amount
-	from sa0010
-
-     WHERE
-	  sa0010.acc_date = #{accDate}
-     AND sa0010.store_cd = #{storeCd} /*正常销售*/
-	 AND sa0010.tran_type = 'sale'
-     AND sa0010.sale_type = '0'
-    GROUP BY  SA0010.acc_date
+    <select id="getcountCustomer" resultType="INT">
+        select COUNT(*)
+        FROM sa0010
+        WHERE tran_type = 'sale'
+        <if test="accDate!=null and accDate!=''">
+            <![CDATA[
+                and sa0010.tran_date >= TO_TIMESTAMP(#{accDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+            <![CDATA[
+                and (sa0010.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{accDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+        </if>
+        and store_cd=#{storeCd} /*--早班*/
+        and to_number(to_char(tran_date,'hh24'),'99') <![CDATA[ >= ]]> 6
+        and to_number(to_char(tran_date,'hh24'),'99') <![CDATA[ < ]]> 14
     </select>
-   </mapper>
+    <select id="getLastMonthSalesAmount" resultType="double">
+        SELECT
+        /*销售金额 = 实际销售额-折扣金额*/
+        COALESCE(SUM (
+        COALESCE (sa0010.sale_amount, 0 ) - COALESCE ( sa0010.discount_amount, 0 )),0) gross_sale_amount
+        from sa0010
+
+        WHERE
+        1 = 1
+        <if test="startDate!=null and startDate!=''">
+            <![CDATA[
+                and sa0010.tran_date >= TO_TIMESTAMP(#{startDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+        </if>
+        <if test="endDate!=null and endDate!=''">
+            <![CDATA[
+                and (sa0010.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{endDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+        </if>
+        AND sa0010.store_cd = #{storeCd} /*正常销售*/
+        AND sa0010.tran_type = 'sale'
+        /* GROUP BY  SA0010.acc_date*/
+    </select>
+</mapper>

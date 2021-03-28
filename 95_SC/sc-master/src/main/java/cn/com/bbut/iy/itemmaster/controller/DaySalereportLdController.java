@@ -122,7 +122,6 @@ public class DaySalereportLdController extends BaseAction {
     @ResponseBody
     public List<AutoCompleteDTO> getAMList(HttpServletRequest request, HttpSession session,String v) {
         List<AutoCompleteDTO> result = daySaleReportService.getAMList(v);
-//        return new ReturnDTO(true,"ok",result);
         return result;
     }
 

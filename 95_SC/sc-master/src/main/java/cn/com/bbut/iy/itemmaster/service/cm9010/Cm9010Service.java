@@ -27,4 +27,7 @@ public interface Cm9010Service {
     List<AutoCompleteDTO> getReturnDifferReason(String v);
 
     List<AutoCompleteDTO> getReceiptDifferReason(String v);
+
+
+    List<AutoCompleteDTO> getAllReason(String v);
 }

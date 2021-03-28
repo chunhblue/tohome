@@ -4,10 +4,12 @@ import cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO;
 import cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyDTO;
 import cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyDetailsDTO;
 import cn.com.bbut.iy.itemmaster.dto.receipt.rrModify.RRModifyParamDTO;
+import cn.com.bbut.iy.itemmaster.entity.od0000.OD0000;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -76,4 +78,6 @@ public interface RRModifyMapper {
     RRModifyDTO selectReturnByKey(RRModifyParamDTO dto);
 
     int updateRecord(RRModifyDTO dto);
+
+    List<OD0000> getCorrList(@Param("receiveIds") Collection<String> receiveIds);
 }

@@ -49,6 +49,7 @@ public class InvoiceDataDTO extends GridDataDTO {
     private String updateUserId ;
     private String updateYmd ;
     private String updateHms ;
-
+    private String posId;
     private int num;
+    private String  saleSerialNo;
 }

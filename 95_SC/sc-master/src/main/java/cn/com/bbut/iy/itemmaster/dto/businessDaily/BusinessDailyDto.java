@@ -46,6 +46,14 @@ public class BusinessDailyDto {
      * 充值退款费用
      */
     private BigDecimal chargeRefundAmount;
+    /**
+     * 舍去金额
+     */
+    private BigDecimal overAmount;
+    /**
+     * 退款金额
+     */
+    private BigDecimal refundAmount;
 
     /**
      * 支付方式金额/合计

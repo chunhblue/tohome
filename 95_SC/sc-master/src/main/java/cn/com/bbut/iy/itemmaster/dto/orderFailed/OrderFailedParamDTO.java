@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 
 /**
  * 订货失败查询DTO
@@ -45,6 +46,8 @@ public class OrderFailedParamDTO extends GridParamDTO {
     private String vendorInfo;
     private String ItemInfo;
 
+    private String orderDifferentiate;
+
     // 共通
     private CommonDTO commonDTO;
 
@@ -55,4 +58,15 @@ public class OrderFailedParamDTO extends GridParamDTO {
 
     // 是否分页
     private boolean flg = true;
+
+    /** 大区CD */
+    private String regionCd;
+    /** 城市CD */
+    private String cityCd;
+    /** 区域CD */
+    private String districtCd;
+    // 店铺cd
+    private String storeCd;
+    /** 权限包含的所有店铺编号 */
+    private Collection<String> stores;
 }

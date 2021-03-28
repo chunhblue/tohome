@@ -15,9 +15,11 @@ public class InvoiceEntryDTO extends GridParamDTO {
     private String status;
     private String customerName;
     private String phone;
+    private String posId;
 
     // 收据单号
     private String receiptNo;
+    private String saleSerialNo;
     private String date;
     private BigDecimal amt;
     private int limitStart;

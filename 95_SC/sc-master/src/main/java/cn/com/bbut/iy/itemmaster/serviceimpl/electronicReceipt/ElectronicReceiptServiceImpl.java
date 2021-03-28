@@ -77,7 +77,6 @@ public class ElectronicReceiptServiceImpl implements ElectronicReceiptService {
     @Override
     public List<AutoCompleteDTO> getItemInfo(String v, String storeCd, String posId, String startDate, String endDate) {
         List<AutoCompleteDTO> item = mapper.getItem(v, storeCd, posId, startDate, endDate);
-        System.out.println(item);
         return item;
 
     }

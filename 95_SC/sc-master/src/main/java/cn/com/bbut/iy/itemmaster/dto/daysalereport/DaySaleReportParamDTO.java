@@ -31,7 +31,9 @@ public class DaySaleReportParamDTO extends GridParamDTO {
     private boolean flg = true;
 
     private  String effectiveStartDate;
+    private  String PoseffectiveStartDate;
     private String  effectiveEndDate;
+    private String   PoseffectiveEndDate;
 
     /** 大区CD */
     private String regionCd;
@@ -43,4 +45,6 @@ public class DaySaleReportParamDTO extends GridParamDTO {
     private String storeCd;
     /** 权限包含的所有店铺编号 */
     private Collection<String> stores;
+    private String includeService;
+    private String typeDate;
 }

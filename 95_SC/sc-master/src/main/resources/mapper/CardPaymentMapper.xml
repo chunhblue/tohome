@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.cardpayment.CardPaymentMapper">
+
+<resultMap id="ResultMap" type="cn.com.bbut.iy.itemmaster.dto.cardPaymentReport.cardPaymentDto">
+    <result column="store_cd" property="storeCd" />
+    <result column="card_type" property="cardType"  />
+    <result column="trans_date" property="transDate" />
+    <result column="trans_date1" property="transDate1" />
+    <result column="trace_no" property="traceNo" />
+    <result column="approve_code" property="approveCode" />
+    <result column="card_num" property="cardNum"  />
+    <result column="amount" property="amount" />
+    <result column="receipt_no" property="receiptNo"/>
+    <result column="business_date" property="businessDate"/>
+    <result column="transcation_number" property="transcationNumber"/>
+    <result column="description" property="description"/>
+    <result column="amount_ck" property="amountCk"/>
+    <result column="amount_vcb" property="amountVcb"/>
+    <result column="deposit_amount" property="depositAmount"/>
+    <result column="free_amount" property="freeAmount"/>
+    <result column="free_precent" property="freePrecent"/>
+    <result column="vat" property="vat"/>
+    <result column="deposit_date" property="depositDate"/>
+</resultMap>
+<select id="searchData" parameterType="cn.com.bbut.iy.itemmaster.dto.cardPaymentReport.cardPaymentParamDto" resultMap="ResultMap">
+    select
+    ma1.store_name,
+    ma8.store_cd,
+    card_type,
+    trans_date,
+    to_char(trans_date,'yyyymmddhh24miss') trans_date1,
+    trace_no,
+    approve_code,
+    card_num,
+    amount,
+    business_date,
+    approval_code,
+    transcation_number,
+    description,
+    amount_ck,
+    amount_vcb,
+    free_amount,
+    free_percent,
+    vat,
+    deposit_date,
+    ma8.deposit_amount,
+    receipt_no from ma8414  ma8
+    left join ma1000 ma1 on ma1.store_cd=ma8.store_cd
+    where 1=1
+    and <![CDATA[#{param.bussinessDate} > ma1.effective_start_date ]]>
+    and <![CDATA[#{param.bussinessDate} < ma1.effective_end_date ]]>
+    and ma8.store_cd IN
+    <foreach item="store" index="index" collection="param.stores"
+             open="(" separator="," close=")">
+        #{store,jdbcType=VARCHAR}
+    </foreach>
+    <if test="param.startDate != null  and param.startDate !=''">
+        and  <![CDATA[  to_char(trans_date,'yyyymmdd')> #{param.startDate}]]>
+    </if>
+    <if test="param.endDate != null and param.endDate !=''">
+        and  <![CDATA[  to_char(trans_date,'yyyymmdd')< #{param.endDate}]]>
+    </if>
+    <if test="param.flg">
+        LIMIT ${param.rows} OFFSET ${param.limitStart}
+    </if>
+
+    ;
+</select>
+<select id="DataCount" parameterType="cn.com.bbut.iy.itemmaster.dto.cardPaymentReport.cardPaymentParamDto" resultType="INT">
+    select count(1) from ma8414  ma8
+    left join ma1000 ma1 on ma1.store_cd=ma8.store_cd
+    where 1=1
+    and <![CDATA[#{param.bussinessDate} > ma1.effective_start_date ]]>
+    and <![CDATA[#{param.bussinessDate} < ma1.effective_end_date ]]>
+    and ma8.store_cd IN
+    <foreach item="store" index="index" collection="param.stores"
+             open="(" separator="," close=")">
+        #{store,jdbcType=VARCHAR}
+    </foreach>
+    <if test="param.startDate != null  and param.startDate !=''">
+        and  <![CDATA[  to_char(trans_date,'yyyymmdd')> #{param.startDate}]]>
+    </if>
+    <if test="param.endDate != null and param.endDate !=''">
+        and  <![CDATA[  to_char(trans_date,'yyyymmdd')< #{param.endDate}]]>
+    </if>
+</select>
+    <select id="searchExportData" parameterType="cn.com.bbut.iy.itemmaster.dto.cardPaymentReport.cardPaymentParamDto" resultMap="ResultMap">
+        select  ma1.store_name,ma8.store_cd,card_type,to_char(trans_date,'yyyymmddhh24miss') trans_date,trace_no,approve_code,card_num,amount,receipt_no from ma8414  ma8
+        left join ma1000 ma1 on ma1.store_cd=ma8.store_cd
+        where 1=1
+        and <![CDATA[#{param.bussinessDate} > ma1.effective_start_date ]]>
+        and <![CDATA[#{param.bussinessDate} < ma1.effective_end_date ]]>
+        and ma8.store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.startDate != null  and param.startDate !=''">
+            and  <![CDATA[  to_char(trans_date,'yyyymmdd')> #{param.startDate}]]>
+        </if>
+        <if test="param.endDate != null and param.endDate !=''">
+            and  <![CDATA[  to_char(trans_date,'yyyymmdd')< #{param.endDate}]]>
+        </if>
+    </select>
+
+</mapper>

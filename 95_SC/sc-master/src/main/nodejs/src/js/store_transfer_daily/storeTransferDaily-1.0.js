@@ -131,7 +131,7 @@ define('storeTransferDaily', function () {
         });
 
         reason=$("#reason").myAutomatic({
-            url:systemPath+"/cm9010/getResonCode",
+            url:systemPath+"/cm9010/getReasonCode",
             ePageSize:10,
             startCount:0,
         })

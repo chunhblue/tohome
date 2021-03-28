@@ -67,6 +67,15 @@
 		input[type="number"]{
 			-moz-appearance: textfield;
 		}
+		/*.zgGrid-main-body {*/
+		/*	border-left: 1px solid #428bca;*/
+		/*	border-right: 1px solid #428bca;*/
+		/*	overflow: hidden;*/
+		/*	overflow-y: scroll;*/
+		/*	clear: both;*/
+		/*	position: relative;*/
+		/*	overflow-x: auto;*/
+		/*}*/
 	</STYLE>
 <!--页头-->
 [@common.header][/@common.header]
@@ -75,7 +84,7 @@
 <body>
 
 <!--导航-->
-[@common.nav "HOME&Operation&Cost Item Adjustment Entry"][/@common.nav]
+[@common.nav "HOME&Operation&Store Expense Item Stock Entry"][/@common.nav]
 
 <div class="container-fluid" id="main_box">
 
@@ -226,14 +235,14 @@
 								</div>
 							</div>
 						</div>
-					<div class="form-group">[#--note--]
-						<label for="note" class="col-sm-2 col-lg-5 control-label">Notes</label>
-						<div class="col-sm-6">
-							<div class="aotu-pos">
-								<input type="text" id="note" class="form-control my-automatic input-sm">
-							</div>
-						</div>
-					</div>
+[#--					<div class="form-group">--][#--note--]
+[#--						<label for="note" class="col-sm-2 col-lg-5 control-label">Notes</label>--]
+[#--						<div class="col-sm-6">--]
+[#--							<div class="aotu-pos">--]
+[#--								<input type="text" id="note" class="form-control my-automatic input-sm">--]
+[#--							</div>--]
+[#--						</div>--]
+[#--					</div>--]
 				</div>
 			</div>
 
@@ -262,6 +271,10 @@
 <input type="hidden" id="toKen" value="${toKen!}"/>
 <input type="hidden" id="typeId" value="${typeId!}">
 <input type="hidden" id="reviewId" value="${reviewId!}">
-<input type="hidden" id="i_storeCd" value="">
+<input type="hidden" id="ParamstoreCd" value="${ParamstoreCd!}">
+<input type="hidden" id="ParamstoreName" value="${ParamstoreName!}">
+<input type="hidden" id="piDateParam" value="${piDateParam!}">
+<input type="hidden" id="create_By" value="${createBy!}">
+<input type="hidden" id="searchJson1" value="">
 </body>
 </html>

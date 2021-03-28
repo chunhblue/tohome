@@ -64,16 +64,6 @@ public class classifiedSaleReportController  extends BaseAction {
        log.debug("User:{} 进入分类销售日报", u.getUserId());
         Collection<Integer> roleIds = (Collection<Integer>) request.getSession().getAttribute(
                 Constants.SESSION_ROLES);
-
-//        SimpleDateFormat sp=new SimpleDateFormat("yyyyMMdd");
-//        Calendar cal= Calendar.getInstance();
-//        try {
-//            cal.setTime(sp.parse("20150819"));
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-////        }
-//        cal.add(Calendar.DATE,-1);
-//        Date bsDate=cal.getTime();
         ModelAndView mv = new ModelAndView("classifiedsalereport/classifiedSaleReport");
         mv.addObject("useMsg", "分类销售日报");
         mv.addObject("bsDate", new Date());

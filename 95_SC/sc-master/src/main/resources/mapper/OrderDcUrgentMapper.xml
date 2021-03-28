@@ -98,7 +98,7 @@
             ma0220.unit_name,
             od0010.order_qty AS order_qty,
             od0010.order_nocharge_qty,
---             COALESCE(od0010.order_qty, 0)+COALESCE(od0010.order_nocharge_qty, 0) order_total_qty,
+            /*COALESCE(od0010.order_qty, 0)+COALESCE(od0010.order_nocharge_qty, 0) order_total_qty,*/
             COALESCE(od0010.order_qty, 0) order_total_qty,
             ( SELECT ma8070.psd ma8070 FROM ma8070 WHERE ma8070.store_cd = #{storeCd,jdbcType=VARCHAR} AND ma8070.article_id = od0010.article_id ) AS psd,
             od0010.order_amt AS order_total_amt
@@ -164,7 +164,6 @@
         distinct
         ma8040.article_id k, CONCAT(ma8040.article_id,' ',ma8040.article_name) AS v
         from
-        ma1105,
         ma2240,
         /*od0010,*/
         sk0000_today right join ma8040 on
@@ -176,8 +175,6 @@
         group by ma8140.article_id) c
         where
         ma8040.article_id = c.article_id
-        and ma1105.item_code = ma8040.article_id
-        and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
         /*and od0010.article_id = ma8040.article_id*/
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
         <if test="vendorId !=null and vendorId != ''">
@@ -234,7 +231,6 @@
         coalesce(od0010.order_qty,0) * coalesce(ma8040.order_price,0) as order_total_amt*/
         from
         ma1100,
-        ma1105,
         ma2240,
         /* od0010,*/
         sk0000_today right join ma8040 on
@@ -256,10 +252,6 @@
         ma8040.article_id = c.article_id
         and ma1100.article_id = ma8040.article_id
         and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
-        /*限制货架信息*/
-        and ma1105.item_code = ma8040.article_id
-        and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
-        /*and od0010.article_id = ma8040.article_id*/
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
         <if test="articleId !=null and articleId != ''">
             and ma8040.article_id = #{articleId,jdbcType=VARCHAR}
@@ -287,7 +279,7 @@
         tax.code_name v
         from
         ma1100,
-        ma1105,
+        /*ma1105,*/
         ma8040,
         ma2240,
         (select code_name,code_value from cm9010 where code_type='00120' ) as tax
@@ -295,10 +287,10 @@
         ma8040.order_tax_type_cd = tax.code_value
         and ma1100.article_id = ma8040.article_id
         and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
-        /*限制货架信息*/
+        /*限制货架信息
         and ma1105.item_code = ma8040.article_id
         and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
-        /*and od0010.article_id = ma8040.article_id*/
+        and od0010.article_id = ma8040.article_id*/
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
         /*限制为dc订货*/
         and ma8040.dc_item = '1'
@@ -489,7 +481,6 @@
         coalesce(od0010.order_qty,0) * coalesce(ma8040.order_price,0) as order_total_amt*/
         from
         ma1100,
-        ma1105,
         ma2240,
         /*od0010,*/
         sk0000_today right join ma8040 on
@@ -502,8 +493,7 @@
             code_value,dealer_reserved_1
             from cm9010 where code_type='00120'
         ) tax
-        on tax.code_value = ma8040.order_tax_type_cd
-        ,
+        on tax.code_value = ma8040.order_tax_type_cd,
         (select ma8140.article_id,max(ma8140.barcode) as barcode from ma8140
         where ma8140.effective_date = #{orderDate,jdbcType=VARCHAR}
         group by ma8140.article_id) c
@@ -511,9 +501,7 @@
         ma8040.article_id = c.article_id
         and ma1100.article_id = ma8040.article_id
         and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
-        /*限制货架信息*/
-        and ma1105.item_code = ma8040.article_id
-        and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
+
         /*and od0010.article_id = ma8040.article_id*/
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
         <if test="articleId !=null and articleId != ''">

@@ -79,7 +79,7 @@
             pi1.store_cd = #{storeCd}
             AND pi1.pi_cd = #{piCd}
             AND pi1.pi_date = #{piDate}
-            AND pi1.pi_status = '03'
+            /*AND pi1.pi_status = '03'*/
         ORDER BY
             concat(pi2.pi_date,pi2.pi_start_time) ASC
         LIMIT 7
@@ -250,6 +250,10 @@
             AND pi5.store_cd = pi1.store_cd
             AND pi5.article_id = pi1.article_id
             AND ma2.article_id = pi1.article_id
+            /* 不盘点原材料商品 */
+            AND ma2.material_type != '04'
+            and ma2.article_id not in
+            (select article_id from pi0126)
             AND ma6.store_cd = #{storeCd}
             AND cm8.sp_id = '0000'
             AND cm8.sp_value BETWEEN ma6.effective_start_date AND ma6.effective_end_date
@@ -282,7 +286,10 @@
             sa1.store_cd = #{storeCd}
             AND sa1.detail_type = 's'
             AND to_char(sa1.sale_date,'yyyyMMddhh24miss')
-            BETWEEN concat(#{piDate},#{startTime}) AND concat(#{piDate},#{endTime})
+
+            BETWEEN
+             concat(#{piDate},#{startTime})
+             AND concat(#{piDate},#{endTime})
     </select>
 
     <select id="getStocktakeVariance" parameterType="string"
@@ -291,7 +298,7 @@
             pi1.pi_cd,
             pi1.pi_date,
             pi1.store_cd,
-            ma3.dep_cd,
+            /*ma3.dep_cd,*/
             SUM(pi2.real_time_qty) bookValQty,
             SUM(pi2.real_time_qty*ma4.base_sale_price) bookValAmt,
             count(pi1.article_id) AS sku, /*sku*/
@@ -332,8 +339,8 @@
         GROUP BY
             pi1.pi_cd,
             pi1.pi_date,
-            pi1.store_cd,
-            ma3.dep_cd
+            pi1.store_cd
+           /* ,ma3.dep_cd*/
     </select>
 
     <select id="getStocktakingHead" parameterType="string"
@@ -362,7 +369,7 @@
             pi1.store_cd = #{storeCd}
             AND pi1.pi_cd = #{piCd}
             AND pi1.pi_date = #{piDate}
-            AND pi1.pi_status = '03'
+            /*AND pi1.pi_status = '03'*/
             AND ma2.store_cd = #{storeCd}
             AND cm3.sp_id = '0000'
             AND cm3.sp_value BETWEEN ma2.effective_start_date AND ma2.effective_end_date
@@ -390,6 +397,10 @@
         AND pi1.store_cd = #{storeCd}
         AND pi1.article_id = ma1.article_id
         AND #{businessDate} BETWEEN ma1.effective_start_date AND ma1.effective_end_date
+        /* 不盘点原材料商品 */
+        AND ma1.material_type != '04'
+        and ma1.article_id not in
+        (select article_id from pi0126)
         AND pi1.pi_qty IS NOT NULL
         AND pi1.real_time_qty <![CDATA[<>]]> 0
         AND pi1.article_id = ma2.article_id
@@ -449,6 +460,10 @@
         AND pi1.pi_date = #{piDate}
         AND pi1.store_cd = #{storeCd}
         AND pi1.article_id = ma1.article_id
+        /* 不盘点原材料商品 */
+        AND ma1.material_type != '04'
+        and ma1.article_id not in
+        (select article_id from pi0126)
         AND pi1.article_id = ma3.article_id
         AND #{businessDate} BETWEEN ma3.effective_start_date and ma3.effective_end_date
         AND ma4.store_cd = pi1.store_cd
@@ -495,6 +510,10 @@
         AND pi1.pi_date = #{piDate}
         AND pi1.store_cd = #{storeCd}
         AND pi1.article_id = ma1.article_id
+        /* 不盘点原材料商品 */
+        AND ma1.material_type != '04'
+        and ma1.article_id not in
+        (select article_id from pi0126)
         AND pi1.article_id = ma2.article_id
         AND #{businessDate} BETWEEN ma2.effective_start_date and ma2.effective_end_date
         AND ma3.store_cd = pi1.store_cd
@@ -551,6 +570,10 @@
         AND pi1.pi_date = #{piDate}
         AND pi1.store_cd = #{storeCd}
         AND pi1.article_id = ma1.article_id
+        /* 不盘点原材料商品 */
+        AND ma1.material_type != '04'
+        and ma1.article_id not in
+        (select article_id from pi0126)
         AND pi1.article_id = ma2.article_id
         AND #{businessDate} BETWEEN ma2.effective_start_date and ma2.effective_end_date
         AND ma3.store_cd = pi1.store_cd
@@ -638,6 +661,10 @@
         AND pi1.pi_date = #{piDate}
         AND pi1.store_cd = #{storeCd}
         AND pi1.article_id = ma1.article_id
+        /* 不盘点原材料商品 */
+        AND ma1.material_type != '04'
+        and ma1.article_id not in
+        (select article_id from pi0126)
         AND pi1.article_id = ma3.article_id
         AND #{businessDate} BETWEEN ma3.effective_start_date and ma3.effective_end_date
         AND ma4.store_cd = pi1.store_cd
@@ -696,6 +723,10 @@
         AND pi1.pi_date = #{piDate}
         AND pi1.store_cd = #{storeCd}
         AND pi1.article_id = ma1.article_id
+        /* 不盘点原材料商品 */
+        AND ma1.material_type != '04'
+        and ma1.article_id not in
+        (select article_id from pi0126)
         AND pi1.article_id = ma2.article_id
         AND #{businessDate} BETWEEN ma2.effective_start_date and ma2.effective_end_date
         AND ma3.store_cd = pi1.store_cd
@@ -739,6 +770,48 @@
             </otherwise>
         </choose>
         LIMIT ${rows} OFFSET ${limit}
+    </select>
+
+    <select id="getTableData4" resultMap="resultItem">
+        select
+            pi_cd,
+            pi_date,
+            store_cd,
+            article_id,
+            article_name,
+            barcode,
+            sales_unit_id,
+            spec,
+            pi_qty_status,
+            first_qty as second_qty,
+            stocktake_time,
+            bad_qty,
+            converted,
+            region
+        from pi0120_t where
+        pi_cd = #{piCd}
+        AND pi_date = #{piDate}
+        AND store_cd = #{storeCd}
+        <if test="searchVal!=null and searchVal!=''">
+            AND (
+            lower(article_id) like lower(CONCAT('%',#{searchVal,jdbcType=VARCHAR},'%'))
+            OR lower(article_name) like lower(CONCAT('%',#{searchVal,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        LIMIT ${rows} OFFSET ${limit}
+    </select>
+
+    <select id="getTableData4Count" resultType="int">
+        select count(*) from pi0120_t where
+        pi_cd = #{piCd}
+        AND pi_date = #{piDate}
+        AND store_cd = #{storeCd}
+        <if test="searchVal!=null and searchVal!=''">
+            AND (
+            lower(article_id) like lower(CONCAT('%',#{searchVal,jdbcType=VARCHAR},'%'))
+            OR lower(article_name) like lower(CONCAT('%',#{searchVal,jdbcType=VARCHAR},'%'))
+            )
+        </if>
     </select>
 
     <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100ParamDTO" resultMap="ResultStockProcess">
@@ -832,4 +905,19 @@
         </if>
     </select>
 
+    <select id="getExceptionItemList" resultType="cn.com.bbut.iy.itemmaster.dto.stocktakeProcess.StocktakeProcessItemsDTO">
+        SELECT
+            pi1.article_id,
+            pi1.article_name,
+            pi1.barcode,
+            pi1.sales_unit_id AS uom,
+            pi1.first_qty,
+            pi1.region
+        FROM
+            pi0120_t pi1
+        WHERE
+            pi1.pi_cd = #{piCd}
+            AND pi1.pi_date = #{piDate}
+            AND pi1.store_cd = #{storeCd}
+    </select>
 </mapper>

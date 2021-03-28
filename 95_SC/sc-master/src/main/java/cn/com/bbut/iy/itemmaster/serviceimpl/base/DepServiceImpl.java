@@ -157,6 +157,7 @@ public class DepServiceImpl implements DepService {
         List<DptResourceDTO> result = new ArrayList<>();
         if (flg == ConstantsDB.COMMON_THREE) {
             MA0070Example example = new MA0070Example();
+            example.setOrderByClause("dep_name ASC");
             MA0070Example.Criteria cri = example.or();
             if (StringUtils.isNotBlank(name)) {
                 cri.andDepNameLike("%" + name.toLowerCase() + "%");
@@ -167,13 +168,13 @@ public class DepServiceImpl implements DepService {
             }
             List<MA0070> deps = MA0070Mapper.selectByExample(example);
             for (MA0070 dep : deps) {
-                DptResourceDTO dto = new DptResourceDTO(dep.getDepCd(), dep.getDepCd().concat(" ").concat(
-                        dep.getDepName().trim()));
+                DptResourceDTO dto = new DptResourceDTO(dep.getDepCd(),dep.getDepName().trim());
                 result.add(dto);
             }
         } else if (flg == ConstantsDB.COMMON_TWO) {
             MA0080Example example = new MA0080Example();
             MA0080Example.Criteria cri = example.or();
+            example.setOrderByClause("pma_name ASC");
             if (StringUtils.isNotBlank(depId)) {
                 cri.andDepCdEqualTo(depId);
             }
@@ -189,12 +190,12 @@ public class DepServiceImpl implements DepService {
             }
             List<MA0080> pmas = MA0080Mapper.selectByExample(example);
             for (MA0080 pma : pmas) {
-                DptResourceDTO dto = new DptResourceDTO(pma.getPmaCd(), pma.getPmaCd().concat(" ").concat(
-                        pma.getPmName().trim()));
+                DptResourceDTO dto = new DptResourceDTO(pma.getPmaCd(), pma.getPmName().trim());
                 result.add(dto);
             }
         } else if (flg == ConstantsDB.COMMON_ONE) {
             MA0090Example example = new MA0090Example();
+            example.setOrderByClause("category_name ASC");
             MA0090Example.Criteria cri = example.or();
             if (StringUtils.isNotBlank(depId)) {
                 cri.andDepCdEqualTo(depId);
@@ -217,12 +218,12 @@ public class DepServiceImpl implements DepService {
             }
             List<MA0090> categorys = MA0090Mapper.selectByExample(example);
             for (MA0090 category : categorys) {
-                DptResourceDTO dto = new DptResourceDTO(category.getCategoryCd(), category.getCategoryCd().concat(" ").concat(
-                        category.getCategoryName().trim()));
+                DptResourceDTO dto = new DptResourceDTO(category.getCategoryCd(), category.getCategoryName().trim());
                 result.add(dto);
             }
         } else if (flg == ConstantsDB.COMMON_ZERO) {
             MA0100Example example = new MA0100Example();
+            example.setOrderByClause("sub_category_name ASC");
             MA0100Example.Criteria cri = example.or();
             if (StringUtils.isNotBlank(depId)) {
                 cri.andDepCdEqualTo(depId);
@@ -251,8 +252,8 @@ public class DepServiceImpl implements DepService {
             }
             List<MA0100> subCategorys = MA0100Mapper.selectByExample(example);
             for (MA0100 subCategory : subCategorys) {
-                DptResourceDTO dto = new DptResourceDTO(subCategory.getSubCategoryCd(), subCategory.getSubCategoryCd().concat(" ").concat(
-                        subCategory.getSubCategoryName().trim()));
+                DptResourceDTO dto = new DptResourceDTO(subCategory.getSubCategoryCd(),
+                        subCategory.getSubCategoryName().trim());
                 result.add(dto);
             }
         }
@@ -282,7 +283,7 @@ public class DepServiceImpl implements DepService {
         if (StringUtils.isNotBlank(depId)) {
             c.andDepCdEqualTo(depId);
         }
-        e.setOrderByClause("dep_cd");
+        e.setOrderByClause("dep_name");
         List<MA0070> deps = MA0070Mapper.selectByExample(e);
         return deps != null && deps.size() > 0 ? deps.get(ConstantsDB.COMMON_ZERO) : null;
     }
@@ -300,7 +301,7 @@ public class DepServiceImpl implements DepService {
         if (StringUtils.isNotBlank(pmaId)) {
             c.andPmaCdEqualTo(pmaId);
         }
-        e.setOrderByClause("pma_cd");
+        e.setOrderByClause("pma_name");
         List<MA0080> deps = MA0080Mapper.selectByExample(e);
         return deps != null && deps.size() > 0 ? deps.get(ConstantsDB.COMMON_ZERO) : null;
     }
@@ -321,7 +322,7 @@ public class DepServiceImpl implements DepService {
         if (StringUtils.isNotBlank(categoryId)) {
             c.andCategoryCdEqualTo(categoryId);
         }
-        e.setOrderByClause("category_cd");
+        e.setOrderByClause("category_name");
         List<MA0090> deps = MA0090Mapper.selectByExample(e);
         return deps != null && deps.size() > 0 ? deps.get(ConstantsDB.COMMON_ZERO) : null;
     }
@@ -345,7 +346,7 @@ public class DepServiceImpl implements DepService {
         if (StringUtils.isNotBlank(subCategoryId)) {
             c.andSubCategoryCdEqualTo(subCategoryId);
         }
-        e.setOrderByClause("sub_category_cd");
+        e.setOrderByClause("sub_category_name");
         List<MA0100> deps = MA0100Mapper.selectByExample(e);
         return deps != null && deps.size() > 0 ? deps.get(ConstantsDB.COMMON_ZERO) : null;
     }

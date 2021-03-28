@@ -15,6 +15,7 @@
         <result column="pi_type_code" property="piTypeCode"></result>
         <result column="pi_method" property="piMethod"></result>
         <result column="review_status" property="reviewStatus"></result>
+        <result column="review_sts_name" property="reviewStsName"></result>
         <result column="remarks" property="remarks"></result>
         <result column="create_user_id" property="createUserId"></result>
         <result column="create_ymd" property="createYmd"></result>
@@ -43,6 +44,7 @@
         <result column="allocation_qty_add" property="allocationQtyAdd"></result>
         <result column="receive_total_qty" property="receiveTotalQty"></result>
         <result column="store_return_qty" property="storeReturnQty"></result>
+        <result column="converter" property="converter"></result>
     </resultMap>
 
     <!--设置 超过了 end time 没有submit的 计划为 过期, 根据业务日期为准-->
@@ -246,7 +248,8 @@
         SELECT
         count(p.pi_date)
         FROM
-        pi0100 p LEFT JOIN MA4200 oper ON oper.emp_num_id = p.create_user_id,
+        pi0100 p LEFT JOIN MA4200 oper ON oper.emp_num_id = p.create_user_id
+        left join pi0105 on p.pi_cd = pi0105.pi_cd,
         ma1000 p1,
         cm9060 p2,
         (SELECT c.code_value,c.code_name FROM CM9010 C WHERE C.code_type = '00510' AND C.effective_sts = '10') C1,
@@ -270,6 +273,9 @@
             </if>
             <if test="pi0100Param.piStatus != null and pi0100Param.piStatus != ''">
                 and P.pi_status = #{pi0100Param.piStatus}
+            </if>
+            <if test="pi0100Param.reviewStatus != null and pi0100Param.reviewStatus != ''">
+                and pi0105.review_status = cast(#{pi0100Param.reviewStatus} as numeric)
             </if>
             <if test="pi0100Param.piStartDate!=null and pi0100Param.piStartDate!='' and pi0100Param.piEndDate!=null and pi0100Param.piEndDate!=''">
                 and P.pi_date BETWEEN #{pi0100Param.piStartDate} AND #{pi0100Param.piEndDate}
@@ -289,13 +295,18 @@
         p.pi_type as pi_type_code,
         c2.code_name as pi_status,
         c1.code_name as pi_type,
-        p.review_status,
+        pi0105.review_status,
+        T2.code_name AS review_sts_name,
         p.remarks,
         p.export_flg,
         oper.emp_name as create_user_id,
         CONCAT(P.create_ymd,P.create_hms) as create_ymd
         FROM
-        pi0100 p LEFT JOIN MA4200 oper ON oper.emp_num_id = p.create_user_id,
+        pi0100 p LEFT JOIN MA4200 oper ON oper.emp_num_id = p.create_user_id
+        left join pi0105 on p.pi_cd = pi0105.pi_cd
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
+        ) T2 ON CAST(pi0105.review_status AS VARCHAR) = T2.code_value,
         ma1000 p1,
         cm9060 p2,
         (SELECT c.code_value,c.code_name FROM CM9010 C WHERE C.code_type = '00510' AND C.effective_sts = '10') C1,
@@ -319,6 +330,9 @@
             </if>
             <if test="pi0100Param.piStatus != null and pi0100Param.piStatus != ''">
                 and P.pi_status = #{pi0100Param.piStatus}
+            </if>
+            <if test="pi0100Param.reviewStatus != null and pi0100Param.reviewStatus != ''">
+                and pi0105.review_status = cast(#{pi0100Param.reviewStatus} as numeric)
             </if>
             <if test="pi0100Param.piStartDate!=null and pi0100Param.piStartDate!='' and pi0100Param.piEndDate!=null and pi0100Param.piEndDate!=''">
                 and P.pi_date BETWEEN #{pi0100Param.piStartDate} AND #{pi0100Param.piEndDate}
@@ -388,30 +402,38 @@
     SELECT DISTINCT
         B.article_id,
         B.article_name,
-        D.default_barcode AS barcode,
+        D.barcode,
         B.spec,
-        B.sales_unit_id
+        B.sales_unit_id,
+       cast(COALESCE(ma12.quantity,1) as VARCHAR) converter
     FROM
         PI0110 A,
-        MA1100 B,
-        MA1110 D,
-        MA1000 E,
-        CM9060 F,
-		MA2240 G
+        MA1100 B
+        left join
+				(SELECT
+					ma1200.parent_article_id,ma1210.quantity,ma1210.child_article_id
+				from ma1200,ma1210
+				where ma1200.parent_article_id=ma1210.parent_article_id
+				and #{piDate} BETWEEN ma1200.effective_start_date and ma1200.effective_end_date
+				and ma1200.effective_start_date = ma1210.effective_start_date
+				) ma12
+        on B.article_id = ma12.parent_article_id,
+        MA1140 D,
+        CM9060 F
     WHERE
         A.pi_cd = #{piCd}
         AND A.pi_date = #{piDate}
         AND F.sp_id = '0000'
         AND A.pma_cd = B.pma_cd
+        /* 不盘点原材料商品
+        AND B.material_type != '04'*/
         AND F.sp_value BETWEEN B.effective_start_date AND B.effective_end_date
         AND B.article_id = D.article_id
-        AND G.vendor_id = D.vendor_id
         AND F.sp_value BETWEEN D.effective_start_date AND D.effective_end_date
-        AND E.store_cd = #{storeCd}
-        AND F.sp_value BETWEEN E.effective_start_date AND E.effective_end_date
-        AND D.structure_cd = E.zo_cd
-        AND G.article_id = B.article_id
-        AND G.store_cd = #{storeCd}
+        /*and B.article_id not in
+            (select article_id from pi0126)*/
+        and (D.barcode is not null and D.barcode != '')
+        and (B.sales_unit_id is not null and B.sales_unit_id != '')
 </select>
 
     <select id="getPrintData" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100ParamDTO" resultMap="BaseResultMap">

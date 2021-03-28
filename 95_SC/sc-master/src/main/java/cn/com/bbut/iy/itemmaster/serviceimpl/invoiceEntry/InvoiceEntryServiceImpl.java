@@ -1,5 +1,6 @@
 package cn.com.bbut.iy.itemmaster.serviceimpl.invoiceEntry;
 
+import cn.com.bbut.iy.itemmaster.dao.Cm9060Mapper;
 import cn.com.bbut.iy.itemmaster.dao.InvoiceEntryMapper;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.ReturnDTO;
@@ -7,6 +8,7 @@ import cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceEntryDTO;
 import cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceItemsDTO;
 import cn.com.bbut.iy.itemmaster.entity.User;
+import cn.com.bbut.iy.itemmaster.entity.base.Cm9060;
 import cn.com.bbut.iy.itemmaster.service.invoiceEntry.InvoiceEntryService;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,16 @@ public class InvoiceEntryServiceImpl implements InvoiceEntryService {
 
     @Autowired
     private InvoiceEntryMapper invoiceEntryMapper;
+    @Autowired
+    private Cm9060Mapper cm9060Mapper;
 
+    /**
+     * 获取当前业务日期
+     */
+    public String getBusinessDate() {
+        Cm9060 dto =  cm9060Mapper.selectByPrimaryKey("0000");
+        return dto.getSpValue();
+    }
     /**
      * 查询发票信息
      */
@@ -108,7 +119,7 @@ public class InvoiceEntryServiceImpl implements InvoiceEntryService {
         }
 //        String accDate = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(date);
         invoice.setAccId(String.valueOf(max + 1));
-        invoice.setAccDate(ymd);
+        invoice.setAccDate(getBusinessDate());
 
         try {
             invoiceEntryMapper.insertInvoice(invoice);

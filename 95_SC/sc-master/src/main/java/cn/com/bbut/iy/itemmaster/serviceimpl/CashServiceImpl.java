@@ -75,7 +75,7 @@ public class CashServiceImpl implements CashService {
                     System.out.println(customerQtyBig);
                     list.get(i).setCustomerQty(customerQtyBig);
                     if (cashDetail.getPayAmt().compareTo(BigDecimal.ZERO) > 0) {
-                        list.get(i).setCustomerAvgPrice(cashDetail.getPayAmt().divide(customerQtyBig));
+                        list.get(i).setCustomerAvgPrice(cashDetail.getPayAmt().divide(customerQtyBig,2));
                     }
                 } else {
                     list.get(i).setCustomerQty(BigDecimal.ZERO);

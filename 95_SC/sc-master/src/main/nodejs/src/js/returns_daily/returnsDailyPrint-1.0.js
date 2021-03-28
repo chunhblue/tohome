@@ -83,7 +83,7 @@ define('storeInventoryDailyPrint', function () {
                             "<td title='"+isEmpty(item.articleId)+"' style='text-align:right;'>" + isEmpty(item.articleId) + "</td>" +
                             "<td title='"+isEmpty(item.articleName) +"' style='text-align:left;'>" + isEmpty(item.articleName)  + "</td>" +
                             "<td title='"+isEmpty(item.barcode) +"' style='text-align:right;'>" + isEmpty(item.barcode)  + "</td>" +
-                            "<td title='"+formatDate(isEmpty(item.saleDate)) +"' style='text-align:center;'>" + formatDate(isEmpty(item.saleDate))  + "</td>" +
+                            "<td title='"+formatDate(isEmpty(item.tranDate)) +"' style='text-align:center;'>" + formatDate(isEmpty(item.tranDate))  + "</td>" +
                             "<td title='"+isEmpty(item.posId) +"' style='text-align:right;'>" + isEmpty(item.posId) + "</td>" +
                             "<td title='"+isEmpty(item.saleSerialNo) +"' style='text-align:right;'>" + isEmpty(item.saleSerialNo) + "</td>" +
                             "<td title='"+toThousands(item.orderQty)  +"' style='text-align:right;'>" + toThousands(item.orderQty)  + "</td>" +
@@ -125,7 +125,7 @@ define('storeInventoryDailyPrint', function () {
                         "<td></td>" +
                         "<td></td>" +
                         "<td></td>" +
-                        // '<td></td>' +
+                        '<td></td>' +
                         '</tr>';
                     m.grid_table.append(totalTempTrHtml);
                 }else {
@@ -145,7 +145,7 @@ define('storeInventoryDailyPrint', function () {
         if (!dateStr) {
             return '';
         }
-        return new Date(dateStr).Format('dd/MM/yyyy')
+        return new Date(dateStr).Format('dd/MM/yyyy hh:mm:ss')
     }
 
     var isEmpty = function (str) {

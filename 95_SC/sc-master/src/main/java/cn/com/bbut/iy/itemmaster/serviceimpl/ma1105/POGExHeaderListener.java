@@ -33,7 +33,7 @@ public class POGExHeaderListener implements ExEventListener {
 
         // 列标题
         String row2 = "NO.,Store No.,Store Name,Store Cluster,Store Group,Shelf,Sub-Shelf,Product Type,Location,Item Code,Product Name,Category,Sub Category," +
-                "V. Facing,H. Facing,D. Facing,Total Facing,Created Date";
+                "V. Facing,H. Facing,D. Facing,Total Facing,POG Name,Created Date";
         String[] titles = row2.split(",");
 
         // 开始拼接excel头信息

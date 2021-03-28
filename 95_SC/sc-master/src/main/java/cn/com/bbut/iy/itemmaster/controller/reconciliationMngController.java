@@ -146,13 +146,13 @@ public class reconciliationMngController extends BaseAction  {
         }
         int i = 0;
         switch(excelGroupCd){
-            case "201":
+            case "201":  // CK SAP (Paybill)
                 i = service.insertExcelToMb1200(u.getUserId(), file);
                 break;
-            case "202":
+            case "202":  // CK SAP (Paycode)
                 i = service.insertExcelTomb1300(file,u.getUserId());
                 break;
-            case "302":
+            case "302": // Viettel
                 i = service.insertMb1700(file,u.getUserId());
                 break;
         }

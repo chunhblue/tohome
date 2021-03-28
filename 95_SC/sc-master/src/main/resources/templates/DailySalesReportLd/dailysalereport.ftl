@@ -80,14 +80,14 @@
             font-size: 12px;
         }
 
-        #dailyTable th {
+        #dailyTable th,#dailyPosTable th {
             font-size: 13px;
             text-align: center;
             background-color: #87CEFF;
         }
 
-        #dailyTable { table-layout: fixed;}
-        #dailyTable th, #dailyTable td{
+        #dailyTable,#dailyPosTable { table-layout: fixed;}
+        #dailyTable th,#dailyTable td{
             overflow:hidden;
             white-space:nowrap;
             text-overflow:ellipsis;
@@ -95,11 +95,22 @@
             -moz-text-overflow: ellipsis;
             -webkit-text-overflow: ellipsis;
         }
-
-        #dailyTable tr, #dailyTable th {
+        #dailyPosTable th, #dailyPosTable td{
+            overflow:hidden;
+            white-space:nowrap;
+            text-overflow:ellipsis;
+            -o-text-overflow:ellipsis;
+            -moz-text-overflow: ellipsis;
+            -webkit-text-overflow: ellipsis;
+        }
+        #dailyTable tr,#dailyPosTable tr {
             height: 28px;
             line-height: 28px;
         }
+        #dailyPosTable th, #dailyTable th{
+            height: 28px;
+            line-height: 28px;
+         }
 
         @media (min-width: 1200px) {
             .col-lg-1-5 {
@@ -198,18 +209,30 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" id="show_status">
+                                    <label for="type"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null">Type</label>
+                                    <div class="col-xs-11 col-sm-10 col-md-10 col-lg-11 col-xs-offset-1  col-sm-offset-0  col-md-offset-0 col-lg-offset-0 ">
+                                        <div class="radio-inline">
+                                            <label>
+                                                <input type="radio" name="order_type" id="order_type_1" nextele="order_type_2" value="1">
+                                                System Date
+                                            </label>
+                                        </div>
+                                        <div class="radio-inline">
+                                            <label>
+                                                <input type="radio" name="order_type" id="order_type_2" value="2"  />
+                                                POS Business Date
+                                            </label>
+                                        </div>
+                                    </div>
                                     <label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null">Date</label>
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-                                        <input id="startDate"  nextele="sell_end_date" placeholder="Start Date" class="form-control input-sm select-date" type="text" value="">
+                                        <input id="effstartDate"  nextele="sell_end_date" placeholder="Start Date" class="form-control input-sm select-date" type="text" value="">
                                     </div>
                                     <label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label"></label>
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-                                        <input  id="endDate"  placeholder="End Date" class="form-control input-sm select-date" type="text" value="">
+                                        <input  id="effendDate"  placeholder="End Date" class="form-control input-sm select-date" type="text" value="">
                                     </div>
-                                    [#--                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-1">--]
-                                    [#--                                        <button id="clear_pd_date" type="button" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-trash icon-right"></span>Clear Date</button>--]
-                                    [#--                                    </div>--]
                                     <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Area Manager</label>
                                     <div class="col-sm-2">
                                         <div class="aotu-pos">
@@ -223,13 +246,23 @@
                                                class="auto-but glyphicon glyphicon-remove circle"></a>
                                         </div>
                                     </div>
-
-
-                                    [#--                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">--]
-                                    [#--                                        <select id="am" class="form-control input-sm">--]
-                                    [#--                                            <option value="">-- All/Please Select --</option>--]
-                                    [#--                                        </select>--]
-                                    [#--                                    </div>--]
+                                    <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Include/Exclude Service</label>
+                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+                                    <select id="include_services" class="form-control input-sm">
+                                        <option value="10">Include Service</option>
+                                        <option value="20">Exclude Service</option>
+                                    </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null">Date</label>
+                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+                                        <input id="PosstartDate"  nextele="sell_end_date" placeholder="Start Date" class="form-control input-sm select-date" type="text" value="">
+                                    </div>
+                                    <label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label"></label>
+                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+                                        <input  id="PosendDate"  placeholder="End Date" class="form-control input-sm select-date" type="text" value="">
+                                    </div>
                                 </div>
                                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                     <div class="wire"></div>
@@ -257,42 +290,66 @@
         </div>
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <span style="float: left">Date Created：${bsDate?string('dd/MM/yyyy')}</span>
+                <span style="float: left">Date Created：${bsDate?string('dd/MM/yyyy')}</span></br>
+                <span style="float: left">Sales data during POS Internet crush(e.g., power off) period will be synchronize back to NRI store system once internet connection back
+                 (POS sales data will save to local during isolated period)
+                </span>
             </div>
         </div>
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <table id="dailyPosTable" class="table table-hover table-striped table-condensed table-bordered zgrid-table"
+                       style="margin-bottom: 10px">
+                    <tr>
+                        <th title="Store No.">Store No.</th>
+                        <th title="Store Name">Store Name</th>
+                        <th title="Date">Date</th>
+                        <th title="Customer Count">Customer Count</th>
+                        <th title="6h-8h">6h-8h</th>
+                        <th title="8h-10h">8h-10h</th>
+                        <th title="10h-12h">10h-12h</th>
+                        <th title="12h-14h">12h-14h</th>
+                        <th title="Shift1">Shift1</th>
+                        <th title="14h-16h">14h-16h</th>
+                        <th title="16h-18h">16h-18h</th>
+                        <th title="18h-20h">18h-20h</th>
+                        <th title="20h-22h">20h-22h</th>
+                        <th title="Shift2">Shift2</th>
+                        <th title="22h-24h">22h-24h</th>
+                        <th title="0h-2h">0h-2h</th>
+                        <th title="2h-4h">2h-4h</th>
+                        <th title="4h-6h">4h-6h</th>
+                        <th title="Shift3">shift3</th>
+                        <th title="Total Amt">Total Amt</th>
+                        <th title="Area Manager Name">Area Manager Name</th>
+                    </tr>
+                </table>[#--分页--]
                 <table id="dailyTable" class="table table-hover table-striped table-condensed table-bordered zgrid-table"
                        style="margin-bottom: 10px">
                     <tr>
                         <th title="Store No.">Store No.</th>
                         <th title="Store Name">Store Name</th>
                         <th title="Date">Date</th>
-                        [#--<th title="Sales Amount">Sales Amount</th>--]
                         <th title="Customer Count">Customer Count</th>
-                        <th title="6h-8h">6h-8h</th>
-                        <th title="8h-10h">8h-10h</th>
-                        <th title="10h-12h">10h-12h</th>
                         <th title="12h-14h">12h-14h</th>
-                        <th title="morning shift">morning shift</th>
                         <th title="14h-16h">14h-16h</th>
                         <th title="16h-18h">16h-18h</th>
                         <th title="18h-20h">18h-20h</th>
+                        <th title="Shift1">Shift1</th>
                         <th title="20h-22h">20h-22h</th>
-                        <th title="shift2">middle shift</th>
                         <th title="22h-24h">22h-24h</th>
                         <th title="0h-2h">0h-2h</th>
                         <th title="2h-4h">2h-4h</th>
+                        <th title="Shift2">Shift2</th>
                         <th title="4h-6h">4h-6h</th>
-                        <th title="night shift">night shift</th>
+                        <th title="6h-8h">6h-8h</th>
+                        <th title="8h-10h">8h-10h</th>
+                        <th title="10h-12h">10h-12h</th>
+                        <th title="Shift3">shift3</th>
                         <th title="Total Amt">Total Amt</th>
-                        [#--<th title="PSD">PSD</th>--]
-                        [#--<th title="Area Manager ID">Area Manager ID</th>--]
                         <th title="Area Manager Name">Area Manager Name</th>
                     </tr>
-                </table>
-
-                [#--分页--]
+                </table>[#--分页--]
                 <nav aria-label="Page navigation" style="text-align: right">
                     <ul class="pagination">
                         <li class="disabled"><a href="javascript:void(0)" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
@@ -312,6 +369,7 @@
     <input type="hidden" id="enterFlag" value="${enterFlag!}"/>
     <input type="hidden" id="piCdParam" value="${piCdParam!}"/>
     <input type="hidden" id="piDateParam" value="${piDateParam!}"/>
+    <input type="hidden" id="typeDate" value=""/>
 
 </div>
 </body>

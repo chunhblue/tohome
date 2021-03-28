@@ -154,4 +154,93 @@
         </if>
     </select>
 
+    <select id="selectAllItemIN" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100c.MaterialDTO" resultType="cn.com.bbut.iy.itemmaster.dto.pi0100c.MaterialDTO">
+    SELECT
+    distinct
+    A.cost_item,
+    A.article_id,
+	A.article_name,
+	C.default_barcode barcode,
+	D.unit_name uom,
+	A.spec
+    FROM
+	MA1100
+	A LEFT JOIN (
+    SELECT
+	ma11.default_barcode,
+	ma11.vendor_id,
+	ma11.article_id
+    FROM
+	ma1110 ma11,
+	ma2240 ma22
+    WHERE
+	ma11.article_id = ma22.article_id
+	AND ma22.store_cd = #{param.storeCd}
+	AND ma11.vendor_id = ma22.vendor_id
+	AND ma11.structure_cd = (
+SELECT
+	ma2.admin_structure_cd
+FROM
+	ma0020 ma2
+WHERE
+	ma2.structure_cd = (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{param.storeCd}  ))) C ON A.article_id = C.article_id,
+	ma0220 D
+WHERE
+	A.sales_unit_id = D.unit_id
+	And A.cost_item='1'
+  <if test="param.articleId !=null and param.articleId !=''">
+  AND  A.article_id=#{param.articleId}
+ </if>
+    </select>
+    <select id="selectCountItem" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100c.MaterialDTO" resultType="INT">
+    SELECT
+     count(1)
+      FROM
+	 MA1100
+	 A LEFT JOIN (
+    SELECT
+	ma11.default_barcode,
+	ma11.vendor_id,
+	ma11.article_id
+    FROM
+	ma1110 ma11,
+	ma2240 ma22
+    WHERE
+	ma11.article_id = ma22.article_id
+	AND ma22.store_cd = #{param.storeCd}
+	AND ma11.vendor_id = ma22.vendor_id
+	AND ma11.structure_cd = (
+    SELECT
+	ma2.admin_structure_cd
+   FROM
+	ma0020 ma2
+   WHERE
+	ma2.structure_cd = (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{param.storeCd}  ))) C ON A.article_id = C.article_id,
+	ma0220 D
+   WHERE
+	A.sales_unit_id = D.unit_id
+	And A.cost_item='1'
+   <if test="param.articleId !=null and  param.articleId !=''">
+    AND  A.article_id=#{param.articleId}
+    </if>
+    </select>
+
+    <select id="selectAllItem" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.ItemInStoreDto" resultType="cn.com.bbut.iy.itemmaster.dto.pi0100c.MaterialDTO">
+        SELECT
+        distinct
+         pi0160.article_id,
+         pi0160.article_name,
+         pi0160.barcode,
+         pi0160.uom,
+         pi0160.qty,
+         pi0160.material_type
+         FROM PI0160
+         WHERE 1=1
+        <if test="param.articleId !=null and param.articleId !=''">
+            AND  pi0160.article_id=#{param.articleId}
+        </if>
+    </select>
+
+
+
 </mapper>

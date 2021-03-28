@@ -54,6 +54,7 @@
         <result column="order_amt" property="orderAmt" jdbcType="NUMERIC" />
         <result column="receive_price" property="rrOrderPrice" jdbcType="NUMERIC" />
         <result column="receive_qty" property="rrOrderQty" jdbcType="NUMERIC" />
+        <result column="receive_qty" property="rrOrderQty1" jdbcType="NUMERIC" />
         <result column="receive_total_amt" property="rrOrderAmt" jdbcType="NUMERIC" />
         <result column="reason_id" property="reasonId" jdbcType="VARCHAR" />
         <result column="correction_difference" property="modifyQty" jdbcType="NUMERIC" />
@@ -345,6 +346,7 @@
 
     <update id="updateRecord">
         update od0000 set
+        upload_flg = null,
         order_remark = #{orderRemark,jdbcType=VARCHAR},
         update_user_id = #{commonDTO.updateUserId,jdbcType=VARCHAR},
         update_ymd = #{commonDTO.updateYmd,jdbcType=VARCHAR},
@@ -371,7 +373,7 @@
 			SELECT
 				O1.store_cd AS storeCd, O1.order_id AS orderId, O1.serial_no AS serialNo, O1.article_id AS articleId,
 				O1.barcode, O1.vendor_id AS vendorId, O1.order_unit AS orderUnit, O1.order_price AS rrOrderPrice,
-				O1.receive_qty AS rrOrderQty, (O1.order_price * O1.receive_qty) AS rrOrderAmt, O.org_order_id,O1.order_nocharge_qty,receive_nocharge_qty
+				O1.receive_qty AS rrOrderQty,O1.receive_qty AS rrOrderQty1, (O1.order_price * O1.receive_qty) AS rrOrderAmt, O.org_order_id,O1.order_nocharge_qty,receive_nocharge_qty
 			FROM OD0000 O, OD0010 O1
 			WHERE O.order_type = '02'
             AND O.order_sts = '04'
@@ -497,4 +499,11 @@
             )AS B ON B.article_id=A.article_id
     </select>
 
+    <select id="getCorrList" resultType="cn.com.bbut.iy.itemmaster.entity.od0000.OD0000">
+        select order_id,org_order_id,store_cd,review_status,create_ymd,create_hms from od0000
+        where org_order_id in
+        <foreach collection="receiveIds" item="receiveId" open="(" separator="," close=")">
+            #{receiveId}
+        </foreach>
+    </select>
 </mapper>

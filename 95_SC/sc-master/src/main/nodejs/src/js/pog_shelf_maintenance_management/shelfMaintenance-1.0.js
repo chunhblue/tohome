@@ -30,6 +30,7 @@ define('pogShelfMaintenance', function () {
         ud_end_date : null,
         pog_cd : null,
         pog_name : null,
+        reviewStatus : null,
         aStore : null,
         search : null,
         reset : null
@@ -90,13 +91,11 @@ define('pogShelfMaintenance', function () {
         if (obj.flg=='0') {
             return;
         }
-        if (obj.reviewSts=='-1') {
-            obj.reviewSts='';
-        }
-        m.ud_start_date.val(obj.ud_start_date);
-        m.ud_end_date.val(obj.ud_end_date);
-        m.pog_cd.val(obj.pog_cd);
-        m.pog_name.val(obj.pog_name);
+        m.ud_start_date.val(fmtIntDate(obj.startDate));
+        m.ud_end_date.val(fmtIntDate(obj.endDate));
+        m.pog_cd.val(obj.pogCd);
+        m.pog_name.val(obj.pogName);
+        m.reviewStatus.val(obj.reviewStatus);
         $.myAutomatic.setValueTemp(aStore,obj.storeCd,obj.storeName);
 
         //拼接检索参数
@@ -149,11 +148,7 @@ define('pogShelfMaintenance', function () {
         }
 
         let obj = eval("("+searchJson+")");
-        obj.ud_start_date=m.ud_start_date.val();
-        obj.ud_end_date=m.ud_end_date.val();
-        obj.pog_cd=m.pog_cd.val();
         obj.pog_name=m.pog_name.val();
-        obj.storeCd=m.aStore.attr('k');
         obj.storeName=m.aStore.attr('v');
         obj.page=tableGrid.getting("page");
         obj.flg='0';
@@ -198,6 +193,7 @@ define('pogShelfMaintenance', function () {
             m.ud_end_date.val("");
             m.pog_cd.val("");
             m.pog_name.val("");
+            m.reviewStatus.val("");
             $.myAutomatic.cleanSelectObj(aStore);
             selectTrTemp = null;
             _common.clearTable();
@@ -273,10 +269,11 @@ define('pogShelfMaintenance', function () {
             endDate:_endDate,
             storeCd:m.aStore.attr('k'),
             pogCd:m.pog_cd.val(),
-            pogName:m.pog_name.val()
+            pogName:m.pog_name.val(),
+            reviewStatus:m.reviewStatus.val()
         };
         m.searchJson.val(JSON.stringify(searchJsonStr));
-    }
+    };
 
 
     //表格初始化-库存报废样式
@@ -285,13 +282,15 @@ define('pogShelfMaintenance', function () {
             title:"Query Result",
             param:paramGrid,
             localSort: true,
-            colNames:["Document Date","Store No.","Store Name","Document","Document Name","Created By"],
+            colNames:["Document Date","Store No.","Store Name","Document","Document Name","Review Status","Is Expired","Created By"],
             colModel:[
                 {name:"createTime",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue:_common.formatDateAndTime},
                 {name:"storeCd",type:"text",text:"right",width:"100",ishide:false,css:""},
                 {name:"storeName",type:"text",text:"left",width:"130",ishide:false,css:""},
                 {name:"pogCd",type:"text",text:"right",width:"130",ishide:true,css:""},
                 {name:"pogName",type:"text",text:"left",width:"130",ishide:false,css:""},
+                {name:"reviewStatusName",type:"text",text:"left",width:"130",ishide:false,css:""},
+                {name:"isExpired",type:"text",text:"left",width:"130",ishide:false,css:"",getCustomValue:getIsExpired},
                 {name:"createUserName",type:"text",text:"left",width:"130",ishide:false,css:""}
             ],//列内容
             width:"max",//宽度自动
@@ -320,6 +319,21 @@ define('pogShelfMaintenance', function () {
                 {butType:"custom",butHtml:"<button id='export' type='button' class='btn btn-info btn-sm'><span class='glyphicon glyphicon-export'></span> Export</button>"}
             ]
         });
+    };
+
+    var getIsExpired = function(tdObj, value){
+        let temp;
+        switch (value) {
+            case "0":
+                temp = "Effective";
+                break;
+            case "1":
+                temp = "Expired";
+                break;
+            default:
+                temp = "";
+        }
+        return $(tdObj).text(temp);
     }
 
     // 按钮权限验证

@@ -87,6 +87,41 @@
 							<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 								<div class="form-horizontal">
 									<div class="form-group">
+										<label for="aRegion" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Region</label>[#-- 大区 --]
+										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+											<div class="aotu-pos">
+												<input type="text" class="form-control my-automatic input-sm" id="aRegion">
+												<a id="regionRefresh" href="javascript:void(0);" title="Refresh" class="auto-but glyphicon glyphicon-refresh refresh"></a>
+												<a id="regionRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
+											</div>
+										</div>
+										<label for="aCity" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">City</label>[#-- 城市 --]
+										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+											<div class="aotu-pos">
+												<input type="text" class="form-control my-automatic input-sm" id="aCity">
+												<a id="cityRefresh" href="javascript:void(0);" title="Refresh" class="auto-but glyphicon glyphicon-refresh refresh"></a>
+												<a id="cityRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
+											</div>
+										</div>
+										<label for="aDistrict" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">District</label>[#-- 区域 --]
+										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+											<div class="aotu-pos">
+												<input type="text" class="form-control my-automatic input-sm" id="aDistrict">
+												<a id="districtRefresh" href="javascript:void(0);" title="Refresh" class="auto-but glyphicon glyphicon-refresh refresh"></a>
+												<a id="districtRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
+											</div>
+										</div>
+										<label for="aStore" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Store</label>[#-- 店铺 --]
+										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+											<div class="aotu-pos">
+												<input type="text" class="form-control my-automatic input-sm" id="aStore">
+												<a id="storeRefresh" href="javascript:void(0);" title="Refresh" class="auto-but glyphicon glyphicon-refresh refresh"></a>
+												<a id="storeRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
+											</div>
+										</div>
+									</div>
+
+									<div class="form-group">
 									    <label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null">Order Date</label>
 									    <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
 											<input id="bf_start_date"  nextele="bf_end_date" placeholder="Start Date" class="form-control input-sm select-date" type="text" value="">
@@ -99,13 +134,24 @@
 										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 											<input type="text" id="barcode" class="form-control input-sm">
 										</div>
-										<label for="failedReason"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Failed Reason</label>
+										<label for="failedReason"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Item Code</label>
 										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-											<select id="failedReason" class="form-control input-sm" nextele="">
-												<option value="">-- All/Please Select --</option>
-											</select>
+											<input type="text" id="articleId" class="form-control input-sm">
 										</div>
 									</div><!-- form-group -->
+
+									<div class="form-group">
+										<label for="" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Query Type</label>
+										<div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
+											<div class="radio-inline"><label><input type="radio" name="query_type" id="vendor"value="0">Vendor</label></div>
+											<div class="radio-inline"><label><input type="radio" name="query_type" id="dc" value="1" checked="checked"/>DC</label></div>
+										</div>
+
+										<label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label"><span id="query_type_text">Vendor Code</span></label>
+										<div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
+											<input type="text" id="query_type_val" class="form-control input-sm">
+										</div>
+									</div>
 								</div>
 							</div>
 							<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">

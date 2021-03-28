@@ -282,7 +282,7 @@
                                                readonly="true">
                                     </div>
                                 </div><!-- form-group -->
-                                <div class="form-group">
+                                <div class="form-group" hidden>
                                     <label for="spec" class="col-xs-4 col-sm-2 col-md-4 col-lg-4 control-label">Specification</label>
                                     <div class="col-xs-8 col-sm-3 col-md-6 col-lg-6">
                                         <input type="text" id="spec" class="form-control input-sm" readonly="true">
@@ -297,7 +297,7 @@
                                 </div><!-- form-group -->
                                 <div class="form-group">
                                     <label for="orderUnitQty" class="col-xs-4 col-sm-2 col-md-4 col-lg-4 control-label"
-                                           style="white-space:nowrap">Qty Per Packaging UOM</label>
+                                           style="white-space:nowrap">converter</label>
                                     <div class="col-xs-8 col-sm-3 col-md-6 col-lg-6">
                                         <input type="text" id="orderUnitQty" class="form-control input-sm"
                                                readonly="true">
@@ -327,7 +327,7 @@
                                                readonly="true">
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" hidden>
                                     <label for="orderPromotionType"
                                            class="col-xs-4 col-sm-2 col-md-4 col-lg-4 control-label"
                                            style="white-space:nowrap">Purchasing Promotion Type</label>
@@ -345,7 +345,7 @@
                                                readonly="true">
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" hidden>
                                     <label for="adviseSalePrice"
                                            class="col-xs-4 col-sm-2 col-md-4 col-lg-4 control-label">RSP</label>
                                     <div class="col-xs-8 col-sm-3 col-md-6 col-lg-6">
@@ -385,6 +385,18 @@
                                         </button>
                                     </div>
                                 </div>
+                                <div class="form-group">
+                                    <label for="articleNoChargeId"  class="col-xs-4 col-sm-2 col-md-4 col-lg-4 control-label">Free Item Code</label>
+                                    <div class="col-xs-8 col-sm-3 col-md-6 col-lg-6">
+                                        <input type="text" id="articleNoChargeId" class="form-control input-sm" readonly="true">
+                                    </div>
+                                </div><!-- form-group -->
+                                <div class="form-group">
+                                    <label for="freeItemQty"  class="col-xs-4 col-sm-2 col-md-4 col-lg-4 control-label">Free Order Qty</label>
+                                    <div class="col-xs-8 col-sm-3 col-md-6 col-lg-6">
+                                        <input type="text" id="freeItemQty" class="form-control input-sm" readonly="true">
+                                    </div>
+                                </div><!-- form-group -->
                                 <div class="form-group">
                                     <label for="promotionDescription"
                                            class="col-xs-4 col-sm-2 col-md-4 col-lg-4 control-label"

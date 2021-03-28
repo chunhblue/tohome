@@ -70,7 +70,7 @@ define('storeTransferIn', function () {
             m.main_box.hide();
         }
         // 加载下拉列表
-        getSelectValue();
+        // getSelectValue();
         // 根据登录人的不同身份权限来设定画面的现实样式
         initPageBytype(m.identity.val());
         // 初始化店铺运营组织检索
@@ -156,7 +156,7 @@ define('storeTransferIn', function () {
         });
         //原因
         reason=$("#reason").myAutomatic({
-            url:url_root+"/cm9010/getResonCode",
+            url:url_root+"/cm9010/getReasonCode",
             ePageSize:10,
             startCount:0,
         })

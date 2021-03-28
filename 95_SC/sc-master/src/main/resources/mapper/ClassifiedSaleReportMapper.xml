@@ -138,9 +138,9 @@
             AND ia.ofc = oper.c_operatorcode
             AND ia.store_cd In
             <foreach item="store" index="index" collection="classParamdto.stores"
-                     open="(" separator="," close=")">
-                #{store,jdbcType=VARCHAR}
-            </foreach>
+                                     open="(" separator="," close=")">
+              #{store,jdbcType=VARCHAR}
+        </foreach>
             <if test="classParamdto.startDate!=null and classParamdto.startDate!='' ">
                 <![CDATA[
              AND ia.acc_date >= #{classParamdto.startDate}

@@ -138,4 +138,19 @@ public class OrderItemDetailDTO implements Serializable {
      * 促销规则描述
      */
     private String promotionDescription;
+
+    /**
+     * 订货商品数量比例
+     */
+    private BigDecimal articleQty;
+
+    /**
+     * 搭赠商品编号
+     */
+    private String articleNoChargeId;
+
+    /**
+     * 搭赠商品数量比例
+     */
+    private BigDecimal articleNoChargeQty;
 }

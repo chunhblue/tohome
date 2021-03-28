@@ -3,10 +3,11 @@ package cn.com.bbut.iy.itemmaster.dao;
 import cn.com.bbut.iy.itemmaster.dto.orderFailed.OrderFailedGridDTO;
 import cn.com.bbut.iy.itemmaster.dto.orderFailed.OrderFailedParamDTO;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Mapper
+@Repository
 public interface OrderFailedMapper {
 
     /**

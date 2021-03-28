@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -62,8 +63,10 @@ public class DaySaleExServiceImpl implements ExService {
             String startDate = sdf.format(calendar.getTime());
             jsonParam.setEffectiveStartDate(startDate);
         }
+
         // 生成文件标题信息对象
         session.setHeaderListener(new DaySaleExHeaderListener(jsonParam));
+
         session.createWorkBook();
         // 创建excel工作表，调用标题信息对象执行标题添加
         session.createSheet("Data");
@@ -89,17 +92,169 @@ public class DaySaleExServiceImpl implements ExService {
      * @param curRow
      */
     private void createExcelBody(Sheet sheet, int curRow, DaySaleReportParamDTO jsonParam) {
-        // 查询数据
-        List<DaySaleReportDTO> _list = mapper.selectDaySaleReport(jsonParam);
-        // 遍历数据
-        int no = 1;
-        for (DaySaleReportDTO ls : _list) {
-            int curCol = 0;
-            Row row = sheet.createRow(curRow);
-            Cell cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
-            setCellValueNo(cell, no++);
+        List<DaySaleReportDTO> _list=new ArrayList<>();
+        if (jsonParam.getTypeDate().equals("1")){
+            _list = mapper.selectDaySaleReport(jsonParam);
+            int no = 1;
+            for (DaySaleReportDTO ls : _list) {
+                int curCol = 0;
+                Row row = sheet.createRow(curRow);
+                Cell cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
+                setCellValueNo(cell, no++);
 
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));
+                setCellValue(cell, ls.getStoreCd());
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
+                setCellValue(cell, ls.getStoreName());
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
+                setCellValue(cell, fmtDateToStr(ls.getSaleDate()));
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getAvgCustomerNo()));
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getTime1214()+""));
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getTime1416()+""));
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getTime1618()+""));
+
+
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getTime1820()+""));
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getShift1()+""));
+
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getTime2022()+""));
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getTime2224()+""));
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getTime02()+""));
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getTime24()+""));
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getShift1()+""));
+                cell = row.createCell(curCol++);
+
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getTime46()+""));
+
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getTime68()+""));
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getTime810()+""));
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getTime1012()+""));
+
+
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getShift3()+""));
+                System.out.println(ls.getShift3());
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+                setCellValue(cell, formatNum(ls.getTotalAmt()+""));
+
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
+                setCellValue(cell, ls.getAmName());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                curRow++;
+            }
+            // 设置列宽
+            int columnIndex = 0;
+            sheet.setColumnWidth(columnIndex++, 5 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 22 * 256);
+            sheet.setColumnWidth(columnIndex++, 18 * 256);
+            sheet.setColumnWidth(columnIndex++, 20 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 20 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 20 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 20 * 256);
+            sheet.setColumnWidth(columnIndex++, 20 * 256);
+            sheet.setColumnWidth(columnIndex++, 25 * 256);
+        }
+        if (jsonParam.getTypeDate().equals("2")){
+            _list = mapper.selectDayPosSaleReport(jsonParam);
+            int no = 1;
+            for (DaySaleReportDTO ls : _list) {
+
+                int curCol = 0;
+                Row row = sheet.createRow(curRow);
+                Cell cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
+                setCellValueNo(cell, no++);
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));
             setCellValue(cell, ls.getStoreCd());
@@ -184,32 +339,36 @@ public class DaySaleExServiceImpl implements ExService {
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
             setCellValue(cell, ls.getAmName());
 
+
             curRow++;
+            }
+            // 设置列宽
+            int columnIndex = 0;
+            sheet.setColumnWidth(columnIndex++, 5 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 22 * 256);
+            sheet.setColumnWidth(columnIndex++, 18 * 256);
+            sheet.setColumnWidth(columnIndex++, 20 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 20 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 20 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 15 * 256);
+            sheet.setColumnWidth(columnIndex++, 20 * 256);
+            sheet.setColumnWidth(columnIndex++, 20 * 256);
+            sheet.setColumnWidth(columnIndex++, 25 * 256);
         }
-        // 设置列宽
-        int columnIndex = 0;
-        sheet.setColumnWidth(columnIndex++, 5 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 22 * 256);
-        sheet.setColumnWidth(columnIndex++, 18 * 256);
-        sheet.setColumnWidth(columnIndex++, 20 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 20 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 20 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 20 * 256);
-        sheet.setColumnWidth(columnIndex++, 20 * 256);
-        sheet.setColumnWidth(columnIndex++, 25 * 256);
+
+
     }
 
 }

@@ -298,8 +298,8 @@ public class IyRoleServiceImpl implements IyRoleService {
         MenuPermDTO son = new MenuPermDTO(ConstantsDB.COMMON_ZERO, "", perms);
         List<MenuPermDTO> sons = new ArrayList<MenuPermDTO>();
         sons.add(son);
-        ParentMenuDTO dto = new ParentMenuDTO(ConstantsDB.COMMON_ZERO, "Other", sons);
-        dtos.add(ConstantsDB.COMMON_ZERO, dto);
+//        ParentMenuDTO dto = new ParentMenuDTO(ConstantsDB.COMMON_ZERO, "Other", sons);
+//        dtos.add(ConstantsDB.COMMON_ZERO, dto);
         return dtos;
     }
 

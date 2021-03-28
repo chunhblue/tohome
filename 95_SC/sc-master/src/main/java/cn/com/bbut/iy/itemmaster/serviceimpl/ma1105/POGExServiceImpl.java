@@ -157,6 +157,10 @@ public class POGExServiceImpl implements ExService {
             setCellValue(cell, ls.getTotalFacing());
 
             cell = row.createCell(curCol++);
+            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
+            setCellValue(cell, ls.getExcelName());
+
+            cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
             setCellValue(cell, fmtDateToStr(ls.getCreateDate()));
 
@@ -181,6 +185,7 @@ public class POGExServiceImpl implements ExService {
         sheet.setColumnWidth(columnIndex++, 10 * 256);
         sheet.setColumnWidth(columnIndex++, 10 * 256);
         sheet.setColumnWidth(columnIndex++, 13 * 256);
+        sheet.setColumnWidth(columnIndex++, 30 * 256);
         sheet.setColumnWidth(columnIndex++, 15 * 256);
     }
 

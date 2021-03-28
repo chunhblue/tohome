@@ -32,7 +32,7 @@ public class AdjustmentExHeaderListener implements ExEventListener {
         String row1 = "";
 
         // 列标题
-        String row2 = "NO,Store No.,Store Name,Inventory Date,TopDepartment,Department,Category, SubCategory,Item Code,Item Name,Barcode,Uom,Adjustment  Quantity,General Reason,Adjustment Reason,Area Manager Code,Area Manager Name";
+        String row2 = "NO,Store No.,Store Name,Inventory Date,TopDepartment,Department,Category, SubCategory,Item Code,Item Name,Barcode,Uom,Adjustment  Quantity,Adjustment Reason,Area Manager Code,Area Manager Name";
         String[] titles = row2.split(",");
 
         // 开始拼接excel头信息

@@ -116,9 +116,9 @@
 										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 											<select id="shift" class="form-control input-sm" nextele="">
 												<option value="">-- All/Please Select --</option>
-												<option value="00">morning shift</option>
-												<option value="01">middle shift</option>
-												<option value="02">night shift</option>
+												<option value="00">Shift1</option>
+												<option value="01">Shift2</option>
+												<option value="02">Shift3</option>
 											</select>
 										</div>
 									</div><!-- form-group -->
@@ -148,6 +148,12 @@
 										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 											<input type="text" id="memberId" class="form-control input-sm">
 										</div>
+										<label for="posId"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1  control-label" style="white-space: nowrap">POS No.</label>
+										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+											<select id="posId" class="form-control input-sm" nextele="">
+												<option value="">-- All/Please Select --</option>
+											</select>
+										</div>
 									</div><!-- form-group -->
 									<div class="form-group">
 										<label for="aStore" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null">Store</label>[#-- 店铺 --]
@@ -167,13 +173,17 @@
 										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 											<input type="text" id="articleShortName" class="form-control input-sm">
 										</div>
-										<label for="posId"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1  control-label" style="white-space: nowrap">POS No.</label>
+										<label for="Total Amount"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Total Amount</label>
 										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-											<select id="posId" class="form-control input-sm" nextele="">
-												<option value="">-- All/Please Select --</option>
-											</select>
+											<input type="text" id="totalAmount" class="form-control input-sm" disabled="disabled">
 										</div>
 									</div><!-- form-group -->
+									<div class="form-group">  [#-- 电子小票编号 --]
+										<label for="saleSerialNo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Receipt No.</label>
+										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+											<input type="text" id="saleSerialNo" class="form-control input-sm">
+										</div>
+									</div>
 								</div>
 							</div>
 							<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">

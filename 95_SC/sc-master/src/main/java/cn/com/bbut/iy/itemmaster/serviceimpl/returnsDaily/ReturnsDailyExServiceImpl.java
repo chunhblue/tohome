@@ -46,6 +46,7 @@ public class ReturnsDailyExServiceImpl implements ExService {
         // 资源权限参数设置
         jsonParam.setStores(paramDTO.getStores());
         jsonParam.setResources(paramDTO.getResources());
+        jsonParam.setReturnDate(Utils.getTimeStamp(jsonParam.getReturnDate()));
         // 生成文件标题信息对象
         session.setHeaderListener(new ReturnsDailyExHeaderListener(jsonParam));
         session.createWorkBook();
@@ -120,8 +121,7 @@ public class ReturnsDailyExServiceImpl implements ExService {
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
-            setCellValue(cell, ls.getSaleFormtDate());
-
+            setCellValue(cell, fmtDateAndTimeToStr19(ls.getTranDate()));
 
 
             cell = row.createCell(curCol++);
@@ -129,8 +129,8 @@ public class ReturnsDailyExServiceImpl implements ExService {
             setCellValue(cell, ls.getPosId());
 
             cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));
-            setCellValue(cell, ls.getSaleSerialNo());
+            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
+            setCellValue(cell, ls.getNonSaleType());
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));

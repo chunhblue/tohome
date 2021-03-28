@@ -135,7 +135,7 @@
                                     </div>
 
                                     <div class="form-group ">
-                                        <label for="aStore" class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">Store</label>[#-- 店铺 --]
+                                        <label for="aStore" class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label not-null">Store</label>[#-- 店铺 --]
                                         <div class="col-xs-12 col-sm-4 col-md-3 col-lg-4">
                                             <div class="aotu-pos">
                                                 <input id="hidStore" hidden value="">
@@ -160,14 +160,20 @@
 
                                     <div class="form-group">
 [#--                                        <label for="posNo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">POS</label>--]
-                                        <label for="posNo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">POS</label>
+                                        [#--<label for="posNo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">POS</label>
                                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                                             <input type="text" id="posNo" class="form-control input-sm">
+                                        </div>--]
+                                        <label for="posNo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">POS</label>
+                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                            <select id="posNo" class="form-control input-sm" nextele="" autocomplete="off" disabled="disabled">
+                                                <option value="">-- All/Please Select --</option>
+                                            </select>
                                         </div>
                                     </div><!-- form-group -->
 
                                     <div class="form-group">
-                                        <label for="saleNo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">Receipt No</label>
+                                        <label for="saleNo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label not-null">Receipt No</label>
                                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                                             <input type="text" id="saleNo" class="form-control input-sm">
                                         </div>
@@ -184,13 +190,22 @@
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="receiptType" class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">Receipt Type</label>[#-- 大区 --]
+                                        [#--<label for="receiptType" class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">Receipt Type</label>--][#-- 大区 --][#--
                                         <div class="col-xs-12 col-sm-4 col-md-3 col-lg-4">
                                             <div class="aotu-pos">
                                                 <input type="text" class="form-control my-automatic input-sm" id="receiptType">
                                                 <a id="receiptfresh" href="javascript:void(0);" title="Refresh" class="auto-but glyphicon glyphicon-refresh refresh"></a>
                                                 <a id="receiptRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
                                             </div>
+                                        </div>--]
+
+                                        <label for="receiptType"  class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">Receipt Type</label>
+                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                            <select id="receiptType" class="form-control input-sm" nextele="" autocomplete="off">
+                                                <option value="">-- All/Please Select --</option>
+                                                <option value="sale">Sale</option>
+                                                <option value="return">Refund</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>

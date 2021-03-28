@@ -243,10 +243,14 @@ public class OrderServiceImpl implements OrderService {
         }*/
         //end——————————————————————————
         if (list != null && list.size() > 0) {
-            flag = orderMapper.updateOrder(dto);
-            if ("0".equals(dto.getDcItem())) {//供应商订货商品
-                //供应商订货商品失效
-                orderMapper.updateOrderExpStsByVendor(dto.getOrderDate(), dto.getVendorId(), dto.getStoreCd());
+            if(dto.getOrderQty().equals(BigDecimal.ZERO)){
+                flag = orderMapper.deleteOrder(dto);
+            }else {
+                flag = orderMapper.updateOrder(dto);
+                if ("0".equals(dto.getDcItem())) {//供应商订货商品
+                    //供应商订货商品失效
+                    orderMapper.updateOrderExpStsByVendor(dto.getOrderDate(), dto.getVendorId(), dto.getStoreCd());
+                }
             }
         } else {
             dto.setOrderNochargeQty(new BigDecimal("0"));
@@ -719,7 +723,8 @@ public class OrderServiceImpl implements OrderService {
 
                 //获取供应商MOQ 和 MOA
                 OrderVendorDetailDTO orderVendorDetailDTO = orderMapper.getVendorDetailByCity(storeCd, orderItemDetailDTO.getVendorId(), businessDate);
-                if (orderVendorDetailDTO != null) {
+                if (orderVendorDetailDTO != null && orderItemDetailDTO.getOrderQty().compareTo(BigDecimal.ZERO)>0
+                  && orderItemDetailDTO.getOrderPrice().compareTo(BigDecimal.ZERO)>0) {
                     if (orderVendorDetailDTO.getMinOrderQty().compareTo(orderItemDetailDTO.getOrderQty()) > 0) {
                         sb.append(orderVendorDetailDTO.getVendorId()).append(" ").append(orderVendorDetailDTO.getVendorName()).append("<br>")
                                 .append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp")
@@ -750,7 +755,8 @@ public class OrderServiceImpl implements OrderService {
             for(OrderItemDetailDTO itemDetail:orderList){
                 // 获取单个商品的MOQ
                 OrderVendorDetailDTO orderItemDetail = orderMapper.getItemDerailByCity(storeCd, itemDetail.getVendorId(), businessDate, itemDetail.getArticleId());
-                if(orderItemDetail != null){
+                if(orderItemDetail != null && itemDetail.getOrderQty().compareTo(BigDecimal.ZERO)>0
+                        && itemDetail.getOrderPrice().compareTo(BigDecimal.ZERO)>0){
                     if (orderItemDetail.getMinOrderQty().compareTo(itemDetail.getOrderQty()) > 0) {
                         sb.append(itemDetail.getVendorId()).append(" ").append(itemDetail.getVendorName()).append("<br>")
                                 .append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp")
@@ -775,15 +781,25 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public boolean checkOrder(String storeCd, String orderDate) {
+    public String checkOrder(String storeCd, String orderDate) {
+        StringBuilder sb = new StringBuilder();
         if (orderMapper.checkVendorOrder(storeCd, orderDate) > 0) {
-            if (orderMapper.checkOrder(storeCd, orderDate) == 0) {
-                return false;
+            List<OrderItemDetailDTO> checkOrderList = orderMapper.checkOrder(storeCd, orderDate);
+            if (checkOrderList.size() > 0) {
+                if(checkOrderList.size()>=2){
+                    sb.append(checkOrderList.get(0).getArticleId()).append(" ").append(checkOrderList.get(0).getArticleName()).append("<br>")
+                            .append(checkOrderList.get(1).getArticleId()).append(" ").append(checkOrderList.get(1).getArticleName()).append("<br>")
+                            .append("&nbsp;&nbsp;&nbsp;&nbsp;").append("didn't satisfy supplier MOA/MOQ requirement");
+                }else {
+                    sb.append(checkOrderList.get(0).getArticleId()).append(" ").append(checkOrderList.get(0).getArticleName()).append("<br>")
+                            .append("&nbsp;&nbsp;&nbsp;&nbsp;").append("didn't satisfy supplier MOA/MOQ requirement");
+                }
+                return sb.toString();
             }
             ;
         }
         ;
-        return true;
+        return null;
     }
 
     @Override
@@ -940,10 +956,14 @@ public class OrderServiceImpl implements OrderService {
         int flag;
 
         if (list != null && list.size() > 0) {
-            flag = orderMapper.updateSpecialOrder(dto);
-            if ("0".equals(dto.getDcItem())) {//供应商订货商品
-                //供应商订货商品失效
-                orderMapper.updateSpecialOrderExpStsByVendor(dto.getOrderDate(), dto.getVendorId(), dto.getStoreCd());
+            if(dto.getOrderQty().equals(BigDecimal.ZERO)){
+                flag = orderMapper.deleteSpecialOrder(dto);
+            }else {
+                flag = orderMapper.updateSpecialOrder(dto);
+                if ("0".equals(dto.getDcItem())) {//供应商订货商品
+                    //供应商订货商品失效
+                    orderMapper.updateSpecialOrderExpStsByVendor(dto.getOrderDate(), dto.getVendorId(), dto.getStoreCd());
+                }
             }
         } else {
             dto.setOrderNochargeQty(new BigDecimal("0"));
@@ -992,15 +1012,25 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public boolean checkSpecialOrder(String storeCd, String orderDate) {
+    public String checkSpecialOrder(String storeCd, String orderDate) {
+        StringBuilder sb = new StringBuilder();
         if (orderMapper.checkVendorSpecialOrder(storeCd, orderDate) > 0) {
-            if (orderMapper.checkSpecialOrder(storeCd, orderDate) == 0) {
-                return false;
+            List<OrderItemDetailDTO> checkOrderList = orderMapper.checkSpecialOrder(storeCd, orderDate);
+            if (checkOrderList.size() > 0) {
+                if(checkOrderList.size()>=2){
+                    sb.append(checkOrderList.get(0).getArticleId()).append(" ").append(checkOrderList.get(0).getArticleName()).append("<br>")
+                            .append(checkOrderList.get(1).getArticleId()).append(" ").append(checkOrderList.get(1).getArticleName()).append("<br>")
+                            .append("&nbsp;&nbsp;&nbsp;&nbsp;").append("didn't satisfy supplier MOA/MOQ requirement");
+                }else {
+                    sb.append(checkOrderList.get(0).getArticleId()).append(" ").append(checkOrderList.get(0).getArticleName()).append("<br>")
+                            .append("&nbsp;&nbsp;&nbsp;&nbsp;").append("didn't satisfy supplier MOA/MOQ requirement");
+                }
+                return sb.toString();
             }
             ;
         }
         ;
-        return true;
+        return null;
     }
 
     @Override

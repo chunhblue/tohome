@@ -34,8 +34,8 @@ public class FailedExHeaderListener implements ExEventListener {
         // 列标题
         // String row2 = "NO.,Order Date,Item Code,Item Barcode,Item Name,Order Type,Order UOM," +
         //        "Order Quantity,Free Quantity,Order Price,Order Amount,Vendor Code,Vendor Name,Failed Reason";
-        String row2 = "NO.,Order Date,Item Code,Item Barcode,Item Name,Order Type,Order UOM," +
-                "Order Quantity,Free Quantity,Vendor Code,Vendor Name,Failed Reason";
+        String row2 = "NO.,Order Date,Item Code,Item Barcode,Item Name,Order UOM," +
+                "Order Quantity,Vendor Code,Vendor Name";
         String[] titles = row2.split(",");
 
         // 开始拼接excel头信息

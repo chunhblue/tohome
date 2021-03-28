@@ -1,5 +1,6 @@
 package cn.com.bbut.iy.itemmaster.service.stocktake;
 
+import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.ReturnDTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100DTO;
@@ -8,8 +9,10 @@ import cn.com.bbut.iy.itemmaster.dto.pi0100.PI0110DTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.text.ParseException;
@@ -38,7 +41,7 @@ public interface StocktakePlanService {
 
     HSSFWorkbook getExportHSSFWorkbook(List<StocktakeItemDTO> list);
 
-    File writeToCSVFile(HttpServletRequest request, List<StocktakeItemDTO> list, String piCd);
+    File writeToTXTFile(HttpServletRequest request, List<StocktakeItemDTO> list, String piCd);
 
     List<PI0100DTO> getPrintData(@Param("pi0100Param") PI0100ParamDTO pi0100Param);
 
@@ -49,5 +52,4 @@ public interface StocktakePlanService {
     List<StocktakeItemDTO> queryExport(String piCd,String piDate,String storeCd);
 
     void updateStocktakingPlanExpired();
-
 }

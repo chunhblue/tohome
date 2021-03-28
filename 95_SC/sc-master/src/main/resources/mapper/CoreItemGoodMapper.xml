@@ -103,7 +103,95 @@
         <if test="param.subCategoryCd!=null and param.subCategoryCd!=''">
             AND A.sub_category_cd = #{param.subCategoryCd}
         </if>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+
     </select>
+    <select id="getDataforgCount" parameterType="cn.com.bbut.iy.itemmaster.dto.coreItem.coreItemParamDTO" resultType="INT">
+        SELECT
+       count(1)
+        FROM
+        (
+        SELECT
+        MA1000.ofc,
+        MA1100.article_name,
+        MA1100.dep_cd,
+        MA1100.pma_cd,
+        MA1100.sub_category_cd,
+        MA1100.category_cd,
+        SA0500.store_cd,
+        sa0500.sale_qty,
+        sa0500.acc_date,
+        sa0500.sale_amt,
+        sa0500.barcode,
+        sa0500.seq_no,
+        SA0500.article_id,
+        sa0500.region_cd
+        FROM
+        SA0500
+        LEFT JOIN MA1100 ON MA1100.article_id = SA0500.article_id
+        left join MA1000 ON  MA1000.store_cd=	SA0500.store_cd
+        ) A,
+        MA0070,
+        MA0080,
+        MA0090,
+        MA1000,
+        t_operator,
+        MA0100
+        WHERE
+        A.dep_cd = MA0070.dep_cd
+        AND A.store_cd=MA1000.store_cd
+        and MA1000.store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        AND A.pma_cd = ma0080.pma_cd
+        AND A.category_cd = MA0090.category_cd
+        AND A.sub_category_cd = MA0100.sub_category_cd
+        AND t_operator.c_operatorcode=A.ofc
+        <if test="param.regionCd!=null and param.regionCd!=''">
+            AND A.region_cd=#{param.regionCd}
+        </if>
+        <if test="param.amCd!=null and param.amCd !=''">
+            AND A.ofc=#{param.amCd}
+        </if>
+        <if test="param.startDate!=null and param.startDate!=''">
+            <![CDATA[
+            AND   A.acc_date  >= #{param.startDate}
+        ]]>
+        </if>
+        <if test="param.endDate!=null and param.endDate!=''">
+            <![CDATA[
+            AND   A.acc_date  <= #{param.endDate}
+           ]]>
+        </if>
+        <if test="param.depCd!=null and param.depCd!=''">
+            AND A.dep_cd = #{param.depCd}
+        </if>
+        <if test="param.pmaCd!=null and param.pmaCd!=''">
+            AND A.pma_cd = #{param.pmaCd}
+        </if>
+        <if test="param.categoryCd!=null and param.categoryCd!=''">
+            AND A.category_cd = #{param.categoryCd}
+        </if>
+        <if test="param.subCategoryCd!=null and param.subCategoryCd!=''">
+            AND A.sub_category_cd = #{param.subCategoryCd}
+        </if>
+
+
+    </select>
+
+
+
+
+
+
+
+
+
+
     <select id="getDataforcity" parameterType="cn.com.bbut.iy.itemmaster.dto.coreItem.coreItemParamDTO" resultMap="BaseItemResult">
           SELECT
         A.*,
@@ -182,7 +270,89 @@
         <if test="param.subCategoryCd!=null and param.subCategoryCd!=''">
             AND A.sub_category_cd = #{param.subCategoryCd}
         </if>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
     </select>
+    <select id="getDataforcityCount" parameterType="cn.com.bbut.iy.itemmaster.dto.coreItem.coreItemParamDTO" resultType="INT">
+          SELECT
+       count (1)
+        FROM
+        (
+        SELECT
+        MA1000.ofc,
+        MA1100.article_name,
+        MA1100.dep_cd,
+        MA1100.pma_cd,
+        MA1100.sub_category_cd,
+        MA1100.category_cd,
+        sa0510.city_cd,
+        SA0510.store_cd,
+        sa0510.sale_qty,
+        sa0510.acc_date,
+        sa0510.sale_amt,
+        sa0510.barcode,
+        sa0510.seq_no,
+        SA0510.article_id
+        FROM
+        SA0510
+        LEFT JOIN MA1100 ON MA1100.article_id = SA0510.article_id
+        left join MA1000 ON  MA1000.store_cd=SA0510.store_cd
+        ) A,
+        MA0070,
+        MA0080,
+        MA0090,
+        MA1000,
+        t_operator,
+        MA0100
+        WHERE
+        A.dep_cd = MA0070.dep_cd
+        AND A.store_cd=MA1000.store_cd
+        and MA1000.store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        AND A.pma_cd = ma0080.pma_cd
+        AND A.category_cd = MA0090.category_cd
+        AND A.sub_category_cd = MA0100.sub_category_cd
+        AND t_operator.c_operatorcode=A.ofc
+        <if test="param.cityCd!=null and param.cityCd!=''">
+            AND A.city_cd=#{param.cityCd}
+        </if>
+        <if test="param.amCd!=null and param.amCd !=''">
+            AND A.ofc=#{param.amCd}
+        </if>
+        <if test="param.startDate!=null and param.startDate!=''">
+            <![CDATA[
+            AND   A.acc_date  >= #{param.startDate}
+        ]]>
+        </if>
+        <if test="param.endDate!=null and param.endDate!=''">
+            <![CDATA[
+            AND   A.acc_date  <= #{param.endDate}
+           ]]>
+        </if>
+        <if test="param.depCd!=null and param.depCd!=''">
+            AND A.dep_cd = #{param.depCd}
+        </if>
+        <if test="param.pmaCd!=null and param.pmaCd!=''">
+            AND A.pma_cd = #{param.pmaCd}
+        </if>
+        <if test="param.categoryCd!=null and param.categoryCd!=''">
+            AND A.category_cd = #{param.categoryCd}
+        </if>
+        <if test="param.subCategoryCd!=null and param.subCategoryCd!=''">
+            AND A.sub_category_cd = #{param.subCategoryCd}
+        </if>
+    </select>
+
+
+
+
+
+
+
     <select id="getDatafordistrict" parameterType="cn.com.bbut.iy.itemmaster.dto.coreItem.coreItemParamDTO" resultMap="BaseItemResult">
         SELECT
         A.*,
@@ -193,6 +363,81 @@
         MA1000.store_name,
         t_operator.c_operatorname,
         MA0100.sub_category_name
+        FROM
+        (
+        SELECT
+        MA1000.ofc,
+        MA1100.article_name,
+        MA1100.dep_cd,
+        MA1100.pma_cd,
+        MA1100.sub_category_cd,
+        MA1100.category_cd,
+        SA0520.store_cd,
+        sa0520.sale_qty,
+        sa0520.acc_date,
+        sa0520.sale_amt,
+        sa0520.barcode,
+        sa0520.seq_no,
+        sa0520.district_cd,
+        SA0520.article_id
+        FROM
+        SA0520
+        LEFT JOIN MA1100 ON MA1100.article_id = SA0520.article_id
+        left join MA1000 ON  MA1000.store_cd=SA0520.store_cd
+        ) A,
+        MA0070,
+        MA0080,
+        MA0090,
+        MA1000,
+        t_operator,
+        MA0100
+        WHERE
+        A.dep_cd = MA0070.dep_cd
+        AND A.store_cd=MA1000.store_cd
+        AND MA1000.store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        AND A.pma_cd = ma0080.pma_cd
+        AND A.category_cd = MA0090.category_cd
+        AND A.sub_category_cd = MA0100.sub_category_cd
+        AND t_operator.c_operatorcode=A.ofc
+        <if test="param.districtCd!=null and param.districtCd!=''">
+            AND A.district_cd=#{param.districtCd}
+        </if>
+        <if test="param.amCd!=null and param.amCd !=''">
+            AND A.ofc=#{param.amCd}
+        </if>
+        <if test="param.startDate!=null and param.startDate!=''">
+            <![CDATA[
+            AND   A.acc_date  >= #{param.startDate}
+        ]]>
+        </if>
+        <if test="param.endDate!=null and param.endDate!=''">
+            <![CDATA[
+            AND   A.acc_date  <= #{param.endDate}
+           ]]>
+        </if>
+        <if test="param.depCd!=null and param.depCd!=''">
+            AND A.dep_cd = #{param.depCd}
+        </if>
+        <if test="param.pmaCd!=null and param.pmaCd!=''">
+            AND A.pma_cd = #{param.pmaCd}
+        </if>
+        <if test="param.categoryCd!=null and param.categoryCd!=''">
+            AND A.category_cd = #{param.categoryCd}
+        </if>
+        <if test="param.subCategoryCd!=null and param.subCategoryCd!=''">
+            AND A.sub_category_cd = #{param.subCategoryCd}
+        </if>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+    <select id="getDatafordistrictCount" parameterType="cn.com.bbut.iy.itemmaster.dto.coreItem.coreItemParamDTO" resultType="INT">
+        SELECT
+      COUNT (1)
         FROM
         (
         SELECT
@@ -272,6 +517,80 @@
          MA1000.store_name,
          t_operator.c_operatorname,
          MA0100.sub_category_name
+         FROM
+         (
+         SELECT
+         MA1000.ofc,
+         MA1100.article_name,
+         MA1100.dep_cd,
+         MA1100.pma_cd,
+         MA1100.sub_category_cd,
+         MA1100.category_cd,
+         SA0530.store_cd,
+         sa0530.sale_qty,
+         sa0530.acc_date,
+         sa0530.sale_amt,
+         sa0530.barcode,
+         sa0530.seq_no,
+         SA0530.article_id
+         FROM
+         SA0530
+         LEFT JOIN MA1100 ON MA1100.article_id = SA0530.article_id
+         left join MA1000 ON  MA1000.store_cd=	SA0530.store_cd
+         ) A,
+         MA0070,
+         MA0080,
+         MA0090,
+         MA1000,
+         t_operator,
+         MA0100
+         WHERE
+         A.dep_cd = MA0070.dep_cd
+         AND A.store_cd=MA1000.store_cd
+         and MA1000.store_cd IN
+         <foreach item="store" index="index" collection="param.stores"
+                  open="(" separator="," close=")">
+             #{store,jdbcType=VARCHAR}
+         </foreach>
+         AND A.pma_cd = ma0080.pma_cd
+         AND A.category_cd = MA0090.category_cd
+         AND A.sub_category_cd = MA0100.sub_category_cd
+         AND t_operator.c_operatorcode=A.ofc
+         <if test="param.storeCd!=null and param.storeCd!=''">
+             AND A.store_cd=#{param.storeCd}
+         </if>
+         <if test="param.amCd!=null and param.amCd !=''">
+             AND A.ofc=#{param.amCd}
+         </if>
+         <if test="param.startDate!=null and param.startDate!=''">
+             <![CDATA[
+            AND   A.acc_date  >= #{param.startDate}
+        ]]>
+         </if>
+         <if test="param.endDate!=null and param.endDate!=''">
+             <![CDATA[
+            AND   A.acc_date  <= #{param.endDate}
+           ]]>
+         </if>
+         <if test="param.depCd!=null and param.depCd!=''">
+             AND A.dep_cd = #{param.depCd}
+         </if>
+         <if test="param.pmaCd!=null and param.pmaCd!=''">
+             AND A.pma_cd = #{param.pmaCd}
+         </if>
+         <if test="param.categoryCd!=null and param.categoryCd!=''">
+             AND A.category_cd = #{param.categoryCd}
+         </if>
+         <if test="param.subCategoryCd!=null and param.subCategoryCd!=''">
+             AND A.sub_category_cd = #{param.subCategoryCd}
+         </if>
+         <if test="param.flg">
+             LIMIT ${param.rows} OFFSET ${param.limitStart}
+         </if>
+     </select>
+     <select id="getDataforStoreCdCount" parameterType="cn.com.bbut.iy.itemmaster.dto.coreItem.coreItemParamDTO" resultType="INT">
+         SELECT
+         COUNT(1)
          FROM
          (
          SELECT

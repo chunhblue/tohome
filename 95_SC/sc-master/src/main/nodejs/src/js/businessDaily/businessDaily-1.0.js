@@ -247,13 +247,14 @@ define('businessDaily', function () {
 						$("#discountAmount").text(toThousands(saleData.discountAmount));//折扣金额
 						$("#saleAmount").text(toThousands(saleData.saleAmount));//实际销售额
 						$("#spillAmount").text(toThousands(saleData.spillAmount));//溢收金额
+						$("#overAmount").text(toThousands(saleData.overAmount));//舍去金额
+						$("#refundAmount").text(toThousands(saleData.refundAmount));//退款金额
 						$("#serviceAmount").text(toThousands(saleData.serviceAmount));//服务费
 						$("#chargeAmount").text(toThousands(saleData.chargeAmount));//充值费用
 						$("#chargeRefundAmount").text(toThousands(saleData.chargeRefundAmount));//充值退款费用
 						$("#countCustomer").text(toThousands(result.data.countCustomer));//统计该天早班顾客数目
-
-						// $("#Average4WeekSalesAmount").text(toThousands((result.data.lastMonthSalesAmount.grossSaleAmount/4).toFixed(2)));//统计顾客数目
-						$("#Average4WeekSalesAmount").text(toThousands(((result.data.lastMonthSalesAmount/4).toFixed(2))));//统计上个月在该天的金额的1/4
+						//统计过去28天的平均金额
+						$("#Average4WeekSalesAmount").text(toThousands(((result.data.lastMonthSalesAmount/28).toFixed(2))));
 
 						//支付方式
 						var payAmt = result.data.payAmt;
@@ -290,12 +291,12 @@ define('businessDaily', function () {
 						var bankDeposit = result.data.bankDeposit;
 							//昨日留存金
 							$("#retentionAmount").text(toThousands(bankDeposit.retentionAmount));
-							//现金小计
+							//今日现金小计
 							$("#cashAmount").text(toThousands(bankDeposit.cashAmount));
 							//应收金额
 							$("#receivablesAmount").text(toThousands(bankDeposit.receivablesAmount));
 							//合计
-							$("#bankDepositTotal").text(toThousands(bankDeposit.retentionAmount+bankDeposit.cashAmount+bankDeposit.receivablesAmount));
+							$("#bankDepositTotal").text(toThousands(bankDeposit.retentionAmount+bankDeposit.cashAmount/*+bankDeposit.receivablesAmount*/));
 
 						//会员积分
 

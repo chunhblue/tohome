@@ -5,6 +5,7 @@ import cn.com.bbut.iy.itemmaster.entity.sa0050.SA0050;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
@@ -24,4 +25,6 @@ public interface CashierDetailMapper {
     long getSaleDetailCount(SaleHeadParam param);
 
     List<SA0050> getCashier(@Param("storeCd") String storeCd, @Param("posId")String posId);
+
+    BigDecimal getSaleHeadAmount(CashierDetailParam param);
 }

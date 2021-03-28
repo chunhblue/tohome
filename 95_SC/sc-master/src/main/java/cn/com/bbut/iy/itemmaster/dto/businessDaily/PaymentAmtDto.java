@@ -22,4 +22,11 @@ public class PaymentAmtDto {
      * 收款金额
      */
     private BigDecimal payInAmt;
+    // cash
+    private BigDecimal payInAmt0;
+    private BigDecimal payInAmt1;
+    private BigDecimal payInAmt2;
+    private BigDecimal payInAmt3;
+    private BigDecimal payInAmt4;
+    private BigDecimal payInAmt5;
 }

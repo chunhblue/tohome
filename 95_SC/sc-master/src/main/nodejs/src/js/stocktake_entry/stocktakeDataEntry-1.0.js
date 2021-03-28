@@ -214,6 +214,7 @@ define('receiptEdit', function () {
             var formData = new FormData();
             formData.append('fileData',select_file);
             formData.append('storeCd',storeCd);
+            formData.append('piCd',$("#storeNo").val());
 
             // 确定要导入吗？
             _common.myConfirm("Are you sure you want to import?",function(result) {
@@ -289,6 +290,64 @@ define('receiptEdit', function () {
                 });
             }
         });
+        // 导出按钮点击事件
+        $("#exportInfo").on("click",function(){
+            let _storeCd = m.store.attr('k');
+            let itemDetail = [], num = 0;
+            $("#zgGridTtable>.zgGrid-tbody tr").each(function () {
+                num++;
+                let stockItem = {
+                    barcode:$(this).find('td[tag=barcode]').text(),
+                    articleId:$(this).find('td[tag=articleId]').text(),
+                    articleName:$(this).find('td[tag=articleName]').text(),
+                    spec:$(this).find('td[tag=spec]').text(),
+                    uom:$(this).find('td[tag=uom]').text(),
+                    firstQty:$(this).find('td[tag=firstQty]').text()
+                }
+                itemDetail.push(stockItem);
+            })
+            if (itemDetail.length<1) {
+                _common.prompt("Please enter the inventory data!",5,"error");/*请录入盘点商品数据*/
+                return;
+            }
+            var _storeName = "";
+            if(m.store.attr('v')!=null){
+                _storeName= m.store.attr('v').substring(6);
+            }
+            let bean = {
+                piCd:m.piCdParam.val(),
+                piDate:m.piDateParam.val(),
+                storeCd:m.store.attr('k'),
+                storeName:_storeName
+            };
+            let _data = {
+                searchJson : JSON.stringify(bean),
+                listJson : JSON.stringify(itemDetail)
+            };
+            _common.loading();
+            $.myAjaxs({
+                url:url_left+"/exportDetail",
+                async:true,
+                cache:false,
+                type :"post",
+                data :_data,
+                dataType:"json",
+                success:function(result){
+                    if(result.success){
+                        //导出excle
+                        window.location.href=url_left+"/download?store="+_storeCd;
+                    } else {
+                        _common.prompt(result.msg,5,"error");
+                    }
+                    _common.loading_close();
+                },
+                error : function(e){
+                    _common.prompt("Data export failed！",5,"error"); // 传票保存失败
+                    common.loading_close();
+                }
+            });
+        });
+
         //返回一览
         m.returnsViewBut.on("click",function(){
             var bank = $("#saveBut").attr("disabled");
@@ -413,12 +472,13 @@ define('receiptEdit', function () {
                 return;
             }
             _common.myConfirm("Please confirm whether you want to delete the selected data？",function(result){
-                if(result=="true"){
+                if(result==="true"){
                     $(selectTrTempFile[0]).remove();
                     selectTrTempFile = null;
                 }
             });
         });
+
         //提交按钮点击事件 文件上传
         $("#affirmByFile").on("click",function(){
             if($("#file_name").val()==null||$("#file_name").val()==''){
@@ -534,14 +594,14 @@ define('receiptEdit', function () {
         list.forEach(function (item) {
             item.rowIndex=uuid();
             var html = '<tr data-index="'+item.rowIndex+'">' +
-                '<td tag="barcode" width="130" title="'+item.barcode+'" align="center" tdindex="zgGridTtable_barcode">'+item.barcode+'</td>' +
-                '<td tag="articleId" width="130" title="'+item.articleId+'" align="center" tdindex="zgGridTtable_articleId">'+item.articleId+'</td>' +
-                '<td tag="articleName" width="130" title="'+item.articleName+'" align="center" tdindex="zgGridTtable_articleName">'+item.articleName+'</td>' +
-                '<td tag="spec" width="130" title="'+item.spec+'" align="center" tdindex="zgGridTtable_spec">'+item.spec+'</td>' +
-                '<td tag="uom" width="130" title="'+item.uom+'" align="center" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
-                '<td tag="badQty" width="130" title="'+(item.badQty).trim()+'" align="center" tdindex="zgGridTtable_badQty">'+(item.badQty).trim()+'</td>' +
-                '<td tag="firstQty" width="130" title="'+item.firstQty+'" align="center" tdindex="zgGridTtable_firstQty">'+item.firstQty+'</td>' +
-                '<td tag="secondQty" width="130" title="" align="center" tdindex="zgGridTtable_secondQty"></td>' +
+                '<td tag="barcode" width="130" title="'+isEmpty(item.barcode)+'" align="center" tdindex="zgGridTtable_barcode">'+isEmpty(item.barcode)+'</td>' +
+                '<td tag="articleId" width="130" title="'+isEmpty(item.articleId)+'" align="center" tdindex="zgGridTtable_articleId">'+isEmpty(item.articleId)+'</td>' +
+                '<td tag="articleName" width="130" title="'+isEmpty(item.articleName)+'" align="center" tdindex="zgGridTtable_articleName">'+isEmpty(item.articleName)+'</td>' +
+                '<td tag="spec" width="130" title="'+isEmpty(item.spec)+'" align="center" tdindex="zgGridTtable_spec">'+isEmpty(item.spec)+'</td>' +
+                '<td tag="uom" width="130" title="'+isEmpty(item.uom)+'" align="center" tdindex="zgGridTtable_uom">'+isEmpty(item.uom)+'</td>' +
+                '<td tag="badQty" width="130" title="'+toThousands(item.badQty)+'" align="center" tdindex="zgGridTtable_badQty">'+toThousands(item.badQty)+'</td>' +
+                '<td tag="firstQty" width="130" title="'+toThousands(item.firstQty)+'" align="center" tdindex="zgGridTtable_firstQty">'+toThousands(item.firstQty)+'</td>' +
+                '<td tag="secondQty" width="130" title="" hidden align="center" tdindex="zgGridTtable_secondQty"></td>' +
                 '</tr>';
             htmls+=html;
             dataForm.push(item);
@@ -562,6 +622,13 @@ define('receiptEdit', function () {
         var uuid = s.join("");
         return uuid;
     }
+
+    var isEmpty = function (str) {
+        if (str == null || str == undefined || str === '') {
+            return '';
+        }
+        return str;
+    };
 
     //画面按钮点击事件
     var but_event = function () {
@@ -646,7 +713,8 @@ define('receiptEdit', function () {
             var record = encodeURIComponent(JSON.stringify(dataForm));
             _common.myConfirm("Are you sure you want to save?",function(result){
                 if(result!=="true"){return false;}
-                var checkFlg = true;
+                // 根据item code限制重复数据
+                /*var checkFlg = true;
                 let articleName = "";let orginValue = "";
                 let orginValue_list = $("#zgGridTtable>.zgGrid-tbody tr td[tag=articleId]");
                 let orginName_list = $("#zgGridTtable>.zgGrid-tbody tr td[tag=articleName]");
@@ -665,7 +733,7 @@ define('receiptEdit', function () {
                 }
                 if(!checkFlg){
                     return false;
-                }
+                }*/
                 $.myAjaxs({
                     url:url_left+"/save",
                     async:true,
@@ -785,7 +853,7 @@ define('receiptEdit', function () {
             for (let i = 0; i < trList.length; i++) {
                 let articleId = $(trList[i]).find('td[tag=articleId]').text().toLowerCase();
                 let articleName = $(trList[i]).find('td[tag=articleName]').text().toLowerCase();
-                if (articleId.indexOf(searchItemCode)==-1&&articleName.indexOf(searchItemCode)==-1) {
+                if (articleId.indexOf(searchItemCode)===-1&&articleName.indexOf(searchItemCode)===-1) {
                     $(trList[i]).hide();
                 }
             }
@@ -934,11 +1002,11 @@ define('receiptEdit', function () {
                         setDisable(true);
                     }
 
-                    // 审核通过只能修改数量
-                    if (m.enterFlag.val()=='update'&&reviewStatus!=null) {
+                    // 审核通过只能修改数量 注释 2021/03/19 by lch
+                    /*if (m.enterFlag.val()=='update'&&reviewStatus!=null) {
                         $('#importResult').attr('disabled', true);
                         $('#deletePlanDetails').attr('disabled', true);
-                    }
+                    }*/
 
                     // 没有导出
                     if (m.enterFlag.val()=='update'&&record.exportFlg.trim()=='0') {
@@ -959,7 +1027,7 @@ define('receiptEdit', function () {
                             $("#secondQty").prop("readonly",true);
                         } else {
                             // 显示复盘量
-                            $("#firstQty").prop("readonly",true);
+                            $("#firstQty").prop("readonly",false);
                             $("#secondQty").prop("readonly",false);
                             $("#remarks").prop("disabled",false);
                         }
@@ -983,14 +1051,14 @@ define('receiptEdit', function () {
                         item.secondQty = item.secondQty != null ? toThousands(item.secondQty) : '';
 
                         var html = '<tr data-index="'+item.rowIndex+'">' +
-                            '<td tag="barcode" width="130" title="'+item.barcode+'" align="center" id="zgGridTtable_'+rowindex+'_tr_barcode" tdindex="zgGridTtable_barcode">'+item.barcode+'</td>' +
-                            '<td tag="articleId" width="130" title="'+item.articleId+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId" tdindex="zgGridTtable_articleId">'+item.articleId+'</td>' +
-                            '<td tag="articleName" width="130" title="'+item.articleName+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleName" tdindex="zgGridTtable_articleName">'+item.articleName+'</td>' +
-                            '<td tag="spec" width="130" title="'+item.spec+'" align="center" id="zgGridTtable_'+rowindex+'_tr_spec" tdindex="zgGridTtable_spec">'+item.spec+'</td>' +
-                            '<td tag="uom" width="130" title="'+item.uom+'" align="center" id="zgGridTtable_'+rowindex+'_tr_uom" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
-                            '<td tag="badQty" width="130" title="'+item.badQty+'" align="center" id="zgGridTtable_'+rowindex+'_tr_badQty" tdindex="zgGridTtable_badQty">'+item.badQty+'</td>' +
-                            '<td tag="firstQty" width="130" title="'+item.firstQty+'" align="center" id="zgGridTtable_'+rowindex+'_tr_firstQty" tdindex="zgGridTtable_firstQty">'+item.firstQty+'</td>' +
-                            '<td tag="secondQty" width="130" title="'+item.secondQty+'" align="center" id="zgGridTtable_'+rowindex+'_tr_secondQty" tdindex="zgGridTtable_secondQty">'+item.secondQty+'</td>' +
+                            '<td tag="barcode" width="130" title="'+isEmpty(item.barcode)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_barcode" tdindex="zgGridTtable_barcode">'+isEmpty(item.barcode)+'</td>' +
+                            '<td tag="articleId" width="130" title="'+isEmpty(item.articleId)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId" tdindex="zgGridTtable_articleId">'+isEmpty(item.articleId)+'</td>' +
+                            '<td tag="articleName" width="130" title="'+isEmpty(item.articleName)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleName" tdindex="zgGridTtable_articleName">'+isEmpty(item.articleName)+'</td>' +
+                            '<td tag="spec" width="130" title="'+isEmpty(item.spec)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_spec" tdindex="zgGridTtable_spec">'+isEmpty(item.spec)+'</td>' +
+                            '<td tag="uom" width="130" title="'+isEmpty(item.uom)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_uom" tdindex="zgGridTtable_uom">'+isEmpty(item.uom)+'</td>' +
+                            '<td tag="badQty" width="130" title="'+toThousands(item.badQty)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_badQty" tdindex="zgGridTtable_badQty">'+toThousands(item.badQty)+'</td>' +
+                            '<td tag="firstQty" width="130" title="'+toThousands(item.firstQty)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_firstQty" tdindex="zgGridTtable_firstQty">'+toThousands(item.firstQty)+'</td>' +
+                            '<td tag="secondQty" hidden width="130" title="'+toThousands(item.secondQty)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_secondQty" tdindex="zgGridTtable_secondQty">'+toThousands(item.secondQty)+'</td>' +
                             '</tr>'
                         htmls += html;
                     });
@@ -1100,14 +1168,17 @@ define('receiptEdit', function () {
             dataType:"json",
             success: fun
         });
-    }
+    };
+
 
     //验证检索项是否合法
     var verifySearch = function () {
         let articleId = $('#itemInput').attr('k');
-        if (!articleId) {
+        let articleName = $('#itemInput').attr('v');
+        if (!articleId || !articleName || articleId===articleName) {
             $('#itemInput').focus();
             $('#itemInput').css("border-color","red");
+            _common.prompt("Exceptional item code,can not modify!",5,"error");
             return false;
         }else {
             $('#itemInput').css("border-color","#CCC");
@@ -1159,7 +1230,7 @@ define('receiptEdit', function () {
                 {name: "uom", type: "text", text: "left", width: "130", ishide: false, getCustomValue: getStringEmpty,},
                 {name: "badQty", type: "text", text: "right", width: "130", ishide: false, getCustomValue: getThousands,},
                 {name: "firstQty", type: "text", text: "right", width: "130", ishide: false, getCustomValue: getThousands,},
-                {name: "secondQty", type: "text", text: "right", width: "130", ishide: false, getCustomValue: getThousands,},
+                {name: "secondQty", type: "text", text: "right", width: "130", ishide: true, getCustomValue: getThousands,},
                 // 隐藏域
                 // {name: "stocktakeTime", type: "text", text: "right", width: "130", ishide: true,},
             ],//列内容
@@ -1192,6 +1263,10 @@ define('receiptEdit', function () {
                 {butType: "upload", butId: "importResult", butText: "Import Stocktake Result", butSize: ""},
                 {butType: "delete", butId: "deletePlanDetails", butText: "Delete", butSize: ""},
                 {butType:"custom",butHtml:"<button id='attachments_view' type='button' class='btn btn-primary btn-sm'><span class='glyphicon glyphicon glyphicon-file'></span> Attachments</button>"},//附件
+                {
+                    butType:"custom",
+                    butHtml:"<button id='exportInfo' type='button' class='btn btn-primary btn-sm'><span class='glyphicon glyphicon-export'></span> Export</button>"
+                },
             ],
         });
     }

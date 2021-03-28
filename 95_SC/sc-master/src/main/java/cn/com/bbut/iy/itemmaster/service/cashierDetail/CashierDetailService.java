@@ -5,6 +5,7 @@ import cn.com.bbut.iy.itemmaster.dto.cashierDetail.*;
 import cn.com.bbut.iy.itemmaster.entity.sa0050.SA0050;
 
 import java.util.List;
+import java.util.Map;
 
 public interface CashierDetailService {
     /**
@@ -41,4 +42,6 @@ public interface CashierDetailService {
      * 根据选中得 店铺和pos id 获得收银员信息
      */
     List<SA0050> getCashier(String storeCd, String posId);
+
+    Map getTotalAmount(CashierDetailParam param);
 }

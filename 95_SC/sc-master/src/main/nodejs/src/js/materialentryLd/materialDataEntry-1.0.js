@@ -42,11 +42,18 @@ define('materialDataEntry', function () {
         search_item_but: null,
         tempTableType: null,
         searchJson: null,
+        searchJson1: null,
         enterFlag: null,
         piCdParam: null,
         searchItemInp: null, // 商品定位输入框
         searchItemBtn: null, // 商品定位按钮
         i_storeCd: null,
+        main_box:null,
+        ParamstoreCd:null,
+        ParamstoreName:null,
+        createBy:null,
+        piDateParam:null,
+        create_By:null,
     }
     // 创建js对象
     var createJqueryObj = function () {
@@ -59,8 +66,8 @@ define('materialDataEntry', function () {
         createJqueryObj();
         url_left = _common.config.surl + "/materialEntry";
         systemPath = _common.config.surl;
-
         but_event();
+
         // 初始化store下拉
         initAutoMatic();
         $("#create_ymd").prop("disabled", true);
@@ -68,20 +75,25 @@ define('materialDataEntry', function () {
         initTable1();
         //表格内按钮事件
         table_event();
-        if (m.enterFlag.val()) {
-            // 获取数据
-            getData(m.piCdParam.val());
-            if (m.enterFlag.val() == 'view') {
-                setDisable(true);
-                // $("#saveBut").prop("disabled", false);
-                // $("#addPlanDetails").prop("disabled", false);
-                // $("#updatePlanDetails").prop("disabled", false);
-                // $("#deletePlanDetails").prop("disabled", false);
-                // $("#remarks").prop("disabled", false);
-            }
-        }
-    }
+        initPage();
 
+    }
+  var  initPage=function () {
+      if (m.enterFlag.val()) {
+          // 获取数据
+
+          getData(m.piCdParam.val());
+          if (m.enterFlag.val() == 'view') {
+              $("#updatePlanDetails").hide();
+              setDisable(true);
+          }
+          if (m.enterFlag.val()=="update"){
+              $("#updatePlanDetails").show();
+          }
+      }else {
+          $("#updatePlanDetails").hide();
+      }
+  }
 
     var table_event = function () {
         // submit 按钮
@@ -264,8 +276,107 @@ define('materialDataEntry', function () {
             }
         });
 
+        // //是否有冻结列的标记
+        //
+        //重写选择背景变色事件
+      if(!m.enterFlag.val()){
+          //是否有冻结列的标记
+          var freeze = tableGrid.getting("freezeIndex");
+          //重写选择背景变色事件
+          tableGrid.find("tbody").unbind('mousedown').on('mousedown','td', function (e) {
+              var thisObj = $(this),
+                  thisParent = $(this).parent();
+              if(3 == e.which){ //鼠标右键
+                  thisParent.addClass("info").siblings().removeClass("info");
+                  var eachTrRightclickFun = $.isFunction(tableGrid.getting("eachTrRightclick")) ? true : false;
+                  if(eachTrRightclickFun){
+                      tableGrid.getting("eachTrRightclick").call(this,thisParent,thisObj);
+                  }
+                  if(freeze>=0){
+                      var freeToTr = thisParent.prop("id");
+                      $("#"+freeToTr+"_free").addClass("info").siblings().removeClass("info");
+                  }
+              }else if(1 == e.which){ //鼠标左键
+                  var cols = tableGrid.getSelectColValue(thisParent,"articleId");
+                  var articleId = $(selectTrTemp).find('td[tag=articleId]').text();
+                  if(cols["articleId"] != articleId && $('#grid_orderQty').length == 1){
+                      var flg = checkOrderQty();
+                      if(flg){
+                          //还原表格中的input框
+                          let qty = toThousands($('#grid_orderQty').val().trim());
+                          $(selectTrTemp).find('td[tag=qty]').text(qty);
+                      }else{
+                          let qty = $('#grid_orderQty').attr("oldValue");
+                          $(selectTrTemp).find('td[tag=qty]').text(qty);
+                          return false;
+                      }
+                  }
+                  //改变背景颜色
+                  thisParent.addClass("info").siblings().removeClass("info");
+                  if(freeze>=0){
+                      var freeToTr = thisParent.prop("id");
+                      $("#"+freeToTr+"_free").addClass("info").siblings().removeClass("info");
+                  }
+                  $(".zgGrid-modal").hide();
+                  var eachTrClickFun = $.isFunction(tableGrid.getting("eachTrClick")) ? true : false;
+                  if(eachTrClickFun){
+                      tableGrid.getting("eachTrClick").call(this,thisParent,thisObj);
+                  }
+              }
+          });
+          // //光标移出
+          m.main_box.on("blur","#grid_orderQty",function(){
+              $("#grid_orderQty").val(this.value);
+              // var flg = checkOrderQty();
+              // if(flg){
+              // 	//还原表格中的input框
+              // 	var orderQty = toThousands($('#grid_orderQty').val().trim());
+              // 	$(selectTrTemp).find('td[tag=orderQty]').text(orderQty);
+              // }else{
+              // 	return false;
+              // }
+          });
+
+          //光标进入，去除金额千分位，并去除小数后面多余的0
+          m.main_box.on("focus","#grid_orderQty",function(){
+              $("#grid_orderQty").val(this.value);
+          })
+
+          //回车保存
+          m.main_box.on("keydown","#grid_orderQty",function(e){
+              if(e.keyCode==13){
+                  var flg = checkOrderQty();
+                  if(flg){
+                      //还原表格中的input框
+                      var qty = toThousands($('#grid_orderQty').val().trim());
+                      $(selectTrTemp).find('td[tag=qty]').text(qty);
+                  }else{
+                      let qty = $('#grid_orderQty').attr("oldValue");
+                      $(selectTrTemp).find('td[tag=qty]').text(qty);
+                      return false;
+                  }
+              }
+          })
+      }
 
     }
+
+    //  3/20开始
+    var checkOrderQty = function () {
+        var qty = reThousands($('#grid_orderQty').val().trim());
+        var reg = /((^[1-9]\d*)|^0)(\.\d+)?$/;
+        if(!reg.test(qty)){
+            _common.prompt("Please enter with correct data type!",3,"info");
+            $('#grid_orderQty').focus();
+            return false;
+        }
+        return true;
+    }
+    var addInputValue=function () {
+        var cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,qty,stockQty");
+        $(selectTrTemp).find('td[tag=qty]').text("").append("<input type='text' class='form-control my-automatic input-sm' id='grid_orderQty' oldValue='"+cols["qty"]+"' value='"+cols["qty"]+"'>");
+    }
+
 
     function uuid() {
         var s = [];
@@ -292,6 +403,11 @@ define('materialDataEntry', function () {
 
     //画面按钮点击事件
     var but_event = function () {
+        if (m.enterFlag.val()=="update"){
+            $("#updatePlanDetails").show();
+        }else {
+            $("#updatePlanDetails").hide();
+        }
         $("#qty").blur(function () {
             $("#qty").val(toThousands(this.value));
         });
@@ -368,19 +484,55 @@ define('materialDataEntry', function () {
             }else {
                 $('#store').css("border-color","#CCC");
             }
-            if (dataForm.length<1) {
-                _common.prompt("Please enter the inventory data!",5,"error");/*请录入费用录入商品数据*/
-                return;
-            }
+            //2021/3/20 开始
+            if (!m.enterFlag.val()){
+                $("#zgGridTtable>.zgGrid-tbody tr").each(function () {
+                        var _articleId = $(this).find('td[tag=articleId]').text();
+                        var barcode = $(this).find('td[tag=barcode]').text();
+                        var articleName = $(this).find('td[tag=articleName]').text();
+                        var uom = $(this).find('td[tag=uom]').text();
+                        var qty = $(this).find('td[tag=qty]').text();
+                        var stockQty = $(this).find('td[tag=stockQty]').text();
+                        var obj = {
+                            'barcode': barcode,
+                            'articleId': _articleId,
+                            'articleName': articleName,
+                            'uom': uom,
+                            'qty': qty,
+                            'stockQty': stockQty,
+                            'rowIndex': uuid(), // 设置一个唯一标识
+                        }
+                        if (obj.qty!=0){
+                            dataForm.push(obj);
+                        }
+
+                });
+                if (dataForm.length<1) {
+                     _common.prompt("Please enter the inventory data!",5,"error");/*请录入费用录入商品数据*/
+                     return;
+                }
+                dataForm.forEach(function (item) {
+                    item.qty=reThousands(item.qty);
+                });
+                 }else {
+                if (dataForm.length<1) {
+                    _common.prompt("Please enter the inventory data!",5,"error");/*请录入费用录入商品数据*/
+                    return;
+                }
+                dataForm.forEach(function (item) {
+                    item.qty=reThousands(item.qty);
+                });
+               }
+
+
+
             // 头档信息
             let data = {
                 'piCd': piCd,
                 'remarks': remarks,
                 'storeCd': storeCd,
             }
-            dataForm.forEach(function (item) {
-                item.qty=reThousands(item.qty);
-            });
+
             var record = encodeURIComponent(JSON.stringify(dataForm));
             data = encodeURIComponent(JSON.stringify(data));
             _common.myConfirm("Are you sure you want to save?",function(result){
@@ -416,6 +568,29 @@ define('materialDataEntry', function () {
 
         // 输入商品id定位功能
         m.searchItemBtn.on('click',function () {
+
+            // if(!m.enterFlag.val()){
+                let storeCd = m.store.attr('k');
+                let articleId=m.searchItemInp.val();
+                if (!storeCd){
+                        _common.prompt("Please enter the Store!",5,"error");/*请录入费用录入商品数据*/
+                        $('#store').focus();
+                        $('#store').css("border-color","red");
+                        return;
+                    }else {
+                        $('#store').css("border-color","#CCC");
+                }
+                var searchJsonStr={
+                    storeCd:$("#store").attr("k"),
+                    articleId:articleId,
+                }
+                m.searchJson1.val(JSON.stringify(searchJsonStr))
+                paramGrid = "searchJson="+ m.searchJson1.val();
+                tableGrid.setting("url",url_left+"/getStoreAllItem");
+                tableGrid.setting("param", paramGrid);
+                tableGrid.setting("page", 1);
+                tableGrid.loadData(null);
+            // }
             searchItem();
         });
         //费用录入创建日期
@@ -528,23 +703,28 @@ define('materialDataEntry', function () {
             clearAll();
             return;
         }
+        m.piCd.val(piCd);
+        $("#create_user").val(m.create_By.val());
+        $("#create_ymd").val(m.piDateParam.val());
+        $.myAutomatic.setValueTemp(a_store,m.ParamstoreCd.val(),m.ParamstoreCd.val()+' '+m.ParamstoreName.val());//赋值
         $.myAjaxs({
             url: url_left + "/getData",
             async: true,
             cache: false,
             type: "get",
-            data: "piCd=" + piCd,
+            data: "piCd=" + piCd+"&storeCd="+$("#store").attr("k")+"&createUser="+$("#create_user").val()+"&createYmd="+$("#create_ymd").val(),
             dataType: "json",
             success: function (result) {
                 if (result.success) {
                     var record = result.o;
                     dataForm = [];
-                    $("#piCd").val(record.piCd);
-                    $("#create_ymd").val(_common.formatCreateDate(record.createYmd));
-                    $("#create_user").val(record.createUserName);
+                    //  2021/3/25
+                    // $("#piCd").val(record.piCd);
+                    // $("#create_ymd").val(_common.formatCreateDate(record.createYmd));
+                    // $("#create_user").val(record.createUserName);
                     $("#remarks").val(record.remarks);
-                    m.i_storeCd.val(record.storeCd);
-                    $.myAutomatic.setValueTemp(a_store, record.storeCd, record.storeName);//赋值
+                    // m.i_storeCd.val(record.storeCd);
+                    // $.myAutomatic.setValueTemp(a_store, record.storeCd, record.storeName);//赋值
                     dataForm=record.itemList;
                     // 封装明细数据
                     var trList = $("#zgGridTtable  tr:not(:first)");
@@ -597,6 +777,7 @@ define('materialDataEntry', function () {
 
     //初始化店铺下拉
     var initAutoMatic = function () {
+
         a_store = $("#store").myAutomatic({
             url: systemPath + "/ma1000/getStoreByPM",
             ePageSize: 10,
@@ -801,29 +982,38 @@ define('materialDataEntry', function () {
                 return resData;
             },
             loadCompleteEvent: function (self) {
+                selectTrTemp = null;//清空选择的行
+                if (!m.enterFlag.val()){
+                    tableGrid.find("tr").on('dblclick', function (e) {
+                        addInputValue();
+                    });
+                    return self;
+                }
+                return self;
             },
             eachTrClick: function (trObj, tdObj) {//正常左侧点击
                 selectTrTemp = trObj;
             },
+            //  2021/3/20
             buttonGroup: [
-                {
-                    butType: "add",
-                    butId: "addPlanDetails",
-                    butText: "Add",
-                    butSize: ""
-                },
+                // {
+                //     butType: "add",
+                //     butId: "addPlanDetails",
+                //     butText: "Add",
+                //     butSize: ""
+                // },
                 {
                     butType: "update",
                     butId: "updatePlanDetails",
                     butText: "Modify",
                     butSize: ""
                 },
-                {
-                    butType: "upload",
-                    butId: "importFiles",
-                    butText: "Import Result",
-                    butSize: ""
-                },
+                // {
+                //     butType: "upload",
+                //     butId: "importFiles",
+                //     butText: "Import Result",
+                //     butSize: ""
+                // },
                 /*{
                     butType: "delete",
                     butId: "deletePlanDetails",

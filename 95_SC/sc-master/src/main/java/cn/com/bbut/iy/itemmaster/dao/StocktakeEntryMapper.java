@@ -1,15 +1,20 @@
 package cn.com.bbut.iy.itemmaster.dao;
 
+import cn.com.bbut.iy.itemmaster.dto.article.ArticleDTO;
+import cn.com.bbut.iy.itemmaster.dto.article.ArticleParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100DTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100ParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO;
+import cn.com.bbut.iy.itemmaster.entity.ma1100.MA1100;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
-@Component
+@Repository
 public interface StocktakeEntryMapper {
 
     StocktakeItemDTO getItemInfo(@Param("itemCode") String itemCode, @Param("piCd") String piCd, @Param("piDate") String piDate);
@@ -21,6 +26,7 @@ public interface StocktakeEntryMapper {
     void save(@Param("list") List<StocktakeItemDTO> stocktakeItemList);
 
     List<StocktakeItemDTO> getPI0120ByPrimary(@Param("piCd") String piCd, @Param("piDate") String piDate);
+    List<StocktakeItemDTO> getPI0120tBy(@Param("piCd") String piCd, @Param("piDate") String piDate);
 
     void updateMainStatus(@Param("piCd") String piCd, @Param("piDate") String piDate, @Param("status")String status);
 
@@ -57,4 +63,30 @@ public interface StocktakeEntryMapper {
     int countOldItem(@Param("articleId")String articleId,@Param("businessDate")String businessDate);
     // 删除临时表
     void deleteTempTable(@Param("tableName")String tempTableName);
+
+    List<MA1100> getItemInformation(@Param("articles")Collection<String> articles,String businessDate);
+
+    void deleteItem();
+    // 保存原材料商品信息到DB
+    int insertNonCountListToDb(@Param("nonCountList")Collection<MA1100> nonCountList);
+
+    List<ArticleDTO> getRawItemList(ArticleParamDTO dto);
+
+    int countRawItemList(ArticleParamDTO dto);
+
+    List<StocktakeItemDTO> getTempExceptionItemList(@Param("tableName")String exceptionTableName,@Param("list")Collection<String> items);
+
+    void tempToExcepition(@Param("list") List<StocktakeItemDTO> exceptionItemList,
+                          @Param("piCd")String piCd,@Param("piDate")String piDate,
+                          @Param("storeCd")String storeCd);
+
+    int getCountTable(@Param("tableName")String exceptionTableName);
+
+    List<String> getArticles(@Param("list")Collection<String> items);
+
+
+    void deleteExByPicd(@Param("piCd") String piCd, @Param("piDate") String piDate);
+    void deleteExMore(@Param("piCd") String piCd, @Param("piDate") String piDate,@Param("list")Collection<String> items);
+
+    PI0100DTO getPi0100Info(String storeCd,String piCd);
 }

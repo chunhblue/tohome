@@ -75,39 +75,68 @@
             <if test="orderEndDate != null and orderEndDate != ''">
                 AND #{orderEndDate,jdbcType=VARCHAR} >= order_date
             </if>
-            <if test="failedReason != null and failedReason != ''">
-                AND order_error_cd = #{failedReason,jdbcType=VARCHAR}
+            <if test="articleId != null and articleId != ''">
+                AND lower(article_id) like lower(CONCAT('%',#{articleId,jdbcType=VARCHAR},'%'))
             </if>
             <if test="barcode != null and barcode != ''">
                 AND lower(barcode) like lower(CONCAT('%',#{barcode,jdbcType=VARCHAR},'%'))
             </if>
+            <if test="vendorId != null and vendorId != ''">
+                AND lower(vendor_id) like lower(CONCAT('%',#{vendorId,jdbcType=VARCHAR},'%'))
+            </if>
+            <choose>
+                <when test="orderDifferentiate == '0'.toString()">
+                    and order_differentiate = '0'
+                </when>
+                <otherwise>
+                    and order_differentiate = '1'
+                </otherwise>
+            </choose>
+            AND store_cd IN
+            <foreach item="store" index="index" collection="stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
         </where>
     </sql>
 
     <select id="selectFailedList" resultMap="FailedGridResultMap" parameterType="cn.com.bbut.iy.itemmaster.dto.orderFailed.OrderFailedParamDTO">
     SELECT
-    T.*,
-    T1.code_name AS method_name,
-    T2.code_name AS order_error_name,
+    T.*,T1.article_name,T2.store_name,
+        <choose>
+            <when test="orderDifferentiate == '0'.toString()">
+                ma2000.vendor_name vendor_name,
+            </when>
+            <otherwise>
+                ma5321.warehouse_name vendor_name,
+            </otherwise>
+        </choose>
     T3.unit_name AS order_uom
     FROM (
-    SELECT * FROM OD8040
+    SELECT * FROM OD0030
     <include refid="selectFailedCondition"></include>
     )T
-    LEFT JOIN (
-    SELECT code_type, code_value, code_name
-    FROM CM9010 WHERE code_type = '00065'
-    ) T1
-    ON T.order_method = T1.code_value
-    LEFT JOIN (
-    SELECT code_type, code_value, code_name
-    FROM CM9010 WHERE code_type = '00075'
-    ) T2
-    ON T.order_error_cd = T2.code_value
+    left join ma1100 T1
+        ON T.article_id = T1.article_id
+        and T.order_date between T1.effective_start_date and T1.effective_end_date
+    left join ma1000 T2
+        ON T.store_cd = T2.store_cd
+        and T.order_date between T2.effective_start_date and T2.effective_end_date
+    <choose>
+        <when test="orderDifferentiate == '0'.toString()">
+            left join ma2000 on T.vendor_id = ma2000.vendor_id
+            and T.order_date between ma2000.effective_start_date and ma2000.effective_end_date
+            and T.order_differentiate = '0'
+        </when>
+        <otherwise>
+            left join ma5321 on T.vendor_id = ma5321.warehouse_no
+            and T.order_differentiate = '1'
+        </otherwise>
+    </choose>
     LEFT JOIN (
     SELECT unit_id, unit_name FROM MA0220
     ) T3
-    ON T.receive_unit_id = T3.unit_id
+    ON T.order_unit = T3.unit_id
     ORDER BY order_date DESC
     <if test="flg">
         LIMIT ${rows} OFFSET ${limitStart}
@@ -115,7 +144,7 @@
 </select>
 
     <select id="selectFailedCount" resultType="INT" parameterType="cn.com.bbut.iy.itemmaster.dto.orderFailed.OrderFailedParamDTO">
-        SELECT COUNT(1) FROM OD8040
+        SELECT count(*) FROM OD0030
         <include refid="selectFailedCondition"></include>
     </select>
 

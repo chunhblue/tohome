@@ -574,7 +574,7 @@
 <!--    8//20测试 添加英文名字-->
     <select id="selectStoreList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" >
     SELECT
-       MA0020.structure_cd k,   CONCAT( MA0020.structure_cd,' ', MA0020.structure_name,' ',MA1000.store_name_en) AS v
+       MA0020.structure_cd k,   CONCAT( MA0020.structure_cd,' ',MA1000.store_name_en) AS v
        FROM
        MA0020,MA1000
        WHERE
@@ -612,7 +612,7 @@
     <select id="getStoreListByLevel" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" >
         SELECT
         MA0020.structure_cd k,
-        CONCAT( MA0020.structure_cd,' ', MA0020.structure_name,' ',MA1000.store_name_en) AS v
+        CONCAT( MA0020.structure_cd,' ',MA1000.store_name_en) AS v
         FROM
         MA0020,MA1000
         WHERE
@@ -806,7 +806,7 @@
 
     <!-- 查询待选 -->
     <select id="selectAllStore" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
-        SELECT ma0020.structure_cd k, CONCAT(ma0020.structure_cd,' ',structure_name,' ',ma1000.store_name_en) AS v
+        SELECT ma0020.structure_cd k, CONCAT(ma0020.structure_cd,' ',ma1000.store_name_en) AS v
         FROM MA0020,ma1000
         WHERE effective_sts = '10'
         AND level = '3'

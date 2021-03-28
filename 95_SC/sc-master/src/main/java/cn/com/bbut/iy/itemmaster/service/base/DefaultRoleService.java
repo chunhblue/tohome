@@ -2,6 +2,7 @@ package cn.com.bbut.iy.itemmaster.service.base;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import cn.com.bbut.iy.itemmaster.dto.AjaxResultDto;
 import cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO;
@@ -95,4 +96,7 @@ public interface DefaultRoleService {
      * @return
      */
     int getMaxPosition(String userId);
+
+    int countFinancePosition(String userId);
+
 }

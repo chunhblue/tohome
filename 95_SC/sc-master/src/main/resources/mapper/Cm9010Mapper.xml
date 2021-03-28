@@ -471,6 +471,22 @@
     order by code_value
   </select>
 
+  <select id="getAllReasonValue" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" parameterType="java.lang.String">
+    select DISTINCT
+    code_value k,CONCAT(code_value,' ',code_name) AS v
+    from CM9010
+    where
+    (code_type='00235' or code_type='00236')
+    AND effective_sts = '10'
+    <if test="v!=null and v!=''">
+      AND (
+      lower(code_value) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+      OR lower(code_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+      )
+    </if>
+    order by code_value
+  </select>
+
   <select id="getWriteOffReasonValue" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO" parameterType="java.lang.String">
     select DISTINCT
     code_value k,CONCAT(code_value,' ',code_name) AS v

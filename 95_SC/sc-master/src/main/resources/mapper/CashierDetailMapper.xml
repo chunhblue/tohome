@@ -50,18 +50,159 @@
         to_char(tran_date,'HH24:MI:SS') AS tran_time,
         case when
         <![CDATA[
-                 sa0010.tran_date >= to_timestamp(sa0010.acc_date||' 06:00:00','yyyyMMdd hh24:mi:ss')
-                 and sa0010.tran_date < to_timestamp(sa0010.acc_date||' 14:00:00','yyyyMMdd hh24:mi:ss') then 'morning shift'
-             when tran_date >= to_timestamp(sa0010.acc_date||' 14:00:00','yyyyMMdd hh24:mi:ss')
-                 and tran_date < to_timestamp(sa0010.acc_date||' 22:00:00','yyyyMMdd hh24:mi:ss') then 'middle shift'
-             when (tran_date < to_timestamp(sa0010.acc_date||' 06:00:00','yyyyMMdd hh24:mi:ss')
-        or tran_date >= to_timestamp(sa0010.acc_date||' 22:00:00','yyyyMMdd hh24:mi:ss')) then 'night shift' end
+                 sa0010.tran_date >= to_timestamp(to_char(sa0010.tran_date, 'YYYYMMDD')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                 and sa0010.tran_date < to_timestamp(to_char(sa0010.tran_date, 'YYYYMMDD')||' 14:00:00','yyyyMMdd hh24:mi:ss') then 'shift1'
+             when tran_date >= to_timestamp(to_char(sa0010.tran_date, 'YYYYMMDD')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                 and tran_date < to_timestamp(to_char(sa0010.tran_date, 'YYYYMMDD')||' 22:00:00','yyyyMMdd hh24:mi:ss') then 'Shift2'
+             when (tran_date < to_timestamp(to_char(sa0010.tran_date, 'YYYYMMDD')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+        or tran_date >= to_timestamp(to_char(sa0010.tran_date, 'YYYYMMDD')||' 22:00:00','yyyyMMdd hh24:mi:ss')) then 'Shift3' end
         ]]> As shift,
         sa0010.sale_serial_no,
         sa0010.cashier_id,
         sa0010.member_id,
-        sa0010.sale_amount,
-        sa0010.over_amount,
+        coalesce(sa0010.sale_amount,0) sale_amount,
+        coalesce(sa0010.over_amount,0) over_amount,
+        sa0010.pay_cd1,
+        sa0010.pay_cd2,
+        sa0010.pay_cd3,
+        sa0010.pay_cd4,
+        sa0010.pay_amount1,
+        sa0010.pay_amount2,
+        sa0010.pay_amount3,
+        sa0010.pay_amount4,
+        (coalesce(sa0010.sale_amount,0)-coalesce(sa0010.over_amount,0)) AS pay_amount
+        FROM
+        <choose>
+            <when test="barcode != null and barcode != ''" >
+                sa0010,sa0020
+                where 1=1
+                and sa0010.acc_date = sa0020.acc_date
+                and sa0010.store_cd = sa0020.store_cd
+                and sa0010.pos_id = sa0020.pos_id
+                and sa0010.tran_serial_no = sa0020.tran_serial_no
+                and (
+                lower(sa0020.article_id) like lower(CONCAT('%',#{barcode,jdbcType=VARCHAR},'%'))
+                or lower(sa0020.barcode) like lower(CONCAT('%',#{barcode,jdbcType=VARCHAR},'%'))
+                )
+            </when>
+            <when test="articleShortName != null and articleShortName != ''" >
+                sa0010,sa0020,ma1100
+                where 1=1
+                and sa0020.article_id = ma1100.article_id
+                <![CDATA[
+                AND ma1100.effective_start_date <= sa0010.acc_date
+                AND ma1100.effective_end_date >= sa0010.acc_date
+                ]]>
+                and sa0010.acc_date = sa0020.acc_date
+                and sa0010.store_cd = sa0020.store_cd
+                and sa0010.pos_id = sa0020.pos_id
+                and sa0010.tran_serial_no = sa0020.tran_serial_no
+                and(
+                 lower(ma1100.article_short_name) like lower(CONCAT('%',#{articleShortName,jdbcType=VARCHAR},'%'))
+                )
+            </when>
+            <otherwise>
+                sa0010
+                where 1=1
+            </otherwise>
+        </choose>
+        and sa0010.store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="startDate!=null and startDate!=''">
+            <![CDATA[
+                and sa0010.tran_date >= TO_TIMESTAMP(#{startDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+        </if>
+        <if test="endDate!=null and endDate!=''">
+            <![CDATA[
+                and (sa0010.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{endDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+        </if>
+        <if test="cashierId!=null and cashierId!=''">
+            and sa0010.cashier_id = #{cashierId,jdbcType=VARCHAR}
+        </if>
+        <if test="memberId!=null and memberId!=''">
+            and sa0010.member_id = #{memberId,jdbcType=VARCHAR}
+        </if>
+        <if test="saleSerialNo!=null and saleSerialNo!=''">
+            and cast(sa0010.sale_serial_no as VARCHAR) like concat('%',#{saleSerialNo,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="posId!=null and posId!=''">
+            and sa0010.pos_id = #{posId,jdbcType=VARCHAR}
+        </if>
+        <if test="payType!=null and payType!=''">
+            <if test="payType=='99'">
+                <![CDATA[
+                and sa0010.sale_amount ${calType} #{payAmt,jdbcType=NUMERIC}
+                ]]>
+            </if>
+            <if test="payType!='99'">
+                <if test="payAmt > 0">
+                    <![CDATA[
+                    and ( (sa0010.pay_cd1 = #{payType,jdbcType=VARCHAR} and sa0010.pay_amount1 ${calType} #{payAmt,jdbcType=NUMERIC})
+                    or (sa0010.pay_cd2 = #{payType,jdbcType=VARCHAR} and sa0010.pay_amount2 ${calType} #{payAmt,jdbcType=NUMERIC})
+                    or (sa0010.pay_cd3 = #{payType,jdbcType=VARCHAR} and sa0010.pay_amount3 ${calType} #{payAmt,jdbcType=NUMERIC})
+                    or (sa0010.pay_cd4 = #{payType,jdbcType=VARCHAR} and sa0010.pay_amount4 ${calType} #{payAmt,jdbcType=NUMERIC}))
+                    ]]>
+                </if>
+            </if>
+        </if>
+        <if test="payAmt!=null and payAmt!='' and (payType==null or payType=='')">
+            <![CDATA[
+            and (sa0010.sale_amount - sa0010.over_amount) ${calType} #{payAmt,jdbcType=NUMERIC}
+            ]]>
+        </if>
+
+        <if test="shift!=null and shift=='00'">
+            <![CDATA[
+            and tran_date >= to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+            and tran_date < to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+            ]]>
+        </if>
+        <if test="shift!=null and shift=='01'">
+            <![CDATA[
+            and tran_date >= to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+            and tran_date < to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss')
+            ]]>
+        </if>
+        <if test="shift!=null and shift=='02'">
+            <![CDATA[
+            and (tran_date < to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+            or tran_date >= to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss'))
+            ]]>
+        </if>
+
+        and sa0010.tran_type = 'sale'
+        
+        order by sa0010.acc_date,sa0010.pos_id,sa0010.tran_serial_no ASC
+        <if test="flg and limitStart >= 0">
+            limit ${limitEnd} offset ${limitStart}
+        </if>
+    </select>
+    <select id="getSaleHeadAmount" parameterType="cn.com.bbut.iy.itemmaster.dto.cashierDetail.CashierDetailParam" resultType="BigDecimal">
+      select SUM(sale_amount-over_amount) from  (SELECT sa0010.acc_date,
+        sa0010.store_cd,
+        sa0010.pos_id,
+        sa0010.tran_serial_no,
+        to_char(sa0010.tran_date,'YYYYMMDD') AS tran_date,
+        to_char(tran_date,'HH24:MI:SS') AS tran_time,
+        case when
+        <![CDATA[
+                 sa0010.tran_date >= to_timestamp(sa0010.acc_date||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                 and sa0010.tran_date < to_timestamp(sa0010.acc_date||' 14:00:00','yyyyMMdd hh24:mi:ss') then 'shift1'
+             when tran_date >= to_timestamp(sa0010.acc_date||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                 and tran_date < to_timestamp(sa0010.acc_date||' 22:00:00','yyyyMMdd hh24:mi:ss') then 'Shift2'
+             when (tran_date < to_timestamp(sa0010.acc_date||' 06:00:00','yyyyMMdd hh24:mi:ss')
+        or tran_date >= to_timestamp(sa0010.acc_date||' 22:00:00','yyyyMMdd hh24:mi:ss')) then 'Shift3' end
+        ]]> As shift,
+        sa0010.sale_serial_no,
+        sa0010.cashier_id,
+        sa0010.member_id,
+        coalesce(sa0010.sale_amount,0) sale_amount,
+        coalesce(sa0010.over_amount,0) over_amount,
         sa0010.pay_cd1,
         sa0010.pay_cd2,
         sa0010.pay_cd3,
@@ -113,16 +254,19 @@
         </foreach>
         <if test="startDate!=null and startDate!=''">
             <![CDATA[
-                and to_char(sa0010.tran_date,'YYYYMMDD') >= #{startDate,jdbcType=VARCHAR}
+                and sa0010.tran_date >= TO_TIMESTAMP(#{startDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
                 ]]>
         </if>
         <if test="endDate!=null and endDate!=''">
             <![CDATA[
-                and to_char(sa0010.tran_date,'YYYYMMDD') <= #{endDate,jdbcType=VARCHAR}
+                and (sa0010.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{endDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
                 ]]>
         </if>
         <if test="cashierId!=null and cashierId!=''">
             and sa0010.cashier_id = #{cashierId,jdbcType=VARCHAR}
+        </if>
+        <if test="saleSerialNo!=null and saleSerialNo!=''">
+            and cast(sa0010.sale_serial_no as VARCHAR) like concat('%',#{saleSerialNo,jdbcType=VARCHAR},'%')
         </if>
         <if test="memberId!=null and memberId!=''">
             and sa0010.member_id = #{memberId,jdbcType=VARCHAR}
@@ -153,36 +297,34 @@
             ]]>
         </if>
 
-        /*--早班*/
+
         <if test="shift!=null and shift=='00'">
             <![CDATA[
-            and tran_date >= to_timestamp(sa0010.acc_date||' 06:00:00','yyyyMMdd hh24:mi:ss')
-            and tran_date < to_timestamp(sa0010.acc_date||' 14:00:00','yyyyMMdd hh24:mi:ss')
+            and tran_date >= to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+            and tran_date < to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
             ]]>
         </if>
-        /*--中班*/
+
         <if test="shift!=null and shift=='01'">
             <![CDATA[
-            and tran_date >= to_timestamp(sa0010.acc_date||' 14:00:00','yyyyMMdd hh24:mi:ss')
-            and tran_date < to_timestamp(sa0010.acc_date||' 22:00:00','yyyyMMdd hh24:mi:ss')
+            and tran_date >= to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+            and tran_date < to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss')
             ]]>
         </if>
-        /*--晚班*/
+
         <if test="shift!=null and shift=='02'">
             <![CDATA[
-            and (tran_date < to_timestamp(sa0010.acc_date||' 06:00:00','yyyyMMdd hh24:mi:ss')
-            or tran_date >= to_timestamp(sa0010.acc_date||' 22:00:00','yyyyMMdd hh24:mi:ss'))
+            and (tran_date < to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+            or tran_date >= to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss'))
             ]]>
         </if>
 
         and sa0010.tran_type = 'sale'
-        and sa0010.sale_type = '0'
-        order by sa0010.acc_date,sa0010.pos_id,sa0010.tran_serial_no ASC
-        <if test="flg and limitStart >= 0">
-            limit ${limitEnd} offset ${limitStart}
-        </if>
+        
+        order by sa0010.acc_date,sa0010.pos_id,sa0010.tran_serial_no ASC)AS A
+
     </select>
-    <select id="getSaleHeadCount" parameterType="cn.com.bbut.iy.itemmaster.dto.cashierDetail.CashierDetailParam" resultType="java.lang.Long">
+    <select id="getSaleHeadCount1" parameterType="cn.com.bbut.iy.itemmaster.dto.cashierDetail.CashierDetailParam" resultType="java.lang.Long">
         SELECT DISTINCT COUNT(*)
         FROM
         <choose>
@@ -268,32 +410,173 @@
         /*--早班*/
         <if test="shift!=null and shift=='00'">
             <![CDATA[
-            and tran_date >= to_timestamp(sa0010.acc_date||' 06:00:00','yyyyMMdd hh24:mi:ss')
-            and tran_date < to_timestamp(sa0010.acc_date||' 14:00:00','yyyyMMdd hh24:mi:ss')
+            and tran_date >= to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+            and tran_date < to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
             ]]>
         </if>
         /*--中班*/
         <if test="shift!=null and shift=='01'">
             <![CDATA[
-            and tran_date >= to_timestamp(sa0010.acc_date||' 14:00:00','yyyyMMdd hh24:mi:ss')
-            and tran_date < to_timestamp(sa0010.acc_date||' 22:00:00','yyyyMMdd hh24:mi:ss')
+            and tran_date >= to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+            and tran_date < to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss')
             ]]>
         </if>
         /*--晚班*/
         <if test="shift!=null and shift=='02'">
             <![CDATA[
-            and (tran_date < to_timestamp(sa0010.acc_date||' 06:00:00','yyyyMMdd hh24:mi:ss')
-            or tran_date >= to_timestamp(sa0010.acc_date||' 22:00:00','yyyyMMdd hh24:mi:ss'))
+            and (tran_date < to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+            or tran_date >= to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss'))
             ]]>
         </if>
         and sa0010.tran_type = 'sale'
-        and sa0010.sale_type = '0'
+        
+    </select>
+    <select id="getSaleHeadCount" parameterType="cn.com.bbut.iy.itemmaster.dto.cashierDetail.CashierDetailParam" resultType="java.lang.Long">
+    select count(1) from (SELECT DISTINCT sa0010.acc_date,
+    sa0010.store_cd,
+    sa0010.pos_id,
+    sa0010.tran_serial_no,
+    to_char(sa0010.tran_date,'YYYYMMDD') AS tran_date,
+    to_char(tran_date,'HH24:MI:SS') AS tran_time,
+    case when
+    <![CDATA[
+                 sa0010.tran_date >= to_timestamp(sa0010.acc_date||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                 and sa0010.tran_date < to_timestamp(sa0010.acc_date||' 14:00:00','yyyyMMdd hh24:mi:ss') then 'shift1'
+             when tran_date >= to_timestamp(sa0010.acc_date||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                 and tran_date < to_timestamp(sa0010.acc_date||' 22:00:00','yyyyMMdd hh24:mi:ss') then 'Shift2'
+             when (tran_date < to_timestamp(sa0010.acc_date||' 06:00:00','yyyyMMdd hh24:mi:ss')
+        or tran_date >= to_timestamp(sa0010.acc_date||' 22:00:00','yyyyMMdd hh24:mi:ss')) then 'Shift3' end
+        ]]> As shift,
+    sa0010.sale_serial_no,
+    sa0010.cashier_id,
+    sa0010.member_id,
+    sa0010.sale_amount,
+    sa0010.over_amount,
+    sa0010.pay_cd1,
+    sa0010.pay_cd2,
+    sa0010.pay_cd3,
+    sa0010.pay_cd4,
+    sa0010.pay_amount1,
+    sa0010.pay_amount2,
+    sa0010.pay_amount3,
+    sa0010.pay_amount4,
+    (coalesce(sa0010.sale_amount,0) - coalesce(sa0010.over_amount,0)) AS pay_amount
+    FROM
+    <choose>
+        <when test="barcode != null and barcode != ''" >
+            sa0010,sa0020
+            where 1=1
+            and sa0010.acc_date = sa0020.acc_date
+            and sa0010.store_cd = sa0020.store_cd
+            and sa0010.pos_id = sa0020.pos_id
+            and sa0010.tran_serial_no = sa0020.tran_serial_no
+            and (
+            lower(sa0020.article_id) like lower(CONCAT('%',#{barcode,jdbcType=VARCHAR},'%'))
+            or lower(sa0020.barcode) like lower(CONCAT('%',#{barcode,jdbcType=VARCHAR},'%'))
+            )
+        </when>
+        <when test="articleShortName != null and articleShortName != ''" >
+            sa0010,sa0020,ma1100
+            where 1=1
+            and sa0020.article_id = ma1100.article_id
+            <![CDATA[
+                AND ma1100.effective_start_date <= sa0010.acc_date
+                AND ma1100.effective_end_date >= sa0010.acc_date
+                ]]>
+            and sa0010.acc_date = sa0020.acc_date
+            and sa0010.store_cd = sa0020.store_cd
+            and sa0010.pos_id = sa0020.pos_id
+            and sa0010.tran_serial_no = sa0020.tran_serial_no
+            and(
+            lower(ma1100.article_short_name) like lower(CONCAT('%',#{articleShortName,jdbcType=VARCHAR},'%'))
+            )
+        </when>
+        <otherwise>
+            sa0010
+            where 1=1
+        </otherwise>
+    </choose>
+    and sa0010.store_cd IN
+    <foreach item="store" index="index" collection="stores"
+             open="(" separator="," close=")">
+        #{store,jdbcType=VARCHAR}
+    </foreach>
+        <if test="startDate!=null and startDate!=''">
+            <![CDATA[
+                and sa0010.tran_date >= TO_TIMESTAMP(#{startDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+        </if>
+        <if test="endDate!=null and endDate!=''">
+            <![CDATA[
+                and (sa0010.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{endDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
+        </if>
+    <if test="cashierId!=null and cashierId!=''">
+        and sa0010.cashier_id = #{cashierId,jdbcType=VARCHAR}
+    </if>
+    <if test="memberId!=null and memberId!=''">
+        and sa0010.member_id = #{memberId,jdbcType=VARCHAR}
+    </if>
+    <if test="saleSerialNo!=null and saleSerialNo!=''">
+        and cast(sa0010.sale_serial_no as VARCHAR) like concat('%',#{saleSerialNo,jdbcType=VARCHAR},'%')
+    </if>
+    <if test="posId!=null and posId!=''">
+        and sa0010.pos_id = #{posId,jdbcType=VARCHAR}
+    </if>
+    <if test="payType!=null and payType!=''">
+        <if test="payType=='99'">
+            <![CDATA[
+                and sa0010.sale_amount ${calType} #{payAmt,jdbcType=NUMERIC}
+                ]]>
+        </if>
+        <if test="payType!='99'">
+            <if test="payAmt > 0">
+                <![CDATA[
+                    and ( (sa0010.pay_cd1 = #{payType,jdbcType=VARCHAR} and sa0010.pay_amount1 ${calType} #{payAmt,jdbcType=NUMERIC})
+                    or (sa0010.pay_cd2 = #{payType,jdbcType=VARCHAR} and sa0010.pay_amount2 ${calType} #{payAmt,jdbcType=NUMERIC})
+                    or (sa0010.pay_cd3 = #{payType,jdbcType=VARCHAR} and sa0010.pay_amount3 ${calType} #{payAmt,jdbcType=NUMERIC})
+                    or (sa0010.pay_cd4 = #{payType,jdbcType=VARCHAR} and sa0010.pay_amount4 ${calType} #{payAmt,jdbcType=NUMERIC}))
+                    ]]>
+            </if>
+        </if>
+    </if>
+    <if test="payAmt!=null and payAmt!='' and (payType==null or payType=='')">
+        <![CDATA[
+            and (sa0010.sale_amount - sa0010.over_amount) ${calType} #{payAmt,jdbcType=NUMERIC}
+            ]]>
+    </if>
+
+    /*--早班*/
+    <if test="shift!=null and shift=='00'">
+        <![CDATA[
+            and tran_date >= to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+            and tran_date < to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+            ]]>
+    </if>
+    /*--中班*/
+    <if test="shift!=null and shift=='01'">
+        <![CDATA[
+            and tran_date >= to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+            and tran_date < to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss')
+            ]]>
+    </if>
+    /*--晚班*/
+    <if test="shift!=null and shift=='02'">
+        <![CDATA[
+            and (tran_date < to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+            or tran_date >= to_timestamp(to_char(sa0010.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss'))
+            ]]>
+    </if>
+
+    and sa0010.tran_type = 'sale'
+    
+    order by sa0010.acc_date,sa0010.pos_id,sa0010.tran_serial_no ASC) as A
     </select>
 
     <select id="getPayDetail" resultType="cn.com.bbut.iy.itemmaster.dto.cashierDetail.PayMethod" parameterType="cn.com.bbut.iy.itemmaster.dto.cashierDetail.SaleHeadParam">
         SELECT sa0000.pay_cd,
                 sa0000.pay_name_print,
-                (case when sa0000.pay_cd = sa0010.pay_cd1 then sa0010.pay_amount1
+                (case when sa0000.pay_cd = sa0010.pay_cd1 then sa0010.pay_amount1-sa0010.change_amount
                 when sa0000.pay_cd = sa0010.pay_cd2 then sa0010.pay_amount2
                 when sa0000.pay_cd = sa0010.pay_cd3 then sa0010.pay_amount3
                 when sa0000.pay_cd = sa0010.pay_cd4 then sa0010.pay_amount4
@@ -321,20 +604,23 @@
         sa0020.sale_qty saleQty,
         sa0020.sale_amount saleAmount,
         sa0020.discount_amount discountAmount
-         FROM sa0020,ma1100,ma0220
-         WHERE sa0020.article_id = ma1100.article_id
-         AND ma1100.sales_unit_id = ma0220.unit_id
+         FROM sa0020
+         left join
+         ma1100
+         on sa0020.article_id = ma1100.article_id
         <![CDATA[
          AND ma1100.effective_start_date <= #{accDate,jdbcType=VARCHAR}
          AND ma1100.effective_end_date >= #{accDate,jdbcType=VARCHAR}
          ]]>
-         AND sa0020.acc_date = #{accDate,jdbcType=VARCHAR}
+         left join ma0220
+         on ma1100.sales_unit_id = ma0220.unit_id AND ma0220.effective_sts = '10'
+         WHERE
+         sa0020.acc_date = #{accDate,jdbcType=VARCHAR}
          AND sa0020.store_cd = #{storeCd,jdbcType=VARCHAR}
          AND sa0020.pos_id = #{posId,jdbcType=VARCHAR}
          AND sa0020.tran_serial_no = #{tranSerialNo,jdbcType=INTEGER}
-         /*除了免费商品 fg */
-         AND sa0020.detail_type in ('s','m','r','ms','ra','mbn','mbs')
-         AND ma0220.effective_sts = '10'
+         /*AND sa0020.detail_type = 's' 除了免费商品 */
+         AND sa0020.detail_type in ('s','m','r','ms','ra','fg','mbn','mbs')
          ORDER BY sale_seq_no ASC
     </select>
 
@@ -353,20 +639,24 @@
         sa0020.sale_qty saleQty,
         sa0020.sale_amount saleAmount,
         sa0020.discount_amount discountAmount
-         FROM sa0020,ma1100,ma0220
-         WHERE sa0020.article_id = ma1100.article_id
-         AND ma1100.sales_unit_id = ma0220.unit_id
+         FROM sa0020
+         left join
+         ma1100
+         on sa0020.article_id = ma1100.article_id
         <![CDATA[
          AND ma1100.effective_start_date <= #{accDate,jdbcType=VARCHAR}
          AND ma1100.effective_end_date >= #{accDate,jdbcType=VARCHAR}
          ]]>
-         AND sa0020.acc_date = #{accDate,jdbcType=VARCHAR}
+         left join ma0220
+         on ma1100.sales_unit_id = ma0220.unit_id AND ma0220.effective_sts = '10'
+         WHERE
+         sa0020.acc_date = #{accDate,jdbcType=VARCHAR}
          AND sa0020.store_cd = #{storeCd,jdbcType=VARCHAR}
          AND sa0020.pos_id = #{posId,jdbcType=VARCHAR}
          AND sa0020.tran_serial_no = #{tranSerialNo,jdbcType=INTEGER}
          /*AND sa0020.detail_type = 's'*/
          AND sa0020.detail_type in ('s','m','r','ms','ra','fg','mbn','mbs')
-         AND ma0220.effective_sts = '10'
+
          ORDER BY sale_seq_no ASC
          <if test="flg">
          LIMIT ${rows} OFFSET ${limitStart};

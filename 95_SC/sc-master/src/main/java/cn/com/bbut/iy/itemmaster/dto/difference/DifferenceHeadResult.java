@@ -20,6 +20,10 @@ public class DifferenceHeadResult {
     private String totalAmt;//总调整金额
     private String orderRemark;//订单备注
 
+    private String totaldeliveryQty; // 总发货数量
     private String totalVarianceQty; // 总差异数量
     private String totalVarianceAmt; // 总差异金额
+
+    private String deliveryOrderId; // 发货单编号
+    private String deliveryDate;//发货日期
 }

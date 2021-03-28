@@ -57,4 +57,9 @@ public class Sk0020ParamDTO extends GridParamDTO {
 
     // 店间调拨数量不同原因
     private String differenceReason;
+
+    /**
+      * cm9010 reason的key值
+      */
+    private String codeType;
 }

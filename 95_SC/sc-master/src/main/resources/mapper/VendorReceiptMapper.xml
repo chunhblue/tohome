@@ -71,6 +71,8 @@
         <result column="order_tax" property="orderTax" jdbcType="DECIMAL"/>
         <result column="receive_price" property="receivePrice" jdbcType="DECIMAL"/>
         <result column="receive_qty" property="receiveQty" jdbcType="DECIMAL"/>
+        <result column="hht_receive_qty" property="hhtReceiveQty" jdbcType="DECIMAL"/>
+        <result column="var_qty" property="varQty" jdbcType="DECIMAL"/>
         <result column="receive_nocharge_qty" property="receiveNoChargeQty" jdbcType="DECIMAL"/>
         <result column="receive_total_qty" property="receiveTotalQty" jdbcType="DECIMAL"/>
         <result column="receive_total_amt" property="receiveTotalAmt" jdbcType="DECIMAL"/>
@@ -348,50 +350,57 @@
     <!-- 查询明细详情 -->
     <sql id="selectDetailsCondition">
         <where>
-            store_cd = #{storeCd,jdbcType=VARCHAR}
-            AND order_id = #{orderId,jdbcType=VARCHAR}
+            a.store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND a.order_id = #{orderId,jdbcType=VARCHAR}
         </where>
     </sql>
 
     <select id="selectDetailCount" resultType="INT"
             parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.vendor.VendorDetailsParamDTO">
-        SELECT COUNT(1) FROM OD0010
+        SELECT COUNT(1) FROM OD0010 a
         <include refid="selectDetailsCondition"></include>
     </select>
 
     <select id="selectDetail" resultMap="ReDetailsDTOMap"
             parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.vendor.VendorDetailsParamDTO">
         SELECT
-        T.*, T1.article_name,concat(T2.code_value,' ',T2.code_name) as differ_reasons
+        T.*, T1.article_name,concat(T2.code_value,' ',T2.code_name) as differ_reasons,
+        COALESCE(T.receive_qty,0)-COALESCE(T.hht_receive_qty,0) var_qty
         FROM (
-        SELECT
-        store_cd, order_id, serial_no, article_id, barcode, vendor_id, promotion_id,
-        order_unit, COALESCE(order_qty,0) order_qty, COALESCE(order_nocharge_qty,0) order_nocharge_qty,
-        COALESCE(order_price,0) order_price, COALESCE(order_amt,0) order_amt,
-        COALESCE(order_amt_notax,0) order_amt_notax, COALESCE(order_tax,0) order_tax, receive_price,
-        receive_total_amt_notax,
-        receive_tax, reason_id, adjust_amt, adjust_qty,tax_rate,
-        COALESCE(order_qty,0) + COALESCE(order_nocharge_qty,0) AS order_total_qty,different_reasons,
-        <!--                <choose>-->
-        <!--                    <when test="pageSts != null and pageSts == '1'.toString()">-->
-        <!--                        COALESCE(order_qty,0) + COALESCE(order_nocharge_qty,0) AS receive_total_qty,-->
-        <!--                        order_qty AS receive_qty,-->
-        <!--                        order_nocharge_qty AS receive_nocharge_qty,-->
-        <!--                        order_amt AS receive_total_amt-->
-        <!--                    </when>-->
-        <!--                    <otherwise>-->
-        receive_qty, receive_nocharge_qty, receive_total_amt, receive_total_qty,is_free_item,is_free_item as is_free_item_t
-        <!--                    </otherwise>-->
-        <!--                </choose>-->
-        FROM
-        OD0010
-        <include refid="selectDetailsCondition"></include>
+            SELECT
+                a.store_cd, a.order_id,a.order_date, a.serial_no, a.article_id, a.barcode, a.vendor_id, a.promotion_id,
+                a.order_unit, COALESCE(a.order_qty,0) order_qty, COALESCE(a.order_nocharge_qty,0) order_nocharge_qty,
+                COALESCE(a.order_price,0) order_price, COALESCE(a.order_amt,0) order_amt,
+                COALESCE(a.order_amt_notax,0) order_amt_notax, COALESCE(a.order_tax,0) order_tax, a.receive_price,
+                a.receive_total_amt_notax,
+                a.receive_tax, a.reason_id, a.adjust_amt, a.adjust_qty,a.tax_rate,
+                COALESCE(a.order_qty,0) + COALESCE(a.order_nocharge_qty,0) AS order_total_qty,a.different_reasons,
+                <!--                <choose>-->
+                <!--                    <when test="pageSts != null and pageSts == '1'.toString()">-->
+                <!--                        COALESCE(order_qty,0) + COALESCE(order_nocharge_qty,0) AS receive_total_qty,-->
+                <!--                        order_qty AS receive_qty,-->
+                <!--                        order_nocharge_qty AS receive_nocharge_qty,-->
+                <!--                        order_amt AS receive_total_amt-->
+                <!--                    </when>-->
+                <!--                    <otherwise>-->
+                b.hht_receive_qty,COALESCE(b.hht_receive_qty,a.receive_qty) as receive_qty, a.receive_nocharge_qty,
+                a.receive_total_amt,a.receive_total_qty,a.is_free_item,a.is_free_item as is_free_item_t
+                <!--                    </otherwise>-->
+                <!--                </choose>-->
+            FROM
+                OD0010 a
+                LEFT JOIN OD0020 b
+                ON b.store_cd = a.store_cd
+                AND b.order_id = a.order_id
+                AND b.order_date = a.order_date
+                AND b.article_id = a.article_id
+                <include refid="selectDetailsCondition"></include>
         ) T
         LEFT JOIN (
-        SELECT article_id, article_name FROM MA1100
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
-        ) T1
-        ON T.article_id = T1.article_id
+            SELECT article_id, article_name FROM MA1100
+            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            ) T1
+            ON T.article_id = T1.article_id
         LEFT JOIN (
         select code_value,code_name from cm9010 where code_type = '00560'
         ) T2 on T2.code_value = T.different_reasons

@@ -14,13 +14,12 @@ import cn.com.bbut.iy.itemmaster.dto.inventory.*;
 import cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam;
 import cn.com.bbut.iy.itemmaster.dto.ma8350.MA8350dto;
 import cn.com.bbut.iy.itemmaster.dto.rtInventory.RTInventoryQueryDTO;
-import cn.com.bbut.iy.itemmaster.dto.rtInventory.RtInvContent;
 import cn.com.bbut.iy.itemmaster.entity.SK0010;
 import cn.com.bbut.iy.itemmaster.entity.SK0010Key;
 import cn.com.bbut.iy.itemmaster.entity.User;
-import cn.com.bbut.iy.itemmaster.entity.sa0160.SA0160;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.*;
+import cn.com.bbut.iy.itemmaster.service.base.DefaultRoleService;
 import cn.com.bbut.iy.itemmaster.service.inventory.InventoryVouchersService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
 import cn.shiy.common.baseutil.Container;
@@ -68,6 +67,8 @@ public class InventoryVouchersController extends BaseAction {
     private RealTimeInventoryQueryService rtInventoryService;
     @Value("${esUrl.inventoryUrl}")
     private String inventoryUrl;
+    @Autowired
+    private DefaultRoleService defaultRoleService;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_Inventory_Voucher";
     private final String EXCEL_EXPORT_NAME = "Inventory Voucher Query.xlsx";
@@ -215,6 +216,36 @@ public class InventoryVouchersController extends BaseAction {
         }
         return _return;
     }
+
+//    @ResponseBody
+//    @RequestMapping(value = "/inventoryItemList")
+//    public ReturnDTO inventoryItemList(HttpServletRequest request, HttpSession session,
+//                                       String storeCd, String itemCode) {
+//        ReturnDTO _return = new ReturnDTO();
+//        if(StringUtils.isBlank(itemCode) || StringUtils.isBlank(storeCd)){
+//            _return.setMsg("Parameter cannot be empty!");
+//            return _return;
+//        }
+//        List<AutoCompleteDTO> _dto = service.getInventoryItemByCode(storeCd, itemCode);
+//        if(_dto == null){
+//            _return.setMsg("No data found!");
+//        }else{
+//            _return.setSuccess(true);
+//            _return.setO(_dto);
+//        }
+//        return _return;
+//    }
+    @ResponseBody
+    @RequestMapping(value = "/inventoryItemList")
+    public List<AutoCompleteDTO> inventoryItemList(HttpServletRequest request, HttpSession session,
+                                             String storeCd, String v) {
+        if(StringUtils.isBlank(storeCd)){
+            return null;
+        }
+        List<AutoCompleteDTO> _list = service.getInventoryItemList(storeCd, v);
+        return _list;
+    }
+
 
     /**
      * 查询店铺信息
@@ -489,18 +520,18 @@ public class InventoryVouchersController extends BaseAction {
             return _return;
         }
         // 判断母货号是否允许操作
-        String _val = cm9060Service.getValByKey("0634");
-        boolean parentFlg = "0".equals(_val) ? true : false;
+//        String _val = cm9060Service.getValByKey("0634");
+//        boolean parentFlg = "0".equals(_val) ? true : false;
         List<String> parentList = new ArrayList<>();
         // 店间调拨和报废需要判断数量是否超出库存数量
-        boolean isCheck = "9".equals(pageType) ? true : false;
+        boolean isCheck = "9".equals(pageType);
         boolean checkFlg = false;
         for(Sk0020DTO bean : sk0020List){
             bean.setCommonDTO(dto);
-            if(!parentFlg){
+//            if(!parentFlg){
                 // 后续判断是否为母货号
                 parentList.add(bean.getArticleId());
-            }
+//            }
             if(isCheck){
                 // 调整单不执行后面判断
                 continue;
@@ -520,18 +551,19 @@ public class InventoryVouchersController extends BaseAction {
             }
             BigDecimal temp = new BigDecimal(stock);
             BigDecimal qty = bean.getQty1();
-            if(qty.compareTo(temp) == 1){
+            if(qty.compareTo(temp) > 0){
                 checkFlg = true;
                 break;
             }
         }
-        if(checkFlg){
-            _return.setMsg("Transfer Quantity cannot be more than actual stock quantity, please check the data!");
-            return _return;
-        }
+         // 注释于 2021/03/27
+//        if(checkFlg && !sk0010.getVoucherType().equals("604") && !sk0010.getVoucherType().equals("501")){
+//            _return.setMsg("Transfer Quantity cannot be more than actual stock quantity, please check the data!");
+//            return _return;
+//        }
         // 判断是否存在母货号
         List<String> result = new ArrayList<>();
-        if(!parentFlg && parentList.size()>0){
+        if(parentList.size()>0){
             result = ma1200Service.checkList(parentList);
         }
         if(result.size()>0){
@@ -844,14 +876,12 @@ public class InventoryVouchersController extends BaseAction {
     }
     @ResponseBody
     @RequestMapping(value = "/detailReason")
-    public List<AutoCompleteDTO> getMa8360(HttpServletRequest request, HttpSession session,String generalLevelCd,String v) {
-        List<AutoCompleteDTO> list;
-        if(StringUtils.isBlank(generalLevelCd)){
-            list =  service.Reasondetail(v);
-        }else {
-            list = service.detailReason(generalLevelCd,v);
-        }
-        return list;
+    public List<AutoCompleteDTO> getMa8360( HttpSession session,String v) {
+        User u = this.getUser(session);
+        int i = defaultRoleService.countFinancePosition(u.getUserId());
+
+        return  service.detailReason(v,i);
+
     }
 
 }

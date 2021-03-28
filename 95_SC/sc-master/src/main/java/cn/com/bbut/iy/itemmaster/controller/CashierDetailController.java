@@ -3,6 +3,7 @@ package cn.com.bbut.iy.itemmaster.controller;
 import cn.com.bbut.iy.itemmaster.annotation.Permission;
 import cn.com.bbut.iy.itemmaster.constant.Constants;
 import cn.com.bbut.iy.itemmaster.constant.PermissionCode;
+import cn.com.bbut.iy.itemmaster.dto.AjaxResultDto;
 import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.ReturnDTO;
@@ -120,6 +121,33 @@ public class CashierDetailController extends BaseAction {
         param.setStores(stores);
         GridDataDTO<SaleHead> grid = service.getSaleHeadList(param);
         return grid;
+    }
+
+
+    @ResponseBody
+    @RequestMapping(value = "/getTotalAmount")
+    public AjaxResultDto getToalAmount(HttpServletRequest request, HttpSession session,
+                                       CashierDetailParam param){
+        AjaxResultDto ajaxResultDto = new AjaxResultDto();
+        Collection<String> stores = getStores(session, param);
+        if(stores.size() == 0){
+            log.info(">>>>>>>>>>>>>>>>>>>>> get stores is null");
+            return null;
+        }
+        User u = this.getUser(session);
+        int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i >= 4){
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DATE, -1);
+            String startDate = sdf.format(calendar.getTime());
+            param.setStartDate(startDate);
+        }
+            param.setStores(stores);
+        Map totalAmount = service.getTotalAmount(param);
+        ajaxResultDto.setData(totalAmount.get("totalAmount"));
+        ajaxResultDto.setSuccess(true);
+        return ajaxResultDto;
     }
 
     /**

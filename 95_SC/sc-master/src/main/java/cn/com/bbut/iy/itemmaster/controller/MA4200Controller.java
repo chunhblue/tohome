@@ -74,7 +74,7 @@ public class MA4200Controller extends BaseAction {
     public Map getUserId(HttpServletRequest request, HttpSession session,
                                                         String empNumId) {
         Map<String,Boolean> map = new HashMap<>();
-        map.put("valid", ma4200Service.getUserIdCount(empNumId));
+        map.put("valid", ma4200Service.getUserIdCount(empNumId.trim()));
         return map;
     }
 

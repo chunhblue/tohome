@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.StaffAttendanceDailyMapper">
+    <resultMap id="BaseItemResult" type="cn.com.bbut.iy.itemmaster.dto.staffAttendanceDaily.StaffAttendanceDailyDto">
+        <result column="store_cd" property="storeCd" jdbcType="VARCHAR"/>
+        <result column="date_in" property="dateIn" jdbcType="VARCHAR"/>
+        <result column="staff_code" property="staffCode" jdbcType="VARCHAR"/>
+        <result column="staff_name" property="staffName" jdbcType="VARCHAR"/>
+        <result column="date_in1" property="dateIn1" jdbcType="VARCHAR"/>
+        <result column="time_in" property="timeIn" jdbcType="VARCHAR"/>
+        <result column="date_out" property="dateOut" jdbcType="VARCHAR"/>
+        <result column="time_out" property="timeOut" jdbcType="VARCHAR"/>
+        <result column="shift" property="shift" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="searchCount" parameterType="cn.com.bbut.iy.itemmaster.dto.staffAttendanceDaily.StaffAttendanceParamDailyDto" resultType="int">
+        SELECT
+        count (*)
+        FROM
+        ma8434
+        left join ma4200
+        on ma8434.staff_code = ma4200.emp_num_id
+        WHERE
+        1 = 1
+        AND ma8434.store_cd =  #{storeCd,jdbcType=VARCHAR}
+        <if test="startDate!=null and startDate!='' ">
+            <![CDATA[
+             AND ma8434.date_in >= #{startDate,jdbcType=VARCHAR}
+            ]]>
+        </if>
+        <if test="endDate!=null and endDate!='' ">
+            <![CDATA[
+             AND ma8434.date_in <= #{endDate,jdbcType=VARCHAR}
+            ]]>
+        </if>
+    </select>
+
+    <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.staffAttendanceDaily.StaffAttendanceParamDailyDto" resultMap="BaseItemResult">
+        SELECT
+        ma8434.store_cd,ma8434.date_in,ma8434.staff_code,ma4200.emp_name staff_name,
+        ma8434.date_in1,ma8434.time_in,ma8434.date_out,ma8434.time_out,ma8434.shift
+        FROM
+        ma8434
+        left join ma4200
+        on ma8434.staff_code = ma4200.emp_num_id
+        WHERE
+        1 = 1
+        AND ma8434.store_cd =  #{storeCd,jdbcType=VARCHAR}
+        <if test="startDate!=null and startDate!='' ">
+            <![CDATA[
+             AND ma8434.date_in >= #{startDate,jdbcType=VARCHAR}
+            ]]>
+        </if>
+        <if test="endDate!=null and endDate!='' ">
+            <![CDATA[
+             AND ma8434.date_in <= #{endDate,jdbcType=VARCHAR}
+            ]]>
+        </if>
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+</mapper>

@@ -42,6 +42,10 @@ public interface StocktakeProcessMapper {
                                                  @Param("endAmt") Integer endAmt, @Param("sidx")String sidx, @Param("sord")String sord,
                                                  @Param("page") int page, @Param("rows") int rows, @Param("limit") int limit);
 
+    List<StocktakeProcessItemsDTO> getTableData4(@Param("piCd") String piCd, @Param("piDate") String piDate,
+                                                 @Param("storeCd") String storeCd, @Param("searchVal") String searchVal,
+                                                 @Param("page") int page, @Param("rows") int rows, @Param("limit") int limit);
+
     int getTableData3Count(@Param("piCd") String piCd, @Param("piDate") String piDate,
                            @Param("storeCd") String storeCd, @Param("searchVal") String searchVal,
                            @Param("businessDate") String businessDate, @Param("startQty") Integer startQty,
@@ -59,6 +63,9 @@ public interface StocktakeProcessMapper {
                            @Param("businessDate") String businessDate, @Param("startQty") Integer startQty,
                            @Param("endQty") Integer endQty, @Param("startAmt") Integer startAmt,
                            @Param("endAmt") Integer endAmt);
+
+    int getTableData4Count(@Param("piCd") String piCd, @Param("piDate") String piDate,
+                      @Param("storeCd") String storeCd, @Param("searchVal") String searchVal);
 
     StocktakeReportDTO getStocktakingHead(@Param("piCd") String piCd, @Param("piDate") String piDate,@Param("storeCd") String storeCd);
 
@@ -95,4 +102,8 @@ public interface StocktakeProcessMapper {
 
     List<StocktakeProcessItemsDTO> getBadMerchandisingList(@Param("piCd") String piCd, @Param("piDate") String piDate,
                                                            @Param("storeCd") String storeCd, @Param("businessDate")String businessDate);
+
+
+    List<StocktakeProcessItemsDTO> getExceptionItemList(@Param("piCd") String piCd, @Param("piDate") String piDate,
+                                                           @Param("storeCd") String storeCd);
 }

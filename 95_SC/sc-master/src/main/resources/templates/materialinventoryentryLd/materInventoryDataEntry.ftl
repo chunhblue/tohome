@@ -245,5 +245,10 @@
 <input type="hidden" id="typeId" value="${typeId!}">
 <input type="hidden" id="reviewId" value="${reviewId!}">
 <input type="hidden" id="i_storeCd" value="">
+<input type="hidden" id="searchJson1" value="">
+<input type="hidden" id="ParamstoreCd" value="${ParamstoreCd!}">
+<input type="hidden" id="ParamstoreName" value="${ParamstoreName!}">
+<input type="hidden" id="piDateParam" value="${piDateParam!}">
+<input type="hidden" id="create_By" value="${createBy!}">
 </body>
 </html>

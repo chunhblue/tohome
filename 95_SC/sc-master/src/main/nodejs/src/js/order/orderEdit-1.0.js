@@ -322,22 +322,24 @@ define('orderEdit', function () {
 			$("#i_orderQty").val(reThousands(this.value));
 		});
 
-		$("#update").on("click", function () {
-			if(selectTrTemp==null){
-				_common.prompt("Please select at least one item!",5,"error"); // 请选择要订货的商品
-				return false;
-			}
-			//正在修改的行不能再修改
-			if($("#grid_orderQty").length >= 1){
-				return false;
-			}
-			if($("#articleId").val()==null||$("#articleId").val()==""){
-				_common.prompt("No relevant item information was found!",5,"error"); // 获取商品详细信息失败
-				return false;
-			}
-			var cols = tableGrid.getSelectColValue(selectTrTemp,"articleId,articleName,realtimeStock,psd,autoOrderQty,orderQty,vendorId,purchaseUnitId,orderPrice,dcItem");
-			$(selectTrTemp).find('td[tag=orderQty]').text("").append("<input type='text' class='form-control my-automatic input-sm' id='grid_orderQty' oldValue='"+cols["orderQty"]+"' value='"+cols["orderQty"]+"'>");
-		});
+
+
+		// $("#update").on("click", function () {
+		// 	if(selectTrTemp==null){
+		// 		_common.prompt("Please select at least one item!",5,"error"); // 请选择要订货的商品
+		// 		return false;
+		// 	}
+		// 	//正在修改的行不能再修改
+		// 	if($("#grid_orderQty").length >= 1){
+		// 		return false;
+		// 	}
+		// 	if($("#articleId").val()==null||$("#articleId").val()==""){
+		// 		_common.prompt("No relevant item information was found!",5,"error"); // 获取商品详细信息失败
+		// 		return false;
+		// 	}
+		// 	var cols = tableGrid.getSelectColValue(selectTrTemp,"articleId,articleName,realtimeStock,psd,autoOrderQty,orderQty,vendorId,purchaseUnitId,orderPrice,dcItem");
+		// 	$(selectTrTemp).find('td[tag=orderQty]').text("").append("<input type='text' class='form-control my-automatic input-sm' id='grid_orderQty' oldValue='"+cols["orderQty"]+"' value='"+cols["orderQty"]+"'>");
+		// });
 
 
 		m.cancel.on("click",function () {
@@ -358,7 +360,7 @@ define('orderEdit', function () {
 			var _orderQty = parseFloat(orderQty),
 				_minOrderQty = parseFloat(minOrderQty),
 				_maxOrderQty = parseFloat(maxOrderQty),
-				_orderBatchQty = parseFloat(orderBatchQty);
+				_orderBatchQty = parseFloat($("#orderBatchQty").val());
 			if(_orderQty==0){//订货量不为空
 				_common.prompt("Order Qty can not be 0!",3,"info");
 				$('#i_orderQty').focus();
@@ -389,7 +391,7 @@ define('orderEdit', function () {
 				_common.prompt("The Incremental Quantity error!",3,"error");
 				return false;
 			}
-			if(_orderBatchQty!=0){
+			if(_orderBatchQty!==0){
 				var remainder = (_orderQty-_minOrderQty)%_orderBatchQty;
 				if(remainder!=0){
 					_common.prompt("Order Qty need to be multiples of Incremental Quantity!",3,"info");
@@ -514,7 +516,7 @@ define('orderEdit', function () {
 						let orderQty = toThousands($('#grid_orderQty').val().trim());
 						$(selectTrTemp).find('td[tag=orderQty]').text(orderQty);
 					}else{
-						let orderQty = $('#grid_orderQty').attr("oldValue");
+						let orderQty = toThousands($('#grid_orderQty').attr("oldValue"));
 						$(selectTrTemp).find('td[tag=orderQty]').text(orderQty);
 						return false;
 					}
@@ -535,7 +537,7 @@ define('orderEdit', function () {
 
 		//光标移出
 		m.main_box.on("blur","#grid_orderQty",function(){
-			$("#grid_orderQty").val(toThousands(this.value));
+			$("#grid_orderQty").val(this.value);
 			// var flg = checkOrderQty();
 			// if(flg){
 			// 	//还原表格中的input框
@@ -548,7 +550,7 @@ define('orderEdit', function () {
 
 		//光标进入，去除金额千分位，并去除小数后面多余的0
 		m.main_box.on("focus","#grid_orderQty",function(){
-			$("#grid_orderQty").val(reThousands(this.value));
+			$("#grid_orderQty").val(this.value);
 		})
 
 		//回车保存
@@ -569,6 +571,7 @@ define('orderEdit', function () {
 	}
 
 	var checkOrderQty = function () {
+
 		var orderQty = reThousands($('#grid_orderQty').val().trim());
 		var reg = /((^[1-9]\d*)|^0)(\.\d+)?$/;
 		if(!reg.test(orderQty)){
@@ -579,7 +582,7 @@ define('orderEdit', function () {
 		var _orderQty = parseFloat(orderQty),
 			_minOrderQty = parseFloat(minOrderQty),
 			_maxOrderQty = parseFloat(maxOrderQty),
-			_orderBatchQty = parseFloat(orderBatchQty);
+			_orderBatchQty = parseFloat($("#orderBatchQty").val());
 		// if(_orderQty==0){//订货量不为空
 		// 	_common.prompt("Order Qty can not be 0!",3,"info");
 		// 	$('#grid_orderQty').focus();
@@ -590,7 +593,7 @@ define('orderEdit', function () {
 		var uploadFlg = colDcItem["uploadFlg"];
 		var uploadOrderQty = Number(reThousands(colDcItem["uploadOrderQty"]));
 		var uploadOrderNochargeQty = Number(reThousands(colDcItem["uploadOrderNochargeQty"]));
-		if(!isNaN(_minOrderQty)&&_orderQty<_minOrderQty){//不得低于最低订货量
+		if(!isNaN(_minOrderQty)&&_orderQty<_minOrderQty&&_orderQty!=0){//不得低于最低订货量
 			if(dcItem=="1"){
 				_common.prompt("Order Qty can not be less than DC MOQ!",3,"info");
 			}else{
@@ -612,9 +615,9 @@ define('orderEdit', function () {
 			_common.prompt("The Incremental Quantity error!",3,"error");
 			return false;
 		}
-		if(_orderBatchQty!=0){
+		if(_orderBatchQty!==0){
 			var remainder = (_orderQty-_minOrderQty)%_orderBatchQty;
-			if(remainder!=0){
+			if(remainder!==0){
 				_common.prompt("Order Qty need to be multiples of Incremental Quantity!",3,"info");
 				$('#grid_orderQty').focus();
 				return false;
@@ -668,7 +671,10 @@ define('orderEdit', function () {
 		});
 		return flg;
 	}
-
+	var addInputValue=function () {
+		   var cols = tableGrid.getSelectColValue(selectTrTemp,"articleId,articleName,realtimeStock,psd,autoOrderQty,orderQty,vendorId,purchaseUnitId,orderPrice,dcItem");
+		   	$(selectTrTemp).find('td[tag=orderQty]').text("").append("<input type='text' class='form-control my-automatic input-sm' id='grid_orderQty' oldValue='"+cols["orderQty"]+"' value='"+cols["orderQty"]+"'>");
+	   }
 	var showResponse = function(data,textStatus, xhr){
 		selectTrTemp = null;
 		var resp = xhr.responseJSON;
@@ -702,6 +708,7 @@ define('orderEdit', function () {
 				m.error_pcode.show();
 				m.main_box.hide();
 		}
+
 	}
 
 	//画面按钮点击事件
@@ -894,7 +901,7 @@ define('orderEdit', function () {
 		}
 		var _orderQty = parseFloat(autoOrderQty),
 			_minOrderQty = parseFloat(minOrderQty),
-			_orderBatchQty = parseFloat(orderBatchQty);
+			_orderBatchQty = parseFloat($("#orderBatchQty").val());
 		var colDcItem = tableGrid.getSelectColValue(trObj,"dcItem,uploadFlg,uploadOrderQty,uploadOrderNochargeQty");
 		var dcItem = colDcItem["dcItem"];
 		if(!isNaN(_minOrderQty)&&_orderQty<_minOrderQty){//不得低于最低订货量
@@ -917,9 +924,9 @@ define('orderEdit', function () {
 			_common.prompt("The Incremental Quantity error!",3,"error");
 			return false;
 		}
-		if(_orderBatchQty!=0){
+		if(_orderBatchQty!==0){
 			var remainder = (_orderQty-_minOrderQty)%_orderBatchQty;
-			if(remainder!=0){
+			if(remainder!==0){
 				_common.prompt("Order Qty need to be multiples of Incremental Quantity!",3,"info");
 				$('#grid_orderQty').focus();
 				return false;
@@ -960,12 +967,20 @@ define('orderEdit', function () {
 		});
 	}
 
+
 	//点击tr后事件
 	var trClick_table1 = function(){
-		var cols = tableGrid.getSelectColValue(selectTrTemp,"articleId,dcItem,orderQty,promotionDescription");
+		var cols = tableGrid.getSelectColValue(selectTrTemp,"articleId,dcItem,orderQty,promotionDescription,articleQty,articleNoChargeId,articleNoChargeQty");
 		var storeCd = m.storeCd.val();
 		var orderDate = m.orderDate.val();
 		var dcItem = cols["dcItem"];
+		$("#freeItemQty").val("");
+		if(cols["articleQty"]>0){
+			var qty = cols["orderQty"]*cols["articleNoChargeQty"]/cols["articleQty"];
+			var freeQty = Math.floor(qty); // 向下取整
+			$("#freeItemQty").val(toThousands(freeQty));
+		}
+		$("#articleNoChargeId").val(cols["articleNoChargeId"]);
 		var promotionDescription = cols["promotionDescription"];
 		$.myAjaxs({
 			url:order_url+"/getItemInfo",
@@ -1028,8 +1043,8 @@ define('orderEdit', function () {
 			title:"Order Detail",
 			param:paramGrid,
 			colNames:["No.","Item Code","Item Name","Real-time Inventory","SOQ",
-				"PSD","write-off Qty","Order Qty","Free Order Qty","Order Total Qty","Vendor Id","Purchase Unit Id",
-				"Order Price","DC Item","uploadFlg","Order Sts","Upload Order Qty","Upload Free Order Qty","Promotion Description","Copy SOQ"],
+				"PSD","Write-off Qty","Order Qty","Free Order Qty","Order Total Qty","Vendor Id","Purchase Unit Id",
+				"Order Price","DC Item","uploadFlg","Order Sts","Upload Order Qty","Upload Free Order Qty","Article Qty","Free Item Code","Free Initial Qty","Promotion Description","Copy SOQ"],
 			colModel:[
 				{name:"num",type:"text",text:"center",width:"50",ishide:false, cellattr: addCellAttr,css:"",getCustomValue:num},
 				{name:"articleId",type:"text",text:"right",width:"90",ishide:false,css:""},
@@ -1049,6 +1064,9 @@ define('orderEdit', function () {
 				{name:"orderSts",type:"text",text:"right",width:"80",ishide:true,css:""},
 				{name:"uploadOrderQty",type:"text",text:"right",width:"120",ishide:true,css:"",getCustomValue:getThousands},
 				{name:"uploadOrderNochargeQty",type:"text",text:"right",width:"110",ishide:true,css:"",getCustomValue:getThousands},
+				{name:"articleQty",type:"text",text:"right",width:"110",ishide:true,css:""},
+				{name:"articleNoChargeId",type:"text",text:"left",width:"110",ishide:true,css:""},
+				{name:"articleNoChargeQty",type:"text",text:"right",width:"110",ishide:true,css:""},
 				{name:"promotionDescription",type:"text",text:"left",width:"160",ishide:false},
 				{name:"copy",type:"text",text:"center",width:"110",getCustomValue:btn},
 			],//列内容
@@ -1074,23 +1092,11 @@ define('orderEdit', function () {
 			},
 			loadCompleteEvent:function(self){
 				selectTrTemp = null;//清空选择的行
-				//判断是否是新店
-				/*if(!!m.storeSts.val()){
-					if(m.storeSts.val()!=="1"){
-						tableGrid.showColumn("autoOrderQty");
-						tableGrid.hideColumn("psd");
-						$("#psd").hide();
-						$("#autoOrderQty").show();
-					}else{
-						tableGrid.showColumn("psd");	//新店
-						tableGrid.hideColumn("autoOrderQty");
-						$("#psd").show();
-						$("#autoOrderQty").hide();
-					}
-				}*/
-				// let itemInfoHeight = $("#itemGrid").height()-46;
-				if(itemInfoHeight>255){
-					// $(".item-info").height(itemInfoHeight);
+				if (m.use.val()=='1'){
+					tableGrid.find("tr").on('dblclick', function (e) {
+						addInputValue();
+					});
+					return self;
 				}
 				return self;
 			},
@@ -1109,14 +1115,14 @@ define('orderEdit', function () {
 					$("#update").attr("disabled", "disabled");
 				}*/
 			},
-			buttonGroup:[
-				{
-					butType: "update",
-					butId: "update",
-					butText: "Modify",
-					butSize: ""//,
-				},//修改
-			],
+			// buttonGroup:[
+			// 	{
+			// 		butType: "update",
+			// 		butId: "update",
+			// 		butText: "Modify",
+			// 		butSize: ""//,
+			// 	},//修改
+			// ],
 
 		});
 	};
@@ -1160,7 +1166,8 @@ define('orderEdit', function () {
 					let title = $(this).attr("title");
 					$(this).attr("title",title.replace(/<br>/g,"  "));
 				});
-				return self;
+
+
 			},
 			ajaxSuccess:function(resData){
 				return resData;

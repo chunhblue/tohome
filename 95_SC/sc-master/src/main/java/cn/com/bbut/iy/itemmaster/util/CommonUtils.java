@@ -68,6 +68,15 @@ public class CommonUtils {
                 + date.substring(0, 4)+" "+date.substring(8,10)+":"+date.substring(10,12)+":"+date.substring(12,14);
     }
 
+    //  String 2021-03-20 15:50:07  --> String dd/MM/yyyy hh:mm:ss
+    public static String fmtDateAndTimeToStr19(String date) {
+        if (StringUtils.isBlank(date)) {
+            return "";
+        }
+        return date.substring(8, 10) + "/" + date.substring(5, 7) + "/" + date.substring(0, 4)  +" "+date.substring(10,19);
+    }
+
+
     /**
      * 获取审核状态
      * @param status

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import cn.com.bbut.iy.itemmaster.dto.base.role.ResourceViewDTO;
+import cn.com.bbut.iy.itemmaster.dto.base.role.RoleStoreDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -40,6 +41,7 @@ public class ExcelParam extends BaseExcelParam {
      * 组织结构包含店铺权限
      */
     private Collection<String> stores;
+    private Collection<RoleStoreDTO> stores1;
 
     private String userId;
 

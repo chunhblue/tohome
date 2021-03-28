@@ -39,8 +39,6 @@ define('returnsDaily', function () {
         userStoreCd: null,
         userStoreName: null,
         am: null,
-        storeCd: null,
-        storeName: null,
         searchJson: null,
         dep: null,
         pma: null,
@@ -69,8 +67,6 @@ define('returnsDaily', function () {
         let category = m.category.attr('k');
         let subCategory = m.subCategory.attr('k');
         let shift = m.shift.val().trim();
-        let storeCd = m.storeCd.val().trim();
-        let storeName = m.storeName.val().trim();
         let calType = m.calType.val().trim();
         let totalAmt = reThousands(m.totalAmt.val().trim());
         // 创建请求字符串
@@ -78,7 +74,7 @@ define('returnsDaily', function () {
             'regionCd':$("#aRegion").attr("k"),
             'cityCd':$("#aCity").attr("k"),
             'districtCd':$("#aDistrict").attr("k"),
-            'aStore':$("#aStore").attr("k"),
+            'storeCd':$("#aStore").attr("k"),
             'barcode': barcode,
             'articleName': articleName,
             'returnDate': formatDate2(returnDate),
@@ -89,8 +85,6 @@ define('returnsDaily', function () {
             'categoryCd': category,
             'subCategoryCd': subCategory,
             'shift': shift,
-            'storeCd': storeCd,
-            'storeName': storeName,
             'calType': calType,
             'totalAmt': totalAmt,
         };
@@ -102,8 +96,8 @@ define('returnsDaily', function () {
         if (!dateStr) {
             return '';
         }
-        return new Date(dateStr).Format('dd/MM/yyyy')
-    }
+        return new Date(dateStr).Format('dd/MM/yyyy hh:mm:ss')
+    };
 
     // 06/03/2020 -> 20200306
     var formatDate2 = function (dateStr) {
@@ -139,7 +133,7 @@ define('returnsDaily', function () {
         let month = businessDate.substring(4,6);
         let day = businessDate.substring(6,8);
         return new Date(year+'/'+month+'/'+day).Format('dd/MM/yyyy');
-    }
+    };
 
     var initAutoMatic = function () {
         //收银员
@@ -166,8 +160,6 @@ define('returnsDaily', function () {
             m.articleName.val('');
             m.returnDate.val(formatBusinessDate(m.businessDate.val()))
             m.shift.val('');
-            m.storeCd.val('');
-            m.storeName.val('');
             m.calType.val('');
             m.cash.val('');
             $("#returnDate").css("border-color","#CCC");
@@ -275,9 +267,10 @@ define('returnsDaily', function () {
                                     "<td title='"+isEmpty(item.articleId)+"' style='text-align:right;'>" + isEmpty(item.articleId) + "</td>" +
                                     "<td title='"+isEmpty(item.articleName) +"' style='text-align:left;'>" + isEmpty(item.articleName)  + "</td>" +
                                     "<td title='"+isEmpty(item.barcode) +"' style='text-align:right;'>" + isEmpty(item.barcode)  + "</td>" +
-                                    "<td title='"+formatDate(isEmpty(item.saleDate)) +"' style='text-align:center;'>" + formatDate(isEmpty(item.saleDate))  + "</td>" +
+                                    "<td title='"+formatDate(isEmpty(item.tranDate)) +"' style='text-align:center;'>" + formatDate(isEmpty(item.tranDate))  + "</td>" +
                                     "<td title='"+isEmpty(item.posId) +"' style='text-align:right;'>" + isEmpty(item.posId) + "</td>" +
                                     "<td title='"+isEmpty(item.saleSerialNo) +"' style='text-align:right;'>" + isEmpty(item.saleSerialNo) + "</td>" +
+                                    "<td title='"+isEmpty(item.nonSaleType) +"' style='text-align:left;'>" + isEmpty(item.nonSaleType) + "</td>" +
                                     "<td title='"+toThousands(item.orderQty)  +"' style='text-align:right;'>" + toThousands(item.orderQty)  + "</td>" +
                                     "<td title='"+toThousands(item.priceActual)  +"' style='text-align:right;'>" + toThousands(item.priceActual)  + "</td>" +
                                     "<td title='"+toThousands(item.totalAmt)  +"' style='text-align:right;'>" + toThousands(item.totalAmt)  + "</td>" +
@@ -307,6 +300,8 @@ define('returnsDaily', function () {
                                 "<td></td>" +
                                 "<td></td>" +
                                 "<td></td>" +
+                                "<td></td>" +
+                                "<td></td>" +
                                 "<td title='Total:'>Total:</td>" +
                                 "<td title='" + toThousands(totalAmt)  +"' style='text-align:right;'>" + toThousands(totalAmt) + "</td>" +
                                 "<td title='" + toThousands(cash) + "' style='text-align:right;'>" + toThousands(cash) + "</td>" +
@@ -315,7 +310,6 @@ define('returnsDaily', function () {
                                 "<td title='" + toThousands(momo) + "' style='text-align:right;'>" + toThousands(momo) + "</td>" +
                                 "<td title='" + toThousands(payoo) + "' style='text-align:right;'>" + toThousands(payoo) + "</td>" +
                                 "<td title='" + toThousands(viettel) + "' style='text-align:right;'>" + toThousands(viettel) + "</td>" +
-                                "<td></td>" +
                                 "<td></td>" +
                                 "<td></td>" +
                                 '<td></td>' +
@@ -353,11 +347,20 @@ define('returnsDaily', function () {
         });
 
         m.totalAmt.blur(function(){
-            m.totalAmt.val(toThousands(this.value));
+            if (m.totalAmt.val()==""){
+                m.totalAmt.val(this.value);
+            }else {
+             m.totalAmt.val(toThousands(this.value));
+            }
+
         });
         //光标进入，去除金额千分位，并去除小数后面多余的0
         m.totalAmt.focus(function(){
-            m.totalAmt.val(reThousands(this.value));
+            if (m.totalAmt.val()==""){
+                m.totalAmt.val(this.value);
+            }else {
+                m.totalAmt.val(toThousands(this.value));
+            }
         });
     };
 

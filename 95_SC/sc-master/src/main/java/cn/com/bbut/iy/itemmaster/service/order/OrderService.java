@@ -89,7 +89,7 @@ public interface OrderService {
      * @param orderDate
      * @return
      */
-    boolean checkOrder(String storeCd,String orderDate);
+    String checkOrder(String storeCd,String orderDate);
 
     /**
      * 添加审核数据
@@ -140,8 +140,8 @@ public interface OrderService {
      */
     String updateSpecialOrderSts(String storeCd);
 
-    // 检查跨天订货信息是否未订货
-    boolean checkSpecialOrder(String storeCd,String orderDate);
+    // 检查跨天订货信息是否未生效
+    String checkSpecialOrder(String storeCd,String orderDate);
 
     /**
      *检查跨天订单是否超过MOA MOQ

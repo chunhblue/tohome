@@ -386,7 +386,8 @@ public class StockPlanController extends BaseAction {
     @Permission(codes = {
             PermissionCode.CODE_SC_PD_SETTING_EXPORT_ITEM,
     })
-    public ReturnDTO toTxt(HttpServletRequest request,HttpSession session, String jsonStr,String piCd,String piDate,String storeCd) {
+    public ReturnDTO toTxt(HttpServletRequest request,HttpSession session, String jsonStr,
+                           String piCd,String piDate,String storeCd) {
         ReturnDTO _return = null;
         //获取用户权限
         // 获取session中的操作用户ID
@@ -411,8 +412,9 @@ public class StockPlanController extends BaseAction {
             _return = new ReturnDTO(false, "No data found!",0);
             return _return;
         }
+        log.info("list:"+list.size());
         //返回商品的csv对象
-        outFile = stocktakePlanService.writeToCSVFile(request,list,piCd);
+        outFile = stocktakePlanService.writeToTXTFile(request,list,piCd);
 
         try {
             // 将导出的数据存入盘点差异表
@@ -432,34 +434,34 @@ public class StockPlanController extends BaseAction {
     }
 
     @RequestMapping("/downloadCsv")
-    public void downloadTxt(String piCd,HttpServletRequest request,HttpServletResponse response) {
-        String fileName = "Stocktake Items_"+piCd+".csv";
-
+    public void downloadTxt(String piCd,HttpServletResponse response) {
+        String fileName = "ItemsmasterStocktake.txt";
         FileInputStream fis = null;
+        log.info("fileName---"+fileName);
         try {
-            OutputStream out = new BufferedOutputStream(response.getOutputStream());
+            OutputStream out = response.getOutputStream();
             response.reset();
 
-            response.setContentType("application/csv;charset=UTF-8");
+            response.setContentType("text/plain;charset=UTF-8");
             // 避免直接访问非公开的文件资源
             response.setHeader("Content-Disposition","attachment; filename="
                     + URLEncoder.encode(fileName, "UTF-8"));
             response.setCharacterEncoding("UTF-8");
 
             fis = new FileInputStream(outFile);
+            log.info("outFile.path:"+outFile.getAbsolutePath());
             int len = 0;
-            byte[] buffer = new byte[1024];
-            while ((len = fis.read(buffer)) > 0) {
+            byte[] buffer = new byte[4096]; // 缓冲区
+            while ((len = fis.read(buffer)) > -1) {
                 out.write(buffer, 0, len);
             }
             fis.close();
             out.flush();
             out.close();
-        } catch (UnsupportedEncodingException ex) {
-            ex.printStackTrace();
         } catch (IOException ex) {
+            log.info("下载,文件名称错误");
             ex.printStackTrace();
-        }finally {
+        } finally {
             if (fis != null) {
                 try {
                     fis.close();
@@ -467,6 +469,7 @@ public class StockPlanController extends BaseAction {
                     throw new RuntimeException(e);
                 }
             }
+            log.info("fis is null");
         }
     }
 	

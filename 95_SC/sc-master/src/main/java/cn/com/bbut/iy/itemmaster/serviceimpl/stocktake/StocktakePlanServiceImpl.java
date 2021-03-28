@@ -28,7 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.math.BigDecimal;
@@ -385,14 +387,14 @@ public class StocktakePlanServiceImpl implements StocktakePlanService {
 
 
         // 需要验证group 母货号是否可以 参与盘点
-        List<String> articleIdArr = new ArrayList<String>();
+//        List<String> articleIdArr = new ArrayList<String>();
 
         // 判断母货号是否允许操作, 为 '0' 可以操作, 为 '1' 不可操作
-        String _val = cm9060Service.getValByKey("0634");
+//        String _val = cm9060Service.getValByKey("0634");
 
         for (StocktakeItemDTO item : list) {
             // 添加商品id
-            articleIdArr.add(item.getArticleId());
+//            articleIdArr.add(item.getArticleId());
 
             // 销售数量
             BigDecimal saleQtyTotal = item.getSaleQtyTotal();
@@ -402,8 +404,8 @@ public class StocktakePlanServiceImpl implements StocktakePlanService {
         }
 
         // 不可操作, 需要过滤掉 导出对象里的 group 商品
-        if (!"0".equals(_val)) {
-            // 验证是否包含group sale 母货号
+        /*if (!"0".equals(_val)) {
+             验证是否包含group sale 母货号
             List<String> groupItemList = ma1200Service.checkList(articleIdArr);
             List<StocktakeItemDTO> newItemList = new ArrayList<StocktakeItemDTO>();
             // 验证
@@ -417,7 +419,7 @@ public class StocktakePlanServiceImpl implements StocktakePlanService {
                 }
                 return newItemList;
             }
-        }
+        }*/
 
         return list;
     }
@@ -594,106 +596,62 @@ public class StocktakePlanServiceImpl implements StocktakePlanService {
 
 
     @Override
-    public File writeToCSVFile(HttpServletRequest request,List<StocktakeItemDTO> list,String piCd){
-        String fileName = "Stocktake Items_"+piCd+".csv";
-        String path = request.getSession().getServletContext().getRealPath(fileDir + "Stocktake Items_"+piCd+".csv");
+    public File writeToTXTFile(HttpServletRequest request,List<StocktakeItemDTO> list,String piCd){
 
-        LinkedHashMap map = new LinkedHashMap();
-        // 设置列名
-        map.put("1","Item Code");
-        map.put("2","Item Name");
-        map.put("3","Barcode");
-        map.put("4","Spec");
-        map.put("5","UOM");
-        map.put("6","Quantity");
-
-        List exportData = new ArrayList<Map>();
-        for(StocktakeItemDTO stockDTO:list){
-            Map row = new LinkedHashMap<String, String>();
-            row.put("1",stockDTO.getArticleId());
-            row.put("2",stockDTO.getArticleName());
-            row.put("3",stockDTO.getBarcode());
-            row.put("4",stockDTO.getSpec());
-            row.put("5",stockDTO.getUom());
-            row.put("6","");
-            exportData.add(row);
-        }
-        File file = createCSVFile(exportData, map, path, fileName);
-
-        return file;
-    }
-
-    /**
-     * 生成CVS文件
-     * @param exportData 源数据List
-     * @param map csv文件的列表头map
-     * @param outPutPath 文件路径
-     * @param fileName 文件名称
-     * @return
-     */
-    public File createCSVFile(List exportData, LinkedHashMap map, String outPutPath,
-                                     String fileName) {
-        File csvFile = null;
-        BufferedWriter csvFileOutputStream = null;
-        try {
-            File file = new File(outPutPath);
-            if (!file.exists()) {
-                file.mkdirs();
-            }
-            //定义文件名格式并创建
-            csvFile =new File(outPutPath+fileName);
-            file.createNewFile();
-            // UTF-8使正确读取分隔符","
-            //如果生产文件乱码，windows下用gbk，linux用UTF-8
-            csvFileOutputStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-                    csvFile), "UTF-8"), 1024);
-
-            //写入前段字节流，防止乱码
-            csvFileOutputStream.write(getBOM());
-            // 写入文件头部
-            for (Iterator propertyIterator = map.entrySet().iterator(); propertyIterator.hasNext();) {
-                java.util.Map.Entry propertyEntry = (java.util.Map.Entry) propertyIterator.next();
-                csvFileOutputStream.write(propertyEntry.getValue() != null ? (String) propertyEntry.getValue() : "" );
-                if (propertyIterator.hasNext()) {
-                    csvFileOutputStream.write(",");
+        FileOutputStream outStr = null;
+        BufferedOutputStream buff = null;
+        String path = fileDir + "ItemsmasterStocktake.txt";
+        String tab = "\t";
+        String enter = "\r\n";
+        StocktakeItemDTO stockDTO;
+        StringBuffer write;
+        File outFile = null;
+        try{
+            outFile = new File(path);
+            outStr = new FileOutputStream(outFile);
+            buff = new BufferedOutputStream(outStr);
+            // 设置每一列的最大长度
+            int length = 20;
+            int articleNameLength = 100;
+            for(int i=0;i<list.size();i++){
+                write = new StringBuffer();
+                if(i == 0){
+                    write.append("Item Code")
+                            .append(tab)
+                            .append("Item Name")
+                            .append(tab)
+                            .append("BarCode")
+                            .append(tab)
+                            .append("Unit")
+                            .append(tab)
+                            .append("Converter").append(enter);
                 }
+                stockDTO = list.get(i);
+                write.append(stockDTO.getArticleId());
+                write.append(tab);
+                write.append(stockDTO.getArticleName());
+                write.append(tab);
+                write.append(stockDTO.getBarcode());
+                write.append(tab);
+                write.append(stockDTO.getUom());
+                write.append(tab);
+                write.append(stockDTO.getConverter());
+                write.append(enter);
+                buff.write(write.toString().getBytes("UTF-8"));
             }
-            csvFileOutputStream.newLine();
-            // 写入文件内容
-            for (Iterator iterator = exportData.iterator(); iterator.hasNext();) {
-                Object row = iterator.next();
-                for (Iterator propertyIterator = map.entrySet().iterator(); propertyIterator.hasNext();) {
-                    java.util.Map.Entry propertyEntry = (java.util.Map.Entry) propertyIterator.next();
-                    String str=row!=null?((String)((Map)row).get( propertyEntry.getKey())):"";
-
-                    if(StringUtils.isEmpty(str)){
-                        str="";
-                    }else{
-                        str=str.replaceAll("\"","\"\"");
-                        if(str.indexOf(",")>=0){
-                            str="\""+str+"\"";
-                        }
-                    }
-                    csvFileOutputStream.write(str);
-                    if (propertyIterator.hasNext()) {
-                        csvFileOutputStream.write(",");
-                    }
-                }
-                if (iterator.hasNext()) {
-                    csvFileOutputStream.newLine();
-                }
-            }
-            csvFileOutputStream.flush();
-        } catch (Exception e) {
+            buff.flush();
+            buff.close();
+        }catch (Exception e){
             e.printStackTrace();
-        } finally {
+        }finally {
             try {
-                csvFileOutputStream.close();
-            } catch (IOException e) {
+                buff.close();
+                outStr.close();
+            }catch (Exception e){
                 e.printStackTrace();
             }
         }
-        return csvFile;
+        return outFile;
     }
 
     /**
@@ -702,7 +660,20 @@ public class StocktakePlanServiceImpl implements StocktakePlanService {
     @Transactional
     @Override
     @Async
-    public Future<String> insertExportItemsToDB(String piCd, String piDate, String storeCd, List<StocktakeItemDTO> oldList) {
+    public Future<String> insertExportItemsToDB(String piCd, String piDate, String storeCd, List<StocktakeItemDTO> list) {
+        List<StocktakeItemDTO> oldList = new ArrayList<>();
+        for(StocktakeItemDTO dto:list){
+           boolean flg = false;
+           for(StocktakeItemDTO oldItem:oldList){
+               if(dto.getArticleId().equals(oldItem.getArticleId())){
+                   flg = true;
+               }
+           }
+           if(!flg){
+               oldList.add(dto);
+           }
+        }
+
         // 获取导出时间
         String exportTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 
@@ -734,7 +705,7 @@ public class StocktakePlanServiceImpl implements StocktakePlanService {
 
         for (int pageNum = 1; pageNum < totalPage + 1; pageNum++) {
             int starNum = (pageNum - 1) * pageSize;
-            int endNum = pageNum * pageSize > totalSize ? (totalSize) : pageNum * pageSize;
+            int endNum = Math.min(pageNum * pageSize, totalSize);
 
             // 用来存入新的集合
             List<StocktakeItemDTO> newList = new ArrayList<StocktakeItemDTO>();
@@ -854,14 +825,48 @@ public class StocktakePlanServiceImpl implements StocktakePlanService {
     }
 
 
-    /**
-     * 功能说明：获取UTF-8编码文本文件开头的BOM签名。
-     * BOM(Byte Order Mark)，是UTF编码方案里用于标识编码的标准标记。例：接收者收到以EF BB BF开头的字节流，就知道是UTF-8编码。
-     * @return UTF-8编码文本文件开头的BOM签名
-     */
-    public static String getBOM() {
+    public String appentStr4Length(String str , int length){
+        if(str == null){
+            str = "";
+        }
+        try {
+            int strLen = 0;//计算原字符串所占长度,规定中文占两个,其他占一个
+            for(int i = 0 ; i<str.length(); i++){
+                if(isChinese(str.charAt(i))){
+                    strLen = strLen + 2;
+                }else{
+                    strLen = strLen + 1;
+                }
+            }
+            if(strLen>=length){
+                return str;
+            }
+            int remain = length - strLen;//计算所需补充空格长度
+//            log.info("<<<"+remain);
+            for(int i =0 ; i< remain ;i++){
+                if(i == 0){
+                    str = str + ",";
+                }
+                str = str + " ";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return str;
+    }
 
-        byte b[] = {(byte)0xEF, (byte)0xBB, (byte)0xBF};
-        return new String(b);
+    // 根据Unicode编码完美的判断中文汉字和符号
+    private static boolean isChinese(char c) {
+        Character.UnicodeBlock ub = Character.UnicodeBlock.of(c);
+        if (ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+                || ub == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
+                || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
+                || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B
+                || ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+                || ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
+                || ub == Character.UnicodeBlock.GENERAL_PUNCTUATION) {
+            return true;
+        }
+        return false;
     }
 }

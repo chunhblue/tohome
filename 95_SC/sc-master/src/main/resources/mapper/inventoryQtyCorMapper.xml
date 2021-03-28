@@ -80,11 +80,24 @@
         where voucher_no = #{voucherNo, jdbcType=VARCHAR}
     </select>
 
-    <select id="getReturnItemList" resultMap="ReStoreInfo">
+    <select id="getReItemList" resultMap="ReStoreInfo">
         select order_id,store_cd,article_id,coalesce(order_qty,0) order_qty,coalesce(receive_qty,0) receive_qty,
         coalesce(correction_difference,0) correction_difference, last_correction_difference
         from od0010
         where order_id = #{orderId, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getReCorrHead" resultType="cn.com.bbut.iy.itemmaster.entity.od0000.OD0000">
+        select order_id,org_order_id, store_cd
+        from od0000
+        where order_id = #{orderId, jdbcType=VARCHAR}
+    </select>
+
+    <select id="getReCorrList" resultType="cn.com.bbut.iy.itemmaster.entity.od0000.OD0000">
+        select order_id,org_order_id, store_cd
+        from od0000
+        where org_order_id = #{orgorderId, jdbcType=VARCHAR}
+        order by (create_ymd || create_hms) desc
     </select>
 
     <select id="getReceiveItemList" resultMap="ReStoreInfo">
@@ -101,7 +114,7 @@
             pi1.c_qty,
             pi2.bad_qty,
             pi1.pi_qty AS second_qty,
-            coalesce(pi1.variance_qty,0) AS variance
+            (coalesce(pi1.variance_qty,0) - coalesce(pi1.last_variance_qty,0)) AS variance
         FROM
             pi0125 pi1
             LEFT JOIN pi0120 pi2
@@ -116,4 +129,12 @@
         order by
             pi1.variance_qty DESC
     </select>
+
+    <update id="updateStockLastVariance">
+        update pi0125 set last_variance_qty = variance_qty
+        where
+        pi_cd = #{piCd}
+        AND store_cd = #{storeCd}
+        AND pi_qty IS NOT NULL
+    </update>
 </mapper>

@@ -746,13 +746,14 @@ define('storeTransfersEdit', function () {
 
 		flg = m.actualQty.attr("e");
 		let handQty = reThousands(m.on_hand_qty.val());
-		if(parseInt(handQty) <= 0){
-			_common.prompt("Target item is out of stock, cannot transfer out!",3,"info");
-			$("#actualQty").prop("disabled", true);
-			return false;
-		}else {
+		// if(parseInt(handQty) <= 0){
+		// 	_common.prompt("Target item is out of stock, cannot transfer out!",3,"info");
+		// 	$("#actualQty").prop("disabled", true);
+		// 	return false;
+		// }else {
 			if(flg==='1'){
 			temp = reThousands($("#item_input_tamount").val());
+			var temp1 = $("#item_input_tamount").val();
 			if(temp == null || $.trim(temp)==""){
 				_common.prompt("The Tranfer Out Qty cannot be empty!",3,"error");
 				$("#item_input_tamount").css("border-color","red");
@@ -765,24 +766,27 @@ define('storeTransfersEdit', function () {
 				return false;
 			}else {
 				let reg = /^[0-9]*$/;
-				if(!reg.test(temp)){
-					_common.prompt("Tranfer Out Qty can only be integers!",3,"error");
-					$("#item_input_tamount").css("border-color","red");
+				if (!reg.test(temp)|| temp1.indexOf(",")>0) {
+					_common.prompt("The quantity can only be integers!", 3, "error");
+					$("#item_input_tamount").css("border-color", "red");
 					$("#item_input_tamount").focus();
 					return false;
 				}else {
-					if(parseInt(temp) > parseInt(handQty)){
-						_common.prompt("Tranfer Out Qty cannot be more than actual stock quantity!",3,"error");
-						$("#item_input_tamount").css("border-color","red");
-						$("#item_input_tamount").focus();
-						return false;
-					}else{
-						$("#item_input_tamount").css("border-color","#CCC");
-					}
+					$("#item_input_tamount").css("border-color", "#CCC");
 				}
+				// else {
+				// 	if(parseInt(temp) > parseInt(handQty)){
+				// 		_common.prompt("Tranfer Out Qty cannot be more than actual stock quantity!",3,"error");
+				// 		$("#item_input_tamount").css("border-color","red");
+				// 		$("#item_input_tamount").focus();
+				// 		return false;
+				// 	}else{
+				// 		$("#item_input_tamount").css("border-color","#CCC");
+				// 	}
+				// }
 			}
 		}
-		}
+		// }
 		temp = m.adjustReason.attr("k");
 		if(temp == null || $.trim(temp)==""){
 			_common.prompt("Please select the write-off reason!",3,"error");
@@ -801,20 +805,19 @@ define('storeTransfersEdit', function () {
 			$.myAutomatic.cleanSelectObj(adjustReason);
 		});
 
+
 		$("#item_input_tamount").blur(function () {
-			$("#item_input_tamount").val(toThousands(this.value));
-			$("#actualQty").val(toThousands($("#item_input_tamount").val()));
-		});
-		$("#formData").blur(function () {
-			getvl($('#fileData')[0].files[0]);
+			let reg = /^-?[1-9]\d*$/;
+			if (reg.test( this.value)&& this.value.indexOf(",")<0){
+				$("#item_input_tamount").val(toThousands(this.value));
+			}
 		});
 		//光标进入，去除金额千分位，并去除小数后面多余的0
 		$("#item_input_tamount").focus(function(){
-			$("#item_input_tamount").val(reThousands(this.value));
-		});
-
-		$("#actualQty").blur(function () {
-			$("#actualQty").val(toThousands(this.value));
+			let reg = /^-?[1-9]\d*$/;
+			if (reg.test( this.value)&& this.value.indexOf(",")<0){
+				$("#item_input_tamount").val(toThousands(this.value));
+			}
 		});
 		//光标进入，去除金额千分位，并去除小数后面多余的0
 		$("#actualQty").focus(function(){
@@ -1191,7 +1194,7 @@ define('storeTransfersEdit', function () {
 	// 根据Store No.取得该店铺信息
 	var initAutomatic = function(){
 		adjustReason = $("#adjustReason").myAutomatic({
-			url:url_root+"/cm9010/getResonCode",
+			url:url_root+"/cm9010/getReasonCode",
 			ePageSize:10,
 			startCount:0,
 		})
@@ -1256,6 +1259,7 @@ define('storeTransfersEdit', function () {
 				clearDialog(false);
 				let _storeCd = $("#vstore").attr('k');
 				let _itemId = thisObject.attr('k');
+				$.myAutomatic.setValueTemp(itemInput,thisObject.attr("k"),thisObject.text());
 				if(!!_storeCd && !!_itemId){
 					checkParent(_itemId, function(res){
 						if(res.success){

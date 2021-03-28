@@ -333,7 +333,7 @@
         </if>
         ) T1
         ON T.article_id = T1.article_id
-        LEFT JOIN ( SELECT code_value, code_name FROM cm9010 WHERE code_type = '00236' ) T3
+        LEFT JOIN ( SELECT code_value, code_name FROM cm9010 WHERE code_type = '00235' ) T3
         ON T.adjust_reason = T3.code_value
         LEFT JOIN MA1000 T4 ON T.store_cd = T4.store_cd
         LEFT JOIN MA1000 T6 ON T.store_cd1 = T6.store_cd
@@ -453,7 +453,7 @@
         </if>
         ) T1
         ON T.article_id = T1.article_id
-        LEFT JOIN ( SELECT code_value, code_name FROM cm9010 WHERE code_type = '00236' ) T3
+        LEFT JOIN ( SELECT code_value, code_name FROM cm9010 WHERE code_type = '00235' ) T3
         ON T.adjust_reason = T3.code_value
         LEFT JOIN MA1000 T4 ON T.store_cd = T4.store_cd
         LEFT JOIN MA1000 T6 ON T.store_cd1 = T6.store_cd

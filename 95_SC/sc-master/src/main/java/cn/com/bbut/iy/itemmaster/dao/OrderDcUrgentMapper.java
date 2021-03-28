@@ -11,12 +11,13 @@ import cn.com.bbut.iy.itemmaster.entity.od0000.OD0000;
 import cn.com.bbut.iy.itemmaster.entity.od0010.OD0010;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
-@Mapper
+@Repository
 public interface OrderDcUrgentMapper {
     List<OrderVendorGridDTO> getOrderList(OrderVendorParamDTO dto);
 

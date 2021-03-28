@@ -35,6 +35,13 @@ define('dailySaleReport', function () {
         aCity : null,
         aDistrict : null,
         aStore : null,
+        include_services:null,
+        PosstartDate:null,
+        PosendDate:null,
+        typeDate:null,
+        effendDate:null,
+        effstartDate:null,
+        dailyPosTable:null,
     }
     // 创建js对象
     var createJqueryObj = function () {
@@ -45,10 +52,20 @@ define('dailySaleReport', function () {
 
     //拼接检索参数
     var setParamJson = function () {
+        var typeDate=m.typeDate.val();
+        let _startDate ='';
+        let _endDate=' ';
+        if (typeDate=='1'){
+            _startDate = formatDate(m.effstartDate.val());
+           _endDate = formatDate(m.effendDate.val());
+        }else {
+            _startDate = formatDate(m.PosstartDate.val());
+            _endDate = formatDate(m.PosendDate.val());
+        }
         let articleId = m.articleId.val();
-        let am = m.am.val();
-        let _startDate = formatDate(m.startDate.val());
-        let _endDate = formatDate(m.endDate.val());
+
+        var includeService = m.include_services.val();
+
         // 创建请求字符串
         let searchJsonStr = {
             'regionCd':$("#aRegion").attr("k"),
@@ -61,6 +78,8 @@ define('dailySaleReport', function () {
             'effectiveEndDate': _endDate,
             'page': page,
             'rows': rows,
+            'includeService':includeService,
+            'typeDate':typeDate,
         };
         m.searchJson.val(JSON.stringify(searchJsonStr));
     }
@@ -88,9 +107,11 @@ define('dailySaleReport', function () {
         but_event();
         // m.search.click();
         // 初始化检索日期
-        _common.initDate(m.startDate,m.endDate);
+        _common.initDate(m.effstartDate,m.effendDate);
+        $("#show_status").find("input[type='radio']").eq(0).click();
+        $("#dailyTable").show();
+        $("#dailyPosTable").hide();
     }
-
     //初始化下拉
     var initAutoMatic = function () {
         // 获用户名字
@@ -103,7 +124,6 @@ define('dailySaleReport', function () {
             success: function (result) {
                 if (result.success) {
                     let user = result.o;
-                    console.log(user);
                     m.author.text(m.author.text()+user.userName)
                 }
             }
@@ -117,19 +137,75 @@ define('dailySaleReport', function () {
         })
     }
     var but_event = function () {
+        m.PosstartDate.datetimepicker({
+            language: 'en',
+            format: 'dd/mm/yyyy',
+            maxView: 4,
+            startView: 2,
+            minView: 2,
+            autoclose: true,
+            todayHighlight: true,
+            todayBtn: true,
+            PosstartDate: new Date(fmtIntDate($('#PosstartDate').val()))
+        });
+        m.PosendDate.datetimepicker({
+            language: 'en',
+            format: 'dd/mm/yyyy',
+            maxView: 4,
+            startView: 2,
+            minView: 2,
+            autoclose: true,
+            todayHighlight: true,
+            todayBtn: true,
+            PosendDate: new Date(fmtIntDate($('#PosendDate').val()))
+        });
+        $("#show_status").find("input[type='radio']").on("click",function() {
+            var thisObj = $(this);
+            var thisVal = thisObj.val();
+            if(thisVal=="1"){
+               m.typeDate.val(thisVal);
+              m.PosendDate.attr("disabled",true);
+              m.PosstartDate.attr("disabled",true);
+              m.PosstartDate.css("border-color","#CCCCCC");
+              m.PosstartDate.val('');
+              m.PosendDate.val('');
+              m.PosendDate.css("border-color","#CCCCCC");
+              m.effstartDate.attr("disabled",false);
+              m.effstartDate.css("border-color","#CCCCCC");
+              m.effendDate.attr("disabled",false);
+              m.effendDate.css("border-color","#CCCCCC");
+                $("#dailyPosTable").hide();
+                $("#dailyTable").show();
+            }else{
+                m.typeDate.val(thisVal);
+                 m.effendDate.attr("disabled",true);
+                m.effstartDate.attr("disabled",true);
+                m.PosendDate.attr("disabled",false);
+                m.PosstartDate.attr("disabled",false);
+                m.effendDate.css("border-color","#CCCCCC");
+                m.PosendDate.css("border-color","#CCCCCC");
+                m.PosstartDate.css("border-color","#CCCCCC");
+                m.PosendDate.css("border-color","#CCCCCC");
+                $("#dailyPosTable").show();
+                $("#dailyTable").hide();
+            }
+        });
         m.reset.click(function () {
             $("#regionRemove").click();
             m.am.val('');
-            m.startDate.val('');
-            m.endDate.val('');
+            m.effendDate.val('');
+            m.effstartDate.val('');
+            m.PosstartDate.val('');
+            m.PosendDate.val('');
             m.am.val("")
-            $("#startDate").css("border-color","#CCC");
-            $("#endDate").css("border-color","#CCC");
+            $("#effendDate").css("border-color","#CCC");
+            $("#effstartDate").css("border-color","#CCC");
             $("#amRemove").click();
             page=1;
             // 清除分页
             _common.resetPaging();
             $("#dailyTable").find("tr:not(:first)").remove();
+            $("#dailyPosTable").find("tr:not(:first)").remove();
         });
         $("#amRemove").on("click",function (e) {
             $.myAutomatic.cleanSelectObj(am);
@@ -146,7 +222,8 @@ define('dailySaleReport', function () {
             if(verifySearch()){
                 page=1;
                 setParamJson();
-                getData(page,rows);
+                var typeDate=m.typeDate.val();
+                getData(page,rows,typeDate);
             }
         })
 
@@ -167,7 +244,7 @@ define('dailySaleReport', function () {
      * @param page 当前页数
      * @param rows 每页显示条数
      */
-    var getData = function (page,rows) {
+    var getData = function (page,rows,typeDate) {
         let record = m.searchJson.val();
         $.myAjaxs({
             url: url_left + "/search",
@@ -178,41 +255,83 @@ define('dailySaleReport', function () {
             dataType: "json",
             success: function (result) {
                 var trList = $("#dailyTable  tr:not(:first)");
+                var trPosList = $("#dailyPosTable  tr:not(:first)");
                 trList.remove();
+                trPosList.remove();
                 if (result.success) {
-                    let dataList = result.o.data;
-                    // 总页数
-                    let totalPage = result.o.totalPage;
-                    // 总条数
-                    let count = result.o.count;
-                    for (let i = 0; i < dataList.length; i++) {
-                        var item = dataList[i];
-                        let tempTrHtml = '<tr style="text-align: center;">' +
-                            '<td title="'+isEmpty(item.storeCd)+'" style="text-align: left">'+isEmpty(item.storeCd)+'</td>' +
-                            '<td title="'+isEmpty(item.storeName)+'" style="text-align: left">'+isEmpty(item.storeName)+'</td>' +
-                            '<td title="'+isEmpty(fmtIntDate(item.saleDate))+'" style="text-align: center">'+isEmpty(fmtIntDate(item.saleDate))+'</td>' +
-                            '<td title="'+toThousands(item.avgCustomerNo)+'" style="text-align:right">'+toThousands(item.avgCustomerNo)+'</td>' +
-                            '<td title="'+toThousands(item.time68)+'" style="text-align:right">'+toThousands(item.time68)+'</td>' +
-                            '<td title="'+toThousands(item.time810)+'" style="text-align:right">'+toThousands(item.time810)+'</td>' +
-                            '<td title="'+toThousands(item.time1012)+'" style="text-align:right">'+toThousands(item.time1012)+'</td>' +
-                            '<td title="'+toThousands(item.time1214)+'" style="text-align:right">'+toThousands(item.time1214)+'</td>' +
-                            '<td title="'+toThousands(item.shift1)+'" style="text-align:right">'+toThousands(item.shift1)+'</td>' +
-                            '<td title="'+toThousands(item.time1416)+'" style="text-align:right">'+toThousands(item.time1416)+'</td>' +
-                            '<td title="'+toThousands(item.time1618)+'" style="text-align:right">'+toThousands(item.time1618)+'</td>' +
-                            '<td title="'+toThousands(item.time1820)+'" style="text-align:right">'+toThousands(item.time1820)+'</td>' +
-                            '<td title="'+toThousands(item.time2022)+'" style="text-align:right">'+toThousands(item.time2022)+'</td>' +
-                            '<td title="'+toThousands(item.shift2)+'" style="text-align:right">'+toThousands(item.shift2)+'</td>' +
-                            '<td title="'+toThousands(item.time2224)+'" style="text-align:right">'+toThousands(item.time2224)+'</td>' +
-                            '<td title="'+toThousands(item.time02)+'" style="text-align:right">'+toThousands(item.time02)+'</td>' +
-                            '<td title="'+toThousands(item.time24)+'" style="text-align:right">'+toThousands(item.time24)+'</td>' +
-                            '<td title="'+toThousands(item.time46)+'" style="text-align:right">'+toThousands(item.time46)+'</td>' +
-                            '<td title="'+toThousands(item.shift3)+'" style="text-align:right">'+toThousands(item.shift3)+'</td>' +
-                            '<td title="'+toThousands(item.totalAmt)+'" style="text-align:right">'+toThousands(item.totalAmt)+'</td>' +
-                            '<td title="'+isEmpty(item.amName)+'" style="text-align: left">'+isEmpty(item.amName)+'</td>' +
-                            '</tr>';
-                        m.dailyTable.append(tempTrHtml);
-                    }
+                  var  dataList = result.o.data;
 
+                    // 总页数
+                    var  totalPage = result.o.totalPage;
+                    // 总条数
+                    var count = result.o.count;
+                    if (typeDate=='2'){
+                        for (let i = 0; i < dataList.length; i++) {
+                            var item = dataList[i];
+                            let tempTrHtml = '<tr style="text-align: center;">' +
+                                '<td title="'+isEmpty(item.storeCd)+'" style="text-align: left">'+isEmpty(item.storeCd)+'</td>' +
+                                '<td title="'+isEmpty(item.storeName)+'" style="text-align: left">'+isEmpty(item.storeName)+'</td>' +
+                                '<td title="'+isEmpty(fmtIntDate(item.saleDate))+'" style="text-align: center">'+isEmpty(fmtIntDate(item.saleDate))+'</td>' +
+                                '<td title="'+toThousands(item.avgCustomerNo)+'" style="text-align:right">'+toThousands(item.avgCustomerNo)+'</td>' +
+                                '<td title="'+toThousands(item.time68)+'" style="text-align:right">'+toThousands(item.time68)+'</td>' +
+                                '<td title="'+toThousands(item.time810)+'" style="text-align:right">'+toThousands(item.time810)+'</td>' +
+                                '<td title="'+toThousands(item.time1012)+'" style="text-align:right">'+toThousands(item.time1012)+'</td>' +
+                                '<td title="'+toThousands(item.time1214)+'" style="text-align:right">'+toThousands(item.time1214)+'</td>' +
+                                '<td title="'+toThousands(item.shift1)+'" style="text-align:right">'+toThousands(item.shift1)+'</td>' +
+                                '<td title="'+toThousands(item.time1416)+'" style="text-align:right">'+toThousands(item.time1416)+'</td>' +
+                                '<td title="'+toThousands(item.time1618)+'" style="text-align:right">'+toThousands(item.time1618)+'</td>' +
+                                '<td title="'+toThousands(item.time1820)+'" style="text-align:right">'+toThousands(item.time1820)+'</td>' +
+                                '<td title="'+toThousands(item.time2022)+'" style="text-align:right">'+toThousands(item.time2022)+'</td>' +
+                                '<td title="'+toThousands(item.shift2)+'" style="text-align:right">'+toThousands(item.shift2)+'</td>' +
+                                '<td title="'+toThousands(item.time2224)+'" style="text-align:right">'+toThousands(item.time2224)+'</td>' +
+                                '<td title="'+toThousands(item.time02)+'" style="text-align:right">'+toThousands(item.time02)+'</td>' +
+                                '<td title="'+toThousands(item.time24)+'" style="text-align:right">'+toThousands(item.time24)+'</td>' +
+                                '<td title="'+toThousands(item.time46)+'" style="text-align:right">'+toThousands(item.time46)+'</td>' +
+                                '<td title="'+toThousands(item.shift3)+'" style="text-align:right">'+toThousands(item.shift3)+'</td>' +
+                                '<td title="'+toThousands(item.totalAmt)+'" style="text-align:right">'+toThousands(item.totalAmt)+'</td>' +
+                                '<td title="'+isEmpty(item.amName)+'" style="text-align: left">'+isEmpty(item.amName)+'</td>' +
+                                '</tr>';
+                            m.dailyPosTable.append(tempTrHtml);
+                        }
+                    }
+                    if (typeDate=='1'){
+                        // dataList = result.o.data;
+                        //
+                        // // 总页数
+                        // totalPage = result.o.totalPage;
+                        // // 总条数
+                        // count = result.o.count;
+                        for (let i = 0; i < dataList.length; i++) {
+
+                            var item = dataList[i];
+                            let tempTrHtml = '<tr style="text-align: center;">' +
+                                '<td title="'+item.storeCd+'" style="text-align: left">'+item.storeCd+'</td>' +
+                                '<td title="'+isEmpty(item.storeName)+'" style="text-align: left">'+isEmpty(item.storeName)+'</td>' +
+                                '<td title="'+isEmpty(fmtIntDate(item.saleDate))+'" style="text-align: center">'+isEmpty(fmtIntDate(item.saleDate))+'</td>' +
+                                '<td title="'+toThousands(item.avgCustomerNo)+'" style="text-align:right">'+toThousands(item.avgCustomerNo)+'</td>' +
+                                '<td title="'+toThousands(item.time1214)+'" style="text-align:right">'+toThousands(item.time1214)+'</td>' +
+                                '<td title="'+toThousands(item.time1416)+'" style="text-align:right">'+toThousands(item.time1416)+'</td>' +
+                                '<td title="'+toThousands(item.time1618)+'" style="text-align:right">'+toThousands(item.time1618)+'</td>' +
+                                '<td title="'+toThousands(item.time1820)+'" style="text-align:right">'+toThousands(item.time1820)+'</td>' +
+                                '<td title="'+toThousands(item.shift1)+'" style="text-align:right">'+toThousands(item.shift1)+'</td>' +
+                                '<td title="'+toThousands(item.time2022)+'" style="text-align:right">'+toThousands(item.time2022)+'</td>' +
+                                '<td title="'+toThousands(item.time2224)+'" style="text-align:right">'+toThousands(item.time2224)+'</td>' +
+                                '<td title="'+toThousands(item.time02)+'" style="text-align:right">'+toThousands(item.time02)+'</td>' +
+                                '<td title="'+toThousands(item.time24)+'" style="text-align:right">'+toThousands(item.time24)+'</td>' +
+                                '<td title="'+toThousands(item.shift2)+'" style="text-align:right">'+toThousands(item.shift2)+'</td>' +
+                                '<td title="'+toThousands(item.time46)+'" style="text-align:right">'+toThousands(item.time46)+'</td>' +
+                                '<td title="'+toThousands(item.time68)+'" style="text-align:right">'+toThousands(item.time68)+'</td>' +
+                                '<td title="'+toThousands(item.time810)+'" style="text-align:right">'+toThousands(item.time810)+'</td>' +
+                                '<td title="'+toThousands(item.time1012)+'" style="text-align:right">'+toThousands(item.time1012)+'</td>' +
+                                '<td title="'+toThousands(item.shift3)+'" style="text-align:right">'+toThousands(item.shift3)+'</td>' +
+                                '<td title="'+toThousands(item.totalAmt)+'" style="text-align:right">'+toThousands(item.totalAmt)+'</td>' +
+                                '<td title="'+isEmpty(item.amName)+'" style="text-align: left">'+isEmpty(item.amName)+'</td>' +
+                                '</tr>';
+                            m.dailyTable.append(tempTrHtml);
+
+                        }
+
+                    }
                     // 加载分页条数据
                     _common.loadPaging(totalPage,count,page,rows);
                 }
@@ -231,43 +350,73 @@ define('dailySaleReport', function () {
             if(verifySearch()){
                 // 拼接检索参数
                 setParamJson();
+                var typeDate = m.typeDate.val();
                 // 分页获取数据
-                getData(page,rows);
+                getData(page,rows,typeDate);
             }
         });
     }
 
     //验证检索项是否合法
     var verifySearch = function(){
-        if(m.startDate.val()==""||m.startDate.val()==null){
-            _common.prompt("Please enter a Sales Date!",5,"error"); // 开始日期不可以为空
-            $("#startDate").focus();
-            $("#startDate").css("border-color","red");
-            return false;
+        var typeDate=m.typeDate.val();
+        let _startDate ='';
+        let _endDate=' ';
+        if (typeDate=='1'){
+            _startDate = formatDate(m.effstartDate.val());
+            _endDate = formatDate(m.effendDate.val());
         }else {
-            $("#startDate").css("border-color","#CCC");
-        }
-        if(m.endDate.val()==""||m.endDate.val()==null){
-            _common.prompt("Please enter a Sales Date!",5,"error"); // 结束日期不可以为空
-            $("#endDate").focus();
-            $("#endDate").css("border-color","red");
-            return false;
-        }else {
-            $("#endDate").css("border-color","#CCC");
+            _startDate = formatDate(m.PosstartDate.val());
+            _endDate = formatDate(m.PosendDate.val());
         }
 
-        if(new Date(fmtDate(m.startDate.val())).getTime()>new Date(fmtDate(m.endDate.val())).getTime()){
-            $("#endDate").focus();
+        if (typeDate=='1'){
+            if(m.effstartDate.val()==""||m.effstartDate.val()==null){
+                _common.prompt("Please enter a Sales Date!",5,"error"); // 开始日期不可以为空
+                $("#effstartDate").focus();
+                $("#effstartDate").css("border-color","red");
+                return false;
+            }else {
+                $("#effstartDate").css("border-color","#CCC");
+            }
+            if(m.effendDate.val()==""||m.effendDate.val()==null){
+                _common.prompt("Please enter a Sales Date!",5,"error"); // 结束日期不可以为空
+                $("#effendDate").focus();
+                $("#effendDate").css("border-color","red");
+                return false;
+            }else {
+                $("#effendDate").css("border-color","#CCC");
+            }
+        }
+        if (m.typeDate.val()=='2'){
+            if(m.PosstartDate.val()==""||m.PosstartDate.val()==null){
+                _common.prompt("Please enter a Sales Date!",5,"error"); // 开始日期不可以为空
+                $("#PosstartDate").focus();
+                $("#PosstartDate").css("border-color","red");
+                return false;
+            }else {
+                $("#PosstartDate").css("border-color","#CCC");
+            }
+            if(m.PosendDate.val()==""||m.PosendDate.val()==null){
+                _common.prompt("Please enter a Sales Date!",5,"error"); // 结束日期不可以为空
+                $("#PosendDate").focus();
+                $("#PosendDate").css("border-color","red");
+                return false;
+            }else {
+                $("#PosendDate").css("border-color","#CCC");
+            }
+        }
+
+        if(new Date(fmtDate(fmtIntDate( _startDate))).getTime()>new Date(fmtDate(fmtIntDate(  _endDate))).getTime()){
             _common.prompt("The start date cannot be greater than the end date!",5,"error");/*开始时间不能大于结束时间*/
             return false;
         }
-        if(m.startDate.val()!=""&&m.endDate.val()!=""){
-            var _StartDate = new Date(fmtDate($("#startDate").val())).getTime();
-            var _EndDate = new Date(fmtDate($("#endDate").val())).getTime();
+        if(_startDate!=""&&_endDate!=""){
+            var _StartDate =new Date(fmtDate(fmtIntDate(_startDate))).getTime();
+            var _EndDate = new Date(fmtDate(fmtIntDate(_endDate))).getTime();
             var difValue = parseInt(Math.abs((_EndDate-_StartDate)/(1000*3600*24)));
             if(difValue >62){
                 _common.prompt("Query Period cannot exceed 62 days!",5,"error"); // 日期期间取值范围不能大于62天
-                $("#endDate").focus();
                 return false;
             }
         }

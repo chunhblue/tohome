@@ -76,4 +76,14 @@ public class Utils {
     public static int getNextEndNum(int curEndNum, int pageSize) {
         return curEndNum + pageSize;
     }
+
+    // "yyyyMMdd" -->  "yyyy-MM-dd"
+    public static String getTimeStamp(String date){
+        String str = "";
+        if(date == null || "".equals(date) || date.length()<8){
+            return str;
+        }
+        str = date.substring(0,4)+"-"+date.substring(4,6)+"-"+date.substring(6,8);
+        return str;
+    }
 }

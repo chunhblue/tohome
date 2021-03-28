@@ -209,4 +209,6 @@ public class ArticleDTO extends GridDataDTO {
 
     private CommonDTO commonDTO;
 
+    private String createUserId;
+    private String createYmd;
 }

@@ -1,9 +1,8 @@
 package cn.com.bbut.iy.itemmaster.service.opreationmanagement;
 
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
-import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100DTOC;
-import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100ParamDTOC;
-import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0110DTOC;
+import cn.com.bbut.iy.itemmaster.dto.pi0100.ItemInStoreDto;
+import cn.com.bbut.iy.itemmaster.dto.pi0100c.*;
 import org.apache.ibatis.annotations.Param;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
@@ -32,4 +31,6 @@ public interface CustOfEntryPlanService {
     HSSFWorkbook getExportHSSFWorkbook(PI0100ParamDTOC pi0100Paramc, String formCondition, String piCd, String piDate);
 
     List<PI0100DTOC> getPrintData(PI0100ParamDTOC pi0100Param);
+
+    GridDataDTO<CostOfDTO> storeAllItem(ItemInStoreDto param);
 }

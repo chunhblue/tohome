@@ -135,12 +135,6 @@ define('stockAdjustment', function () {
 			cleanInput:function () {
 
 			},
-			selectEleClick:function (thisObj) {
-				if (thisObj.attr("k") !== null && thisObj.attr("k") !== "") {
-					var strm ="&generalLevelCd="+ m.adjustmentReason.attr('k');
-					getGeneralLevelCd(strm);
-				}
-			}
 		})
 
 
@@ -152,25 +146,14 @@ define('stockAdjustment', function () {
 			$.myAutomatic.cleanSelectObj(a_pma);
 			$.myAutomatic.cleanSelectObj(a_category);
 			$.myAutomatic.cleanSelectObj(a_subCategory);
-			// $("#pma").attr("disabled", true);
-			// $("#category").attr("disabled", true);
-			// $("#subCategory").attr("disabled", true);
-			// $("#pmaRefresh").attr("disabled",true).css("pointer-events","none");
-			// $("#categoryRefresh").attr("disabled",true).css("pointer-events","none");
-			// $("#subCategoryRefresh").attr("disabled",true).css("pointer-events","none");
 		});
 		$("#pmaRemove").on("click", function (e) {
 			$.myAutomatic.cleanSelectObj(a_category);
 			$.myAutomatic.cleanSelectObj(a_subCategory);
-			// $("#category").attr("disabled", true);
-			// $("#subCategory").attr("disabled", true);
-			// $("#categoryRefresh").attr("disabled",true).css("pointer-events","none");
-			// $("#subCategoryRefresh").attr("disabled",true).css("pointer-events","none");
+
 		});
 		$("#categoryRemove").on("click", function (e) {
-			$.myAutomatic.cleanSelectObj(a_subCategory);
-			// $("#subCategory").attr("disabled", true);
-			// $("#subCategoryRefresh").attr("disabled",true).css("pointer-events","none");
+			$.myAutomatic.cleanSelectObj(a_subCategory);;
 		});
 		$("#amRemove").on("click",function (e) {
 			$.myAutomatic.cleanSelectObj(am);
@@ -228,16 +211,6 @@ define('stockAdjustment', function () {
 				window.open(encodeURI(url), "excelExportWin", "width=450,height=300,scrollbars=yes");
 			}
 		});
-		// // 查询类型监听事件
-		// $('input:radio[name="queryType"]').on('change',function(){
-		// 	var checkValue = $('input:radio[name="queryType"]:checked').val();
-		// 	// ertal(checkValue)
-		// 	if(checkValue == '1'){
-		// 		setDisable(true);
-		// 	}else{
-		// 		setDisable(false);
-		// 	}
-		// });
     }
 
 	/**
@@ -278,7 +251,6 @@ define('stockAdjustment', function () {
 							'<td title="' + isEmpty(item.barcode) + '" style="text-align: right">' + isEmpty(item.barcode) + '</td>' +
 							'<td title="' + isEmpty(item.uom) + '" style="text-align:left;">' + isEmpty(item.uom) + '</td>' +
 							'<td title="' + toThousands(item.adjustmentQty) + '" style="text-align:right;">' + toThousands(item.adjustmentQty) + '</td>' +
-							'<td title="' + isEmpty(item.generalReasonText) + '" style="text-align: left">' + isEmpty(item.generalReasonText) + '</td>' +
 							'<td title="' + isEmpty(item.adjustReasonText) + '" style="text-align: left">' + isEmpty(item.adjustReasonText) + '</td>' +
 							'<td title="' + isEmpty(item.ofc) + '" style="text-align: left">' + isEmpty(item.ofc) + '</td>' +
 							'<td title="' + isEmpty(item.ofcName) + '" style="text-align: left">' + isEmpty(item.ofcName) + '</td>' +
@@ -299,7 +271,6 @@ define('stockAdjustment', function () {
 						"<td style='text-align:right'>total qty </td>"+
 						"<td style='text-align:right'>"+toThousands(result.o.ItemQty)+"</td>"+
 						"<td></td>" +"<td></td>" +
-						"<td></td>" +
 						"<td></td>" +
 						"</tr>";
 					if (totalPage===page){
@@ -364,51 +335,8 @@ define('stockAdjustment', function () {
 				return false;
 			}
 		}
-		// var temp = m.itemId.val().trim();
-		// if(temp!=null && $.trim(temp)!=''){
-		// 	var reg = /^[0-9]*$/;
-		// 	if(!reg.test(temp)){
-		// 		m.itemId.focus();
-		// 		_common.prompt("Item Code must be pure Numbers!",5,"info");/*商品编号必须是纯数字*/
-		// 		return false;
-		// 	}
-		// }
-		if (m.generalReason.attr("v")!=null && m.generalReason.attr("v")!=""){
-			if (m.adjustmentReason.attr("k")==null || m.adjustmentReason.attr("k")==""){
-				_common.prompt("Please enter a reason!",3,"info");
-				$("#adjustmentReason").css("border-color","red");
-				$("#adjustmentReason").focus();
-				return false;
-			}else {
-				$("#adjustmentReason").css("border-color", "#CCC");
-			}
-		}
-		if (m.adjustmentReason.attr("k")!=null && m.adjustmentReason.attr("k")!=""){
-			if (m.generalReason.attr("k")==null || m.generalReason.attr("k")==""){
-				var strm ="&generalLevelCd="+ m.adjustmentReason.attr('k');
-				getGeneralLevelCd(strm);
-			}
-		}
-
     	return true;
     }
-	function getGeneralLevelCd(strm) {
-		$.myAjaxs({
-			url:url_root+"/inventoryVoucher/getGeneralLevel",
-			async:true,
-			cache:false,
-			type :"get",
-			data :strm,
-			dataType:"json",
-			success:function (result) {
-				$.myAutomatic.setValueTemp(generalReason,result.generalLevelCd,result.generalLevelReason);
-			},
-			error:function (e) {
-
-			}
-
-		})
-	}
     // 拼接检索参数
     var setParamJson = function(){
     	// 日期格式转换
@@ -422,7 +350,7 @@ define('stockAdjustment', function () {
 			storeCd:$("#aStore").attr("k"),
 			adjustmentStartDate: _startDate,
 			adjustmentEndDate: _endDate,
-			generalReason:m.generalReason.attr("k"),
+			// generalReason:m.generalReason.attr("k"),
 			adjustReason:m.adjustmentReason.attr("k"),
 			barcode:m.barcode.val().trim(),
 			articleName:m.itemName.val().trim(),

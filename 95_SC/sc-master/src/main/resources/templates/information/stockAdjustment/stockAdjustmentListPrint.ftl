@@ -85,7 +85,6 @@
                         <th title="Barcode">Barcode</th>
                         <th title="UOM">UOM</th>
                         <th title="Write Off Quantity">Write Off Quantity</th>
-                        <th title="General Reason">General Reason</th>
                         <th title="Adjustment Reason">Adjustment Reason</th>
                         <th title="Are Manager Code">Are Manager Code</th>
                         <th title="Are Manager Name">Are Manager Name</th>

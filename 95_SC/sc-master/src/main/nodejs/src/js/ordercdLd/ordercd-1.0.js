@@ -198,11 +198,11 @@ define('orderCd', function () {
                 var paramGrid="storeCd="+cols['storeCd']+"&storeName="+cols['storeName']+"&orderId="+ cols['orderId']+"&orderDate="+cols['orderDate'] +"&vendorId="+cols['vendorId']+"&warehouseName="+cols['warehouseName']
                 saveParamToSession();
                 // if('Store Order'==cols['orderMethod'].trim()){
-                if('40'===cols['orderMethod1']){
+                if(cols['orderId'].length < 13){
+                    top.location = url_left+"/cdOrderView?"+paramGrid;
+                }else {
                     let param = "use=0&orderId="+cols["orderId"].trim();
                     top.location = url_root+"/urgentOrderDc/edit?"+param;
-                }else {
-                    top.location = url_left+"/cdOrderView?"+paramGrid;
                 }
             }
         });

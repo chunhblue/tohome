@@ -245,4 +245,10 @@ public class DefaultRoleServiceImpl implements DefaultRoleService {
     public int getMaxPosition(String userId) {
         return ma4160Mapper.getMaxPositionByuserId(userId);
     }
+
+    @Override
+    public int countFinancePosition(String userId){
+
+        return ma4160Mapper.countFinancePosition(userId);
+    }
 }

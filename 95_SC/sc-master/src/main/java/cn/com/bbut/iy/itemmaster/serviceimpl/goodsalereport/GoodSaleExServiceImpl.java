@@ -91,6 +91,9 @@ public class GoodSaleExServiceImpl implements ExService {
      * @param curRow
      */
     private void createExcelBody(Sheet sheet, int curRow, goodSaleReportParamDTO jsonParam) {
+
+        jsonParam.setStartDate(Utils.getTimeStamp(jsonParam.getStartDate()));
+        jsonParam.setEndDate(Utils.getTimeStamp(jsonParam.getEndDate()));
         // 查询数据
         jsonParam.setFlg(false);
         List<goodSaleReportDTO> _list = mapper.search(jsonParam);
@@ -116,19 +119,10 @@ public class GoodSaleExServiceImpl implements ExService {
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
             setCellValue(cell, ls.getStoreName());
 
-            String saleDate = ls.getSaleDate();
-            if (!StringUtils.isEmpty(saleDate)) {
-                try {
-                    Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(saleDate);
-                    saleDate=new SimpleDateFormat("dd/MM/yyyy").format(date);
-                } catch (ParseException e) {
-                    saleDate = "";
-                    e.printStackTrace();
-                }
-            }
+            String tranDate = ls.getTranDate();
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
-            setCellValue(cell, saleDate);
+            setCellValue(cell, fmtDateAndTimeToStr19(tranDate));
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));

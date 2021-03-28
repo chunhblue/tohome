@@ -15,6 +15,7 @@ import cn.com.bbut.iy.itemmaster.entity.SK0010Example;
 import cn.com.bbut.iy.itemmaster.entity.SK0010Key;
 import cn.com.bbut.iy.itemmaster.entity.SK0020Example;
 import cn.com.bbut.iy.itemmaster.entity.base.Cm9060;
+import cn.com.bbut.iy.itemmaster.entity.od0000.OD0000;
 import cn.com.bbut.iy.itemmaster.service.SequenceService;
 import cn.com.bbut.iy.itemmaster.service.transferMod.TransferModService;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -87,7 +90,51 @@ public class TransferModServiceImpl implements TransferModService {
     @Override
     public List<AutoCompleteDTO> getOrgOrderList(String storeCd, String type, String v) {
         String businessDate = getBusinessDate();
-        return mapper.selectOrgOrder(storeCd,businessDate, type, v);
+        List<AutoCompleteDTO> _list =  mapper.selectOrgOrder(storeCd,businessDate, type, v);
+        if(_list == null || _list.size() == 0){
+            return _list;
+        }
+        Collection<String> voucherNos = new ArrayList<>();
+        for(AutoCompleteDTO  dto : _list){
+            voucherNos.add(dto.getV());
+        }
+        List<SK0010> corrList = mapper.getCorrList(voucherNos,type);
+        List<SK0010> newList = new ArrayList<>();
+        for(SK0010 oldItem : corrList){
+            boolean checkFlg = true;
+            for(SK0010 newItem : newList){
+                if(newItem.getVoucherNo1().equals(oldItem.getVoucherNo1())){
+                    if(oldItem.getCreateYmd()!=null && oldItem.getCreateHms()!=null
+                            && newItem.getCreateYmd()!=null&& newItem.getCreateHms()!=null){
+                        if(Long.parseLong(oldItem.getCreateYmd()+oldItem.getCreateHms())
+                                > Long.parseLong(newItem.getCreateYmd()+newItem.getCreateHms())){
+                            newItem.setVoucherNo(oldItem.getVoucherNo());
+                            newItem.setVoucherNo1(oldItem.getVoucherNo1());
+                            newItem.setReviewSts(oldItem.getReviewSts());
+                            newItem.setCreateYmd(oldItem.getCreateYmd());
+                            newItem.setCreateHms(oldItem.getCreateHms());
+                            newItem.setStoreCd(oldItem.getStoreCd());
+                        }
+                    }
+                    checkFlg = false;
+                }
+            }
+            if(checkFlg){
+                newList.add(oldItem);
+            }
+        }
+        if(newList.size()>0){
+            for(int i =0;i<_list.size();i++){
+                AutoCompleteDTO dto = _list.get(i);
+                for(SK0010 newItem : newList){
+                    if(dto.getV().equals(newItem.getVoucherNo1()) && !newItem.getReviewSts().equals("10")){
+                        _list.remove(dto);
+                        i--; // 索引减1，保证索引正常，不然报java.util.ConcurrentModificationException
+                    }
+                }
+            }
+        }
+        return _list;
     }
 
     /**

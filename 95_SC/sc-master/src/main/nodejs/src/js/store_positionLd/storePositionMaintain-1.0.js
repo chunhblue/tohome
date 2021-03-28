@@ -195,14 +195,26 @@ define('storePositionMaintain', function () {
                         notEmpty: {
                             message: 'Please enter all required fields(marked with red color)!'
                         },
-                        stringLength: {
-                            min: 1,
-                            max: 10,
-                            message: 'Entered data exceeded the maximum length!'
+                        callback:{
+                            message: 'Entered data exceeded the maximum length!',
+                            callback: function (value) {
+                             if (value.trim().length>11){
+                                 return false;
+                             }else {
+                                 return  true;
+                             }
+                          }
                         },
-                        regexp: {
-                            regexp: /^[a-zA-Z0-9_\.]+$/,
-                            message: 'The User ID can only consist of alphabetical, number, dot and underscore'
+                        callback:{
+                            message: 'The User ID can only consist of alphabetical, number, and parting line',
+                            callback:function (value) {
+                              var  regexp= /^[a-zA-Z0-9_-]+$/;
+                              if (value.trim().match(regexp)){
+                                  return  true;
+                              }else {
+                                  return false;
+                              }
+                            },
                         },
                         threshold: 1,//有1字符以上才发送ajax请求
                         remote: {
@@ -350,7 +362,72 @@ define('storePositionMaintain', function () {
             }
         })
     }
-
+//     //  2021/3/11
+    // function ValidatorUserInfo(){
+    //         $("#userInfoPanel").bootstrapValidator({
+    //             excluded: [':disabled'],
+    //             feedbackIcons: {
+    //                 validating: 'glyphicon glyphicon-refresh'
+    //             },
+    //             fields: {
+    //                 nickname: {//字段名
+    //                     validators: {
+    //                         notEmpty: {//不能为空
+    //                             message: '请输入姓名'
+    //                         },
+    //                         //长度校验
+    //                         stringLength: {
+    //                             min: 1,
+    //                             max:11,
+    //                             message: '字符长度必须在1位到10位之间'
+    //                         },
+    //
+    //                     }
+    //                 },
+    //                 phone: {
+    //                     validators: {
+    //                         notEmpty: {
+    //                             message: '请输入手机号'
+    //                         },
+    //                         regexp: {
+    //                             regexp: /^[1][3,4,5,7,8][0-9]{9}$/,
+    //                             message: '请输入正确的手机号'
+    //                         },
+    //                     }
+    //                 },
+    //                 schoolName: {
+    //                     validators: {
+    //                         notEmpty: {
+    //                             message: '请选择分支机构'
+    //                         },
+    //                         callback: {//用于select的校验
+    //                             message: '请选择分支机构',
+    //                             callback: function(value, validator) {//这里可以自定义value的判断规则
+    //                                 if (value == 0) {//"请选择"
+    //                                     return false;
+    //                                 } else {
+    //                                     return true;
+    //                                 }
+    //                             }
+    //                         }
+    //                     }
+    //                 },
+    //                 remark: {
+    //                     validators: {
+    //                         notEmpty: {
+    //                             message: '请输入简介'
+    //                         },
+    //                         //长度校验
+    //                         stringLength: {
+    //                             min: 1,
+    //                             message: '字符长度必须在1位以上'
+    //                         },
+    //                     }
+    //                 },
+    //             }
+    //         })
+    //     }
+    //     // 初始化下拉列表
     // 初始化下拉列表
     function initSelectOptions(title, selectId, code) {
         // 共通请求

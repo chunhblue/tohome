@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -80,8 +81,22 @@ public class PromotionServiceImpl implements PromotionService {
     @Override
     public GridDataDTO<Ma4070DTO> getMa4070(PromotionParamDTO dto) {
         GridDataDTO<Ma4070DTO> _return = new GridDataDTO<Ma4070DTO>();
-        List<Ma4070DTO> _list = mapper.selectMa4070(dto);
-        _return.setRows(_list);
+        String mmPromotionPattern = mapper.getMMPromotionPattern(dto.getPromotionCd());
+        if(mmPromotionPattern == null){
+            List<Ma4070DTO> _list = mapper.selectMa4070(dto);
+            _return.setRows(_list);
+            return _return;
+        }
+        if (mmPromotionPattern.equals("04")){
+            List<Ma4070DTO> _list = mapper.selectMa4070(dto);
+            HashSet<Ma4070DTO> ma4070dtos2 = new HashSet<Ma4070DTO>(_list);
+            _list.clear();
+            _list.addAll(ma4070dtos2);
+            _return.setRows(_list);
+        }else {
+            List<Ma4070DTO> _list = mapper.selectMa4070(dto);
+            _return.setRows(_list);
+        }
         return _return;
     }
 
@@ -163,5 +178,28 @@ public class PromotionServiceImpl implements PromotionService {
         return _return;
     }
 
+    /**
+     * 查询直接促销
+     *
+     */
+    @Override
+    public GridDataDTO<Ma4150DTO> getMa4150(PromotionParamDTO dto) {
+        GridDataDTO<Ma4150DTO> _return = new GridDataDTO<Ma4150DTO>();
+        List<Ma4150DTO> _list = mapper.getMa4150(dto);
+        _return.setRows(_list);
+        return _return;
+    }
+
+    /**
+     * 查询bill value
+     *
+     */
+    @Override
+    public GridDataDTO<Ma4155DTO> getMa4155(PromotionParamDTO dto) {
+        GridDataDTO<Ma4155DTO> _return = new GridDataDTO<Ma4155DTO>();
+        List<Ma4155DTO> _list = mapper.getMa4155(dto);
+        _return.setRows(_list);
+        return _return;
+    }
 
 }

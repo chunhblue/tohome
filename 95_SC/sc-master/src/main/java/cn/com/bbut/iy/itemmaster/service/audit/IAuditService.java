@@ -122,4 +122,7 @@ public interface IAuditService {
      * @return
      */
     int checkAuditByUserId(String storeCd, String userId , long position);
+
+
+    String getCorrType(String reTableName,String recordCd,Integer typeId);
 }

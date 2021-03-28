@@ -411,12 +411,13 @@
       od0010.order_amt AS order_total_amt
       FROM
       ma1000,
-      ma1100,
+      ma1100 left join
+        PI0125 PI1
+        on pi1.article_id = ma1100.article_id and pi1.store_cd =#{param.storeCd}
+        LEFT JOIN PI0120 PI2 ON pi1.pi_cd = pi2.pi_cd
+        AND pi1.pi_date = pi2.pi_date
+        AND pi1.article_id = pi2.article_id,
       ma1110,
-      PI0125 PI1
-      LEFT JOIN PI0120 PI2 ON pi1.pi_cd = pi2.pi_cd
-      AND pi1.pi_date = pi2.pi_date
-      AND pi1.article_id = pi2.article_id,
       od0010
       LEFT JOIN sk0000 ON od0010.article_id = sk0000.article_id
       AND sk0000.store_cd = #{param.storeCd}
@@ -425,8 +426,6 @@
       LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id
       WHERE
       ma1100.article_id = od0010.article_id
-      AND pi1.store_cd =#{param.storeCd}
-      AND pi1.article_id = ma1100.article_id
       AND ma1000.store_cd = od0010.store_cd
       AND #{param.orderDate} BETWEEN ma1000.effective_start_date
       AND ma1000.effective_end_date
@@ -454,6 +453,9 @@
         </if>
         <if test="param.am!=null and param.am!=''">
             AND  ma1000.ofc = #{param.am}
+        </if>
+        <if test="param.barcode!=null and param.barcode!=''">
+            AND  od0010.barcode = #{param.barcode}
         </if>
       AND ma1110.structure_cd = (
       SELECT
@@ -505,12 +507,13 @@
         od0010.order_amt AS order_total_amt
         FROM
         ma1000,
-        ma1100,
-        ma1110,
+        ma1100 left join
         PI0125 PI1
+        on pi1.article_id = ma1100.article_id and pi1.store_cd =#{param.storeCd}
         LEFT JOIN PI0120 PI2 ON pi1.pi_cd = pi2.pi_cd
         AND pi1.pi_date = pi2.pi_date
         AND pi1.article_id = pi2.article_id,
+        ma1110,
         od0010
         LEFT JOIN sk0000 ON od0010.article_id = sk0000.article_id
         AND sk0000.store_cd = #{param.storeCd}
@@ -519,8 +522,6 @@
         LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id
         WHERE
         ma1100.article_id = od0010.article_id
-        AND pi1.store_cd =#{param.storeCd}
-        AND pi1.article_id = ma1100.article_id
         AND ma1000.store_cd = od0010.store_cd
         AND #{param.orderDate} BETWEEN ma1000.effective_start_date
         AND ma1000.effective_end_date

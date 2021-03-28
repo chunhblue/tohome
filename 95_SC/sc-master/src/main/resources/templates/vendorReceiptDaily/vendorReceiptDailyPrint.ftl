@@ -85,8 +85,8 @@
                         <th title="Barcode">Barcode</th>
                         <th title="Vendor Code">Vendor Code</th>
                         <th title="Vendor Name">Vendor Name</th>
-                        <th title="Area Manager ID">Area Manager ID</th>
                         <th title="Area Manager Name">Area Manager Name</th>
+                        <th title="Operation Manager Name">Operation Manager Name</th>
                         <th title="Receiving Quantity">Receiving Quantity</th>[#--收货数量--]
                         <th title="Created By">Created By</th>
                         <th title="Remark">Remark</th>

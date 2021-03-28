@@ -78,7 +78,6 @@ public class StockProcessController extends BaseAction {
             _return = new ReturnDTO(false, "Session time out!","001");
             return _return;
         }
-
         //返回商品的HSSFWorkbook对象
         wb = stocktakeProcessService.getExportHSSFWorkbook(piCd, piDate, storeCd);
         if(wb == null) {
@@ -179,6 +178,23 @@ public class StockProcessController extends BaseAction {
                                                                String sidx, String sord,
                                                                int page, int rows, HttpServletRequest request, HttpSession session) {
         return stocktakeProcessService.getTableData3(piCd,piDate,storeCd,searchVal,startQty,endQty,startAmt,endAmt,sidx,sord,page,rows);
+    }
+
+    /**
+     * 获取上传异常商品编号的商品
+     * @param piCd
+     * @param piDate
+     * @param storeCd
+     * @param searchVal
+     * @param page
+     * @param rows
+     * @return
+     */
+    @RequestMapping("/getTableData4")
+    @ResponseBody
+    public GridDataDTO<StocktakeProcessItemsDTO> getTableData4(String piCd, String piDate,String storeCd,String searchVal,
+                                                               int page, int rows) {
+        return stocktakeProcessService.getTableData4(piCd,piDate,storeCd,searchVal,page,rows);
     }
 
     @RequestMapping("/getData")

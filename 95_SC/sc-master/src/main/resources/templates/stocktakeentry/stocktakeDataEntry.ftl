@@ -122,7 +122,7 @@
 									</div>
 								</div>
 								<div class="form-group">
-									<label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Stocktaking Time</label>
+									<label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">Stocktaking Time</label>
 									<div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
 										<input id="pd_start_time" readonly="true" nextele="sell_end_date" placeholder="Start Time" class="form-control input-sm select-date" type="text" value="">
 									</div>
@@ -247,7 +247,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="form-group">
+						<div class="form-group" hidden> [#--隐藏 2021/03/19 by lch--]
 							<label for="secondQty" class="col-sm-2 col-lg-5 control-label">Adjust Qty</label>
 							<div class="col-sm-6">
 								<div class="aotu-pos">

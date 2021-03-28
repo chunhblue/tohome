@@ -40,6 +40,9 @@ public interface StocktakeProcessService {
                                                         String sidx, String sord,
                                                         int page, int rows);
 
+    GridDataDTO<StocktakeProcessItemsDTO> getTableData4(String piCd, String piDate,
+                                                        String storeCd, String searchVal,int page, int rows);
+
     List<StocktakeProcessDTO> getPrintData(PI0100ParamDTO pi0100);
 
     /**

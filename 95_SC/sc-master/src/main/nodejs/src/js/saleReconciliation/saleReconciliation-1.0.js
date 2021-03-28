@@ -721,11 +721,11 @@ define('saleReconciliation', function () {
 	var shiftFmt = function(tdObj, value){
     	var shiftName = "";
     	if(value=="00"){
-			shiftName = "morning shift"
+			shiftName = "Shift1"
 		}else if(value=="01"){
-			shiftName = "middle shift"
+			shiftName = "Shift2"
 		}else if(value=="02"){
-			shiftName = "night shift"
+			shiftName = "Shift3"
 		}
 		return $(tdObj).text(shiftName);
 	}

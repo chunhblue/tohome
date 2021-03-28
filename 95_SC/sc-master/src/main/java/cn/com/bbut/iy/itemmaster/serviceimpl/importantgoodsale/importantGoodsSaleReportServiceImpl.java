@@ -7,6 +7,8 @@ import cn.com.bbut.iy.itemmaster.entity.base.Ma1000;
 import cn.com.bbut.iy.itemmaster.entity.ma0020.MA0020C;
 import cn.com.bbut.iy.itemmaster.entity.ma0080.MA0080;
 import cn.com.bbut.iy.itemmaster.service.importantgoodsale.importantGoodsSaleReportService;
+import cn.com.bbut.iy.itemmaster.util.Utils;
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -50,6 +52,10 @@ public class importantGoodsSaleReportServiceImpl implements importantGoodsSaleRe
 
     @Override
     public Map<String,Object> getGoodSaleReportContent(importantgoodSaleReportParamDTO param) {
+        param.setStartDate(Utils.getTimeStamp(param.getStartDate()));
+        param.setEndDate(Utils.getTimeStamp(param.getEndDate()));
+        int startPage = param.getPage();
+        int startSeqNo=1+param.getRows()*(startPage-1);
         // 获取总条数
         int count = goodsSaleReportMapper.searchCount(param);
 
@@ -58,14 +64,12 @@ public class importantGoodsSaleReportServiceImpl implements importantGoodsSaleRe
 
         List<importantgoodSaleReportDTO> goodsList = goodsSaleReportMapper.search(param);
         for (int i = 0; i <goodsList.size(); i++) {
+
             goodsList.get(i).setSaleDate(formatDate2( goodsList.get(i).getSaleDate()));
             goodsList.get(i).setAccDate(formatDate2( goodsList.get(i).getSaleDate()));
-            goodsList.get(i).setSeqNo(i+1);
+            goodsList.get(i).setSeqNo(startSeqNo);
+            startSeqNo++;
         }
-//        for (importantgoodSaleReportDTO reportdto :goodsList) {
-//            reportdto.setSaleDate(formatDate2(reportdto.getSaleDate()));
-//            reportdto.setAccDate(formatDate1(reportdto.getAccDate()));
-//        }
 
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("totalPage",totalPage);

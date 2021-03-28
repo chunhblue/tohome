@@ -358,6 +358,9 @@
       <if test="multipleFlg != null" >
         multiple_flg,
       </if>
+      <if test="orderAmtNotax != null" >
+        order_amt_notax,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="storeCd != null" >
@@ -489,6 +492,9 @@
       </if>
       <if test="multipleFlg != null" >
         #{multipleFlg,jdbcType=VARCHAR},
+      </if>
+      <if test="orderAmtNotax != null" >
+        #{orderAmtNotax,jdbcType=NUMERIC},
       </if>
     </trim>
   </insert>
@@ -819,6 +825,9 @@
       <if test="reviewStatus != null" >
         review_status = #{reviewStatus,jdbcType=INTEGER},
       </if>
+      <if test="orderAmtNotax != null" >
+        order_amt_notax = #{orderAmtNotax,jdbcType=NUMERIC}
+      </if>
     </set>
     where store_cd = #{storeCd,jdbcType=CHAR}
     and order_id = #{orderId,jdbcType=VARCHAR}
@@ -972,4 +981,51 @@
         insert into od0005(order_id) values (#{orderId,jdbcType=VARCHAR})
         ON CONFLICT (order_id) DO NOTHING;
   </insert>
+
+  <!--差异单头档-->
+  <select id="selectShopOrderHeadByOrderId" resultType="cn.com.bbut.iy.itemmaster.dto.difference.DifferenceHeadResult" >
+    SELECT DISTINCT A
+    .upload_date,
+    A.delivery_date,
+    A.order_id,
+    A.delivery_order_id,
+    A.org_order_id,
+    A.store_cd,
+    CONCAT ( f.store_name, '', f.store_name_en ) AS store_name,
+    C.warehouse_no delivery_center_id,
+    C.warehouse_name  AS  delivery_center_name,
+    h.update_ymd receive_date,
+    A.create_ymd AS create_date,
+    b.total_delivery_qty,
+    h.total_receive_qty,
+    b.total_delivery_qty - h.total_receive_qty AS total_variance_qty
+    FROM
+    od0001
+    A LEFT JOIN ( SELECT delivery_order_id, SUM ( order_qty ) total_delivery_qty FROM od0011 GROUP BY delivery_order_id ) b ON A.delivery_order_id = b.delivery_order_id
+    LEFT JOIN (
+    SELECT
+    od0000_t.order_id,
+    od0000_t.update_ymd,
+    SUM ( od0010_t.receive_qty ) total_receive_qty
+    FROM
+    od0010_t,
+    od0000_t
+    WHERE
+    od0010_t.receive_id = od0000_t.receive_id
+    GROUP BY
+    od0000_t.order_id,
+    od0000_t.update_ymd
+    ) h ON A.order_id = h.order_id
+    LEFT JOIN MA5321 C ON C.warehouse_no = A.vendor_id,
+    ma1000 f,
+    cm9060 G
+    WHERE
+    A.store_cd = f.store_cd
+    AND G.sp_id = '0000'
+    AND G.sp_value BETWEEN f.effective_start_date
+    AND f.effective_end_date
+    <if test="orderId != null and orderId != ''" >
+      and a.order_id = #{orderId}
+    </if>
+  </select>
 </mapper>

@@ -79,6 +79,12 @@ public class VendorDetailsGridDTO extends GridDataDTO {
     // 实收数量
     private BigDecimal receiveQty;
 
+    // HHT收货数量
+    private BigDecimal hhtReceiveQty;
+
+    // 收货差异数量 = receiveQty - hhtReceiveQty
+    private BigDecimal varQty;
+
     // 实收搭赠数
     private BigDecimal receiveNoChargeQty;
 

@@ -102,7 +102,7 @@ define('orderNewStore', function () {
 		// 初始化分类查询
 		// initAutoMatic();
 		_common.initCategoryAutoMatic();
-		//大中小分类初始化
+		// 		//大中小分类初始化
 		// dpt_init();
 
 		$("#show_status").find("input[type='radio']").eq(1).click();
@@ -537,27 +537,9 @@ define('orderNewStore', function () {
 			}else {
 				$("#aStore").css("border-color","#CCC");
 			}
-			var msg = "";
-			//判断是否更改
-			$.myAjaxs({
-				url:url_left+"/checkVendorOrder",
-				async:false,
-				cache:false,
-				type :"post",
-				data :{
-					storeCd: m.aStore.attr('k'),
-					orderDate: subfmtDate(m.order_date.val())
-				},
-				dataType:"json",
-				success:function(result){
-					if(result.success){
-						msg = "No order item(Supplier) to meet the requirements ! ";
-					}
-				},
-				complete:_common.myAjaxComplete
-			});
-			_common.myConfirm(msg + "Are you sure to submit?", function (result) {
-				if (result != "true") {
+
+			_common.myConfirm("Are you sure to submit?", function (result) {
+				if (result !== "true") {
 					return false;
 				}
 				$.myAjaxs({
@@ -583,6 +565,32 @@ define('orderNewStore', function () {
 								dataType: "json",
 								success: function (result) {
 									if (result.success) {
+										var msg = "";
+										//判断是否更改
+										$.myAjaxs({
+											url:url_left+"/checkVendorOrder",
+											async:false,
+											cache:false,
+											type :"post",
+											data :{
+												storeCd: m.aStore.attr('k'),
+												orderDate: subfmtDate(m.order_date.val())
+											},
+											dataType:"json",
+											success:function(result){
+												if(result.success){
+													// 订货时订货了供应商的商品，但是订货的这些商品有未生效的
+													// msg = "All ordered items didn't satisfy supplier MOA/MOQ requirement, are you sure to continue? ";
+													_common.prompt(result.message,5,"error");
+													msg = result.message;
+												}
+											},
+											complete:_common.myAjaxComplete
+										});
+										if(msg !== ""){
+											return false;
+										}
+
 										// _common.prompt("Operation Succeeded!", 2, "success");// 成功
 										var recordCd = m.aStore.attr('k') + subfmtDate(m.order_date.val());
 										var typeId = m.typeId.val();

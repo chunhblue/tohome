@@ -1038,20 +1038,20 @@ define('returnWarehouseEdit', function () {
                 $("#orderQty").css("border-color", "#CCCCCC");
             }
 
-            var receiveQty = parseFloat(reThousands(m.receiveQty.val()));//收货数量
-            if (!isNaN(receiveQty)) {
-                if (_orderQty > receiveQty) {//不得高于收货数量
-                    $("#orderQty").css("border-color", "red");
-                    _common.prompt("Return Qty can not be greater than Received Qty!", 3, "info");
-                    m.orderQty.focus();
-                    return false;
-                } else {
-                    $("#orderQty").css("border-color", "#CCCCCC");
-                }
-            } else {
-                _common.prompt("There is an error in quantity type Received Qty!", 5, "error");
-                return false;
-            }
+            // var receiveQty = parseFloat(reThousands(m.receiveQty.val()));//收货数量
+            // if (!isNaN(receiveQty)) {
+            //     if (_orderQty > receiveQty) {//不得高于收货数量
+            //         $("#orderQty").css("border-color", "red");
+            //         _common.prompt("Return Qty can not be greater than Received Qty!", 3, "info");
+            //         m.orderQty.focus();
+            //         return false;
+            //     } else {
+            //         $("#orderQty").css("border-color", "#CCCCCC");
+            //     }
+            // } else {
+            //     _common.prompt("There is an error in quantity type Received Qty!", 5, "error");
+            //     return false;
+            // }
 
 
             var returnedQty = parseFloat(reThousands(m.returnedQty.val()));//已退货数量

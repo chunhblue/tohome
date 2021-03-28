@@ -21,6 +21,7 @@ public class goodSaleReportDTO  {
     private String articleName;
     private String barcode;
     private String saleDate;
+    private String tranDate;
     private String storeCd;
     private  String storeName;
     private String city;

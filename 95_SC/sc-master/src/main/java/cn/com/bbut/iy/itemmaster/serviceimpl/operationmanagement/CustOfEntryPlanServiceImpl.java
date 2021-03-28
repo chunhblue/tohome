@@ -3,10 +3,8 @@ package cn.com.bbut.iy.itemmaster.serviceimpl.operationmanagement;
 import cn.com.bbut.iy.itemmaster.dao.CustEntryMapper;
 import cn.com.bbut.iy.itemmaster.dao.CustEntryPlanMapper;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
-import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100DTOC;
-import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100ParamDTOC;
-import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0110DTOC;
-import cn.com.bbut.iy.itemmaster.dto.pi0100c.StocktakeItemDTOC;
+import cn.com.bbut.iy.itemmaster.dto.pi0100.ItemInStoreDto;
+import cn.com.bbut.iy.itemmaster.dto.pi0100c.*;
 import cn.com.bbut.iy.itemmaster.dto.rtInventory.RTInventoryQueryDTO;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
 import cn.com.bbut.iy.itemmaster.service.RealTimeInventoryQueryService;
@@ -123,7 +121,7 @@ public class CustOfEntryPlanServiceImpl implements CustOfEntryPlanService {
         }
         List<String> articles = new ArrayList<>();
         // 获取明细信息
-        List<StocktakeItemDTOC> pi0110List =  custEntryMapper.getPI0130ByPrimary(piCd,storeCd);
+        List<StocktakeItemDTOC> pi0110List =  custEntryMapper.getPI0130ByPrimaryIn(piCd);
         for(StocktakeItemDTOC item:pi0110List){
             articles.add(item.getArticleId());
         }
@@ -349,6 +347,32 @@ public class CustOfEntryPlanServiceImpl implements CustOfEntryPlanService {
             }
         }
         return _list;
+    }
+
+    @Override
+    public GridDataDTO<CostOfDTO> storeAllItem(ItemInStoreDto param) {
+        List<String> articles = new ArrayList<>();
+        List<CostOfDTO>  _list=custOfEntryPlanMapper.getAllItem(param);
+        for (CostOfDTO dto:_list) {
+            articles.add(dto.getArticleId());
+        }
+        String inEsTime = cm9060Service.getValByKey("1206");
+        //拼接url，转义参数
+        String connUrl = inventoryUrl + "GetRelTimeInventory/" +  param.getStoreCd()
+                + "/*/*/*/*/*/" + inEsTime+"/*/*";
+        List<RTInventoryQueryDTO> rTdTOList = rtInventoryService.getStockList(articles,connUrl);
+        if(rTdTOList.size()>0){
+            for(RTInventoryQueryDTO rtDto:rTdTOList){
+                for(CostOfDTO articlelist:_list){
+                    if(rtDto.getItemCode().equals(articlelist.getArticleId())){
+                        articlelist.setStockQty(rtDto.getRealtimeQty().toString()); // 实时库存
+                    }
+                }
+            }
+        }
+        GridDataDTO<CostOfDTO> data = new GridDataDTO<CostOfDTO>();
+        data.setRows(_list);
+        return data;
     }
 
 }

@@ -113,13 +113,16 @@
     </update>
 
     <update id="createTxtTempTable">
-        create temporary table ${tableName} (
+        DROP TABLE IF EXISTS ${tableName};
+        create table ${tableName} (
             article_id varchar(255),
             article_name varchar(255),
             barcode varchar(255),
             unit varchar(255),
             bad_qty varchar(255),
             pi_qty varchar(255),
+            converter varchar(255),
+            region varchar(255),
             stocktake_time varchar(255)
         )
     </update>
@@ -135,6 +138,8 @@
             #{item.uom,jdbcType=VARCHAR},
             #{item.badQty,jdbcType=VARCHAR},
             #{item.firstQty,jdbcType=VARCHAR},
+            #{item.converter,jdbcType=VARCHAR},
+            #{item.region,jdbcType=VARCHAR},
             #{item.stocktakeTime,jdbcType=VARCHAR}
             )
         </foreach>
@@ -148,13 +153,14 @@
             t1.unit AS uom,
             t1.bad_qty AS badQty,
             t1.pi_qty AS firstQty,
+            t1.region,
             t1.stocktake_time AS stocktakeTime,
             t2.spec
         FROM
-            ${tableName} t1,
+            ${tableName} t1
+            left join
             ma1100 t2
-        WHERE
-            t2.article_id = t1.article_id
+            on t2.article_id = t1.article_id
             AND #{businessDate} BETWEEN t2.effective_start_date AND t2.effective_end_date
     </select>
 
@@ -267,41 +273,40 @@
                 </if>
             </set>
             where
-                pi_cd = #{item.piCd}
-                AND pi_date = #{item.piDate}
-                AND store_cd = #{item.storeCd}
-                AND article_id = #{item.articleId}
+            pi_cd = #{item.piCd}
+            AND pi_date = #{item.piDate}
+            AND store_cd = #{item.storeCd}
+            AND article_id = #{item.articleId}
         </foreach>
     </update>
 
     <update id="updatePi0125">
         UPDATE PI0125
-            SET pi_qty = NULL ,
-            variance_qty = NULL
-        WHERE
-            article_id IN (
-            SELECT DISTINCT
-                A.article_id
-            FROM
-                PI0125 A
-            WHERE
-                A.pi_cd = #{piCd}
-                AND A.pi_date = #{piDate}
-                AND A.store_cd = #{storeCd}
-                AND A.article_id NOT IN (
-                    SELECT
-                        article_id
-                    FROM
-                        PI0120
-                    WHERE
-                        pi_cd = #{piCd}
-                        AND pi_date = #{piDate}
-                        AND store_cd = #{storeCd}
-                    )
-            )
-            AND pi_cd = #{piCd}
-            AND pi_date = #{piDate}
-            AND store_cd = #{storeCd}
+SET pi_qty = NULL,
+variance_qty = NULL
+WHERE
+	EXISTS (
+	SELECT
+	DISTINCT P.article_id
+	FROM
+		pi0125 P,
+		(
+		SELECT DISTINCT A
+			.article_id
+		FROM
+			PI0125 A
+		WHERE
+			A.pi_cd = #{ piCd }
+			AND A.pi_date = #{ piDate }
+			AND A.store_cd = #{ storeCd }
+			AND A.article_id NOT in ( SELECT article_id FROM PI0120 WHERE pi_cd = #{ piCd } AND pi_date = #{ piDate } AND store_cd = #{ storeCd } )
+		) A
+	WHERE
+		P.article_id = A.article_id
+	)
+	AND pi_cd = #{ piCd }
+	AND pi_date = #{ piDate }
+	AND store_cd = #{ storeCd }
     </update>
 
     <select id="getItemVarianceReport" resultMap="BaseItemResult">
@@ -362,28 +367,28 @@
 
     <select id="getItemList" parameterType="java.lang.String" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
         SELECT
-            A.article_id k,
-            concat(A.article_id,' ',A.article_name) v
+        A.article_id k,
+        concat(A.article_id,' ',A.article_name) v
         FROM
-            ma1100 A,
-            CM9060 B,
-            PI0110 C,
-            SK0000_today D
+        ma1100 A,
+        CM9060 B,
+        PI0110 C,
+        SK0000_today D
         WHERE
-            B.sp_id = '0000'
-            AND B.sp_value BETWEEN A.effective_start_date AND A.effective_end_date
-            AND C.pi_cd = #{piCd,jdbcType=VARCHAR}
-            AND C.pi_date = #{piDate,jdbcType=VARCHAR}
-            AND A.pma_cd = C.pma_cd
-            AND B.sp_value = D.effective_date
-            AND A.article_id = D.article_id
-            AND D.store_cd = #{piStoreCd,jdbcType=VARCHAR}
-            <if test="v!=null and v!=''">
-                AND (
-                lower(A.article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-                OR lower(A.article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-                )
-            </if>
+        B.sp_id = '0000'
+        AND B.sp_value BETWEEN A.effective_start_date AND A.effective_end_date
+        AND C.pi_cd = #{piCd,jdbcType=VARCHAR}
+        AND C.pi_date = #{piDate,jdbcType=VARCHAR}
+        AND A.pma_cd = C.pma_cd
+        AND B.sp_value = D.effective_date
+        AND A.article_id = D.article_id
+        AND D.store_cd = #{piStoreCd,jdbcType=VARCHAR}
+        <if test="v!=null and v!=''">
+            AND (
+            lower(A.article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(A.article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
     </select>
 
     <select id="getItemInfoByList" parameterType="java.lang.String" resultMap="BaseItemResult">
@@ -415,7 +420,7 @@
     </select>
 
     <delete id="deleteByPicd">
-        DELETE FROM PI0120 WHERE PI_CD = #{piCd} AND PI_DATE = #{piDate}
+        DELETE FROM PI0120 WHERE PI_CD = #{piCd} AND PI_DATE = #{piDate};
     </delete>
 
     <insert id="save" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO">
@@ -472,27 +477,231 @@
             P1.pi_date,
             P1.barcode,
             P1.store_cd,
-            M1.article_id,
+            P1.article_id,
             M1.article_name,
-            M1.spec,
-            P1.bad_qty,
-            M1.sales_unit_id,
-            P1.first_qty,
+            P1.spec,
+            coalesce(P1.bad_qty,'0') bad_qty,
+            P1.sales_unit_id,
+            coalesce(P1.first_qty,'0') first_qty,
             P1.second_qty,
             P1.stocktake_time
         FROM
-            PI0120 P1,
-            MA1100 M1,
-            CM9060 C1
+            PI0120 P1
+            left join
+            MA1100 M1 on
+            P1.article_id = M1.article_id
+            AND (select sp_value from CM9060 where sp_id = '0000')
+            BETWEEN M1.effective_start_date AND M1.effective_end_date
         WHERE
             P1.pi_cd = #{piCd}
             AND P1.pi_date = #{piDate}
-            AND C1.sp_id = '0000'
-            AND P1.article_id = M1.article_id
             AND P1.pi_qty_status = '0'
-            AND C1.sp_value BETWEEN M1.effective_start_date
-            AND M1.effective_end_date
-        ORDER BY M1.article_id ASC
+        ORDER BY P1.article_id ASC
     </select>
 
+    <select id="getPI0120tBy" resultMap="BaseItemResult">
+        SELECT
+            P1.pi_cd,
+            P1.pi_date,
+            P1.barcode,
+            P1.store_cd,
+            P1.article_id,
+            P1.article_name,
+            P1.spec,
+            coalesce(P1.bad_qty,'0') bad_qty,
+            P1.sales_unit_id,
+            coalesce(P1.first_qty,'0') first_qty,
+            P1.second_qty,
+            P1.stocktake_time
+        FROM
+            PI0120_t P1
+            left join
+            MA1100 M1 on
+            P1.article_id = M1.article_id
+            AND (select sp_value from CM9060 where sp_id = '0000')
+            BETWEEN M1.effective_start_date AND M1.effective_end_date
+        WHERE
+            P1.pi_cd = #{piCd}
+            AND P1.pi_date = #{piDate}
+        ORDER BY P1.article_id ASC
+    </select>
+
+    <select id="getItemInformation" resultType="cn.com.bbut.iy.itemmaster.entity.ma1100.MA1100">
+        select article_id,article_name,delivery_type_cd,dep_cd,pma_cd,category_cd,
+        sub_category_cd,spec,sales_unit_id,brand,
+        review_status,material_type from ma1100
+        where #{businessDate} BETWEEN effective_start_date AND effective_end_date
+        and article_id in
+        <foreach collection="articles" item="articleId" index="index"
+                 open="(" separator="," close=")">
+            #{articleId,jdbcType=VARCHAR}
+        </foreach>
+    </select>
+
+    <delete id="deleteItem">
+        delete from pi0126;
+    </delete>
+
+    <insert id="insertNonCountListToDb">
+        insert into pi0126(article_id,article_name,delivery_type_cd,dep_cd,
+        pma_cd,category_cd,sub_category_cd,spec,sales_unit_id,create_user_id,create_ymd,create_hms)
+        values
+        <foreach collection="nonCountList" item="item" index="index" separator=",">
+            (
+            #{item.articleId,jdbcType=VARCHAR},#{item.articleName,jdbcType=VARCHAR},
+            #{item.deliveryTypeCd,jdbcType=VARCHAR},#{item.depCd,jdbcType=VARCHAR},
+            #{item.pmaCd,jdbcType=VARCHAR},#{item.categoryCd,jdbcType=VARCHAR},
+            #{item.subCategoryCd,jdbcType=VARCHAR},#{item.spec,jdbcType=VARCHAR},
+            #{item.salesUnitId,jdbcType=VARCHAR},#{item.createUserId,jdbcType=VARCHAR},
+            #{item.createYmd,jdbcType=VARCHAR},#{item.createHms,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+
+    <select id="getRawItemList" resultType="cn.com.bbut.iy.itemmaster.dto.article.ArticleDTO"
+            parameterType="cn.com.bbut.iy.itemmaster.dto.article.ArticleParamDTO">
+        select T.article_id,T.article_name,T.delivery_type_cd,T.dep_cd,T.pma_cd,T.category_cd,
+        T.sub_category_cd,T.spec,T.sales_unit_id,T.create_user_id,concat(T.create_ymd,T.create_hms) as create_ymd,
+        T1.dep_name, T2.pma_name, T3.category_name, T4.sub_category_name
+        from pi0126 T
+        LEFT JOIN (
+        SELECT dep_cd, dep_name FROM MA0070
+        ) T1
+        ON T.dep_cd = T1.dep_cd
+        LEFT JOIN (
+        SELECT dep_cd, pma_cd, pma_name FROM MA0080
+        ) T2
+        ON T.dep_cd = T2.dep_cd AND T.pma_cd = T2.pma_cd
+        LEFT JOIN (
+        SELECT dep_cd, pma_cd, category_cd, category_name FROM MA0090
+        ) T3
+        ON T.dep_cd = T3.dep_cd AND T.pma_cd = T3.pma_cd AND T.category_cd = T3.category_cd
+        LEFT JOIN (
+        SELECT dep_cd, pma_cd, category_cd, sub_category_cd, sub_category_name FROM MA0100
+        ) T4
+        ON T.dep_cd = T4.dep_cd AND T.pma_cd = T4.pma_cd AND T.category_cd = T4.category_cd AND T.sub_category_cd = T4.sub_category_cd
+        where 1=1
+        <if test="articleId != null and articleId != ''">
+            AND lower(T.article_id) like lower(CONCAT('%',#{articleId,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="articleName != null and articleName != ''">
+            AND lower(T.article_name) like lower(CONCAT('%',#{articleName,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="depCd != null and depCd != '' and depCd!='999'">
+            AND T.dep_cd = #{depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="pmaCd != null and pmaCd != ''">
+            AND T.pma_cd = #{pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="categoryCd != null and categoryCd != ''">
+            AND T.category_cd = #{categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="subCategoryCd != null and subCategoryCd != ''">
+            AND T.sub_category_cd = #{subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+
+    <select id="countRawItemList" resultType="Integer"
+            parameterType="cn.com.bbut.iy.itemmaster.dto.article.ArticleParamDTO">
+        select count(*) from pi0126 where 1=1
+        <if test="articleId != null and articleId != ''">
+            AND lower(article_id) like lower(CONCAT('%',#{articleId,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="articleName != null and articleName != ''">
+            AND lower(article_name) like lower(CONCAT('%',#{articleName,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="depCd != null and depCd != '' and depCd!='999'">
+            AND dep_cd = #{depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="pmaCd != null and pmaCd != ''">
+            AND pma_cd = #{pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="categoryCd != null and categoryCd != ''">
+            AND category_cd = #{categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="subCategoryCd != null and subCategoryCd != ''">
+            AND sub_category_cd = #{subCategoryCd,jdbcType=VARCHAR}
+        </if>
+    </select>
+    <select id="getTempExceptionItemList"  resultType="cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO">
+        SELECT
+        article_id,
+        article_name,
+        barcode,
+        unit as uom,
+        bad_qty,
+        pi_qty,
+        converter,
+        region,
+        stocktake_time
+        from ${tableName}
+        where  (article_id || '_' || barcode) in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getCountTable" resultType="Integer">
+        select count(*) from pg_class where relname = #{tableName};
+    </select>
+
+    <insert id="tempToExcepition">
+        insert into pi0120_t(
+        pi_cd,pi_date,store_cd,article_id,article_name,barcode,sales_unit_id,first_qty,
+        stocktake_time,bad_qty,converted,region
+        )
+        values
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{piCd},
+            #{piDate},
+            #{storeCd},
+            #{item.articleId},
+            #{item.articleName},
+            #{item.barcode},
+            #{item.uom},
+            cast(#{item.piQty} as NUMERIC),
+            #{item.stocktakeTime},
+            cast(#{item.badQty} as NUMERIC),
+            cast(#{item.converter} as NUMERIC),
+            #{item.region}
+            )
+        </foreach>
+    </insert>
+
+    <select id="getArticles" resultType="String">
+        select article_id from ma1100
+        where article_id in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and (SELECT sp_value from cm9060 where sp_id = '0000') BETWEEN effective_start_date and effective_end_date
+    </select>
+
+    <delete id="deleteExByPicd">
+        DELETE FROM PI0120_t WHERE PI_CD = #{piCd} AND PI_DATE = #{piDate}
+    </delete>
+
+    <delete id="deleteExMore">
+        DELETE FROM PI0120_t WHERE PI_CD = #{piCd} AND PI_DATE = #{piDate}
+        and  (article_id || '_' || barcode) not in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="getPi0100Info" resultType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100DTO">
+    SELECT
+    p.pi_date,
+    p.pi_cd,
+    p.pi_start_time,
+    p.pi_end_time,
+    p.store_cd
+    from pi0100 p
+    where
+    p.store_cd = #{storeCd} and p.pi_cd = #{piCd}
+    </select>
 </mapper>

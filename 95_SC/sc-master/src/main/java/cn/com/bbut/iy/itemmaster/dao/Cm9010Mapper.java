@@ -27,4 +27,11 @@ public interface Cm9010Mapper extends Cm9010GenMapper {
     List<AutoCompleteDTO> getTypeList(@Param("v") String v);
 
     List<AutoCompleteDTO> getReasonValue(@Param("v")String v);
+
+    /**
+     * 获取所有的库存异动原因
+     * @param v
+     * @return
+     */
+    List<AutoCompleteDTO> getAllReasonValue(@Param("v")String v);
 }

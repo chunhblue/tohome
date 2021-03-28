@@ -210,7 +210,7 @@
 
 
   <select id="getListByStorePm" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
-    select distinct store_cd k,CONCAT(store_cd,' ',store_name,' ',store_name_en) v from ma1000
+    select distinct store_cd k,CONCAT(store_cd,' ',store_name_en) v from ma1000
     where
     <![CDATA[
         effective_start_date <= #{businessDate,jdbcType=VARCHAR}
@@ -221,12 +221,6 @@
              open="(" separator="," close=")">
       #{storeCd,jdbcType=VARCHAR}
     </foreach>
-<!--    <if test="storeCd != null and storeCd !=''">-->
-<!--      and (-->
-<!--      lower(store_cd) like lower(CONCAT('%',#{storeCd,jdbcType=VARCHAR},'%'))-->
-<!--      or lower(store_name) like lower(CONCAT('%',#{storeCd,jdbcType=VARCHAR},'%'))-->
-<!--      or lower(store_name_en) like lower(CONCAT('%',#{storeCd,jdbcType=VARCHAR},'%'))-->
-<!--      )-->
     <if test="v!=null and v!=''">
       AND (
       lower(structure_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))

@@ -822,11 +822,11 @@ define('itemTransfersEdit', function () {
 
         flg = m.actualQty.attr("e");
         let handQty = reThousands(m.inventoryQty.val());
-        if(parseInt(handQty) <= 0 ){
-            $("#item_input").focus();
-            _common.prompt("Target item is out of stock, cannot transfer out!",3,"info"); // 转出商品库存为0，不能转移
-            return false;
-        }else {
+        // if(parseInt(handQty) <= 0 ){
+        //     $("#item_input").focus();
+        //     _common.prompt("Target item is out of stock, cannot transfer out!",3,"info"); // 转出商品库存为0，不能转移
+        //     return false;
+        // }else {
             if (flg != '1') {
                 temp = reThousands($("#actualQty").val());
                 if (temp == null || $.trim(temp) == "") {
@@ -846,16 +846,17 @@ define('itemTransfersEdit', function () {
                         $("#actualQty").css("border-color", "red");
                         $("#actualQty").focus();
                         return false;
-                    } else {
-                        if (Math.abs(parseInt(temp)) > Math.abs(parseInt(handQty))) {
-                            _common.prompt("Tranfer Qty cannot be more than actual stock quantity!", 3, "error");
-                            $("#actualQty").css("border-color", "red");
-                            $("#actualQty").focus();
-                            return false;
-                        } else {
-                            $("#actualQty").css("border-color", "#CCC");
-                        }
                     }
+                    // else {
+                    //     if (Math.abs(parseInt(temp)) > Math.abs(parseInt(handQty))) {
+                    //         _common.prompt("Tranfer Qty cannot be more than actual stock quantity!", 3, "error");
+                    //         $("#actualQty").css("border-color", "red");
+                    //         $("#actualQty").focus();
+                    //         return false;
+                    //     } else {
+                    //         $("#actualQty").css("border-color", "#CCC");
+                    //     }
+                    // }
                 }
             }
 
@@ -869,7 +870,7 @@ define('itemTransfersEdit', function () {
                 $("#adjustReason").css("border-color", "#CCC");
             }
             return true;
-        }
+       // }
     }
 
 
@@ -910,7 +911,7 @@ define('itemTransfersEdit', function () {
             if(verifySearch()){
                 let _storeCd = $("#aStore").attr('k');
                 let _voucherNo = $("#tf_cd").val();
-                let _type = '601'; // or '602'
+                let _type = '602'; // or '601'
                 let _date = subfmtDate($("#tf_date").val());
                 let _storeCd1 = $("#aStore").attr('k');
                 let itemDetail = [],inItemDetail=[], num = 0, _amount = 0, _amountNoTax = 0, _taxAmt = 0;
@@ -1322,7 +1323,7 @@ define('itemTransfersEdit', function () {
     // 根据Store No.取得该店铺信息
     var initAutomatic = function(){
         adjustReason = $("#adjustReason").myAutomatic({
-            url:url_root+"/cm9010/getResonCode",
+            url:url_root+"/cm9010/getReasonCode",
             ePageSize:10,
             startCount:0,
         });
@@ -1358,6 +1359,7 @@ define('itemTransfersEdit', function () {
             },
             selectEleClick: function (thisObject) {
                 clearDialog(false);
+                $.myAutomatic.setValueTemp(itemInput,thisObject.attr("k"),thisObject.text());
                 if(thisObject.attr('k') == $("#In_item_input").attr('k')){
                     $("#item_input").focus();
                     $.myAutomatic.cleanSelectObj(itemInput);
@@ -1365,6 +1367,7 @@ define('itemTransfersEdit', function () {
                     return false;
                 }
                 let _storeCd = $("#aStore").attr('k');
+                $.myAutomatic.setValueTemp(itemInput,thisObject.attr("k"),thisObject.text());
                 let _itemId = thisObject.attr('k');
                 if(!!_storeCd && !!_itemId){
                     checkParent(_itemId, function(res){
@@ -1409,6 +1412,7 @@ define('itemTransfersEdit', function () {
                     return false;
                 }
                 let _storeCd = $("#aStore").attr('k');
+                $.myAutomatic.setValueTemp(InItemInput,thisObject.attr("k"),thisObject.text());
                 let _itemId = thisObject.attr('k');
                 if(!!_storeCd && !!_itemId){
                     checkParent(_itemId, function(res){

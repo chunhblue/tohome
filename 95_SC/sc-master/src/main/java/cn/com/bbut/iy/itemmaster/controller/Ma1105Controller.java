@@ -94,7 +94,7 @@ public class Ma1105Controller extends BaseAction {
             return rest;
         }
         String fileName = fileData.getOriginalFilename();
-        String excelName = fileName.substring(0,fileName.length()-13);
+        String excelName = fileName.substring(0,fileName.length()-5);
         String suf = fileData.getOriginalFilename().substring(fileData.getOriginalFilename().lastIndexOf(".")+1);
         if(!suf.equalsIgnoreCase("xls")&&!suf.equalsIgnoreCase("xlsx")){
             rest.setSuccess(false);
@@ -104,6 +104,12 @@ public class Ma1105Controller extends BaseAction {
         if (StringUtils.isBlank(storeCd)) {
             rest.setSuccess(false);
             rest.setMessage("Store No. cannot be empty！");
+            return rest;
+        }
+        int num = service.countPogName(excelName,storeCd);
+        if(num>0){
+            rest.setSuccess(false);
+            rest.setMessage("This file has been uploaded today！");
             return rest;
         }
 
@@ -139,6 +145,7 @@ public class Ma1105Controller extends BaseAction {
                 }
                 for(Ma1105 ma1105 : list){
                     ma1105.setCommonDTO(dto);
+                    ma1105.setExcelName(excelName); // 设置上传文档名
                 }
                 // 保存文件基本信息
                 service.insertFileData(list,excelName,storeCd,dto);
@@ -202,6 +209,25 @@ public class Ma1105Controller extends BaseAction {
             if(ma1105!=null){
                 resultDto.setSuccess(true);
                 resultDto.setData(ma1105);
+            }
+        }
+        return resultDto;
+    }
+
+    /**
+     * 更新 货架信息
+     * @param storeCd
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/updateShelf")
+    public AjaxResultDto updateShelf(String storeCd) {
+        AjaxResultDto resultDto = new AjaxResultDto();
+        resultDto.setSuccess(false);
+        if(StringUtils.isNotBlank(storeCd)){
+            int num = service.updateShelfToMa1105(storeCd);
+            if(num>0){
+                resultDto.setSuccess(true);
             }
         }
         return resultDto;

@@ -109,9 +109,12 @@ public interface InventoryVouchersMapper {
          * item 下拉列表
          */
         List<AutoCompleteDTO> getItemList(@Param("storeCd") String storeCd,
-@Param("v") String v,
-@Param("businessDate") String businessDate);
+        @Param("v") String v,
+         @Param("businessDate") String businessDate);
 
+        List<AutoCompleteDTO> getInventoryItemList(@Param("storeCd") String storeCd,
+                                          @Param("v") String v,
+                                          @Param("businessDate") String businessDate);
         /**
          * item 转出单号下拉列表
          */
@@ -175,11 +178,10 @@ public interface InventoryVouchersMapper {
 
         /**
          *获取详细的理由
-         * @param generalLevelCd
          * @param v
          * @return
          */
-        List<AutoCompleteDTO> getMa8360(@Param("generalLevelCd")String generalLevelCd,@Param("v")String v);
+        List<AutoCompleteDTO> getMa8360(@Param("v")String v,@Param("num")int num);
 
         /**
          * 查询库存调整商品详情

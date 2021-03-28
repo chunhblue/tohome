@@ -441,6 +441,10 @@
   </select>
 
 <select id="getMaxPositionByuserId" resultType="int">
-  select min(position) from ma4210 where user_code = #{userId,jdbcType=VARCHAR};
+  select coalesce (min(position),10) from ma4210 where user_code = #{userId,jdbcType=VARCHAR};
+</select>
+
+<select id="countFinancePosition" resultType="int">
+  select count(*) from ma4210 where position = '6' and user_code = #{userId,jdbcType=VARCHAR};
 </select>
 </mapper>

@@ -29,6 +29,7 @@ public class PI0100DTO extends GridDataDTO {
     private String piFirstFinishFlg; // 是否初盘完成
     private String piCommitFlg; // 是否认列
     private String reviewStatus;
+    private String reviewStsName;  // 审核名称
     private String piStatusCode;
     private String piTypeCode;
     private String exportFlg;

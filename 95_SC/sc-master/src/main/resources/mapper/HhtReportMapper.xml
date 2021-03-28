@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.hhtReport.hhtReportMapper">
+    <resultMap id="reMap" type="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportDto">
+        <id column="store_cd" property="storeCd" />
+        <id column="order_id" property="orderId"/>
+        <id column="total_open_po" property="totalOpenPo"/>
+        <id column="grpo_of_qty" property="grpoOfQty"/>
+        <id column="no_of_confi_po" property="noOfConfiPo"/>
+        <id column="no_of_pending_grpo" property="noOfPendingGrpo"/>
+    </resultMap>
+    <select id="selectData" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultMap="reMap">
+        SELECT a.*,B.*,c.* ,d.*,e.store_name
+        from
+        ma1000 e right join
+        (select store_cd,   COALESCE(count(store_cd),0) AS total_open_po from od0000  where
+        1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and
+
+        order_date > #{param.hhstartDate} AND #{param.hhendDate}>order_date AND  order_sts !='01'  GROUP BY store_cd) a
+        on e.store_cd=a.store_cd
+        left join
+        (select store_cd, COALESCE(count(store_cd),0) as no_of_confi_po from od0000  where 1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and   order_date > #{param.hhstartDate} AND #{param.hhendDate}>order_date    AND  review_status='20'  GROUP BY store_cd)  b
+        on a.store_cd=b.store_cd  left join
+        (select store_cd,  COALESCE(count(store_cd),0)  as  no_of_pending_grpo from od0000  where 1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+         and   order_date > #{param.hhstartDate} AND #{param.hhendDate}>order_date     AND  review_status='15'  GROUP BY store_cd) c
+         on b.store_cd=c.store_cd left join
+        (select store_cd, COALESCE(count(store_cd),0)  AS grpo_of_qty from od0000  where 1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and    order_date > #{param.hhstartDate} AND #{param.hhendDate}>order_date
+        AND  review_status='10'  GROUP BY store_cd)
+        d  on d.store_cd=c.store_cd
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  c.store_cd=#{param.storeCd}
+        </if>
+        and  c.store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                                       open="(" separator="," close=")">
+        #{store,jdbcType=VARCHAR}
+       </foreach>
+         LIMIT ${param.rows} OFFSET ${param.limitStart}
+    </select>
+    <select id="selectDataCount" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultType="INT">
+        SELECT count(1)
+        from
+        ma1000 e right join
+        (select store_cd,   COALESCE(count(store_cd),0) AS total_open_po from od0000  where
+        1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and
+
+        order_date > #{param.hhstartDate} AND #{param.hhendDate}>order_date AND  order_sts !='01'  GROUP BY store_cd) a
+        on e.store_cd=a.store_cd
+        left join
+        (select store_cd, COALESCE(count(store_cd),0) as no_of_confi_po from od0000  where 1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and   order_date > #{param.hhstartDate} AND #{param.hhendDate}>order_date    AND  review_status='20'  GROUP BY store_cd)  b
+        on a.store_cd=b.store_cd  left join
+        (select store_cd,  COALESCE(count(store_cd),0)  as  no_of_pending_grpo from od0000  where 1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and   order_date > #{param.hhstartDate} AND #{param.hhendDate}>order_date     AND  review_status='15'  GROUP BY store_cd) c
+        on b.store_cd=c.store_cd left join
+        (select store_cd, COALESCE(count(store_cd),0)  AS grpo_of_qty from od0000  where 1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and    order_date > #{param.hhstartDate} AND #{param.hhendDate}>order_date
+        AND  review_status='10'  GROUP BY store_cd)
+        d  on d.store_cd=c.store_cd
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  c.store_cd=#{param.storeCd}
+        </if>
+        and  c.store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+        #{store,jdbcType=VARCHAR}
+        </foreach>
+    </select>
+</mapper>

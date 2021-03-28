@@ -74,6 +74,8 @@ define('receiptEdit', function () {
         submitAuditBut: null,
         // 隐藏域
         orderDiff: null,
+        articleId: null,
+        isFreeItem: null,
     }
     // 创建js对象
     var createJqueryObj = function () {
@@ -495,6 +497,7 @@ define('receiptEdit', function () {
                 _common.prompt("Please select the data to view!", 5, "error");
                 return false;
             }
+
             if ($("#receiveQty2").length == 1) {
                 _common.prompt("The table being modified cannot be viewed",5,"error");
                 return false;
@@ -502,6 +505,12 @@ define('receiptEdit', function () {
             clearDialogValue(true);
             setDialogIsDisable(true);// 设置弹窗不允许编辑
             var cols = tableGrid.getSelectColValue(selectTrTemp, "barcode,articleId,articleName,orderUnit,receivePrice,orderQty,orderNoChargeQty,receiveQty,receiveNoChargeQty,receiveTotalAmt,differenceReasonText,isFreeItemText");
+            var attribute1 = $(selectTrTemp[0]).find('td').eq(3).text();
+            if (attribute1==="Total:"){
+                _common.prompt("Please select the effective data to view!", 5, "error");
+                $("#update_dialog").hide();
+                return false;
+            }
             $("#barcode").val(cols['barcode']);
             $("#itemId").val(cols['articleId']);
             $("#itemName").val(cols['articleName']);
@@ -516,7 +525,7 @@ define('receiptEdit', function () {
                 ePageSize: 5,
                 startCount: 0,
             })
-            $.myAutomatic.setValueTemp(differenceReason, '', cols['differenceReasonText']);
+            $.myAutomatic.setValueTemp(differenceReason, cols['differenceReason'], cols['differenceReasonText']);
             $('#update_dialog').attr("flg", "view");
             $('#update_dialog').modal("show");
             $("#update_affirm").prop("disabled", true); //设置submit为只查看模式
@@ -614,9 +623,12 @@ define('receiptEdit', function () {
                     var cols = tableGrid.getSelectColValue(thisParent, "articleId,isFreeItem");
                     let articleId = tableGrid.find('.info td[tag=articleId]').text();
                     let isFreeItem = tableGrid.find('.info td[tag=isFreeItem]').text();
+                    let selArticleId = m.articleId.val();
+                    let selIsFreeItem = m.isFreeItem.val();
                     if ((articleId !== cols["articleId"] || isFreeItem !== cols["isFreeItem"])
                         && !orderAdd && verifyDialogSearch2(true)) {
                         let receiveQty = parseInt(reThousands($("#receiveQty2").val()));
+                        let hhtReceiveQty = parseInt(reThousands($(".info [tag=hhtReceiveQty]").text()));
                         let receiveNoQty = parseInt(reThousands($("#receiveNoQty2").val()));
                         let orderQty = parseInt(reThousands($(".info [tag=orderQty]").text()));
                         let orderNoQty = parseInt(reThousands($(".info [tag=orderNoChargeQty]").text()));
@@ -625,7 +637,9 @@ define('receiptEdit', function () {
                         m.differenceReason = $("#differenceReason2");
                         m.receiveNoQty = $("#receiveNoQty2");
                         m.receiveQty = $("#receiveQty2");
-
+                        if (isNaN(hhtReceiveQty) || hhtReceiveQty === null || hhtReceiveQty === '') {
+                            hhtReceiveQty = 0;
+                        }
                         /*if(receiveNoQty > orderNoQty){
 							// msg = "receiving free quantity is greater than order free quantity, " + msg;
 							_common.prompt("receiving free qty can not be greater than order free qty!");
@@ -666,10 +680,11 @@ define('receiptEdit', function () {
                         $("#zgGridTable>.zgGrid-tbody tr").each(function () {
                             let articleId = $(this).find('td[tag=articleId]').text();
                             let isFreeItem = $(this).find('td[tag=isFreeItem]').text();
-                            if (articleId === cols["articleId"] && isFreeItem === cols["isFreeItem"]) {
+                            if (articleId === selArticleId && isFreeItem === selIsFreeItem) {
                                 let _price = reThousands(m.receivePrice.val());
                                 let _amount = Number(accMul(receiveQty, _price)).toFixed(2);
                                 let _total = accAdd(receiveQty, receiveNoQty);
+                                $(this).find('td[tag=varQty]').text(toThousands(receiveQty-hhtReceiveQty));
                                 $(this).find('td[tag=receiveQty]').text(toThousands(m.receiveQty.val()));
                                 $(this).find('td[tag=receiveQty1]').text(toThousands(m.receiveQty.val()));
                                 $(this).find('td[tag=receiveNoChargeQty]').text(toThousands(m.receiveNoQty.val()));
@@ -754,9 +769,12 @@ define('receiptEdit', function () {
         }
         orderAdd = false;
         //获取旧值
-        var cols = tableGrid.getSelectColValue(selectTrTemp, "receiveQty,receiveNoChargeQty,differenceReasonText,differenceReason,orderQty,orderNoChargeQty");
+        var cols = tableGrid.getSelectColValue(selectTrTemp, "articleId,isFreeItem,receiveQty,receiveNoChargeQty,differenceReasonText,differenceReason,orderQty,orderNoChargeQty");
         //添加input框
         tableGrid.find(".info [tag=receiveQty]").text("").append("<input type='text' id='receiveQty2'  class='form-control my-automatic input-sm' placeholder='Please Entry'>");
+        // 记录article id
+        m.articleId.val(cols['articleId'])
+        m.isFreeItem.val(cols['isFreeItem'])
         //赋值
         if (checkNotNull(cols['receiveQty'])) {
             $('#receiveQty2').val(toThousands(isNotNull(cols['orderQty'])));
@@ -804,7 +822,7 @@ define('receiptEdit', function () {
             ePageSize: 5,
             startCount: 0,
         });
-        $.myAutomatic.setValueTemp(differenceReason, '', cols['differenceReasonText']);
+        $.myAutomatic.setValueTemp(differenceReason, cols['differenceReason'], cols['differenceReasonText']);
         $('td[tag=differenceReasonText]').css("overflow", "visible");
         if (cols['differenceReasonText'] != null && cols['differenceReasonText'] != '') {
             $("#differenceReason2").prop("disabled", false);
@@ -1096,6 +1114,7 @@ define('receiptEdit', function () {
                 $("#zgGridTable>.zgGrid-tbody tr:not(:last-child)").each(function () {
                     // 数据计算
                     let _qty = reThousands($(this).find('td[tag=receiveQty]').text());
+                    let orderQty = reThousands($(this).find('td[tag=orderQty]').text());
                     if (_qty == "") {
                         _qty = null;
                     }
@@ -1122,6 +1141,7 @@ define('receiptEdit', function () {
                         serialNo: $(this).find('td[tag=serialNo]').text(),
                         articleId: $(this).find('td[tag=articleId]').text(),
                         receiveQty: _qty,
+                        orderQty:orderQty,
                         // receiveNoChargeQty:reThousands($(this).find('td[tag=receiveNoChargeQty1]').text()),
                         receiveNoChargeQty: _receiveNoChargeQty,
                         // receiveTotalQty:reThousands($(this).find('td[tag=receiveTotalQty1]').text()),
@@ -1142,6 +1162,18 @@ define('receiptEdit', function () {
                 if (itemDetail.length < 1) {
                     _common.prompt("Commodity information cannot be empty!", 5, "error");
                     return false;
+                }
+                // 校验原因
+                for (let i = 0; i < itemDetail.length; i++) {
+                    if (itemDetail[i].receiveQty == null) {
+                        continue;
+                    }
+                    if (itemDetail[i].receiveQty < itemDetail[i].orderQty) {
+                        if(itemDetail[i].differenceReason==''){
+                            _common.prompt("Item "+itemDetail[i].articleId+" Differnece Reason cannot be empty!");
+                            return false;
+                        }
+                    }
                 }
                 //附件信息
                 var fileDetail = [], fileDetailJson = "";
@@ -1520,8 +1552,9 @@ define('receiptEdit', function () {
             localSort: true,
             height: "300",
             colNames: ["Store", "Order", "No.", "Price", "Item Barcode", "Item Code", "Item Name", "UOM",
-                "Order Qty", "Order Free Qty", "Total Order Qty", "Order Amount", "Tax Rate", "Receiving Qty", "Receiving Qty",
-                "Receiving Free Qty", "Receiving Free Qty", "Total Receiving Qty", "Total Receiving Qty", "Receiving Amount", "Item Type", "Item Type", "DifferenceReason", "Difference Reason"],
+                "Order Qty", "Order Free Qty", "Total Order Qty", "Order Amount", "Tax Rate"," SO Transfer Qty","HHT Receiving Qty", "Receiving Qty", "Receiving Qty",
+                "Receiving Free Qty", "Receiving Free Qty", "Total Receiving Qty", "Total Receiving Qty", "Receiving Amount",
+                "Variance Qty","Item Type", "Item Type", "DifferenceReason", "Difference Reason"],
             colModel: [
                 {name: "storeCd", type: "text", text: "right", ishide: true},
                 {name: "orderId", type: "text", text: "right", ishide: true},
@@ -1531,116 +1564,23 @@ define('receiptEdit', function () {
                 {name: "articleId", type: "text", text: "right", width: "110", ishide: false, css: ""},
                 {name: "articleName", type: "text", text: "left", width: "150", ishide: false, css: ""},
                 {name: "orderUnit", type: "text", text: "left", width: "100", ishide: false, css: ""},
-                {
-                    name: "orderQty",
-                    type: "text",
-                    text: "right",
-                    width: "130",
-                    ishide: false,
-                    css: "",
-                    getCustomValue: getThousands
-                },
-                {
-                    name: "orderNoChargeQty",
-                    type: "text",
-                    text: "right",
-                    width: "160",
-                    ishide: true,
-                    css: "",
-                    getCustomValue: getThousands
-                },
-                {
-                    name: "orderTotalQty",
-                    type: "text",
-                    text: "right",
-                    width: "150",
-                    ishide: true,
-                    css: "",
-                    getCustomValue: getThousands
-                },
-                {
-                    name: "orderAmt",
-                    type: "text",
-                    text: "right",
-                    width: "150",
-                    ishide: true,
-                    css: "",
-                    getCustomValue: getThousands
-                },
+                {name: "orderQty",type: "text",text: "right",width: "130",ishide: false,css: "",getCustomValue: getThousands},
+                {name: "orderNoChargeQty", type: "text", text: "right", width: "160", ishide: true, css: "", getCustomValue: getThousands},
+                {name: "orderTotalQty", type: "text", text: "right", width: "150", ishide: true, css: "", getCustomValue: getThousands},
+                {name: "orderAmt", type: "text", text: "right", width: "150", ishide: true, css: "", getCustomValue: getThousands},
                 {name: "taxRate", type: "text", text: "right", width: "130", ishide: true, css: ""},
-                {
-                    name: "receiveQty",
-                    type: "text",
-                    text: "right",
-                    width: "130",
-                    ishide: false,
-                    css: "",
-                    getCustomValue: getThousands
-                },
-                {
-                    name: "receiveQty1",
-                    type: "text",
-                    text: "right",
-                    width: "130",
-                    ishide: true,
-                    css: "",
-                    getCustomValue: isNull
-                },
-                {
-                    name: "receiveNoChargeQty",
-                    type: "text",
-                    text: "right",
-                    width: "160",
-                    ishide: true,
-                    css: "",
-                    getCustomValue: getThousands
-                },
-                {
-                    name: "receiveNoChargeQty1",
-                    type: "text",
-                    text: "right",
-                    width: "160",
-                    ishide: true,
-                    css: "",
-                    getCustomValue: isNull
-                },
-                {
-                    name: "receiveTotalQty",
-                    type: "text",
-                    text: "right",
-                    width: "160",
-                    ishide: true,
-                    css: "",
-                    getCustomValue: getThousands
-                },
-                {
-                    name: "receiveTotalQty1",
-                    type: "text",
-                    text: "right",
-                    width: "160",
-                    ishide: true,
-                    css: "",
-                    getCustomValue: isNull
-                },
-                {
-                    name: "receiveTotalAmt",
-                    type: "text",
-                    text: "right",
-                    width: "130",
-                    ishide: true,
-                    css: "",
-                    getCustomValue: getThousands
-                },
+                {name: "deliveryQty",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getThousands},
+                {name: "hhtReceiveQty",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getThousands},
+                {name: "receiveQty", type: "text", text: "right", width: "130", ishide: false, css: "", getCustomValue: getThousands},
+                {name: "receiveQty1", type: "text", text: "right", width: "130", ishide: true, css: "", getCustomValue: isNull},
+                {name: "receiveNoChargeQty", type: "text", text: "right", width: "160", ishide: true, css: "", getCustomValue: getThousands},
+                {name: "receiveNoChargeQty1", type: "text", text: "right", width: "160", ishide: true, css: "", getCustomValue: isNull},
+                {name: "receiveTotalQty", type: "text", text: "right", width: "160", ishide: true, css: "", getCustomValue: getThousands},
+                {name: "receiveTotalQty1", type: "text", text: "right", width: "160", ishide: true, css: "", getCustomValue: isNull},
+                {name: "receiveTotalAmt", type: "text", text: "right", width: "130", ishide: true, css: "", getCustomValue: getThousands},
+                {name: "varQty",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getThousands},
                 {name: "isFreeItem", type: "text", text: "left", ishide: true},
-                {
-                    name: "isFreeItemText",
-                    type: "text",
-                    text: "left",
-                    width: "100",
-                    ishide: false,
-                    css: "",
-                    getCustomValue: getItemType
-                },
+                {name: "isFreeItemText", type: "text", text: "left", width: "100", ishide: false, css: "", getCustomValue: getItemType},
                 {name: "differenceReason", type: "text", text: "left", ishide: true},
                 {name: "differenceReasonText", type: "text", text: "left", width: "130", ishide: false, css: ""}
             ],//列内容
@@ -1691,11 +1631,13 @@ define('receiptEdit', function () {
     var total_qty = function () {
         if ($("#zgGridTable>.zgGrid-tbody tr").length > 0) {
             var orderQty = 0, orderNoChargeQty = 0, orderTotalQty = 0, receiveQty = 0, receiveNoChargeQty = 0,
-                receiveTotalQty = 0;
+                receiveTotalQty = 0,hhtReceiveQty =0,deliveryQty=0;
             $("#zgGridTable>.zgGrid-tbody tr").each(function () {
                 var td_orderQty = parseFloat($(this).find('td[tag=orderQty]').text().replace(/,/g, ""));
                 /*var td_orderNoChargeQty= parseFloat($(this).find('td[tag=orderNoChargeQty]').text().replace(/,/g, ""));
 				var td_orderTotalQty= parseFloat($(this).find('td[tag=orderTotalQty]').text().replace(/,/g, ""));*/
+                var td_deliveryQty = parseFloat($(this).find('td[tag=deliveryQty]').text().replace(/,/g, ""));
+                var td_hhtReceiveQty = parseFloat($(this).find('td[tag=hhtReceiveQty]').text().replace(/,/g, ""));
                 var td_receiveQty = parseFloat($(this).find('td[tag=receiveQty]').text().replace(/,/g, ""));
                 /*var td_receiveNoChargeQty= parseFloat($(this).find('td[tag=receiveNoChargeQty]').text().replace(/,/g, ""));
 				var td_receiveTotalQty= parseFloat($(this).find('td[tag=receiveTotalQty]').text().replace(/,/g, ""));*/
@@ -1705,6 +1647,10 @@ define('receiptEdit', function () {
 					orderNoChargeQty +=  parseFloat(td_orderNoChargeQty);
 				if(!isNaN(td_orderTotalQty))
 					orderTotalQty +=  parseFloat(td_orderTotalQty);*/
+                if(!isNaN(td_deliveryQty))
+                    deliveryQty +=  parseFloat(td_deliveryQty);
+                if(!isNaN(td_hhtReceiveQty))
+                    hhtReceiveQty +=  parseFloat(td_hhtReceiveQty);
                 if (!isNaN(td_receiveQty))
                     receiveQty += parseFloat(td_receiveQty);
                 /*if(!isNaN(td_receiveNoChargeQty))
@@ -1717,10 +1663,12 @@ define('receiptEdit', function () {
                 "<td>" + fmtIntNum(orderQty) + "</td>" +
                 /*"<td>"+fmtIntNum(orderNoChargeQty)+"</td>"+
 				"<td>"+fmtIntNum(orderTotalQty)+"</td>" +*/
+                "<td>" + fmtIntNum(deliveryQty) + "</td>" +
+                "<td>" + fmtIntNum(hhtReceiveQty) + "</td>" +
                 "<td>" + fmtIntNum(receiveQty) + "</td>" +
                 /*"<td>"+fmtIntNum(receiveNoChargeQty)+"</td>" +
 				"<td>"+fmtIntNum(receiveTotalQty)+"</td>" +*/
-                "<td></td>" + "<td></td>" +
+                "<td></td><td></td><td></td>"+
                 "</tr>";
             $("#total_qty").remove();
             $("#zgGridTable_tbody").append(total);

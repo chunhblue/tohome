@@ -253,8 +253,6 @@
         SELECT store_cd k, receive_id v FROM OD0000_T
         WHERE store_cd = #{storeCd,jdbcType=VARCHAR}
         AND receive_id LIKE CONCAT('%',#{v,jdbcType=VARCHAR},'%')
-        and receive_id not in(
-	        select org_order_id from od0000 where od0000.org_order_id = OD0000_T.receive_id)
     </select>
 
     <select id="orgOrderIdCount" resultType="int" parameterType="String">

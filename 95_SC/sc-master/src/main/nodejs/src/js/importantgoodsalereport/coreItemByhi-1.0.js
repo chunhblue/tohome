@@ -446,7 +446,7 @@ define('coreItemByhi' , function (){
                          //   '<td title="' + isEmpty(item.seqNo) + '" style="text-align: right">' + isEmpty(item.seqNo) + '</td>' +
                             '<td title="' + isEmpty(item.storeCd) + '" style="text-align: left">' + isEmpty(item.storeCd) + '</td>' +
                             '<td title="' + isEmpty(item.storeName) + '" style="text-align: left">' + isEmpty(item.storeName) + '</td>' +
-                            '<td title="' + isEmpty(item.accDate) + '" style="text-align: center">' + isEmpty(item.accDate) + '</td>' +
+                            '<td title="' + formatBusinessDate(item.accDate) + '" style="text-align: center">' + formatBusinessDate(item.accDate) + '</td>' +
                             '<td title="' + isEmpty(item.depName) + '" style="text-align: left">' + isEmpty(item.depName) + '</td>' +
                             '<td title="' + isEmpty(item.pmaName) + '" style="text-align: left">' + isEmpty(item.pmaName) + '</td>' +
                             '<td title="' + isEmpty(item.categoryName) + '" style="text-align: left">' + isEmpty(item.categoryName) + '</td>' +
@@ -472,9 +472,19 @@ define('coreItemByhi' , function (){
             }
 
         });
-    }
+    };
+
+    var formatBusinessDate = function (businessDate) {
+        if (!businessDate) {
+            return '';
+        }
+        let year = businessDate.substring(0,4);
+        let month = businessDate.substring(4,6);
+        let day = businessDate.substring(6,8);
+        return new Date(year+'/'+month+'/'+day).Format('dd/MM/yyyy');
+    };
  var isEmpty = function (str) {
-            if (str == null || str == undefined || str == '') {
+            if (str == null || str === '') {
                 return '';
             }
             return str;

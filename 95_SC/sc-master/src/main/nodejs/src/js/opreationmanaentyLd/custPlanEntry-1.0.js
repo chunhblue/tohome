@@ -130,7 +130,7 @@ define('custPlanEntry', function () {
                 _common.prompt("Please select at least one row of data!",5,"error");
                 return;
             }
-            var cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,piDate");
+            var cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,storeCd,storeName,createUserName,createYmd");
             if(cols==null){
                 _common.prompt("Please select at least one row of data!",5,"error");
             }else{
@@ -138,7 +138,7 @@ define('custPlanEntry', function () {
                 _common.getRecordStatus(cols['piCd'],m.typeId.val(),function (result) {
                     if (result.success){
                         saveParamToSession();
-                        top.location = url_left+"/edit?identity="+m.identity.val()+"&enterFlag=update&piCdParam="+cols['piCd'];
+                        top.location = url_left+"/edit?identity="+m.identity.val()+"&enterFlag=update&piCdParam="+cols['piCd']+"&piDateParam="+cols['createYmd']+"&storeCd="+cols['storeCd']+"&storeName="+cols['storeName']+"&createBy="+cols['createUserName'];
                     }else{
                         _common.prompt(result.message,5,"error");
                     }
@@ -174,12 +174,12 @@ define('custPlanEntry', function () {
                 _common.prompt("Please select at least one row of data!",5,"error");
                 return;
             }
-            var cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,piDate");
+            var cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,storeCd,storeName,createUserName,createYmd");
             if(cols==null){
                 _common.prompt("Please select at least one row of data!",5,"error");
             }else{
                 saveParamToSession();
-                top.location = url_left+"/edit?identity="+m.identity.val()+"&enterFlag=view&piCdParam="+cols['piCd'];
+                top.location = url_left+"/edit?identity="+m.identity.val()+"&enterFlag=view&piCdParam="+cols['piCd']+"&piDateParam="+cols['createYmd']+"&storeCd="+cols['storeCd']+"&storeName="+cols['storeName']+"&createBy="+cols['createUserName'];
             }
         });
 

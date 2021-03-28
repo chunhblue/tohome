@@ -145,6 +145,19 @@
 									</div>
 
 								</div>
+								<div class="form-group">
+									<label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">Review Status</label>
+									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+										<select id="reviewStatus" class="form-control input-sm" nextele="reviewStatus">
+											<option value="">-- All/Please Select --</option>
+											<option value="1">Pending</option>
+											<option value="5">Rejected</option>
+											<option value="6">Withdrawn</option>
+											<option value="7">Expired</option>
+											<option value="10">Approved</option>
+										</select>
+									</div>
+								</div>
 							</div>
 						</div>
 						<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">

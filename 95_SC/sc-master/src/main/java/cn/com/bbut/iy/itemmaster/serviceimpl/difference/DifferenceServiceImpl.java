@@ -54,7 +54,6 @@ public class DifferenceServiceImpl implements DifferenceService {
 
         long count = od0010Mapper.selectByConditionCountPlus(differenceListParam);
 
-//        List<DifferenceListResult> list = od0010Mapper.selectByCondition(differenceListParam);
         List<DifferenceListResult> list = od0010Mapper.selectByConditionPlus(differenceListParam);
 
         return new GridDataDTO<>(list, param.getPage(), count,param.getRows());

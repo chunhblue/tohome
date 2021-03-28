@@ -124,12 +124,13 @@ define('materialPlanEntry', function () {
                 _common.prompt("Please select at least one row of data!",5,"error");
                 return;
             }
-            var cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,piDate");
+            var cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,storeCd,storeName,createUserName,createYmd");
             if(cols==null){
                 _common.prompt("Please select at least one row of data!",5,"error");
             }else{
                 saveParamToSession();
-                top.location = url_left+"/edit?identity="+m.identity.val()+"&enterFlag=update&piCdParam="+cols['piCd'];
+                top.location = url_left+"/edit?identity="+m.identity.val()+"&enterFlag=update&piCdParam="+cols['piCd']+"&piDateParam="+cols['createYmd']+"&storeCd="+cols['storeCd']+"&storeName="+cols['storeName']+"&createBy="+cols['createUserName'];
+
             }
         });
 
@@ -162,12 +163,13 @@ define('materialPlanEntry', function () {
                 _common.prompt("Please select at least one row of data!",5,"error");
                 return;
             }
-            var cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,piDate");
+            var cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,storeCd,storeName,createUserName,createYmd");
             if(cols==null){
                 _common.prompt("Please select at least one row of data!",5,"error");
             }else{
                 saveParamToSession();
-                top.location = url_left+"/edit?identity="+m.identity.val()+"&enterFlag=view&piCdParam="+cols['piCd'];
+                top.location = url_left+"/edit?identity="+m.identity.val()+"&enterFlag=view&piCdParam="+cols['piCd']+"&piDateParam="+cols['createYmd']+"&storeCd="+cols['storeCd']+"&storeName="+cols['storeName']+"&createBy="+cols['createUserName'];
+
             }
         });
 

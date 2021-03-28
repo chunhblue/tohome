@@ -328,6 +328,50 @@ public class BMPromotionController extends BaseAction {
     }
 
     /**
+     * 查询直接促销设定
+     *
+     * @param request
+     * @param session
+     * @param searchJson
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    @ResponseBody
+    @RequestMapping(value = "/getOnSale")
+    public GridDataDTO<Ma4150DTO> getOnSale(HttpServletRequest request, HttpSession session,
+                                                 String searchJson) {
+        if(searchJson == null){
+            return new GridDataDTO<Ma4150DTO>();
+        }
+        // 转换参数对象
+        Gson gson = new Gson();
+        PromotionParamDTO param = gson.fromJson(searchJson, PromotionParamDTO.class);
+        return service.getMa4150(param);
+    }
+
+    /**
+     * 查询直接促销设定
+     *
+     * @param request
+     * @param session
+     * @param searchJson
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    @ResponseBody
+    @RequestMapping(value = "/getBillValue")
+    public GridDataDTO<Ma4155DTO> getBillValue(HttpServletRequest request, HttpSession session,
+                                                 String searchJson) {
+        if(searchJson == null){
+            return new GridDataDTO<Ma4155DTO>();
+        }
+        // 转换参数对象
+        Gson gson = new Gson();
+        PromotionParamDTO param = gson.fromJson(searchJson, PromotionParamDTO.class);
+        return service.getMa4155(param);
+    }
+
+    /**
      * 查询门店例外设定
      *
      * @param request

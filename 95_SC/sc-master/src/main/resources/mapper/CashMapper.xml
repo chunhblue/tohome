@@ -41,7 +41,7 @@
     <sql id="Shift_Sa0010_Where">
         where
         tran_type = 'sale'
-        and sale_type = '0'
+
         and acc_date=#{payDate,jdbcType=VARCHAR}
         and store_cd=#{storeCd,jdbcType=VARCHAR}
     </sql>
@@ -49,7 +49,7 @@
     <sql id="Shift_Sa0030_Where">
         where
         tran_type = 'sale'
-        and sale_type = '0'
+
         and voucher_date=#{payDate,jdbcType=VARCHAR}
         and store_cd=#{storeCd,jdbcType=VARCHAR}
     </sql>

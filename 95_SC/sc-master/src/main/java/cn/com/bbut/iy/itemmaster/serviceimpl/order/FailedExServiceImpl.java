@@ -44,6 +44,8 @@ public class FailedExServiceImpl implements ExService {
         OrderFailedParamDTO jsonParam = gson.fromJson(paramDTO.getParam(), OrderFailedParamDTO.class);
         // 导出数据不需要分页
         jsonParam.setFlg(false);
+        // 资源权限参数设置
+        jsonParam.setStores(paramDTO.getStores());
         // 生成文件标题信息对象
         session.setHeaderListener(new FailedExHeaderListener(jsonParam));
         session.createWorkBook();
@@ -100,19 +102,11 @@ public class FailedExServiceImpl implements ExService {
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
-            setCellValue(cell, ls.getMethodName());
-
-            cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
             setCellValue(cell, ls.getOrderUom());
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
             setCellValue(cell, ls.getOrderQty());
-
-            cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
-            setCellValue(cell, ls.getOrderNoChargeQty());
 
             /*cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
@@ -130,28 +124,19 @@ public class FailedExServiceImpl implements ExService {
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
             setCellValue(cell, ls.getVendorName());
 
-            cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
-            setCellValue(cell, ls.getFailedReason());
-
             curRow++;
         }
         // 设置列宽
         int columnIndex = 0;
         sheet.setColumnWidth(columnIndex++, 5 * 256);
+        sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 17 * 256);
-        sheet.setColumnWidth(columnIndex++, 30 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 13 * 256);
         sheet.setColumnWidth(columnIndex++, 18 * 256);
-        sheet.setColumnWidth(columnIndex++, 18 * 256);
-        // sheet.setColumnWidth(columnIndex++, 18 * 256);
-        // sheet.setColumnWidth(columnIndex++, 18 * 256);
+        sheet.setColumnWidth(columnIndex++, 25 * 256);
         sheet.setColumnWidth(columnIndex++, 15 * 256);
-        sheet.setColumnWidth(columnIndex++, 60 * 256);
-        sheet.setColumnWidth(columnIndex++, 100 * 256);
+        sheet.setColumnWidth(columnIndex++, 15 * 256);
+        sheet.setColumnWidth(columnIndex++, 18 * 256);
+        sheet.setColumnWidth(columnIndex++, 25 * 256);
     }
 
 }

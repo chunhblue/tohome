@@ -38,6 +38,9 @@
         <result column="total_qty" jdbcType="VARCHAR" property="totalQty" />
         <result column="promotion_description" jdbcType="VARCHAR" property="promotionDescription" />
         <result column="write_off_qty" jdbcType="VARCHAR" property="writeOffQty" />
+        <result column="article_qty" jdbcType="NUMERIC" property="articleQty" />
+        <result column="article_nocharge_id" jdbcType="VARCHAR" property="articleNoChargeId" />
+        <result column="article_nocharge_qty" jdbcType="NUMERIC" property="articleNoChargeQty" />
 
     </resultMap>
     <resultMap id="BaseResultMap2" type="cn.com.bbut.iy.itemmaster.dto.order.OrderDetailInfo">
@@ -161,6 +164,7 @@
         ma8040.article_id = ma8140.article_id
         and ma8140.effective_date = #{orderDate,jdbcType=VARCHAR}
         and ma8040.article_id =  od8020.article_id
+        and od8020.order_qty!=0
         <if test="vendorId !=null and vendorId != ''">
             and ma8040.vendor_id = #{vendorId,jdbcType=VARCHAR}
             and ma8040.dc_item = '0'
@@ -219,6 +223,7 @@
         and ma1105.item_code =  od8020.article_id
         and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
+        AND od8020.order_qty !=0
         <if test="vendorId !=null and vendorId != ''">
             and ma8040.vendor_id = #{vendorId,jdbcType=VARCHAR}
             and ma8040.dc_item = '0'
@@ -226,8 +231,11 @@
         and od8020.order_date = #{orderDate,jdbcType=VARCHAR}
         and od8020.store_cd = #{storeCd,jdbcType=VARCHAR}
         <if test="pogCd != null and pogCd != ''">
-            and ma1105.shelf in (
-            select shelf from ma1108 where pog_cd = #{pogCd,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND ma1105.shelf = any (
+            array(SELECT shelf
+            FROM ma1108
+            WHERE ma1108.pog_cd = #{pogCd,jdbcType=VARCHAR}
+            AND ma1108.store_cd = #{storeCd,jdbcType=VARCHAR})
             )
         </if>
         <if test="shelf != null and shelf != ''">
@@ -243,8 +251,11 @@
         from ma1100,ma1105,ma1110,ma2240 where ma1105.item_code = ma1100.article_id
         and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR} and #{orderDate,jdbcType=VARCHAR} between ma1100.effective_start_date and ma1100.effective_end_date
         <if test="pogCd != null and pogCd != ''">
-            and ma1105.shelf in (
-            select shelf from ma1108 where pog_cd = #{pogCd,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND ma1105.shelf = any (
+            array(SELECT shelf
+            FROM ma1108
+            WHERE ma1108.pog_cd = #{pogCd,jdbcType=VARCHAR}
+            AND ma1108.store_cd = #{storeCd,jdbcType=VARCHAR})
             )
         </if>
         <if test="shelf != null and shelf != ''">
@@ -287,8 +298,11 @@
         </if>
         and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
         <if test="pogCd != null and pogCd != ''">
-            and ma1105.shelf in (
-            select shelf from ma1108 where pog_cd = #{pogCd,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND ma1105.shelf = any (
+            array(SELECT shelf
+            FROM ma1108
+            WHERE ma1108.pog_cd = #{pogCd,jdbcType=VARCHAR}
+            AND ma1108.store_cd = #{storeCd,jdbcType=VARCHAR})
             )
         </if>
         <if test="shelf != null and shelf != ''">
@@ -315,7 +329,11 @@
         ma8040.base_order_price order_price,
         ma8040.dc_item,
         ma8040.promotion_description,
-        coalesce(iv.advise_qty,0) as auto_order_qty,
+        coalesce(ma8040.article_qty,0) article_qty,
+        concat(ma8040.article_nocharge_id,' ',ma1100.article_name) article_nocharge_id,
+        coalesce(ma8040.article_nocharge_qty,0) article_nocharge_qty,
+        coalesce((select ma8070.soq ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR}
+        and ma8070.article_id=ma8040.article_id),0) as auto_order_qty,
         coalesce(od8020.order_qty,0)+coalesce(od8020.order_nocharge_qty,0) AS total_qty,
         od8020.order_qty as order_qty,
         od8020.order_nocharge_qty,
@@ -326,14 +344,14 @@
         (select ma8070.psd ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR} and ma8070.article_id=ma8040.article_id) as psd,
         (select avg(sk0020.qty1) from sk0020 where sk0020.store_cd = #{storeCd,jdbcType=VARCHAR} and sk0020.article_id = ma8040.article_id and sk0020.voucher_type = '603'
         and sk0020.voucher_date between to_char(TO_DATE(#{orderDate,jdbcType=VARCHAR},'yyyyMMdd') - INTERVAL '28 day', 'yyyyMMdd') and #{orderDate,jdbcType=VARCHAR}) as write_off_qty
-        from ma2240,ma8140,ma1105,pipelinedb.inventory_view iv right join ma8040 on ma8040.article_id = iv.article_id
-        and iv.effective_date = #{orderDate,jdbcType=VARCHAR}
-        and iv.store_cd = #{storeCd,jdbcType=VARCHAR}
+        from ma2240,ma8140,ma1105,ma8040
         full join od8020 ON od8020.article_id=ma8040.article_id
         and od8020.order_date = #{orderDate,jdbcType=VARCHAR}
         and od8020.store_cd = #{storeCd,jdbcType=VARCHAR}
+        left join ma1100 on ma8040.article_nocharge_id = ma1100.article_id
+        and #{orderDate,jdbcType=VARCHAR} between ma1100.effective_start_date and ma1100.effective_end_date
+        AND ma1100.inventory_item='1'
         where
-        /*ma8040.article_id = iv.article_id*/
         ma8040.article_id = ma8140.article_id
         and ma8140.effective_date = #{orderDate,jdbcType=VARCHAR}
         and ma1105.item_code = ma8040.article_id
@@ -366,26 +384,29 @@
     </select>
 
     <select id="getOrderListDetailCount" parameterType="cn.com.bbut.iy.itemmaster.dto.order.OrderItemParamDTO" resultType="long">
-        select count(*) from (select
+        select count(*) from (
+        select
         distinct
         ma8040.article_id,
         ma8040.article_name,
         ma8040.vendor_id,
         ma8040.purchase_unit_id,
-        ma8040.base_order_price,
+        ma8040.base_order_price order_price,
         ma8040.dc_item,
         ma8040.promotion_description,
-        coalesce(iv.advise_qty,0) as auto_order_qty,
+        coalesce((select ma8070.soq ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR}
+        and ma8070.article_id=ma8040.article_id),0) as auto_order_qty,
+        coalesce(od8020.order_qty,0)+coalesce(od8020.order_nocharge_qty,0) AS total_qty,
         od8020.order_qty as order_qty,
+        od8020.order_nocharge_qty,
         od8020.upload_flg,
-        (select ma8070.psd from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR} and
-        ma8070.article_id=ma8040.article_id) as psd,
+        od8020.order_sts,
+        od8020.upload_order_qty,
+        od8020.upload_order_nocharge_qty,
+        (select ma8070.psd ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR} and ma8070.article_id=ma8040.article_id) as psd,
         (select avg(sk0020.qty1) from sk0020 where sk0020.store_cd = #{storeCd,jdbcType=VARCHAR} and sk0020.article_id = ma8040.article_id and sk0020.voucher_type = '603'
-        and sk0020.voucher_date between to_char(TO_DATE(#{orderDate,jdbcType=VARCHAR},'yyyyMMdd') - INTERVAL '28 day', 'yyyyMMdd') and #{orderDate,jdbcType=VARCHAR}) as write_off_qty,
-        COALESCE (iv.real_time_qty, 0 ) AS realtime_stock /*--实时库存*/
-        from ma2240,ma8140,ma1105,pipelinedb.inventory_view iv right join ma8040 on ma8040.article_id = iv.article_id
-        and iv.effective_date = #{orderDate,jdbcType=VARCHAR}
-        and iv.store_cd = #{storeCd,jdbcType=VARCHAR}
+        and sk0020.voucher_date between to_char(TO_DATE(#{orderDate,jdbcType=VARCHAR},'yyyyMMdd') - INTERVAL '28 day', 'yyyyMMdd') and #{orderDate,jdbcType=VARCHAR}) as write_off_qty
+        from ma2240,ma8140,ma1105,ma8040
         full join od8020 ON od8020.article_id=ma8040.article_id
         and od8020.order_date = #{orderDate,jdbcType=VARCHAR}
         and od8020.store_cd = #{storeCd,jdbcType=VARCHAR}
@@ -427,7 +448,8 @@
         ma8040.purchase_unit_id,
         ma8040.base_order_price order_price,
         ma8040.dc_item,
-        coalesce(iv.advise_qty,0) as auto_order_qty,
+        coalesce((select ma8070.soq ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR}
+        and ma8070.article_id=ma8040.article_id),0) as auto_order_qty,
         coalesce(od8020.order_qty,0)+coalesce(od8020.order_nocharge_qty,0) AS total_qty,
         od8020.order_qty as order_qty,
         od8020.order_nocharge_qty,
@@ -436,14 +458,11 @@
         od8020.upload_order_qty,
         od8020.upload_order_nocharge_qty,
         (select ma8070.psd ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR} and ma8070.article_id=ma8040.article_id) as psd
-        from ma2240,ma8140,pipelinedb.inventory_view iv right join ma8040 on ma8040.article_id = iv.article_id
-        and iv.effective_date = #{orderDate,jdbcType=VARCHAR}
-        and iv.store_cd = #{storeCd,jdbcType=VARCHAR}
+        from ma2240,ma8140,ma8040
         full join od8020 ON od8020.article_id=ma8040.article_id
         and od8020.order_date = #{orderDate,jdbcType=VARCHAR}
         and od8020.store_cd = #{storeCd,jdbcType=VARCHAR}
         where
-        /*ma8040.article_id = iv.article_id*/
         ma8040.article_id = ma8140.article_id
         and ma8140.effective_date = #{orderDate,jdbcType=VARCHAR}
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
@@ -468,23 +487,25 @@
     </select>
 
     <select id="getOrderListDetailByDptCount" parameterType="cn.com.bbut.iy.itemmaster.dto.order.OrderItemParamDTO" resultType="long">
-        select count(*) from (select
+        select count(*) from (
+        select
         distinct
         ma8040.article_id,
         ma8040.article_name,
         ma8040.vendor_id,
         ma8040.purchase_unit_id,
-        ma8040.base_order_price,
+        ma8040.base_order_price order_price,
         ma8040.dc_item,
-        coalesce(iv.advise_qty,0) as auto_order_qty,
+        coalesce((select ma8070.soq ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR} and ma8070.article_id=ma8040.article_id),0) as auto_order_qty,
+        coalesce(od8020.order_qty,0)+coalesce(od8020.order_nocharge_qty,0) AS total_qty,
         od8020.order_qty as order_qty,
+        od8020.order_nocharge_qty,
         od8020.upload_flg,
-        (select ma8070.psd ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR} and
-        ma8070.article_id=ma8040.article_id) as psd,
-        COALESCE (iv.real_time_qty, 0 ) AS realtime_stock /*--实时库存*/
-        from ma2240,ma8140,pipelinedb.inventory_view iv right join ma8040 on ma8040.article_id = iv.article_id
-        and iv.effective_date = #{orderDate,jdbcType=VARCHAR}
-        and iv.store_cd = #{storeCd,jdbcType=VARCHAR}
+        od8020.order_sts,
+        od8020.upload_order_qty,
+        od8020.upload_order_nocharge_qty,
+        (select ma8070.psd ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR} and ma8070.article_id=ma8040.article_id) as psd
+        from ma2240,ma8140, ma8040
         full join od8020 ON od8020.article_id=ma8040.article_id
         and od8020.order_date = #{orderDate,jdbcType=VARCHAR}
         and od8020.store_cd = #{storeCd,jdbcType=VARCHAR}
@@ -550,14 +571,14 @@
         and sk0000_today.store_cd = #{storeCd,jdbcType=VARCHAR},
         ma0220,ma1100,ma2240,
         (SELECT
-            ma1110.article_id,
-            ma1110.vendor_id,
-            ma1110.default_barcode  AS barcode,
-            ma1110.structure_cd
-            FROM
-            ma1110
-            WHERE
-            #{orderDate,jdbcType=VARCHAR} between ma1110.effective_start_date and ma1110.effective_end_date
+        ma1110.article_id,
+        ma1110.vendor_id,
+        ma1110.default_barcode  AS barcode,
+        ma1110.structure_cd
+        FROM
+        ma1110
+        WHERE
+        #{orderDate,jdbcType=VARCHAR} between ma1110.effective_start_date and ma1110.effective_end_date
         ) c,
         ma2000
         left join ma2002 on
@@ -619,9 +640,13 @@
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
         and od8020.order_date = #{orderDate,jdbcType=VARCHAR}
         and od8020.store_cd = #{storeCd,jdbcType=VARCHAR}
+        and  od8020.order_qty !=0
         <if test="pogCd != null and pogCd != ''">
-            and ma1105.shelf in (
-            select shelf from ma1108 where pog_cd = #{pogCd,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND ma1105.shelf = any (
+            array(SELECT shelf
+            FROM ma1108
+            WHERE ma1108.pog_cd = #{pogCd,jdbcType=VARCHAR}
+            AND ma1108.store_cd = #{storeCd,jdbcType=VARCHAR})
             )
         </if>
         <if test="shelf != null and shelf != ''">
@@ -637,8 +662,11 @@
         from ma1100,ma1105,ma1110,ma2240 where ma1105.item_code = ma1100.article_id
         and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR} and #{orderDate,jdbcType=VARCHAR} between ma1100.effective_start_date and ma1100.effective_end_date
         <if test="pogCd != null and pogCd != ''">
-            and ma1105.shelf in (
-            select shelf from ma1108 where pog_cd = #{pogCd,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND ma1105.shelf = any (
+            array(SELECT shelf
+            FROM ma1108
+            WHERE ma1108.pog_cd = #{pogCd,jdbcType=VARCHAR}
+            AND ma1108.store_cd = #{storeCd,jdbcType=VARCHAR})
             )
         </if>
         <if test="shelf != null and shelf != ''">
@@ -674,8 +702,11 @@
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
         and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
         <if test="pogCd != null and pogCd != ''">
-            and ma1105.shelf in (
-            select shelf from ma1108 where pog_cd = #{pogCd,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=VARCHAR}
+            AND ma1105.shelf = any (
+            array(SELECT shelf
+            FROM ma1108
+            WHERE ma1108.pog_cd = #{pogCd,jdbcType=VARCHAR}
+            AND ma1108.store_cd = #{storeCd,jdbcType=VARCHAR})
             )
         </if>
         <if test="shelf != null and shelf != ''">
@@ -695,6 +726,13 @@
         and od8020.order_date = #{orderDate,jdbcType=CHAR}
         and od8020.store_cd = #{storeCd,jdbcType=VARCHAR}
     </select>
+
+    <delete id="deleteOrder"  parameterType="cn.com.bbut.iy.itemmaster.dto.order.OrderItemDetailDTO">
+        delete from od8020
+        where od8020.article_id = #{articleId,jdbcType=VARCHAR}
+        and od8020.order_date = #{orderDate,jdbcType=CHAR}
+        and od8020.store_cd = #{storeCd,jdbcType=VARCHAR}
+    </delete>
 
     <update id="updateOrder" parameterType="cn.com.bbut.iy.itemmaster.dto.order.OrderItemDetailDTO">
         update od8020
@@ -751,13 +789,15 @@
         ON CONFLICT (order_id) DO NOTHING;
     </insert>
 
-    <select id="checkOrder" resultType="java.lang.Integer">
-        select count(*) from od8020
+    <select id="checkOrder" resultMap="BaseResultMap1">
+        select od8020.store_cd,od8020.article_id,ma1100.article_name from od8020,ma1100
         where
-        dc_item = '0'
-        and order_sts = '2'
-        and store_cd = #{storeCd,jdbcType=VARCHAR}
-        and order_date = #{orderDate,jdbcType=VARCHAR}
+        od8020.dc_item = '0'
+        and od8020.order_sts = '1'
+				and od8020.article_id = ma1100.article_id
+				and od8020.order_date BETWEEN ma1100.effective_start_date and ma1100.effective_end_date
+        and od8020.store_cd = #{storeCd,jdbcType=VARCHAR}
+        and od8020.order_date = #{orderDate,jdbcType=VARCHAR}
     </select>
 
 
@@ -836,7 +876,8 @@
     </select>
 
     <select id="getStoreListNotOrder" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
-        select distinct ma1000.store_cd k,CONCAT(ma1000.store_cd,' ',ma1000.store_name,' ',ma1000.store_name_en) v from ma1000,ma1106
+        select distinct ma1000.store_cd k,CONCAT(ma1000.store_cd,' ',ma1000.store_name_en) v from ma1000
+        /*,ma1106*/
         where
         <![CDATA[
         effective_start_date <= #{businessDate,jdbcType=VARCHAR}
@@ -844,9 +885,9 @@
         ]]>
         /*and ma1000.store_cd not in (
         select distinct store_cd from od0000 where order_type = '01'
-        )*/
+        )
         and ma1000.store_cd = ma1106.store_cd
-        and ma1106.review_status = 10
+        and ma1106.review_status = 10*/
         and ma1000.store_cd in
         <foreach item="store" index="index" collection="stores"
                  open="(" separator="," close=")">
@@ -1054,11 +1095,14 @@
     </update>
 
     <select id="getMa1107" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
-        select pog_cd k,pog_name v
-         from ma1107
-            where EFFECTIVE_STS='10'
-            and store_cd = #{storeCd,jdbcType=VARCHAR}
-        ORDER BY pog_cd
+        select ma07.pog_cd k,ma07.pog_name v
+         from ma1107 ma07, ma1104 ma04
+            where ma07.EFFECTIVE_STS='10'
+            and ma07.store_cd = #{storeCd,jdbcType=VARCHAR}
+						and ma07.pog_cd = ma04.pog_cd
+						and ma07.store_cd = ma04.store_cd
+						and ma04.is_expired = '0'
+        ORDER BY ma07.pog_cd
     </select>
 
     <select id="getMa1108" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
@@ -1119,6 +1163,7 @@
         ma8040.article_id = ma8140.article_id
         and ma8140.effective_date = #{orderDate,jdbcType=VARCHAR}
         and ma8040.article_id =  od8020_t.article_id
+        AND od8020_t.order_qty !=0
         <if test="vendorId !=null and vendorId != ''">
             and ma8040.vendor_id = #{vendorId,jdbcType=VARCHAR}
             and ma8040.dc_item = '0'
@@ -1137,7 +1182,7 @@
         <include refid="MA1100_WHERE_CLAUSE"/>
         group by dep_cd,pma_cd) article_count
         ON article_count.dep_cd = can_order.dep_cd and article_count.pma_cd = can_order.pma_cd
-        ORDER BY can_order.dep_cd ASC,can_order.pma_cd ASC
+        ORDER BY do_order_count desc, can_order.dep_cd ASC,can_order.pma_cd ASC
         <if test="limitStart >= 0">
             limit ${limitEnd} offset ${limitStart}
         </if>
@@ -1176,6 +1221,7 @@
         and ma1105.item_code =  od8020_t.article_id
         and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
+        AND od8020_t.order_qty !=0
         <if test="vendorId !=null and vendorId != ''">
             and ma8040.vendor_id = #{vendorId,jdbcType=VARCHAR}
             and ma8040.dc_item = '0'
@@ -1255,7 +1301,7 @@
         </if>
         <include refid="MA8040_WHERE_CLAUSE"/>
         GROUP BY ma1105.shelf,ma0090.category_name,ma0100.sub_category_name,do_order_count.num,article_count.num
-        ORDER BY ma1105.shelf ASC
+        ORDER BY do_order_count DESC,ma1105.shelf ASC
         <if test="limitStart >= 0">
             limit ${limitEnd} offset ${limitStart}
         </if>
@@ -1276,6 +1322,7 @@
         and ma1105.item_code =  od8020_t.article_id
         and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
+        AND od8020_t.order_qty !=0
         <if test="vendorId !=null and vendorId != ''">
             and ma8040.vendor_id = #{vendorId,jdbcType=VARCHAR}
             and ma8040.dc_item = '0'
@@ -1368,7 +1415,11 @@
         ma8040.base_order_price order_price,
         ma8040.dc_item,
         ma8040.promotion_description,
-        coalesce(iv.advise_qty,0) as auto_order_qty,
+        coalesce(ma8040.article_qty,0) article_qty,
+        concat(ma8040.article_nocharge_id,' ',ma1100.article_name) article_nocharge_id,
+        coalesce(ma8040.article_nocharge_qty,0) article_nocharge_qty,
+        coalesce((select ma8070.soq ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR}
+        and ma8070.article_id=ma8040.article_id),0) as auto_order_qty,
         coalesce(od8020_t.order_qty,0)+coalesce(od8020_t.order_nocharge_qty,0) AS total_qty,
         od8020_t.order_qty as order_qty,
         od8020_t.order_nocharge_qty,
@@ -1379,14 +1430,16 @@
         (select ma8070.psd ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR} and ma8070.article_id=ma8040.article_id) as psd,
         (select avg(sk0020.qty1) from sk0020 where sk0020.store_cd = #{storeCd,jdbcType=VARCHAR} and sk0020.article_id = ma8040.article_id and sk0020.voucher_type = '603'
         and sk0020.voucher_date between to_char(TO_DATE(#{orderDate,jdbcType=VARCHAR},'yyyyMMdd') - INTERVAL '28 day', 'yyyyMMdd') and #{orderDate,jdbcType=VARCHAR}) as write_off_qty
-        from ma2240,ma8140,ma1105,pipelinedb.inventory_view iv right join ma8040 on ma8040.article_id = iv.article_id
-        and iv.effective_date = #{orderDate,jdbcType=VARCHAR}
-        and iv.store_cd = #{storeCd,jdbcType=VARCHAR}
+        from ma2240,ma8140,ma1105,ma8040
         full join od8020_t ON od8020_t.article_id=ma8040.article_id
         and od8020_t.store_cd = #{storeCd,jdbcType=VARCHAR}
+        left join ma1100 on ma8040.article_nocharge_id = ma1100.article_id
+        and #{orderDate,jdbcType=VARCHAR} between ma1100.effective_start_date and ma1100.effective_end_date
+        AND ma1100.inventory_item='1'
         where
         ma8040.article_id = ma8140.article_id
         and ma8140.effective_date = #{orderDate,jdbcType=VARCHAR}
+        AND MA8040.inventory_item='1'
         and ma1105.item_code = ma8040.article_id
         and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
@@ -1427,16 +1480,15 @@
         ma8040.base_order_price,
         ma8040.dc_item,
         ma8040.promotion_description,
-        coalesce(iv.advise_qty,0) as auto_order_qty,
+        coalesce((select ma8070.soq ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR}
+        and ma8070.article_id=ma8040.article_id),0) as auto_order_qty,
         od8020_t.order_qty as order_qty,
         od8020_t.upload_flg,
         (select ma8070.psd from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR} and
         ma8070.article_id=ma8040.article_id) as psd,
         (select avg(sk0020.qty1) from sk0020 where sk0020.store_cd = #{storeCd,jdbcType=VARCHAR} and sk0020.article_id = ma8040.article_id and sk0020.voucher_type = '603'
         and sk0020.voucher_date between to_char(TO_DATE(#{orderDate,jdbcType=VARCHAR},'yyyyMMdd') - INTERVAL '28 day', 'yyyyMMdd') and #{orderDate,jdbcType=VARCHAR}) as write_off_qty
-        from ma2240,ma8140,ma1105,pipelinedb.inventory_view iv right join ma8040 on ma8040.article_id = iv.article_id
-        and iv.effective_date = #{orderDate,jdbcType=VARCHAR}
-        and iv.store_cd = #{storeCd,jdbcType=VARCHAR}
+        from ma2240,ma8140,ma1105,ma8040
         full join od8020_t ON od8020_t.article_id=ma8040.article_id
         and od8020_t.store_cd = #{storeCd,jdbcType=VARCHAR}
         where
@@ -1477,7 +1529,8 @@
         ma8040.purchase_unit_id,
         ma8040.base_order_price order_price,
         ma8040.dc_item,
-        coalesce(iv.advise_qty,0) as auto_order_qty,
+        coalesce((select ma8070.soq ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR}
+        and ma8070.article_id=ma8040.article_id),0) as auto_order_qty,
         coalesce(od8020_t.order_qty,0)+coalesce(od8020_t.order_nocharge_qty,0) AS total_qty,
         od8020_t.order_qty as order_qty,
         od8020_t.order_nocharge_qty,
@@ -1485,16 +1538,13 @@
         od8020_t.order_sts,
         od8020_t.upload_order_qty,
         od8020_t.upload_order_nocharge_qty,
-        (select ma8070.psd ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR} and ma8070.article_id=ma8040.article_id) as psd,
-        COALESCE (iv.real_time_qty, 0 ) AS realtime_stock /*--实时库存*/
-        from ma2240,ma8140,pipelinedb.inventory_view iv right join ma8040 on ma8040.article_id = iv.article_id
-        and iv.effective_date = #{orderDate,jdbcType=VARCHAR}
-        and iv.store_cd = #{storeCd,jdbcType=VARCHAR}
+        (select ma8070.psd ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR} and ma8070.article_id=ma8040.article_id) as psd
+        from ma2240,ma8140,ma8040
         full join od8020_t ON od8020_t.article_id=ma8040.article_id
         and od8020_t.store_cd = #{storeCd,jdbcType=VARCHAR}
         where
-        /*ma8040.article_id = iv.article_id*/
         ma8040.article_id = ma8140.article_id
+        AND MA8040.inventory_item='1'
         and ma8140.effective_date = #{orderDate,jdbcType=VARCHAR}
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
         <if test="articleId !=null and articleId != ''">
@@ -1526,15 +1576,13 @@
         ma8040.purchase_unit_id,
         ma8040.base_order_price,
         ma8040.dc_item,
-        coalesce(iv.advise_qty,0) as auto_order_qty,
+        coalesce((select ma8070.soq ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR}
+        and ma8070.article_id=ma8040.article_id),0) as auto_order_qty,
         od8020_t.order_qty as order_qty,
         od8020_t.upload_flg,
         (select ma8070.psd ma8070 from ma8070 where ma8070.store_cd=#{storeCd,jdbcType=VARCHAR} and
-        ma8070.article_id=ma8040.article_id) as psd,
-        COALESCE (iv.real_time_qty, 0 ) AS realtime_stock /*--实时库存*/
-        from ma2240,ma8140,pipelinedb.inventory_view iv right join ma8040 on ma8040.article_id = iv.article_id
-        and iv.effective_date = #{orderDate,jdbcType=VARCHAR}
-        and iv.store_cd = #{storeCd,jdbcType=VARCHAR}
+        ma8070.article_id=ma8040.article_id) as psd
+        from ma2240,ma8140, ma8040
         full join od8020_t ON od8020_t.article_id=ma8040.article_id
         and od8020_t.store_cd = #{storeCd,jdbcType=VARCHAR}
         where
@@ -1657,6 +1705,13 @@
         and store_cd = #{storeCd,jdbcType=VARCHAR}
     </select>
 
+    <delete id="deleteSpecialOrder"  parameterType="cn.com.bbut.iy.itemmaster.dto.order.OrderItemDetailDTO">
+        delete from od8020_t
+        where od8020_t.article_id = #{articleId,jdbcType=VARCHAR}
+        and od8020_t.order_date = #{orderDate,jdbcType=CHAR}
+        and od8020_t.store_cd = #{storeCd,jdbcType=VARCHAR}
+    </delete>
+
     <update id="updateSpecialOrder" parameterType="cn.com.bbut.iy.itemmaster.dto.order.OrderItemDetailDTO">
         update od8020_t
         <if test="orderQty!=null">
@@ -1777,12 +1832,15 @@
         and store_cd = #{storeCd,jdbcType=VARCHAR}
     </select>
 
-    <select id="checkSpecialOrder" resultType="java.lang.Integer">
-        select count(*) from od8020_t
+    <select id="checkSpecialOrder" resultMap="BaseResultMap1">
+         select od8020_t.store_cd,od8020_t.article_id,ma1100.article_name from od8020_t,ma1100
         where
-        dc_item = '0'
-        and order_sts = '2'
-        and store_cd = #{storeCd,jdbcType=VARCHAR}
+        od8020_t.dc_item = '0'
+        and od8020_t.order_sts = '1'
+				and od8020_t.article_id = ma1100.article_id
+				and od8020_t.order_date BETWEEN ma1100.effective_start_date and ma1100.effective_end_date
+        and od8020_t.store_cd = #{storeCd,jdbcType=VARCHAR}
+        and od8020_t.order_date = #{orderDate,jdbcType=VARCHAR}
     </select>
 
     <select id="getSpecialOrderInfoByItem" resultType="cn.com.bbut.iy.itemmaster.dto.order.OrderItemDetailDTO">

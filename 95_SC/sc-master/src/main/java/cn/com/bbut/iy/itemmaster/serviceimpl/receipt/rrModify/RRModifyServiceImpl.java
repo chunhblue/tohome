@@ -11,6 +11,7 @@ import cn.com.bbut.iy.itemmaster.dto.rtInventory.RTInventoryQueryDTO;
 import cn.com.bbut.iy.itemmaster.dto.rtInventory.RealTimeDto;
 import cn.com.bbut.iy.itemmaster.dto.rtInventory.RtInvContent;
 import cn.com.bbut.iy.itemmaster.entity.base.Cm9060;
+import cn.com.bbut.iy.itemmaster.entity.od0000.OD0000;
 import cn.com.bbut.iy.itemmaster.entity.od0010.OD0010;
 import cn.com.bbut.iy.itemmaster.entity.od0010.OD0010Example;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -301,6 +303,50 @@ public class RRModifyServiceImpl implements IRRModifyService {
                 _list = rrMapper.selectOrgOrderId(storeCd, v);
                 break;
         }
+        if(_list == null || _list.size() == 0){
+            return _list;
+        }
+        Collection<String> receiveIds = new ArrayList<>();
+        for(AutoCompleteDTO  dto : _list){
+            receiveIds.add(dto.getV());
+        }
+        List<OD0000> corrList = rrMapper.getCorrList(receiveIds);
+        List<OD0000> newList = new ArrayList<>();
+        for(OD0000 oldItem : corrList){
+            boolean checkFlg = true;
+            for(OD0000 newItem : newList){
+                if(newItem.getOrgOrderId().equals(oldItem.getOrgOrderId())){
+                    if(oldItem.getCreateYmd()!=null && oldItem.getCreateHms()!=null
+                    && newItem.getCreateYmd()!=null&& newItem.getCreateHms()!=null){
+                        if(Long.parseLong(oldItem.getCreateYmd()+oldItem.getCreateHms())
+                                > Long.parseLong(newItem.getCreateYmd()+newItem.getCreateHms())){
+                            newItem.setOrgOrderId(oldItem.getOrgOrderId());
+                            newItem.setOrderId(oldItem.getOrderId());
+                            newItem.setReviewStatus(oldItem.getReviewStatus());
+                            newItem.setCreateYmd(oldItem.getCreateYmd());
+                            newItem.setCreateHms(oldItem.getCreateHms());
+                            newItem.setStoreCd(oldItem.getStoreCd());
+                        }
+                    }
+                    checkFlg = false;
+                }
+            }
+            if(checkFlg){
+                newList.add(oldItem);
+            }
+        }
+        if(newList.size()>0){
+            for(int i =0;i<_list.size();i++){
+                AutoCompleteDTO dto = _list.get(i);
+                for(OD0000 newItem : newList){
+                    if(dto.getV().equals(newItem.getOrgOrderId()) && newItem.getReviewStatus() != 10){
+                        _list.remove(dto);
+                        i--; // 索引减1，保证索引正常，不然报java.util.ConcurrentModificationException
+                    }
+                }
+            }
+        }
+
         return _list;
     }
 

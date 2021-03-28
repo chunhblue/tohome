@@ -18,7 +18,8 @@ define('receiptEdit', function () {
 		a_store='',
 		dataForm1=[],
 		dataForm2=[],
-		dataForm3=[];
+		dataForm3=[],
+		dataForm4=[];
 	const KEY = 'STOCKTAKING_VARIANCE_REPORT';
 	var m = {
 		toKen:null,
@@ -224,12 +225,14 @@ define('receiptEdit', function () {
 		if(verifySearch()) {
 			setParamGrid();
 			let activeTab = $('#card').find('li.active > a').attr('href');
-			if (activeTab == '#card1') {
+			if (activeTab === '#card1') {
 				getTableData1(paramGrid);
-			} else if (activeTab == '#card2') {
+			} else if (activeTab === '#card2') {
 				getTableData2(paramGrid);
-			} else if (activeTab == '#card3') {
+			} else if (activeTab === '#card3') {
 				getTableData3(paramGrid);
+			}else if (activeTab === '#card4') {
+				getTableData4(paramGrid);
 			}
 		}
 	}
@@ -352,7 +355,7 @@ define('receiptEdit', function () {
 					$.myAutomatic.setValueTemp(a_store,record.storeCd,record.storeName);//赋值
 
 					// 盘点完成才能导出
-					$('#export_btn').prop('disabled',record.piStatus!='03');
+					//$('#export_btn').prop('disabled',record.piStatus!='03');
 
 					// 获取明细数据
 					setParamGrid();
@@ -360,6 +363,7 @@ define('receiptEdit', function () {
 					initTable1();
 					initTable2();
 					initTable3();
+					initTable4();
 				}
 			}
 		});
@@ -501,6 +505,11 @@ define('receiptEdit', function () {
 		tableGrid3.setting("page", 1);
 		tableGrid3.loadData();
 	};
+	var getTableData4 = function (paramGrid) {
+		tableGrid4.setting("param", paramGrid);
+		tableGrid4.setting("page", 1);
+		tableGrid4.loadData();
+	};
 
 	//表格初始化-正常盘点商品
 	var initTable1 = function(){
@@ -598,6 +607,7 @@ define('receiptEdit', function () {
 		});
 	}
 
+
 	//表格初始化-账面无库存商品
 	var initTable3 = function(){
 		tableGrid3 = $("#zgGridTtable3").zgGrid({
@@ -644,6 +654,49 @@ define('receiptEdit', function () {
 			},
 		});
 	}
+
+	//表格初始化-上传异常商品
+	var initTable4 = function(){
+		tableGrid4 = $("#zgGridTtable4").zgGrid({
+			title:"Exception Item",
+			param:paramGrid,
+			url: url_left+"/getTableData4",
+			colNames:["Item Barcode","Item Code","Item Name","Spec","UOM","Stocktaking Qty","Converted","Region"],
+			colModel:[
+				{name:"barcode", type:"text", text:"right", width:"130", ishide:false,},
+				{name:"articleId", type:"text", text:"right", width:"130", ishide:false, css:""},
+				{name:"articleName", type:"text", text:"left", width:"130", ishide:false, css:""},
+				{name:"spec", type:"text", text:"left", width:"130", ishide:false, css:""},
+				{name:"uom", type:"text", text:"left", width:"130", ishide:false, css:""},
+				{name:"secondQty", type:"text", text:"right", width:"130", ishide:false, getCustomValue:getThousands},
+				{name:"converted", type:"text", text:"right", width:"130", ishide:false,},
+				{name:"region", type:"text", text:"left", width:"130", ishide:false, getCustomValue:getThousands},
+			],//列内容
+			traverseData:dataForm4,
+			width:"max",//宽度自动
+			page:1,//当前页
+			rowPerPage:10,//每页数据量
+			isPage:true,//是否需要分页
+			isCheckbox:false,
+			loadEachBeforeEvent:function(trObj){
+				tempTrObjValue={};
+				return trObj;
+			},
+			ajaxSuccess:function(resData){
+				return resData;
+			},
+			footerrow:true,
+			loadCompleteEvent:function(self) {
+
+			},
+			userDataOnFooter: true,
+			eachTrClick:function(trObj,tdObj){//正常左侧点击
+				selectTrTemp = trObj;
+			},
+		});
+	}
+
+
 	self.init = init;
 	return self;
 });

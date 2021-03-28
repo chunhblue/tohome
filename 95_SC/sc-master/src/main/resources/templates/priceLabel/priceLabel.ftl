@@ -61,11 +61,9 @@
         .del-alert{
             display:none;
         }
-        #zgGridTtable_tfoot_box_page{
+        /*#zgGridTtable_tfoot_box_page{
             display: none;
-        }
-
-
+        }*/
     </STYLE>
     <!--页头-->
     [@common.header][/@common.header]

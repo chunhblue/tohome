@@ -51,6 +51,8 @@ define('invoiceEntryEdit', function () {
         email2:null,
         returnsViewBut: null,
         enterFlag: null, // 操作状态
+        posId:null,
+        posID:null,
     }
     // 创建js对象
     var createJqueryObj = function () {
@@ -185,7 +187,7 @@ define('invoiceEntryEdit', function () {
         if (!selectTrTemp) {
             return;
         }
-        let col = tableGrid.getSelectColValue(selectTrTemp, 'receiptNo,storeNo');
+        let col = tableGrid.getSelectColValue(selectTrTemp, 'receiptNo,storeNo,posId');
 
         if (!col) {
             return;
@@ -193,6 +195,7 @@ define('invoiceEntryEdit', function () {
         let obj = {
             'receiptNo': col['receiptNo'],
             'storeNo': col['storeNo'],
+            'posId':col['posId']
         };
         let paramGrid = 'searchJson=' + JSON.stringify(obj);
         receiptGridTable.setting("url", url_left + "/searchInvoiceItem");
@@ -206,12 +209,14 @@ define('invoiceEntryEdit', function () {
         let endDate = formatDate(m.endDate.val());
         let storeNo = m.storeNo.attr('k');
         let receiptNo = m.searchReceiptNo.val();
+        let posId = m.posId.val();
 
         let obj = {
             'startDate': startDate,
             'endDate': endDate,
             'storeNo': storeNo,
             'receiptNo': receiptNo,
+            'posId': posId,
         };
         m.searchJson.val(JSON.stringify(obj));
     }
@@ -219,6 +224,7 @@ define('invoiceEntryEdit', function () {
     function verifySave() {
         let customerName = m.customerName.val();
         let companyName = m.companyName.val();
+        let taxCode = m.tax.val();
         let address = m.address.val();
         let phone = m.phone.val();
         let phone2 = m.phone2.val();
@@ -240,6 +246,14 @@ define('invoiceEntryEdit', function () {
             return false;
         } else {
             $("#companyName").css("border-color", "#CCCCCC");
+        }
+        if (!taxCode) {
+            _common.prompt('Please enter TAX CODE!', 5, 'error');
+            $("#tax").css("border-color", "red");
+            m.tax.focus();
+            return false;
+        } else {
+            $("#tax").css("border-color", "#CCCCCC");
         }
         if (!address) {
             _common.prompt('Please enter Address', 5, 'error');
@@ -282,7 +296,7 @@ define('invoiceEntryEdit', function () {
             m.email.focus();
             return false;
         }
-        let email_reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
+        let email_reg = /^([\w]+)(.[\w]+)*@([\w-]+\.){1,5}([A-Za-z]){2,4}$/;
         if (!email_reg.test(email)) {
             _common.prompt('Please enter the correct email format!', 5, 'error');
             $("#email").css("border-color", "red");
@@ -306,7 +320,7 @@ define('invoiceEntryEdit', function () {
         let startDate = m.startDate.val();
         let endDate = m.endDate.val();
         let storeNo = m.storeNo.attr('k');
-
+        let posId= m.posId.val();
         if (!storeNo) {
             _common.prompt('Please select a store first!', 5, 'error');
             m.storeNo.css("border-color","red");
@@ -314,6 +328,14 @@ define('invoiceEntryEdit', function () {
             return false;
         }else {
             m.storeNo.css("border-color","#CCC");
+        }
+        if (!posId) {
+            _common.prompt('Please select a posId!', 5, 'error');
+            m.posId.css("border-color","red");
+            m.posId.focus();
+            return false;
+        }else {
+            m.posId.css("border-color","#CCC");
         }
         if (!startDate) {
             _common.prompt('Please select start date!', 5, 'error');
@@ -399,16 +421,19 @@ define('invoiceEntryEdit', function () {
             }
 
             let receiptNo = '';
+            let saleSerialNo='';
             let amt = 0;
             // 拼接 Receipt No. , 用'; ' 分割
             for (let i = 0; i < checkboxTrs.length; i++) {
                 let item = checkboxTrs[i];
-                let col = tableGrid.getSelectColValue(item, 'receiptNo,amt');
+                let col = tableGrid.getSelectColValue(item, 'receiptNo,amt,saleSerialNo');
                 amt += parseFloat(reThousands(col['amt']))
                 if (i == checkboxTrs.length - 1) {
                     receiptNo += col['receiptNo'];
+                    saleSerialNo +=letterToNumber(col['saleSerialNo'])
                 } else {
                     receiptNo += col['receiptNo'] + ';';
+                    saleSerialNo +=letterToNumber(col['saleSerialNo'])+';';
                 }
             }
 
@@ -422,6 +447,7 @@ define('invoiceEntryEdit', function () {
             let phone2=m.phone2.val();
             let email = m.email.val();
             let email2=m.email2.val();
+            let posId=m.posId.val();
 
             let obj = {
                 'phone2':phone2,
@@ -435,7 +461,9 @@ define('invoiceEntryEdit', function () {
                 'email': email,
                 'status': '01', // 开票状态, 保存为 '已提交未开票'
                 'receiptNo': receiptNo,
+                'saleSerialNo':saleSerialNo,
                 'amt': amt,
+                'posId':posId,
             };
 
             let _data = JSON.stringify(obj);
@@ -454,6 +482,7 @@ define('invoiceEntryEdit', function () {
                         if (result.success) {
                             // 变为查看模式
                             setDisable(true);
+                            m.posId.attr("disabled",true);
                             _common.prompt("Data saved successfully！", 5, "info");/*保存成功*/
                             let record = result.o;
                             getData(record.accId, record.storeNo);
@@ -474,6 +503,7 @@ define('invoiceEntryEdit', function () {
             m.endDate.val("");
             m.storeNo.val('');
             m.searchReceiptNo.val('');
+            m.posId.val('');
             m.storeNo.removeAttr('v');
             m.storeNo.removeAttr('k');
             m.storeNo.css("border-color","#CCC");
@@ -520,6 +550,43 @@ define('invoiceEntryEdit', function () {
                 $("#endDate").datetimepicker('setStartDate', null);
             }
         });
+        m.storeNo.on('blur', function () {
+            let storeCd = m.storeNo.attr('k');
+            if (!storeCd) {
+                m.posId.find("option:not(:first)").remove();
+                return;
+            }
+            getSelectPosId(storeCd);
+        });
+        //获取pos机号下拉
+        var getSelectPosId = function (storeCd) {
+            if (storeCd != null && storeCd != '') {
+                $.myAjaxs({
+                    url: systemPath + "/paymentMode/edit/getPosId",
+                    async: true,
+                    cache: false,
+                    type: "post",
+                    data: "storeCd=" + storeCd,
+                    dataType: "json",
+                    success: function (result) {
+                        m.posId.find("option:not(:first)").remove();
+                        if (result.success) {
+                            for (var i = 0; i < result.data.length; i++) {
+                                var optionValue = result.data[i].posId;
+                                var optionText = result.data[i].posName;
+                                m.posId.append(new Option(optionText, optionValue));
+                            }
+                            m.posId.find("option:first").prop("selected", true);
+                        }
+                    },
+                    error: function (e) {
+                        _common.prompt("request failed!", 5, "error");
+                    },
+                    complete: _common.myAjaxComplete
+                });
+            }
+        }
+
         //结束时间
         m.endDate.datetimepicker(
             {
@@ -546,7 +613,14 @@ define('invoiceEntryEdit', function () {
         a_store = $("#storeNo").myAutomatic({
             url: systemPath + "/ma1000/getStoreByPM",
             ePageSize: 10,
-            startCount: 0
+            startCount: 0,
+            cleanInput: function () {
+                m.posId.attr("disabled",true);
+                $.myAutomatic.cleanSelectObj(a_store);
+            },
+            selectEleClick: function (thisObj) {
+               m.posId.attr("disabled",false);
+                }
         });
     };
     // 06/03/2020 -> 20200306
@@ -564,11 +638,13 @@ define('invoiceEntryEdit', function () {
             title: "Invoice Information",
             param: paramGrid,
             localSort: true,
-            colNames: ["Store No.", "Date and Time", "Receipt No.", "Amount"],
+            colNames: ["Store No.", "Pos Id","Date and Time", "Receipt No.","Receipt No.", "Amount"],
             colModel: [
                 {name: "storeNo", type: "text", text: "right", width: "120", ishide: false, css: ""},
+                {name: "posId", type: "text", text: "right", width: "120", ishide: false, css: ""},
                 {name: "date", type: "text", text: "left", width: "120", ishide: false, getCustomValue: dateFmt},
-                {name: "receiptNo", type: "text", text: "left", width: "120", ishide: false, css: ""},
+                {name: "receiptNo", type: "text", text: "left", width: "120", ishide: true, css: ""},
+                {name: "saleSerialNo", type: "text", text: "left", width: "120", ishide: false, css: ""},
                 {name: "amt", type: "text", text: "left", width: "120", ishide: false, css: "",getCustomValue: getThousands},
             ],//列内容
             // traverseData:data,
@@ -641,7 +717,48 @@ define('invoiceEntryEdit', function () {
     var dateFmt = function (tdObj, value) {
         return $(tdObj).text(fmtIntDate(value));
     }
-
+      function letterToNumber(str) {
+              var str = str.toUpperCase().split("");
+              var al = str.length;
+              var numout = '';
+              for (var i = 0; i < al; i++) {
+               switch (str[i]) {
+                   case 'Q':
+                       numout=numout+'1'
+                     break;
+                   case 'W':
+                       numout=numout+'2'
+                       break;
+                   case 'E':
+                       numout=numout+'3'
+                       break;
+                   case 'R':
+                       numout=numout+'4'
+                       break;
+                   case 'T':
+                       numout=numout+'5'
+                       break;
+                   case 'Y':
+                       numout=numout+'6'
+                       break;
+                   case 'U':
+                       numout=numout+'7'
+                       break;
+                   case 'I':
+                       numout=numout+'8'
+                       break;
+                   case 'O':
+                       numout=numout+'9'
+                       break;
+                   case 'P':
+                       numout=numout+'0'
+                   default:
+                        numout=numout+str[i]
+                       break;
+               }
+              }
+              return numout;
+    }
     //格式化数字类型的日期
     function fmtIntDate(date) {
         if (!date) {

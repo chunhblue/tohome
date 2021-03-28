@@ -91,6 +91,8 @@ public class CoreItemExServiceImpl implements ExService {
      * @param curRow
      */
     private void createExcelBody(Sheet sheet, int curRow, importantgoodSaleReportParamDTO jsonParam) {
+        jsonParam.setStartDate(Utils.getTimeStamp(jsonParam.getStartDate()));
+        jsonParam.setEndDate(Utils.getTimeStamp(jsonParam.getEndDate()));
         // 查询数据
         List<importantgoodSaleReportDTO> _list = mapper.search(jsonParam);
         for (int i = 0; i < _list.size(); i++) {
@@ -116,7 +118,7 @@ public class CoreItemExServiceImpl implements ExService {
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
-            setCellValue(cell, fmtDateToStr(ls.getAccDate()));
+            setCellValue(cell, fmtDateAndTimeToStr19(ls.getTranDate()));
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));

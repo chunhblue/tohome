@@ -150,6 +150,19 @@
                                         </div><!-- form-group -->
 
                                         <div class="form-group">
+                                            <label for="perTransactionQty" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">Max. Qty Per Transaction</label>
+                                            <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
+                                                <input id="perTransactionQty" readonly="true" class="form-control" type="text" value="">
+                                            </div>
+                                            <div id="reqdBillAmountDiv">
+                                                <label for="reqdBillAmount" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">Req'd Bill Amount</label>
+                                                <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
+                                                    <input id="reqdBillAmount" readonly="true" class="form-control" type="text" value="">
+                                                </div>
+                                            </div>
+                                        </div><!-- form-group -->
+
+                                        <div class="form-group">
                                             <label class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">MM Promotion Schedule</label>
                                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-10">
                                                 <label for="monday" class="col-xs-6 col-sm-4 col-md-4 col-lg-1 checkbox">
@@ -184,16 +197,16 @@
                                         </div><!-- form-group -->
 
                                         <div class="form-group">
-                                            <label for="promotionPromptFlgC" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">MM Promotion Reminder</label>
+                                            [#--<label for="promotionPromptFlgC" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">MM Promotion Reminder</label>
                                             <div class="col-xs-4 col-sm-4 col-md-3 col-lg-1">
                                                 <select id="promotionPromptFlgC" disabled="disabled" class="form-control input-sm">
                                                     <option value=""></option>
                                                     <option value="1">Yes</option>
                                                     <option value="0">No</option>
                                                 </select>
-                                            </div>
-                                            <label for="promotionPromptName" class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">MM Promotion Reminder Description</label>
-                                            <div class="col-xs-4 col-sm-4 col-md-3 col-lg-3">
+                                            </div>--]
+                                            <label for="promotionPromptName" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">MM Promotion Reminder Description</label>
+                                            <div class="col-xs-4 col-sm-4 col-md-3 col-lg-6">
                                                 <input id="promotionPromptName" readonly="true" class="form-control" type="text" value="">
                                             </div>
                                         </div><!-- form-group -->
@@ -227,11 +240,30 @@
                                         </div><!-- form-group -->
 
                                         <div class="form-group">
+                                            <label class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label"></label>
+                                            <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
+                                                <label class="radio">
+                                                    <input name="promotionPattern" disabled="disabled" type="radio" value="05"/>
+                                                    On Sale</label>
+                                            </div>
+                                            <div class="col-xs-4 col-sm-4 col-md-2 col-lg-2">
+                                                <label class="radio">
+                                                    <input name="promotionPattern" disabled="disabled" type="radio" value="06"/>
+                                                    Buy X take Y</label>
+                                            </div>
+                                            <div class="col-xs-4 col-sm-4 col-md-2 col-lg-2">
+                                                <label class="radio">
+                                                    <input name="promotionPattern" disabled="disabled" type="radio" value="07"/>
+                                                    Bill Value</label>
+                                            </div>
+                                        </div><!-- form-group -->
+
+                                        <div class="form-group" id="MMPromotionType">
                                             <label class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">MM Promotion Type</label>
                                             <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
                                                 <label class="radio">
                                                     <input name="promotionType" disabled="disabled" type="radio" value="1"/>
-                                                Amount</label>
+                                                Sale Price</label>
                                             </div>
                                             <div class="col-xs-4 col-sm-4 col-md-2 col-lg-2">
                                                 <label class="radio">
@@ -245,34 +277,38 @@
                                             </div>
                                         </div><!-- form-group -->
 
-                                        <div class="form-group">
+                                        <div class="form-group" id="billValueDiscountValue" hidden="true">
+                                            <label for="billValueDiscount" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">Discount Value(VND)</label>
+                                            <div class="col-xs-4 col-sm-4 col-md-3 col-lg-4">
+                                                <input id="billValueDiscount" readonly="true" class="form-control" type="text" value="">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group" id="MMPromotionDiscountDistribution">
                                             <label class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">MM Promotion Discount Distribution Ratio Type</label>
                                             <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
                                                 <label class="radio">
-                                                    <input name="promotionRatioType" disabled="disabled" type="radio" value="1"/>
-                                                Manually Set Ratio</label>
+                                                    <input name="promotionRatioType" disabled="disabled" type="radio" value="1"/>Manually Set Ratio</label>
                                             </div>
                                             <div class="col-xs-4 col-sm-4 col-md-2 col-lg-2">
                                                 <label class="radio">
-                                                    <input name="promotionRatioType" disabled="disabled" type="radio" value="2"/>
-                                                Automatically Set Ratio</label>
+                                                    <input name="promotionRatioType" disabled="disabled" type="radio" value="2"/>Automatically Set Ratio</label>
                                             </div>
                                             <div class="col-xs-4 col-sm-4 col-md-2 col-lg-2">
                                                 <label class="radio">
-                                                    <input name="promotionRatioType" disabled="disabled" type="radio" value="3"/>
-                                                No Distribution</label>
+                                                    <input name="promotionRatioType" disabled="disabled" type="radio" value="3"/>No Distribution</label>
                                             </div>
                                         </div><!-- form-group -->
                                     </fieldset><!-- fieldset-2 -->
 
-                                    <fieldset class="fieldsetModule" style="">
+                                    <fieldset class="fieldsetModule" style="" id="MMPromotionConditionSetting">
                                         <legend class="legendTitle" style="width:200px;">MM Promotion Condition Setting</legend>
                                         <div class="form-group" style="margin:2px;">
                                             <table id="conditionGridTable"></table>
                                         </div>
                                     </fieldset><!-- fieldset-3 -->
 
-                                    <fieldset class="fieldsetModule" style="">
+                                    <fieldset class="fieldsetModule" style="" id="MMPromotionItemsAndCategorySetting">
                                         <legend class="legendTitle" style="width:270px;">MM Promotion Items and Category Setting</legend>
 
                                         <ul class="nav nav-tabs">
@@ -281,7 +317,7 @@
                                             <li><a href="#card3" data-toggle="tab">MM Promotion Brand Setting</a></li>
                                         </ul>
 
-                                        <div class="tab-content" style="border-width:0 1px 1px 1px;border-style:solid;border-color:#CCCCCC;padding:10px;height:200px;">
+                                        <div class="tab-content" style="border-width:0 1px 1px 1px;border-style:solid;border-color:#CCCCCC;padding:10px;height:100%;">
                                             <div class="tab-pane active" id="card1">
                                                 <div class="form-group" style="margin:5px;">
                                                     <table id="itemGridTable"></table>
@@ -301,6 +337,23 @@
                                             </div><!-- tab-3 -->
                                         </div>
                                     </fieldset><!-- fieldset-4 -->
+
+                                    <fieldset class="fieldsetModule" style="" id="MMPromotionOnSale" hidden="true">
+                                        <legend class="legendTitle" style="width:200px;">MM Promotion On Sale</legend>
+                                        <div class="form-group" style="margin:2px;">
+                                            <table id="onSaleGridTable"></table>
+                                        </div>
+                                    </fieldset><!-- fieldset-5 -->
+
+                                    <fieldset class="fieldsetModule" style="" id="MMPromotionBillValue" hidden="true">
+                                        <legend class="legendTitle" style="width:200px;">MM Promotion Bill Value</legend>
+                                        <div class="form-group" style="margin:2px;">
+                                            <table id="billValuePreconditionTable"></table>
+                                        </div>
+                                        <div class="form-group" style="margin:2px;" id="billValueBenefitTableDiv">
+                                            <table id="billValueBenefitTable"></table>
+                                        </div>
+                                    </fieldset><!-- fieldset-6 -->
 
                                     <fieldset class="fieldsetModule" style="">
                                         <legend class="legendTitle" style="width:180px;">Store Promotion Area Setting</legend>

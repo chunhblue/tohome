@@ -56,26 +56,25 @@ define('vendorReceiptDailyPrint', function () {
                     for (let i = 0; i < dataList.length; i++) {
                         var item = dataList[i];
                         let tempTrHtml = '<tr>' +
-                        '<td title="' + isEmpty(item.receiveId) + '" style="text-align:right;">' + isEmpty(item.receiveId) + '</td>' +
-                        '<td title="' + isEmpty(item.storeCd) + '" style="text-align:right;">' + isEmpty(item.storeCd) + '</td>' +
-                        '<td title="' + isEmpty(item.storeName) + '" style="text-align:left;">' + isEmpty(item.storeName) + '</td>' +
-                        // '<td title="' + isEmpty(item.accDate) + '" style="text-align:center;">' + isEmpty(item.accDate) + '</td>' +
-                        '<td title="' + isEmpty(item.receiveDate) + '" style="text-align:center;">' + isEmpty(item.receiveDate) + '</td>' +
-                        '<td title="' + isEmpty(item.pmaName) + '" style="text-align:left;">' + isEmpty(item.pmaName) + '</td>' +
-                        '<td title="' + isEmpty(item.categoryName) + '" style="text-align:left;">' + isEmpty(item.categoryName) + '</td>' +
-                        '<td title="' + isEmpty(item.subCategoryName) + '" style="text-align:left;">' + isEmpty(item.subCategoryName) + '</td>' +
-                        '<td title="' + isEmpty(item.barcode) + '" style="text-align:left;">' + isEmpty(item.barcode) + '</td>' +
-                        '<td title="' + isEmpty(item.articleId) + '" style="text-align:right;">' + isEmpty(item.articleId) + '</td>' +
-                        '<td title="' + isEmpty(item.articleName) + '" style="text-align:left;">' + isEmpty(item.articleName) + '</td>' +
-                        '<td title="' + isEmpty(item.barcode) + '" style="text-align:right;">' + isEmpty(item.barcode) + '</td>' +
-                        '<td title="' + isEmpty(item.vendorId) + '" style="text-align:left;">' + isEmpty(item.vendorId) + '</td>' +
-                        '<td title="' + isEmpty(item.vendorName) + '" style="text-align:left;">' + isEmpty(item.vendorName) + '</td>' +
-                        '<td title="' + isEmpty(item.amCd) + '" style="text-align:left;">' + isEmpty(item.amCd) + '</td>' +
-                        '<td title="' + isEmpty(item.amName) + '" style="text-align:left;">' + isEmpty(item.amName) + '</td>' +
-                        '<td title="' + toThousands(item.receiveTotalQty) + '" style="text-align:right;">' + toThousands(item.receiveTotalQty) + '</td>' +
-                        '<td title="' + isEmpty(item.userName) + '" style="text-align:left;">' + isEmpty(item.userName) + '</td>' +
-                        '<td title="' + isEmpty(item.receivedRemark) + '" style="text-align:left;">' + isEmpty(item.receivedRemark) + '</td>' +
-                        '</tr>';
+                            '<td title="' + isEmpty(item.receiveId) + '" style="text-align:right;">' + isEmpty(item.receiveId) + '</td>' +
+                            '<td title="' + isEmpty(item.storeCd) + '" style="text-align:right;">' + isEmpty(item.storeCd) + '</td>' +
+                            '<td title="' + isEmpty(item.storeName) + '" style="text-align:left;">' + isEmpty(item.storeName) + '</td>' +
+                            // '<td title="' + isEmpty(item.accDate) + '" style="text-align:center;">' + isEmpty(item.accDate) + '</td>' +
+                            '<td title="' + isEmpty(item.receiveDate) + '" style="text-align:center;">' + isEmpty(item.receiveDate) + '</td>' +
+                            '<td title="' + isEmpty(item.pmaName) + '" style="text-align:left;">' + isEmpty(item.pmaName) + '</td>' +
+                            '<td title="' + isEmpty(item.categoryName) + '" style="text-align:left;">' + isEmpty(item.categoryName) + '</td>' +
+                            '<td title="' + isEmpty(item.subCategoryName) + '" style="text-align:left;">' + isEmpty(item.subCategoryName) + '</td>' +
+                            '<td title="' + isEmpty(item.articleId) + '" style="text-align:right;">' + isEmpty(item.articleId) + '</td>' +
+                            '<td title="' + isEmpty(item.articleName) + '" style="text-align:left;">' + isEmpty(item.articleName) + '</td>' +
+                            '<td title="' + isEmpty(item.barcode) + '" style="text-align:right;">' + isEmpty(item.barcode) + '</td>' +
+                            '<td title="' + isEmpty(item.vendorId) + '" style="text-align:left;">' + isEmpty(item.vendorId) + '</td>' +
+                            '<td title="' + isEmpty(item.vendorName) + '" style="text-align:left;">' + isEmpty(item.vendorName) + '</td>' +
+                            '<td title="' + isEmpty(item.amName) + '" style="text-align:left;">' + isEmpty(item.amName) + '</td>' +
+                            '<td title="' + isEmpty(item.omName) + '" style="text-align:left;">' + isEmpty(item.omName) + '</td>' +
+                            '<td title="' + toThousands(item.receiveTotalQty) + '" style="text-align:right;">' + toThousands(item.receiveQty) + '</td>' +
+                            '<td title="' + isEmpty(item.userName) + '" style="text-align:left;">' + isEmpty(item.userName) + '</td>' +
+                            '<td title="' + isEmpty(item.receivedRemark) + '" style="text-align:left;">' + isEmpty(item.receivedRemark) + '</td>' +
+                            '</tr>';
                         m.grid_table.append(tempTrHtml);
                     }
                 }else {

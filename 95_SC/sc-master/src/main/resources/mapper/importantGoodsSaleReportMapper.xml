@@ -5,6 +5,7 @@
 
         <result column="article_id" property="articleId"></result>
         <result column="sale_date" property="saleDate"></result>
+        <result column="tran_date" property="tranDate"></result>
         <result column="store_cd" property="storeCd"></result>
         <result column="store_name" property="storeName"></result>
         <result column="city" property="city"></result>
@@ -57,6 +58,7 @@
         ma10.store_cd,
         ma10.store_name,
         sa02.sale_date,
+        sa01.tran_date,
         sa02.price_actual,
         sa02.sale_qty,
         sa02.sale_amount,
@@ -76,6 +78,7 @@
 		sa02.acc_date
     FROM
         ma1000 ma10,
+        sa0010 sa01,
         sa0020 sa02,
         ma1100 ma11,
         ma0070 ma07,
@@ -100,14 +103,18 @@
                  open="(" separator="," close=")">
             #{store,jdbcType=VARCHAR}
         </foreach>
+        AND sa01.acc_date = sa02.acc_date
+        AND sa01.store_cd = sa02.store_cd
+        AND sa01.pos_id = sa02.pos_id
+        AND sa01.tran_serial_no = sa02.tran_serial_no
         <if test="goodSaleReport.startDate!=null and goodSaleReport.startDate!=''">
             <![CDATA[
-            AND   to_char(sa02.sale_date,'yyyyMMdd')  >= #{goodSaleReport.startDate}
+        AND sa01.tran_date >= TO_TIMESTAMP(#{goodSaleReport.startDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
         ]]>
         </if>
         <if test="goodSaleReport.endDate!=null and goodSaleReport.endDate!=''">
             <![CDATA[
-            AND   to_char(sa02.sale_date,'yyyyMMdd')  <= #{goodSaleReport.endDate}
+             and (sa01.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{goodSaleReport.endDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
            ]]>
         </if>
         <if test="goodSaleReport.depCd!=null and goodSaleReport.depCd!=''">
@@ -140,9 +147,10 @@
 
     <select id="searchCount" parameterType="cn.com.bbut.iy.itemmaster.dto.goodsalereport.goodSaleReportParamDTO" resultType="int">
         SELECT  DISTINCT
-            count (ma11.article_id)
+            count (*)
         FROM
             ma1000 ma10,
+            sa0010 sa01,
             sa0020 sa02,
             ma1100 ma11,
             ma0070 ma07,
@@ -167,16 +175,20 @@
                      open="(" separator="," close=")">
                 #{store,jdbcType=VARCHAR}
             </foreach>
-            <if test="goodSaleReport.startDate!=null and goodSaleReport.startDate!=''">
-                <![CDATA[
-                AND   to_char(sa02.sale_date,'yyyyMMdd')  >= #{goodSaleReport.startDate}
-            ]]>
-            </if>
-            <if test="goodSaleReport.endDate!=null and goodSaleReport.endDate!=''">
-                <![CDATA[
-                AND   to_char(sa02.sale_date,'yyyyMMdd')  <= #{goodSaleReport.endDate}
-               ]]>
-            </if>
+        AND sa01.acc_date = sa02.acc_date
+        AND sa01.store_cd = sa02.store_cd
+        AND sa01.pos_id = sa02.pos_id
+        AND sa01.tran_serial_no = sa02.tran_serial_no
+        <if test="goodSaleReport.startDate!=null and goodSaleReport.startDate!=''">
+            <![CDATA[
+        AND sa01.tran_date >= TO_TIMESTAMP(#{goodSaleReport.startDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        ]]>
+        </if>
+        <if test="goodSaleReport.endDate!=null and goodSaleReport.endDate!=''">
+            <![CDATA[
+             and (sa01.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{goodSaleReport.endDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+           ]]>
+        </if>
             <if test="goodSaleReport.depCd!=null and goodSaleReport.depCd!=''">
                 AND ma11.dep_cd = #{goodSaleReport.depCd}
             </if>

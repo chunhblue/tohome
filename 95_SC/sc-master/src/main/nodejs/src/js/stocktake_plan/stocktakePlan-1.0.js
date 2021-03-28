@@ -31,6 +31,7 @@ define('stocktakePlan', function () {
         reset:null,
         search_store_input:null,
         pd_status:null,
+        reviewStatus:null,
         aRegion : null,
         aCity : null,
         aDistrict : null,
@@ -89,6 +90,7 @@ define('stocktakePlan', function () {
         m.pd_start_date.val(obj.piStartDate);
         m.pd_end_date.val(obj.piEndDate);
         m.pd_status.val(obj.piStatus);
+        m.reviewStatus.val(obj.reviewStatus);
         m.pd_cd.val(obj.piCd);
         // 设置组织架构回显
         _common.setAutomaticVal(obj);
@@ -392,7 +394,8 @@ define('stocktakePlan', function () {
             piStartDate:_startDate,
             piEndDate:_endDate,
             piCd:m.pd_cd.val(),
-            piStatus:piStatus
+            piStatus:piStatus,
+            reviewStatus:m.reviewStatus.val()
         };
         m.searchJson.val(JSON.stringify(searchJsonStr));
     }
@@ -432,6 +435,7 @@ define('stocktakePlan', function () {
             m.pd_end_date.val("");
             m.pd_cd.val("");
             m.pd_status.val("");
+            m.reviewStatus.val("");
             $("#regionRemove").click();
             selectTrTemp = null;
             m.searchJson.val('');
@@ -445,7 +449,7 @@ define('stocktakePlan', function () {
             title:"Stocktake Plan",
             param:paramGrid,
             localSort: true,
-            colNames:["Date","Start Time","End Time","Document No.","Store No.","Store Name","Status","Type","Remarks","Day End of Now","Created by","Date Created","piStatusCode","piTypeCode","exportFlg"],
+            colNames:["Date","Start Time","End Time","Document No.","Store No.","Store Name","Status","Review Status","Review Status","Type","Remarks","Day End of Now","Created by","Date Created","piStatusCode","piTypeCode","exportFlg"],
             colModel:[
                 {name:"piDate",type:"text",text:"center",width:"130",ishide:false,css:""},
                 {name:"piStartTime",type:"text",text:"center",width:"130",ishide:false},
@@ -454,6 +458,8 @@ define('stocktakePlan', function () {
                 {name:"storeCd",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:null},
                 {name:"storeName",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:null},
                 {name:"piStatus",type:"text",text:"left",width:"130",ishide:false,css:"",getCustomValue:null},
+                {name:"reviewStatus",type:"text",text:"left",width:"130",ishide:true,css:""},
+                {name:"reviewStsName",type:"text",text:"left",width:"130",ishide:false,css:""},
                 {name:"piType",type:"text",text:"left",width:"130",ishide:false,css:"",getCustomValue:null},
                 {name:"remarks",type:"text",text:"left",width:"130",ishide:false,css:"",getCustomValue:null},
                 {name:"dayEndOfNow",type:"text",text:"right",width:"130",ishide:false,css:""},

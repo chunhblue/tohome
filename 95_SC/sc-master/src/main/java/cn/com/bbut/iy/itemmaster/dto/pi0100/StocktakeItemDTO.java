@@ -13,6 +13,9 @@ import java.math.BigDecimal;
  *
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
+@AllArgsConstructor
+@NoArgsConstructor
 public class StocktakeItemDTO {
     private String barcode;
     private String storeCd;
@@ -72,4 +75,11 @@ public class StocktakeItemDTO {
     // 上一次的差异量, 多次更新实时库存用
     private BigDecimal lastVarianceQty;
 
+    // 临时存储数量
+    private String piQty;
+    // 拆包装转换比例
+    private String converter;
+
+    // region:Bad Merchandise;  Backroom;  Display
+    private String region;
 }

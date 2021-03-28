@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.StampSummaryReportMapper">
+    <resultMap id="BaseItemResult" type="cn.com.bbut.iy.itemmaster.dto.StampSummaryDaily.StampSummaryReportDto">
+        <result column="business_date" property="businessDate"/>
+        <result column="store_cd" property="storeCd"/>
+        <result column="store_name" property="storeName"/>
+        <result column="article_id" property="articleId"/>
+        <result column="article_name" property="articleName"/>
+        <result column="total_issued_qty" property="totalIssuedQty"/>
+        <result column="bonus_items_qty" property="bonusItemsQty"/>
+        <result column="amount_qty" property="amountQty"/>
+        <result column="create_ymd_hms" property="createYmdHms"/>
+    </resultMap>
+
+    <select id="searchCount" parameterType="cn.com.bbut.iy.itemmaster.dto.StampSummaryDaily.StampSummaryParamReportDto" resultType="int">
+        SELECT
+        count(*)
+        FROM
+        ma8436
+        left join ma1000
+        on ma8436.store_cd = ma1000.store_cd
+        and #{param.businessDate} between ma1000.effective_start_date AND ma1000.effective_end_date
+        left join ma1100
+        on ma8436.article_id = ma1100.article_id
+        and #{param.businessDate} between ma1100.effective_start_date AND ma1100.effective_end_date
+        WHERE
+        1 = 1
+        AND ma8436.store_cd =  #{param.storeCd,jdbcType=VARCHAR}
+        <if test="param.startDate!=null and param.startDate!='' ">
+            <![CDATA[
+             AND ma8436.business_date >= #{param.startDate}
+            ]]>
+        </if>
+        <if test="param.endDate!=null and param.endDate!='' ">
+            <![CDATA[
+             AND ma8436.business_date <= #{param.endDate}
+            ]]>
+        </if>
+    </select>
+
+    <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.StampSummaryDaily.StampSummaryParamReportDto" resultMap="BaseItemResult">
+        SELECT
+        ma8436.store_cd,ma1000.store_name,ma8436.article_id,ma1100.article_name,ma8436.business_date,
+        ma8436.total_issued_qty
+        FROM
+        ma8436
+        left join ma1000
+        on ma8436.store_cd = ma1000.store_cd
+        and #{param.businessDate} between ma1000.effective_start_date AND ma1000.effective_end_date
+        left join ma1100
+        on ma8436.article_id = ma1100.article_id
+        and #{param.businessDate} between ma1100.effective_start_date AND ma1100.effective_end_date
+        WHERE
+        1 = 1
+        AND ma8436.store_cd =  #{param.storeCd,jdbcType=VARCHAR}
+        <if test="param.startDate!=null and param.startDate!='' ">
+            <![CDATA[
+             AND ma8436.business_date >= #{param.startDate}
+            ]]>
+        </if>
+        <if test="param.endDate!=null and param.endDate!='' ">
+            <![CDATA[
+             AND ma8436.business_date <= #{param.endDate}
+            ]]>
+        </if>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+
+    <select id="searchDetail" parameterType="cn.com.bbut.iy.itemmaster.dto.StampSummaryDaily.StampSummaryParamReportDto" resultMap="BaseItemResult">
+        SELECT
+        ma8435.store_cd,ma1000.store_name,ma8435.article_id,ma1100.article_name,ma8435.business_date,
+        ma8435.total_issued_qty,ma8435.bonus_items_qty,ma8435.amount_qty,
+        (ma8435.create_ymd || ma8435.create_hms) as create_ymd_hms
+        FROM
+        ma8435
+        left join ma1000
+        on ma8435.store_cd = ma1000.store_cd
+        and #{param.businessDate} between ma1000.effective_start_date AND ma1000.effective_end_date
+        left join ma1100
+        on ma8435.article_id = ma1100.article_id
+        and #{param.businessDate} between ma1100.effective_start_date AND ma1100.effective_end_date
+        WHERE
+        1 = 1
+        AND ma8435.store_cd In
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.startDate!=null and param.startDate!='' ">
+            <![CDATA[
+             AND ma8435.business_date >= #{param.startDate}
+            ]]>
+        </if>
+        <if test="param.endDate!=null and param.endDate!='' ">
+            <![CDATA[
+             AND ma8435.business_date <= #{param.endDate}
+            ]]>
+        </if>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+
+    <select id="searchDetailCount" parameterType="cn.com.bbut.iy.itemmaster.dto.StampSummaryDaily.StampSummaryParamReportDto" resultType="int">
+        SELECT
+        count(*)
+        FROM
+        ma8435
+        left join ma1000
+        on ma8435.store_cd = ma1000.store_cd
+        and #{param.businessDate} between ma1000.effective_start_date AND ma1000.effective_end_date
+        left join ma1100
+        on ma8435.article_id = ma1100.article_id
+        and #{param.businessDate} between ma1100.effective_start_date AND ma1100.effective_end_date
+        WHERE
+        1 = 1
+        AND ma8435.store_cd In
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.startDate!=null and param.startDate!='' ">
+            <![CDATA[
+             AND ma8435.business_date >= #{param.startDate}
+            ]]>
+        </if>
+        <if test="param.endDate!=null and param.endDate!='' ">
+            <![CDATA[
+             AND ma8435.business_date <= #{param.endDate}
+            ]]>
+        </if>
+    </select>
+</mapper>

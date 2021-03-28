@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.viettelPhoneMapper.ViettelPhoneMapper">
+
+    <resultMap id="ReMap" type="cn.com.bbut.iy.itemmaster.dto.viettelPhone.ma8407dto">
+        <result column="request_date" property="requestDate" />
+        <result column="request_id" property="requestId" />
+        <result column="order_id" property="orderId"/>
+        <result column="receipt_no" property="receiptNo"  />
+        <result column="trans_amt" property="transAmt" />
+        <result column="status" property="status" />
+        <result column="message" property="message" />
+    </resultMap>
+    <select id="searchData"  parameterType="cn.com.bbut.iy.itemmaster.dto.viettelParamPhone.ma8407Paramdto" resultMap="ReMap">
+         select  request_date,request_id,order_id,receipt_no,trans_amt,status,message  from ma8407
+         where 1=1
+      <if test="param.startDateTime != null  and param.startDateTime !=''">
+        and  <![CDATA[  to_char(request_date,'yyyymmddhh24miss')> #{param.startDateTime}]]>
+      </if>
+        <if test="param.endDateTime != null and param.endDateTime !=''">
+            and  <![CDATA[  to_char(request_date,'yyyymmddhh24miss')< #{param.endDateTime}]]>
+        </if>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+    <select id="searchDataExport"  parameterType="cn.com.bbut.iy.itemmaster.dto.viettelParamPhone.ma8407Paramdto" resultMap="ReMap">
+        select  to_char(request_date,'yyyymmddhh24miss') request_date,request_id,order_id,receipt_no,trans_amt,status,message  from ma8407
+        where 1=1
+        <if test="param.startDateTime != null  and param.startDateTime !=''">
+            and  <![CDATA[  to_char(request_date,'yyyymmddhh24miss')> #{param.startDateTime}]]>
+        </if>
+        <if test="param.endDateTime != null and param.endDateTime !=''">
+            and  <![CDATA[  to_char(request_date,'yyyymmddhh24miss')< #{param.endDateTime}]]>
+        </if>
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+    <select id="searchCount"  parameterType="cn.com.bbut.iy.itemmaster.dto.viettelParamPhone.ma8407Paramdto" resultType="INT">
+         select   COUNT(1)  from ma8407
+        where 1=1
+        <if test="param.startDateTime != null and param.startDateTime !=''">
+            and  <![CDATA[  to_char(request_date,'yyyymmddhh24miss')> #{param.startDateTime}]]>
+        </if>
+        <if test="param.endDateTime != null and param.endDateTime !=''">
+            and  <![CDATA[  to_char(request_date,'yyyymmddhh24miss')< #{param.endDateTime}]]>
+        </if>
+    </select>
+</mapper>

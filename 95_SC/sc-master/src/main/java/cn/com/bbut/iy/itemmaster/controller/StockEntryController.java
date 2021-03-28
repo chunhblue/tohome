@@ -19,15 +19,12 @@ import cn.com.bbut.iy.itemmaster.service.CM9060Service;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
 import cn.com.bbut.iy.itemmaster.service.stocktake.StocktakeEntryService;
 import cn.com.bbut.iy.itemmaster.service.stocktake.StocktakePlanService;
-import cn.com.bbut.iy.itemmaster.util.ExcelBaseUtil;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -36,12 +33,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -65,6 +62,7 @@ public class StockEntryController extends BaseAction {
     private MRoleStoreService mRoleStoreService;
     @Autowired
     private CM9060Service cm9060Service;
+    private SXSSFWorkbook wb;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_STOCKTAKE_RESULT_QUERY";
     private final String EXCEL_EXPORT_NAME = "Stocktake Result Query.xlsx";
@@ -75,8 +73,9 @@ public class StockEntryController extends BaseAction {
     @Permission(codes = { PermissionCode.CODE_SC_PD_ENTRY_IMOIRT})
     @ResponseBody
     @RequestMapping(method = RequestMethod.POST, value = "/uploadResult", produces = "text/html;charset=UTF-8")
-    public String fileUpload(HttpServletRequest request, HttpSession session,@RequestParam("fileData") MultipartFile file,@RequestParam("storeCd")String storeCd) {
-        return stocktakeEntryService.insertFileUpload(file,request,session,storeCd);
+    public String fileUpload(HttpServletRequest request, HttpSession session,@RequestParam("fileData") MultipartFile file
+            ,@RequestParam("storeCd")String storeCd,@RequestParam("piCd")String piCd) {
+        return stocktakeEntryService.insertFileUpload(file,request,session,storeCd,piCd);
     }
 
     /**
@@ -193,7 +192,7 @@ public class StockEntryController extends BaseAction {
                 }
                 List<StocktakeItemDTO> itemList = null;
 
-                Map<String,Object> map = stocktakeEntryService.insertImportTxt(file,storeCd);
+                Map<String,Object> map = stocktakeEntryService.insertImportCsv(file,storeCd,piCd);
                 for(Map.Entry<String,Object> entry : map.entrySet()){
                     if("list".equals(entry.getKey()) ){
                         Object list = entry.getValue();
@@ -205,30 +204,11 @@ public class StockEntryController extends BaseAction {
                 }
 
                 if (itemList==null||itemList.size()<1) {
-                    _extjsFormResult.setMessage("No data found!");
+                    _extjsFormResult.setMessage(msg);
                     _extjsFormResult.setSuccess(false);
                     return gson.toJson(_extjsFormResult);
                 }
-                Boolean checkFlg = true;
-                String msgg = "";
-                for(int i=0;i<itemList.size();i++){
-                    String articleIdi = itemList.get(i).getArticleId();
-                    String articleNamei = itemList.get(i).getArticleName();
-                    for(int j=0;j<i;j++){
-                        String articleIdj = itemList.get(j).getArticleId();
-                        if(articleIdi.equals(articleIdj)){
-                            checkFlg = false;
-                            msgg = "Item:" + articleIdi + "  " + articleNamei + "  is repeated!"
-                                    +"<br>"+"Please remove duplicate items!";
-                        }
-                    }
-                }
-                // 检查出重复数据
-                if(!checkFlg){
-                    _extjsFormResult.setMessage(msgg);
-                    _extjsFormResult.setSuccess(false);
-                    return gson.toJson(_extjsFormResult);
-                }
+
                 for (StocktakeItemDTO item : itemList) {
                     item.setPiCd(piCd);
                     item.setPiDate(piDate);
@@ -252,7 +232,7 @@ public class StockEntryController extends BaseAction {
             return gson.toJson(_extjsFormResult);
         }
         // 上传成功
-        _extjsFormResult.setMessage("Upload Succeed");
+        _extjsFormResult.setMessage(msg);
         _extjsFormResult.setSuccess(true);
         return gson.toJson(_extjsFormResult);
     }
@@ -521,5 +501,74 @@ public class StockEntryController extends BaseAction {
             _id = "D" + _type + date;
         }
         return _id;
+    }
+
+    /**
+     * 导出查询结果
+     *
+     * @param request
+     * @param session
+     * @param searchJson
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping("/exportDetail")
+    @ResponseBody
+    @Permission(codes = { PermissionCode.CODE_SC_PD_ENTRY_EXPORT })
+    public ReturnDTO exportDetail(HttpServletRequest request, HttpSession session, String searchJson, String listJson) {
+        ReturnDTO _return = null;
+        if(org.apache.commons.lang.StringUtils.isBlank(searchJson)
+                || org.apache.commons.lang.StringUtils.isBlank(listJson)){
+            log.info("导出查询参数为空");
+            _return = new ReturnDTO(false, "Export query parameter is empty",0);
+            return _return;
+        }
+        Gson gson = new Gson();
+        PI0100DTO pi0100DTO = gson.fromJson(searchJson,PI0100DTO.class);
+        if(pi0100DTO == null) {
+            log.info("Failed to get head information");
+            _return = new ReturnDTO(false, "Failed to get head information", 0);
+            return _return;
+        }
+        List<StocktakeItemDTO> stockList = gson.fromJson(listJson, new TypeToken<List<StocktakeItemDTO>>(){}.getType());
+        if(stockList == null || stockList.size() == 0){
+            log.info("Failed to get the details of the item!");
+            _return = new ReturnDTO(false, "Failed to get the details of the item!", 0);
+            return _return;
+        }
+
+        wb =  stocktakeEntryService.getExcel(pi0100DTO,stockList);
+        if(wb == null) {
+            _return = new ReturnDTO(false, "No data found!",0);
+            return _return;
+        }
+
+        _return = new ReturnDTO(true, "Succeeded!",1);
+        return _return;
+    }
+
+    /**
+     * 导出excle
+     */
+    @RequestMapping("/download")
+    public void export(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            //下载
+            String fileName = "STOCK_TAKE_RESULT.xlsx";
+
+            fileName = URLEncoder.encode(fileName,"utf-8");
+            fileName = new String(fileName.getBytes(StandardCharsets.UTF_8),"iso8859-1");
+
+            response.setContentType("application/x-msdownload");
+            response.addHeader("Content-Disposition", "attachment;filename="+fileName);
+
+            OutputStream outputStream = response.getOutputStream();
+            wb.write(outputStream);
+            wb.close();
+            outputStream.flush();
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

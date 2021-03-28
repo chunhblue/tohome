@@ -23,4 +23,8 @@ public interface DaSaleReportMapper {
     List<MA0020C> getCity();
 
     int selectDaySaleReportCount(@Param("daySaleReportParamdto")DaySaleReportParamDTO param);
+
+    int selectDayPosSaleReportCount(@Param("daySaleReportParamdto")DaySaleReportParamDTO param);
+
+    List<DaySaleReportDTO> selectDayPosSaleReport(@Param("daySaleReportParamdto") DaySaleReportParamDTO param);
 }

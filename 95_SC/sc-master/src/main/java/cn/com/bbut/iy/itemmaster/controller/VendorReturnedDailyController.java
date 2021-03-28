@@ -3,30 +3,21 @@ package cn.com.bbut.iy.itemmaster.controller;
 import cn.com.bbut.iy.itemmaster.annotation.Permission;
 import cn.com.bbut.iy.itemmaster.constant.Constants;
 import cn.com.bbut.iy.itemmaster.constant.PermissionCode;
-import cn.com.bbut.iy.itemmaster.dao.VendorReceiptDailyMapper;
 import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
 import cn.com.bbut.iy.itemmaster.dto.VendorReturnedDaily.VendorReturnedDailyDTO;
 import cn.com.bbut.iy.itemmaster.dto.VendorReturnedDaily.VendorReturnedDailyParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.ReturnDTO;
-import cn.com.bbut.iy.itemmaster.dto.base.role.ResourceViewDTO;
 import cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam;
-import cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyDTO;
-import cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO;
 import cn.com.bbut.iy.itemmaster.entity.User;
-import cn.com.bbut.iy.itemmaster.entity.base.Ma1000;
-import cn.com.bbut.iy.itemmaster.entity.ma0020.MA0020C;
-import cn.com.bbut.iy.itemmaster.entity.ma0080.MA0080;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
 import cn.com.bbut.iy.itemmaster.service.VendorReturnedDaily.VendorReturnedDailyService;
-import cn.com.bbut.iy.itemmaster.service.vendorReceiptDaily.VendorReceiptDailyService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,7 +36,6 @@ import java.util.*;
  */
 @Controller
 @Slf4j
-//@Secure
 @RequestMapping(value = Constants.REQ_HEADER + "/vendorReturnedDaily")
 public class VendorReturnedDailyController extends BaseAction {
 

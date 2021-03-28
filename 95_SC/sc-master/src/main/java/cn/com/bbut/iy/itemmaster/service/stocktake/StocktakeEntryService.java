@@ -1,11 +1,16 @@
 package cn.com.bbut.iy.itemmaster.service.stocktake;
 
+import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
+import cn.com.bbut.iy.itemmaster.dto.article.ArticleDTO;
+import cn.com.bbut.iy.itemmaster.dto.article.ArticleParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO;
+import cn.com.bbut.iy.itemmaster.dto.base.CommonDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.ReturnDTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100DTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100ParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,14 +41,24 @@ public interface StocktakeEntryService {
 
     void updateEndTime(String piCd, String piDate, String storeCd);
 
-    String insertFileUpload(MultipartFile file, HttpServletRequest request, HttpSession session,String storeCd);
+    String insertFileUpload(MultipartFile file, HttpServletRequest request, HttpSession session,String storeCd,String piCd);
 
     GridDataDTO<PI0100DTO> search(PI0100ParamDTO pi0100Param);
 
     List<StocktakeItemDTO> insertImportExcel(MultipartFile file,String storeCd);
 
-    // 读取txt文件内容
-    Map<String,Object> insertImportTxt(MultipartFile file, String storeCd);
+    // 读取csv文件内容
+    Map<String,Object> insertImportCsv(MultipartFile file, String storeCd,String piCd);
     // MultipartFile -> File
     void inputStreamToFile(InputStream ins, File file);
+
+    String insertNonCountExcel(MultipartFile file, CommonDTO dto);
+
+    /**
+     *
+     * 条件查询主档记录
+     */
+    GridDataDTO<ArticleDTO> getList(ArticleParamDTO dto);
+
+    SXSSFWorkbook getExcel(PI0100DTO pi0100DTO,List<StocktakeItemDTO> stockList);
 }

@@ -6,11 +6,13 @@ package cn.com.bbut.iy.itemmaster.dao;
         import cn.com.bbut.iy.itemmaster.dto.businessDaily.PaymentAmtDto;
         import org.apache.ibatis.annotations.Mapper;
         import org.apache.ibatis.annotations.Param;
+        import org.springframework.stereotype.Repository;
 
+        import java.math.BigDecimal;
         import java.text.SimpleDateFormat;
         import java.util.List;
 
-@Mapper
+@Repository
 public interface BusinessDailyMapper {
     /**
      * 获取销售数据
@@ -19,6 +21,17 @@ public interface BusinessDailyMapper {
      * @return
      */
     BusinessDailyDto getSaleData(@Param("payDate")String payDate, @Param("storeCd")String storeCd,@Param("businessDate")String businessDate);
+
+    /**
+     * 营业金额
+     * @return
+     */
+    String getGrossSaleAmount(@Param("payDate")String payDate, @Param("storeCd")String storeCd, @Param("businessDate")String businessDate);
+    /**
+     * 退款金额
+     * @return
+     */
+    String getRefundAmount(@Param("payDate")String payDate, @Param("storeCd")String storeCd, @Param("businessDate")String businessDate);
 
     /**
      * 获取支付类型应付金额
@@ -34,7 +47,8 @@ public interface BusinessDailyMapper {
      * @param storeCd 店铺号
      * @return
      */
-    List<PaymentAmtDto> getPayInAmt(@Param("payDate")String payDate, @Param("storeCd")String storeCd);
+    PaymentAmtDto getPayInAmt(@Param("payDate")String payDate, @Param("storeCd")String storeCd);
+
 
     /**
      *  获取经费
@@ -63,5 +77,5 @@ public interface BusinessDailyMapper {
 
     Integer getcountCustomer(@Param("accDate") String businessDate, @Param("storeCd") String storeCd);
 
-    Integer getLastMonthSalesAmount(@Param("accDate") String businessDateformat, @Param("storeCd") String storeCd);
+    Double getLastMonthSalesAmount(@Param("startDate") String startDate,@Param("endDate") String endDate, @Param("storeCd") String storeCd);
 }

@@ -30,4 +30,10 @@ public interface CustEntryMapper {
     void saveAllItem(@Param("list") List<StocktakeItemDTOC> stocktakeItemList);
 
     void updateItem(@Param("param")PI0100DTOC item);
+
+    List<StocktakeItemDTOC> getPI0130ByPrimaryIn(@Param("piCd") String piCd);
+
+    void saveAllItemIn(@Param("list") List<StocktakeItemDTOC> stocktakeItemList);
+
+    List<StocktakeItemDTOC> getPI0130ByPrimaryIIn(@Param("piCd")String piCd, @Param("articleId")String articleId,@Param("barcode")String barcode);
 }

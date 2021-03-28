@@ -141,6 +141,13 @@ define('importantgoodsSaleDayReport' , function (){
         });
     };
 
+    // 格式化日期
+    var formatDateTime = function (dateStr) {
+        if (dateStr == null || dateStr === '') {
+            return '';
+        }
+        return new Date(dateStr).Format('dd/MM/yyyy hh:mm:ss')
+    };
     /**
      * 分页获取数据
      * @param page 当前页数
@@ -170,7 +177,7 @@ define('importantgoodsSaleDayReport' , function (){
                          //  '<td title="' + isEmpty(item.seqNo) + '" style="text-align: right">' + isEmpty(item.seqNo) + '</td>' +
                             '<td title="' + isEmpty(item.storeCd) + '" style="text-align: left">' + isEmpty(item.storeCd) + '</td>' +
                             '<td title="' + isEmpty(item.storeName) + '" style="text-align: left">' + isEmpty(item.storeName) + '</td>' +
-                            '<td title="' + isEmpty(item.accDate) + '" style="text-align: center">' + isEmpty(item.accDate) + '</td>' +
+                            '<td title="' + formatDateTime(item.tranDate) + '" style="text-align: center">' + formatDateTime(item.tranDate) + '</td>' +
                             '<td title="' + isEmpty(item.depName) + '" style="text-align: left">' + isEmpty(item.depName) + '</td>' +
                             '<td title="' + isEmpty(item.pmaName) + '" style="text-align: left">' + isEmpty(item.pmaName) + '</td>' +
                             '<td title="' + isEmpty(item.categoryName) + '" style="text-align: left">' + isEmpty(item.categoryName) + '</td>' +

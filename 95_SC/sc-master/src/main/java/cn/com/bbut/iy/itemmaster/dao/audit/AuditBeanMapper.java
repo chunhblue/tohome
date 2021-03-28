@@ -138,4 +138,6 @@ public interface AuditBeanMapper{
      * @return
      */
     int checkAuditByPosition(@Param("storeCd")String storeCd,@Param("userId") String userId, @Param("position")long position);
+
+    String getCorrType(@Param("tableName")String reTableName, @Param("recordCd")String recordCd,@Param("typeId")Integer typeId);
 }

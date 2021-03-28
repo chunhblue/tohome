@@ -82,7 +82,7 @@
 [#--		<div class="shade"></div>--]
 [#--	</div>--]
 <!--导航-->
-[@common.nav "HOME&Sale&Cashier Shift Report Query"][/@common.nav]
+[@common.nav "HOME&Sale&Cashier Balancing Query"][/@common.nav]
 <div class="container-fluid" id="main_box">
 	<div class="row">
 		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">

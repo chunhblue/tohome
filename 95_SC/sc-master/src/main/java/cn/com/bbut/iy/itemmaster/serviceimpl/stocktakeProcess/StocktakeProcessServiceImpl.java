@@ -172,6 +172,15 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
     }
 
     @Override
+    public GridDataDTO<StocktakeProcessItemsDTO> getTableData4(String piCd, String piDate, String storeCd,
+                                                               String searchVal, int page, int rows) {
+        int count = stocktakeProcessMapper.getTableData4Count(piCd,piDate,storeCd,searchVal);
+        int limit = (page-1)* rows;
+        List<StocktakeProcessItemsDTO> result = stocktakeProcessMapper.getTableData4(piCd,piDate,storeCd,searchVal,page,rows,limit);
+        return new GridDataDTO<>(result,page , count,rows);
+    }
+
+    @Override
     public List<StocktakeProcessDTO> getPrintData(PI0100ParamDTO pi0100) {
         List<StocktakeProcessDTO> result = stocktakeProcessMapper.search(pi0100);
         for (StocktakeProcessDTO stock : result) {
@@ -214,7 +223,220 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
         // 创建第三个sheet
         this.createSheet5(piCd,piDate,storeCd,sheet5,wb);
 
+        // 生成一个表格
+        SXSSFSheet sheet6 = wb.createSheet("Exceptional Report");
+        // 创建第6个sheet
+        this.createSheet6(piCd,piDate,storeCd,sheet6,wb);
         return wb;
+    }
+
+    private void createSheet6(String piCd, String piDate, String storeCd, SXSSFSheet sheet, SXSSFWorkbook wb) {
+        // 缩放 70%
+        sheet.setZoom(70);
+
+        // 生成并设置另一个样式
+        CellStyle style0 = wb.createCellStyle();
+        style0.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
+        style0.setFillPattern(XSSFCellStyle.SOLID_FOREGROUND);
+        style0.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+        style0.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);
+
+        sheet.setDefaultColumnStyle(7,style0);
+
+        // 生成并设置另一个样式
+        CellStyle style1 = wb.createCellStyle();
+        style1.setFillForegroundColor(IndexedColors.LIGHT_CORNFLOWER_BLUE.getIndex());
+        style1.setFillPattern(XSSFCellStyle.SOLID_FOREGROUND);
+        style1.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+        style1.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);
+
+        // 生成另一种字体4
+        Font font1 = wb.createFont();
+        // 设置字体
+        font1.setFontName("Microsoft JhengHei");
+        // 设置字体大小
+        font1.setFontHeightInPoints((short) 10);
+        // 在样式4中引用这种字体
+        style1.setFont(font1);
+
+        // 生成并设置另一个样式
+        CellStyle style2 = wb.createCellStyle();
+        style2.setFillForegroundColor(IndexedColors.WHITE.getIndex());
+        style2.setFillPattern(XSSFCellStyle.SOLID_FOREGROUND);
+        style2.setBorderTop(XSSFCellStyle.BORDER_THIN);
+        style2.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+        style2.setBorderRight(XSSFCellStyle.BORDER_THIN);
+        style2.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+        style2.setAlignment(XSSFCellStyle.ALIGN_LEFT);
+        style2.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);
+
+        // 在样式4中引用这种字体
+        style2.setFont(font1);
+
+        // 生成并设置另一个样式
+        CellStyle style3 = wb.createCellStyle();
+        style3.setFillForegroundColor(IndexedColors.RED.getIndex());
+        style3.setFillPattern(XSSFCellStyle.SOLID_FOREGROUND);
+        style3.setAlignment(XSSFCellStyle.ALIGN_LEFT);
+        style3.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);
+
+        // 生成并设置另一个样式
+        CellStyle style5 = wb.createCellStyle();
+        style5.setFillForegroundColor(IndexedColors.BLUE_GREY.getIndex());
+        style5.setFillPattern(XSSFCellStyle.SOLID_FOREGROUND);
+        style5.setAlignment(XSSFCellStyle.ALIGN_LEFT);
+        style5.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);
+
+        // 在样式5中引用这种字体
+        style3.setFont(font1);
+
+        // 生成并设置另一个样式
+        DataFormat format = wb.createDataFormat();
+        CellStyle style4 = wb.createCellStyle();
+        style4.setFillForegroundColor(IndexedColors.WHITE.getIndex());
+        style4.setFillPattern(XSSFCellStyle.SOLID_FOREGROUND);
+        style4.setAlignment(XSSFCellStyle.ALIGN_LEFT);
+        style4.setVerticalAlignment(XSSFCellStyle.VERTICAL_CENTER);
+        style4.setDataFormat(format.getFormat("dd/MM/yyyy"));
+
+        // 在样式4中引用这种字体
+        style4.setFont(font1);
+
+        // 设置列宽
+        sheet.setColumnWidth(0, 10 * 256);
+        sheet.setColumnWidth(1, 15 * 256);
+        sheet.setColumnWidth(2, 15 * 256);
+        sheet.setColumnWidth(3, 50 * 256);
+        sheet.setColumnWidth(4, 15 * 256);
+        sheet.setColumnWidth(5, 15 * 256);
+        sheet.setColumnWidth(6, 15 * 256);
+        sheet.setColumnWidth(7, 3 * 256);
+        sheet.setColumnWidth(8, 25 * 256);
+        sheet.setColumnWidth(9, 15 * 256);
+        sheet.setColumnWidth(10, 15 * 256);
+        sheet.setColumnWidth(11, 15 * 256);
+        sheet.setColumnWidth(12, 15 * 256);
+        sheet.setColumnWidth(13, 15 * 256);
+        sheet.setColumnWidth(14, 30 * 256);
+
+        // 行号
+        int rowNum = 0;
+
+        // title 第一行
+        SXSSFRow row = sheet.createRow(rowNum++);
+        SXSSFCell cell = row.createCell(0);
+        cell.setCellValue("Exceptional Result");
+        cell.setCellStyle(style3);
+
+        cell = row.createCell(1);
+        cell.setCellValue("Store ID");
+        cell.setCellStyle(style4);
+
+        cell = row.createCell(2);
+        cell.setCellValue(storeCd);
+        cell.setCellStyle(style4);
+
+        cell = row.createCell(3);
+        cell.setCellValue("Stock take date");
+        cell.setCellStyle(style4);
+
+        cell = row.createCell(4);
+        cell.setCellValue(formatDate(piDate));
+        cell.setCellStyle(style4);
+
+        cell = row.createCell(8);
+        cell.setCellValue("Already on Item Master.");
+        cell.setCellStyle(style3);
+
+        cell = row.createCell(9);
+        cell.setCellValue("Sell Item");
+        cell.setCellStyle(style5);
+
+        cell = row.createCell(10);
+        cell.setCellValue("Prchse Item");
+        cell.setCellStyle(style5);
+
+        cell = row.createCell(11);
+        cell.setCellValue("Invnt Item");
+        cell.setCellStyle(style5);
+
+        cell = row.createCell(12);
+        cell.setCellValue("Active");
+        cell.setCellStyle(style5);
+
+        cell = row.createCell(13);
+        cell.setCellValue("CIA item");
+        cell.setCellStyle(style5);
+
+        cell = row.createCell(14);
+        cell.setCellValue("Note");
+        cell.setCellStyle(style5);
+
+        // 合并单元格CellRangeAddress构造参数依次表示起始行，截至行，起始列， 截至列
+        sheet.addMergedRegion(new CellRangeAddress(rowNum-1, rowNum-1, 15, 29));
+        cell = row.createCell(15);
+        cell.setCellValue("Picture of Exceptional");
+        cell.setCellStyle(style5);
+
+
+
+
+        // 第二行结果总数
+        row = sheet.createRow(rowNum++);
+        cell = row.createCell(1);
+        cell.setCellValue("");
+
+        cell = row.createCell(2);
+        cell.setCellValue("Barcode");
+
+        cell = row.createCell(3);
+        cell.setCellValue("Item Name");
+
+        cell = row.createCell(4);
+        cell.setCellValue("UOM");
+
+        cell = row.createCell(5);
+        cell.setCellValue("Stocktaking Qty");
+
+        cell = row.createCell(6);
+        cell.setCellValue("Region");
+
+
+        // 第三行结果总数
+//        row = sheet.createRow(rowNum++);
+
+        // 绑定异常商品信息
+        List<StocktakeProcessItemsDTO> list = stocktakeProcessMapper.getExceptionItemList(piCd,piDate,storeCd);
+        for (int i = 0; i < list.size(); i++) {
+
+            StocktakeProcessItemsDTO item = list.get(i);
+            // 第四行商品假数据
+            row = sheet.createRow(rowNum++);
+            cell = row.createCell(0);
+            cell.setCellValue(i+1);
+
+            cell = row.createCell(1);
+            cell.setCellValue("");
+            cell.setCellValue(item.getArticleId());
+
+            cell = row.createCell(2);
+            cell.setCellValue(item.getBarcode());
+
+            cell = row.createCell(3);
+            cell.setCellValue(item.getArticleName());
+
+            cell = row.createCell(4);
+            cell.setCellValue(item.getUom());
+
+            cell = row.createCell(5);
+            cell.setCellValue(item.getFirstQty());
+
+            cell = row.createCell(6);
+            cell.setCellValue(item.getRegion());
+
+            cell = row.createCell(8);
+            cell.setCellValue(item.getArticleId());
+        }
     }
 
     private void createSheet5(String piCd, String piDate, String storeCd, SXSSFSheet sheet, SXSSFWorkbook wb) {
@@ -492,11 +714,17 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
 
         // 遍历标题
         for (int i = 0; i < result.size(); i++) {
+            String lastDate = "";
             // 遍历标题 获得每组的第一个, 取得日期就可以了
-            StocktakeReportByDepDTO item = result.get(i).get(0);
+            if (result.get(i) != null && result.get(i).size() > 1) {
+                StocktakeReportByDepDTO item = result.get(i).get(0);
+                lastDate = item.getPiDate();
+            }
             cell = row.createCell(i+1);
             cell.setCellStyle(titleStyle);
-            cell.setCellValue(getDateEmpty(item.getPiDate()));
+            if (!StringUtils.isEmpty(lastDate)) {
+                cell.setCellValue(getDateEmpty(lastDate));
+            }
         }
 
         List<String> pmaNames = new ArrayList<String>();
@@ -748,7 +976,11 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
 
         // store 信息
         SXSSFCell cell1 = row.createCell(3);
-        cell1.setCellValue(getValEmpty(head.getStoreName()));
+        if (head !=null){
+            cell1.setCellValue(getValEmpty(head.getStoreName()));
+        }else {
+            cell1.setCellValue(getValEmpty(""));
+        }
         cell1.setCellStyle(style1);
         // 合并单元格CellRangeAddress构造参数依次表示起始行，截至行，起始列， 截至列
         sheet.addMergedRegion(new CellRangeAddress(rowNum-1, rowNum-1, 3, 7));
@@ -1526,22 +1758,37 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             cell.setCellStyle(style8);
 
             cell = row.createCell(6);
+            if(item.getInventoryQty() == null){
+                item.setInventoryQty(BigDecimal.ZERO);
+            }
             cell.setCellValue(item.getInventoryQty().longValue());
             cell.setCellStyle(style8);
 
             cell = row.createCell(7);
+            if(item.getPiQty() == null){
+                item.setPiQty(BigDecimal.ZERO);
+            }
             cell.setCellValue(item.getPiQty().longValue());
             cell.setCellStyle(style8);
 
             cell = row.createCell(8);
+            if(item.getBaseSalePrice() == null){
+                item.setBaseSalePrice(BigDecimal.ZERO);
+            }
             cell.setCellValue(item.getBaseSalePrice().longValue());
             cell.setCellStyle(style8);
 
             cell = row.createCell(9);
+            if(item.getVarianceQty() == null){
+                item.setVarianceQty(BigDecimal.ZERO);
+            }
             cell.setCellValue(item.getVarianceQty().longValue());
             cell.setCellStyle(style9);
 
             cell = row.createCell(10);
+            if(item.getVarianceAmt() == null){
+                item.setVarianceAmt(BigDecimal.ZERO);
+            }
             cell.setCellValue(item.getVarianceAmt().longValue());
             cell.setCellStyle(style9);
 
@@ -2795,6 +3042,9 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
         if (thisBookValue.getQty() == null) {
             thisBookValue.setQty(new BigDecimal("0"));
         }
+        if (thisBookValue.getAmt()==null){
+            thisBookValue.setAmt(new BigDecimal(0));
+        }
         double thisTotalVarianceAmtPer = divisionFun(thisTotalVarianceAmt, thisBookValue.getAmt().longValue());
         SXSSFCell row30Cell5 = row.createCell(12);
         row30Cell5.setCellValue(thisTotalVarianceAmtPer);
@@ -2953,12 +3203,15 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
         row33Cell2.setCellValue("1/3 Sale during the stock-take");
         row33Cell2.setCellStyle(style6);
 
-        // 获取盘点期间 1/3 的销售额
-        Integer saleAmt = stocktakeProcessMapper._getStocktakePeriodSaleAmt(
-                headInfo.getThisStocktakeDate(),
-                headInfo.getStoreCd(),
-                headInfo.getThisStartTime(),
-                headInfo.getThisEndTime());
+        Integer saleAmt=null;
+        if (headInfo.getThisStartTime() != null || headInfo.getThisEndTime()!=null){
+            // 获取盘点期间 1/3 的销售额
+            saleAmt = stocktakeProcessMapper._getStocktakePeriodSaleAmt(
+                    headInfo.getThisStocktakeDate(),
+                    headInfo.getStoreCd(),
+                    headInfo.getThisStartTime(),
+                    headInfo.getThisEndTime());
+        }
         if (saleAmt == null) {
             saleAmt = 0;
         }
@@ -3213,7 +3466,7 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             }
         }
     }
-
+//第一个结束
 
     // 获取过去 六次 的盘点数据
     private List<List<StocktakeReportByDepDTO>> getVarianceByDep(String piCd, String piDate, String storeCd) {

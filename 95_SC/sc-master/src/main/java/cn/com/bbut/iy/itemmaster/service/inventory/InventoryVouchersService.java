@@ -111,6 +111,7 @@ public interface InventoryVouchersService {
 
     // 自动加载 item 下拉
     List<AutoCompleteDTO> getItemList(String storeCd, String v);
+    List<AutoCompleteDTO> getInventoryItemList(String storeCd, String v);
 
     //  DOC No. 下拉
     List<AutoCompleteDTO> getDOCList(String storeCd,String storeCd1,String v);
@@ -133,7 +134,7 @@ public interface InventoryVouchersService {
      */
     List<AutoCompleteDTO> generalReason(String v);
 
-    List<AutoCompleteDTO> detailReason(String generalLevelCd, String v);
+    List<AutoCompleteDTO> detailReason(String v,int num);
 
     Map<String, Object> Total(Sk0020ParamDTO sk0020);
 
@@ -148,4 +149,5 @@ public interface InventoryVouchersService {
     Ma1000DTO getSouthOrNouth(String storeCd);
 
     List<AutoCompleteDTO> getOutStoreList(String v, String zoCd);
+
 }

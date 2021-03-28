@@ -166,6 +166,11 @@
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                                         <select id="dj_status" class="form-control input-sm" nextele="dj_status">
                                             <option value="">-- All/Please Select --</option>
+                                            <option value="1">Pending</option>
+                                            <option value="5">Rejected</option>
+                                            <option value="6">Withdrawn</option>
+                                            <option value="7">Expired</option>
+                                            <option value="10">Approved</option>
                                         </select>
                                     </div>
                                     <label for="itemInfo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space:nowrap">Item Code/Name</label>

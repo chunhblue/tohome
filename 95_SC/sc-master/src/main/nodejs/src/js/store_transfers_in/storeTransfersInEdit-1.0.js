@@ -1375,7 +1375,7 @@ define('storeTransfersInEdit', function () {
 	// 根据Store No.取得该店铺信息
 	var initAutomatic = function(){
 		adjustReason = $("#adjustReason").myAutomatic({
-			url:url_root+"/cm9010/getResonCode",
+			url:url_root+"/cm9010/getReasonCode",
 			ePageSize:10,
 			startCount:0,
 		})
@@ -1397,7 +1397,7 @@ define('storeTransfersInEdit', function () {
 			cleanInput: function() {
 				$("#zgGridTtable>.zgGrid-tbody tr").empty();
 				$("#search").prop("disabled",true);
-				$("#out_cd").val("");
+				$.myAutomatic.cleanSelectObj(getSelectDOC1);
 			},
 			selectEleClick: function (thisObject) {
 				$("#out_cd").val("");
@@ -1436,7 +1436,7 @@ define('storeTransfersInEdit', function () {
 			cleanInput: function() {
 				$("#zgGridTtable>.zgGrid-tbody tr").empty();
 				$("#search").prop("disabled",true);
-				$("#out_cd").val("");
+				$.myAutomatic.cleanSelectObj(getSelectDOC1);
 			},
 			selectEleClick: function (thisObject) {
 				let vstore = $("#vstore").attr('k');
@@ -1467,11 +1467,13 @@ define('storeTransfersInEdit', function () {
 			startCount: 0,
 			cleanInput: function() {
 				$("#zgGridTtable>.zgGrid-tbody tr").empty();
+				var str = "&vstore=" + $("#vstore").attr('k')+"&tstore=" + $("#tstore").attr("k");
+				$.myAutomatic.replaceParam(getSelectDOC1, str);
 			},
 			selectEleClick: function (thisObject) {
 				$("#search").prop("disabled", false);
 			}
-		})
+		});
 
 		// 判断是否商品已经转移
 		getExistsDoc = function(vstore,tstore){
@@ -1492,7 +1494,7 @@ define('storeTransfersInEdit', function () {
 								if(optionValue == m.out_cd.val()){
 									// 货物在店铺之间不可以进行多次转移
 									_common.prompt("No multiple transfers between stores,please select other Tranfer Out Document No.!",3,"error");
-									$("#search").prop("disabled", true);
+									$("#search").prop("disabled", false);
 									existDoc = '0';
 									break;
 								}

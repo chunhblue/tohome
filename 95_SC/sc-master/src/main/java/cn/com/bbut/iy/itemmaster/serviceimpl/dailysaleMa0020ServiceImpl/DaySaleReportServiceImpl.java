@@ -31,19 +31,27 @@ public class DaySaleReportServiceImpl implements DaySaleReportService {
 
     @Override
     public Map<String,Object> search(DaySaleReportParamDTO param) {
+        int totalPage=0;
+        int count=0;
+        List<DaySaleReportDTO> result;
+        if (param.getTypeDate().equals("1")) {
+            // 获取 总数
+             count = daSaleReportMapper.selectDaySaleReportCount(param);
+            // 获取总页数
 
-        // 获取 总数
-        int count = daSaleReportMapper.selectDaySaleReportCount(param);
+            totalPage= (count % param.getRows() == 0) ? (count / param.getRows()) : (count / param.getRows()) + 1;
+            result = daSaleReportMapper.selectDaySaleReport(param);
 
-        // 获取总页数
-        int totalPage = (count % param.getRows() == 0) ? (count / param.getRows()) : (count / param.getRows()) + 1;
-        List<DaySaleReportDTO> result = daSaleReportMapper.selectDaySaleReport(param);
-
+        }else{
+             count = daSaleReportMapper.selectDayPosSaleReportCount(param);
+            // 获取总页数
+            totalPage = (count % param.getRows() == 0) ? (count / param.getRows()) : (count / param.getRows()) + 1;
+            result = daSaleReportMapper.selectDayPosSaleReport(param);
+        }
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("totalPage",totalPage);
         map.put("count",count);
         map.put("data",result);
-
         return map;
     }
 

@@ -1,6 +1,10 @@
 package cn.com.bbut.iy.itemmaster.dto.difference;
 
+import cn.com.bbut.iy.itemmaster.dto.base.GridParamDTO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.Collection;
 
@@ -9,7 +13,10 @@ import java.util.Collection;
  *
  */
 @Data
-public class DifferenceListParam {
+@EqualsAndHashCode(callSuper = true)
+@AllArgsConstructor
+@NoArgsConstructor
+public class DifferenceListParam  extends GridParamDTO {
     private String orderId;
     private String orgOrderId;
     private String orderStartDate;
@@ -28,6 +35,10 @@ public class DifferenceListParam {
     private String orderDifferentiate;
     private String vendorId;
     private String dc;
+
+    private String deliveryOrderId; // 发货单编号
+    private String deliveryStartDate; // 发货单开始日期
+    private String deliveryEndDate; // 发货单结束日期
 
     // 是否分页
     private boolean flg = true;

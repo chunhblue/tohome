@@ -24,7 +24,8 @@ define('promotionDetails', function () {
 		searchJson: null,
 		_promotionCd : null,
 		back: null,
-		dialog_cancel:null
+		dialog_cancel:null,
+		mmPromotionPattern:""
 	}
 
  	// 创建js对象
@@ -107,6 +108,7 @@ define('promotionDetails', function () {
 			dataType:"json",
 			success: function(result){
 				if(result.success){
+					m.mmPromotionPattern = result.o.promotionDiff;
 					// 获取例外店铺信息
 					getException(param);
 					// 获取促销区域信息
@@ -119,6 +121,11 @@ define('promotionDetails', function () {
 					getItem(param);
 					// 获取条件信息
 					getCondition(param);
+					// 获取直接指定价格促销信息
+					getOnSale(param);
+					// 获取bill value信息
+					getBillValuePrecondition(promotionCd);
+					getBillValueBenefit(promotionCd);
 					// 加载基本信息
 					$('#department').val(result.o.depName);
 					$('#regionCd').val(result.o.regionName);
@@ -130,9 +137,34 @@ define('promotionDetails', function () {
 					$('#promotionEndTime').val(fmtIntTime(result.o.promotionEndTime));
 					$('#promotionPromptFlgC').val(result.o.promotionPromptFlg);
 					$('#promotionPromptName').val(result.o.promotionPromptName);
+					$('#perTransactionQty').val(result.o.perTransactionQty);
 					$("input[name='promotionPattern'][value="+result.o.promotionDiff+"]").attr("checked",true);
 					$("input[name='promotionType'][value="+result.o.promotionType+"]").attr("checked",true);
 					$("input[name='promotionRatioType'][value="+result.o.promotionAllotType+"]").attr("checked",true);
+					// 判断隐藏栏位
+					if(m.mmPromotionPattern == '05'){
+						$("#MMPromotionType").hide();
+						$("#MMPromotionDiscountDistribution").hide();
+						$("#MMPromotionConditionSetting").hide();
+						$("#MMPromotionItemsAndCategorySetting").hide();
+						$("#MMPromotionOnSale").show();
+					}else if (m.mmPromotionPattern == '07'){
+						$("#MMPromotionDiscountDistribution").hide();
+						$("#MMPromotionConditionSetting").hide();
+						$("#MMPromotionItemsAndCategorySetting").hide();
+						$("#MMPromotionBillValue").show();
+						$("#reqdBillAmountDiv").show();
+						getFormatNumber("#reqdBillAmount",result.o.reqdBillAmount);
+						if(result.o.promotionType != "1"){
+							$("#billValueBenefitTableDiv").hide();
+							$("#billValueDiscountValue").show();
+							if(result.o.promotionType == "2"){
+								getFormatNumber("#billValueDiscount",result.o.billValueDiscount);
+							}else if(result.o.promotionType == "3"){
+								getMMPromotionPrice("#billValueDiscount",result.o.billValueDiscount);
+							}
+						}
+					}
 					// 判断多选是否选中
 					if(result.o.promotionWeekCycle != null && result.o.promotionWeekCycle != ''){
 						var str = result.o.promotionWeekCycle;
@@ -207,6 +239,40 @@ define('promotionDetails', function () {
 		categoryExGridTable.loadData();
 	}
 
+	// 获取类别设定例外商品
+	var getOnSale = function(param){
+		paramGrid = "searchJson=" + param;
+		onSaleGridTable.setting("url", url_left + "/getOnSale");
+		onSaleGridTable.setting("param", paramGrid);
+		onSaleGridTable.loadData();
+	}
+
+	// 获取bill value前提信息
+	var getBillValuePrecondition = function(promotionCd){
+		var _data = {
+			promotionCd : promotionCd,
+			isPromotion : "0",
+		}
+		var param = JSON.stringify(_data);
+		paramGrid = "searchJson=" + param;
+		billValuePreconditionTable.setting("url", url_left + "/getBillValue");
+		billValuePreconditionTable.setting("param", paramGrid);
+		billValuePreconditionTable.loadData();
+	}
+
+	// 获取bill value指定价格信息
+	var getBillValueBenefit = function(promotionCd){
+		var _data = {
+			promotionCd : promotionCd,
+			isPromotion : "1",
+		}
+		var param = JSON.stringify(_data);
+		paramGrid = "searchJson=" + param;
+		billValueBenefitTable.setting("url", url_left + "/getBillValue");
+		billValueBenefitTable.setting("param", paramGrid);
+		billValueBenefitTable.loadData();
+	}
+
 	// 获取类别设定
 	var getCategory = function(param){
 		paramGrid = "searchJson=" + param;
@@ -243,6 +309,9 @@ define('promotionDetails', function () {
 				initCategoryTable();// 类别设定列表初始化
 				initBrandExceptionTable();// 品牌设定例外商品列表初始化
 				initCategoryExceptionTable();// 类别设定例外商品列表初始化
+				initOnSaleTable();// 直接指定价格初始化
+				initBillValuePreconditionTable();// bill value初始化
+				initBillValueBenefitTable();// bill value初始化
 				break;
 			case "2":
 				initTable2();//列表初始化
@@ -262,7 +331,7 @@ define('promotionDetails', function () {
 			colNames:["Serial","Except Type","Store No.","Store Name","City","District"],
 			colModel:[
 				{name:"serial",type:"text",text:"left",width:"60",ishide:false,css:""},
-				{name:"exceptType",type:"text",text:"left",width:"60",ishide:false,css:""},
+				{name:"exceptType",type:"text",text:"left",width:"60",ishide:false,css:"",getCustomValue:getExceptTypeName},
 				{name:"storeCd",type:"text",text:"right",width:"60",ishide:false,css:""},
 				{name:"storeName",type:"text",text:"left",width:"60",ishide:false,css:""},
 				{name:"cityName",type:"text",text:"left",width:"60",ishide:false,css:""},
@@ -357,6 +426,71 @@ define('promotionDetails', function () {
 		});
 	}
 
+	// 表格初始化-直接指定价格商品
+	var initOnSaleTable = function(){
+		onSaleGridTable = $("#onSaleGridTable").zgGrid({
+			title:"Result",
+			param:paramGrid,
+			localSort: true,
+			colNames:["No.","Item Code","Item Name","City","Price Group",
+				"Reg. Price","Sale Price"],
+			colModel:[
+				{name:"displaySeq",type:"text",text:"center",width:"80",ishide:false,css:"",getCustomValue:getString0},
+				{name:"articleId",type:"text",text:"center",width:"130",ishide:false,css:""},
+				{name:"articleName",type:"text",text:"left",width:"200",ishide:false,css:""},
+				{name:"cityName",type:"text",text:"center",width:"80",ishide:false,css:""},
+				{name:"maName",type:"text",text:"center",width:"130",ishide:false,css:""},
+				{name:"sellingPrice",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue:getFormatNumber},
+				{name:"promotionPrice",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue:getFormatNumber},
+			],//列内容
+			width:"max",//宽度自动
+			isPage:false//是否需要分页
+		});
+	}
+
+	// 表格初始化-直接指定价格商品
+	var initBillValuePreconditionTable = function(){
+		billValuePreconditionTable = $("#billValuePreconditionTable").zgGrid({
+			title:"Bill Value Precondition",
+			param:paramGrid,
+			localSort: true,
+			colNames:["No.","Item Code","Item Name","City","Price Group",
+				"Reg. Price"],
+			colModel:[
+				{name:"displaySeq",type:"text",text:"center",width:"80",ishide:false,css:"",getCustomValue:getString0},
+				{name:"articleId",type:"text",text:"center",width:"130",ishide:false,css:""},
+				{name:"articleName",type:"text",text:"left",width:"200",ishide:false,css:""},
+				{name:"cityName",type:"text",text:"center",width:"80",ishide:false,css:""},
+				{name:"maName",type:"text",text:"center",width:"130",ishide:false,css:""},
+				{name:"sellingPrice",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue:getFormatNumber},
+			],//列内容
+			width:"max",//宽度自动
+			isPage:false//是否需要分页
+		});
+	}
+
+	// 表格初始化-直接指定价格商品
+	var initBillValueBenefitTable = function(){
+		billValueBenefitTable = $("#billValueBenefitTable").zgGrid({
+			title:"Bill Value Benefit",
+			param:paramGrid,
+			localSort: true,
+			colNames:["No.","Item Code","Item Name","City","Price Group",
+				"Reg. Price","Sale Price"],
+			colModel:[
+				{name:"displaySeq",type:"text",text:"center",width:"80",ishide:false,css:"",getCustomValue:getString0},
+				{name:"articleId",type:"text",text:"center",width:"130",ishide:false,css:""},
+				{name:"articleName",type:"text",text:"left",width:"200",ishide:false,css:""},
+				{name:"cityName",type:"text",text:"center",width:"80",ishide:false,css:""},
+				{name:"maName",type:"text",text:"center",width:"130",ishide:false,css:""},
+				{name:"sellingPrice",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue:getFormatNumber},
+				{name:"promotionPrice",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue:getFormatNumber},
+			],//列内容
+			width:"max",//宽度自动
+			isPage:false//是否需要分页
+		});
+	}
+
 	// 表格初始化-类别设定
 	var initCategoryTable = function(){
 		categoryGridTable = $("#categoryGridTable").zgGrid({
@@ -385,16 +519,23 @@ define('promotionDetails', function () {
 			title:"Result",
 			param:paramGrid,
 			localSort: true,
-			colNames:["Promotion Pattern","Item Code","Item Name","Sub-Category","Selling Price"],
+			colNames:["Promotion Pattern","Item Code","City","Price Group","Item Name","Sub-Category","Reg. Price"],
 			colModel:[
-				{name:"promotionTermGroup",type:"text",text:"left",width:"100",ishide:false,css:""},
+				{name:"promotionTermGroup",type:"text",text:"left",width:"100",ishide:false,css:"",getCustomValue:getPatternName},
 				{name:"articleId",type:"text",text:"right",width:"100",ishide:false,css:""},
+				{name:"cityName",type:"text",text:"right",width:"100",ishide:false,css:""},
+				{name:"maName",type:"text",text:"right",width:"100",ishide:false,css:""},
 				{name:"articleName",type:"text",text:"left",width:"150",ishide:false,css:""},
 				{name:"subCategoryName",type:"text",text:"left",width:"130",ishide:false,css:""},
-				{name:"articleSalePrice",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getString0}
+				{name:"articleSalePrice",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getFormatNumber}
 			],//列内容
 			width:"max",// 宽度自动
-			isPage:false// 是否需要分页
+			isPage:false,// 是否需要分页
+			loadCompleteEvent:function(){
+				if(m.mmPromotionPattern == '04'){
+					itemGridTable.hideColumn("promotionTermGroup");
+				}
+			}
 		});
 	}
 
@@ -409,27 +550,84 @@ define('promotionDetails', function () {
 			colModel:[
 				{name:"promotionTermGroup",type:"text",text:"left",width:"130",ishide:false,css:"",getCustomValue:getPatternName},
 				{name:"promotionTermQty",type:"text",text:"right",width:"130",ishide:false,css:""},
-				{name:"promotionTermAmt",type:"text",text:"right",width:"100",ishide:false,css:"",getCustomValue:getString0},
-				{name:"promotionValue",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getString0},
-				{name:"promotionAllotValue",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getString0}
+				{name:"promotionTermAmt",type:"text",text:"right",width:"100",ishide:false,css:"",getCustomValue:getFormatNumber},
+				{name:"promotionValue",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue:getMMPromotionPrice},
+				{name:"promotionAllotValue",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getPercentage}
 			],//列内容
 			width:"max",//宽度自动
-			isPage:false//是否需要分页
+			isPage:false,//是否需要分页
+			loadCompleteEvent:function(){
+				if($("input[name='promotionType']:checked").length == 1){
+					// 页面栏位名称修改值
+					if ($("input[name='promotionType']:checked").parent().length == 1){
+						var mmPromotionType= $.trim($("input[name='promotionType']:checked").parent().text());
+						var mmPromotionRatioType= $.trim($("input[name='promotionRatioType']:checked").parent().text());
+						var rows = conditionTableGrid.find('tr');
+						for (var i=0;i<rows.length;i++){
+							if (i==0){
+								rows[0].children[3].textContent = mmPromotionType;
+								rows[0].children[4].textContent = mmPromotionRatioType;
+								break;
+							}
+						}
+					}
+				}
+				if (m.mmPromotionPattern == "02" || m.mmPromotionPattern == "03"){
+					var rows = conditionTableGrid.find('tr');
+					for (var i=1;i<rows.length;i++){
+						if (i==1){
+							if (m.mmPromotionPattern == "02"){
+								rows[i].children[3].rowSpan = 2;
+							}else if (m.mmPromotionPattern == "03"){
+								rows[i].children[3].rowSpan = 3;
+							}
+						}else{
+							rows[i].children[3].remove();
+						}
+					}
+				}
+			}
 		});
 	}
 
 	// 获取分组标识名称
 	function getPatternName(tdObj, value){
 		var _value = "";
+		if (m.mmPromotionPattern == '04'){
+			_value = value;
+		}else if(m.mmPromotionPattern == '01' || m.mmPromotionPattern == '02' || m.mmPromotionPattern == '03'){
+			switch (value) {
+				case "01":
+					_value = "A";
+					break;
+				case "02":
+					_value = "B";
+					break;
+				case "03":
+					_value = "C";
+					break;
+			}
+		}else if(m.mmPromotionPattern == '06'){
+			switch (value) {
+				case "01":
+					_value = "X";
+					break;
+				case "02":
+					_value = "Y";
+					break;
+			}
+		}
+		return $(tdObj).text(_value);
+	}
+
+	function getExceptTypeName(tdObj, value){
+		var _value = "";
 		switch (value) {
-			case "01":
-				_value = "A";
+			case "1":
+				_value = "Add";
 				break;
-			case "02":
-				_value = "B";
-				break;
-			case "03":
-				_value = "C";
+			case "0":
+				_value = "Exclude";
 				break;
 		}
 		return $(tdObj).text(_value);
@@ -437,8 +635,55 @@ define('promotionDetails', function () {
 
 	// 为0返回'0'
 	function getString0(tdObj, value){
-		var _value = value == 0 ? "0" : value;
+		var _value = value === 0 ? "0" : value;
 		return $(tdObj).text(_value);
+	}
+
+	// 千分位字符 如 1201 转换位 1,201
+	function getFormatNumber(tdObj, value){
+		var _value = "";
+		if(value != null && value != ""){
+			value = value.toFixed(2);
+			value = parseFloat(value);
+			var num = value+"";
+			//千位分割
+			_value = num.replace(/(\d{1,3})(?=(\d{3})+(?:$|\.))/g,'$1,');
+		}
+		$(tdObj).val(_value);
+		return $(tdObj).text(_value);
+	}
+
+	// 为0返回'0%'
+	function getMMPromotionPrice(tdObj, value){
+		var _value = "";
+		var promotionType = $("input[name='promotionType']:checked");
+		if(promotionType.length == 1){
+			if(promotionType.val()=="3"){
+				if(value == ""){
+					value = 0;
+				}
+				_value = value+"%";
+			}else {
+				//千位分割
+				value = value.toFixed(2);
+				value = parseFloat(value);
+				var num = value+"";
+				_value = num.replace(/(\d{1,3})(?=(\d{3})+(?:$|\.))/g,'$1,');
+			}
+		}
+		$(tdObj).val(_value)
+		return $(tdObj).text(_value);
+	}
+
+	// 为0返回'0%'
+	function getPercentage(tdObj, value){
+		var res = "";
+		if (value!=null&&value!=""){
+			value = value.toFixed(2);
+			value = parseFloat(value);
+			res = value+"%";
+		}
+		return $(tdObj).text(res);
 	}
 
 	// 格式化数字类型的日期

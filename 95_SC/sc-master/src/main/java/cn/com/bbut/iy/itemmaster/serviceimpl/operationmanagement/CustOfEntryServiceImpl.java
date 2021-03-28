@@ -101,6 +101,71 @@ public class CustOfEntryServiceImpl  implements CustOfEntryService {
 
          return -1;
     }
+    @Override
+    public PI0100DTOC getDataPio(PI0100DTOC pioC) {
+        String inEsTime = cm9060Service.getValByKey("1206");
+        if (StringUtils.isEmpty(pioC.getPiCd())) {
+            return null;
+        }
+        // 获取主档信息
+        PI0100DTOC pi0100c = custOfEntryPlanMapper.getPI0100ByPrimary(pioC.getPiCd());
+        if (pi0100c==null) {
+            return null;
+        }
+        List<String> articles = new ArrayList<>();
+        List<StocktakeItemDTOC> list= custEntryMapper.getPI0130ByPrimaryIn(pioC.getPiCd());
+        for(StocktakeItemDTOC item:list){
+            articles.add(item.getArticleId());
+        }
+        //拼接url，转义参数
+        String connUrl = inventoryUrl + "GetRelTimeInventory/" + pi0100c.getStoreCd() + "/"
+                + "*" + "/*/*/*/*/" + inEsTime+"/*/*";
+        List<RTInventoryQueryDTO> rTdTOList = rtInventoryService.getStockList(articles,connUrl);
+        if(rTdTOList.size()>0){
+            for(RTInventoryQueryDTO rtDto:rTdTOList){
+                for(StocktakeItemDTOC stockDto:list){
+                    if(rtDto.getItemCode().equals(stockDto.getArticleId())){
+                        stockDto.setStockQty(rtDto.getRealtimeQty().toString()); // 实时库存
+                    }
+                }
+            }
+        }
+        pi0100c.setItemList(list);
+        return pi0100c;
+    }
+
+    @Override
+    public PI0100DTOC getDataPioIn(PI0100DTOC pioC) {
+        String inEsTime = cm9060Service.getValByKey("1206");
+        if (StringUtils.isEmpty(pioC.getPiCd())) {
+            return null;
+        }
+        // 获取主档信息
+        PI0100DTOC pi0100c = custOfEntryPlanMapper.getPI0100ByPrimary(pioC.getPiCd());
+        if (pi0100c==null) {
+            return null;
+        }
+        List<String> articles = new ArrayList<>();
+        List<StocktakeItemDTOC> list= custEntryMapper.getPI0130ByPrimaryIIn(pioC.getPiCd(),pioC.getArticleId(),pioC.getBarcode());
+        for(StocktakeItemDTOC item:list){
+            articles.add(item.getArticleId());
+        }
+        //拼接url，转义参数
+        String connUrl = inventoryUrl + "GetRelTimeInventory/" + pi0100c.getStoreCd() + "/"
+                + "*" + "/*/*/*/*/" + inEsTime+"/*/*";
+        List<RTInventoryQueryDTO> rTdTOList = rtInventoryService.getStockList(articles,connUrl);
+        if(rTdTOList.size()>0){
+            for(RTInventoryQueryDTO rtDto:rTdTOList){
+                for(StocktakeItemDTOC stockDto:list){
+                    if(rtDto.getItemCode().equals(stockDto.getArticleId())){
+                        stockDto.setStockQty(rtDto.getRealtimeQty().toString()); // 实时库存
+                    }
+                }
+            }
+        }
+        pi0100c.setItemList(list);
+        return pi0100c;
+    }
 
     /**
      * 查询数据
@@ -117,7 +182,7 @@ public class CustOfEntryServiceImpl  implements CustOfEntryService {
             return null;
         }
         List<String> articles = new ArrayList<>();
-        List<StocktakeItemDTOC> list= custEntryMapper.getPI0130ByPrimary(piCd,pi0100c.getStoreCd());
+        List<StocktakeItemDTOC> list= custEntryMapper.getPI0130ByPrimaryIn(piCd);
         for(StocktakeItemDTOC item:list){
             articles.add(item.getArticleId());
         }
@@ -145,10 +210,12 @@ public class CustOfEntryServiceImpl  implements CustOfEntryService {
         String dateStr = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
         String ymd = dateStr.split("-")[0];
         String hms = dateStr.split("-")[1];
+        Integer count=0;
         // 费用金额
 //        BigDecimal expensePrice = new BigDecimal("0");
 
         if (item.getPiCd()==null||StringUtils.isEmpty(item.getPiCd())) {
+            count++;
             // 新增
             //获取序列号
 //            String piCd = sequenceService.getSequence("pi0135_pi_cd_seq");
@@ -162,23 +229,29 @@ public class CustOfEntryServiceImpl  implements CustOfEntryService {
             item.setPiCd(piCd);
             item.setCreateYmd(ymd);
             item.setCreateHms(hms);
-            // 补充明细数据
+//            // 补充明细数据
             for (StocktakeItemDTOC dto : stocktakeItemList) {
-                String[] dateAndTime = formatLastUpdateTime(dto.getLastUpdateTime());
                 dto.setPiCd(item.getPiCd());
                 dto.setStoreCd(item.getStoreCd());
-                dto.setUpdateYmd(dateAndTime[0]);
-                dto.setUpdateHms(dateAndTime[1]);
-//                expensePrice=expensePrice.add(dto.getExpensePrice());
+                dto.setUpdateYmd(item.getCreateYmd());
+                dto.setUpdateYmd(item.getCreateHms());
+             // expensePrice=expensePrice.add(dto.getExpensePrice());
             }
-//            item.setExpenseAmt(expensePrice);
+           // item.setExpenseAmt(expensePrice);
 
             try {
                 // 保存数据
                 // 保存头档
                 custEntryMapper.saveItem(item);
+                if (count>0){
+                    custEntryMapper.saveAllItemIn(stocktakeItemList);
+                }else {
+                    custEntryMapper.saveAllItem(stocktakeItemList);
+
+
+                }
                 // 保存明细
-                custEntryMapper.saveAllItem(stocktakeItemList);
+
                 return item;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -186,14 +259,13 @@ public class CustOfEntryServiceImpl  implements CustOfEntryService {
             }
         } else {
             // 修改
-            // 补充明细数据
+//            // 补充明细数据
             for (StocktakeItemDTOC dto : stocktakeItemList) {
-                String[] dateAndTime = formatLastUpdateTime(dto.getLastUpdateTime());
                 dto.setPiCd(item.getPiCd());
                 dto.setStoreCd(item.getStoreCd());
-                dto.setUpdateYmd(dateAndTime[0]);
-                dto.setUpdateHms(dateAndTime[1]);
-//                expensePrice=expensePrice.add(dto.getExpensePrice());
+                dto.setUpdateYmd(ymd);
+                dto.setUpdateYmd(hms);
+////                expensePrice=expensePrice.add(dto.getExpensePrice());
             }
 //            item.setExpenseAmt(expensePrice);
             item.setUpdateYmd(ymd);
@@ -213,6 +285,8 @@ public class CustOfEntryServiceImpl  implements CustOfEntryService {
             }
         }
     }
+
+
 
     private String[] formatLastUpdateTime(String dateStr) {
         String[] strArr = null;

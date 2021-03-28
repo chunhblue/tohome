@@ -39,4 +39,14 @@ public interface OD0010Mapper extends OD0010GenMapper {
     int updateLastCorr(String orderId);
 
     List<OD0010> getOD0010List(String orderId);
+
+     // 发货单，收货单差异条件查询
+    List<DifferenceListResult> selectShopDiffByCondition(DifferenceListParam differenceListParam);
+
+    long selectShopDiffByConditionCount(DifferenceListParam differenceListParam);
+
+    //发货单，收货单商品明细
+    List<DifferenceItemsResult> selectShopDiffByOrderId(DifferenceListParam differenceListParam);
+
+    long selectShopDiffByOrderIdCount(DifferenceListParam differenceListParam);
 }

@@ -5,12 +5,16 @@ import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.cashierDetail.*;
 import cn.com.bbut.iy.itemmaster.entity.sa0050.SA0050;
 import cn.com.bbut.iy.itemmaster.service.cashierDetail.CashierDetailService;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sun.rmi.runtime.Log;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -25,10 +29,22 @@ public class CashierDetailServiceImpl implements CashierDetailService {
 
     @Override
     public GridDataDTO<SaleHead> getSaleHeadList(CashierDetailParam dto) {
+        dto.setStartDate(getTimeStamp(dto.getStartDate()));
+        dto.setEndDate(getTimeStamp(dto.getEndDate()));
         List<SaleHead> list = cashierDetailMapper.getSaleHead(dto);
         long count = cashierDetailMapper.getSaleHeadCount(dto);
         return new GridDataDTO<>(list, dto.getPage(), count,
                 dto.getRows());
+    }
+
+    // "yyyyMMdd" -->  "yyyy-MM-dd"
+    public String getTimeStamp(String date){
+        String str = "";
+        if(date == null || "".equals(date) || date.length()<8){
+            return str;
+        }
+        str = date.substring(0,4)+"-"+date.substring(4,6)+"-"+date.substring(6,8);
+        return str;
     }
 
     @Override
@@ -72,5 +88,15 @@ public class CashierDetailServiceImpl implements CashierDetailService {
     @Override
     public List<SA0050> getCashier(String storeCd, String posId) {
         return cashierDetailMapper.getCashier(storeCd,posId);
+    }
+
+    @Override
+    public Map getTotalAmount(CashierDetailParam param) {
+        param.setStartDate(Utils.getTimeStamp(param.getStartDate()));
+        param.setEndDate(Utils.getTimeStamp(param.getEndDate()));
+        BigDecimal totalAmount = cashierDetailMapper.getSaleHeadAmount(param);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("totalAmount",totalAmount);
+        return map;
     }
 }

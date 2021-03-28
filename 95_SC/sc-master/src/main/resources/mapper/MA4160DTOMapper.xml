@@ -22,7 +22,18 @@
         <result column="nr_hms" jdbcType="CHAR" property="nrHms" />
     </resultMap>
     <select id="selectCountByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.store.MA4160DTO" resultType="INT">
-        SELECT  COUNT(1)  from  ma4160
+        SELECT  COUNT(*)  from  ma4160
+        <where>
+            <if test="ma4160ParamDTO.jobTypeCd !=null and ma4160ParamDTO.jobTypeCd!=''">
+                AND lower(job_type_cd) like lower(CONCAT('%',#{ma4160ParamDTO.jobTypeCd,jdbcType=CHAR},'%'))
+            </if>
+            <if test="ma4160ParamDTO.jobCatagoryName !=null and ma4160ParamDTO.jobCatagoryName!='' ">
+                AND lower(job_catagory_name) like lower(CONCAT('%',#{ma4160ParamDTO.jobCatagoryName,jdbcType=CHAR},'%'))
+            </if>
+            <if test="ma4160ParamDTO.effectiveSts !=null and ma4160ParamDTO.effectiveSts!='' ">
+                AND effective_sts = #{ma4160ParamDTO.effectiveSts,jdbcType=CHAR}
+            </if>
+        </where>
     </select>
     <select id="selectListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.store.MA4160DTO" resultMap="BaseResultMap">
         select  job_type_cd,job_catagory_name,effective_sts  from ma4160
@@ -41,8 +52,9 @@
             AND lower(job_catagory_name) like lower(CONCAT('%',#{ma4160ParamDTO.jobCatagoryName,jdbcType=CHAR},'%'))
         </if>
             <if test="ma4160ParamDTO.effectiveSts !=null and ma4160ParamDTO.effectiveSts!='' ">
-                AND lower(effective_sts) like lower(CONCAT('%',#{ma4160ParamDTO.effectiveSts,jdbcType=CHAR},'%'))
+                AND effective_sts = #{ma4160ParamDTO.effectiveSts,jdbcType=CHAR}
             </if>
         </where>
+        LIMIT ${ma4160ParamDTO.rows} OFFSET ${ma4160ParamDTO.limitStart}
     </select>
 </mapper>

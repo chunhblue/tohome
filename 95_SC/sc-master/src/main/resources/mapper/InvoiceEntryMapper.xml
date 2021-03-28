@@ -7,6 +7,8 @@
         <result column="receiptNo" property="receiptNo"></result>
         <result column="date" property="date"></result>
         <result column="amt" property="amt"></result>
+        <result column="pos_id" property="posId"></result>
+        <result column="sale_serial_no" property="saleSerialNo"></result>
     </resultMap>
 
     <resultMap id="invoiceItemResult" type="cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceItemsDTO">
@@ -40,6 +42,8 @@
         <result column="create_user_id" property="createUserId"></result>
         <result column="create_ymd" property="createYmd"></result>
         <result column="create_hms" property="createHms"></result>
+        <result column="posId" property="posId"></result>
+        <result column="sale_serial_no" property="saleSerialNo"></result>
     </resultMap>
 
     <update id="updateStatus" parameterType="cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceDataDTO">
@@ -61,8 +65,10 @@
         A.store_cd,
         A.tran_serial_no AS receiptNo,
         A.tran_date AS date,
+        A.sale_serial_no,
         A.sale_amount AS amt,
-        B.num
+        B.num,
+        A.pos_id
         FROM
         SA0010 A,
         (
@@ -77,7 +83,6 @@
             CAST(#{receiptNo} AS integer)
         </foreach>
         AND S.tran_type = 'sale'
-        AND S.sale_type = '0'
         ) B
         WHERE
         A.store_cd = #{storeNo}
@@ -86,7 +91,7 @@
             CAST(#{receiptNo} AS integer)
         </foreach>
         AND A.tran_type = 'sale'
-        AND A.sale_type = '0'
+
         ORDER BY
         acc_date
         LIMIT ${rows} OFFSET ${limitStart}
@@ -113,7 +118,8 @@
             A.issue_hms,
             B.emp_name AS create_user_id,
             A.create_ymd,
-            A.create_hms
+            A.create_hms,
+            A.pos_id
         FROM
             sa0230 A
             LEFT JOIN MA4200 B ON A.create_user_id = B.emp_num_id
@@ -140,6 +146,7 @@
         A.phone2,
         A.email2,
         A.receipt_no,
+        A.sale_serial_no,
         A.amt,
         B.code_name AS statusName,
         A.status,
@@ -149,6 +156,7 @@
         A.create_user_id,
         A.create_ymd,
         A.create_hms,
+        A.pos_id,
         C.num
         FROM
         sa0230 A,
@@ -200,6 +208,9 @@
         <if test="param.status!=null and param.status!=''">
             AND A.status = #{param.status}
         </if>
+        <if test="param.posId!=null and param.posId!=''">
+            AND A.posId = #{param.posId}
+        </if>
         <if test="param.customerName!=null and param.customerName!=''">
             AND lower(A.customer_name) like lower(CONCAT('%',#{param.customerName},'%'))
         </if>
@@ -217,8 +228,10 @@
         SELECT
         A.store_cd,
         A.tran_serial_no AS receiptNo,
+        A.sale_serial_no ,
         A.tran_date AS date,
         A.sale_amount AS amt,
+        A.pos_id,
         B.num
         FROM
         SA0010 A,
@@ -236,24 +249,27 @@
             AND S.acc_date BETWEEN #{param.startDate} AND #{param.endDate}
         </if>
         <if test="param.receiptNo!=null and param.receiptNo!=''">
-            AND cast(tran_serial_no AS VARCHAR) like concat('%',#{param.receiptNo},'%')
+            AND cast(sale_serial_no AS VARCHAR) like concat('%',#{param.receiptNo},'%')
         </if>
         AND S.tran_type = 'sale'
-        AND S.sale_type = '0'
         ) B
         WHERE
         1=1
         <if test="param.storeNo!=null and param.storeNo!=''">
             AND A.store_cd = #{param.storeNo}
         </if>
+        <if test="param.posId!=null and param.posId!=''">
+            AND A.pos_id = #{param.posId}
+        </if>
         <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">
             AND A.acc_date BETWEEN #{param.startDate} AND #{param.endDate}
         </if>
         <if test="param.receiptNo!=null and param.receiptNo!=''">
-            AND cast(tran_serial_no AS VARCHAR) like concat('%',#{param.receiptNo},'%')
+            AND cast(sale_serial_no AS VARCHAR) like concat('%',#{param.receiptNo},'%')
         </if>
+
         AND A.tran_type = 'sale'
-        AND A.sale_type = '0'
+
         ORDER BY
         acc_date
         LIMIT ${param.rows} OFFSET ${param.limitStart}
@@ -288,6 +304,7 @@
                     AND B.article_id = C.article_id
                     AND D.sp_value BETWEEN C.effective_start_date AND C.effective_end_date
                     AND B.detail_type = 's'
+                   AND A.pos_id = #{param.posId}
             ) E
         WHERE
             A.tran_serial_no = CAST(#{param.receiptNo} AS integer)
@@ -298,6 +315,8 @@
             AND B.article_id = C.article_id
             AND D.sp_value BETWEEN C.effective_start_date AND C.effective_end_date
             AND B.detail_type = 's'
+            AND A.pos_id = #{param.posId}
+
         ORDER BY
             B.sale_seq_no
         LIMIT ${param.rows} OFFSET ${param.limitStart}
@@ -325,7 +344,9 @@
             status,
             create_user_id,
             create_ymd,
-            create_hms
+            pos_id,
+            create_hms,
+            sale_serial_no
         ) VALUES (
             #{param.accId},
             #{param.accDate},
@@ -343,7 +364,9 @@
             #{param.status},
             #{param.createUserId},
             #{param.createYmd},
-            #{param.createHms}
+            #{param.posId},
+            #{param.createHms},
+            #{param.saleSerialNo}
         )
     </insert>
 </mapper>

@@ -3,6 +3,7 @@ package cn.com.bbut.iy.itemmaster.dto.classifiedsalereport;
 import cn.com.bbut.iy.itemmaster.dto.base.GridParamDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Collection;
@@ -15,6 +16,7 @@ import java.util.Collection;
  * @Version 1.0
  */
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

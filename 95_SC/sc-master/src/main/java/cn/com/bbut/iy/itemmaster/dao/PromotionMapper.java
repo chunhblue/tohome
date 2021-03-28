@@ -2,10 +2,11 @@ package cn.com.bbut.iy.itemmaster.dao;
 
 import cn.com.bbut.iy.itemmaster.dto.promotion.*;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Mapper
+@Repository
 public interface PromotionMapper {
 
     /**
@@ -74,4 +75,18 @@ public interface PromotionMapper {
      */
     List<Ma4100DTO> selectMa4100(PromotionParamDTO dto);
 
+    /**
+     * 查询MMPromotionPatternCd
+     */
+    String getMMPromotionPattern(String promotionCd);
+
+    /**
+     * 查询直接促销信息
+     */
+    List<Ma4150DTO> getMa4150(PromotionParamDTO dto);
+
+    /**
+     * 查询bill value
+     */
+    List<Ma4155DTO> getMa4155(PromotionParamDTO dto);
 }

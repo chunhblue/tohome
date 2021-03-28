@@ -199,6 +199,7 @@
         sa0020.store_cd,
         to_char(sa0020.sale_date,'yyyyMMdd') trans_date,
         sa0020.article_id,
+        sa0020.barcode,
         ma1100.article_name,
         sum(sa0020.sale_qty) ckQty,
         sum(sa0020.sale_amount) ckAmount
@@ -212,7 +213,7 @@
         <foreach collection="dbStores" item="item" index="index" open="(" separator="," close=")">
             #{item,jdbcType=VARCHAR}
         </foreach>
-        group by sa0020.store_cd,trans_date,sa0020.article_id,ma1100.article_name
+        group by sa0020.store_cd,trans_date,sa0020.article_id,ma1100.article_name,sa0020.barcode
         ORDER BY
         sa0020.store_cd,trans_date,article_id ASC
     </select>
@@ -221,7 +222,8 @@
         select
         store_cd,
         business_date,
-        item_code
+        item_code,
+        barcode
         from mb1300 where
         (store_cd || ' ' || item_code) in
         <foreach collection="storeItems" item="item" index="index" open="(" separator="," close=")">
@@ -232,7 +234,7 @@
     <insert id="insertExcelToMb1300" parameterType="cn.com.bbut.iy.itemmaster.entity.Mb1300">
         insert into public.mb1300(
         store_cd,business_date,item_code,item_name,ck_qty,ck_amount,payoo_qty,pucharse_amt,payoo_amount,
-        vary_qty,commission_vat,commission,create_user_id,create_ymd_hms,vary_amount
+        vary_qty,commission_vat,commission,create_user_id,create_ymd_hms,vary_amount,barcode
         ) values
         <foreach collection="mb1300List" item="mb1300" index="index" separator=",">(
             #{mb1300.storeCd},
@@ -249,14 +251,15 @@
             coalesce(#{mb1300.commission},0),
             #{mb1300.createUserId},
             to_char(NOW(),'yyyyMMddhhmmss'),
-            coalesce(#{mb1300.varyAmount},0)
+            coalesce(#{mb1300.varyAmount},0),
+            #{mb1300.barcode}
             )
         </foreach>
     </insert>
 
     <delete id="deleteMb1300ByCondition">
         delete from mb1300
-        where (store_cd || ' ' || business_date || ' ' || item_code) in
+        where (store_cd || ' ' || business_date || ' ' || item_code || ' ' || barcode) in
         <foreach collection="storeDateItems" item="item" index="index" open="(" separator="," close=")">
             #{item,jdbcType=VARCHAR}
         </foreach>
@@ -269,24 +272,14 @@
         mb1300.business_date trans_date,
         mb1300.item_code article_id,
         mb1300.item_name article_name,
-        T.barcode,
+        mb1300.barcode,
         mb1300.payoo_qty as third_qty,
         payoo_amount as third_amount,
         ck_qty ckQty,
         ck_amount ckAmount,
         vary_qty,vary_amount
         FROM
-        mb1300
-        LEFT JOIN (
-        SELECT ma1110.article_id,ma1110.default_barcode barcode,ma1110.vendor_id from ma1110,ma2240,mb1300 mb13
-        where  #{businessDate,jdbcType=VARCHAR}
-        BETWEEN ma1110.effective_start_date AND ma1110.effective_end_date
-        and ma1110.article_id = ma2240.article_id and ma2240.store_cd = mb13.store_cd
-        and ma1110.vendor_id = ma2240.vendor_id
-        and ma1110.structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
-        (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = mb13.store_cd))
-        ) T
-        ON T.article_id = mb1300.item_code ,
+        mb1300,
         ma1000
         where
         mb1300.store_cd = ma1000.store_cd

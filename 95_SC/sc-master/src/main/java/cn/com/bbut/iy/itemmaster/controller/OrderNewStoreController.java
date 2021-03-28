@@ -373,8 +373,10 @@ public class OrderNewStoreController extends BaseAction {
             resultDto.setSuccess(false);
             resultDto.setMessage("Parameter cannot be empty!");
         }else{
-            if(!orderService.checkOrder(storeCd,orderDate)){
+            String msg = orderService.checkOrder(storeCd,orderDate);
+            if(msg != null){
                 resultDto.setSuccess(true);
+                resultDto.setMessage(msg);
                 resultDto.setData("1");
                 return resultDto;
             }

@@ -92,6 +92,7 @@ define('cashierAmount', function () {
         table_but();
         // 根据跳转加载数据，设置操作模式
         setValueByType();
+        $("#updateByPay").hide();
     }
 
     // 根据跳转方式，设置画面可否编辑、加载内容
@@ -303,7 +304,7 @@ define('cashierAmount', function () {
                     $("#expenditurehide").val($(thisObj).attr("k"));
                     getDescription(thisObj.attr("k"),storeCd,accDate);
                     $("#addexpenditureNo").removeClass("disabled");
-                    //11月30日
+                    //2020年11月30日
                     $('div[name="resExpendRow"]').each(function () {
                         $("#expendFlgVal").val(num);
                         ++num;
@@ -351,23 +352,36 @@ define('cashierAmount', function () {
     var table_but = function () {
         //返回一览
         m.returnsViewBut.on("click", function () {
-            var bank = $("#returnsSubmitBut").attr("disabled");
-            if (submitFlag === false && bank != 'disabled') {
+            if (m.viewSts.val()=="view"){
+                _common.updateBackFlg(KEY);
+                top.location = systemPath + "/saleReconciliation";
+            }
+            var submitbank = $("#returnsSubmitBut").attr("disabled");
+            if (m.viewSts.val()!="view" && submitbank !='disabled'){
                 _common.myConfirm("Current change is not submitted yet，are you sure to exit?", function (result) {
-                    if (result === "true") {
-                        _common.updateBackFlg(KEY);
-                        top.location = systemPath + "/saleReconciliation";
-                    }
-                });
+                            if (result === "true") {
+                    _common.updateBackFlg(KEY);
+                    top.location = systemPath + "/saleReconciliation";
+                }
+            });
             }
-            if (submitFlag === true) {
-                _common.updateBackFlg(KEY);
-                top.location = systemPath + "/saleReconciliation";
-            }
-            if (submitFlag === false && bank === 'disabled') {
-                _common.updateBackFlg(KEY);
-                top.location = systemPath + "/saleReconciliation";
-            }
+            // var bank = $("#returnsSubmitBut").attr("disabled");
+            // if (submitFlag === false && bank != 'disabled') {
+            //     _common.myConfirm("Current change is not submitted yet，are you sure to exit?", function (result) {
+            //         if (result === "true") {
+            //             _common.updateBackFlg(KEY);
+            //             top.location = systemPath + "/saleReconciliation";
+            //         }
+            //     });
+            // }
+            // if (submitFlag === true) {
+            //     _common.updateBackFlg(KEY);
+            //     top.location = systemPath + "/saleReconciliation";
+            // }
+            // if (submitFlag === false && bank === 'disabled') {
+            //     _common.updateBackFlg(KEY);
+            //     top.location = systemPath + "/saleReconciliation";
+            // }
         });
         $("#updateByPay").on("click", function () {
             if (selectTrTemp == null) {
@@ -745,33 +759,34 @@ define('cashierAmount', function () {
             $("#expenditureNo_clear").click();
             if (verifySearch("1")) {
                 // if ($("#cash_split_flag_1").is(":checked")) {
-                    var  payInAmtValue1=0,payInAmtValue2=0,payInAmtValue3=0;
                     if ($("#zgGridTtable>.zgGrid-tbody tr").length > 0) {
+                        var payAmt0=0,payAmt1=0,payAmt2=0
                         $("#zgGridTtable>.zgGrid-tbody tr").each(function () {
                             if ($(this).find('td[tag=payCd]').text() === "01") {
-                                payInAmtValue1 =$(this).find('td[tag=payInAmt]').text();
+                                $(this).find('td[tag=payInAmt]').text($("#totalShift1").val());
+                                payAmt0=  reThousands($(this).find('td[tag=payAmt]').text());
                             }
                             if ($(this).find('td[tag=payCd]').text() === "02") {
-                                payInAmtValue2 =$(this).find('td[tag=payInAmt]').text();
+                                $(this).find('td[tag=payInAmt]').text($("#totalShift2").val());
+                                payAmt1=  reThousands($(this).find('td[tag=payAmt]').text());
                             }
                             if ($(this).find('td[tag=payCd]').text() === "03") {
-                                payInAmtValue3 =$(this).find('td[tag=payInAmt]').text();
+                                $(this).find('td[tag=payInAmt]').text($("#totalShift3").val());
+                                payAmt2=  reThousands($(this).find('td[tag=payAmt]').text());
+                            }
+                        });
+                        $("#zgGridTtable>.zgGrid-tbody tr").each(function () {
+                            if ($(this).find('td[tag=payCd]').text() === "01") {
+                                $(this).find('td[tag=payAmtDiff]').text(reThousands($("#totalShift1").val())-payAmt0);
+                            }
+                            if ($(this).find('td[tag=payCd]').text() === "02") {
+                                $(this).find('td[tag=payAmtDiff]').text(reThousands($("#totalShift2").val())-payAmt1);
+                            }
+                            if ($(this).find('td[tag=payCd]').text() === "03") {
+                                $(this).find('td[tag=payAmtDiff]').text(reThousands($("#totalShift3").val())-payAmt2);
                             }
                         });
                     }
-                    if ($("#totalShift1").val()!==payInAmtValue1){
-                        _common.prompt("the total shift1 not same with actual shift1 cash,please check! ",3,"error");
-                        return  false;
-                    }
-                    if($("#totalShift2").val()!==payInAmtValue2){
-                        _common.prompt("the total shift2 not same with actual shift2 cash,please check! ",3,"error");
-                        return  false;
-                    }
-                    if($("#totalShift3").val()!==payInAmtValue3){
-                        _common.prompt("the total shift3 not same with actual shift3 cash,please check! ",3,"error");
-                        return  false;
-                    }
-                // }
                 var payArr = [];
                 var cashArr = [];
                 $("#zgGridTtable>.zgGrid-tbody tr").each(function () {
@@ -847,6 +862,7 @@ define('cashierAmount', function () {
                                     m.expense.prop("disabled", true);
                                     m.payId.val(result.data);
                                     m.toKen.val(result.toKen);
+                                    m.viewSts.val("view");
                                     $('#a_store_refresh').prop('disabled', true);
                                     $('#a_store_clear').prop('disabled', true);
                                     $('#search').prop('disabled', true);

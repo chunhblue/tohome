@@ -21,6 +21,8 @@ public class Mb1300 {
 
     private String itemCode;
 
+    private String barcode;
+
     private String itemName;
 
     private BigDecimal payooQty;

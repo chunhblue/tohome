@@ -9,8 +9,10 @@ import cn.com.bbut.iy.itemmaster.dto.cm9070.Cm9070ReturnDTO;
 import cn.com.bbut.iy.itemmaster.dto.fsInventory.StocktakeItemDTOD;
 import cn.com.bbut.iy.itemmaster.dto.materialentry.PI0100DTOE;
 import cn.com.bbut.iy.itemmaster.dto.materialentry.StocktakeItemDTOE;
+import cn.com.bbut.iy.itemmaster.dto.pi0100.ItemInStoreDto;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100DTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO;
+import cn.com.bbut.iy.itemmaster.dto.pi0100c.MaterialDTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100DTOC;
 import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100ParamDTOC;
 import cn.com.bbut.iy.itemmaster.dto.pi0100c.StocktakeItemDTOC;
@@ -70,8 +72,6 @@ public class materialEntryServiceImpl implements materialEntryService {
     @Autowired
     private SequenceService sequenceService;
 
-    @Autowired
-    private Cm9070Service cm9070ServiceImpl;
 
     @Autowired
     private Cm9060Mapper cm9060Mapper;
@@ -96,7 +96,6 @@ public class materialEntryServiceImpl implements materialEntryService {
         if (count < 1) {
             return new GridDataDTO<PI0100DTOC>();
         }
-
         List<PI0100DTOC> _list = materialplanMapper.search(pi0100Param);
 
         GridDataDTO<PI0100DTOC> data = new GridDataDTO<PI0100DTOC>(_list,pi0100Param.getPage(), count, pi0100Param.getRows());
@@ -104,40 +103,40 @@ public class materialEntryServiceImpl implements materialEntryService {
     }
 
     @Override
-    public PI0100DTOC getData(String piCd) {
-        if (StringUtils.isEmpty(piCd)) {
-            return null;
+    public GridDataDTO<MaterialDTO> storeAllItem(ItemInStoreDto param) {
+        List<String> articles = new ArrayList<>();
+        List<MaterialDTO> _list= materialplanMapper.selectAllItem(param);
+//        Integer count= materialplanMapper.selectCountItem(param);
+        for (MaterialDTO dto:_list) {
+            articles.add(dto.getArticleId());
         }
-
-        // 获取主档信息
-        PI0100DTOC pi0100c = materialplanMapper.getPI0100ByPrimary(piCd);
-        if (pi0100c==null) {
-            return null;
+        String inEsTime = cm9060Service.getValByKey("1206");
+        //拼接url，转义参数
+        String connUrl = inventoryUrl + "GetRelTimeInventory/" +  param.getStoreCd()
+                + "/*/*/*/*/*/" + inEsTime+"/*/*";
+        List<RTInventoryQueryDTO> rTdTOList = rtInventoryService.getStockList(articles,connUrl);
+        if(rTdTOList.size()>0){
+            for(RTInventoryQueryDTO rtDto:rTdTOList){
+                for(MaterialDTO articlelist:_list){
+                    if(rtDto.getItemCode().equals(articlelist.getArticleId())){
+                        articlelist.setStockQty(rtDto.getRealtimeQty().toString()); // 实时库存
+                    }
+                }
+            }
         }
-        // 格式化日期
-        String date = fomatData(pi0100c.getPiDate());
-        pi0100c.setPiDate(date);
-        List<StocktakeItemDTOC> list= materialentryMapper.getPI0140ByPrimary(piCd,pi0100c.getStoreCd());
+        GridDataDTO<MaterialDTO> data = new GridDataDTO<MaterialDTO>();
+        data.setRows(_list);
 
-        pi0100c.setItemList(list);
-        return pi0100c;
+        return  data ;
     }
 
     @Override
-    public PI0100DTOC getInvenData(String piCd) {
-        Cm9060 cm9060 = cm9060Mapper.selectByPrimaryKey("0000");
-        if (StringUtils.isEmpty(piCd)) {
+    public PI0100DTOC getInvenDataPio(PI0100DTOC pi0100c) {
+        if (StringUtils.isEmpty(pi0100c.getPiCd())) {
             return null;
         } // 获取主档信息
-        PI0100DTOC pi0100c = materialplanMapper.getPI0100ByPrimary(piCd);
-        if (pi0100c==null) {
-            return null;
-        }
-        // 格式化日期
-        String date = fomatData(pi0100c.getPiDate());
-        pi0100c.setPiDate(date);
         List<String> articles = new ArrayList<>();
-        List<StocktakeItemDTOC> list= materialentryMapper.getPI0140ByPrimary(piCd,pi0100c.getStoreCd());
+        List<StocktakeItemDTOC> list= materialentryMapper.getPI0140ByPrimary(pi0100c.getPiCd());
         for(StocktakeItemDTOC item:list){
             articles.add(item.getArticleId());
         }
@@ -162,6 +161,64 @@ public class materialEntryServiceImpl implements materialEntryService {
 
     }
 
+    @Override
+    public PI0100DTOC getData(String piCd) {
+        if (StringUtils.isEmpty(piCd)) {
+            return null;
+        }
+
+        // 获取主档信息
+        PI0100DTOC pi0100c = materialplanMapper.getPI0100ByPrimary(piCd);
+        if (pi0100c==null) {
+            return null;
+        }
+        // 格式化日期
+        String date = fomatData(pi0100c.getPiDate());
+        pi0100c.setPiDate(date);
+        List<StocktakeItemDTOC> list= materialentryMapper.getPI0140ByPrimary(piCd);
+        pi0100c.setItemList(list);
+        return pi0100c;
+    }
+
+//    @Override
+//    public PI0100DTOC getInvenData(String piCd) {
+////        Cm9060 cm9060 = cm9060Mapper.selectByPrimaryKey("0000");
+//        if (StringUtils.isEmpty(piCd)) {
+//            return null;
+//        } // 获取主档信息
+//        PI0100DTOC pi0100c = materialplanMapper.getPI0100ByPrimary(piCd);
+//        if (pi0100c==null) {
+//            return null;
+//        }
+//        // 格式化日期
+//        String date = fomatData(pi0100c.getPiDate());
+//        pi0100c.setPiDate(date);
+//        List<String> articles = new ArrayList<>();
+//        List<StocktakeItemDTOC> list= materialentryMapper.getPI0140ByPrimary(piCd);
+//        for(StocktakeItemDTOC item:list){
+//            articles.add(item.getArticleId());
+//        }
+//        String inEsTime = cm9060Service.getValByKey("1206");
+//        //拼接url，转义参数
+//        String connUrl = inventoryUrl + "GetRelTimeInventory/" +  pi0100c.getStoreCd()
+//                + "/*/*/*/*/*/" + inEsTime+"/*/*";
+//        List<RTInventoryQueryDTO> rTdTOList = rtInventoryService.getStockList(articles,connUrl);
+//        if(rTdTOList.size()>0){
+//            for(RTInventoryQueryDTO rtDto:rTdTOList){
+//                for(StocktakeItemDTOC stockDto:list){
+//                    if(rtDto.getItemCode().equals(stockDto.getArticleId())){
+//                        stockDto.setStockQty(rtDto.getRealtimeQty().toString()); // 实时库存
+//                    }
+//                }
+//            }
+//        }
+//
+//        pi0100c.setItemList(list);
+//        return pi0100c;
+//
+//
+//    }
+
 
     @Override
     public StocktakeItemDTOC getItemInfo(String itemCode,String storeCd) {
@@ -180,13 +237,15 @@ public class materialEntryServiceImpl implements materialEntryService {
         String dateStr = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
         String ymd = dateStr.split("-")[0];
         String hms = dateStr.split("-")[1];
-
+          Integer count=0;
         if (item.getPiCd()==null||StringUtils.isEmpty(item.getPiCd())) {
+            count++;
             // 新增
             //获取序列号
             // String piCd = sequenceService.getSequence("pi0155_pi_cd_seq");
             String piCd = sequenceService.getSequence("pi0155_irm_id_seq","IRM",item.getStoreCd());
             if(org.apache.commons.lang.StringUtils.isBlank(piCd)){
+
                 //获取序列失败
                 log.error("获取序列失败 getSequence: {}", "pi0155_irm_id_seq");
                 RuntimeException e = new RuntimeException("获取序列失败[ pi0155_irm_id_seq ]");
@@ -207,7 +266,11 @@ public class materialEntryServiceImpl implements materialEntryService {
                 // 保存头档
                 materialentryMapper.saveItem(item);
                 // 保存明细
-                materialentryMapper.saveAllItem(stocktakeItemList);
+                if (count>0){
+                    materialentryMapper.saveAllItemIn(stocktakeItemList);
+                }else {
+                    materialentryMapper.saveAllItem(stocktakeItemList);
+                }
                 Boolean checkFlg = checkRawMaterialItemStock(detailType,item.getStoreCd(),stocktakeItemList);
                 if(!checkFlg){
                     item.setPiCd(null);

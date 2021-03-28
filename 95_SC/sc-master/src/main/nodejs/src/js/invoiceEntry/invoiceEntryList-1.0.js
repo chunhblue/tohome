@@ -317,7 +317,7 @@ define('invoiceEntryList', function () {
                 {name:"storeNo",type:"text",text:"right",width:"130",ishide:false,css:""},
                 {name:"storeName",type:"text",text:"left",width:"160",ishide:false,css:""},
                 {name:"accDate",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue: dateFmt},
-                {name:"receiptNo",type:"text",text:"right",width:"130",ishide:false,css:""},
+                {name:"saleSerialNo",type:"text",text:"right",width:"130",ishide:false,css:""},
                 {name:"amt",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue: getThousands},
                 {name:"customerName",type:"text",text:"left",width:"130",ishide:false,css:""},
                 {name:"companyName",type:"text",text:"left",width:"130",ishide:false,css:""},

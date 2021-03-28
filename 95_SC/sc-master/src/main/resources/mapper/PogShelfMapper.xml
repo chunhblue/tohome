@@ -6,6 +6,9 @@
         <id column="store_cd" jdbcType="VARCHAR" property="storeCd" />
         <result column="store_name" jdbcType="VARCHAR" property="storeName" />
         <result column="pog_name" jdbcType="VARCHAR" property="pogName" />
+        <result column="review_status" jdbcType="NUMERIC" property="reviewStatus" />
+        <result column="review_status_name" jdbcType="VARCHAR" property="reviewStatusName" />
+        <result column="is_expired" jdbcType="VARCHAR" property="isExpired" />
         <result column="shelf" jdbcType="VARCHAR" property="shelf" />
         <result column="sub_shelf" jdbcType="VARCHAR" property="subShelf" />
         <result column="create_user_id" jdbcType="VARCHAR" property="commonDTO.createUserId" />
@@ -21,10 +24,14 @@
     </resultMap>
     <select id="getPogShelfList" resultMap="BaseResultMap">
         select pog_cd,pog_name,ma1104.store_cd,ma1000.store_name,ma4200.emp_name create_user_name,
-        concat(ma1104.create_ymd,ma1104.create_hms) as createTime
+        concat(ma1104.create_ymd,ma1104.create_hms) as createTime,ma1104.review_status,T.code_name review_status_name,is_expired
         from ma1104
         left join ma1000 on ma1104.store_cd = ma1000.store_cd
         left join ma4200 on ma1104.create_user_id = ma4200.emp_num_id
+        left join (
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
+        ) T
+         ON CAST(ma1104.review_status AS VARCHAR) = T.code_value
         where ma1104.store_cd = #{storeCd,jdbcType=VARCHAR}
         <if test="startDate != null and startDate != ''">
             AND ma1104.create_ymd >= #{startDate}
@@ -34,6 +41,9 @@
         </if>
         <if test="pogName != null and pogName != ''">
             And lower(ma1104.pog_name) like lower(concat('%',#{pogName,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="reviewStatus != null and reviewStatus != '' ">
+            AND ma1104.review_status  = cast(#{reviewStatus,jdbcType=VARCHAR} as integer)
         </if>
         <if test="flg">
             LIMIT ${rows} OFFSET ${limitStart}
@@ -54,6 +64,9 @@
         </if>
         <if test="pogName != null and pogName != ''">
             And lower(ma1104.pog_name) like lower(concat('%',#{pogName,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="reviewStatus != null and reviewStatus != '' ">
+            AND ma1104.review_status  = cast(#{reviewStatus,jdbcType=INTEGER} as integer)
         </if>
     </select>
 

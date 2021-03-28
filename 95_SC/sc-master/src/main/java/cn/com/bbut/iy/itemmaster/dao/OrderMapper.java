@@ -47,6 +47,8 @@ public interface OrderMapper {
 
     int insertOrder(OrderItemDetailDTO dto);
 
+    int deleteOrder(OrderItemDetailDTO dto);
+
     /**
      * 获取促销例外或添加的信息
      * @param dto
@@ -163,12 +165,12 @@ public interface OrderMapper {
     int insertAudit(String storeCd, String orderDate);
 
     /**
-     * 检查订货是否没有订货
+     * 检查订货商品是否没有生效
      * @param storeCd
      * @param orderDate
      * @return
      */
-    int checkOrder(String storeCd, String orderDate);
+    List<OrderItemDetailDTO> checkOrder(String storeCd, String orderDate);
 
     /**
      * 检查vendor订货是否没有订货
@@ -224,6 +226,8 @@ public interface OrderMapper {
 
     int insertSpecialOrder(OrderItemDetailDTO dto);
 
+    int deleteSpecialOrder(OrderItemDetailDTO dto);
+
     /**
      * 修改供应商订货状态失效
      * @param businessDate
@@ -252,7 +256,7 @@ public interface OrderMapper {
     /**
      * 检查跨天订货信息是否没有订货
      */
-    int checkSpecialOrder(String storeCd, String orderDate);
+    List<OrderItemDetailDTO> checkSpecialOrder(String storeCd, String orderDate);
 
     /**
      * 检查vendor跨天订货信息是否没有订货

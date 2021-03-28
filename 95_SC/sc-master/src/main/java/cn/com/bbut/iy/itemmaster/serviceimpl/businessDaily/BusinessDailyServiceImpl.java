@@ -26,7 +26,7 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
 
     @Override
     public List<BusinessDailyDto> getSaleAmountByPma(String payDate, String storeCd) {
-        return mapper.getSaleAmountByPma(payDate,storeCd);
+        return mapper.getSaleAmountByPma(getTimeStamp(payDate),storeCd);
     }
 
     @Override
@@ -53,19 +53,29 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
         map.put("businessDate",businessDate);
         return map;
     }
+
+    // "yyyyMMdd" -->  "yyyy-MM-dd"
+    public String getTimeStamp(String date){
+        String str = "";
+        if(date == null || "".equals(date) || date.length()<8){
+            return str;
+        }
+        str = date.substring(0,4)+"-"+date.substring(4,6)+"-"+date.substring(6,8);
+        return str;
+    }
     /**
      * 统计上个月销售金额
      */
-    private Integer getLastMonthSalesAmount(String businessDate, String storeCd) {
+    private Double getLastMonthSalesAmount(String businessDate, String storeCd) {
         SimpleDateFormat businessDateformat = new SimpleDateFormat("yyyyMMdd");
         try {
             Date parseDate = businessDateformat.parse(businessDate);
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(parseDate);
-            calendar.add(Calendar.MONTH,-1);
+            calendar.add(Calendar.DATE,-28);
             Date time = calendar.getTime();
-            String format = businessDateformat.format(time);
-            return mapper.getLastMonthSalesAmount(format,storeCd);
+            String startDate = getTimeStamp(businessDateformat.format(time));
+            return mapper.getLastMonthSalesAmount(startDate,getTimeStamp(businessDate),storeCd);
         } catch (ParseException e) {
             e.printStackTrace();
             return null;
@@ -79,7 +89,7 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
      * 统计顾客数目
      */
     private Integer getcountCustomer(String businessDate, String storeCd) {
-        return mapper.getcountCustomer(businessDate,storeCd);
+        return mapper.getcountCustomer(getTimeStamp(businessDate),storeCd);
     }
 
     /**
@@ -89,13 +99,19 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
      * @return
      */
     private BusinessDailyDto getBankDeposit(String businessDate, String storeCd) {
-        return mapper.getSubtotalDue(businessDate,storeCd);
+        return mapper.getSubtotalDue(getTimeStamp(businessDate),storeCd);
     }
 
     @Override
     public BusinessDailyDto getSaleData(String payDate, String storeCd,String businessDate) {
-        BusinessDailyDto businessDailyDto = mapper.getSaleData(payDate,storeCd,businessDate);
+        // 营业额
+        String grossSaleAmount = mapper.getGrossSaleAmount(getTimeStamp(payDate),storeCd,businessDate);
+        // 顾客退款金额
+        String refundAmount = mapper.getRefundAmount(getTimeStamp(payDate),storeCd,businessDate);
+        BusinessDailyDto businessDailyDto = mapper.getSaleData(getTimeStamp(payDate),storeCd,businessDate);
         if(businessDailyDto!=null){
+            businessDailyDto.setGrossSaleAmount(new BigDecimal(grossSaleAmount));
+            businessDailyDto.setRefundAmount(new BigDecimal(refundAmount));
             businessDailyDto.setServiceAmount(//服务费显示为   服务费-充值费
                     businessDailyDto.getServiceAmount().subtract(businessDailyDto.getChargeAmount())
             );
@@ -105,36 +121,19 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
 
     @Override
     public BusinessDailyDto getPayInAmt(String payDate, String storeCd) {
-        List<PaymentAmtDto> paymentAmtList = mapper.getPayInAmt(payDate,storeCd);
+        PaymentAmtDto paymentAmtDto = mapper.getPayInAmt(getTimeStamp(payDate),storeCd);
+
         BusinessDailyDto dto = new BusinessDailyDto();
-        BigDecimal payInAmt = BigDecimal.ZERO;
-        if(paymentAmtList!=null&&paymentAmtList.size()>0){
-            for (PaymentAmtDto paymentAmtDto: paymentAmtList) {
-                switch (paymentAmtDto.getPayCd()) {
-                    case "01"://Cash
-                        dto.setPayAmt0(paymentAmtDto.getPayInAmt());
-                        break;
-                    case "02"://Card Payment
-                        dto.setPayAmt1(paymentAmtDto.getPayInAmt());
-                        break;
-                    case "03"://E-Voucher
-                        dto.setPayAmt2(paymentAmtDto.getPayInAmt());
-                        break;
-                    case "04"://Momo
-                        dto.setPayAmt3(paymentAmtDto.getPayInAmt());
-                        break;
-                    case "05"://Payoo
-                        dto.setPayAmt4(paymentAmtDto.getPayInAmt());
-                        break;
-                    case "06"://Viettel
-                        dto.setPayAmt5(paymentAmtDto.getPayInAmt());
-                        break;
-                }
-                if(paymentAmtDto.getPayInAmt()!=null)
-                payInAmt = payInAmt.add(paymentAmtDto.getPayInAmt());
-            }
-            dto.setPayAmt(payInAmt);
-        }
+        dto.setPayAmt0(paymentAmtDto.getPayInAmt0()); // Cash
+        dto.setPayAmt1(paymentAmtDto.getPayInAmt1()); // Card
+        dto.setPayAmt2(paymentAmtDto.getPayInAmt2()); // E-Voucher
+        dto.setPayAmt3(paymentAmtDto.getPayInAmt3()); // Momo
+        dto.setPayAmt4(paymentAmtDto.getPayInAmt4()); // Zalo
+        dto.setPayAmt5(paymentAmtDto.getPayInAmt5()); // VNPAY
+
+        dto.setPayAmt(dto.getPayAmt0().add(dto.getPayAmt1()).add(dto.getPayAmt2())
+        .add(dto.getPayAmt3()).add(dto.getPayAmt4()).add(dto.getPayAmt5()));
+
         return dto;
     }
 

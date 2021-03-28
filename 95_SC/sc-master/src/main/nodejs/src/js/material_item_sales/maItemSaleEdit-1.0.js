@@ -114,8 +114,8 @@ define('maItemSaleEdit', function () {
 				{name:"articleName",type:"text",text:"left",width:"130",ishide:false,css:""},
 				{name:"spec",type:"text",text:"left",width:"90",ishide:false,css:""},
 				{name:"uom",type:"text",text:"left",width:"80",ishide:false,css:""},
-				{name:"unitQty",type:"text",text:"right",width:"110",ishide:false,css:"",getCustomValue:_common.getThousands},
-				{name:"articleQty",type:"text",text:"right",width:"110",ishide:false,css:"",getCustomValue:_common.getThousands},
+				{name:"unitQty",type:"text",text:"right",width:"110",ishide:false,css:""},
+				{name:"articleQty",type:"text",text:"right",width:"110",ishide:false,css:""},
 				{name:"salePrice",type:"text",text:"right",width:"110",ishide:false,css:"",getCustomValue:_common.getThousands},
 				{name:"salePriceAmount",type:"text",text:"right",width:"110",ishide:true,css:"",getCustomValue:_common.getThousands}
 			],//列内容

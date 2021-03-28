@@ -48,6 +48,16 @@ public class Cm9010ServiceImpl implements Cm9010Service {
         return reasonValue;
     }
 
+    /**
+     * 获取所有的库存异动原因
+     * @param v
+     * @return
+     */
+    @Override
+    public List<AutoCompleteDTO> getAllReason(String v) {
+        List<AutoCompleteDTO> reasonValue = cm9010Mapper.getAllReasonValue(v);
+        return reasonValue;
+    }
 
     @Override
     public List<AutoCompleteDTO> getWriteOffReasonValue(String v) {

@@ -7,6 +7,7 @@ import cn.com.bbut.iy.itemmaster.entity.base.Ma1000;
 import cn.com.bbut.iy.itemmaster.entity.ma0020.MA0020C;
 import cn.com.bbut.iy.itemmaster.entity.ma0080.MA0080;
 import cn.com.bbut.iy.itemmaster.service.goodsalereport.GoodsSaleReportService;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -52,7 +53,10 @@ public class GoodsSaleReportServiceImpl implements GoodsSaleReportService {
     public Map<String,Object> getGoodSaleReportContent(goodSaleReportParamDTO param) {
          BigDecimal sumSaleAmount=BigDecimal.ZERO;
          BigDecimal sumSaleAmountQty=BigDecimal.ZERO;
+        param.setStartDate(Utils.getTimeStamp(param.getStartDate()));
+        param.setEndDate(Utils.getTimeStamp(param.getEndDate()));
         int itemSKU=0;
+
 
         // 获取总条数
         int count = goodsSaleReportMapper.searchCount(param);

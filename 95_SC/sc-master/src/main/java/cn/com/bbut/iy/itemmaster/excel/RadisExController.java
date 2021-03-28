@@ -137,7 +137,7 @@ public class RadisExController implements ExController {
         lock.lock();
         try {
             log.debug("checking...{}", key);
-            status = getStatus(key);
+//            status = getStatus(key);
             if (status != null) {
                 switch (status.getStatus()) {
                 case ExStatus.STATUS_RUNNING:

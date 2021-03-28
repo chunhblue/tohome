@@ -89,6 +89,12 @@ public class WarehouseDetailsGridDTO extends GridDataDTO {
     private BigDecimal receiveNoChargeQty;
     private BigDecimal receiveNoChargeQty1;
 
+    // HHT收货数量
+    private BigDecimal hhtReceiveQty;
+
+    // 收货差异数量 = receiveQty - hhtReceiveQty
+    private BigDecimal varQty;
+
     // 总实收数量
     private BigDecimal receiveTotalQty;
 
@@ -109,6 +115,8 @@ public class WarehouseDetailsGridDTO extends GridDataDTO {
 
     // 搭赠数量验收差
     private BigDecimal differenceFreeQty;
+
+    private BigDecimal deliveryQty; // 发货数量
 
     // 上传flg
     private String uploadFlg;

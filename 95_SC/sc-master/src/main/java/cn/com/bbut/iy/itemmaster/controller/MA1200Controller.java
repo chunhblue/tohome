@@ -53,11 +53,11 @@ public class MA1200Controller extends BaseAction {
         boolean flag = true;
         MA1200DTO _dto = ma1200Service.getByParentId(itemId);
         if(_dto != null){
-            String _val = cm9060Service.getValByKey("0634");
-            if(!"0".equals(_val)){
-                flag = false;
-                _return.setMessage("You cannot choose a combination of goods!");
-            }
+//            String _val = cm9060Service.getValByKey("0634");
+//            if(!"0".equals(_val)){
+//                flag = false;
+//                _return.setMessage("You cannot choose a combination of goods!");
+//            }
         }
         _return.setSuccess(flag);
         return _return;

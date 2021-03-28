@@ -16,7 +16,7 @@ define('dayOrderFailure', function () {
 		getThousands = null,
 	    selectTrTemp = null,
 	    tempTrObjValue = {},//临时行数据存储
-	    bmCodeOrItem = 0,//0 bmCode 1：item
+		checkValue = null,
     	common=null;
     var m = {
 		toKen : null,
@@ -30,6 +30,7 @@ define('dayOrderFailure', function () {
 		clear_bf_date : null,
 		failedReason : null,
 		barcode : null,
+		articleId : null,
 		search : null,
 		reset : null
     }
@@ -62,6 +63,8 @@ define('dayOrderFailure', function () {
 		table_event();
 		//权限验证
 		isButPermission();
+		// 初始化组织架构
+		_common.initOrganization();
 		// 初始化检索日期
 		_common.initDate(m.bf_start_date,m.bf_end_date);
     }
@@ -114,14 +117,17 @@ define('dayOrderFailure', function () {
     	});
     	// 清空按钮事件
     	m.reset.on("click",function(){
+			$("#regionRemove").click();
 			m.bf_start_date.val("");
 			m.bf_end_date.val("");
-			m.clear_bf_date.val("");
-			m.failedReason.val("");
 			m.barcode.val("");
+			m.query_type_val.val("");
 			selectTrTemp = null;
 			_common.clearTable();
     	});
+		$('input:radio[name="query_type"]').on('change',function(){
+			checkValue = $('input:radio[name="query_type"]:checked').val();
+		});
     }
 
 	// 判断是否是数字
@@ -178,15 +184,22 @@ define('dayOrderFailure', function () {
     
     // 拼接检索参数
     var setParamJson = function(){
+
 		// 订货日期
 		var _orderStartDate = fmtStringDate(m.bf_start_date.val())||null;
 		var _orderEndDate = fmtStringDate(m.bf_end_date.val())||null;
 		// 创建请求字符串
 		var searchJsonStr ={
+			regionCd:$("#aRegion").attr("k"),
+			cityCd:$("#aCity").attr("k"),
+			districtCd:$("#aDistrict").attr("k"),
+			storeCd:$("#aStore").attr("k"),
 			orderStartDate:_orderStartDate,
 			orderEndDate:_orderEndDate,
-			failedReason:m.failedReason.val().trim(),
-			barcode:m.barcode.val().trim()
+			articleId:m.articleId.val().trim(),
+			barcode:m.barcode.val().trim(),
+			orderDifferentiate: checkValue,
+			vendorId: $("#query_type_val").val()
 		};
  		m.searchJson.val(JSON.stringify(searchJsonStr));
     }
@@ -198,24 +211,21 @@ define('dayOrderFailure', function () {
     		title:"Query Result",
     		param:paramGrid,
 			localSort: true,
-    		colNames:["Order Date","Item Code","Item Barcode","Item Name","Order Type","Order UOM","Order Quantity",
-				"Free Quantity","Order Price","Order Amount","Vendor Code","Vendor Name","Failed Reason"],
+    		colNames:["Order Date","Item Code","Item Barcode","Item Name","Order UOM","Order Quantity",
+				"Order Price","Order Amount","Vendor Code","Vendor Name"],
     		colModel:[
 				{name:"orderDate",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue:dateFmt},
 				{name:"articleId",type:"text",text:"right",width:"130",ishide:false,css:""},
 				{name:"barcode",type:"text",text:"right",width:"130",ishide:false,css:""},
 				{name:"articleName",type:"text",text:"left",width:"130",ishide:false,css:""},
-				{name:"methodName",type:"text",text:"left",width:"130",ishide:false,css:""},
 				{name:"orderUom",type:"text",text:"left",width:"130",ishide:false,css:""},
 				{name:"orderQty",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getThousands},
-				{name:"orderNoChargeQty",type:"text",text:"right",width:"130",ishide:true,css:"",getCustomValue:getThousands},
 				/*商品进货单价和税后订货总金额*/
 				{name:"orderPrice",type:"text",text:"right",width:"130",ishide:true,css:"",getCustomValue:getThousands},
 				{name:"orderAmt",type:"text",text:"right",width:"130",ishide:true,css:"",getCustomValue:getThousands},
 
 				{name:"vendorId",type:"text",text:"right",width:"130",ishide:false,css:""},
-				{name:"vendorName",type:"text",text:"left",width:"150",ishide:false,css:""},
-				{name:"failedReason",type:"text",text:"left",width:"200",ishide:false,css:""}
+				{name:"vendorName",type:"text",text:"left",width:"150",ishide:false,css:""}
 			],//列内容
 			width:"max",//宽度自动
 			page:1,//当前页

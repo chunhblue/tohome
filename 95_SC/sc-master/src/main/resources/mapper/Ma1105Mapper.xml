@@ -27,8 +27,11 @@
     <result column="store_type_cd" jdbcType="VARCHAR" property="storeTypeCd" />
     <result column="store_type_name" jdbcType="VARCHAR" property="storeTypeName" />
     <result column="store_group_name" jdbcType="VARCHAR" property="storeGroupName" />
+    <result column="pog_name" jdbcType="VARCHAR" property="excelName" />
 
   </resultMap>
+
+
   <sql id="Example_Where_Clause">
     <!--
       WARNING - @mbg.generated
@@ -136,7 +139,7 @@
     ,ma1100.article_name product_name,ma1000.store_name
     ,ma0070.dep_name,ma0080.pma_name,ma0090.category_name,ma0100.sub_category_name
     ,ma0030.store_type_cd,ma0030.store_type_name
-    ,ma0035.store_group_cd,ma0035.store_group_name
+    ,ma0035.store_group_cd,ma0035.store_group_name,ma1105.pog_name
     from ma1105,ma1100,ma0070,ma0080,ma0090,ma0100,ma1000,ma0030,ma0035
     <where>
       ma1105.item_code = ma1100.article_id
@@ -555,27 +558,18 @@
         delete from ma1107 where pog_name = #{excelName,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=VARCHAR}
   </delete>
 
-  <delete id="deleteMa1108" parameterType="cn.com.bbut.iy.itemmaster.entity.base.Ma1105">
-        delete from ma1108 where pog_cd = #{pogCd,jdbcType=VARCHAR}
-        and shelf = #{shelf,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=VARCHAR}
-  </delete>
-
-  <delete id="deleteMa1109" parameterType="cn.com.bbut.iy.itemmaster.entity.base.Ma1105">
-        delete from ma1109 where pog_cd = #{pogCd,jdbcType=VARCHAR} and shelf = #{shelf,jdbcType=VARCHAR}
-        and sub_shelf = #{subShelf,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=VARCHAR}
-  </delete>
-
   <delete id="deleteMa1104">
         delete from ma1104 where pog_cd = #{pogCd,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=VARCHAR}
   </delete>
 
   <insert id="insertMa1104" parameterType="cn.com.bbut.iy.itemmaster.entity.base.Ma1105">
         insert into ma1104(
-        pog_cd,pog_name,store_cd, create_user_id, create_ymd, create_hms)
+        pog_cd,pog_name,store_cd, create_user_id, create_ymd, create_hms,review_status,is_expired)
         values(
         #{pogCd,jdbcType=VARCHAR},#{excelName,jdbcType=VARCHAR},#{storeCd,jdbcType=VARCHAR},
         #{commonDTO.createUserId,jdbcType=VARCHAR},
-        #{commonDTO.createYmd,jdbcType=CHAR}, #{commonDTO.createHms,jdbcType=CHAR}
+        #{commonDTO.createYmd,jdbcType=CHAR}, #{commonDTO.createHms,jdbcType=CHAR},
+        1,'1'
         )
   </insert>
 
@@ -590,23 +584,139 @@
   </insert>
 
   <insert id="insertMa1108" parameterType="cn.com.bbut.iy.itemmaster.entity.base.Ma1105">
-        insert into ma1108(
-        pog_cd,shelf,store_cd,effective_sts, create_user_id, create_ymd, create_hms)
-        values(
-        #{pogCd,jdbcType=VARCHAR},#{shelf,jdbcType=VARCHAR},#{storeCd,jdbcType=VARCHAR},'10',
-         #{commonDTO.createUserId,jdbcType=VARCHAR},
-        #{commonDTO.createYmd,jdbcType=CHAR}, #{commonDTO.createHms,jdbcType=CHAR}
-        )
+    insert into ma1108(
+    pog_cd,shelf,store_cd,effective_sts, create_user_id, create_ymd, create_hms)
+    values
+    <foreach collection="ma1105s" item="item" index="index"  separator="," >
+      (
+      #{item.pogCd,jdbcType=VARCHAR},#{item.shelf,jdbcType=VARCHAR},#{item.storeCd,jdbcType=VARCHAR},'10',
+      #{item.commonDTO.createUserId,jdbcType=VARCHAR},
+      #{item.commonDTO.createYmd,jdbcType=CHAR}, #{item.commonDTO.createHms,jdbcType=CHAR}
+      )
+    </foreach>
   </insert>
 
   <insert id="insertMa1109" parameterType="cn.com.bbut.iy.itemmaster.entity.base.Ma1105">
-        insert into ma1109(
-        pog_cd,shelf,sub_shelf,store_cd,effective_sts, create_user_id, create_ymd, create_hms)
-        values(
-        #{pogCd,jdbcType=VARCHAR},#{shelf,jdbcType=VARCHAR},#{subShelf,jdbcType=VARCHAR},#{storeCd,jdbcType=VARCHAR},'10',
-        #{commonDTO.createUserId,jdbcType=VARCHAR},
-        #{commonDTO.createYmd,jdbcType=CHAR}, #{commonDTO.createHms,jdbcType=CHAR}
-        )
+    insert into ma1109(
+    pog_cd,shelf,sub_shelf,store_cd,effective_sts, create_user_id, create_ymd, create_hms)
+    values
+    <foreach collection="ma1105s" item="item" index="index"  separator="," >
+      (
+      #{item.pogCd,jdbcType=VARCHAR},#{item.shelf,jdbcType=VARCHAR},
+      #{item.subShelf,jdbcType=VARCHAR},#{item.storeCd,jdbcType=VARCHAR},'10',
+      #{item.commonDTO.createUserId,jdbcType=VARCHAR},
+      #{item.commonDTO.createYmd,jdbcType=CHAR}, #{item.commonDTO.createHms,jdbcType=CHAR}
+      )
+    </foreach>
   </insert>
 
+  <insert id="insertMa1105tSelective" parameterType="cn.com.bbut.iy.itemmaster.entity.base.Ma1105">
+    insert into ma1105_t
+    (
+        desc_g,
+        loc,
+        item_code,
+        product_name,
+        v_facing,
+        h_facing,
+        d_facing,
+        total_facing,
+        shelf,
+        sub_shelf,
+        create_user_id,
+        create_date,
+        store_cd,
+        pog_name
+        )
+        values
+    <foreach collection="ma1105s" item="item" index="index"  separator="," >
+    (
+      #{item.descG,jdbcType=VARCHAR},
+      #{item.loc,jdbcType=VARCHAR},
+      #{item.itemCode,jdbcType=VARCHAR},
+      #{item.productName,jdbcType=VARCHAR},
+      #{item.vFacing,jdbcType=VARCHAR},
+      #{item.hFacing,jdbcType=VARCHAR},
+      #{item.dFacing,jdbcType=VARCHAR},
+      #{item.totalFacing,jdbcType=VARCHAR},
+      #{item.shelf,jdbcType=VARCHAR},
+      #{item.subShelf,jdbcType=VARCHAR},
+      #{item.createUserId,jdbcType=VARCHAR},
+      #{item.createDate,jdbcType=CHAR},
+      #{item.storeCd,jdbcType=VARCHAR},
+      #{item.excelName,jdbcType=VARCHAR}
+      )
+    </foreach>
+  </insert>
+
+  <select id="getStatusByStoreCd" resultType="INTEGER">
+    select review_status from ma1106 where store_cd = #{storeCd,jdbcType=VARCHAR}
+  </select>
+
+  <select id="getTempShelf" resultType="cn.com.bbut.iy.itemmaster.entity.base.Ma1105" parameterType="String">
+        select store_cd,shelf from ma1105_t
+        WHERE store_cd = #{storeCd,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteMa1105Byshelf" parameterType="cn.com.bbut.iy.itemmaster.entity.base.Ma1105">
+    delete from ma1105 where (store_cd,shelf) in
+    <foreach collection="ma1105s" item="item" index="index" open="(" close=")" separator=",">
+      (
+       #{item.storeCd,jdbcType=VARCHAR},#{item.shelf,jdbcType=VARCHAR}
+      )
+    </foreach>
+  </delete>
+
+  <insert id="insertShelfToMall05" parameterType="String">
+    insert into ma1105
+    select
+    desc_g,loc,item_code,product_name,v_facing,h_facing,d_facing,total_facing,shelf,
+    sub_shelf,create_user_id,create_date,store_cd,pog_name
+    from ma1105_t where store_cd = #{storeCd,jdbcType=VARCHAR}
+  </insert>
+
+  <delete id="deleteShelf" parameterType="String">
+    delete from ma1105_t where store_cd = #{storeCd,jdbcType=VARCHAR}
+  </delete>
+
+  <select id="getPOGInformation" resultType="cn.com.bbut.iy.itemmaster.dto.ma1105.Ma1104Dto">
+    SELECT * FROM ma1104 where store_cd = #{storeCd,jdbcType=VARCHAR}
+and (create_ymd || create_hms) = (select max(create_ymd || create_hms) from ma1104 where store_cd = #{storeCd,jdbcType=VARCHAR})
+  </select>
+
+  <update id="updatePOGAuditStatus" parameterType="cn.com.bbut.iy.itemmaster.dto.ma1105.Ma1104Dto">
+    update  ma1104 set review_status = #{reviewStatus},is_expired = #{isExpired,jdbcType=VARCHAR}
+     where store_cd = #{storeCd,jdbcType=VARCHAR}
+    and pog_cd = #{pogCd,jdbcType=VARCHAR}
+  </update>
+
+  <update id="updatePOGIsExpiredStatus" parameterType="cn.com.bbut.iy.itemmaster.dto.ma1105.Ma1104Dto">
+    update  ma1104 set is_expired = '1' where store_cd = #{storeCd,jdbcType=VARCHAR}
+    and (create_ymd || create_hms)  &lt;  (select max(create_ymd || create_hms) from ma1104 where store_cd = #{storeCd,jdbcType=VARCHAR})
+    and pog_name = #{pogName,jdbcType=VARCHAR};
+  </update>
+
+  <select id="countPogName" resultType="java.lang.Integer">
+    select count(*) from ma1104 where pog_name = #{excelName,jdbcType=VARCHAR}
+    and store_cd = #{storeCd,jdbcType=VARCHAR}
+    and create_ymd = to_char(CURRENT_DATE,'yyyyMMdd')
+    and review_status = '10'
+    and is_expired = '0'
+  </select>
+
+  <update id="modifyPOGStatus">
+    UPDATE  ma1104
+    SET
+    REVIEW_STATUS = #{status,jdbcType=SMALLINT}
+    <choose>
+      <when test="status == 10">
+        ,is_expired = '0'
+      </when>
+      <otherwise>
+        ,is_expired = '1'
+      </otherwise>
+    </choose>
+    WHERE
+    store_cd = #{recordCd}
+  </update>
 </mapper>

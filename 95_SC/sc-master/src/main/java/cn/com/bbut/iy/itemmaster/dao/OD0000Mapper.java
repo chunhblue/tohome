@@ -26,4 +26,7 @@ public interface OD0000Mapper extends OD0000GenMapper {
      * @return
      */
     int insertOd0005(OD0000 od0000);
+
+    //发货单，收货单差异单头档
+    DifferenceHeadResult selectShopOrderHeadByOrderId(@Param("orderId") String orderId);
 }

@@ -7,6 +7,7 @@
         <result column="article_name" property="articleName"></result>
         <result column="barcode" property="barcode"></result>
         <result column="sale_date" property="saleDate"></result>
+        <result column="tran_date" property="tranDate"></result>
         <result column="pos_id" property="posId"></result>
         <result column="sale_serial_no" property="saleSerialNo"></result>
         <result column="sale_qty" property="orderQty"></result>
@@ -23,6 +24,7 @@
         <result column="creditCar" property="creditCar"></result>
         <result column="store_cd" property="storeCd"></result>
         <result column="store_name" property="storeName"></result>
+        <result column="non_sale_type" property="nonSaleType"></result>
 
         <result column="cardPayment" property="cardPayment"></result>
         <result column="eVoucher" property="eVoucher"></result>
@@ -53,6 +55,7 @@
         SELECT
         B.article_id,
         C.article_name,
+        A.tran_date,
         B.sale_date,
         B.barcode,
         to_char(B.sale_date,'dd/MM/yyyy') as sale_formt_date,
@@ -62,6 +65,7 @@
         B.price_original,
         B.price_actual,
         B.sale_amount,
+        sa21.non_sale_type,
         A.cashier_id,
         D.cashier_name,
         E.store_cd,
@@ -77,10 +81,14 @@
         CASE WHEN A.pay_cd1='07' THEN B.sale_amount ELSE '0' END AS creditCard, /*creditCard 字段不用了*/
         (B.sale_amount) as totalAmt
         FROM
-        SA0010 A,
-        SA0020 B,
+        SA0010 A
+        left join SA0050 D on A.cashier_id = D.cashier_id and A.store_cd = D.store_cd,
+        SA0020 B
+        left join sa0021 sa21
+        on sa21.acc_date=B.acc_date and sa21.store_cd=B.store_cd
+        and sa21.pos_id=B.pos_id and sa21.tran_serial_no=B.tran_serial_no
+        and sa21.item_code=B.article_id,
         MA1100 C,
-        SA0050 D,
         MA1000 E,
         t_operator oper
         WHERE
@@ -95,7 +103,6 @@
         AND B.detail_type = 'r'
         AND B.article_id = C.article_id
         AND B.acc_date BETWEEN C.effective_start_date AND C.effective_end_date
-        AND A.cashier_id = D.cashier_id
         AND A.store_cd IN
         <foreach item="store" index="index" collection="param.stores"
                  open="(" separator="," close=")">
@@ -104,26 +111,29 @@
         /*--早班*/
         <if test="param.shift!=null and param.shift=='00'">
             <![CDATA[
-                and A.tran_date >= to_timestamp(A.acc_date||' 06:00:00','yyyyMMdd hh24:mi:ss')
-                and A.tran_date < to_timestamp(A.acc_date||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
                 ]]>
         </if>
         /*--中班*/
         <if test="param.shift!=null and param.shift=='01'">
             <![CDATA[
-                and A.tran_date >= to_timestamp(A.acc_date||' 14:00:00','yyyyMMdd hh24:mi:ss')
-                and A.tran_date < to_timestamp(A.acc_date||' 22:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss')
                 ]]>
         </if>
         /*--晚班*/
         <if test="param.shift!=null and param.shift=='02'">
             <![CDATA[
-                and (A.tran_date < to_timestamp(A.acc_date||' 06:00:00','yyyyMMdd hh24:mi:ss')
-                or A.tran_date >= to_timestamp(A.acc_date||' 22:00:00','yyyyMMdd hh24:mi:ss'))
+                and (A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                or A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss'))
                 ]]>
         </if>
         <if test="param.returnDate!=null and param.returnDate!=''">
-            and to_char(A.tran_date,'YYYYMMDD') = #{param.returnDate}
+            <![CDATA[
+        AND A.tran_date >= TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        and (A.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        ]]>
         </if>
 
         <if test="param.cashierCd!=null and param.cashierCd!=''">
@@ -159,9 +169,8 @@
             and B.sale_amount ${param.calType} cast(#{param.totalAmt,jdbcType=VARCHAR} as NUMERIC)
             ]]>
         </if>
-        <if test="param.barcode != null and param.totalAmt != ''" >
-
-            and B.barcode LIKE lower( CONCAT('%',#{param.barcode},'%')
+        <if test="param.barcode != null and param.barcode != ''" >
+            and B.barcode LIKE lower(CONCAT('%',#{param.barcode},'%')
         </if>
     </select>
 

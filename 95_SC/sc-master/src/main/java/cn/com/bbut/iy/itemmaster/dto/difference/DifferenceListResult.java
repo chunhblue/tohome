@@ -17,10 +17,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DifferenceListResult extends GridDataDTO {
     private static final long serialVersionUID = 1L;
-    // 数据库查询出的字段
+    /**
+     * 数据库查询出的字段
+     */
+
+    // 订单编号
     private String orderId;
+    // 发货单编号
+    private String deliveryOrderId;
     private String orgOrderId;
     private String orderDate;
+    private String deliveryDate; // 发货单日期
     private String receiveDate;
     private String receiveId;
     private String createDate;

@@ -271,7 +271,9 @@
 							<th>Sales Amount</th>[#--营业毛额--]
 							<th>Discount Amount</th>[#--折扣毛额--]
 							<th>Income</th>[#--实际收入--]
-							<th>Over Amount</th>[#--溢收--]
+							<th>Spill Amount</th>[#--溢收--]
+							<th>Over Amount</th>[#--舍去金额--]
+							<th>Refund Amount</th>[#--舍去金额--]
 							<th>Services</th>[#--服务费--]
 							<th>Charge</th>[#--充值--]
 							<th>Charge Refund</th>[#--充值退款--]
@@ -284,6 +286,8 @@
 							<td id="discountAmount">0</td>
 							<td id="saleAmount">0</td>
 							<td id="spillAmount">0</td>
+							<td id="overAmount">0</td>
+							<td id="refundAmount">0</td>
 							<td id="serviceAmount">0</td>
 							<td id="chargeAmount">0</td>
 							<td id="chargeRefundAmount">0</td>
@@ -324,12 +328,12 @@
 							</tr>
 							<tr>
 								[#--打折券--]
-								<td>Payoo</td>
+								<td>Zalo</td>
 								<td id="payAmt4">0</td>
 							</tr>
 							<tr>
 								[#--预付卡--]
-								<td>Viettel</td>
+								<td>VNPAY</td>
 								<td id="payAmt5">0</td>
 							</tr>
 							<tr style="background-color: #00B2EE">
@@ -373,22 +377,28 @@
 							</tr>
 						</table>
 					</div>
+					<div><input id="receivablesAmount" hidden></div>
 					<div class="col-xs-12 col-sm-12 col-md-1-5 col-md-offset-1-5 col-lg-1-5 col-lg-offset-1-5">
 						<table class="table table-hover table-striped table-condensed table-bordered zgrid-table td-align" style="margin-bottom: 10px">
 							<tr>
 								<th colspan="2">Bank Deposit</th>[#--银行缴费--]
 							</tr>
 							<tr>
-								<td>Working capital retained yesterday</td>[#--昨日留存周转金--]
+								<td>Working capital retained yesterday</td>[#--昨日留存现金--]
 								<td id="retentionAmount">0</td>
 							</tr>
-							<tr>
-								<td>Subtotal due today</td>[#--本日应收小计--]
+							[#--<tr>
+								<td>Subtotal due today</td>--][#--今日应收小计--][#--
 								<td id="receivablesAmount">0</td>
+							</tr>--]
+							<tr>
+								<td>Subtotal of accumulated cash</td>[#--今日累计现金小计--]
+								<td id="cashAmount">0</td>
+
 							</tr>
 							<tr>
-								<td>Subtotal of accumulated cash</td>[#--累计现金小计--]
-								<td id="cashAmount">0</td>
+								<td></td>
+								<td></td>
 							</tr>
 							<tr>
 								<td></td>

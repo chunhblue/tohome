@@ -46,4 +46,5 @@ public class ItemInfoDTO{
 
     // 库存量
     private BigDecimal onHandQty;
+
 }

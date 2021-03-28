@@ -27,25 +27,30 @@ public class CoreItemerviceImpl implements CoreItemService {
 
     public Map<String, Object> getData(coreItemParamDTO paramDTO) {
         List<coreItemDTO> datafor=null;
+        Integer dataforCoun=0;
         if (paramDTO.getCoreItemType().equals("01")) {
             datafor= mapper.getDataforg(paramDTO);
+            dataforCoun=mapper.getDataforgCount(paramDTO);
 
         }
         if (paramDTO.getCoreItemType().equals("02")){
             datafor = mapper.getDataforcity(paramDTO);
+            dataforCoun = mapper.getDataforcityCount(paramDTO);
         }
         if (paramDTO.getCoreItemType().equals("03")){
             datafor= mapper.getDatafordistrict(paramDTO);
+            dataforCoun= mapper.getDatafordistrictCount(paramDTO);
         }
         if (paramDTO.getCoreItemType().equals("04")){
             datafor= mapper.getDataforStoreCd(paramDTO);
+            dataforCoun= mapper.getDatafordistrictCount(paramDTO);
         }
         // 获取总页数
-        int totalPage = (datafor.size() % paramDTO.getRows() == 0) ? (datafor.size() / paramDTO.getRows()) : (datafor.size() / paramDTO.getRows()) + 1;
+        int totalPage = (dataforCoun % paramDTO.getRows() == 0) ? (dataforCoun / paramDTO.getRows()) : (dataforCoun / paramDTO.getRows()) + 1;
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("totalPage",totalPage);
         map.put("data",datafor);
-        map.put("count",datafor.size()+1);
+        map.put("count",dataforCoun);
         return map;
     }
 }

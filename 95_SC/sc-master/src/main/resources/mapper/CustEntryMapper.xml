@@ -94,6 +94,30 @@
             )
         </foreach>
     </insert>
+    <insert id="saveAllItemIn" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100c.StocktakeItemDTOC">
+        INSERT INTO PI0130 (
+        pi_cd,
+        article_id,
+        barcode,
+        qty,
+        update_ymd,
+        update_hms,
+        note,
+        fn_stock_qty
+        ) VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (
+            #{item.piCd,jdbcType=VARCHAR},
+            #{item.articleId,jdbcType=VARCHAR},
+            #{item.barcode,jdbcType=VARCHAR},
+            #{item.qty,jdbcType=NUMERIC},
+            #{item.updateYmd,jdbcType=VARCHAR},
+            #{item.updateHms,jdbcType=VARCHAR},
+            #{item.note,jdbcType=VARCHAR},
+            cast( #{item.stockQty} AS NUMERIC)
+            )
+        </foreach>
+    </insert>
 
 
 
@@ -120,5 +144,56 @@
             AND C1.sp_value BETWEEN M1.effective_start_date
             AND M1.effective_end_date
     </select>
+    <select id="getPI0130ByPrimaryIn" resultMap="BaseItemResult">
+        SELECT
+            P1.pi_cd,
+            P1.barcode,
+            M1.article_id,
+            M1.article_name,
+            M1.spec,
+            M1.sales_unit_id,
+            P1.qty,
+            CONCAT(P1.update_ymd, P1.update_hms) as last_update_time,
+            P1.note
+        FROM
 
+            PI0130 P1,
+            MA1100 M1,
+            CM9060 C1
+        WHERE
+            P1.pi_cd = #{piCd}
+            AND C1.sp_id = '0000'
+            AND P1.article_id = M1.article_id
+            AND C1.sp_value BETWEEN M1.effective_start_date
+            AND M1.effective_end_date
+    </select>
+    <select id="getPI0130ByPrimaryIIn" resultMap="BaseItemResult">
+        SELECT
+            P1.pi_cd,
+            P1.barcode,
+            M1.article_id,
+            M1.article_name,
+            M1.spec,
+            M1.sales_unit_id,
+            P1.qty,
+            CONCAT(P1.update_ymd, P1.update_hms) as last_update_time,
+            P1.note
+        FROM
+
+            PI0130 P1,
+            MA1100 M1,
+            CM9060 C1
+        WHERE
+            P1.pi_cd = #{piCd}
+            AND C1.sp_id = '0000'
+            AND P1.article_id = M1.article_id
+            AND C1.sp_value BETWEEN M1.effective_start_date
+            AND M1.effective_end_date
+        <if test="articleId!=null and articleId!=''">
+            AND M1.article_id=#{articleId}
+        </if>
+        <if test="barcode!=null and barcode!=''">
+            AND  P1.barcode=#{barcode}
+        </if>
+    </select>
 </mapper>

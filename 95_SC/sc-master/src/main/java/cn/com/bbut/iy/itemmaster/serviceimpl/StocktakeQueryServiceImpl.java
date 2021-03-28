@@ -206,7 +206,6 @@ public class StocktakeQueryServiceImpl implements StocktakeQueryService {
                     sk0020.setVoucherType("605");
                     sk0020.setStoreCd1(sk0020.getStoreCd());
                     sk0020.setAdjustReason("55");
-//                    sk0020.setDisplaySeq(new BigDecimal(i++));
                     sk0020.setDisplaySeq(new BigDecimal(i+""));
                     voucharAmtNotax=voucharAmtNotax.add(sk0020.getAmtNoTax());
                     i++;

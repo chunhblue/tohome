@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.customercount.CustomerCountMapper">
+    <resultMap id="ResultMap" type="cn.com.bbut.iy.itemmaster.dto.customercount.CustomerCountDto">
+        <result column="store_cd" property="storeCd" />
+        <result column="store_name" property="storeName" />
+        <result column="date_time" property="dateTime"  />
+        <result column="k1_bill_19k" property="k1bill19k"  />
+        <result column="k19_bill_29k" property="k19bill29k"  />
+        <result column="k29_bill_39k" property="k29bill39k"  />
+        <result column="k39_bill_49k" property="k39bill49k"  />
+        <result column="bill_49k" property="bill49k"  />
+        <result column="total" property="total"  />
+
+    </resultMap>
+
+<select id="searchData" parameterType="cn.com.bbut.iy.itemmaster.dto.customercount.CustomerCountParamDto" resultMap="ResultMap">
+select  ma8.store_cd,ma1.store_name,to_char(date,'yyyy/MM/dd') date_time,k1_bill_19k,k19_bill_29k,k29_bill_39k, k39_bill_49k,bill_49k,total from ma8415  ma8  left join ma1000 ma1 on ma8.store_cd=ma1.store_cd
+and <![CDATA[#{param.bussinessDate} > ma1.effective_start_date ]]>
+and <![CDATA[#{param.bussinessDate} < ma1.effective_end_date ]]>
+where 1=1
+and ma8.store_cd IN
+<foreach item="store" index="index" collection="param.stores"
+         open="(" separator="," close=")">
+    #{store,jdbcType=VARCHAR}
+</foreach>
+<if test="param.startDate != null  and param.startDate !=''">
+    and  <![CDATA[  to_char(date,'yyyymmdd')> #{param.startDate}]]>
+</if>
+<if test="param.endDate != null and param.endDate !=''">
+    and  <![CDATA[  to_char(date,'yyyymmdd')< #{param.endDate}]]>
+</if>
+<if test="param.flg">
+    LIMIT ${param.rows} OFFSET ${param.limitStart}
+</if>
+</select>
+<select id="searchCount" parameterType="cn.com.bbut.iy.itemmaster.dto.customercount.CustomerCountParamDto" resultType="INT">
+select count(1) from ma8415  ma8
+left join ma1000 ma1 on ma1.store_cd=ma8.store_cd
+where 1=1
+and <![CDATA[#{param.bussinessDate} > ma1.effective_start_date ]]>
+and <![CDATA[#{param.bussinessDate} < ma1.effective_end_date ]]>
+and ma8.store_cd IN
+<foreach item="store" index="index" collection="param.stores"
+         open="(" separator="," close=")">
+    #{store,jdbcType=VARCHAR}
+</foreach>
+<if test="param.startDate != null  and param.startDate !=''">
+    and  <![CDATA[  to_char(date,'yyyymmdd')> #{param.startDate}]]>
+</if>
+<if test="param.endDate != null and param.endDate !=''">
+    and  <![CDATA[  to_char(date,'yyyymmdd')< #{param.endDate}]]>
+</if>
+</select>
+</mapper>

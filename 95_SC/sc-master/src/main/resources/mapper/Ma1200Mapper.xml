@@ -29,6 +29,7 @@
             SELECT M.article_id, M.article_name
             FROM MA1100 M, MA1140 M1
             WHERE M1.is_default = '1'
+            AND M.inventory_item='1'
             AND M.article_id = M1.article_id
             AND M.effective_start_date = M1.effective_start_date
             AND (SELECT sp_value FROM CM9060 WHERE sp_id = '0000')

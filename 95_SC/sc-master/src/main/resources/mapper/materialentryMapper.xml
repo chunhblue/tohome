@@ -115,6 +115,24 @@
             )
         </foreach>
     </insert>
+    <insert id="saveAllItemIn" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100c.StocktakeItemDTOC">
+        INSERT INTO PI0150 (
+        pi_cd,
+        article_id,
+        barcode,
+        fn_stock_qty,
+        qty
+        ) VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (
+            #{item.piCd,jdbcType=VARCHAR},
+            #{item.articleId,jdbcType=VARCHAR},
+            #{item.barcode,jdbcType=VARCHAR},
+            cast( #{item.stockQty} AS NUMERIC),
+            #{item.qty,jdbcType=NUMERIC}
+            )
+        </foreach>
+    </insert>
 
     <select id="getPI0140ByPrimary" resultMap="BaseItemResult2">
         SELECT
