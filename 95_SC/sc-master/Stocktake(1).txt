@@ -1,6 +1,0 @@
-﻿Itemcode,	Barcode,		ItemName,				Unit,   PhysicalCount,   Converted,	badqty,	Region,	        	  CountingTime,
-166432,	8935217413003,	TH TRUE MILK Sua Chua Co Duong 100g*1BO,	HOP,	 2,	        1,		        ,	Display,	       	 20200930194759,
-166432,	8935217413003,	TH TRUE MILK Sua Chua Co Duong 100g*1BO,	HOP,	 1,	        1,		        ,	Display,	      	 20200930194811,
-177598,	8935217413201,	TH TRUE MILK Sua Chua Nha Dam 100g*1BO,	HOP,	 2,	        1,		        ,	Display,	      	 20200930194806,
-177598,	8935217413201,	TH TRUE MILK Sua Chua Nha Dam 100g*1BO,	HOP,	 1,	        1,		        ,	Display,	      	 20200930194815,
-1111,	8935217403370,	1111,					BAR,	 1111,	        1,		        ,	Not Yet Receiving,	 20200930194835,
