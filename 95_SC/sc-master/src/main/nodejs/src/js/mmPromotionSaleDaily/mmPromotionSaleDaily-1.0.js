@@ -222,7 +222,7 @@ define('mmPromotionSaleDaily', function () {
                                     '<td title="'+isEmpty(item.distributionType)+'" rowspan="'+item.list.length+'" style="vertical-align: middle;text-align: left">'+isEmpty(item.distributionType)+'</td>' +
                                     '<td title="'+toThousands(item.totalSellingPrice)+'" rowspan="'+item.list.length+'" style="vertical-align: middle;text-align: right">'+toThousands(item.totalSellingPrice)+'</td>' +
                                     '<td title="'+toThousands(item.totalSaleQty)+'" rowspan="'+item.list.length+'" style="vertical-align: middle;text-align: right">'+toThousands(item.totalSaleQty)+'</td>' +
-                                    '<td title="'+toThousands(item.totalSaleAmt)+'" rowspan="'+item.list.length+'" style="vertical-align: middle;text-align: right">'+toThousands(item.totalSaleAmt)+'</td>' +
+                                    '<td title="'+toThousands(item.discountAmt)+'" rowspan="'+item.list.length+'" style="vertical-align: middle;text-align: right">'+toThousands(item.discountAmt)+'</td>' +
                                     '<td title="'+isEmpty(item.list[j].barcode)+'" style="text-align: right">'+isEmpty(item.list[j].barcode)+'</td>' +
                                     '<td title="'+isEmpty(item.list[j].articleId)+'" style="text-align: right">'+isEmpty(item.list[j].articleId)+'</td>' +
                                     '<td title="'+isEmpty(item.list[j].articleName)+'" style="text-align: left">'+isEmpty(item.list[j].articleName)+'</td>' +
@@ -255,7 +255,7 @@ define('mmPromotionSaleDaily', function () {
                                 '<td title="'+isEmpty(item.distributionType)+'" style="text-align: left">'+isEmpty(item.distributionType)+'</td>' +
                                 '<td title="'+toThousands(item.totalSellingPrice)+'" style="text-align: right">'+toThousands(item.totalSellingPrice)+'</td>' +
                                 '<td title="'+toThousands(item.totalSaleQty)+'" style="text-align: right">'+toThousands(item.totalSaleQty)+'</td>' +
-                                '<td title="'+toThousands(item.totalSaleAmt)+'" style="text-align: right">'+toThousands(item.totalSaleAmt)+'</td>' +
+                                '<td title="'+toThousands(item.discountAmt)+'" rowspan="'+item.list.length+'" style="vertical-align: middle;text-align: right">'+toThousands(item.discountAmt)+'</td>' +
                                 '<td title="'+isEmpty(item.list[0].barcode)+'" style="text-align: right">'+isEmpty(item.list[0].barcode)+'</td>' +
                                 '<td title="'+isEmpty(item.list[0].articleId)+'" style="text-align: right">'+isEmpty(item.list[0].articleId)+'</td>' +
                                 '<td title="'+isEmpty(item.list[0].articleName)+'" style="text-align: left">'+isEmpty(item.list[0].articleName)+'</td>' +
@@ -298,6 +298,10 @@ define('mmPromotionSaleDaily', function () {
             $("#startDate").focus();
             $("#startDate").css("border-color","red");
             return false;
+        }else if(_common.judgeValidDate(m.startDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#startDate").focus();
+            return false;
         }else {
             $("#startDate").css("border-color","#CCC");
         }
@@ -305,6 +309,10 @@ define('mmPromotionSaleDaily', function () {
             _common.prompt("Please enter a Sales Date!",5,"error"); // 结束日期不可以为空
             $("#endDate").focus();
             $("#endDate").css("border-color","red");
+            return false;
+        }else if(_common.judgeValidDate(m.endDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#endDate").focus();
             return false;
         }else {
             $("#endDate").css("border-color","#CCC");

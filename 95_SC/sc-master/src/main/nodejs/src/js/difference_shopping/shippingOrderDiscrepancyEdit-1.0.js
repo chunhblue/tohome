@@ -187,15 +187,17 @@ define('shoppingOrderDifferEdit', function () {
             title:"Delivery Variance Detail",
             param:paramGrid,
             localSort: true,
-            colNames:["Item Barcode","Item Code","Item Name","tax","UOM","Delivery Quantity","Receive Quantity","Variance Quantity"],
+            colNames:["Item Barcode","Item Code","Item Name","tax","UOM","Order Qty","DC Picked Quantity","Receiveing  Qty","(Ordered-DC Picked) Qty","(DC Picked-Received)Qty"],
             colModel:[
                 {name:"barcode",type:"text",text:"right",width:"100",ishide:false,css:""},
                 {name:"articleId",type:"text",text:"right",width:"100",ishide:false,css:""},
                 {name:"articleName",type:"text",text:"left",width:"200",ishide:false,css:""},
                 {name:"orderTax",type:"text",text:"center",width:"80",ishide:true,css:""},//隐藏
                 {name:"unitName",type:"text",text:"left",width:"80",ishide:false,css:""},
-                {name:"orderQty",type:"text",text:"right",width:"100",ishide:false,css:"",getCustomValue:getThousands},
+                {name:"orderedQty",type:"text",text:"left",width:"80",ishide:false,css:"",getCustomValue:getThousands},
+                {name:"dcPickedQty",type:"text",text:"right",width:"100",ishide:false,css:"",getCustomValue:getThousands},
                 {name:"receiveQty",type:"text",text:"right",width:"100",ishide:false,css:"",getCustomValue:getThousands},
+                {name:"orderqtyDcPickedQty",type:"text",text:"right",width:"100",ishide:false,css:"",getCustomValue:getThousands},
                 {name:"adjustQty",type:"text",text:"right",width:"100",ishide:false,css:"",getCustomValue:getThousands}
             ],//列内容
             // traverseData:data,

@@ -2,6 +2,7 @@ package cn.com.bbut.iy.itemmaster.dto.base;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Node {
     public Node() {
@@ -35,7 +36,9 @@ public class Node {
     private String text;   //节点名称
     private String icon;
     private String href;   //点击节点触发的链接
+    private Map<String, Object> state;//设置state
     private List<Node> nodes;    //子节点，可以用递归的方法读取
+    private String structureCd;    //城市CD
 
     public String getNodeId() {
         return nodeId;
@@ -70,6 +73,21 @@ public class Node {
     }
     public void setHref(String href) {
         this.href = href;
+    }
+
+
+    public String getStructureCd() {
+        return structureCd;
+    }
+    public void setStructureCd(String structureCd) {
+        this.structureCd = structureCd;
+    }
+
+    public Map<String, Object> getState() {
+        return state;
+    }
+    public void setState(Map<String, Object> state) {
+        this.state = state;
     }
 
     public List<Node> getNodes() {

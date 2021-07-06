@@ -119,6 +119,10 @@ define('cashier', function () {
                         notEmpty: {
                             message: 'The Old Password is required and can\'t be empty'
                         },
+                        regexp:{
+                            message: "The password can only be positive integers",
+                            regexp:/^[0-9]+$/
+                        },
                         // stringLength: {
                         //     min: 6,
                         //     max: 8,
@@ -135,6 +139,7 @@ define('cashier', function () {
                             },
                             delay: 1000,//设置1秒发送一次ajax
                         },
+                        message: "The quantity can only be integers",
                     }
                 },
                 newPassword: {
@@ -143,10 +148,14 @@ define('cashier', function () {
                         notEmpty: {
                             message: 'The New Password is required and can\'t be empty'
                         },
+                        regexp:{
+                            message: "The password can only be positive integers",
+                            regexp:/^[0-9]+$/
+                        },
                         stringLength: {
-                            min: 6,
+                            min: 1,
                             max: 8,
-                            message: 'The New Password must be more than 6 and less than 8 characters long'
+                            message: 'The New Password must be more than 1 and less than 8 characters long'
                         },
                         different: {
                             field: 'oldPassword',
@@ -160,10 +169,14 @@ define('cashier', function () {
                         notEmpty: {
                             message: 'The Repeat New Password is required and can\'t be empty'
                         },
+                        regexp:{
+                            message: "The password can only be positive integers",
+                            regexp:/^[0-9]+$/
+                        },
                         stringLength: {
-                            min: 6,
+                            min: 1,
                             max: 8,
-                            message: 'New password must be more than 6 and less than 8 characters!'
+                            message: 'The New Password must be more than 1 and less than 8 characters long'
                         },
                         identical: {//判断两次密码是否相同
                             field: 'newPassword',
@@ -235,10 +248,14 @@ define('cashier', function () {
                         notEmpty: {
                             message: 'The Password is required and can\'t be empty'
                         },
+                        regexp:{
+                            message: "The password can only be positive integers",
+                            regexp:/^[0-9]+$/
+                        },
                         stringLength: {
-                            min: 6,
+                            min: 1,
                             max: 8,
-                            message: 'The Password is must be more than 6 and less than 8 characters long'
+                            message: 'The Password is must be more than 1 and less than 8 characters long'
                         }
 
 
@@ -289,12 +306,14 @@ define('cashier', function () {
     var table_event = function () {
         $("#add").on("click", function () {
             clear_input();
+            $("#ini_password").show();
             m.i_cashierId.val("");
             m.i_cashierName.val("");
             m.i_cashierEmail.val("");
             m.inital_password.val("");
             m.cashierLevel.val("");
             m.cashierLevel.val("");
+            m.inital_password.attr("disabled",false);
             $("#cashierform").data('bootstrapValidator').destroy();
             $("#cashierform").data('bootstrapValidator', null);
             validator();
@@ -315,7 +334,11 @@ define('cashier', function () {
             m.i_cashierEmail.val("");
             m.inital_password.val("");
             m.cashierLevel.val("");
+            $("#ini_password").hide();
+            m.inital_password.attr("disabled",true);
             m.info_store.attr("disabled",true);
+            $("#info_store_refresh").hide();
+            $("#info_store_clear").hide();
             $("#cashierform").data('bootstrapValidator').destroy();
             $("#cashierform").data('bootstrapValidator', null);
             validator();
@@ -335,8 +358,8 @@ define('cashier', function () {
             m.cashierLevel.val(cols["cashierLevelCd"]);
             m.effectiveSts.val(cols["effectiveSts"]);
 
-            $('#info_store_clear').show();
-            $('#info_store_refresh').show();
+            // $('#info_store_clear').show();
+            // $('#info_store_refresh').show();
             m.i_cashierId.attr("disabled",true);
             $('#cashier_dialog').modal("show");
         });
@@ -396,7 +419,7 @@ define('cashier', function () {
                 _common.prompt("Please select cashier!",5,"info"); // 请选择收银员
                 return;
             }
-            var cols = tableGrid.getSelectColValue(selectTrTemp,"effectiveSts,cashierId,cashierName");
+            var cols = tableGrid.getSelectColValue(selectTrTemp,"effectiveSts,cashierId,cashierName,storeCd");
             if(cols["effectiveSts"]=="10"){
                 // _common.prompt("收银员 '" + cols["cashierName"] + "'已为正常状态，请确认!",5,"info");
                 _common.prompt("selected '" + cols["cashierName"] + "' is already effective!, please confirm!",5,"info");
@@ -405,7 +428,7 @@ define('cashier', function () {
             // 请确认是否要恢复选中的收银员
             _common.myConfirm("Please confirm whether you want to restore the selected cashier？",function(result){
                 if(result=="true"){
-                    updateCashierSts(cols["cashierId"],"10")
+                    updateCashierSts(cols["cashierId"],cols["storeCd"],"10")
                 }
             });
         });
@@ -470,6 +493,9 @@ define('cashier', function () {
             m.pwd_duty.val("");
             m.pwd_cashierLevel.val("");
             m.pwd_effectiveSts.val("");
+            m.oldPassword.val("");
+            m.newPassword.val("");
+            m.repeatPassword.val("");
             var cols = tableGrid.getSelectColValue(selectTrTemp,"storeCd,effectiveSts,cashierId,cashierName,duty,cashierLevel,effectiveStsName");
             m.pwd_cashierId.val(cols["cashierId"]);
             m.pwdStoreCd.val(cols["storeCd"]);

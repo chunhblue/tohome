@@ -6,14 +6,17 @@ import cn.com.bbut.iy.itemmaster.constant.Constants;
 import cn.com.bbut.iy.itemmaster.constant.PermissionCode;
 import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
 import cn.com.bbut.iy.itemmaster.dto.base.role.ResourceViewDTO;
+import cn.com.bbut.iy.itemmaster.dto.businessDaily.BusinessDailyDto;
 import cn.com.bbut.iy.itemmaster.dto.mmPromotionSaleDaily.MMPromotionSaleDailyParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.order.ResultDto;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.base.DefaultRoleService;
 import cn.com.bbut.iy.itemmaster.service.businessDaily.BusinessDailyService;
 import cn.com.bbut.iy.itemmaster.serviceimpl.CM9060ServiceImpl;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +50,8 @@ public class BusinessDailyController extends BaseAction {
     private CM9060ServiceImpl cm9060Service;
     @Autowired
     private DefaultRoleService defaultRoleService;
-
+    @Autowired
+    private Ma4320Service ma4320Service;
     private final String EXCEL_EXPORT_KEY = "EXCEL_STORE_OPERATION_DAILY";
     private final String EXCEL_EXPORT_NAME = "Store Operation Daily Report.xlsx";
 
@@ -63,6 +67,8 @@ public class BusinessDailyController extends BaseAction {
     public ModelAndView tolistView(HttpServletRequest request, HttpSession session,
                                    Map<String, ?> model) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
         log.debug("User:{} 进入 营业日报管理", u.getUserId());
         SimpleDateFormat sp=new SimpleDateFormat("yyyyMMdd");
         //获取业务时间
@@ -74,15 +80,15 @@ public class BusinessDailyController extends BaseAction {
             e.printStackTrace();
         }
         String checkFlg = "0";
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
             checkFlg = "1";
-        }
+        }*/
         ModelAndView mv = new ModelAndView("businessDaily/businessDaily");
         mv.addObject("useMsg", "营业日报管理画面");
         mv.addObject("checkFlg", checkFlg);
         mv.addObject("bsDate", bsDate);
-        mv.addObject("printTime", new Date());
+        mv.addObject("printTime", Utils.getFormateDate(ymd));
         return mv;
     }
 
@@ -98,18 +104,44 @@ public class BusinessDailyController extends BaseAction {
                              Map<String, ?> model, String storeCd ,String businessDate,String searchJson) {
         ResultDto resultDto = new ResultDto();
         resultDto.setSuccess(false);
+        User u = this.getUser(session);
         if(StringUtils.isNotBlank(storeCd)){
+            int i = defaultRoleService.judgeSMPosition(u.getUserId(),storeCd);
+            if(i==0){
+                // 判断cash balance entry是否已经录入
+               int num = service.getCashBalanceCount(businessDate,storeCd);
+               if(num<1){
+                   resultDto.setFlag("2"); // 没有数据
+                   resultDto.setMessage("Please complete cash balancing entry for target store & date first!");
+                   return resultDto;
+               }
+            }
+
             Map map = service.getData(storeCd,businessDate);
             if(map!=null){
                 map.put("nowDate",new Date());
                 resultDto.setSuccess(true);
                 resultDto.setData(map);
+                resultDto.setFlag("0");  // 查询成功
             }else{
+                resultDto.setFlag("1"); // 没有数据
                 resultDto.setMessage("The query data is empty!");
             }
         }else{
             resultDto.setMessage("Store No. cannot be empty!");
         }
+        return resultDto;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/getPayName")
+    public ResultDto getPayName(HttpServletRequest request, HttpSession session,
+                             Map<String, ?> model,String storeCd ,String businessDate) {
+        ResultDto resultDto = new ResultDto();
+        BusinessDailyDto dto = service.getPayInAmt(businessDate,storeCd);
+
+        resultDto.setData(dto);
+        resultDto.setSuccess(true);
         return resultDto;
     }
 

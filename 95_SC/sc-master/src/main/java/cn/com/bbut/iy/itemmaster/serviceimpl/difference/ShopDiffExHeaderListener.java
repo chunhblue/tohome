@@ -25,7 +25,7 @@ public class ShopDiffExHeaderListener  implements ExEventListener {
         String row1 = "";
 
         String row2 = "NO.,PO No.,Delivery Date,Last Date Received,Last Received No.," +
-                "Store No,Store Name,DC No.,DC Name,Total Variance Quantity";
+                "Store No,Store Name,DC No.,DC Name,(Ordered-DC Picked) Qty,(DC Picked-Received)Qty";
         String[] titles = row2.split(",");
 
         // 开始拼接excel头信息

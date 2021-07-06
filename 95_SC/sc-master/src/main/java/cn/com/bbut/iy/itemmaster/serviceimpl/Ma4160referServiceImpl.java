@@ -29,9 +29,9 @@ public class Ma4160referServiceImpl implements Ma4160referService {
  private MA0020DTOMapper ma0020DTOMapper;
 
     @Override
-    public List<MA4160DTO> getLJobTye() {
+    public List<MA4160DTO> getLJobTye(boolean flg) {
 
-        return  ma4160DTOMapper.selectAllma4160();
+        return  ma4160DTOMapper.selectAllma4160(flg);
 
     }
 

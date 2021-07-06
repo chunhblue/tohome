@@ -22,6 +22,9 @@
         <result column="pay_amt_3" property="payAmt3" jdbcType="NUMERIC" />
         <result column="pay_amt_4" property="payAmt4" jdbcType="NUMERIC" />
         <result column="pay_amt_5" property="payAmt5" jdbcType="NUMERIC" />
+        <result column="pay_hht_amt0" property="payHHTAmt0" jdbcType="NUMERIC" />
+        <result column="pay_hht_amt1" property="payHHTAmt1" jdbcType="NUMERIC" />
+        <result column="pay_hht_amt2" property="payHHTAmt2" jdbcType="NUMERIC" />
         <result column="shift" property="shift" jdbcType="CHAR" />
         <result column="pos_id" property="posId" jdbcType="VARCHAR" />
         <result column="cash_cd" property="cashCd" jdbcType="VARCHAR" />
@@ -36,37 +39,56 @@
         <result column="cash_split_flag" property="cashSplitFlag" jdbcType="VARCHAR" />
         <result column="remark" property="remark" jdbcType="VARCHAR" />
         <result column="voucher_no" property="voucherNo" jdbcType="VARCHAR" />
+        <result column="create_user_id" property="createUserId" jdbcType="VARCHAR" />
+        <result column="create_ymd" property="createYmd" jdbcType="VARCHAR" />
+        <result column="create_hms" property="createHms" jdbcType="VARCHAR" />
     </resultMap>
 
     <sql id="Shift_Sa0010_Where">
         where
-        tran_type = 'sale'
-
-        and acc_date=#{payDate,jdbcType=VARCHAR}
+        tran_type in ('sale','return')
+         <![CDATA[
+                and tran_date >= TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                and (tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{payDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                ]]>
         and store_cd=#{storeCd,jdbcType=VARCHAR}
     </sql>
 
     <sql id="Shift_Sa0030_Where">
         where
-        tran_type = 'sale'
+        tran_type in ('sale','return')
 
-        and voucher_date=#{payDate,jdbcType=VARCHAR}
+        and voucher_date=#{voucherDate,jdbcType=VARCHAR}
         and store_cd=#{storeCd,jdbcType=VARCHAR}
     </sql>
 
-    <select id="getCashDetailyList" resultMap="ResultMap">
+    <select id="getCashDetailyList" resultMap="ResultMap" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetailParam">
         select sa0170.pay_id,sa0170.pay_date,sa0170.user_id,sa0170.user_name,sa0170.shift,sa0170.pos_id,sa0170.review_status,
-                T.store_cd,T.store_name,T.ofc,T.c_operatorname,sa0170.pay_in_amt,
+                T.store_cd,T.store_name,T.ofc,T.c_operatorname,sa0170.pay_in_amt,sa0170.create_user_id,sa0170.create_ymd,sa0170.create_hms,coalesce(customertable.customer_qty,0) customer_qty,
                (select COALESCE(sum(case pay_cd when '01' then pay_in_amt end),0) as pay_in_amt_0 from sa0180 where sa0170.pay_id=sa0180.pay_id),/*shift1*/
                (select COALESCE(sum(case pay_cd when '02' then pay_in_amt end),0) as pay_in_amt_1 from sa0180 where sa0170.pay_id=sa0180.pay_id),/*shift2*/
                (select COALESCE(sum(case pay_cd when '03' then pay_in_amt end),0) as pay_in_amt_2 from sa0180 where sa0170.pay_id=sa0180.pay_id),/*shift3*/
                (select COALESCE(sum(case pay_cd when '04' then pay_in_amt end),0) as pay_in_amt_3 from sa0180 where sa0170.pay_id=sa0180.pay_id),/*Additional*/
                (select COALESCE(sum(case pay_cd when '05' then pay_in_amt end),0) as pay_in_amt_4 from sa0180 where sa0170.pay_id=sa0180.pay_id) /*Offset Claim*/
-               from sa0170,
+               from sa0170
+               left join (
+                SELECT
+                coalesce(sum(a.sale_cnt),0) customer_qty,a.acc_date,a.store_cd
+                FROM
+                (SELECT distinct
+                sale_cnt,to_char(tran_date::date-1,'yyyyMMdd') acc_date ,store_cd
+                FROM
+                sa0090
+                ) a
+                WHERE 1=1
+                GROUP BY a.acc_date,a.store_cd
+                ) AS customertable
+                on sa0170.store_cd=customertable.store_cd
+                and sa0170.pay_date = customertable.acc_date,
                (SELECT  DISTINCT MA1000.store_cd,MA1000.store_name,MA1000.ofc,t_operator.c_operatorcode,t_operator.c_operatorname from MA1000,SA0170,t_operator WHERE SA0170.store_cd=MA1000.STORE_CD
                 AND MA1000.ofc=t_operator.c_operatorcode
                  ) AS T
-                where sa0170.store_cd IN
+        where sa0170.store_cd IN
                 <foreach item="store" index="index" collection="stores"
                          open="(" separator="," close=")">
                     #{store,jdbcType=VARCHAR}
@@ -87,6 +109,38 @@
                     AND T.c_operatorcode=#{am,jdbcType=VARCHAR}
                 </if>
                order by pay_date,user_id
+               <if test="flg">
+                   LIMIT ${rows} OFFSET ${limitStart}
+               </if>
+    </select>
+
+    <select id="getCashDetailycount" resultType="int"  parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetailParam">
+        select
+        count(*)
+        from sa0170,
+        (SELECT  DISTINCT MA1000.store_cd,MA1000.store_name,MA1000.ofc,t_operator.c_operatorcode,t_operator.c_operatorname from MA1000,SA0170,t_operator WHERE SA0170.store_cd=MA1000.STORE_CD
+        AND MA1000.ofc=t_operator.c_operatorcode
+        ) AS T
+        where sa0170.store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and sa0170.pay_sts='10'
+        and T.store_cd=sa0170.store_cd
+        <if test="vStartDate!=null and vStartDate!=''">
+            <![CDATA[
+                    and sa0170.pay_date >= #{vStartDate,jdbcType=VARCHAR}
+                    ]]>
+        </if>
+        <if test="vEndDate!=null and vEndDate!=''">
+            <![CDATA[
+                    and sa0170.pay_date <= #{vEndDate,jdbcType=VARCHAR}
+                    ]]>
+        </if>
+        <if test="am !='' and am !=null">
+            AND T.c_operatorcode=#{am,jdbcType=VARCHAR}
+        </if>
     </select>
 
 
@@ -99,16 +153,25 @@
         select t1.amount+t2.amount pay_amt,
         pay_0.pay_amt_0+pay1_0.pay_amt_0 pay_amt_0,
         pay_1.pay_amt_1+pay1_1.pay_amt_1 pay_amt_1,
-        pay_2.pay_amt_2+pay1_2.pay_amt_2 pay_amt_2
+        pay_2.pay_amt_2+pay1_2.pay_amt_2 pay_amt_2,
+        pay_hht_0.pay_amt_0 pay_hht_amt0,
+        pay_hht_1.pay_amt_1 pay_hht_amt1,
+        pay_hht_2.pay_amt_2 pay_hht_amt2
         from
-        /*应收金额 = 销售金额-舍去金额*/
-        (select sum(COALESCE(sa0010.sale_amount,0)-COALESCE(sa0010.over_amount,0)) amount from sa0010
+        (select COALESCE ( SUM (
+        CASE
+        WHEN pay_cd1 = '01' THEN pay_amount1 - change_amount
+        WHEN pay_cd2 = '01' THEN pay_amount2 - change_amount
+        WHEN pay_cd3 = '01' THEN pay_amount3 - change_amount
+        WHEN pay_cd4 = '01' THEN pay_amount4 - change_amount
+        END
+        ), 0 )  amount  from sa0010
             <include refid="Shift_Sa0010_Where" />
         ) t1,
-        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1
-        when pay_cd2='01' then pay_amount2
-        when pay_cd3='01' then pay_amount3
-        when pay_cd4='01' then pay_amount4
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
         end),0) as pay_amt_0 from sa0010
         <include refid="Shift_Sa0010_Where" />
         /*--早班*/
@@ -117,10 +180,10 @@
             and to_number(to_char(tran_date,'hh24'),'99') < 14
             ]]>
         ) pay_0,
-        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1
-        when pay_cd2='01' then pay_amount2
-        when pay_cd3='01' then pay_amount3
-        when pay_cd4='01' then pay_amount4
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
         end),0) as pay_amt_1 from sa0010
         <include refid="Shift_Sa0010_Where" />
         /*--中班*/
@@ -129,10 +192,10 @@
             and to_number(to_char(tran_date,'hh24'),'99') < 22
             ]]>
         ) pay_1,
-        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1
-        when pay_cd2='01' then pay_amount2
-        when pay_cd3='01' then pay_amount3
-        when pay_cd4='01' then pay_amount4
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
         end),0) as pay_amt_2 from sa0010
         <include refid="Shift_Sa0010_Where" />
         /*--晚班*/
@@ -141,13 +204,53 @@
             or to_number(to_char(tran_date,'hh24'),'99') >= 22)
             ]]>
         ) pay_2,
+        /* HHT的销售数据 */
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
+        end),0) as pay_amt_0 from sa0010
+        <include refid="Shift_Sa0010_Where" />
+        and pos_id = '99'
+        /*--早班*/
+        <![CDATA[
+            and to_number(to_char(tran_date,'hh24'),'99') >= 6
+            and to_number(to_char(tran_date,'hh24'),'99') < 14
+            ]]>
+        ) pay_hht_0,
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
+        end),0) as pay_amt_1 from sa0010
+        <include refid="Shift_Sa0010_Where" />
+        and pos_id = '99'
+        /*--中班*/
+        <![CDATA[
+            and to_number(to_char(tran_date,'hh24'),'99') >= 14
+            and to_number(to_char(tran_date,'hh24'),'99') < 22
+            ]]>
+        ) pay_hht_1,
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
+        end),0) as pay_amt_2 from sa0010
+        <include refid="Shift_Sa0010_Where" />
+        and pos_id = '99'
+        /*--晚班*/
+        <![CDATA[
+            and (to_number(to_char(tran_date,'hh24'),'99') < 6
+            or to_number(to_char(tran_date,'hh24'),'99') >= 22)
+            ]]>
+        ) pay_hht_2,
         (select COALESCE(sum(sa0030.sale_amount-sa0030.over_amount+sa0030.spill_amount),0) amount from sa0030
             <include refid="Shift_Sa0030_Where" />
         ) t2,
-        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1
-        when pay_cd2='01' then pay_amount2
-        when pay_cd3='01' then pay_amount3
-        when pay_cd4='01' then pay_amount4
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
         end),0) as pay_amt_0 from sa0030
         <include refid="Shift_Sa0030_Where" />
         /*--早班*/
@@ -156,10 +259,10 @@
             and to_number(to_char(tran_date,'hh24'),'99') < 14
             ]]>
         ) pay1_0,
-        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1
-        when pay_cd2='01' then pay_amount2
-        when pay_cd3='01' then pay_amount3
-        when pay_cd4='01' then pay_amount4
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
         end),0) as pay_amt_1 from sa0030
         <include refid="Shift_Sa0030_Where" />
         /*--中班*/
@@ -168,10 +271,10 @@
             and to_number(to_char(tran_date,'hh24'),'99') < 22
             ]]>
         ) pay1_1,
-        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1
-        when pay_cd2='01' then pay_amount2
-        when pay_cd3='01' then pay_amount3
-        when pay_cd4='01' then pay_amount4
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
         end),0) as pay_amt_2 from sa0030
         <include refid="Shift_Sa0030_Where" />
         /*--晚班*/
@@ -238,15 +341,12 @@
 
     <select id="getCashDetail" parameterType="cn.com.bbut.iy.itemmaster.dto.cash.CashDetail" resultMap="ResultMap">
         select store_cd,pay_id,pay_date,upload_flg from sa0170
-        where user_id=#{userId,jdbcType=VARCHAR}
-        and pay_date=#{payDate,jdbcType=VARCHAR}
+        where pay_date=#{payDate,jdbcType=VARCHAR}
         and store_cd=#{storeCd,jdbcType=VARCHAR}
-        and shift=#{shift,jdbcType=VARCHAR}
-        and pos_id=#{posId,jdbcType=VARCHAR}
         and cash_split_flag=#{cashSplitFlag,jdbcType=VARCHAR}
-        <if test="voucherNo != null and voucherNo != ''">
+        <!--<if test="voucherNo != null and voucherNo != ''">
            and pay_id = null
-        </if>
+        </if>-->
         limit 1
     </select>
 
@@ -254,7 +354,7 @@
         select
             T.store_cd, CONCAT(T1.store_cd,' ',T1.store_name,' ',T1.store_name_en) AS store_name,
             T.pay_id, T.pay_date, T.upload_flg, T.cash_split_flag, T.user_id,
-            T.user_name, T.shift, T.pos_id, T.review_status,T.remark,T.voucher_no
+            T.user_name, T.shift, T.pos_id, T.review_status,T.remark,T.voucher_no,T.create_user_id,T.create_ymd,T.create_hms
         from sa0170 T
         left join(
             select store_cd, store_name,store_name_en from ma1000

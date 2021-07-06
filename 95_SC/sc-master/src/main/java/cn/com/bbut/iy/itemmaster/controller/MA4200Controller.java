@@ -170,5 +170,13 @@ public class MA4200Controller extends BaseAction {
         }
         return ard;
     }
+
+    @ResponseBody
+    @RequestMapping(value = "/getStoreInformation")
+    public GridDataDTO<MA4200GridDTO> getEmpStoreInfo(int page,int rows,String userCode) {
+
+        GridDataDTO<MA4200GridDTO> dataDTO = ma4200Service.getStore(userCode,page,rows);
+        return dataDTO;
+    }
 }
 

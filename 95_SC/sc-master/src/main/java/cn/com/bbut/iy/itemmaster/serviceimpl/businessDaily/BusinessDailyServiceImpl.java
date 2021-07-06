@@ -43,6 +43,8 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
         map.put("saleData",this.getSaleData(businessDate,storeCd,businessDate));
         //支付方式
         map.put("payAmt",this.getPayInAmt(businessDate,storeCd));
+        // 充值费 Services Revenue – Breakdown (Cash Only)
+        map.put("serviceAmt",this.getServiceInAmt(businessDate,storeCd));
         //经费
         map.put("expenditureAmt",this.getExpenditureAmt(businessDate,storeCd));
         //银行缴款
@@ -99,7 +101,7 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
      * @return
      */
     private BusinessDailyDto getBankDeposit(String businessDate, String storeCd) {
-        return mapper.getSubtotalDue(getTimeStamp(businessDate),storeCd);
+        return mapper.getSubtotalDue(getTimeStamp(businessDate),storeCd,businessDate);
     }
 
     @Override
@@ -112,9 +114,9 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
         if(businessDailyDto!=null){
             businessDailyDto.setGrossSaleAmount(new BigDecimal(grossSaleAmount));
             businessDailyDto.setRefundAmount(new BigDecimal(refundAmount));
-            businessDailyDto.setServiceAmount(//服务费显示为   服务费-充值费
+            /*businessDailyDto.setServiceAmount(//服务费
                     businessDailyDto.getServiceAmount().subtract(businessDailyDto.getChargeAmount())
-            );
+            );*/
         }
         return businessDailyDto;
     }
@@ -122,6 +124,7 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
     @Override
     public BusinessDailyDto getPayInAmt(String payDate, String storeCd) {
         PaymentAmtDto paymentAmtDto = mapper.getPayInAmt(getTimeStamp(payDate),storeCd);
+        List<PaymentAmtDto> payCdList = mapper.getPayName();
 
         BusinessDailyDto dto = new BusinessDailyDto();
         dto.setPayAmt0(paymentAmtDto.getPayInAmt0()); // Cash
@@ -130,10 +133,91 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
         dto.setPayAmt3(paymentAmtDto.getPayInAmt3()); // Momo
         dto.setPayAmt4(paymentAmtDto.getPayInAmt4()); // Zalo
         dto.setPayAmt5(paymentAmtDto.getPayInAmt5()); // VNPAY
+        dto.setPayAmt6(paymentAmtDto.getPayInAmt6()); // GrabMoca
+        for(PaymentAmtDto payDto:payCdList){
+            switch (payDto.getPayCd()){
+                case "01":
+                    dto.setPayCd0(payDto.getPayName());
+                    break;
+                case "02":
+                    dto.setPayCd1(payDto.getPayName());
+                    break;
+                case "03":
+                    dto.setPayCd2(payDto.getPayName());
+                    break;
+                case "04":
+                    dto.setPayCd3(payDto.getPayName());
+                    break;
+                case "06":
+                    dto.setPayCd4(payDto.getPayName());
+                    break;
+                case "07":
+                    dto.setPayCd5(payDto.getPayName());
+                    break;
+                case "18":
+                    dto.setPayCd6(payDto.getPayName());
+                    break;
+                default:
+
+            }
+        }
 
         dto.setPayAmt(dto.getPayAmt0().add(dto.getPayAmt1()).add(dto.getPayAmt2())
-        .add(dto.getPayAmt3()).add(dto.getPayAmt4()).add(dto.getPayAmt5()));
+                .add(dto.getPayAmt3()).add(dto.getPayAmt4()).add(dto.getPayAmt5()).add(dto.getPayAmt6()));
 
+        List<PaymentAmtDto> _countList = mapper.getCountCustomerByPayCd(getTimeStamp(payDate),storeCd);
+        Integer count = 0;
+        for(PaymentAmtDto _count:_countList){
+            switch (_count.getPayCd()){
+                case "01":
+                    dto.setCustomerCount0(_count.getCustomerCount());
+                    break;
+                case "02":
+                    dto.setCustomerCount1(_count.getCustomerCount());
+                    break;
+                case "03":
+                    dto.setCustomerCount2(_count.getCustomerCount());
+                    break;
+                case "04":
+                    dto.setCustomerCount3(_count.getCustomerCount());
+                    break;
+                case "06":
+                    dto.setCustomerCount4(_count.getCustomerCount());
+                    break;
+                case "07":
+                    dto.setCustomerCount5(_count.getCustomerCount());
+                    break;
+                case "18":
+                    dto.setCustomerCount6(_count.getCustomerCount());
+                    break;
+                default:
+            }
+            count += _count.getCustomerCount();
+        }
+        dto.setCustomerCount(count);
+        return dto;
+    }
+
+    private BusinessDailyDto getServiceInAmt(String payDate, String storeCd) {
+        BusinessDailyDto dto = new BusinessDailyDto();
+        PaymentAmtDto serviceAmtDto = mapper.getServiceAmt(getTimeStamp(payDate),storeCd);
+        PaymentAmtDto countServiceDto = mapper.getCountByService(getTimeStamp(payDate),storeCd);
+        dto.setMomoCashInAmt(serviceAmtDto.getMomoCashInAmt());
+        dto.setPayooBillAmt(serviceAmtDto.getPayooBillAmt());
+        dto.setPayooCodeAmt(serviceAmtDto.getPayooCodeAmt());
+        dto.setPayooAmt(serviceAmtDto.getPayooCodeAmt().add(serviceAmtDto.getPayooBillAmt()));
+        dto.setViettelAmt(serviceAmtDto.getViettelAmt());
+        dto.setOtherServiceAmt(serviceAmtDto.getOtherServiceAmt());
+        dto.setServicePayAmt(serviceAmtDto.getMomoCashInAmt().add(serviceAmtDto.getPayooBillAmt())
+                .add(serviceAmtDto.getPayooCodeAmt()).add(serviceAmtDto.getViettelAmt()));
+
+        dto.setMomoCashIncount(countServiceDto.getMomoCashIncount());
+        dto.setPayooCodeCount(countServiceDto.getPayooCodeCount());
+        dto.setPayooBillCount(countServiceDto.getPayooBillCount());
+        dto.setPayooCount(countServiceDto.getPayooCodeCount()+countServiceDto.getPayooBillCount());
+        dto.setViettelCount(countServiceDto.getViettelCount());
+        dto.setServiceCount(countServiceDto.getMomoCashIncount()+countServiceDto.getPayooCodeCount()
+                +countServiceDto.getPayooBillCount()+countServiceDto.getViettelCount());
         return dto;
     }
 
@@ -156,4 +240,8 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
         return businessDailyDto;
     }
 
+    @Override
+    public int getCashBalanceCount(String businessDate,String storeCd){
+        return mapper.getCashBalanceCount(businessDate,storeCd);
+    }
 }

@@ -175,6 +175,8 @@ public class SK0010 extends SK0010Key {
     private String reviewId;
 
     private String reviewSts;
+    // 附件类型
+    private String fileType = "";
 
     //附件信息
     private String fileDetailJson;

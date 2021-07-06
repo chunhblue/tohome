@@ -29,7 +29,9 @@
 		<result column="article_name_en" property="articleNameEn" jdbcType="VARCHAR" />
 		<result column="different_reasons" property="differenceReason" jdbcType="VARCHAR" />
 		<result column="difference_reason" property="differenceReason" jdbcType="VARCHAR" />
+		<result column="difference_reason1" property="differenceReason1" jdbcType="VARCHAR" />
 		<result column="difference_reason_text" property="differenceReasonText" jdbcType="VARCHAR" />
+		<result column="difference_reason_text1" property="differenceReasonText1" jdbcType="VARCHAR" />
 		<result column="tax_rate" property="taxRate" jdbcType="DECIMAL" />
 		<result column="is_free_item" property="isFreeItem" jdbcType="CHAR"/>
 		<result column="is_free_item_t" property="isFreeItemText" jdbcType="CHAR"/>
@@ -38,7 +40,7 @@
 		<result column="delivery_qty" property="deliveryQty" jdbcType="DECIMAL"/>
 	</resultMap>
 
-	<select id="selectDetail" resultMap="ReOD0010TMap" parameterType="cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TParamDTO">
+	<select id="selectDcDetail" resultMap="ReOD0010TMap" parameterType="cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TParamDTO">
 		SELECT
 			T.*, T1.article_name
 		FROM (
@@ -48,12 +50,14 @@
 			    OD0010_T.order_nocharge_qty, OD0010_T.order_price, OD0010_T.order_amt, OD0010_T.order_tax,
 				OD0010_T.order_amt_notax, OD0010_T.receive_price, OD0010_T.receive_total_qty,
 				OD0010_T.receive_total_amt,OD0010_T.receive_total_amt_notax, OD0010_T.receive_tax,
-				coalesce(OD0010_T.receive_qty,od0011.order_qty) receive_qty,
+				coalesce(OD0010_T.receive_qty,0) receive_qty,
 				 OD0010_T.receive_nocharge_qty,
 				reason.code_value difference_reason,concat(reason.code_value,' ',reason.code_name) difference_reason_text,
                 COALESCE(OD0010_T.order_qty,0) + COALESCE(OD0010_T.order_nocharge_qty,0) AS order_total_qty,
                 OD0010.tax_rate,OD0010_T.is_free_item,OD0010_T.is_free_item as is_free_item_t,
-                OD0020.hht_receive_qty,COALESCE(OD0010_T.receive_qty,0)-COALESCE(OD0020.hht_receive_qty,0) var_qty,
+                coalesce(OD0020.hht_receive_qty,0) hht_receive_qty,
+                /*COALESCE(OD0010_T.receive_qty,0)-COALESCE(OD0020.hht_receive_qty,0) var_qty1,*/
+                  COALESCE(od0011.order_qty,0)-COALESCE(OD0010_T.receive_qty,0) var_qty,
                 od0011.order_qty as delivery_qty
 			FROM OD0010_T left join (select DISTINCT code_value,code_name from CM9010
 				where code_type='00560'
@@ -70,6 +74,51 @@
 				and od0010.is_free_item = od0010_t.is_free_item
 				left join OD0020 on OD0010.store_cd = OD0020.store_cd
 				and OD0010.order_id = OD0020.order_id
+				and OD0010.article_id = OD0020.article_id
+				AND OD0010.serial_no = cast(coalesce(OD0020.line_num,0)+1 as VARCHAR)
+			WHERE od0010_t.receive_id = #{receiveId,jdbcType=VARCHAR}
+		) T
+		LEFT JOIN (
+			SELECT article_id, article_name FROM MA1100
+			WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+		) T1
+		ON T.article_id = T1.article_id
+		ORDER BY T.serial_no
+	</select>
+
+	<select id="selectVendorDetail" resultMap="ReOD0010TMap" parameterType="cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TParamDTO">
+		SELECT
+			T.*, T1.article_name
+		FROM (
+			SELECT
+				OD0010_T.store_cd, OD0010_T.order_id, OD0010_T.serial_no, OD0010_T.article_id, OD0010_T.barcode,
+			    OD0010_T.vendor_id, OD0010_T.promotion_id,OD0010_T.order_unit, OD0010_T.order_qty,
+			    OD0010_T.order_nocharge_qty, OD0010_T.order_price, OD0010_T.order_amt, OD0010_T.order_tax,
+				OD0010_T.order_amt_notax, OD0010_T.receive_price, OD0010_T.receive_total_qty,
+				OD0010_T.receive_total_amt,OD0010_T.receive_total_amt_notax, OD0010_T.receive_tax,
+				coalesce(OD0010_T.receive_qty,0) receive_qty,
+				coalesce(OD0010_T.receive_qty,0)- coalesce (OD0020.hht_receive_qty,0) ss_hh_qty,
+				 OD0010_T.receive_nocharge_qty,
+				reason.code_value difference_reason,concat(reason.code_value,' ',reason.code_name) difference_reason_text,
+                COALESCE(OD0010_T.order_qty,0) + COALESCE(OD0010_T.order_nocharge_qty,0) AS order_total_qty,
+                OD0010.tax_rate,OD0010_T.is_free_item,OD0010_T.is_free_item as is_free_item_t,
+                COALESCE(OD0020.hht_receive_qty,0) hht_receive_qty,
+            COALESCE(OD0010_T.receive_qty,0)-COALESCE(OD0010_T.order_qty,0) var_qty,
+             concat( reason1.code_value, ' ', reason1.code_name ) difference_reason_text1,
+	       OD0010_T.different_reasons1
+			FROM OD0010_T left join (select DISTINCT code_value,code_name from CM9010
+				where code_type='00560'
+				AND effective_sts = '10') reason
+				on OD0010_T.different_reasons = reason.code_value
+				LEFT JOIN ( SELECT DISTINCT code_value, code_name FROM CM9010 WHERE code_type = '00560' AND effective_sts = '10' ) reason1 ON OD0010_T.different_reasons1 = reason1.code_value
+				left join OD0010
+				on OD0010.store_cd = OD0010_T.store_cd
+				and OD0010.order_id = OD0010_T.order_id
+				and OD0010.article_id = OD0010_T.article_id
+				and od0010.is_free_item = od0010_t.is_free_item
+				left join OD0020 on OD0010.store_cd = OD0020.store_cd
+				and OD0010.order_id = OD0020.order_id
+				AND OD0010.serial_no = cast(coalesce(OD0020.line_num,0)+1 as VARCHAR)
 				and OD0010.article_id = OD0020.article_id
 			WHERE od0010_t.receive_id = #{receiveId,jdbcType=VARCHAR}
 		) T
@@ -91,20 +140,48 @@
         INSERT INTO
 			OD0010_T
 		SELECT
-		    #{receiveId,jdbcType=VARCHAR}, store_cd, serial_no, article_id, order_id,
-		    barcode, vendor_id, promotion_id, order_unit, order_qty, order_nocharge_qty,
-		    order_price, order_amt, order_amt_notax, order_tax, receive_price,
-		    coalesce(order_qty,0) AS receive_qty, coalesce(order_nocharge_qty,0) AS receive_nocharge_qty,
-		    (coalesce(order_qty,0) + coalesce(order_nocharge_qty,0)) AS receive_total_qty,
-		    order_amt_notax AS receive_total_amt_notax,
-		    order_amt AS receive_total_amt, order_tax AS receive_tax,upload_flg,null as update,null as different_reasons,
-		    is_free_item
+		    #{receiveId,jdbcType=VARCHAR}, a.store_cd, a.serial_no, a.article_id, a.order_id,
+		    a.barcode, a.vendor_id, a.promotion_id, a.order_unit, a.order_qty, a.order_nocharge_qty,
+		    a.order_price, a.order_amt, a.order_amt_notax, a.order_tax, a.receive_price,
+		    coalesce(b.hht_receive_qty,0) AS receive_qty, 0 AS receive_nocharge_qty,
+		    coalesce(b.hht_receive_qty,0)  AS receive_total_qty,
+		    a.order_amt_notax AS receive_total_amt_notax,
+		    a.order_amt AS receive_total_amt, a.order_tax AS receive_tax,a.upload_flg,null as update,null as different_reasons,
+		    a.is_free_item,
+		    #{differentReasons1,jdbcType=VARCHAR}
 		FROM
-			OD0010
+			OD0010 a
+			LEFT JOIN OD0020 b
+			ON a.store_cd = b.store_cd
+				AND a.order_id = b.order_id
+				AND a.serial_no = CAST(coalesce(b.line_num, 0) + 1 AS VARCHAR)
+				AND a.article_id = b.article_id
 		WHERE
-            store_cd = #{storeCd,jdbcType=VARCHAR}
-        AND order_id = #{orderId,jdbcType=VARCHAR}
+            a.store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND a.order_id = #{orderId,jdbcType=VARCHAR}
     </insert>
+
+	<insert id="insertDCByCopy" parameterType="cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TDTO">
+		INSERT INTO
+			OD0010_T
+		SELECT
+		    #{receiveId,jdbcType=VARCHAR}, a.store_cd, a.serial_no, a.article_id, a.order_id,
+		    a.barcode, a.vendor_id, a.promotion_id, a.order_unit, a.order_qty, a.order_nocharge_qty,
+		    a.order_price, a.order_amt, a.order_amt_notax, a.order_tax, a.receive_price,
+		    coalesce(od0011.order_qty,0) AS receive_qty, coalesce(a.order_nocharge_qty,0) AS receive_nocharge_qty,
+		    (coalesce(od0011.order_qty,0) + coalesce(a.order_nocharge_qty,0)) AS receive_total_qty,
+		    a.order_amt_notax AS receive_total_amt_notax,
+		    a.order_amt AS receive_total_amt, a.order_tax AS receive_tax,a.upload_flg,null as update,null as different_reasons,
+		    a.is_free_item
+		FROM
+			OD0010 a LEFT JOIN od0011
+		ON a.order_id = od0011.delivery_order_id
+			AND a.article_id = od0011.article_id
+			AND a.store_cd = od0011.store_cd
+		WHERE
+            a.store_cd = #{storeCd,jdbcType=VARCHAR}
+        AND a.order_id = #{orderId,jdbcType=VARCHAR}
+	</insert>
 
     <insert id="insertByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.od0010_t.OD0010TDTO">
         INSERT INTO
@@ -116,7 +193,8 @@
 			#{receiveQty,jdbcType=DECIMAL},#{receiveNoChargeQty,jdbcType=DECIMAL},#{receiveTotalQty,jdbcType=DECIMAL},
 		    #{receiveTotalAmt,jdbcType=DECIMAL},
             #{receiveTotalAmtNoTax,jdbcType=DECIMAL}, #{receiveTax,jdbcType=DECIMAL},
-            upload_flg,upload_date,#{differenceReason,jdbcType=VARCHAR},is_free_item
+            upload_flg,upload_date,#{differenceReason,jdbcType=VARCHAR},is_free_item,
+            #{differenceReason1,jdbcType=VARCHAR}
 		FROM
 			OD0010
 		WHERE

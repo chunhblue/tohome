@@ -157,14 +157,14 @@ define('unpackEdit', function () {
 
 	// 画面按钮点击事件
 	var but_event = function(){
-		$("#unpackQty").blur(function () {
-			$("#unpackQty").val(toThousands(this.value));
-		});
-
-		//光标进入，去除金额千分位，并去除小数后面多余的0
-		$("#unpackQty").focus(function(){
-			$("#unpackQty").val(reThousands(this.value));
-		});
+		// $("#unpackQty").blur(function () {
+		// 	$("#unpackQty").val(toThousands(this.value));
+		// });
+		//
+		// //光标进入，去除金额千分位，并去除小数后面多余的0
+		// $("#unpackQty").focus(function(){
+		// 	$("#unpackQty").val(reThousands(this.value));
+		// });
 
 		// 母货号拆包数量监听事件
 		m.unpackQty.on("change",function(){
@@ -282,7 +282,8 @@ define('unpackEdit', function () {
 							// 变为查看模式
 							setSomeDisable(true);
 							m.viewSts.val("view");
-							m.unpackId.val(result.o)
+							m.unpackId.val(result.o);
+							m.unpackQty.val(toThousands(m.unpackQty.val()));
 							$('#resetBtn').prop("disabled", true);
 							_common.prompt("Data saved successfully！",5,"success");/*保存成功*/
 						}else{
@@ -353,17 +354,18 @@ define('unpackEdit', function () {
 		$("#articleId").css("border-color","#CCCCCC");
 
 		temp = reThousands(m.unpackQty.val());
+		var temp1 = m.unpackQty.val();
 		if(temp==null||$.trim(temp)==''){
 			$("#unpackQty").css("border-color","red");
 			_common.prompt("Unpacking quantity cannot be empty!",5,"info");
-			$("#unpackQty").focus();
+	   	$("#unpackQty").focus();
 			return false;
 		}else{
-			if(!checkNum(temp)){
-				$("#unpackQty").css("border-color","red");
-				_common.prompt("Unpacking quantity can only be an integer!",5,"info");
-				$("#unpackQty").focus();
-				return false;
+			if(!checkNum(temp) || temp1.indexOf(",")>0){
+					$("#unpackQty").css("border-color","red");
+					_common.prompt("Unpacking quantity can only be an integer!",5,"info");
+					$("#unpackQty").focus();
+					return false;
 			}
 			if(parseFloat(temp)>999999){
 				$("#unpackQty").css("border-color","red");

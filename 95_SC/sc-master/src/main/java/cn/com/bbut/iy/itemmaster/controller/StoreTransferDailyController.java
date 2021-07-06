@@ -17,9 +17,11 @@ import cn.com.bbut.iy.itemmaster.entity.ma0020.MA0020C;
 import cn.com.bbut.iy.itemmaster.entity.ma0080.MA0080;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.storeTransferDaily.StoreTransferDailyService;
 import cn.com.bbut.iy.itemmaster.service.vendorReceiptDaily.VendorReceiptDailyService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +58,8 @@ public class StoreTransferDailyController extends BaseAction {
 
     @Autowired
     private MRoleStoreService mRoleStoreService;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_ALLOCATION_DAILY_REPORT";
     private final String EXCEL_EXPORT_NAME = "Store Transfer Daily Report.xlsx";
@@ -70,14 +74,14 @@ public class StoreTransferDailyController extends BaseAction {
     @RequestMapping(method = RequestMethod.GET)
     public ModelAndView tolistView(HttpServletRequest request, HttpSession session, HttpServletResponse response) throws IOException {
         User u = this.getUser(session);
-        /*if (u==null) {
-            return new ModelAndView("login");
-        }*/
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入 门店调拨日报(按商品)", u.getUserId());
         ModelAndView mv = new ModelAndView("storeTransferDaily/storeTransferDaily");
         mv.addObject("useMsg", "门店调拨日报(按商品)");
-        mv.addObject("bsDate", new Date());
-        mv.addObject("printTime", new Date());
+        mv.addObject("bsDate", Utils.getFormateDate(ymd));
+        mv.addObject("printTime", Utils.getFormateDate(ymd));
         mv.addObject("userName",u.getUserName());
         return mv;
     }
@@ -203,14 +207,14 @@ public class StoreTransferDailyController extends BaseAction {
     @RequestMapping(value = "/print")
     public ModelAndView toPrintlistView(HttpServletRequest request, HttpSession session, HttpServletResponse response,String searchJson) throws IOException {
         User u = this.getUser(session);
-        /*if (u==null) {
-            return new ModelAndView("login");
-        }*/
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入 门店调拨日报(按商品)打印", u.getUserId());
         ModelAndView mv = new ModelAndView("storeTransferDaily/storeTransferDailyPrint");
         mv.addObject("useMsg", "门店调拨日报(按商品)打印");
-        mv.addObject("bsDate", new Date());
-        mv.addObject("printTime", new Date());
+        mv.addObject("bsDate", Utils.getFormateDate(ymd));
+        mv.addObject("printTime",Utils.getFormateDate(ymd));
         mv.addObject("userName",u.getUserName());
         mv.addObject("searchJson", searchJson);
         return mv;

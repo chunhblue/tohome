@@ -65,7 +65,7 @@
 
 <body>
 <!--导航-->
-[@common.nav "HOME&Ordering&Shopping Order Variance Query"][/@common.nav]
+[@common.nav "HOME&Ordering&DC Picked Vs Actual Received Variance Detail"][/@common.nav]
 <div class="container-fluid" id="main_box">
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">

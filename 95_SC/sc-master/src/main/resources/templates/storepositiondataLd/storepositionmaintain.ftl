@@ -71,11 +71,11 @@
             display: none;
         }
     </STYLE>
+    <!--页头-->
+    [@common.header][/@common.header]
 </head>
 
 <body>
-<!--页头-->
-[@common.header][/@common.header]
 <!--导航-->
 [@common.nav "HOME&Hierarchy&User Management"][/@common.nav]
 
@@ -108,29 +108,31 @@
                                         <div class="aotu-pos">
                                             <input type="text" class="form-control my-automatic input-sm" id="a_store"
                                                    placeholder="" autocomplete="off" >
-                                            <a id="" href="javascript:void(0);" title="Refresh"
+                                            <a id="a_store" href="javascript:void(0);" title="Refresh"
                                                class="auto-but glyphicon glyphicon-refresh refresh"></a>
                                             <a id="" href="javascript:void(0);" title="Clear"
                                                class="auto-but glyphicon glyphicon-remove circle"></a>
                                         </div>
                                    </div>
+                                 <label for="jobTypeCd"
+                                        class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Position</label>
+                                 <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+                                     <select id="jobTypeCd" class="form-control input-sm">
+                                         <option value="">-- All/Please Select --</option>
+                                     </select>
+                                 </div>
+
+
                               </div>
-                                <div class="form-group">
-                                    <label for="jobTypeCd"
-                                           class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Position</label>
+                             <div class="form-group">
+                                    <label for="effectiveStatus"
+                                           class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">User Status</label>
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-                                        <select id="jobTypeCd" class="form-control input-sm">
+                                        <select id="effectiveStatus" class="form-control input-sm">
                                             <option value="">-- All/Please Select --</option>
                                         </select>
                                     </div>
-                                        <label for="effectiveStatus"
-                                               class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">User Status</label>
-                                        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-                                            <select id="effectiveStatus" class="form-control input-sm">
-                                                <option value="">-- All/Please Select --</option>
-                                            </select>
-                                        </div>
-                                   </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -192,8 +194,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label for="storeCd" class="col-sm-3  my-automatic control-label">Store</label>
+                        <div class="form-group" id="storeGroup">
+                            <label for="storeCd" class="col-sm-3  my-automatic control-label not-null">Store</label>
                             <div class="col-xs-12 col-sm-5">
                                 <div class="aotu-pos">
                                     <input type="text" class="form-control input-sm" id="storeCd" placeholder="Please Entry 3 Letter" autocomplete="off" name="a_store">
@@ -210,6 +212,7 @@
                                 <select id="job_type_cd" class="form-control input-sm" name="position">
                                     <option value="">-- All/Please Select --</option>
                                 </select>
+                                <input id="job_type_cd1" class="form-control input-sm">
                             </div>
                         </div>
                         <div class="form-group">
@@ -400,6 +403,28 @@
         </div>
     </div>
 </div>
+
+<div id="stores_dialog" class="modal fade bs-example-modal-md" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Store Information</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <table id="storesTable"></table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="colseStoresTable" type="button" class="btn btn-default btn-sm"> <span class="glyphicon glyphicon-remove icon-right"></span>Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!--页脚-->
 [@common.footer][/@common.footer]
 <input type="hidden" id="toKen" value="${toKen!}"/>

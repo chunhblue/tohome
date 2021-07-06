@@ -28,4 +28,19 @@ public class PayMethod  extends GridDataDTO {
      * 支付金额
      */
     private BigDecimal payAmount;
+
+    /**
+     * 店铺号
+     */
+    private String storeCd;
+
+    /**
+     * 收银机号
+     */
+    private String posId;
+
+    /**
+     * 交易流水号
+     */
+    private int tranSerialNo;
 }

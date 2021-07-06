@@ -26,13 +26,13 @@ public class ReturnsDailyExHeaderListener implements ExEventListener {
     public void action(Workbook wb) {
         Sheet sheet = wb.getSheet(Constants.EXCEL_SHEET_DEF_NAME);
         // 大标题
-        String row0 = "Customer Refund Daily Report";
+        String row0 = "Non Sale Daily Report";
 
         // 二号标题
         String row1 = "";
 
         // 列标题
-        String row2 = "NO.,Store No.,Store Name,Item Code,Item Name,Barcode,Date,POS No.,Receipt No.,Refund Quantity,Selling Price,Total Amount,Cash,Card Payment,E-Voucher,Momo,Payoo,Viettel,Cashier ID,Cashier Name,Area Manager Name" ;
+        String row2 = "NO.,Store No.,Store Name,Item Code,Item Name,Date,POS No.,Receipt No.,Non Sale Type,Quantity,Amount,Cashier ID,Cashier Name,Area Manager Name,Mode" ;
         String[] titles = row2.split(",");
 
         // 开始拼接excel头信息

@@ -68,10 +68,6 @@ public class StockAdjustmentServiceImpl implements StockAdjustmentService {
                     String description = expenditureDTO.getDescription();
                     sk02.setDescription(description);
                 }
-
-                Sk0020DTO little = inventoryVouchersMapper.getGeneralReason(sk02.getAdjustReason());
-                sk02.setGeneralReason(little.getGeneralReason());
-                sk02.setGeneralReasonText(little.getGeneralReasonText());
             }
         }
         data.setRows(_list);

@@ -102,6 +102,10 @@
 									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 										<input id="bs_date"  placeholder="Business Date" class="form-control input-sm" type="text" value="">
 									</div>
+									<label id="submitter1" for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label not-null">Submitter</label>
+									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+										<input id="submitter"  class="form-control input-sm"  disabled="disabled" type="text" value="">
+									</div>
 									<label for="a_cashier" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" hidden>Cashier</label>
 									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" hidden>
 										<div class="aotu-pos">
@@ -150,6 +154,10 @@
 									<label for="remark"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">Remarks</label>
 									<div class="col-xs-12 col-sm-4 col-md-6 col-lg-6">
 										<input type="text" id="remark" class="form-control input-sm">
+									</div>
+									<label for="SubmissionDate"  id="submissionDate1" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">Submission Date</label>
+									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+										<input type="text" id="submissionDate" class="form-control input-sm" disabled="disabled">
 									</div>
 								</div><!-- form-group -->
 								<div class="form-group">
@@ -245,6 +253,7 @@
 <input type="hidden" id="totalShift1" value="">
 <input type="hidden" id="totalShift2" value="">
 <input type="hidden" id="totalShift3" value="">
+<input type="hidden" id="userName1" value="${userName!}">
 <div class="aotu-pos" style="diaplay: none;">
 <input id="from_hide_expend" type="hidden" name="expendStr" value=""/>
 	<select id="differenceReason" class="form-control input-sm">

@@ -1018,8 +1018,9 @@ define('returnWarehouseEdit', function () {
             }
 
             var reg = /((^[1-9]\d*)|^0)(\.\d+)?$/;
-            var orderQty = reThousands(m.orderQty.val().trim());//退货数量
-            if (!reg.test(orderQty)) {
+            // var orderQty = reThousands(m.orderQty.val().trim());//退货数量
+            var orderQty = m.orderQty.val().trim();//退货数量
+            if (!reg.test(orderQty) || orderQty.indexOf(",")>1) {
                 $("#orderQty").css("border-color", "red");
                 _common.prompt("Please enter with correct data type!", 3, "info");
                 m.orderQty.focus();
@@ -1229,7 +1230,7 @@ define('returnWarehouseEdit', function () {
         // m.spec.val(tempTrSpec);
         // m.orderPrice.val(tempTrPrice);
         m.orderAmount.val(tempTrItemAmt);
-        m.orderQty.val(tempTrOrderQty);
+        m.orderQty.val(reThousands(tempTrOrderQty));
         m.orderNochargeQty.val(tempTrOrderNochargeQty);
         m.reasonId.val(tempTrReasonId);
     }
@@ -1287,20 +1288,22 @@ define('returnWarehouseEdit', function () {
 
         });
 
+
+        // 2021/3/29
         //退货数量失去焦点计算总退货金额
-        $("#orderQty").blur(function () {
-            var orderQty = reThousands(m.orderQty.val());
-            var price = reThousands(m.orderPrice.val());
-            if (!!orderQty) {
-                m.orderAmount.val(parseFloat(orderQty * price).toFixed(2));//保留两位小数
-            }
-            $("#orderQty").val(toThousands(this.value));
-        });
+        // $("#orderQty").blur(function () {
+        //     var orderQty = reThousands(m.orderQty.val());
+        //     var price = reThousands(m.orderPrice.val());
+        //     if (!!orderQty) {
+        //         m.orderAmount.val(parseFloat(orderQty * price).toFixed(2));//保留两位小数
+        //     }
+        //     $("#orderQty").val(toThousands(this.value));
+        // });
 
         //光标进入，去除金额千分位，并去除小数后面多余的0
-        $("#orderQty").focus(function () {
-            $("#orderQty").val(reThousands(this.value));
-        });
+        // $("#orderQty").focus(function () {
+        //     $("#orderQty").val(reThousands(this.value));
+        // });
 
         //退货搭赠数量失去焦点计算总退货金额
         $("#orderNochargeQty").blur(function () {
@@ -1721,6 +1724,7 @@ define('returnWarehouseEdit', function () {
                 if (result != "true") {
                     return false;
                 }
+                $("#audit_affirm").prop("disabled",true);
                 $.myAjaxs({
                     url: _common.config.surl + "/audit/submit",
                     async: true,

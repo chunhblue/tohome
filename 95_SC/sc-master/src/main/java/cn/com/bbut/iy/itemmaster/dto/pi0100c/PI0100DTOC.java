@@ -35,6 +35,7 @@ public class PI0100DTOC extends GridDataDTO {
     private String createUserName;
     private String articleId;
     private String barcode;
+    private String uploadFlg;
     // 明细
     private List<PI0110DTOC> details;
 
@@ -47,4 +48,6 @@ public class PI0100DTOC extends GridDataDTO {
     private BigDecimal expenseAmt;
     // 审核状态
     private String reviewSts;
+    private String reason;
+    private String reasonCode;
 }

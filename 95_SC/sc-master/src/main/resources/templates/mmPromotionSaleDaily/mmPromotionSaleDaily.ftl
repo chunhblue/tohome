@@ -295,11 +295,11 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                    <span style="float: left">Date Created：${bsDate?string('dd/MM/yyyy')}</span>
+                    <span style="float: left">Date Created：${bsDate!}</span>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="row" style="overflow: scroll">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="width: 140%;">
                     [#--table-hover table-striped--]
                     <table id="dailyTable" class="table table-condensed table-bordered zgrid-table"
                            cellspacing="0" cellpadding="5"
@@ -315,7 +315,7 @@
                             <th title="Distribution Type">Distribution<br> Type</th>[#--分摊规则--]
                             <th title="Selling Price">Selling<br> Price</th>[#--售价--]
                             <th title="Selling Amount">Sales<br> Quantity</th>[#--销售数量--]
-                            <th title="Selling Amount">Sales<br> Amount</th>[#--销售金额--]
+                            <th title="Selling Amount">Discount<br> Amount</th>[#--销售金额--]
                             <th title="Item Barcode">Item<br> Barcode</th>[#--商品条码--]
                             <th title="Item Code">Item<br> Code</th>[#--商品编号--]
                             <th title="Item Name">Item<br> Name</th>[#--商品名称--]

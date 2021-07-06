@@ -5,6 +5,8 @@ import cn.com.bbut.iy.itemmaster.constant.Constants;
 import cn.com.bbut.iy.itemmaster.constant.ConstantsAudit;
 import cn.com.bbut.iy.itemmaster.controller.BaseAction;
 import cn.com.bbut.iy.itemmaster.dao.CustEntryMapper;
+import cn.com.bbut.iy.itemmaster.dao.MA4160DTOMapper;
+import cn.com.bbut.iy.itemmaster.dao.materialEntryMapper;
 import cn.com.bbut.iy.itemmaster.dto.AjaxResultDto;
 import cn.com.bbut.iy.itemmaster.dto.audit.*;
 import cn.com.bbut.iy.itemmaster.dto.inventory.Sk0010DTO;
@@ -70,8 +72,12 @@ public class AuditController extends BaseAction {
     private Ma1200Service ma1200Service;
     @Autowired
     private CustEntryMapper custEntryMapper;
+    @Autowired
+    private materialEntryMapper materialEntryMapper;
     @Value("${esUrl.inventoryUrl}")
     private String inventoryUrl;
+    @Autowired
+    private MA4160DTOMapper ma4160DTOMapper;
 
     /**
      * 保存审核信息
@@ -101,6 +107,7 @@ public class AuditController extends BaseAction {
             ){
             ard.setMessage("Parameters can not be empty!");
             ard.setSuccess(false);
+            log.error("-------------------------参数是空,typeId为0 或者 nReviewid、recordCd、storeCd中有为空的-------------------------");
             return ard;
         }
 
@@ -108,7 +115,7 @@ public class AuditController extends BaseAction {
         try {
             reviewId = Long.parseLong(nReviewid);
         } catch (Exception e) {
-            log.debug("参数错误 nReviewid {}",nReviewid);
+            log.error("-------------------------参数错误 nReviewid {}",nReviewid+"-------------------------");
             ard.setMessage("参数错误!");
             ard.setSuccess(false);
             return ard;
@@ -120,6 +127,7 @@ public class AuditController extends BaseAction {
         if("null".equals(table)||"null".equals(key)){
             ard.setSuccess(false);
             ard.setMessage("Failed to get information for audit type!");
+            log.error("-------------------------获取审核类型对应信息的失败-------------------------");
             return ard;
         }
 
@@ -137,6 +145,7 @@ public class AuditController extends BaseAction {
                 if(updateRecordFlg<0){
                     ard.setSuccess(false);
                     ard.setMessage("Modify master file audit status and process failure!");
+                    log.error("-------------------------修改主档审核状态和流程失败-------------------------");
                     return ard;
                 }
 
@@ -185,7 +194,7 @@ public class AuditController extends BaseAction {
                 List<ReviewInfoBean> reviewInfo = reviewServiceImpl.getStepByReviewid(reviewId);
                 ReviewInfoBean reviewInfoBean;
                 if(reviewInfo == null || reviewInfo.size() == 0){
-                    log.error("获取流程步骤失败 reviewId {}",reviewId);
+                    log.error("-------------------------获取流程步骤失败 reviewId {}",reviewId+"-------------------------");
                     throw new RuntimeException("获取流程步骤失败");
                 }
                 reviewInfoBean = reviewInfo.get(0);
@@ -238,6 +247,7 @@ public class AuditController extends BaseAction {
                     auditServiceImpl.updateVoidAudit(auditBean);
                     ard.setSuccess(false);
                     ard.setMessage("Audit failure!");
+                    log.error("-------------------------audit失败,根据主档ID和适用开始日设置记录无效-------------------------");
                 }
             }
         }
@@ -261,6 +271,7 @@ public class AuditController extends BaseAction {
         if(StringUtils.isBlank(recordCd) || StringUtils.isBlank(distinguishId)) {
             _return.setSuccess(true);
             _return.setMessage("params is null");
+            log.info("-------------------------params is null-------------------------");
             return _return;
         }
         // 查询结果
@@ -283,6 +294,7 @@ public class AuditController extends BaseAction {
         if(bean == null){
             _return.setSuccess(false);
             _return.setMessage("Null");
+            log.info("-------------------------角色查询记录审核记录为空-------------------------");
             return _return;
         }
         // 判断角色是否符合
@@ -301,6 +313,7 @@ public class AuditController extends BaseAction {
                 _return.setData(roleId);
                 _return.setSuccess(false);
                 _return.setMessage("role");
+                log.info("-------------------------角色没有查询店铺的权限-------------------------");
                 return _return;
             }
         }
@@ -331,6 +344,7 @@ public class AuditController extends BaseAction {
         if(temp != 0){
             _return.setSuccess(false);
             _return.setMessage("status");
+            log.info("-------------------------记录不在审核阶段-------------------------");
             return _return;
         }
         // 判断角色是否符合
@@ -349,6 +363,7 @@ public class AuditController extends BaseAction {
                 _return.setData(roleId);
                 _return.setSuccess(false);
                 _return.setMessage("role");
+                log.info("-------------------------用户不能审核这个店铺-------------------------");
                 return _return;
             }
         }
@@ -380,6 +395,7 @@ public class AuditController extends BaseAction {
             _return.setMessage("Complete");
             _return.setSuccess(true);
         }else {
+            log.info("-------------------------审核未完成-------------------------");
             _return.setMessage("Unfinished");
         }
         return _return;
@@ -420,6 +436,7 @@ public class AuditController extends BaseAction {
         if(StringUtils.isBlank(recordId)){
             _return.setSuccess(false);
             _return.setMessage("Param");
+            log.info("-------------------------参数recordId为空-------------------------");
             return _return;
         }
         // 查询记录
@@ -427,6 +444,7 @@ public class AuditController extends BaseAction {
         if(bean == null){
             _return.setSuccess(false);
             _return.setMessage("Null");
+            log.info("-------------------------根据主档ID和操作序列查询记录,查询记录失败(在t_audit_tab查询失败)-------------------------");
             return _return;
         }
         // 判断角色是否符合
@@ -443,6 +461,7 @@ public class AuditController extends BaseAction {
             if(count==0){
                 _return.setSuccess(false);
                 _return.setMessage("Inconformity");
+                log.info("-------------------------该用户职务不具有审核权限与ma4210相关-------------------------");
                 return _return;
             }
         }
@@ -468,6 +487,7 @@ public class AuditController extends BaseAction {
         if(auditStatus == null){
             _return.setSuccess(false);
             _return.setMessage("Param");
+            log.info("-------------------------auditStatus"+auditStatus+"auditStatus为空-------------------------");
             return _return;
         }
         try {
@@ -475,6 +495,7 @@ public class AuditController extends BaseAction {
             if(auditStep == null){
                 _return.setSuccess(false);
                 _return.setMessage("Null");
+                log.error("-------------------------审核记录ID,在t_audit_tab没查询出审核记录-------------------------");
                 return _return;
             }
             // 判断当前步骤项
@@ -486,6 +507,7 @@ public class AuditController extends BaseAction {
             if(typeid == 0){
                 _return.setSuccess(false);
                 _return.setMessage("review type error");
+                log.error("-------------------------review type error,t_audit_tab中typeid == 0-------------------------");
                 return _return;
             }
             // 记录审核结果
@@ -502,6 +524,7 @@ public class AuditController extends BaseAction {
                         if(!checkFlg){
                             _return.setSuccess(false);
                             _return.setMessage("Failed to save inventory information!");
+                            log.error("-------------------------Failed to save inventory information!-------------------------");
                             return _return;
                         }
                     }
@@ -513,6 +536,7 @@ public class AuditController extends BaseAction {
                 }else{
                     _return.setSuccess(false);
                     _return.setMessage("review step error");
+                    log.error("-------------------------review step error-------------------------");
                     return _return;
                 }
             }else if("0".equals(auditStatus)){//审核不通过
@@ -587,7 +611,7 @@ public class AuditController extends BaseAction {
 
                     int add = auditServiceImpl.addRecord(newAuditBean);
                     if(add > 0){
-                        log.debug("-------------------------新流程生成成功，生成流程的通知-------------------------");
+                        log.debug("-------------------------新流程生成成功,生成流程的通知-------------------------");
                         // 新建通知
                         NotificationBean notificationBean = new NotificationBean();
                         // 店铺cd
@@ -627,8 +651,8 @@ public class AuditController extends BaseAction {
                         }
                     }
                 }else{
-                    _return.setMessage("upt");
-                    log.debug("------------------------- Completed -------------------------");
+                    _return.setMessage("Initiate audit failure!");
+                    log.error("------------------------- Initiate audit failure! -------------------------");
                 }
             }
             _return.setData(_flag);
@@ -688,7 +712,7 @@ public class AuditController extends BaseAction {
             _return.setMessage("The approval status is expired and cannot modify!");//审核状态已失效
         }else if(status == 10){//审核成功
             _return.setSuccess(false);
-            _return.setMessage("Selected PO is already approved and cannot modify!");//审核状态已完成
+            _return.setMessage("Selected document!");//审核状态已完成
         }else if(status == 15){////收货录入完成，未审核
             _return.setSuccess(true);
         }else if(status == 5 || status == 6){//审核驳回、审核撤回
@@ -718,6 +742,7 @@ public class AuditController extends BaseAction {
         if(auditStep == null){
             _return.setSuccess(false);
             _return.setMessage("AuditStep no data");
+            log.info("auditStep"+auditStep+"-------------------------无审核步骤数据-------------------------");
             return _return;
         }
         long reviewid = auditStep.getNReviewid();
@@ -730,6 +755,7 @@ public class AuditController extends BaseAction {
         if("null".equals(table)||"null".equals(key)){
             _return.setSuccess(false);
             _return.setMessage("Failed!");
+            log.info("-------------------------获取审核类型对应的主档表名、主键失败-------------------------");
             return _return;
         }
         int count;
@@ -737,12 +763,14 @@ public class AuditController extends BaseAction {
             // 判断是否已Completed
             long subMax = reviewServiceImpl.getSubMaxByReviewId(reviewid);
             long nowSubNo = auditStep.getSubNo();
+            log.info("subMax:"+subMax+"  nowSubNo:"+nowSubNo+"------------------------");
             if(subMax == nowSubNo){
                 // 记录Completed
                 count = auditServiceImpl.updateRecordStatus(table,key, recordCd, 10,reviewid,getUserId(session));
             }else{
                 // 记录审核流程未完成
                 count = 0;
+
             }
         }else if(auditStatus.equals("0")){
             // 记录未通过审核
@@ -750,11 +778,13 @@ public class AuditController extends BaseAction {
         }else{
             _return.setSuccess(false);
             _return.setMessage("Status is unknow");
+            log.info("-------------------------审核状态不明-------------------------");
             return _return;
         }
         if(count == -1){
             _return.setSuccess(false);
             _return.setMessage("Failed!");
+            log.info("-------------------------审核状态不明-------------------------");
             return _return;
         }
         _return.setSuccess(true);
@@ -845,7 +875,7 @@ public class AuditController extends BaseAction {
         log.info("进入audit/getStatus方法!");
         AjaxResultDto _return = new AjaxResultDto();
         if(StringUtils.isBlank(recordId)|| typeId == 0){
-            log.info("-------------------------参数异常-------------------------");
+            log.error("-------------------------参数异常-------------------------");
             _return.setSuccess(false);
             return _return;
         }
@@ -853,7 +883,7 @@ public class AuditController extends BaseAction {
         // 查询当前审核记录
         AuditBean bean = auditServiceImpl.getIdByRecordId(typeId, recordId);
         if(bean == null){
-            log.info("-------------------------查询审核记录为空-------------------------");
+            log.error("-------------------------查询审核记录为空-------------------------");
             _return.setSuccess(false);
             return _return;
         }
@@ -873,7 +903,7 @@ public class AuditController extends BaseAction {
 
         List<ReviewInfoDTO> reviewStep = reviewServiceImpl.getStepBynReviewid(reviewid);
         if(reviewStep == null || reviewStep.size() == 0){
-            log.info("-------------------------查询流程步骤为空-------------------------");
+            log.error("-------------------------查询流程步骤为空-------------------------");
             _return.setSuccess(false);
             return _return;
         }
@@ -1044,11 +1074,15 @@ public class AuditController extends BaseAction {
                 checkFlg = checkRtStockMsg(detailType,storeCd,stockItemList);
                 return checkFlg;
             case "tmp_ci_adjustment":
-                List<StocktakeItemDTOC> pi0110List =  custEntryMapper.getPI0130ByPrimary(recordCd,storeCd);
+                List<StocktakeItemDTOC> pi0110List =  custEntryMapper.getPI0130ByPrimaryIn(recordCd);
                 checkFlg = checkCostItemStock(detailType,storeCd,pi0110List);
                 return checkFlg;
+            case "tmp_rms_adjustment":
+                List<StocktakeItemDTOC> pi0155List =  materialEntryMapper.getPI0140ByPrimary(recordCd);
+                checkFlg = checkCostItemStock(detailType,storeCd,pi0155List);
+                return checkFlg;
         }
-
+        log.info("修正实时库存和bi库存保存失败");
     return false;
     }
 
@@ -1247,6 +1281,7 @@ public class AuditController extends BaseAction {
                 // 修正bi库存
                 String rtBi = rtService.saveBIrtQty(saveRtQtyList,detailType,storeCd);
                 if(rtBi == null){
+                    log.error("修正修正bi库存失败");
                     checkFlg = false;
                 }
 
@@ -1653,5 +1688,400 @@ public class AuditController extends BaseAction {
         }
 
         return checkFlg;
+    }
+
+    /**
+     * 保存收货审核信息
+     * @param typeId 审核类型
+     * @param nReviewid 流程id
+     * @param recordCd 数据cd
+     * @param storeCd 店铺cd
+     * @return
+     */
+    @RequestMapping("/saveReceiveAudit")
+    @ResponseBody
+    @Transactional(rollbackFor = Exception.class)
+    public AjaxResultDto saveReceiveAudit(int typeId, String nReviewid, String recordCd, String storeCd,
+                                    HttpServletRequest request, HttpSession session,String detailType) {
+        User u = this.getUser(session);
+        AjaxResultDto ard = ajaxRepeatSubmitCheck(request, session);
+//        if (!ard.isSuccess()) {
+//            ard.setToKen(ard.getToKen());
+//            return ard;
+//        }
+        if(StringUtils.isBlank(storeCd)){
+            storeCd = "000000";
+        }
+        if(typeId == 0 || StringUtils.isBlank(nReviewid)
+                || StringUtils.isBlank(recordCd)
+                || StringUtils.isBlank(storeCd)){
+            ard.setMessage("Parameters can not be empty!");
+            ard.setSuccess(false);
+            log.error("-------------------------参数是空,typeId为0 或者 nReviewid、recordCd、storeCd中有为空的-------------------------");
+            return ard;
+        }
+
+        long reviewId;
+        try {
+            reviewId = Long.parseLong(nReviewid);
+        } catch (Exception e) {
+            log.error("-------------------------参数错误 nReviewid {}",nReviewid+"-------------------------");
+            ard.setMessage("参数错误!");
+            ard.setSuccess(false);
+            return ard;
+        }
+        //获取审核类型对应信息
+        Map<String,Object> auditInfo= ConstantsAudit.getAuditInfo(typeId);
+        String table = String.valueOf(auditInfo.get("table"));
+        String key = String.valueOf(auditInfo.get("key"));
+        if("null".equals(table)||"null".equals(key)){
+            ard.setSuccess(false);
+            ard.setMessage("Failed to get information for audit type!");
+            log.error("-------------------------获取审核类型对应信息的失败-------------------------");
+            return ard;
+        }
+
+        String[] recordCds = recordCd.split(",");
+        String[] storeCds = storeCd.split(",");
+        if(recordCds.length>=1){
+            for (int i = 0; i < recordCds.length; i++) {
+                String rCd = recordCds[i];
+                String storeCd1 = storeCds[i];
+                if(StringUtils.isBlank(storeCd1)){
+                    storeCd1 = "000000";
+                }
+                //修改主档审核状态和流程
+                int updateRecordFlg = auditServiceImpl.updateRecordStatus(table,key,rCd, 1,reviewId,null);
+                if(updateRecordFlg<0){
+                    ard.setSuccess(false);
+                    ard.setMessage("Modify master file audit status and process failure!");
+                    log.error("-------------------------修改主档审核状态和流程失败-------------------------");
+                    return ard;
+                }
+
+                AuditBean auditBean = new AuditBean();
+                AuditBean startAuditBean = new AuditBean();
+                NotificationBean notificationBean = new NotificationBean();
+                // 存入提交流程用户信息
+                auditBean.setNOperatorid("");
+                startAuditBean.setNOperatorid(u.getUserId());
+                // 流程ID
+                auditBean.setNReviewid(reviewId);
+                startAuditBean.setNReviewid(reviewId);
+                // 主档类型
+                auditBean.setNTypeid(typeId);
+                startAuditBean.setNTypeid(typeId);
+                notificationBean.setNTypeid(typeId);
+                // 主档ID
+                auditBean.setCRecordCd(rCd);
+                startAuditBean.setCRecordCd(rCd);
+                notificationBean.setCRecordCd(rCd);
+                // 适用开始日
+                auditBean.setStoreCd(storeCd1);
+                startAuditBean.setStoreCd(storeCd1);
+                notificationBean.setStoreCd(storeCd1);
+
+                auditBean.setEffectiveStartDate(storeCd1);
+                startAuditBean.setEffectiveStartDate(storeCd1);
+                notificationBean.setEffectiveStartDate(storeCd1);
+
+                // 先将之前的流程设为无效
+                log.debug("-------------------------将该记录之前的流程信息无效-------------------------");
+                auditServiceImpl.updateVoidAudit(auditBean);
+                log.debug("-------------------------将该记录的审核通知无效-------------------------");
+                notificationServiceImpl.updateVoidNotification(notificationBean);
+                // 流程ID
+                auditBean.setNReviewid(reviewId);
+                startAuditBean.setNReviewid(reviewId);
+                // 操作序列
+                int sub = 1;
+                auditBean.setSubNo(sub);
+                startAuditBean.setSubNo(0);
+                // 审核状态值
+                auditBean.setCAuditstatus(sub * 10);
+                startAuditBean.setCAuditstatus(0);
+                // 流程步骤项
+                List<ReviewInfoBean> reviewInfo = reviewServiceImpl.getStepByReviewid(reviewId);
+                ReviewInfoBean reviewInfoBean;
+                if(reviewInfo == null || reviewInfo.size() == 0){
+                    log.error("-------------------------获取流程步骤失败 reviewId {}",reviewId+"-------------------------");
+                    throw new RuntimeException("获取流程步骤失败");
+                }
+                reviewInfoBean = reviewInfo.get(0);
+                auditBean.setCStep(reviewInfoBean.getNRecordid());
+                startAuditBean.setCStep(0);
+                // 添加时间
+                Date now = new Date();
+                auditBean.setDInsertTime(now);
+                startAuditBean.setDAuditTime(now);
+                startAuditBean.setDInsertTime(now);
+                // 查询类别编号
+                String distinguishId = auditServiceImpl.getDistinguishById(typeId);
+                auditBean.setDistinguishId(distinguishId);
+                startAuditBean.setDistinguishId(distinguishId);
+
+                auditServiceImpl.addRecord(startAuditBean);
+                int addRecord = auditServiceImpl.addRecord(auditBean);
+                if(addRecord > 0){
+                    log.debug("-------------------------流程第一步保存成功，生成通知-------------------------");
+                    ard.setSuccess(true);
+                    // 流程ID
+                    notificationBean.setNReviewid(reviewId);
+                    // 优先级
+                    notificationBean.setCPriority(91);
+                    // 步骤
+                    notificationBean.setCSubNo(1);
+                    // 角色ID
+                    ReviewInfoBean stepInfo = reviewServiceImpl.getIdByReviewIdAndSubNo(reviewId, 1);
+                    if(stepInfo == null){
+                        notificationBean.setNRoleid(0);
+                    }else{
+                        notificationBean.setNRoleid(stepInfo.getNRoleid());
+                    }
+                    // URL
+                    String Url;
+                    if(typeId != 0){
+                        Url = notificationServiceImpl.getUrlByTypeId(typeId);
+                    }else{
+                        Url = "";
+                    }
+                    notificationBean.setCUrl(Url);
+                    // 添加时间
+                    notificationBean.setCNotificationTime(now);
+                    //与邮件有关 占时 关闭
+//                    int addNotification = notificationServiceImpl.addNotification(notificationBean);
+//                    if(addNotification > 0){
+//                        ard.setMessage("All success!");
+//                    }
+                }else {
+                    auditServiceImpl.updateVoidAudit(auditBean);
+                    ard.setSuccess(false);
+                    ard.setMessage("Audit failure!");
+                    log.error("-------------------------audit失败,根据主档ID和适用开始日设置记录无效-------------------------");
+                }
+            }
+        }
+
+        // 查询记录
+        AuditBean bean = auditServiceImpl.getIdByRecordId(typeId, recordCd);
+        if(bean == null){
+            ard.setSuccess(false);
+            ard.setMessage("Audit is null");
+            log.error("-------------------------根据主档ID和操作序列查询记录,查询记录失败(在t_audit_tab查询失败)-------------------------");
+            return ard;
+        }
+        // 判断角色是否符合
+        long cStep = bean.getCStep();
+        ReviewInfoBean step = reviewServiceImpl.getStepById(cStep);
+
+        if (step == null) {
+            step = new ReviewInfoBean();
+        }
+        Integer roleId = step.getNRoleid();
+
+        if(StringUtils.isNotBlank(storeCd)){
+            int count=0;
+            count = auditServiceImpl.checkAuditByUserId(storeCd,u.getUserId(),roleId);
+
+            List<Integer> positionList = ma4160DTOMapper.getPositionList(storeCd, u.getUserId());
+            for (Integer  position: positionList) {
+                if (position==4 || position==2 || position==1){
+                    count ++;
+                }
+            }
+
+
+            if(count==0){
+                ard.setSuccess(false);
+                ard.setMessage("This user position does not have review privileges");
+                log.error("-------------------------该用户职务不具有审核权限与ma4210相关-------------------------");
+                return ard;
+            }
+        }
+        // 返回记录主键ID
+
+        ard.setData(bean.getNRecordid());
+        //审核结果
+        String auditStatus = "1";//通过
+        String auditContent = "";
+        long auditStepId = bean.getNRecordid();
+
+        try {
+            AuditBean auditStep = auditServiceImpl.getAuditById(auditStepId);
+            if(auditStep == null){
+                ard.setSuccess(false);
+                ard.setMessage("auditStep is null");
+                log.error("审核记录ID,在t_audit_tab没查询出审核记录,auditStep is null");
+                return ard;
+            }
+            // 判断当前步骤项
+            long reviewid = auditStep.getNReviewid();
+            // 审核通过，判断是否有下一步，生成新的流程
+            boolean flag = false;
+            // 判断主档类型
+            int typeid = auditStep.getNTypeid();
+            if(typeid == 0){
+                ard.setSuccess(false);
+                ard.setMessage("review type error");
+                log.error("---review type error,t_audit_tab中typeid == 0-------------------------");
+                return ard;
+            }
+            // 记录审核结果
+            String _flag = "0";
+
+            if("1".equals(auditStatus)){//审核通过
+                long subMax = reviewServiceImpl.getSubMaxByReviewId(reviewid);
+                long nowSubNo = auditStep.getSubNo();
+
+                if(subMax == nowSubNo){
+                    auditStep.setCAuditstatus(99);
+                    if(detailType != null){
+                        boolean checkFlg = reNewalMsg(detailType,auditStep.getStoreCd(),auditStep.getCRecordCd());
+                        if(!checkFlg){
+                            ard.setSuccess(false);
+                            ard.setMessage("Failed to save inventory information!");
+                            log.error("-------------------------Failed to save inventory information!-------------------------");
+                            return ard;
+                        }
+                    }
+                    auditServiceImpl.updateAuditStatus(auditStep);
+                    _flag = "10";
+                }else if(subMax > nowSubNo){
+                    flag = true;
+
+                }else{
+                    ard.setSuccess(false);
+                    ard.setMessage("review step error");
+                    log.error("-------------------------review step error-------------------------");
+                    return ard;
+                }
+            }
+            User user = this.getUser(session);
+            auditStep.setNOperatorid(user.getUserId());
+            auditStep.setDAuditTime(new Date());
+            auditStep.setCAuditContent(auditContent);
+
+            int r = auditServiceImpl.updateAuditInfo(auditStep);
+
+            // 审核信息更新完成，取消通知
+            // 类型ID
+            typeId = typeid;
+            // 主档ID
+            recordCd = auditStep.getCRecordCd();
+            // 店铺code
+
+            // 适用开始日
+            String startDate = auditStep.getEffectiveStartDate();
+            // 操作序列
+            int subNo = auditStep.getSubNo();
+            NotificationBean record = notificationServiceImpl.getByKeyAndSubNo(typeId, subNo, recordCd, startDate);
+            if(record != null){
+                log.debug("-------------------------已进行审核更新，取消通知显示-------------------------");
+                record.setStatus(_flag);
+                notificationServiceImpl.updateNotification(record);
+            }
+            if(r > 0){
+                ard.setSuccess(true);
+                if(flag){
+                    log.debug("-------------------------步骤更新完成，生成流程下一步-------------------------");
+                    // 生成新的流程
+                    AuditBean newAuditBean = new AuditBean();
+                    // 审核流程ID
+                    reviewId = auditStep.getNReviewid();
+                    newAuditBean.setNReviewid(reviewId);
+                    // 类别ID
+                    newAuditBean.setDistinguishId(auditStep.getDistinguishId());
+                    // 主档类型ID
+                    newAuditBean.setNTypeid(typeId);
+                    // 店铺cd
+                    newAuditBean.setStoreCd(storeCd);
+                    // 主档ID
+                    newAuditBean.setCRecordCd(recordCd);
+                    // 适用开始日
+                    newAuditBean.setEffectiveStartDate(startDate);
+                    // 操作序列
+                    int newSubNo = subNo + 1;
+                    newAuditBean.setSubNo(newSubNo);
+                    // 审核状态值
+                    newAuditBean.setCAuditstatus(newSubNo * 10);
+                    // 添加时间
+                    Date now = new Date();
+                    newAuditBean.setDInsertTime(now);
+                    // 步骤ID
+                    ReviewInfoBean stepInfo = reviewServiceImpl.getIdByReviewIdAndSubNo(reviewId, newSubNo);
+                    long stepNo;
+                    if(stepInfo != null){
+                        stepNo = stepInfo.getNRecordid();
+                    }else{
+                        stepNo = 0;
+                    }
+                    newAuditBean.setCStep(stepNo);
+                    newAuditBean.setNOperatorid("");
+
+                    int add = auditServiceImpl.addRecord(newAuditBean);
+                    if(add > 0){
+                        log.debug("-------------------------新流程生成成功,生成流程的通知-------------------------");
+                        // 新建通知
+                        NotificationBean notificationBean = new NotificationBean();
+                        // 店铺cd
+                        notificationBean.setStoreCd(storeCd);
+                        // 流程ID
+                        notificationBean.setNReviewid(reviewId);
+                        // 优先级
+                        notificationBean.setCPriority(91);
+                        // 类型ID
+                        notificationBean.setNTypeid(typeId);
+                        // 主档ID
+                        notificationBean.setCRecordCd(recordCd);
+                        // 适用开始日
+                        notificationBean.setEffectiveStartDate(startDate);
+                        // 步骤
+                        notificationBean.setCSubNo(newSubNo);
+                        // 角色ID
+                        if(stepInfo == null){
+                            notificationBean.setNRoleid(0);
+                        }else{
+                            notificationBean.setNRoleid(stepInfo.getNRoleid());
+                        }
+                        // URL
+                        String Url;
+                        if(typeId != 0){
+                            Url = notificationServiceImpl.getUrlByTypeId(typeId);
+                        }else{
+                            Url = "";
+                        }
+                        notificationBean.setCUrl(Url);
+                        // 添加时间
+                        notificationBean.setCNotificationTime(now);
+
+                        // 收货邮件发送，注释
+//                        int addNotification = notificationServiceImpl.addNotification(notificationBean);
+//                        if(addNotification > 0){
+//                            log.debug("-------------------------审核更新 + 生成新流程、通知 OK-------------------------");
+//                        }
+                    }
+                }else{
+                    ard.setMessage("upt");
+                    log.debug("------------------------- Completed -------------------------");
+                }
+            }
+            ard.setData(_flag);
+            //修改主档审核状态
+            int flg = auditServiceImpl.updateRecordStatus(auditStepId,auditStatus,user.getUserId());
+            if(flg<1){
+                //修改失败事务回滚
+                log.error("修改主档审核状态失败 类型:{} 数据id:{}",recordCd,typeId);
+                throw new SystemRuntimeException("修改主档审核状态失败 类型:{"+typeId+"} 数据id:{"+recordCd+"}");
+            }else {
+                ard.setSuccess(true);
+            }
+        } catch (Exception e){
+            //手动回滚
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            ard.setSuccess(false);
+            e.printStackTrace();
+            log.error("审核失败 {}",e.getMessage());
+        }
+        return ard;
     }
 }

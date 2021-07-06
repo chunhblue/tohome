@@ -13,6 +13,7 @@ import cn.com.bbut.iy.itemmaster.dto.order.ResultDto;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
 import cn.com.bbut.iy.itemmaster.service.CashService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,8 @@ public class CashierAmountController extends BaseAction {
     private CashService cashService;
     @Autowired
     private CM9060Service cm9060Service;
+    @Autowired
+    private Ma4320Service ma4320Service;
     /**
      * 收银员收款金额登录画面
      * @param request
@@ -69,6 +72,7 @@ public class CashierAmountController extends BaseAction {
         mv.addObject("typeId", ConstantsAudit.TYPE_CASHIER_AMOUNT);
         mv.addObject("reviewId", ConstantsAudit.REVIEW_CASHIER_AMOUNT);
         mv.addObject("useMsg", "收银员收款金额登录画面");
+        mv.addObject("userName",u.getUserName());
         this.saveToken(request);
         return mv;
     }
@@ -194,12 +198,13 @@ public class CashierAmountController extends BaseAction {
         if (!res.isSuccess()) {
             return res;
         }
-        Date date = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMdd");
-        SimpleDateFormat sdf1 = new SimpleDateFormat("HHmmss");
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
+
         cashDetail.setUpdateUserId(u.getUserId());
-        cashDetail.setUpdateYmd(sdf.format(date));
-        cashDetail.setUpdateHms(sdf1.format(date));
+        cashDetail.setUpdateYmd(ymd);
+        cashDetail.setUpdateHms(hms);
         cashDetail = cashService.insertOrUpdate(cashDetail,payList,cashList);
         if(cashDetail!=null){
             res.setSuccess(true);

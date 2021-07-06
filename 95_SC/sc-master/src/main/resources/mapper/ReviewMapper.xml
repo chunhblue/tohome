@@ -162,8 +162,8 @@
       )
     values (#{nReviewid,jdbcType=NUMERIC}, #{cReviewcode,jdbcType=VARCHAR}, #{nTypeid,jdbcType=SMALLINT}, 
       #{cReviewname,jdbcType=VARCHAR}, #{startRole,jdbcType=VARCHAR}, #{cReserved2,jdbcType=VARCHAR}, 
-      #{cReserved3,jdbcType=VARCHAR}, #{nInsertUserId,jdbcType=NUMERIC}, #{nUpdateUserId,jdbcType=NUMERIC}, 
-      #{dInsertTime,jdbcType=TIMESTAMP}, #{dUpdateTime,jdbcType=TIMESTAMP}, #{cEnable,jdbcType=CHAR}, 
+      #{cReserved3,jdbcType=VARCHAR}, #{nInsertUserId,jdbcType=NUMERIC}, #{nUpdateUserId,jdbcType=NUMERIC},
+      now(), #{dUpdateTime,jdbcType=TIMESTAMP}, #{cEnable,jdbcType=CHAR},
       #{cReviewDepCd,jdbcType=VARCHAR}, #{cReviewPmaCd,jdbcType=VARCHAR}, #{cReviewRegionCd,jdbcType=VARCHAR}
       )
   </insert>

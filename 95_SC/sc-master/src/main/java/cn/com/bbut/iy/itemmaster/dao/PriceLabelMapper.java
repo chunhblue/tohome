@@ -1,6 +1,8 @@
 package cn.com.bbut.iy.itemmaster.dao;
 
 import cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO;
+import cn.com.bbut.iy.itemmaster.dto.priceByDay.PriceByDayDTO;
+import cn.com.bbut.iy.itemmaster.dto.priceByDay.PriceByDayParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.priceLabel.PriceLabelDTO;
 import cn.com.bbut.iy.itemmaster.dto.priceLabel.PriceLabelParamDTO;
 import org.apache.ibatis.annotations.Param;
@@ -27,4 +29,7 @@ public interface PriceLabelMapper {
      * @return
      */
     List<AutoCompleteDTO> getItemList(@Param("v") String v);
+
+    Integer searchTypeCount(@Param("param") PriceLabelParamDTO param);
+    List<PriceLabelDTO> selectListByCondition(@Param("param") PriceLabelParamDTO dto);
 }

@@ -16,4 +16,9 @@ public interface Ma4160Service {
    GridDataDTO<MA4160DTO> selectAll(MA4160ParamDTO ma4160ParamDTO);
    GridDataDTO<MA4160DTO> search(MA4160ParamDTO ma4160ParamDTO);
 
+   int getPositionByStoreCd(String storeCd,String userId);
+
+   int checkAuditByStoreCdAndUserId(String storeCd,String userId);
+
+   List<Integer> getPositionList(String storeCd,String userId);
 }

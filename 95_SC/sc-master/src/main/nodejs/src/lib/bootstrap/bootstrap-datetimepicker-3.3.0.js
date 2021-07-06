@@ -1078,7 +1078,8 @@
                 day = this.viewDate.getUTCDate(),
                 hours = this.viewDate.getUTCHours(),
                 minutes = this.viewDate.getUTCMinutes(),
-                seconds = this.viewDate.getUTCSeconds();
+                // seconds = this.viewDate.getUTCSeconds();
+                seconds = 0;
 
               if (target.is('.month')) {
                 this.viewDate.setUTCDate(1);

@@ -33,7 +33,7 @@
 		where 
 			r.c_enable = '1' 
 		and r.n_reviewid = #{nReviewid} 
-		order by c_stepname
+		order by c_step
 	</select>
 
 	<select id="selectInfoByReviewID" resultMap="ReReviewInfoDTO">

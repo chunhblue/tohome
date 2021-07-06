@@ -99,4 +99,5 @@ public interface DefaultRoleService {
 
     int countFinancePosition(String userId);
 
+    int judgeSMPosition(String userId,String StoreCd);
 }

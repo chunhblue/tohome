@@ -73,8 +73,9 @@ define('receiptEdit', function () {
 		//表格内按钮事件
 		table_event();
 		setDisable(true);
+		$("#approvalBut").hide();
 		//审核事件
-		approval_event();
+		// approval_event();
 
 	}
 
@@ -93,7 +94,7 @@ define('receiptEdit', function () {
 		var month = dateStr.substring(2,4);
 		var year = dateStr.substring(4,8);
 		return year+month+day;
-	}
+	};
 
 	var table_event = function(){
 		$("#startQty").blur(function () {

@@ -47,7 +47,7 @@ public class PriceExHeaderListener implements ExEventListener {
                 "Selling Price Status,Current Sales Price";*/
         String row2 = "NO.,Item Code,Item Name,Item English Name,Barcode,Top Department,Department," +
                 "Category,Sub-Category,Store Cluster,Store No.," +
-                "Store Name,Vendor Code,Vendor Name,Purchasing Price,Selling Price,Original Selling Price";
+                "Store Name,Vendor Code,Vendor Name,Selling Price,Original Selling Price";
         String[] titles = row2.split(",");
 
         // 开始拼接excel头信息

@@ -187,13 +187,13 @@ public class LoginController extends BaseAction {
                 // 将用户角色权限店铺放入session
                 Collection<String> stores = new HashSet<>();
                 //判断用户是否设置默认店铺
-                if(StringUtils.isNotBlank(user.getStoreCd())){
-                    stores.add(user.getStoreCd());
-                }else{
+//                if(StringUtils.isNotBlank(user.getStoreCd())){
+//                    stores.add(user.getStoreCd());
+//                }else{
 //                    stores = getStoresByRoleIds(roleIds);
                     //获取用户角色权限店铺 by ma4210
                     stores = getStoresByUserId(user.getUserId());
-                }
+//                }
                 if (stores!=null&&stores.size()>0){
                     session.setAttribute(Constants.SESSION_STORES, stores);
                 }

@@ -120,6 +120,7 @@ public class WriteOffController extends BaseAction {
         if (SearchJson!=null && SearchJson!=" ") {
             Gson  gson = new Gson();
             param = gson.fromJson(SearchJson, WriteOffParamDTO.class);
+
         }
         if (param==null){
             param = new WriteOffParamDTO();
@@ -181,7 +182,7 @@ public class WriteOffController extends BaseAction {
         }
         param.setFlg(false);
         param.setStores(stores);
-        Map<String, Object> list = service.deleteGetList(param);
+        Map<String, Object> list = service.deleteGetListPrint(param);
         return new ReturnDTO(true,"ok",list);
     }
 
@@ -207,6 +208,7 @@ public class WriteOffController extends BaseAction {
         param.setStores(stores);
         WriteOffDTO offDto = service.deleteGetOffQty(param);
         if (offDto == null) {
+            _return.setSuccess(false);
             _return.setMsg("No data found");
         } else {
             _return.setO(offDto);

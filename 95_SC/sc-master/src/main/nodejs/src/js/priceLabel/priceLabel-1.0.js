@@ -39,6 +39,7 @@ define('priceLabel', function () {
         aDistrict: null,
         aStore: null,
         toPdf: null,
+        barcode:null,
         regionRemove: null,
     }
     // 创建js对象
@@ -54,21 +55,58 @@ define('priceLabel', function () {
             _common.prompt("Please select a start date!", 3, "info");/*请选择开始日期*/
             $("#startDate").focus();
             return false;
+        }else if(_common.judgeValidDate($("#startDate").val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#startDate").css("border-color","red");
+            $("#startDate").focus();
+            return false;
+        }else {
+            $("#startDate").css("border-color","#CCC");
         }
         if (!$("#endDate").val()) {
             _common.prompt("Please select a end date!", 3, "info");/*请选择结束日期*/
             $("#endDate").focus();
             return false;
+        }else if(_common.judgeValidDate($("#endDate").val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#endDate").css("border-color","red");
+            $("#endDate").focus();
+            return false;
+        }else {
+            $("#endDate").css("border-color","#CCC");
         }
 
         let start = new Date(fmtDate($("#startDate").val())).getTime();
         let end = new Date(fmtDate($("#endDate").val())).getTime();
+        if(judgeNaN(end)){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#endDate").focus();
+            return false;
+        }
 
         if (start > end) {
             $("#endDate").focus();
             _common.prompt("The start date cannot be greater than the end date!", 3, "info");/*开始时间不能大于结束时间*/
             return false;
         }
+        if(!m.type.val()){
+           $("#type").focus();
+           $("#type").css("border-color","red");
+           _common.prompt("Please select a Price Label Type!", 3, "info");/*请选择结束日期*/
+            return false;
+        }else {
+           $("#type").css("border-color","#CCCCCC");
+       }
+          if (m.type.val()==="03"){
+          if (!m.aStore.val()){
+              $("#aStore").focus();
+              _common.prompt("Please select a store!", 3, "info");
+              $("#aStore").css("border-color","red");
+              return  false;
+          }else {
+              $("#aStore").css("border-color","#CCCCCC");
+          }
+          }
 
         let difValue = parseInt(Math.abs((end - start) / (1000 * 3600 * 24)));
         if (difValue > 62) {
@@ -77,8 +115,11 @@ define('priceLabel', function () {
             return false;
         }
         return true;
-    }
+    };
 
+    function judgeNaN (value) {
+        return value !== value;
+    }
     function init(_common) {
         createJqueryObj();
         systemPath = _common.config.surl;
@@ -161,9 +202,7 @@ define('priceLabel', function () {
                 return;
             }
             setParamJson();
-
-            let params = encodeURIComponent(JSON.stringify(m.searchJson.val()));
-
+           let params = encodeURIComponent(JSON.stringify(m.searchJson.val()));
             var url = url_left + "/print?&flg=printAll&searchJson=" + params;
             let me = document;
             _common.myConfirm("Are you sure you want to print all the price labels?",function(result){
@@ -354,6 +393,7 @@ define('priceLabel', function () {
         let aStore = m.aStore.attr('k');
         let type = m.type.val();
         let articleId = m.articleId.attr('k');
+        let barcode=m.barcode.val();
         let startYmd = formatDate(m.startDate.val());
         let endYmd = formatDate(m.endDate.val());
         let searchJson = {
@@ -369,6 +409,7 @@ define('priceLabel', function () {
             'articleId': articleId,
             'startYmd': startYmd,
             'endYmd': endYmd,
+            'barcode':barcode,
         }
         m.searchJson.val(JSON.stringify(searchJson));
     }
@@ -425,13 +466,20 @@ define('priceLabel', function () {
             param: paramGrid,
             localSort: true,
             lineNumber: false,
-            colNames: ["Store No.", "Store Name", "Price Label VN Name", "Price Label EN Name", "Top Department Cd", "Top Department", "Department Cd", "Department", "Category", "CategoryCd", "Sub Category", "Sub CategoryCd", "Item Name", "Item Barcode", "Item Code", "Old Price", "New Price", "Effective Start Date"],
+            colNames: ["Store No.", "Store Name", "Effective Start Date","Price Label VN Name", "Price Label EN Name", "Top Department Cd", "Top Department", "Department Cd", "Department", "Category", "CategoryCd", "Sub Category", "Sub CategoryCd", "Item Name", "Item Barcode", "Item Code", "Old Price", "New Price"],
             colModel: [
                 {name: "storeCd", type: "text", text: "left", width: "90", ishide: false,},
                 {name: "storeName", type: "text", text: "left", width: "130", ishide: false,},
+                {
+                    name: "effectiveStartDate",
+                    type: "text",
+                    text: "center",
+                    width: "130",
+                    ishide: false,
+                    getCustomValue: dateFmt
+                },
                 {name: "priceLabelVnName", type: "text", text: "left", width: "90", ishide: false,},
                 {name: "priceLabelEnName", type: "text", text: "left", width: "90", ishide: false,},
-
                 {name: "depCd", type: "text", text: "left", width: "130", ishide: true,},
                 {name: "depName", type: "text", text: "left", width: "130", ishide: false,},
                 {name: "pmaCd", type: "text", text: "left", width: "130", ishide: true,},
@@ -459,14 +507,7 @@ define('priceLabel', function () {
                     ishide: false,
                     getCustomValue: getThousands
                 },
-                {
-                    name: "effectiveStartDate",
-                    type: "text",
-                    text: "center",
-                    width: "130",
-                    ishide: false,
-                    getCustomValue: dateFmt
-                },
+
             ],//列内容
             width: "max",//宽度自动
             page: 1,//当前页

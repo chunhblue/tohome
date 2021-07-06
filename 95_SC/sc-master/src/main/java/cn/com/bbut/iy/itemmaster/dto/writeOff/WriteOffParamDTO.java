@@ -19,7 +19,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WriteOffParamDTO extends GridParamDTO {
-
     private String businessDate;
 
 

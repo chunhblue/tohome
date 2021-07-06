@@ -94,14 +94,14 @@ public class MaItemSaleController extends BaseAction {
             return new GridDataDTO<Ma4350DetailGridDto>();
         }
         User u = this.getUser(session);
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             param.setSaleStartDate(startDate);
-        }
+        }*/
         param.setStores(stores);
         return ma4350Service.getList(param);
     }

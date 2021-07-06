@@ -27,6 +27,7 @@ import cn.com.bbut.iy.itemmaster.service.*;
 import cn.com.bbut.iy.itemmaster.service.cm9010.Cm9010Service;
 import cn.com.bbut.iy.itemmaster.service.ma1000.Ma1000Service;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +71,8 @@ public class ReturnVendorController extends BaseAction {
 
     @Autowired
     private MRoleStoreService mRoleStoreService;
-
+    @Autowired
+    private Ma4320Service ma4320Service;
     /**
      * 退供应商申请单管理画面
      *
@@ -232,7 +234,6 @@ public class ReturnVendorController extends BaseAction {
         log.debug("抓取商品信息，user:{}", user.getUserId());
         AjaxResultDto resultDto = new AjaxResultDto();
         if(param!=null){
-
             if (param.getReturnType().equals("10")){
                 ReturnWarehouseDetailInfo itemInfo = returnWarehouseService.getdirectItemInfo(param);
                 if(itemInfo!=null){
@@ -508,24 +509,26 @@ public class ReturnVendorController extends BaseAction {
     @Permission(codes = { PermissionCode.CODE_SC_V_RETURN_LIST_VIEW})
     public ModelAndView toPrintView(HttpServletRequest request, HttpSession session,
                                    String searchJson,String returnType) {
+        User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         if(returnType.equals("20")){
-            User u = this.getUser(session);
             log.debug("User:{} 进入 退供应商申请单打印画面", u.getUserId());
             ModelAndView mv = new ModelAndView("return/vendor/returnPrint");
             mv.addObject("searchJson", searchJson);
             mv.addObject("userName", u.getUserName());
             mv.addObject("returnType", returnType);
-            mv.addObject("printTime", new Date());
+            mv.addObject("printTime", Utils.getFormateDate(ymd));
             mv.addObject("useMsg", "退供应商申请单打印画面");
             return mv;
         }else {
-            User u = this.getUser(session);
             log.debug("User:{} 进入 退供应商申请单打印画面", u.getUserId());
             ModelAndView mv = new ModelAndView("return/vendor/returnOrgPrint");
             mv.addObject("searchJson", searchJson);
             mv.addObject("userName", u.getUserName());
             mv.addObject("returnType", returnType);
-            mv.addObject("printTime", new Date());
+            mv.addObject("printTime", Utils.getFormateDate(ymd));
             mv.addObject("useMsg", "退供应商申请单打印画面");
             return mv;
         }
@@ -561,11 +564,14 @@ public class ReturnVendorController extends BaseAction {
     public ModelAndView toReceiptPrintView(HttpServletRequest request, HttpSession session,
                                            String searchJson) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入 确认退供应商申请单打印画面", u.getUserId());
         ModelAndView mv = new ModelAndView("receipt/return_vendor/returnPrint");
         mv.addObject("searchJson", searchJson);
         mv.addObject("userName", u.getUserName());
-        mv.addObject("printTime", new Date());
+        mv.addObject("printTime", Utils.getFormateDate(ymd));
         mv.addObject("useMsg", "确认退供应商申请单打印画面");
         return mv;
     }

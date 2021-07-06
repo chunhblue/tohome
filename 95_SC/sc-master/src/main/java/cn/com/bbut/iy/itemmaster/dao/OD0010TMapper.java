@@ -15,10 +15,15 @@ import java.util.List;
 public interface OD0010TMapper {
 
     /**
-     * 查询商品详情
+     * 查询DC商品详情
      * @param dto
      */
-    List<OD0010TDTO> selectDetail(OD0000TParamDTO dto);
+    List<OD0010TDTO> selectDcDetail(OD0000TParamDTO dto);
+    /**
+     * 查询供应商商品详情
+     * @param dto
+     */
+    List<OD0010TDTO> selectVendorDetail(OD0000TParamDTO dto);
 
     /**
      * 修正传票获取原数据
@@ -31,11 +36,18 @@ public interface OD0010TMapper {
 
     int deleteCopy(OD0000TDTO dto);
     /**
-     * 复制订单商品信息
+     * 复制供应商订单商品信息
      * 收货数量、金额 = 订货数量、金额
      * @param dto
      */
     int insertByCopy(OD0000TDTO dto);
+
+    /**
+     * 复制DC订单商品信息
+     * 收货数量、金额 = 订货数量、金额
+     * @param dto
+     */
+    int insertDCByCopy(OD0000TDTO dto);
 
     /**
      * 根据主键添加收货数据

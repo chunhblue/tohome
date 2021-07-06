@@ -58,4 +58,7 @@ public class StocktakeItemDTOC {
 
    // 描述
    private String note;
+   private String reason;
+   private String reasonCode;
+   private String fnStockQty;
 }

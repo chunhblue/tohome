@@ -15,11 +15,13 @@ import cn.com.bbut.iy.itemmaster.service.*;
 import cn.com.bbut.iy.itemmaster.service.ma1140.MA1140Service;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
 import cn.shiy.common.baseutil.Container;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,10 +31,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 实时库存查询
@@ -76,6 +75,8 @@ public class RealTimeInventoryQueryController extends BaseAction {
         mv.addObject("date",date);
         return mv;
     }
+
+
 
     /**
      * 实时库存一览

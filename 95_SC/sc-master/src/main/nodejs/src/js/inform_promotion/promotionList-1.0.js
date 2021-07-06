@@ -169,7 +169,21 @@ define('promotionList', function () {
 	}
 	// 验证检索项是否合法
 	var verifySearch = function(){
-		if(m.promotionStartDate.val()!=""&&m.promotionEndDate.val()!=""){
+		if(m.promotionStartDate.val()!==""&&m.promotionStartDate.val()!=null){
+			if(_common.judgeValidDate(m.promotionStartDate.val())){
+				_common.prompt("Please enter a valid date!",3,"info");
+				$("#promotionStartDate").focus();
+				return false;
+			}
+		}
+		if(m.promotionEndDate.val()!==""&&m.promotionEndDate.val()!=null){
+			if(_common.judgeValidDate(m.promotionEndDate.val())){
+				_common.prompt("Please enter a valid date!",3,"info");
+				$("#promotionEndDate").focus();
+				return false;
+			}
+		}
+		if(m.promotionStartDate.val()!==""&&m.promotionEndDate.val()!==""){
 			var _ctStartDate = new Date(fmtDate($("#promotionStartDate").val())).getTime();
 			var _ctEndDate = new Date(fmtDate($("#promotionEndDate").val())).getTime();
 			var ctdifValue = parseInt(Math.abs((_ctEndDate-_ctStartDate)/(1000*3600*24)));
@@ -180,6 +194,20 @@ define('promotionList', function () {
 			}
 		}
 
+		if(m.entry_start_date.val()!==""&&m.entry_start_date.val()!=null){
+			if(_common.judgeValidDate(m.entry_start_date.val())){
+				_common.prompt("Please enter a valid date!",3,"info");
+				$("#entry_start_date").focus();
+				return false;
+			}
+		}
+		if(m.entry_end_date.val()!==""&&m.entry_end_date.val()!=null){
+			if(_common.judgeValidDate(m.entry_end_date.val())){
+				_common.prompt("Please enter a valid date!",3,"info");
+				$("#entry_end_date").focus();
+				return false;
+			}
+		}
 		if(m.entry_start_date.val()!=""&&m.entry_end_date.val()!=""){
 			var _eStartDate = new Date(fmtDate($("#entry_start_date").val())).getTime();
 			var _eEndDate = new Date(fmtDate($("#entry_end_date").val())).getTime();
@@ -191,7 +219,7 @@ define('promotionList', function () {
 			}
 		}
 		return true;
-	}
+	};
 	//画面按钮点击事件
 	var but_event = function(){
 		$('input:radio').on("change",function(){

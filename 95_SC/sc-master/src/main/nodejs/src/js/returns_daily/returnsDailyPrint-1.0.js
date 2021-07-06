@@ -55,51 +55,31 @@ define('storeInventoryDailyPrint', function () {
                 var trList = $("#grid_table  tr:not(:first)");
                 trList.remove();
                 if(result.success){
-                    let dataList = result.o;
-
-                    let totalAmt = 0; // 总金额
-                    let cash = 0; // 现金
-                    let cardPayment = 0; // 信用卡
-                    let eVoucher = 0; // E-Voucher 支付
-                    let momo = 0; // Momo
-                    let payoo = 0; // Payoo
-                    let viettel = 0; // Viettel
+                    let dataList =  result.o.data;
                     if (dataList.length < 1) {
                         _common.prompt("No data found!", 5, "info");/*查询数据为空*/
                         return;
                     }
                     for (let i = 0; i < dataList.length; i++) {
                         var item = dataList[i];
-                        totalAmt += parseFloat(item.totalAmt);
-                        cash += parseFloat(item.cash);
-                        cardPayment += parseFloat(item.cardPayment);
-                        eVoucher += parseFloat(item.eVoucher);
-                        momo += parseFloat(item.momo);
-                        payoo += parseFloat(item.payoo);
-                        viettel += parseFloat(item.viettel);
                         let tempTrHtml = '<tr>' +
                             "<td title='"+isEmpty(item.storeCd)+"' style='text-align:left;'>" + isEmpty(item.storeCd) + "</td>" +
                             "<td title='"+isEmpty(item.storeName)+"' style='text-align:left;'>" + isEmpty(item.storeName) + "</td>" +
                             "<td title='"+isEmpty(item.articleId)+"' style='text-align:right;'>" + isEmpty(item.articleId) + "</td>" +
                             "<td title='"+isEmpty(item.articleName) +"' style='text-align:left;'>" + isEmpty(item.articleName)  + "</td>" +
-                            "<td title='"+isEmpty(item.barcode) +"' style='text-align:right;'>" + isEmpty(item.barcode)  + "</td>" +
+                            // "<td title='"+isEmpty(item.barcode) +"' style='text-align:right;'>" + isEmpty(item.barcode)  + "</td>" +
                             "<td title='"+formatDate(isEmpty(item.tranDate)) +"' style='text-align:center;'>" + formatDate(isEmpty(item.tranDate))  + "</td>" +
                             "<td title='"+isEmpty(item.posId) +"' style='text-align:right;'>" + isEmpty(item.posId) + "</td>" +
-                            "<td title='"+isEmpty(item.saleSerialNo) +"' style='text-align:right;'>" + isEmpty(item.saleSerialNo) + "</td>" +
+                            "<td title='"+isEmpty(item.tranSerialNo) +"' style='text-align:right;'>" + isEmpty(item.tranSerialNo) + "</td>" +
+                            "<td title='"+isEmpty(item.nonSaleType) +"' style='text-align:left;'>" + isEmpty(item.nonSaleType) + "</td>" +
                             "<td title='"+toThousands(item.orderQty)  +"' style='text-align:right;'>" + toThousands(item.orderQty)  + "</td>" +
-                            "<td title='"+toThousands(item.priceActual)  +"' style='text-align:right;'>" + toThousands(item.priceActual)  + "</td>" +
                             "<td title='"+toThousands(item.totalAmt)  +"' style='text-align:right;'>" + toThousands(item.totalAmt)  + "</td>" +
-                            "<td title='"+toThousands(item.cash)  +"' style='text-align:right;'>" + toThousands(item.cash)  + "</td>" +
-                            "<td title='"+toThousands(item.cardPayment)  +"' style='text-align:right;'>" + toThousands(item.cardPayment)  + "</td>" +
-                            "<td title='"+ toThousands(item.eVoucher)  +"' style='text-align:right;'>" +  toThousands(item.eVoucher)  + "</td>" +
-                            "<td title='"+ toThousands(item.momo)  +"' style='text-align:right;'>" +  toThousands(item.momo)  + "</td>" +
-                            "<td title='"+ toThousands(item.payoo) +"' style='text-align:right;'>" +  toThousands(item.payoo)  + "</td>" +
-                            "<td title='"+ toThousands(item.viettel) +"' style='text-align:right;'>" +  toThousands(item.viettel)  + "</td>" +
                             "<td title='"+  isEmpty(item.cashierId) +"' style='text-align:right;'>" +   isEmpty(item.cashierId)  + "</td>" +
 
                             "<td title='"+ isEmpty(item.cashierName) +"' style='text-align:left;'>" +  isEmpty(item.cashierName)  + "</td>" +
                             // "<td title='"+ isEmpty(item.amCd) +"' style='text-align:left;'>" +  isEmpty(item.amCd)  + "</td>" +
                             "<td title='"+ isEmpty(item.amName) +"' style='text-align:left;'>" +  isEmpty(item.amName)  + "</td>" +
+                            "<td title='"+ isEmpty(item.mode) +"' style='text-align:left;'>" +  isEmpty(item.mode)  + "</td>" +
                             '</tr>';
                         m.grid_table.append(tempTrHtml);
                     }
@@ -107,24 +87,18 @@ define('storeInventoryDailyPrint', function () {
                     let totalTempTrHtml = '<tr style="background-color: #87CEFF">' +
                         "<td></td>" +
                         "<td></td>" +
+                        // "<td></td>" +
                         "<td></td>" +
                         "<td></td>" +
-                        "<td></td>" +
-                        "<td</td>" +
                         "<td></td>" +
                         "<td></td>" +
                         "<td></td>" +
                         "<td title='Total:'>Total:</td>" +
-                        "<td title='" + toThousands(totalAmt)  +"' style='text-align:right;'>" + toThousands(totalAmt) + "</td>" +
-                        "<td title='" + toThousands(cash) + "' style='text-align:right;'>" + toThousands(cash) + "</td>" +
-                        "<td title='" + toThousands(cardPayment) + "' style='text-align:right;'>" + toThousands(cardPayment) + "</td>" +
-                        "<td title='" + toThousands(eVoucher) + "' style='text-align:right;'>" + toThousands(eVoucher) + "</td>" +
-                        "<td title='" + toThousands(momo) + "' style='text-align:right;'>" + toThousands(momo) + "</td>" +
-                        "<td title='" + toThousands(payoo) + "' style='text-align:right;'>" + toThousands(payoo) + "</td>" +
-                        "<td title='" + toThousands(viettel) + "' style='text-align:right;'>" + toThousands(viettel) + "</td>" +
+                        "<td title='" + toThousands(result.o.totalQty)  +"' style='text-align:right;'>" + toThousands(result.o.totalQty) + "</td>" +
+                        "<td title='" + toThousands(result.o.totalAmount)  +"' style='text-align:right;'>" + toThousands(result.o.totalAmount) + "</td>" +
                         "<td></td>" +
                         "<td></td>" +
-                        "<td></td>" +
+                        '<td></td>' +
                         '<td></td>' +
                         '</tr>';
                     m.grid_table.append(totalTempTrHtml);

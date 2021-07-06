@@ -145,9 +145,9 @@ public class PriceExServiceImpl implements ExService {
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
             setCellValue(cell, ls.getVendorName());
 
-            cell = row.createCell(curCol++);
+            /*cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
-            setCellValue(cell, ls.getOrderPrice());
+            setCellValue(cell, ls.getOrderPrice());*/
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
@@ -175,7 +175,7 @@ public class PriceExServiceImpl implements ExService {
         sheet.setColumnWidth(columnIndex++, 25 * 256);
         sheet.setColumnWidth(columnIndex++, 15 * 256);
         sheet.setColumnWidth(columnIndex++, 25 * 256);
-        sheet.setColumnWidth(columnIndex++, 22 * 256);
+//        sheet.setColumnWidth(columnIndex++, 22 * 256);
         sheet.setColumnWidth(columnIndex++, 22 * 256);
         sheet.setColumnWidth(columnIndex++, 25 * 256);
     }

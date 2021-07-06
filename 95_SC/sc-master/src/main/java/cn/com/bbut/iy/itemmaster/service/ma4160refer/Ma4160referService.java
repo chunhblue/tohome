@@ -10,7 +10,7 @@ import java.util.List;
 @Service
 public interface Ma4160referService {
 
-    List<MA4160DTO> getLJobTye();
+    List<MA4160DTO> getLJobTye(boolean flg);
 
 
     List<MA0020DTO> getStructName();

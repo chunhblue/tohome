@@ -139,7 +139,7 @@
                                     <div class="col-sm-2">
                                         <div class="aotu-pos">
                                             <input type="text"
-                                                   class="form-control my-automatic input-sm"autocomplete="off"
+                                                   class="form-control my-automatic input-sm" autocomplete="off"
                                                    id="pma">
                                             <a id="pmaRefresh" href="javascript:void(0);" title="Refresh"
                                                class="auto-but glyphicon glyphicon-refresh refresh"></a>
@@ -176,7 +176,7 @@
                                 <div class="form-group">
                                     <label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null">Query Date</label>
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-                                        <input id="startDate"  nextele="sell_end_date" placeholder="Start Date" class="form-control input-sm select-date" type="text" value="">
+                                        <input id="startDate"  nextele="sell_end_date" placeholder="Start Date" class="form-control input-sm select-date"  type="text"  disabled="disabled" value="">
                                     </div>
                                     <label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label"></label>
                                     <div class="ccol-xs-12 col-sm-4 col-md-3 col-lg-2">
@@ -198,6 +198,13 @@
                                         </select>
                                     </div>
                                 </div>
+                                    <div class="form-group">
+                                        <label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Barcode</label>
+                                        <div class="ccol-xs-12 col-sm-4 col-md-3 col-lg-2">
+                                            <input  id="barcode"  class="form-control input-sm" type="text" value="">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-12">
                                 <div class="wire"></div>
@@ -207,7 +214,6 @@
                         </div>
                     </div>
                 </div>
-               </div>
             </div>
     </div>
     <div class="row">

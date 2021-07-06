@@ -41,6 +41,7 @@ define('classifiedSaleReport', function () {
         dep:null,
         pma:null,
         subCategory:null,
+        totalSaleAmount:null,
         category:null,
     }
     // 创建js对象
@@ -152,6 +153,7 @@ define('classifiedSaleReport', function () {
             m.subCategory.val("");
             m.subCategory.prop("disabled",true);
             $("#amRemove").click();
+            $("#totalSaleAmount").val("");
             $("#regionRemove").click();
             $("#depRemove").click();
             $("#startDate").css("border-color","#CCC");
@@ -168,6 +170,20 @@ define('classifiedSaleReport', function () {
                 page=1;
                 setParamJson();
                 getData(page,rows);
+                let record = m.searchJson.val();
+                $.myAjaxs({
+                    url: url_left  + "/getTotalSaleAmount",
+                    async: true,
+                    cache: false,
+                    type: "post",
+                    data: 'SearchJson='+record,
+                    dataType: "json",
+                    success: function (result) {
+                        m.totalSaleAmount.val(toThousands(result.o.data));
+                    },
+                    complete: _common.myAjaxComplete
+                });
+
             }
 
         })
@@ -261,6 +277,10 @@ define('classifiedSaleReport', function () {
             $("#startDate").focus();
             $("#startDate").css("border-color","red");
             return false;
+        }else if(_common.judgeValidDate(m.startDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#startDate").focus();
+            return false;
         }else {
             $("#startDate").css("border-color","#CCC");
         }
@@ -268,6 +288,10 @@ define('classifiedSaleReport', function () {
             _common.prompt("Please enter a Sales Date!",5,"error"); // 结束日期不可以为空
             $("#endDate").focus();
             $("#endDate").css("border-color","red");
+            return false;
+        }else if(_common.judgeValidDate(m.endDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#endDate").focus();
             return false;
         }else {
             $("#endDate").css("border-color","#CCC");

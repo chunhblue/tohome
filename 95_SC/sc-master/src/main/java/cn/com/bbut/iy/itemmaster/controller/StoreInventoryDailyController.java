@@ -14,8 +14,10 @@ import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.storeTransferDaily.StoreTransferDailyService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +49,8 @@ public class StoreInventoryDailyController extends BaseAction {
     private MRoleStoreService mRoleStoreService;
     @Autowired
     private CM9060Service cm9060Service;
-
+    @Autowired
+    private Ma4320Service ma4320Service;
     private final String EXCEL_EXPORT_KEY = "EXCEL_INVENTORY_REPORT";
     private final String EXCEL_EXPORT_NAME = "Store Inventory Daily Report.xlsx";
 
@@ -61,13 +64,16 @@ public class StoreInventoryDailyController extends BaseAction {
     @RequestMapping(method = RequestMethod.GET)
     public ModelAndView tolistView(HttpServletRequest request, HttpSession session) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入 门店报废日报", u.getUserId());
         ModelAndView mv = new ModelAndView("storeInventoryDaily/storeInventoryDaily");
         String businessDate = cm9060Service.getValByKey("0000");
         mv.addObject("use", 0);
         mv.addObject("identity", 1);
         mv.addObject("author", u.getUserName());
-        mv.addObject("bsDate", new Date());
+        mv.addObject("bsDate", Utils.getFormateDate(ymd));
         mv.addObject("businessDate", businessDate);
         mv.addObject("useMsg", "门店报废日报一览画面");
         return mv;
@@ -83,12 +89,15 @@ public class StoreInventoryDailyController extends BaseAction {
     public ModelAndView toupdateView(HttpServletRequest request, HttpSession session,
                                      String searchJson,int page,int rows) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入 门店报废日报打印画面", u.getUserId());
         ModelAndView mv = new ModelAndView("storeInventoryDaily/storeInventoryDailyPrint");
         mv.addObject("use", 0);
         mv.addObject("identity", 1);
         mv.addObject("author", u.getUserName());
-        mv.addObject("bsDate", new Date());
+        mv.addObject("bsDate", Utils.getFormateDate(ymd));
         mv.addObject("searchJson", searchJson);
         mv.addObject("page", page);
         mv.addObject("rows", rows);

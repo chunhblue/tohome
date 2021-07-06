@@ -13,6 +13,7 @@ import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.List;
 
 import static cn.com.bbut.iy.itemmaster.util.CommonUtils.*;
@@ -149,10 +152,10 @@ public class WriteOffExServiceImpl implements ExService {
 //            cell = row.createCell(curCol++);
 //            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
 //            setCellValue(cell, ls.getWriteOffAmt());
-
-            cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
-            setCellValue(cell, ls.getSaleQty());
+//SALE Qty 占时隐藏
+//            cell = row.createCell(curCol++);
+//            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+//            setCellValue(cell, ls.getSaleQty());
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
@@ -225,9 +228,9 @@ public class WriteOffExServiceImpl implements ExService {
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
         setCellValue(cell, formatNum(offDto.getWriteOffQty()+""));
 
-        cell = row.createCell(curCol++);
-        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
-        setCellValue(cell, formatNum(offDto.getSaleQty()+""));
+//        cell = row.createCell(curCol++);
+//        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+//        setCellValue(cell, formatNum(offDto.getSaleQty()+""));
 
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
@@ -260,5 +263,13 @@ public class WriteOffExServiceImpl implements ExService {
         sheet.setColumnWidth(columnIndex++, 25 * 256);
         sheet.setColumnWidth(columnIndex++, 25 * 256);
     }
-
+    public static String formatNum(String num) {
+        if (StringUtils.isBlank(num)) {
+            return "0";
+        }
+        int i = new BigDecimal(num).setScale(0, BigDecimal.ROUND_HALF_UP).intValue();
+        DecimalFormat df = new DecimalFormat("###,###");
+        String result = df.format(i);
+        return result;
+    }
 }

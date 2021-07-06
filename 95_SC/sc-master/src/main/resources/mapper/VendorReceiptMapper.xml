@@ -72,6 +72,8 @@
         <result column="receive_price" property="receivePrice" jdbcType="DECIMAL"/>
         <result column="receive_qty" property="receiveQty" jdbcType="DECIMAL"/>
         <result column="hht_receive_qty" property="hhtReceiveQty" jdbcType="DECIMAL"/>
+        <result column="hht_receive_date" property="hhtReceiveDate" jdbcType="VARCHAR"/>
+        <result column="hht_receive_time" property="hhtReceiveTime" jdbcType="VARCHAR"/>
         <result column="var_qty" property="varQty" jdbcType="DECIMAL"/>
         <result column="receive_nocharge_qty" property="receiveNoChargeQty" jdbcType="DECIMAL"/>
         <result column="receive_total_qty" property="receiveTotalQty" jdbcType="DECIMAL"/>
@@ -95,11 +97,12 @@
         <result column="tax_rate" property="taxRate" jdbcType="DECIMAL"/>
         <result column="is_free_item" property="isFreeItem" jdbcType="CHAR"/>
         <result column="is_free_item_t" property="isFreeItemText" jdbcType="CHAR"/>
+        <result column="ss_hh_qty" property="ssHHQty" jdbcType="DECIMAL"/>
     </resultMap>
 
     <sql id="selectReceiptCondition">
         AND order_type = '01'
-        AND order_sts IN ('00','04')
+        AND order_sts IN ('00','04','07')
         AND review_status IN (10,15,20)
         AND store_cd IN
         <foreach item="store" index="index" collection="stores"
@@ -365,7 +368,7 @@
             parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.vendor.VendorDetailsParamDTO">
         SELECT
         T.*, T1.article_name,concat(T2.code_value,' ',T2.code_name) as differ_reasons,
-        COALESCE(T.receive_qty,0)-COALESCE(T.hht_receive_qty,0) var_qty
+        COALESCE(T.receive_qty,0)-COALESCE(T.order_qty,0) var_qty
         FROM (
             SELECT
                 a.store_cd, a.order_id,a.order_date, a.serial_no, a.article_id, a.barcode, a.vendor_id, a.promotion_id,
@@ -383,7 +386,11 @@
                 <!--                        order_amt AS receive_total_amt-->
                 <!--                    </when>-->
                 <!--                    <otherwise>-->
-                b.hht_receive_qty,COALESCE(b.hht_receive_qty,a.receive_qty) as receive_qty, a.receive_nocharge_qty,
+                COALESCE(b.hht_receive_qty,0)+COALESCE(a.receive_qty,0)-COALESCE(b.hht_receive_qty,0) as ss_hh_qty,
+                (COALESCE(b.hht_receive_qty, 0)) hht_receive_qty,
+                (COALESCE(b.hht_receive_qty, 0) + COALESCE(a.receive_qty, 0))  receive_qty,
+                b.receive_date hht_receive_date,b.receive_time hht_receive_time,
+                a.receive_nocharge_qty,
                 a.receive_total_amt,a.receive_total_qty,a.is_free_item,a.is_free_item as is_free_item_t
                 <!--                    </otherwise>-->
                 <!--                </choose>-->
@@ -392,6 +399,7 @@
                 LEFT JOIN OD0020 b
                 ON b.store_cd = a.store_cd
                 AND b.order_id = a.order_id
+                AND a.serial_no = cast(coalesce(b.line_num,0)+1 as VARCHAR)
                 AND b.order_date = a.order_date
                 AND b.article_id = a.article_id
                 <include refid="selectDetailsCondition"></include>

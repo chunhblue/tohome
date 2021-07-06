@@ -20,12 +20,22 @@
         count (1)
         FROM(
         SELECT
+        T.store_cd,
+        ma1.store_name,
+        T.acc_date AS sale_date,
+        T.merchandising,
+        T.foodService,
+        T.service,
+        oper.c_operatorcode,
+        oper.c_operatorname
+        FROM(
+        SELECT
         B.store_cd,
         B.acc_date ,
         coalesce( merchandising, 0 ) AS merchandising,
         coalesce( foodService, 0 ) AS foodService,
-        coalesce( service, 0 ) AS service,
-        B.ofc
+        coalesce( service, 0 ) AS service
+        -- B.ofc
         FROM
         (
         SELECT
@@ -33,18 +43,17 @@
         A.acc_date,
         sum(merchandising) as merchandising,
         sum(foodService) as foodService,
-        sum(service) as service,
-        A.ofc
+        sum(service) as service
+        -- A.ofc
         FROM (
         SELECT
         store_cd,
         acc_date,
-        ofc,
         case dep_name when 'Merchandising' then sale_amt_t end as merchandising ,
         case dep_name when 'Food Service' then sale_amt_t end as foodService,
         case dep_name when 'Service' then sale_amt_t end as service
-        FROM ia0000
-        ) as A GROUP BY a.store_cd,a.acc_date,ofc
+        FROM ia0001
+        ) as A GROUP BY a.store_cd,a.acc_date
         ) AS B
         ) AS T,
         ma1000 ma1,
@@ -54,7 +63,7 @@
         T.store_cd = ma1.store_cd
         AND cm1.sp_id = '0000'
         AND cm1.sp_value BETWEEN ma1.effective_start_date AND ma1.effective_end_date
-        AND T.ofc = oper.c_operatorcode
+        AND ma1.ofc = oper.c_operatorcode
         AND T.store_cd In
         <foreach item="store" index="index" collection="classParamdto.stores"
                  open="(" separator="," close=")">
@@ -71,11 +80,12 @@
             ]]>
         </if>
         <if test="classParamdto.am!=null and classParamdto.am!=''">
-            AND T.ofc = #{classParamdto.am}
+            AND ma1.ofc = #{classParamdto.am}
         </if>
         <if test="classParamdto.storeCd!=null and classParamdto.storeCd!=''">
             AND T.store_cd = #{classParamdto.storeCd}
         </if>
+        )AS A;
     </select>
 
     <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.classifiedsalereport.clssifiedSaleParamReportDTO" resultMap="BaseItemResult">
@@ -94,8 +104,8 @@
         B.acc_date ,
         coalesce( merchandising, 0 ) AS merchandising,
         coalesce( foodService, 0 ) AS foodService,
-        coalesce( service, 0 ) AS service,
-        B.ofc
+        coalesce( service, 0 ) AS service
+--         B.ofc
         FROM
         (
         SELECT
@@ -103,18 +113,17 @@
         A.acc_date,
         sum(merchandising) as merchandising,
         sum(foodService) as foodService,
-        sum(service) as service,
-        A.ofc
+        sum(service) as service
+--         A.ofc
         FROM (
         SELECT
         store_cd,
         acc_date,
-        ofc,
         case dep_name when 'Merchandising' then sale_amt_t end as merchandising ,
         case dep_name when 'Food Service' then sale_amt_t end as foodService,
         case dep_name when 'Service' then sale_amt_t end as service
-        FROM ia0000
-        ) as A GROUP BY a.store_cd,a.acc_date,ofc
+        FROM ia0001
+        ) as A GROUP BY a.store_cd,a.acc_date
         ) AS B
         ) AS T,
         ma1000 ma1,
@@ -124,7 +133,7 @@
         T.store_cd = ma1.store_cd
         AND cm1.sp_id = '0000'
         AND cm1.sp_value BETWEEN ma1.effective_start_date AND ma1.effective_end_date
-        AND T.ofc = oper.c_operatorcode
+        AND ma1.ofc = oper.c_operatorcode
         AND T.store_cd In
         <foreach item="store" index="index" collection="classParamdto.stores"
                  open="(" separator="," close=")">
@@ -141,7 +150,7 @@
             ]]>
         </if>
         <if test="classParamdto.am!=null and classParamdto.am!=''">
-            AND T.ofc = #{classParamdto.am}
+            AND ma1.ofc = #{classParamdto.am}
         </if>
         <if test="classParamdto.storeCd!=null and classParamdto.storeCd!=''">
             AND T.store_cd = #{classParamdto.storeCd}

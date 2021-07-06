@@ -67,7 +67,7 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                    <span style="float: left">Date Created：${bsDate?string('dd/MM/yyyy')}</span>
+                    <span style="float: left">Date Created：${bsDate!}</span>
                 </div>
             </div>
             <div class="row">
@@ -78,7 +78,7 @@
                             <th title="Document No.">Document No.</th>
                             <th title="Store No.">Store No.</th>
                             <th title="Store Name">Store Name</th>
-                            <th title="Submission Date">Submission Date</th>
+                            <th title="Submission Date">Submission<br>Date</th>
                             <th title="Department">Department</th>
                             <th title="Category">Category</th>
                             <th title="Sub-category">Sub-category</th>
@@ -86,9 +86,9 @@
                             <th title="Item Name">Item Name</th>
                             <th title="Barcode">Barcode</th>
                             <th title="DC">DC</th>
-                            <th title="Area Manager ID">Area Manager ID</th>
-                            <th title="Operation Manager ID">Operation Manager ID</th>
-                            <th title="Receiving Quantity">Receiving Quantity</th>[#--收货数量--]
+                            <th title="Area Manager ID">Area<br>Manager ID</th>
+                            <th title="Operation Manager ID">Operation<br>Manager ID</th>
+                            <th title="Receiving Quantity">Receiving<br>Quantity</th>[#--收货数量--]
                             <th title="Created By">Created By</th>
                             <th title="Remark">Remark</th>
                         </tr>

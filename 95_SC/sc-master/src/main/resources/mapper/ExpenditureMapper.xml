@@ -73,7 +73,7 @@
     </select>
 
     <select id="selectListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.expenditure.ExpenditureParamDTO" resultMap="ReResultMap">
-        SELECT
+        SELECT distinct
         T.*, T1.dep_name, T2.pay_name, T3.item_name, T4.user_name,
         T5.code_name AS status_name, T6.emp_name AS create_user
         FROM (
@@ -241,7 +241,7 @@
     <select id="getOperator" parameterType="string" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
         SELECT   distinct
         a.emp_num_id k,
-        concat(a.emp_name,' ',emp_num_id) v from ma4200 a left join  ma4160 b on a.job_type_cd=b.job_type_cd where position>=4
+        concat(a.emp_name,' ',emp_num_id) v from ma4200 a left join  ma4160 b on a.job_type_cd=b.job_type_cd where position=4
         <if test="storeCd  !=null and storeCd != ''">
             AND  a.store_cd=#{storeCd}
         </if>

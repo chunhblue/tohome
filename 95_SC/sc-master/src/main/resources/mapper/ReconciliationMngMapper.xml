@@ -163,7 +163,7 @@
             #{mb1700.partnerUsername},
             #{mb1700.shopName},
             #{mb1700.createUserId},
-            to_char(NOW(),'yyyyMMddhhmmss'),
+            to_char(NOW(),'yyyyMMddhh24miss'),
             coalesce(#{mb1700.ckQty},0),
             coalesce(#{mb1700.ckAmount},0),
             coalesce(#{mb1700.varyQty},0),
@@ -188,7 +188,7 @@
             coalesce(#{mb1200.ckAmount},0),
             coalesce(#{mb1200.varyQty},0),
             #{mb1200.createUserId},
-            to_char(NOW(),'yyyyMMddhhmmss'),
+            to_char(NOW(),'yyyyMMddhh24miss'),
             coalesce(#{mb1200.varyAmount},0)
             )
         </foreach>
@@ -250,7 +250,7 @@
             coalesce(#{mb1300.commissionVat},0),
             coalesce(#{mb1300.commission},0),
             #{mb1300.createUserId},
-            to_char(NOW(),'yyyyMMddhhmmss'),
+            to_char(NOW(),'yyyyMMddhh24miss'),
             coalesce(#{mb1300.varyAmount},0),
             #{mb1300.barcode}
             )

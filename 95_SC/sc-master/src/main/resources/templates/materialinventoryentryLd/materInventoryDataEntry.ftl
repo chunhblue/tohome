@@ -82,7 +82,7 @@
 <body>
 
 <!--导航-->
-[@common.nav "HOME&Operation&Raw Material Stock Entry"][/@common.nav]
+[@common.nav "HOME&Operation&Month End Stock Count Management Entry"][/@common.nav]
 
 <div class="container-fluid" id="main_box">
     <div class="row">
@@ -156,6 +156,7 @@
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-center">
             <button id="saveBut" type="button" class="btn btn-primary saveBut"><span class="glyphicon glyphicon-ok icon-right"></span>Submit</button>
+            <button id="approvalBut" type="button" class="btn btn-default returnsViewBut"><span class="glyphicon glyphicon-paperclip icon-right"></span>Approval</button>
             <button id="returnsViewBut" type="button" class="btn btn-default returnsViewBut"><span class="glyphicon glyphicon-share icon-right"></span>Back</button>
         </div>
     </div><!--row 分割-->
@@ -230,6 +231,8 @@
         </div>
     </div>
 </div>
+<!--审核-->
+[@common.audit][/@common.audit]
 <!--页脚-->
 [#--货号定位高亮参照 ：https://blog.csdn.net/mhshencaobo/article/details/84588847 --]
 [@common.footer][/@common.footer]

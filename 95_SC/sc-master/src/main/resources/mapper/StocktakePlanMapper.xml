@@ -47,21 +47,263 @@
         <result column="converter" property="converter"></result>
     </resultMap>
 
+	<insert id="insertInventoryToTemp">
+		drop table if exists ${tableName};
+		create temp table ${tableName} as
+		select ma1100.article_id from pi0110,ma1100 where
+		pi_cd=#{param.piCd}
+		and pi_date = #{param.piDate}
+		and pi0110.pma_cd = ma1100.pma_cd
+		and inventory_item = '1'
+	</insert>
+
+    <select id="getInventoryData" resultType="map">
+		SELECT
+			a.article_id,
+			sum(a.sale_qty) as sale_qty,
+			sum(a.receive_qty) as receive_qty,
+			sum(a.trans_in_qty) as trans_in_qty,
+			sum(a.trans_out_qty) as trans_out_qty,
+			sum(a.return_qty) as return_qty,
+			sum(a.item_trans_out_qty) as item_trans_out_qty,
+			sum(a.item_trans_in_qty) as item_trans_in_qty,
+			sum(a.write_off_qty) as write_off_qty,
+			sum(a.receive_corr_qty) as receive_corr_qty,
+			sum(a.return_corr_qty) as return_corr_qty,
+			sum(a.positive_adjust_qty) as positive_adjust_qty,
+			sum(a.negative_adjust_qty) as negative_adjust_qty
+		FROM (
+			SELECT
+				coalesce(e.child_article_id,a.article_id) as article_id,
+				sum(case a.ctype when 'sale' then a.qty else 0 end)*coalesce(e.quantity,1) as sale_qty,
+				sum(case a.ctype when 'receive' then a.qty else 0 end)*coalesce(e.quantity,1) as receive_qty,
+				sum(case a.ctype when 'trans_in' then a.qty else 0 end)*coalesce(e.quantity,1) as trans_in_qty,
+				sum(case a.ctype when 'trans_out' then a.qty else 0 end)*coalesce(e.quantity,1) as trans_out_qty,
+				sum(case a.ctype when 'return' then a.qty else 0 end)*coalesce(e.quantity,1) as return_qty,
+				sum(case a.ctype when 'item_trans_out' then a.qty else 0 end)*coalesce(e.quantity,1) as item_trans_out_qty,
+				sum(case a.ctype when 'item_trans_in' then a.qty else 0 end)*coalesce(e.quantity,1) as item_trans_in_qty,
+				sum(case a.ctype when 'write_off' then a.qty else 0 end)*coalesce(e.quantity,1) as write_off_qty,
+				sum(case a.ctype when 'receive_corr' then a.qty else 0 end)*coalesce(e.quantity,1) as receive_corr_qty,
+				sum(case a.ctype when 'return_corr' then a.qty else 0 end)*coalesce(e.quantity,1) as return_corr_qty,
+				sum(case a.ctype when 'positive_adjustment' then a.qty else 0 end)*coalesce(e.quantity,1) as positive_adjust_qty,
+				sum(case a.ctype when 'negative_adjustment' then a.qty else 0 end)*coalesce(e.quantity,1) as negative_adjust_qty
+			FROM
+			(
+			SELECT DISTINCT d.tran_serial_no::VARCHAR as transid, 'sale' as ctype, b.article_id, d.sale_qty as qty
+			FROM ${tableName} b, sa0020 d
+			WHERE
+				b.article_id = d.article_id
+				AND d.store_cd = #{param.storeCd}
+				AND d.detail_type = 's'
+				AND to_char(sale_date,'YYYYMMDDHH24MISS') BETWEEN #{param.piDate}||'060000' AND #{param.piDate}||#{param.startTime}
+
+			UNION ALL
+
+			SELECT DISTINCT d.receive_id as transid, 'receive' as ctype, b.article_id, COALESCE(d.receive_qty,0) AS qty
+			FROM ${tableName} b, od0000_t c, od0010_t d, t_audit_tab e
+			WHERE
+				c.store_cd = #{param.storeCd}
+				AND c.receive_id = d.receive_id
+				AND b.article_id = d.article_id
+				AND c.receive_id = e.record_cd
+				AND c.store_cd = e.store_cd
+				AND e.c_enable = '1'
+				AND e.sub_no != 0
+				AND mod(e.c_auditstatus,10) = 9
+				AND to_char(e.audit_time,'YYYYMMDDHH24MISS') BETWEEN #{param.piDate}||'060000' AND #{param.piDate}||#{param.startTime}
+
+			UNION ALL
+
+			SELECT DISTINCT c.voucher_no as transid, 'trans_in' as ctype, b.article_id, COALESCE(c.qty1,0) AS qty
+			FROM ${tableName} b, sk0020 c, t_audit_tab e
+			WHERE
+				c.store_cd = #{param.storeCd}
+				AND c.voucher_type = '501'
+				AND b.article_id = c.article_id
+				AND c.voucher_no = e.record_cd
+				AND c.store_cd = e.store_cd
+				AND e.c_enable = '1'
+				AND e.sub_no != 0
+				AND mod(e.c_auditstatus,10) = 9
+				AND to_char(e.audit_time,'YYYYMMDDHH24MISS') BETWEEN #{param.piDate}||'060000' AND #{param.piDate}||#{param.startTime}
+
+			UNION ALL
+
+			SELECT DISTINCT c.voucher_no as transid, 'trans_out' as ctype, b.article_id, COALESCE(c.qty2,0) AS qty
+			FROM ${tableName} b, sk0020 c, t_audit_tab e
+			WHERE
+				c.store_cd = #{param.storeCd}
+				AND c.voucher_type = '502'
+				AND b.article_id = c.article_id
+				AND c.voucher_no = e.record_cd
+				AND c.store_cd = e.store_cd
+				AND e.c_enable = '1'
+				AND e.sub_no != 0
+				AND mod(e.c_auditstatus,10) = 9
+				AND to_char(e.audit_time,'YYYYMMDDHH24MISS') BETWEEN #{param.piDate}||'060000' AND #{param.piDate}||#{param.startTime}
+
+			UNION ALL
+
+			SELECT DISTINCT c.order_id as transid, 'return' as ctype, b.article_id, COALESCE(c.receive_qty,0) AS qty
+			FROM ${tableName} b, od0010 c, t_audit_tab e
+			WHERE
+				c.store_cd = #{param.storeCd}
+				AND left(c.order_id,3) IN ('RRS','RRD')
+				AND b.article_id = c.article_id
+				AND c.order_id = e.record_cd
+				AND c.store_cd = e.store_cd
+				AND e.c_enable = '1'
+				AND e.sub_no != 0
+				AND mod(e.c_auditstatus,10) = 9
+				AND to_char(e.audit_time,'YYYYMMDDHH24MISS') BETWEEN #{param.piDate}||'060000' AND #{param.piDate}||#{param.startTime}
+
+			UNION ALL
+
+			SELECT DISTINCT c.voucher_no as transid, 'item_trans_out' as ctype, b.article_id, ABS(COALESCE(c.qty1,0)) AS qty
+			FROM ${tableName} b, sk0020 c, t_audit_tab e
+			WHERE
+				c.store_cd = #{param.storeCd}
+				AND c.voucher_type = '602'
+				AND b.article_id = c.article_id
+				AND c.voucher_no = e.record_cd
+				AND c.store_cd = e.store_cd
+				AND e.c_enable = '1'
+				AND e.sub_no != 0
+				AND mod(e.c_auditstatus,10) = 9
+				AND to_char(e.audit_time,'YYYYMMDDHH24MISS') BETWEEN #{param.piDate}||'060000' AND #{param.piDate}||#{param.startTime}
+
+			UNION ALL
+
+			SELECT DISTINCT c.voucher_no as transid, 'item_trans_in' as ctype, b.article_id, ABS(COALESCE(c.qty1,0)) AS qty
+			FROM ${tableName} b, sk0020 c, t_audit_tab e
+			WHERE
+				c.store_cd = #{param.storeCd}
+				AND c.voucher_type = '601'
+				AND b.article_id = c.article_id
+				AND c.voucher_no = e.record_cd
+				AND c.store_cd = e.store_cd
+				AND e.c_enable = '1'
+				AND e.sub_no != 0
+				AND mod(e.c_auditstatus,10) = 9
+				AND to_char(e.audit_time,'YYYYMMDDHH24MISS') BETWEEN #{param.piDate}||'060000' AND #{param.piDate}||#{param.startTime}
+
+			UNION ALL
+
+			SELECT DISTINCT c.voucher_no as transid, 'write_off' as ctype, b.article_id, ABS(COALESCE(c.qty1,0)) AS qty
+			FROM ${tableName} b, sk0020 c, t_audit_tab e
+			WHERE
+				c.store_cd = #{param.storeCd}
+				AND c.voucher_type = '603'
+				AND b.article_id = c.article_id
+				AND c.voucher_no = e.record_cd
+				AND c.store_cd = e.store_cd
+				AND e.c_enable = '1'
+				AND e.sub_no != 0
+				AND mod(e.c_auditstatus,10) = 9
+				AND to_char(e.audit_time,'YYYYMMDDHH24MISS') BETWEEN #{param.piDate}||'060000' AND #{param.piDate}||#{param.startTime}
+
+            UNION ALL
+
+			SELECT DISTINCT c.voucher_no as transid, 'positive_adjustment' as ctype, b.article_id, ABS(COALESCE(c.qty1,0)) AS qty
+			FROM ${tableName} b, sk0020 c, t_audit_tab e
+			WHERE
+				c.store_cd = #{param.storeCd}
+				AND c.voucher_type = '604'
+				AND b.article_id = c.article_id
+				AND c.voucher_no = e.record_cd
+				AND c.store_cd = e.store_cd
+				AND e.c_enable = '1'
+				AND e.sub_no != 0
+				AND mod(e.c_auditstatus,10) = 9
+				and COALESCE(c.qty1,0) > 0
+				AND to_char(e.audit_time,'YYYYMMDDHH24MISS') BETWEEN #{param.piDate}||'060000' AND #{param.piDate}||#{param.startTime}
+
+            UNION ALL
+
+			SELECT DISTINCT c.voucher_no as transid, 'negative_adjustment' as ctype, b.article_id, ABS(COALESCE(c.qty1,0)) AS qty
+			FROM ${tableName} b, sk0020 c, t_audit_tab e
+			WHERE
+				c.store_cd = #{param.storeCd}
+				AND c.voucher_type = '604'
+				AND b.article_id = c.article_id
+				AND c.voucher_no = e.record_cd
+				AND c.store_cd = e.store_cd
+				AND e.c_enable = '1'
+				AND e.sub_no != 0
+				AND mod(e.c_auditstatus,10) = 9
+				<![CDATA[
+				and COALESCE(c.qty1,0) < 0
+				]]>
+				AND to_char(e.audit_time,'YYYYMMDDHH24MISS') BETWEEN #{param.piDate}||'060000' AND #{param.piDate}||#{param.startTime}
+
+			UNION ALL
+
+			SELECT DISTINCT c.order_id as transid, 'receive_corr' AS ctype, b.article_id, COALESCE ( C.correction_difference, 0 ) AS qty
+			FROM ${tableName} b, od0010 C, od0000 d, t_audit_tab e
+			WHERE
+				C.store_cd = #{param.storeCd}
+				AND c.order_id = d.order_id
+				AND c.store_cd = d.store_cd
+				AND d.order_type = '07'
+				AND b.article_id = C.article_id
+				AND C.order_id = e.record_cd
+				AND C.store_cd = e.store_cd
+				AND e.c_enable = '1'
+				AND e.sub_no != 0
+				AND MOD ( e.c_auditstatus, 10 ) = 9
+				AND to_char(e.audit_time,'YYYYMMDDHH24MISS') BETWEEN #{param.piDate}||'060000' AND #{param.piDate}||#{param.startTime}
+
+			UNION ALL
+
+			SELECT DISTINCT c.order_id as transid, 'return_corr' AS ctype, b.article_id, COALESCE ( C.correction_difference, 0 ) AS qty
+			FROM ${tableName} b, od0010 C, od0000 d, t_audit_tab e
+			WHERE
+				C.store_cd = #{param.storeCd}
+				AND c.order_id = d.order_id
+				AND c.store_cd = d.store_cd
+				AND d.order_type = '08'
+				AND b.article_id = C.article_id
+				AND C.order_id = e.record_cd
+				AND C.store_cd = e.store_cd
+				AND e.c_enable = '1'
+				AND e.sub_no != 0
+				AND MOD ( e.c_auditstatus, 10 ) = 9
+				AND to_char(e.audit_time,'YYYYMMDDHH24MISS') BETWEEN #{param.piDate}||'060000' AND #{param.piDate}||#{param.startTime}
+			) a
+			left join (
+				select
+					b.parent_article_id,
+					b.effective_start_date
+				from
+					ma1200 a,
+					ma1210 b
+				where
+					(SELECT sp_value FROM cm9060 WHERE sp_id = '0000') between a.effective_start_date and a.effective_end_date
+					and a.parent_article_id = b.parent_article_id
+					and a.effective_start_date = b.effective_start_date
+					and a.review_status = 10
+				group by
+					b.parent_article_id,b.effective_start_date
+				having count(child_article_id)=1
+				order by b.parent_article_id
+				) d on a.article_id = d.parent_article_id
+			left join ma1210 e on e.parent_article_id = d.parent_article_id
+			and e.effective_start_date = d.effective_start_date
+			GROUP BY
+				a.article_id,
+				e.child_article_id,
+				e.quantity
+		) a
+		GROUP BY a.article_id
+	</select>
+
     <!--设置 超过了 end time 没有submit的 计划为 过期, 根据业务日期为准-->
     <update id="updateStocktakingPlanExpired" parameterType="string">
-        UPDATE PI0100
-            SET pi_status = '04'
+       UPDATE  PI0100 A SET pi_status = '04'
         WHERE
-        pi_cd IN (
-            SELECT
-                A.pi_cd
-            FROM
-                PI0100 A
-            WHERE
-                <![CDATA[ CONCAT(A.pi_date,A.pi_end_time)  < concat(#{bsDate},to_char(now(),'hh24miss')) ]]>
-                AND A.review_status IS NULL
-                AND A.pi_status BETWEEN '01' AND '02'
-        )
+        <![CDATA[ CONCAT(A.pi_date,A.pi_end_time)  < concat(#{bsDate},to_char(now(),'hh24miss')) ]]>
+        AND A.review_status IS NULL
+        AND A.pi_status BETWEEN '01' AND '02'
     </update>
 
     <select id="getPi0125CountByPicd" resultType="int">
@@ -139,7 +381,7 @@
             C.pma_cd,
             C.pma_name
         FROM
-            SK0000 A,
+            sk0000_today A,
             MA1100 B,
             MA0080 C
         WHERE
@@ -410,23 +652,33 @@
         PI0110 A,
         MA1100 B
         left join
-				(SELECT
-					ma1200.parent_article_id,ma1210.quantity,ma1210.child_article_id
+				(SELECT distinct
+					ma1200.parent_article_id,ma1210.quantity
 				from ma1200,ma1210
 				where ma1200.parent_article_id=ma1210.parent_article_id
-				and #{piDate} BETWEEN ma1200.effective_start_date and ma1200.effective_end_date
+				and  #{piDate} BETWEEN ma1200.effective_start_date and ma1200.effective_end_date
 				and ma1200.effective_start_date = ma1210.effective_start_date
+				and ma1200.parent_article_id in (select a.parent_article_id from (SELECT count(ma1210.*) num,ma1210.parent_article_id from ma1210,ma1200
+				where ma1210.parent_article_id = ma1200.parent_article_id  GROUP BY ma1210.parent_article_id) a where num = 1)
+				union
+				SELECT distinct
+					ma1200.parent_article_id,1.000
+				from ma1200,ma1210
+				where ma1200.parent_article_id=ma1210.parent_article_id
+				and  #{piDate} BETWEEN ma1200.effective_start_date and ma1200.effective_end_date
+				and ma1200.effective_start_date = ma1210.effective_start_date
+				and ma1200.parent_article_id in (select a.parent_article_id from (SELECT count(ma1210.*) num,ma1210.parent_article_id from ma1210,ma1200
+				where ma1210.parent_article_id = ma1200.parent_article_id  GROUP BY ma1210.parent_article_id) a where num > 1)
 				) ma12
         on B.article_id = ma12.parent_article_id,
         MA1140 D,
-        CM9060 F
+        CM9060 F,
+        MA1130 G
     WHERE
         A.pi_cd = #{piCd}
         AND A.pi_date = #{piDate}
         AND F.sp_id = '0000'
         AND A.pma_cd = B.pma_cd
-        /* 不盘点原材料商品
-        AND B.material_type != '04'*/
         AND F.sp_value BETWEEN B.effective_start_date AND B.effective_end_date
         AND B.article_id = D.article_id
         AND F.sp_value BETWEEN D.effective_start_date AND D.effective_end_date
@@ -434,6 +686,11 @@
             (select article_id from pi0126)*/
         and (D.barcode is not null and D.barcode != '')
         and (B.sales_unit_id is not null and B.sales_unit_id != '')
+        and B.article_id = G.article_id
+        AND B.effective_start_date = G.effective_start_date
+        AND G.structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
+            (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd,jdbcType=VARCHAR}))
+            AND G.sale_inactive = '0'
 </select>
 
     <select id="getPrintData" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100ParamDTO" resultMap="BaseResultMap">
@@ -491,6 +748,12 @@
         ON CONFLICT (pi_cd) DO NOTHING;
     </insert>
 
+    <update id="updateAudit" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100DTO">
+        update pi0105 set n_reviewid = 28,review_status = 10,update_user_id = #{pi0100.updateUserId,jdbcType=VARCHAR},
+        update_ymd = #{pi0100.updateYmd,jdbcType=VARCHAR},update_hms = #{pi0100.updateHms,jdbcType=VARCHAR}
+        where pi_cd = #{pi0100.piCd,jdbcType=VARCHAR}
+    </update>
+
     <select id="getDayOfEnd" resultType="Integer">
         SELECT pi_date FROM pi0100
         WHERE
@@ -501,5 +764,39 @@
             AND pi_date > #{piDate,jdbcType=VARCHAR}
         ORDER BY
             pi_date ASC
+    </select>
+
+    <update id="createTempTable">
+        DROP TABLE IF EXISTS ${tableName};
+        create table ${tableName} (
+            article_id varchar(255),
+            real_time_qty numeric(19,0),
+            export_time varchar(255)
+        )
+    </update>
+
+    <insert id="saveToTempTable" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO">
+        INSERT INTO ${tableName}
+        VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (
+            #{item.articleId,jdbcType=VARCHAR},
+            #{item.realTimeQty},
+            #{item.exportTime,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+
+    <select id="getstockList" resultType="cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO">
+        select t.article_id,t.real_time_qty,t.export_time
+        from ${tableName} t
+        join ma1100 ma1
+		on t.article_id = ma1.article_id
+		where
+		t.article_id not in (select article_id from pi0126)
+		and (select sp_value from cm9060 where sp_id = '0000')
+		    between ma1.effective_start_date and ma1.effective_end_date
+		and ma1.inventory_item = '1'
+		AND ma1.cost_item = '0'
     </select>
 </mapper>

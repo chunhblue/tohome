@@ -20,9 +20,11 @@ import cn.com.bbut.iy.itemmaster.entity.od0010.OD0010;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.audit.IAuditService;
 import cn.com.bbut.iy.itemmaster.service.od0010.directOd0010Service;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +62,8 @@ public class OrderCdController extends BaseAction{
     private IAuditService auditServiceImpl;
     @Autowired
     private CM9060Service cm9060Service;
+    @Autowired
+    private Ma4320Service ma4320Service;
     private final String EXCEL_EXPORT_KEY = "EXCEL_ORDER_DC";
     private final String EXCEL_EXPORT_NAME = "DC Store Order Query.xlsx";
 
@@ -132,6 +136,9 @@ public class OrderCdController extends BaseAction{
         Gson gson = new Gson();
         od0010ParamDTO  od0010ParamDTO = gson.fromJson(searchJson, od0010ParamDTO.class);
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         Collection<Integer> roleIds = (Collection<Integer>) request.getSession().getAttribute(
                 Constants.SESSION_ROLES);
         //获取业务时间
@@ -140,7 +147,7 @@ public class OrderCdController extends BaseAction{
         mv.addObject("time", date);
         mv.addObject("userName", u.getUserName());
         mv.addObject("identity", 1);
-        mv.addObject("printTime", new Date());
+        mv.addObject("printTime",  Utils.getFormateDate(ymd));
         mv.addObject("useMsg", "打印画面");
         mv.addObject("dto",od0010ParamDTO);
         return mv;
@@ -276,7 +283,7 @@ public class OrderCdController extends BaseAction{
             _return.setMessage("The approval status is expired and cannot modify!");//审核状态已失效
         }else if(status == 10){//审核成功
             _return.setSuccess(false);
-            _return.setMessage("Selected PO is already approved and cannot modify!");//审核状态已完成
+            _return.setMessage("Selected document!");//审核状态已完成
         }else if(status == 15){////收货录入完成，未审核
             _return.setSuccess(false);
             _return.setMessage("Selected PO is during receiving process, cannot modify!");

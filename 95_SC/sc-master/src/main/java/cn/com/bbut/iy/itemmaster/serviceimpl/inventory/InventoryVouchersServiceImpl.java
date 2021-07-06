@@ -189,6 +189,7 @@ public class InventoryVouchersServiceImpl implements InventoryVouchersService {
             sk0010.setUploadFlg("0");
             // 保存头档
             i = inventoryVouchersMapper.insertSk0010(sk0010);
+            log.error("voucherType:"+sk0010.getVoucherType()+"<br>"+"sk0010:"+sk0010);
             // 保存明细
             for(Sk0020DTO bean : sk0020List){
                 bean.setVoucherNo(sk0010.getVoucherNo());
@@ -237,9 +238,9 @@ public class InventoryVouchersServiceImpl implements InventoryVouchersService {
             }
             inventoryVouchersMapper.updateSk0010Amt(sk0020List.get(0));
 
-            //添加附件信息
+            //添加附件信息  "04" : 调拨  "10" : 报废
             MA4320Example example = new MA4320Example();
-            example.or().andInformCdEqualTo(sk0010.getVoucherNo()).andFileTypeEqualTo("04");
+            example.or().andInformCdEqualTo(sk0010.getVoucherNo()).andFileTypeEqualTo(sk0010.getFileType());
             ma4320Mapper.deleteByExample(example);
             if(StringUtils.isNotBlank(sk0010.getFileDetailJson())){
                 List<MA4320> ma4320List = new Gson().fromJson(sk0010.getFileDetailJson(), new TypeToken<List<MA4320>>(){}.getType());
@@ -319,7 +320,7 @@ public class InventoryVouchersServiceImpl implements InventoryVouchersService {
         }
         GridDataDTO<Sk0020DTO> data = new GridDataDTO<Sk0020DTO>();
         List<Sk0020DTO> _list = inventoryVouchersMapper.selectListSk0020(sk0020);
-        System.out.println(_list);
+
         if(_list == null || _list.equals("")){
             log.info("<<<<<<<<<<_list is null");
         }else {
@@ -403,7 +404,17 @@ public class InventoryVouchersServiceImpl implements InventoryVouchersService {
         return inventoryVouchersMapper.getOutStoreList(v,zoCd, businessDate);
     }
 
-
+    /**
+     * 获取审核通过的转出门店by InStore
+     * @param v
+     * @param vstore
+     * @return
+     */
+    @Override
+    public List<AutoCompleteDTO> getStoreListByInStore(String v, String vstore) {
+        String businessDate = getBusinessDate();
+        return inventoryVouchersMapper.getStoreListByInStore(v,vstore, businessDate);
+    }
 
     /**
      * 商品自动下拉

@@ -137,6 +137,39 @@ define('dailySaleReport', function () {
         })
     }
     var but_event = function () {
+        m.effstartDate.datetimepicker({
+            language: 'en',
+            format: 'dd/mm/yyyy',
+            maxView: 4,
+            startView: 2,
+            minView: 2,
+            autoclose: true,
+            todayHighlight: true,
+            todayBtn: true,
+        }).on('changeDate', function (ev) {
+            if (ev.date) {
+                $("#effendDate").datetimepicker('setStartDate', new Date(ev.date.valueOf()))
+            } else {
+                $("#effendDate").datetimepicker('setStartDate', null);
+            }
+        });
+
+        m.effendDate.datetimepicker({
+            language: 'en',
+            format: 'dd/mm/yyyy',
+            maxView: 4,
+            startView: 2,
+            minView: 2,
+            autoclose: true,
+            todayHighlight: true,
+            todayBtn: true,
+        }).on('changeDate', function (ev) {
+            if (ev.date) {
+                $("#effstartDate").datetimepicker('setEndDate', new Date(ev.date.valueOf()))
+            } else {
+                $("#effstartDate").datetimepicker('setEndDate', new Date());
+            }
+        });
         m.PosstartDate.datetimepicker({
             language: 'en',
             format: 'dd/mm/yyyy',
@@ -147,7 +180,14 @@ define('dailySaleReport', function () {
             todayHighlight: true,
             todayBtn: true,
             PosstartDate: new Date(fmtIntDate($('#PosstartDate').val()))
+        }).on('changeDate', function (ev) {
+            if (ev.date) {
+                $("#PosendDate").datetimepicker('setStartDate', new Date(ev.date.valueOf()))
+            } else {
+                $("#PosendDate").datetimepicker('setStartDate', null);
+            }
         });
+
         m.PosendDate.datetimepicker({
             language: 'en',
             format: 'dd/mm/yyyy',
@@ -158,25 +198,40 @@ define('dailySaleReport', function () {
             todayHighlight: true,
             todayBtn: true,
             PosendDate: new Date(fmtIntDate($('#PosendDate').val()))
+        }).on('changeDate', function (ev) {
+            if (ev.date) {
+                $("#PosstartDate").datetimepicker('setEndDate', new Date(ev.date.valueOf()))
+            } else {
+                $("#PosstartDate").datetimepicker('setEndDate', new Date());
+            }
+
         });
         $("#show_status").find("input[type='radio']").on("click",function() {
             var thisObj = $(this);
             var thisVal = thisObj.val();
             if(thisVal=="1"){
-               m.typeDate.val(thisVal);
+                var trList = $("#dailyTable  tr:not(:first)");
+                var trPosList = $("#dailyPosTable  tr:not(:first)");
+                trList.remove();
+                trPosList.remove();
+                _common.loadPaging(1,0,page,rows);
+                m.typeDate.val(thisVal);
               m.PosendDate.attr("disabled",true);
               m.PosstartDate.attr("disabled",true);
               m.PosstartDate.css("border-color","#CCCCCC");
-              m.PosstartDate.val('');
-              m.PosendDate.val('');
               m.PosendDate.css("border-color","#CCCCCC");
               m.effstartDate.attr("disabled",false);
               m.effstartDate.css("border-color","#CCCCCC");
               m.effendDate.attr("disabled",false);
               m.effendDate.css("border-color","#CCCCCC");
-                $("#dailyPosTable").hide();
-                $("#dailyTable").show();
+              $("#dailyPosTable").hide();
+              $("#dailyTable").show();
             }else{
+                var trList = $("#dailyTable  tr:not(:first)");
+                var trPosList = $("#dailyPosTable  tr:not(:first)");
+                trList.remove();
+                trPosList.remove();
+                _common.loadPaging(1,0,page,rows);
                 m.typeDate.val(thisVal);
                  m.effendDate.attr("disabled",true);
                 m.effstartDate.attr("disabled",true);
@@ -269,9 +324,9 @@ define('dailySaleReport', function () {
                         for (let i = 0; i < dataList.length; i++) {
                             var item = dataList[i];
                             let tempTrHtml = '<tr style="text-align: center;">' +
-                                '<td title="'+isEmpty(item.storeCd)+'" style="text-align: left">'+isEmpty(item.storeCd)+'</td>' +
+                                '<td title="'+isEmpty(item.storeCd)+'" style="text-align: left;width: auto">'+isEmpty(item.storeCd)+'</td>' +
                                 '<td title="'+isEmpty(item.storeName)+'" style="text-align: left">'+isEmpty(item.storeName)+'</td>' +
-                                '<td title="'+isEmpty(fmtIntDate(item.saleDate))+'" style="text-align: center">'+isEmpty(fmtIntDate(item.saleDate))+'</td>' +
+                                '<td title="'+fmtIntDate(item.saleDate)+'" style="text-align: center">'+fmtIntDate(item.saleDate)+'</td>' +
                                 '<td title="'+toThousands(item.avgCustomerNo)+'" style="text-align:right">'+toThousands(item.avgCustomerNo)+'</td>' +
                                 '<td title="'+toThousands(item.time68)+'" style="text-align:right">'+toThousands(item.time68)+'</td>' +
                                 '<td title="'+toThousands(item.time810)+'" style="text-align:right">'+toThousands(item.time810)+'</td>' +
@@ -290,6 +345,32 @@ define('dailySaleReport', function () {
                                 '<td title="'+toThousands(item.shift3)+'" style="text-align:right">'+toThousands(item.shift3)+'</td>' +
                                 '<td title="'+toThousands(item.totalAmt)+'" style="text-align:right">'+toThousands(item.totalAmt)+'</td>' +
                                 '<td title="'+isEmpty(item.amName)+'" style="text-align: left">'+isEmpty(item.amName)+'</td>' +
+                                '</tr>'+
+                                '<tr style="text-align: center;">' +
+                                '<td title="" style="text-align: left"></td>' +
+                                '<td title="" style="text-align: left"></td>' +
+                                '<td title="" style="text-align: center"></td>' +
+                                '<td title="Count per hour" style="text-align:center">Count per hour</td>' +
+                                '<td title="'+toThousands(item.hour6_8)+'" style="text-align:right">'+toThousands(item.hour6_8)+'</td>' +
+                                '<td title="'+toThousands(item.hour8_10)+'" style="text-align:right">'+toThousands(item.hour8_10)+'</td>' +
+                                '<td title="'+toThousands(item.hour10_12)+'" style="text-align:right">'+toThousands(item.hour10_12)+'</td>' +
+                                '<td title="'+toThousands(item.hour12_14)+'" style="text-align:right">'+toThousands(item.hour12_14)+'</td>' +
+                                '<td title="'+toThousands(item.hour6_8+item.hour8_10+item.hour10_12+item.hour12_14)+'" style="text-align:right">'+
+                                toThousands(item.hour6_8+item.hour8_10+item.hour10_12+item.hour12_14)+'</td>' +
+                                '<td title="'+toThousands(item.hour14_16)+'" style="text-align:right">'+toThousands(item.hour14_16)+'</td>' +
+                                '<td title="'+toThousands(item.hour16_18)+'" style="text-align:right">'+toThousands(item.hour16_18)+'</td>' +
+                                '<td title="'+toThousands(item.hour18_20)+'" style="text-align:right">'+toThousands(item.hour18_20)+'</td>' +
+                                '<td title="'+toThousands(item.hour20_22)+'" style="text-align:right">'+toThousands(item.hour20_22)+'</td>' +
+                                '<td title="'+toThousands(item.hour14_16+item.hour16_18+item.hour18_20+item.hour20_22)+'" style="text-align:right">'+
+                                toThousands(item.hour14_16+item.hour16_18+item.hour18_20+item.hour20_22)+'</td>' +
+                                '<td title="'+toThousands(item.hour22_24)+'" style="text-align:right">'+toThousands(item.hour22_24)+'</td>' +
+                                '<td title="'+toThousands(item.hour0_2)+'" style="text-align:right">'+toThousands(item.hour0_2)+'</td>' +
+                                '<td title="'+toThousands(item.hour2_4)+'" style="text-align:right">'+toThousands(item.hour2_4)+'</td>' +
+                                '<td title="'+toThousands(item.hour4_6)+'" style="text-align:right">'+toThousands(item.hour4_6)+'</td>' +
+                                '<td title="'+toThousands(item.hour22_24+item.hour0_2+item.hour2_4+item.hour4_6)+'" style="text-align:right">'+
+                                toThousands(item.hour22_24+item.hour0_2+item.hour2_4+item.hour4_6)+'</td>' +
+                                '<td title="" style="text-align:right"></td>' +
+                                '<td title="" style="text-align: left"></td>' +
                                 '</tr>';
                             m.dailyPosTable.append(tempTrHtml);
                         }
@@ -301,37 +382,61 @@ define('dailySaleReport', function () {
                         // totalPage = result.o.totalPage;
                         // // 总条数
                         // count = result.o.count;
-                        for (let i = 0; i < dataList.length; i++) {
 
-                            var item = dataList[i];
-                            let tempTrHtml = '<tr style="text-align: center;">' +
-                                '<td title="'+item.storeCd+'" style="text-align: left">'+item.storeCd+'</td>' +
-                                '<td title="'+isEmpty(item.storeName)+'" style="text-align: left">'+isEmpty(item.storeName)+'</td>' +
-                                '<td title="'+isEmpty(fmtIntDate(item.saleDate))+'" style="text-align: center">'+isEmpty(fmtIntDate(item.saleDate))+'</td>' +
-                                '<td title="'+toThousands(item.avgCustomerNo)+'" style="text-align:right">'+toThousands(item.avgCustomerNo)+'</td>' +
-                                '<td title="'+toThousands(item.time1214)+'" style="text-align:right">'+toThousands(item.time1214)+'</td>' +
-                                '<td title="'+toThousands(item.time1416)+'" style="text-align:right">'+toThousands(item.time1416)+'</td>' +
-                                '<td title="'+toThousands(item.time1618)+'" style="text-align:right">'+toThousands(item.time1618)+'</td>' +
-                                '<td title="'+toThousands(item.time1820)+'" style="text-align:right">'+toThousands(item.time1820)+'</td>' +
-                                '<td title="'+toThousands(item.shift1)+'" style="text-align:right">'+toThousands(item.shift1)+'</td>' +
-                                '<td title="'+toThousands(item.time2022)+'" style="text-align:right">'+toThousands(item.time2022)+'</td>' +
-                                '<td title="'+toThousands(item.time2224)+'" style="text-align:right">'+toThousands(item.time2224)+'</td>' +
-                                '<td title="'+toThousands(item.time02)+'" style="text-align:right">'+toThousands(item.time02)+'</td>' +
-                                '<td title="'+toThousands(item.time24)+'" style="text-align:right">'+toThousands(item.time24)+'</td>' +
-                                '<td title="'+toThousands(item.shift2)+'" style="text-align:right">'+toThousands(item.shift2)+'</td>' +
-                                '<td title="'+toThousands(item.time46)+'" style="text-align:right">'+toThousands(item.time46)+'</td>' +
-                                '<td title="'+toThousands(item.time68)+'" style="text-align:right">'+toThousands(item.time68)+'</td>' +
-                                '<td title="'+toThousands(item.time810)+'" style="text-align:right">'+toThousands(item.time810)+'</td>' +
-                                '<td title="'+toThousands(item.time1012)+'" style="text-align:right">'+toThousands(item.time1012)+'</td>' +
-                                '<td title="'+toThousands(item.shift3)+'" style="text-align:right">'+toThousands(item.shift3)+'</td>' +
-                                '<td title="'+toThousands(item.totalAmt)+'" style="text-align:right">'+toThousands(item.totalAmt)+'</td>' +
-                                '<td title="'+isEmpty(item.amName)+'" style="text-align: left">'+isEmpty(item.amName)+'</td>' +
-                                '</tr>';
-                            m.dailyTable.append(tempTrHtml);
-
+                            for (let i = 0; i < dataList.length; i++) {
+                                var item = dataList[i];
+                                let tempTrHtml = '<tr style="text-align: center;">' +
+                                    '<td title="'+isEmpty(item.storeCd)+'" style="text-align: left">'+isEmpty(item.storeCd)+'</td>' +
+                                    '<td title="'+isEmpty(item.storeName)+'" style="text-align: left">'+isEmpty(item.storeName)+'</td>' +
+                                    '<td title="'+fmtIntDate(item.saleDate)+'" style="text-align: center">'+fmtIntDate(item.saleDate)+'</td>' +
+                                    '<td title="'+toThousands(item.avgCustomerNo)+'" style="text-align:right">'+toThousands(item.avgCustomerNo)+'</td>' +
+                                    '<td title="'+toThousands(item.time68)+'" style="text-align:right">'+toThousands(item.time68)+'</td>' +
+                                    '<td title="'+toThousands(item.time810)+'" style="text-align:right">'+toThousands(item.time810)+'</td>' +
+                                    '<td title="'+toThousands(item.time1012)+'" style="text-align:right">'+toThousands(item.time1012)+'</td>' +
+                                    '<td title="'+toThousands(item.time1214)+'" style="text-align:right">'+toThousands(item.time1214)+'</td>' +
+                                    '<td title="'+toThousands(item.shift1)+'" style="text-align:right">'+toThousands(item.shift1)+'</td>' +
+                                    '<td title="'+toThousands(item.time1416)+'" style="text-align:right">'+toThousands(item.time1416)+'</td>' +
+                                    '<td title="'+toThousands(item.time1618)+'" style="text-align:right">'+toThousands(item.time1618)+'</td>' +
+                                    '<td title="'+toThousands(item.time1820)+'" style="text-align:right">'+toThousands(item.time1820)+'</td>' +
+                                    '<td title="'+toThousands(item.time2022)+'" style="text-align:right">'+toThousands(item.time2022)+'</td>' +
+                                    '<td title="'+toThousands(item.shift2)+'" style="text-align:right">'+toThousands(item.shift2)+'</td>' +
+                                    '<td title="'+toThousands(item.time2224)+'" style="text-align:right">'+toThousands(item.time2224)+'</td>' +
+                                    '<td title="'+toThousands(item.time02)+'" style="text-align:right">'+toThousands(item.time02)+'</td>' +
+                                    '<td title="'+toThousands(item.time24)+'" style="text-align:right">'+toThousands(item.time24)+'</td>' +
+                                    '<td title="'+toThousands(item.time46)+'" style="text-align:right">'+toThousands(item.time46)+'</td>' +
+                                    '<td title="'+toThousands(item.shift3)+'" style="text-align:right">'+toThousands(item.shift3)+'</td>' +
+                                    '<td title="'+toThousands(item.totalAmt)+'" style="text-align:right">'+toThousands(item.totalAmt)+'</td>' +
+                                    '<td title="'+isEmpty(item.amName)+'" style="text-align: left">'+isEmpty(item.amName)+'</td>' +
+                                    '</tr>'+
+                                    '<tr style="text-align: center;">' +
+                                    '<td title="" style="text-align: left"></td>' +
+                                    '<td title="" style="text-align: left"></td>' +
+                                    '<td title="" style="text-align: center"></td>' +
+                                    '<td title="Count per hour" style="text-align:center">Count per hour</td>' +
+                                    '<td title="'+toThousands(item.hour6_8)+'" style="text-align:right">'+toThousands(item.hour6_8)+'</td>' +
+                                    '<td title="'+toThousands(item.hour8_10)+'" style="text-align:right">'+toThousands(item.hour8_10)+'</td>' +
+                                    '<td title="'+toThousands(item.hour10_12)+'" style="text-align:right">'+toThousands(item.hour10_12)+'</td>' +
+                                    '<td title="'+toThousands(item.hour12_14)+'" style="text-align:right">'+toThousands(item.hour12_14)+'</td>' +
+                                    '<td title="'+toThousands(item.hour6_8+item.hour8_10+item.hour10_12+item.hour12_14)+'" style="text-align:right">'+
+                                    toThousands(item.hour6_8+item.hour8_10+item.hour10_12+item.hour12_14)+'</td>' +
+                                    '<td title="'+toThousands(item.hour14_16)+'" style="text-align:right">'+toThousands(item.hour14_16)+'</td>' +
+                                    '<td title="'+toThousands(item.hour16_18)+'" style="text-align:right">'+toThousands(item.hour16_18)+'</td>' +
+                                    '<td title="'+toThousands(item.hour18_20)+'" style="text-align:right">'+toThousands(item.hour18_20)+'</td>' +
+                                    '<td title="'+toThousands(item.hour20_22)+'" style="text-align:right">'+toThousands(item.hour20_22)+'</td>' +
+                                    '<td title="'+toThousands(item.hour14_16+item.hour16_18+item.hour18_20+item.hour20_22)+'" style="text-align:right">'+
+                                    toThousands(item.hour14_16+item.hour16_18+item.hour18_20+item.hour20_22)+'</td>' +
+                                    '<td title="'+toThousands(item.hour22_24)+'" style="text-align:right">'+toThousands(item.hour22_24)+'</td>' +
+                                    '<td title="'+toThousands(item.hour0_2)+'" style="text-align:right">'+toThousands(item.hour0_2)+'</td>' +
+                                    '<td title="'+toThousands(item.hour2_4)+'" style="text-align:right">'+toThousands(item.hour2_4)+'</td>' +
+                                    '<td title="'+toThousands(item.hour4_6)+'" style="text-align:right">'+toThousands(item.hour4_6)+'</td>' +
+                                    '<td title="'+toThousands(item.hour22_24+item.hour0_2+item.hour2_4+item.hour4_6)+'" style="text-align:right">'+
+                                    toThousands(item.hour22_24+item.hour0_2+item.hour2_4+item.hour4_6)+'</td>' +
+                                    '<td title="" style="text-align:right"></td>' +
+                                    '<td title="" style="text-align: left"></td>' +
+                                    '</tr>';
+                                m.dailyTable.append(tempTrHtml);
+                            }
                         }
-
-                    }
                     // 加载分页条数据
                     _common.loadPaging(totalPage,count,page,rows);
                 }
@@ -376,6 +481,10 @@ define('dailySaleReport', function () {
                 $("#effstartDate").focus();
                 $("#effstartDate").css("border-color","red");
                 return false;
+            }else if(_common.judgeValidDate(m.effstartDate.val())){
+                _common.prompt("Please enter a valid date!",3,"info");
+                $("#effstartDate").focus();
+                return false;
             }else {
                 $("#effstartDate").css("border-color","#CCC");
             }
@@ -383,6 +492,10 @@ define('dailySaleReport', function () {
                 _common.prompt("Please enter a Sales Date!",5,"error"); // 结束日期不可以为空
                 $("#effendDate").focus();
                 $("#effendDate").css("border-color","red");
+                return false;
+            }else if(_common.judgeValidDate(m.effendDate.val())){
+                _common.prompt("Please enter a valid date!",3,"info");
+                $("#effendDate").focus();
                 return false;
             }else {
                 $("#effendDate").css("border-color","#CCC");
@@ -394,6 +507,10 @@ define('dailySaleReport', function () {
                 $("#PosstartDate").focus();
                 $("#PosstartDate").css("border-color","red");
                 return false;
+            }else if(_common.judgeValidDate(m.PosstartDate.val())){
+                _common.prompt("Please enter a valid date!",3,"info");
+                $("#PosstartDate").focus();
+                return false;
             }else {
                 $("#PosstartDate").css("border-color","#CCC");
             }
@@ -402,6 +519,10 @@ define('dailySaleReport', function () {
                 $("#PosendDate").focus();
                 $("#PosendDate").css("border-color","red");
                 return false;
+            }else if(_common.judgeValidDate(m.PosendDate.val())){
+                _common.prompt("Please enter a valid date!",3,"info");
+                $("#PosendDate").focus();
+                return false;
             }else {
                 $("#PosendDate").css("border-color","#CCC");
             }
@@ -409,6 +530,11 @@ define('dailySaleReport', function () {
 
         if(new Date(fmtDate(fmtIntDate( _startDate))).getTime()>new Date(fmtDate(fmtIntDate(  _endDate))).getTime()){
             _common.prompt("The start date cannot be greater than the end date!",5,"error");/*开始时间不能大于结束时间*/
+            if (typeDate=='1'){
+                $("#effendDate").focus();
+            }else {
+                $("#PosendDate").focus();
+            }
             return false;
         }
         if(_startDate!=""&&_endDate!=""){
@@ -417,6 +543,11 @@ define('dailySaleReport', function () {
             var difValue = parseInt(Math.abs((_EndDate-_StartDate)/(1000*3600*24)));
             if(difValue >62){
                 _common.prompt("Query Period cannot exceed 62 days!",5,"error"); // 日期期间取值范围不能大于62天
+                if (typeDate=='1'){
+                    $("#effendDate").focus();
+                }else {
+                    $("#PosendDate").focus();
+                }
                 return false;
             }
         }
@@ -452,6 +583,7 @@ define('dailySaleReport', function () {
         var reg = /\d{1,3}(?=(\d{3})+$)/g;
         return (val + '').replace(reg, '$&,');
     }
+
 
 
     self.init = init;

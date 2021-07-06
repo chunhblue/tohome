@@ -252,12 +252,12 @@ define('orderDirectSupplier', function () {
             if (m.orderDirectSupplierDateStartDate.val() != null || m.orderDirectSupplierDateStartDate.val() != null) {
                 $("#orderDirectSupplierDateStartDate").css("border-color","#CCCCCC");
             }
-        })
+        });
         $("#orderDirectSupplierDateEndDate").blur(function () {
             if (m.orderDirectSupplierDateEndDate.val() != null || m.orderDirectSupplierDateEndDate.val() != null) {
                 $("#orderDirectSupplierDateEndDate").css("border-color","#CCCCCC");
             }
-        })
+        });
 
         m.search.on("click", function () {
            if(verifySearch()){
@@ -549,8 +549,8 @@ define('orderDirectSupplier', function () {
     var getMenthod = function(tdObj, value){
         let str = '';
         switch (value) {
-            case '40':
-                str = 'DC Store Order';
+            case '10':
+                str = 'DC Order';
                 break;
             case '30':
                 str='DC Allocation Order';
@@ -558,7 +558,7 @@ define('orderDirectSupplier', function () {
             case '20':
                 str = 'Direct Store Purchase Order';
                 break;
-            case '10':
+            case '40':
                 str='Direct Store Purchase Allocation';
                 break;
         }
@@ -588,26 +588,26 @@ define('orderDirectSupplier', function () {
             _common.prompt("Please select a start date!",3,"info");/*请选择开始日期*/
             $("#orderDirectSupplierDateStartDate").focus();
             return false;
-        }else{
-            _StartDate = new Date(fmtDate($("#orderDirectSupplierDateStartDate").val())).getTime();
-            if(judgeNaN(_StartDate)){
-                _common.prompt("Please enter a valid date!",3,"info");
-                $("#orderDirectSupplierDateStartDate").focus();
-                return false;
-            }
+        }else if(_common.judgeValidDate($("#orderDirectSupplierDateStartDate").val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#orderDirectSupplierDateStartDate").css("border-color","red");
+            $("#orderDirectSupplierDateStartDate").focus();
+            return false;
+        }else {
+            $("#orderDirectSupplierDateStartDate").css("border-color","#CCCCCC");
         }
         let _EndDate = null;
         if(!$("#orderDirectSupplierDateEndDate").val()){
             _common.prompt("Please select a end date!",3,"info");/*请选择结束日期*/
             $("#orderDirectSupplierDateEndDate").focus();
             return false;
-        }else{
-            _EndDate = new Date(fmtDate($("#orderDirectSupplierDateEndDate").val())).getTime();
-            if(judgeNaN(_EndDate)){
-                _common.prompt("Please enter a valid date!",3,"info");
-                $("#orderDirectSupplierDateEndDate").focus();
-                return false;
-            }
+        }else if(_common.judgeValidDate($("#orderDirectSupplierDateEndDate").val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#orderDirectSupplierDateEndDate").css("border-color","red");
+            $("#orderDirectSupplierDateEndDate").focus();
+            return false;
+        }else {
+            $("#orderDirectSupplierDateEndDate").css("border-color","#CCCCCC");
         }
         if(_StartDate>_EndDate){
             $("#orderDirectSupplierDateEndDate").focus();
@@ -637,7 +637,7 @@ define('orderDirectSupplier', function () {
                 for (var i = 0; i < result.length; i++) {
                     var optionValue = result[i].codeValue;
                     var optionText = result[i].codeName;
-                    if(optionValue=='10'||optionValue=='20'){
+                    if(optionValue=='40'||optionValue=='20'){
                         selectObj.append(new Option(optionText, optionValue));
                     }
                 }

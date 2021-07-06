@@ -158,6 +158,7 @@ define('writeOff', function () {
 				page=1;
 				setParamJson();
 				getData(page,rows);
+				total_detail(m.searchJson.val());
 			}
 		})
 
@@ -231,6 +232,7 @@ define('writeOff', function () {
 							'<td title="' + isEmpty(item.barcode) + '" style="text-align: right">' + isEmpty(item.barcode) + '</td>' +
 							'<td title="' + isEmpty(item.uom) + '" style="text-align: left">' + isEmpty(item.uom) + '</td>' +
 							'<td title="' + toThousands(item.writeOffQty) + '" style="text-align:right;">' + toThousands(item.writeOffQty) + '</td>' +
+							// sale_qty
 							'<td title="' + toThousands(item.saleQty) + '" style="text-align:right;">' + toThousands(item.saleQty) + '</td>' +
 							"<td style='text-align:left;'>" + isEmpty(item.adjustReason) + "</td>" +
 							'<td title="' + isEmpty(item.ofc) + '" style="text-align: left">' + isEmpty(item.ofc) + '</td>' +
@@ -247,12 +249,12 @@ define('writeOff', function () {
 							"<td></td>" +
 							"<td style='text-align:right'>Total:</td>" +
 							"<td style='text-align:right'>total Item</td>" +
-							"<td style='text-align:right'>"+result.o.totalItem+"</td>"+
+							"<td style='text-align:right'>"+toThousands($("#totalDoc").val())+"</td>"+
 							"<td></td>"+
 							"<td></td>"+
 							"<td style='text-align:right'>total qty </td>"+
-							"<td style='text-align:right'>"+result.o.ItemQty+"</td>"+
-							"<td style='text-align:right'>"+result.o.itemSaleQty+"</td>" +
+							"<td style='text-align:right'>"+toThousands($("#toTotalQty").val())+"</td>"+
+							"<td style='text-align:right'>"+toThousands($("#itemSaleQty").val())+"</td>" +
 							"<td></td>" +"<td></td>" +
 							"<td></td>" +
 							"</tr>";
@@ -271,6 +273,32 @@ define('writeOff', function () {
 			}
 		});
 	}
+
+	var total_detail = function (data) {
+	    $.myAjaxs({
+	        url: url_left+"/getOffQty",
+	        async: false,
+	        cache: false,
+	        type: "post",
+	        data: 'searchJson=' + data,
+	        dataType: "json",
+	        success: function (result) {
+	            if(result.success){
+	                $("#toTotalQty").val(result.o.writeOffQty);
+	                $("#itemSaleQty").val(result.o.saleQty);
+	                $("#totalDoc").val(result.o.records);
+	            }else {
+	                $("#toTotalQty").val('');
+	                $("#itemSaleQty").val('');
+	                $("#totalDoc").val('');
+	            }
+	        },
+	        error:function () {
+	            $("#toTotalQty").val('');
+	            $("#totalDoc").val('');
+	        }
+	    })
+	};
 
 	// 分页按钮事件
 	var but_paging = function () {
@@ -323,6 +351,10 @@ define('writeOff', function () {
 			$("#writeOffStartDate").focus();
 			$("#writeOffStartDate").css("border-color","red");
 			return false;
+		}else if(_common.judgeValidDate(m.writeOffStartDate.val())){
+			_common.prompt("Please enter a valid date!",3,"info");
+			$("#writeOffStartDate").focus();
+			return false;
 		}else {
 			$("#writeOffStartDate").css("border-color","#CCC");
 		}
@@ -330,6 +362,10 @@ define('writeOff', function () {
 			_common.prompt("Please enter a Date!",5,"error"); // 结束日期不可以为空
 			$("#writeOffEndDate").focus();
 			$("#writeOffEndDate").css("border-color","red");
+			return false;
+		}else if(_common.judgeValidDate(m.writeOffEndDate.val())){
+			_common.prompt("Please enter a valid date!",3,"info");
+			$("#writeOffEndDate").focus();
 			return false;
 		}else {
 			$("#writeOffEndDate").css("border-color","#CCC");
@@ -404,6 +440,7 @@ define('writeOff', function () {
 			subCategoryCd:$("#subCategory").attr("k"),
 			categoryCd:$("#category").attr("k"),
 			articleName:m.itemName.val().trim(),
+			// articleId:m.itemName.val().trim(),
 			page: page,
 			rows: rows,
  		};

@@ -130,8 +130,8 @@ define('custDataEntry', function () {
         list.forEach(function (item) {
             item.rowIndex=uuid();
             item.lastUpdateTime=lastUpdateTime;
-            item.qty=toThousands(item.qty);
-            item.stockQty=toThousands(item.stockQty);
+            item.qty=reThousands(item.qty);
+            item.stockQty=reThousands(item.stockQty);
             if(i<list.length){
                 i=i+1
             }
@@ -526,6 +526,7 @@ define('custDataEntry', function () {
                 if (result != "true") {
                     return false;
                 }
+                $("#audit_affirm").prop("disabled",true);
                 var detailType = "tmp_ci_adjustment";
                 $.myAjaxs({
                     url: systemPath + "/audit/submit",
@@ -631,15 +632,19 @@ define('custDataEntry', function () {
                     var barcode = $(this).find('td[tag=barcode]').text();
                     var articleName = $(this).find('td[tag=articleName]').text();
                     var uom = $(this).find('td[tag=uom]').text();
-                    var qty = $(this).find('td[tag=qty]').text();
-                    var stockQty = $(this).find('td[tag=stockQty]').text();
+                    var qty = reThousands($(this).find('td[tag=qty]').text());
+                    var stockQty = reThousands($(this).find('td[tag=stockQty]').text());
+                    var reasonCode = $(this).find('td[tag=reasonCode]').text();
+                    var fnStockQty = $(this).find('td[tag=fnStockQty]').text();
                     var obj = {
                         'barcode': barcode,
                         'articleId': _articleId,
                         'articleName': articleName,
                         'uom': uom,
                         'qty': qty,
+                        'reasonCode':reasonCode,
                         'stockQty': stockQty,
+                        'fnStockQty':fnStockQty,
                         'rowIndex': uuid(), // 设置一个唯一标识
                     }
                     if (obj.qty != 0) {
@@ -707,6 +712,7 @@ define('custDataEntry', function () {
 
         // 输入商品id定位功能
         m.searchItemBtn.on('click',function () {
+
             let storeCd = m.store.attr('k');
             let articleId=m.searchItemInp.val();
             let barcode=m.searchItemBcd.val();
@@ -719,22 +725,24 @@ define('custDataEntry', function () {
                 $('#store').css("border-color","#CCC");
             }
 
+           if (m.piCd.val()!= null && m.piCd.val()!=" "){
+                if (m.enterFlag.val()=="view" || m.enterFlag.val()=="update"){
+                    getDataIn(m.piCd.val());
+                }else {
+                    var searchJsonStr={
+                        storeCd:$("#store").attr("k"),
+                        articleId:articleId,
+                        barcode:barcode,
+                    }
+                    m.searchJson1.val(JSON.stringify(searchJsonStr));
+                    paramGrid = "searchJson="+ m.searchJson1.val();
+                    tableGrid.setting("url",url_left+"/getStoreCustItem");
+                    tableGrid.setting("param", paramGrid);
+                    tableGrid.setting("page", 1);
+                    tableGrid.loadData(null);
+                }
 
-         if (m.enterFlag.val()=="view" || m.enterFlag.val()=="update"){
-             getDataIn(m.piCdParam.val());
-            }else {
-             var searchJsonStr={
-                 storeCd:$("#store").attr("k"),
-                 articleId:articleId,
-                 barcode:barcode,
-             }
-             m.searchJson1.val(JSON.stringify(searchJsonStr));
-             paramGrid = "searchJson="+ m.searchJson1.val();
-             tableGrid.setting("url",url_left+"/getStoreCustItem");
-             tableGrid.setting("param", paramGrid);
-             tableGrid.setting("page", 1);
-             tableGrid.loadData(null);
-         }
+           }
             // searchItem();
         });
 
@@ -904,6 +912,8 @@ define('custDataEntry', function () {
                             '<td tag="uom" width="80" title="'+item.uom+'" align="left" id="zgGridTtable_'+rowindex+'_tr_uom" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
                             '<td tag="qty" width="80" title="'+toThousands(item.qty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_qty" tdindex="zgGridTtable_qty">'+toThousands(item.qty)+'</td>' +
                             '<td tag="stockQty" width="80" title="'+toThousands(item.stockQty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_stockQty" tdindex="zgGridTtable_stockQty">'+toThousands(item.stockQty)+'</td>' +
+                            '<td tag="reason" width="80" title="'+item.reason+'" align="right" id="zgGridTtable_'+rowindex+'_tr_stockQty" tdindex="zgGridTtable_reason">'+item.reason+'</td>' +
+                            '<td class="hide" tag="fnStockQty" width="130" title="'+toThousands(item.fnStockQty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_fnStockQty" tdindex="zgGridTtable_fnStockQty">'+toThousands(item.fnStockQty)+'</td>' +
                             // '<td tag="lastUpdateTime" width="130" title="'+formatDateAndTime(item.lastUpdateTime)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_lastUpdateTime" tdindex="zgGridTtable_lastUpdateTime">'+formatDateAndTime(item.lastUpdateTime)+'</td>' +
                             // '<td tag="note" width="130" title="'+isEmpty(item.note)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_note" tdindex="zgGridTtable_note">'+isEmpty(item.note)+'</td>' +
                             '</tr>';
@@ -963,6 +973,7 @@ define('custDataEntry', function () {
                             '<td tag="uom" width="80" title="'+item.uom+'" align="left" id="zgGridTtable_'+rowindex+'_tr_uom" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
                             '<td tag="qty" width="80" title="'+toThousands(item.qty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_qty" tdindex="zgGridTtable_qty">'+toThousands(item.qty)+'</td>' +
                             '<td tag="stockQty" width="80" title="'+toThousands(item.stockQty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_stockQty" tdindex="zgGridTtable_stockQty">'+toThousands(item.stockQty)+'</td>' +
+                            '<td tag="reason" width="80" title="'+item.reason+'" align="right" id="zgGridTtable_'+rowindex+'_tr_stockQty" tdindex="zgGridTtable_reason">'+item.reason+'</td>' +
                             // '<td tag="lastUpdateTime" width="130" title="'+formatDateAndTime(item.lastUpdateTime)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_lastUpdateTime" tdindex="zgGridTtable_lastUpdateTime">'+formatDateAndTime(item.lastUpdateTime)+'</td>' +
                             // '<td tag="note" width="130" title="'+isEmpty(item.note)+'" align="center" id="zgGridTtable_'+rowindex+'_tr_note" tdindex="zgGridTtable_note">'+isEmpty(item.note)+'</td>' +
                             '</tr>';
@@ -1135,7 +1146,7 @@ define('custDataEntry', function () {
         tableGrid = $("#zgGridTtable").zgGrid({
             title: "Details",
             param: paramGrid,
-            colNames: ["Item Barcode", "Item Code", "Item Name", "UOM", "Qty","Inventory Qty"],
+            colNames: ["Item Barcode", "Item Code", "Item Name", "UOM", "Qty","Inventory Qty","Reason Code","Reason","fnStockQty"],
             colModel: [
                 {
                     name: "barcode",
@@ -1174,7 +1185,7 @@ define('custDataEntry', function () {
                     text: "right",
                     width: "80",
                     ishide: false,
-                    getCustomValue:getThousands
+                    // getCustomValue:getThousands
                 },
                 {
                     name: "stockQty",
@@ -1184,6 +1195,28 @@ define('custDataEntry', function () {
                     ishide: false,
                     getCustomValue:getThousands
                 },
+                {
+                    name: "reasonCode",
+                    type: "text",
+                    text: "right",
+                    width: "80",
+                    ishide: true,
+                },
+                {
+                    name: "reason",
+                    type: "text",
+                    text: "right",
+                    width: "80",
+                    ishide: false,
+                },
+                {
+                    name: "fnStockQty",
+                    type: "text",
+                    text: "right",
+                    width: "130",
+                    ishide: true,
+                    getCustomValue:getThousands
+                }
             ],//列内容
             traverseData: dataForm,
             width: "max",//宽度自动

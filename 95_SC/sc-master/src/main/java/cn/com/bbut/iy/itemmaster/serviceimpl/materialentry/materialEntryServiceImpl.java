@@ -162,6 +162,35 @@ public class materialEntryServiceImpl implements materialEntryService {
     }
 
     @Override
+    public PI0100DTOC getInvenDataPioIn(PI0100DTOC pi0100c) {
+        if (StringUtils.isEmpty(pi0100c.getPiCd())) {
+            return null;
+        } // 获取主档信息
+        List<String> articles = new ArrayList<>();
+        List<StocktakeItemDTOC> list= materialentryMapper.getPI0140ByPrimaryIn(pi0100c.getPiCd(),pi0100c.getArticleId());
+        for(StocktakeItemDTOC item:list){
+            articles.add(item.getArticleId());
+        }
+        String inEsTime = cm9060Service.getValByKey("1206");
+        //拼接url，转义参数
+        String connUrl = inventoryUrl + "GetRelTimeInventory/" +  pi0100c.getStoreCd()
+                + "/*/*/*/*/*/" + inEsTime+"/*/*";
+        List<RTInventoryQueryDTO> rTdTOList = rtInventoryService.getStockList(articles,connUrl);
+        if(rTdTOList.size()>0){
+            for(RTInventoryQueryDTO rtDto:rTdTOList){
+                for(StocktakeItemDTOC stockDto:list){
+                    if(rtDto.getItemCode().equals(stockDto.getArticleId())){
+                        stockDto.setStockQty(rtDto.getRealtimeQty().toString()); // 实时库存
+                    }
+                }
+            }
+        }
+
+        pi0100c.setItemList(list);
+        return pi0100c;
+    }
+
+    @Override
     public PI0100DTOC getData(String piCd) {
         if (StringUtils.isEmpty(piCd)) {
             return null;
@@ -271,10 +300,10 @@ public class materialEntryServiceImpl implements materialEntryService {
                 }else {
                     materialentryMapper.saveAllItem(stocktakeItemList);
                 }
-                Boolean checkFlg = checkRawMaterialItemStock(detailType,item.getStoreCd(),stocktakeItemList);
+                /*Boolean checkFlg = checkRawMaterialItemStock(detailType,item.getStoreCd(),stocktakeItemList);
                 if(!checkFlg){
                     item.setPiCd(null);
-                }
+                }*/
                 return item;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -297,10 +326,10 @@ public class materialEntryServiceImpl implements materialEntryService {
                 // 先删除, 再添加
                 materialentryMapper.deleteByPicd(item.getPiCd());
                 materialentryMapper.saveAllItem(stocktakeItemList);
-                Boolean checkFlg = checkRawMaterialItemStock(detailType,item.getStoreCd(),stocktakeItemList);
+                /*Boolean checkFlg = checkRawMaterialItemStock(detailType,item.getStoreCd(),stocktakeItemList);
                 if(!checkFlg){
                     item.setPiCd(null);
-                }
+                }*/
                 return item;
             } catch (Exception e) {
                 e.printStackTrace();

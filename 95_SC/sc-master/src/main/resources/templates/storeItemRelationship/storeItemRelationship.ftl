@@ -213,6 +213,11 @@
 										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 											<input id="createDate" placeholder="Created Date" class="form-control input-sm select-date" type="text" value="">
 										</div>
+
+										<label for="excelName"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">POG Name</label>
+										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+											<input type="text" id="excelName" class="form-control input-sm">
+										</div>
 									</div>
 								</div>
 							</div>
@@ -274,11 +279,12 @@
 								</div>
 							</div>
 						</div>
-						<div class="form-group">
+						<div class="form-group" >
+							<div  id="expendFileLine"></div>
 							<label for="file"  class="col-sm-4 control-label not-null">File</label>
 							<div class="col-sm-5">
 								<div class="aotu-pos">
-									<input type="file" id="fileData" name="fileData" class="form-control input-sm">
+									<input type="file" id="fileData" name="fileData" class="form-control input-sm" multiple="multiple">
 								</div>
 							</div>
 						</div>

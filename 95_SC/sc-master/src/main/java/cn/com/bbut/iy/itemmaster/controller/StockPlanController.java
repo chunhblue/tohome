@@ -20,9 +20,11 @@ import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.stocktake.StocktakeEntryService;
 import cn.com.bbut.iy.itemmaster.service.stocktake.StocktakePlanService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -73,6 +75,9 @@ public class StockPlanController extends BaseAction {
     private String fileDir;//target
     @Autowired
     private ContextPathConfig contextPathConfig;
+    @Autowired
+    private Ma4320Service ma4320Service;
+    private HSSFWorkbook wb;
     
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_STOCKTAKE_PLAN_QUERY";
@@ -204,7 +209,7 @@ public class StockPlanController extends BaseAction {
 
         if (loginUser==null) {
             // 没有登陆
-            return new ReturnDTO(false,"请先登录!");
+            return new ReturnDTO(false,"Please login first!");
         }
 
         if (StringUtils.isEmpty(record)) {
@@ -231,21 +236,19 @@ public class StockPlanController extends BaseAction {
             return new ReturnDTO(false,"Parameter exception!");
         }
         if (pi0100.getDetails().size()<1) {
-            return new ReturnDTO(false,"明细数据不能为空!");
+            return new ReturnDTO(false,"The detail data cannot be empty!");
         }
 
         if (StringUtils.isEmpty(pi0100.getFlag()) ||
                 (!"add".equals(pi0100.getFlag()) &&
                         !"update".equals(pi0100.getFlag()))) {
-            return new ReturnDTO(false,"操作状态错误!");
+            return new ReturnDTO(false,"Operation status error!");
         }
         String flag = pi0100.getFlag();
 
-        Date now = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");
-        String dateStr = sdf.format(now);
-        String ymd = dateStr.split("-")[0];
-        String hms = dateStr.split("-")[1];
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
 
         // 明细数据
         List<PI0110DTO> pi0110List = pi0100.getDetails();
@@ -270,9 +273,9 @@ public class StockPlanController extends BaseAction {
         }
 
         if (piCd==null||"".equals(piCd)) {
-            return new ReturnDTO(false,"保存盘点计划失败!");
+            return new ReturnDTO(false,"Failed to get piCd!");
         }
-        return new ReturnDTO(true,"保存盘点计划成功",pi0100.getPiCd());
+        return new ReturnDTO(true,"Preservation Inventory Program Success",pi0100.getPiCd());
     }
 
     private String getStoreNo(PI0100DTO pi0100DTO){
@@ -309,7 +312,40 @@ public class StockPlanController extends BaseAction {
         }
     }
 
-    private HSSFWorkbook wb;
+    @RequestMapping("/exportDataCapture")
+    @ResponseBody
+    public ReturnDTO exportDataCapture(HttpServletRequest request, HttpServletResponse response,HttpSession session, String jsonStr) {
+        ReturnDTO _return = null;
+        //获取用户权限
+        // 获取session中的操作用户ID
+        User _sessionUser = this.getUser(session);
+        if(_sessionUser == null){
+            // logger.error("登录失效,请重新登陆");
+            _return = new ReturnDTO(false, "Session time out!","001");
+            return _return;
+        }
+
+        if(jsonStr == null || "".equals(jsonStr)) {
+            _return = new ReturnDTO(false, "No data found!",0);
+            return _return;
+        }
+        //前端查询条件
+        Gson gson = new Gson();
+        PI0100ParamDTO pi0100Param = gson.fromJson(jsonStr, PI0100ParamDTO.class);
+
+        String tempTableName = "temp_item_list";
+        // 将异动商品存入临时表
+        stocktakePlanService.insertInventoryToTemp(pi0100Param,tempTableName);
+        //返回商品的HSSFWorkbook对象
+        wb = stocktakePlanService.getInventoryHSSFWorkbook(pi0100Param,tempTableName);
+        if(wb == null) {
+            _return = new ReturnDTO(false, "No data found!",0);
+            return _return;
+        }
+
+        _return = new ReturnDTO(true, "Succeeded!",1);
+        return _return;
+    }
 
     @RequestMapping("/queryExport")
     @ResponseBody
@@ -365,12 +401,13 @@ public class StockPlanController extends BaseAction {
      * 导出excle
      */
     @RequestMapping("/download")
-    public void export(String piCd,HttpServletRequest request,HttpServletResponse response) {
-        String fileName = "Stocktake Items_"+piCd+".xlsx";
+    public void export(String piCd,String fileName, HttpServletRequest request,HttpServletResponse response) {
+        // String _fileName = "Stocktake Items_"+piCd+".xlsx";
+        String _fileName = fileName+"_"+piCd+".xls";
         try {
             //下载
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            response.addHeader("Content-Disposition", "attachment;filename="+fileName);
+            response.addHeader("Content-Disposition", "attachment;filename="+_fileName);
             OutputStream outputStream = response.getOutputStream();
             wb.write(outputStream);
             outputStream.flush();
@@ -481,6 +518,9 @@ public class StockPlanController extends BaseAction {
     public ModelAndView stocktakeProcessPrint(HttpServletRequest request, HttpSession session,
                                               Map<String, ?> model,String searchJson) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入盘点计划打印一览画面", u.getUserId());
         Collection<Integer> roleIds = (Collection<Integer>) request.getSession().getAttribute(
                 Constants.SESSION_ROLES);
@@ -489,7 +529,7 @@ public class StockPlanController extends BaseAction {
         mv.addObject("identity", 1);
         mv.addObject("userName", u.getUserName());
         mv.addObject("searchJson", searchJson);
-        mv.addObject("printTime", new Date());
+        mv.addObject("printTime", Utils.getFormateDate(ymd));
         mv.addObject("useMsg", "盘点计划打印画面");
         return mv;
     }

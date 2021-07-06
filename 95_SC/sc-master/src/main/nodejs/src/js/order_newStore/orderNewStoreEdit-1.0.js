@@ -555,7 +555,7 @@ define('orderEdit', function () {
 				_common.prompt("The Incremental Quantity error!",3,"error");
 				return false;
 			}
-			if(_orderBatchQty!==0){
+			if(_orderQty != 0 && _orderBatchQty!==0){
 				var remainder = (_orderQty-_minOrderQty)%_orderBatchQty;
 				if(remainder!==0){
 					_common.prompt("Order Qty need to be multiples of Incremental Quantity!",3,"info");
@@ -737,8 +737,9 @@ define('orderEdit', function () {
 
 	var checkOrderQty = function () {
 		var orderQty = reThousands($('#grid_orderQty').val().trim());
+		var orderQty1 = $('#grid_orderQty').val().trim();
 		var reg = /((^[1-9]\d*)|^0)(\.\d+)?$/;
-		if(!reg.test(orderQty)){
+		if(!reg.test(orderQty) || orderQty1.indexOf(",")>0){
 			_common.prompt("Please enter with correct data type!",3,"info");
 			$('#grid_orderQty').focus();
 			return false;
@@ -746,7 +747,7 @@ define('orderEdit', function () {
 		var _orderQty = parseFloat(orderQty),
 			_minOrderQty = parseFloat(minOrderQty),
 			_maxOrderQty = parseFloat(maxOrderQty),
-			_orderBatchQty = parseFloat($("#orderBatchQty").val());
+			_orderBatchQty = parseFloat(reThousands($("#orderBatchQty").val()));
 		// if(_orderQty==0){//订货量不为空
 		// 	_common.prompt("Order Qty can not be 0!",3,"info");
 		// 	$('#grid_orderQty').focus();
@@ -766,7 +767,7 @@ define('orderEdit', function () {
 			$('#grid_orderQty').focus();
 			return false;
 		}
-		if(reThousands($("#orderBatchQty").val())!==0){
+		if(_orderQty != 0 && reThousands($("#orderBatchQty").val())!==0){
 			var remainder = (_orderQty-_minOrderQty)%_orderBatchQty;
 			if(remainder!==0){
 				_common.prompt("Order Qty need to be multiples of Incremental Quantity!",3,"info");
@@ -788,7 +789,7 @@ define('orderEdit', function () {
 			_common.prompt("The Incremental Quantity error!",3,"error");
 			return false;
 		}
-		if(_orderBatchQty!=0){
+		if(_orderQty != 0 && _orderBatchQty!=0){
 			var remainder = (_orderQty-_minOrderQty)%_orderBatchQty;
 			if(remainder!=0){
 				_common.prompt("Order Qty need to be multiples of Incremental Quantity!",3,"info");
@@ -1096,7 +1097,7 @@ define('orderEdit', function () {
 			_common.prompt("The Incremental Quantity error!",3,"error");
 			return false;
 		}
-		if(_orderBatchQty!=0){
+		if(_orderQty != 0 && _orderBatchQty!=0){
 			var remainder = (_orderQty-_minOrderQty)%_orderBatchQty;
 			if(remainder!=0){
 				_common.prompt("Order Qty need to be multiples of Incremental Quantity!",3,"info");

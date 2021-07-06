@@ -60,6 +60,8 @@
             display:none;
         }
     </STYLE>
+    <!--页头-->
+    [@common.header][/@common.header]
 </head>
 
 <body>
@@ -68,8 +70,6 @@
 [#--		<div class="error-pcode-text"> ${useMsg!} </div>--]
 [#--		<div class="shade"></div>--]
 [#--	</div>--]
-<!--页头-->
-[@common.header][/@common.header]
 <!--导航-->
 [@common.nav "HOME&Ordering&Direct Store Purchase Order Query"][/@common.nav]
 <div class="container-fluid" id="main_box">
@@ -164,6 +164,7 @@
                                             <option value="1">Pending</option>
                                             <option value="5">Rejected</option>
                                             <option value="6">Withdrawn</option>
+                                            <option value="7">Expired</option>
                                             <option value="10">Approved</option>
                                             <option value="15">Receiving Pending</option>
                                             <option value="20">Received</option>

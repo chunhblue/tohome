@@ -131,4 +131,8 @@ public class WarehouseDetailsGridDTO extends GridDataDTO {
 
     // 共通
     private CommonDTO commonDTO;
+
+    // hht收货时间
+    private String hhtReceiveDate;
+    private String hhtReceiveTime;
 }

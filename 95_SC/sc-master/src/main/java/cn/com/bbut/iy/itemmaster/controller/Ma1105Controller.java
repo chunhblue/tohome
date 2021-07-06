@@ -14,13 +14,16 @@ import cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam;
 import cn.com.bbut.iy.itemmaster.dto.ma1105.Ma1105ParamDTO;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.entity.base.Ma1105;
+import cn.com.bbut.iy.itemmaster.entity.base.Ma1105Example;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.ImportExcelService;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.ma1105.Ma1105Service;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +59,8 @@ public class Ma1105Controller extends BaseAction {
     private Ma1105Service service;
     @Autowired
     private MRoleStoreService mRoleStoreService;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_POG_QUERY";
     private final String EXCEL_EXPORT_NAME = "POG Query List.xlsx";
@@ -82,77 +87,86 @@ public class Ma1105Controller extends BaseAction {
         return mv;
     }
 
+
     @Permission(codes = { PermissionCode.CODE_SC_S_I_R_UPLOAD})
     @ResponseBody
     @RequestMapping(method = RequestMethod.POST,value = "/upload")
-    public AjaxResultDto withSimple(@RequestParam("fileData")MultipartFile fileData,String storeCd,boolean isCoverage, HttpServletRequest req, HttpServletResponse resp, HttpSession session) {
+    public AjaxResultDto withSimple(@RequestParam("fileData")MultipartFile[] fileDatas,String storeCd,boolean isCoverage, HttpServletRequest req, HttpServletResponse resp, HttpSession session) {
         AjaxResultDto rest = new AjaxResultDto();
         User u = this.getUser(session);
-        if (StringUtils.isBlank(fileData.getOriginalFilename())) {
-            rest.setSuccess(false);
-            rest.setMessage("Upload file cannot be empty！");
+        // 获取当前用户、时间
+        CommonDTO dto = getCommonDTO(session);
+        if(dto == null){
+            rest.setMsg("Failed to get user information!");
             return rest;
         }
-        String fileName = fileData.getOriginalFilename();
-        String excelName = fileName.substring(0,fileName.length()-5);
-        String suf = fileData.getOriginalFilename().substring(fileData.getOriginalFilename().lastIndexOf(".")+1);
-        if(!suf.equalsIgnoreCase("xls")&&!suf.equalsIgnoreCase("xlsx")){
-            rest.setSuccess(false);
-            rest.setMessage("Upload file format error! Expected 'XLS' or'xlsx'!");
-            return rest;
-        }
-        if (StringUtils.isBlank(storeCd)) {
-            rest.setSuccess(false);
-            rest.setMessage("Store No. cannot be empty！");
-            return rest;
-        }
-        int num = service.countPogName(excelName,storeCd);
-        if(num>0){
-            rest.setSuccess(false);
-            rest.setMessage("This file has been uploaded today！");
-            return rest;
-        }
+        List<Ma1105Example> ma1105Examples = new ArrayList<>();
+        for(int i=0;i<fileDatas.length;i++) {
+            Ma1105Example example = new Ma1105Example();
+            if (StringUtils.isBlank(fileDatas[i].getOriginalFilename())) {
+                rest.setSuccess(false);
+                rest.setMessage("Upload file cannot be empty！");
+                return rest;
+            }
+            String fileName = fileDatas[i].getOriginalFilename();
+            String excelName = fileName.substring(0, fileName.lastIndexOf("."));
+            String excelNamePrefix = fileName.split("-")[0].replace(" ", "");
+            String suf = fileDatas[i].getOriginalFilename().substring(fileDatas[i].getOriginalFilename().lastIndexOf(".") + 1);
+            if (!suf.equalsIgnoreCase("xls") && !suf.equalsIgnoreCase("xlsx")) {
+                rest.setSuccess(false);
+                rest.setMessage(excelName + " format error! Expected 'XLS' or'xlsx'!");
+                return rest;
+            }
+            if (StringUtils.isBlank(storeCd)) {
+                rest.setSuccess(false);
+                rest.setMessage("Store No. cannot be empty！");
+                return rest;
+            }
+            int num = service.countPogName(excelName, storeCd);
+            if (num > 0) {
+                rest.setSuccess(false);
+                rest.setMessage(excelName + " has been uploaded today！");
+                return rest;
+            }
 
-        List<Ma1105> list = new ArrayList<>();
-        try {
-            list = importExcelService.importExcelWithSimple(fileData,storeCd,u, req, resp);
+            List<Ma1105> list = new ArrayList<>();
+
+            list = importExcelService.importExcelWithSimple(fileDatas[i],storeCd,u, req, resp);
             if(list == null || list.size() == 0 ) {
                 rest.setSuccess(false);
-                rest.setMessage("Imported data file is empty!");
+                rest.setMessage("Imported "+excelName+" data file is empty!");
+                return rest;
             }else {
                 //判断是否确认覆盖
                 if(!isCoverage){
                     //去除货架重复
-                    List<Ma1105> shelf = list.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(o -> o.getShelf()))), ArrayList::new));
-                    List<String> shelfList = service.selectMa1105(shelf);
-                    if(shelfList!=null&&shelfList.size()>0){
+                    int isPogNamePrefix = service.isCovergePogNamePrefix(storeCd,excelNamePrefix);
+                    if(isPogNamePrefix>0){
                         rest.setSuccess(false);
                         rest.setSource("shelf");
-                        StringBuilder sb = new StringBuilder();
-                        shelfList.forEach(s ->{
-                            sb.append(s+",");
-                        });
-//                        rest.setMessage("导入货架("+sb.substring(0,sb.length()-1)+")已经拥有！");
-                        rest.setMessage("Imported shelf("+sb.substring(0,sb.length()-1)+")already exists!");
+                        rest.setMessage(" Imported POG file("+excelNamePrefix+")already exists");
                         return rest;
                     }
-                }
-                // 获取当前用户、时间
-                CommonDTO dto = getCommonDTO(session);
-                if(dto == null){
-                    rest.setMsg("Failed to get user information!");
-                    return rest;
-                }
-                for(Ma1105 ma1105 : list){
-                    ma1105.setCommonDTO(dto);
-                    ma1105.setExcelName(excelName); // 设置上传文档名
-                }
+                 }
+            }
+
+            for(Ma1105 ma1105 : list){
+                ma1105.setCommonDTO(dto);
+                ma1105.setExcelName(excelName); // 设置上传文档名
+            }
+            example.setStoreCd(storeCd);
+            example.setMa1105s(list);
+            example.setExcelName(excelName);
+            example.setCommonDTO(dto);
+            ma1105Examples.add(example);
+        }
+    try {
                 // 保存文件基本信息
-                service.insertFileData(list,excelName,storeCd,dto);
-                int flag = service.insertData(list,storeCd);
+                service.insertFileData(ma1105Examples);
+                int flag = service.insertData(ma1105Examples);
                 rest.setSuccess(true);
                 rest.setMessage("Data imported successfully!");
-            }
+
         }catch (Exception e){
             e.printStackTrace();
             rest.setSuccess(false);
@@ -214,24 +228,7 @@ public class Ma1105Controller extends BaseAction {
         return resultDto;
     }
 
-    /**
-     * 更新 货架信息
-     * @param storeCd
-     * @return
-     */
-    @ResponseBody
-    @RequestMapping(value = "/updateShelf")
-    public AjaxResultDto updateShelf(String storeCd) {
-        AjaxResultDto resultDto = new AjaxResultDto();
-        resultDto.setSuccess(false);
-        if(StringUtils.isNotBlank(storeCd)){
-            int num = service.updateShelfToMa1105(storeCd);
-            if(num>0){
-                resultDto.setSuccess(true);
-            }
-        }
-        return resultDto;
-    }
+
 
     /**
      * 导出查询结果
@@ -303,6 +300,9 @@ public class Ma1105Controller extends BaseAction {
         if(u == null){
             return null;
         }
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         CommonDTO dto = new CommonDTO();
         // 当前用户ID
         dto.setUpdateUserId(u.getUserId());
@@ -313,12 +313,12 @@ public class Ma1105Controller extends BaseAction {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HHmmss");
         // 当前时间年月日
         String date = dateFormat.format(now);
-        dto.setCreateYmd(date);
-        dto.setUpdateYmd(date);
+        dto.setCreateYmd(ymd);
+        dto.setUpdateYmd(ymd);
         // 当前时间时分秒
         String time = timeFormat.format(now);
-        dto.setCreateHms(time);
-        dto.setUpdateHms(time);
+        dto.setCreateHms(hms);
+        dto.setUpdateHms(hms);
         return dto;
     }
 }

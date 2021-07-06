@@ -12,9 +12,11 @@ import cn.com.bbut.iy.itemmaster.dto.order.*;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.entity.base.Ma1000;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.audit.IAuditService;
 import cn.com.bbut.iy.itemmaster.service.ma1000.Ma1000Service;
 import cn.com.bbut.iy.itemmaster.service.order.OrderService;
+import cn.com.bbut.iy.itemmaster.util.DateConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +49,8 @@ public class OrderNewStoreController extends BaseAction {
     private Ma1000Service ma1000Service;
     @Autowired
     private IAuditService auditServiceImpl;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     /**
      * 新店铺订货登录管理画面
@@ -65,9 +69,13 @@ public class OrderNewStoreController extends BaseAction {
         log.debug("User:{} 进入 新店铺订货登录管理画面", u.getUserId());
         //获取业务时间
         String date = cm9060Service.getValByKey("0000");
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         ModelAndView mv = new ModelAndView("order_newStore/orderList");
         mv.addObject("data", param);
         mv.addObject("date", date);
+        mv.addObject("hms", hms);
         mv.addObject("use", 0);
         mv.addObject("identity", 1);
         mv.addObject("useMsg", "新店铺订货登录管理画面");
@@ -141,6 +149,9 @@ public class OrderNewStoreController extends BaseAction {
         if(param==null){
             param = new OrderItemParamDTO();
         }
+        Date date = DateConvert.FromString(param.getOrderDate(),"yyyyMMdd");
+        int day = date.getDay();
+        param.setScheduleDay(day);
         //设置资源
         GridDataDTO<OrderItemDTO> grid = new GridDataDTO<>();
         if(StringUtils.isNotBlank(param.getOrderType())&&
@@ -466,7 +477,7 @@ public class OrderNewStoreController extends BaseAction {
             _return.setMessage("The approval status is expired and cannot modify!");//审核状态已失效
         }else if(status == 10){//审核成功
             _return.setSuccess(false);
-            _return.setMessage("Selected PO is already approved and cannot modify!");//审核状态已完成
+            _return.setMessage("Selected document!");//审核状态已完成
         }else if(status == 15){////收货录入完成，未审核
             _return.setSuccess(true);
         }else if(status == 5 || status == 6){//审核驳回、审核撤回

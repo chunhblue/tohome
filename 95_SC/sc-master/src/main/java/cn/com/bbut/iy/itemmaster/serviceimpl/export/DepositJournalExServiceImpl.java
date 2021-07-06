@@ -58,14 +58,14 @@ public class DepositJournalExServiceImpl implements ExService {
         jsonParam.setFlg(false);
         // 资源权限参数设置
         jsonParam.setStores(paramDTO.getStores());
-        int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
+        /*int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
         if(i >= 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             jsonParam.setStartDate(startDate);
-        }
+        }*/
         // 获取业务日期
         if(StringUtils.isBlank(jsonParam.getBusinessDate())){
             jsonParam.setBusinessDate(cm9060Service.getValByKey("0000"));
@@ -116,7 +116,6 @@ public class DepositJournalExServiceImpl implements ExService {
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
             setCellValue(cell, ls.getStoreName());
 
-
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
             setCellValue(cell, ls.getOfc());
@@ -129,31 +128,25 @@ public class DepositJournalExServiceImpl implements ExService {
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
             setCellValue(cell, ls.getOm());
 
-
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
             setCellValue(cell, ls.getOmName());
-
-
-
-
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
             setCellValue(cell, ls.getOc());
 
-
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
             setCellValue(cell, ls.getOcName());
 
-
-
-
-
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
             setCellValue(cell, fmtDateToStr(ls.getAccDate()));
+
+            cell = row.createCell(curCol++);
+            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
+            setCellValue(cell, fmtDateToStr(ls.getDepositDate()));
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
@@ -181,6 +174,7 @@ public class DepositJournalExServiceImpl implements ExService {
         sheet.setColumnWidth(columnIndex++, 22 * 256);
         sheet.setColumnWidth(columnIndex++, 22 * 256);
         sheet.setColumnWidth(columnIndex++, 22 * 256);
+        sheet.setColumnWidth(columnIndex++, 15 * 256);
         sheet.setColumnWidth(columnIndex++, 15 * 256);
         sheet.setColumnWidth(columnIndex++, 18 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);

@@ -11,6 +11,7 @@ import cn.com.bbut.iy.itemmaster.serviceimpl.CM9060ServiceImpl;
 import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
+import com.sun.org.apache.xpath.internal.operations.Number;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -76,7 +77,7 @@ public class DiffExServiceImpl implements ExService {
 
     /**
      * 生产excel内容
-     * 
+     *
      * @param sheet
      * @param curRow
      */
@@ -137,7 +138,10 @@ public class DiffExServiceImpl implements ExService {
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
-            setCellValue(cell, ls.getTotalAmt());
+
+            String str = String.valueOf(ls.getTotalAmt());
+            Double dou=Double.valueOf(str);
+            setCellValue(cell, String.format("%,d",dou.intValue()));
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
@@ -159,5 +163,6 @@ public class DiffExServiceImpl implements ExService {
         sheet.setColumnWidth(columnIndex++, 30 * 256);
         sheet.setColumnWidth(columnIndex++, 15 * 256);
     }
+
 
 }

@@ -42,13 +42,13 @@ public class BusinessDailyExHeaderListener implements ExEventListener {
         String row1 = "";
 
         // 列标题
-        String row2 = "Sales Amount,Discount Amount,Income,Over Amount,Services,Charge,Charge Refund,Count Customer,PSD";
+        String row2 = "Sales Amount,Discount Amount,Income,Spill Amount,Over Amount,Refund Amount,Services,Charge,Charge Refund,Count Customer,PSD";
         String[] titles = row2.split(",");
 
         // 开始拼接excel头信息
         int index = 0;
 //        int colNum = 13;
-        int colNum = 17;
+        int colNum = 21;
         CellRangeAddress region = null;
 
         Row row = sheet.createRow(index++);

@@ -56,7 +56,7 @@ public class TypeIdTools {
                 }
                 break;
             case 23 :
-                detailType = "tmp_transfer_out";
+                detailType = "tmp_adjustment";
                 break;
         }
        return detailType;

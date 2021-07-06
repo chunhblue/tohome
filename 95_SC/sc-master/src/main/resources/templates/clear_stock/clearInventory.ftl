@@ -177,7 +177,7 @@
             <div class="modal-body">
                 <div class="form-horizontal">
                     <div class="form-group">
-                        <label for="inputItem"  class="col-sm-2 col-lg-4 control-label not-null">Item</label>
+                        <label for="inputItem"  class="col-sm-2 col-lg-4 control-label not-null">Item/Barcode</label>
                         <div class="col-sm-6">
                             <div class="aotu-pos" id="itemDivOrg">
                                 <input type="text" class="form-control my-automatic input-sm" placeholder="Please enter 3 digit" id="inputItem"  autocomplete="off">

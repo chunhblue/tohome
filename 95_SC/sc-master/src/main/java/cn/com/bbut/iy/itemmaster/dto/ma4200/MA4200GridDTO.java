@@ -305,4 +305,8 @@ public class MA4200GridDTO  extends GridDataDTO {
      * 区分是否是md用户 1是
      */
     private String md;
+
+    private String storeDetailCd;
+
+    private String StoreDetailName;
 }

@@ -198,7 +198,7 @@ define('bomSale', function () {
 			"<th>Returning VAT Amount</th>" +
 			"<th>GP</th>" +
 			"<th>GP%</th>" +
-			"<th>Daily Cost%</th>" +
+			// "<th>Daily Cost%</th>" +
 			"</tr>";
 		// 计算求和
 		var saleQtyTal = 0, saleCostTal = 0, saleAmtTal = 0, saleTaxTal = 0;
@@ -221,7 +221,7 @@ define('bomSale', function () {
 				"<td>" + toThousands(re.returnTaxT) + "</td>" +
 				"<td>" + toThousands(re.grossMargin) + "</td>" +
 				"<td>" + fmtRate(re.grossMarginRate) + "</td>" +
-				"<td>" + toThousands(re.avgCostNoTax) + "</td>" +
+				// "<td>" + toThousands(re.avgCostNoTax) + "</td>" +
 				"</tr>";
 			saleCostTal = accAdd(saleCostTal, re.saleCostT);
 			saleQtyTal = accAdd(saleQtyTal, re.saleQtyT);

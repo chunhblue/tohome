@@ -91,13 +91,13 @@
 		VALUES 
 		(#{insertBean.nReviewid}, #{insertBean.nRoleid}, #{insertBean.cPriority}, #{insertBean.cUrl}, 
 		#{insertBean.storeCd}, #{insertBean.cRecordCd}, #{insertBean.nTypeid}, #{insertBean.cSubNo},
-		#{insertBean.cNotificationTime}, 1) 
+		now()::TIMESTAMP, 1)
 	</insert>
 
 	<update id="updateNotification">
 		UPDATE t_backlog 
 		SET C_ENABLE = #{updateBean.status, jdbcType=VARCHAR},
-		d_insert_time = current_timestamp
+		d_insert_time = now()::TIMESTAMP
 		WHERE n_recordid = #{updateBean.nRecordid}
 	</update>
 

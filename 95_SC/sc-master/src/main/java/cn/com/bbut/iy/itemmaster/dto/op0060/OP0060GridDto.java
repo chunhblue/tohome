@@ -183,6 +183,7 @@ public class OP0060GridDto  extends GridDataDTO {
      */
     private String nrHms;
 
+    private String depositDate;
 
     private String ofc;
     private String ofcName;

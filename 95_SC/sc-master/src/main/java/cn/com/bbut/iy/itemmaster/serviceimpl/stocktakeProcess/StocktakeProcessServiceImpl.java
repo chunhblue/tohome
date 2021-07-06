@@ -36,8 +36,6 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
     @Autowired
     private StocktakeProcessMapper stocktakeProcessMapper;
     @Autowired
-    private MRoleStoreService mRoleStoreService;
-    @Autowired
     private StocktakePlanMapper stocktakePlanMapper;
     @Autowired
     private CM9060Service cm9060Service;
@@ -232,7 +230,7 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
 
     private void createSheet6(String piCd, String piDate, String storeCd, SXSSFSheet sheet, SXSSFWorkbook wb) {
         // 缩放 70%
-        sheet.setZoom(70);
+//        sheet.setZoom(70);
 
         // 生成并设置另一个样式
         CellStyle style0 = wb.createCellStyle();
@@ -429,7 +427,7 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             cell.setCellValue(item.getUom());
 
             cell = row.createCell(5);
-            cell.setCellValue(item.getFirstQty());
+            cell.setCellValue(Integer.parseInt(item.getFirstQty()));
 
             cell = row.createCell(6);
             cell.setCellValue(item.getRegion());
@@ -596,7 +594,8 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             cell.setCellValue(item.getUom());
 
             cell = row.createCell(5);
-            cell.setCellValue(item.getBadQty());
+            cell.setCellValue(Integer.parseInt(item.getBadQty()));
+             // 设置单元格格式为数值格式
         }
     }
 
@@ -1487,7 +1486,11 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
         row5Cell2.setCellStyle(style2);
 
         SXSSFCell row5Cell4 = row.createCell(15);
-        row5Cell4.setCellValue("");
+        if(grandTotal.getReviewStatus() != null && grandTotal.getReviewStatus() == 10){
+            row5Cell4.setCellValue(getValEmpty(grandTotal.getEmpName()));
+        }else {
+            row5Cell4.setCellValue("");
+        }
         row5Cell4.setCellStyle(style2);
         // 合并单元格
         CellRangeAddress brandRegion = new CellRangeAddress(5, 5, 15, 16);
@@ -1528,11 +1531,11 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
         row8Cell0.setCellStyle(style3);
 
         row8Cell0 = row.createCell(6);
-        row8Cell0.setCellValue("Stock on SAP");
+        row8Cell0.setCellValue("System Stock");
         row8Cell0.setCellStyle(style3);
 
         row8Cell0 = row.createCell(7);
-        row8Cell0.setCellValue("Upload Pcount on SAP");
+        row8Cell0.setCellValue("Physical Stock");
         row8Cell0.setCellStyle(style3);
 
         row8Cell0 = row.createCell(8);
@@ -1576,7 +1579,7 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
         row9Cell12.setCellStyle(style5);
 
         SXSSFCell row9Cell13 = row.createCell(13);
-        row9Cell13.setCellValue("IV Amount allocated from DC to stores");
+        row9Cell13.setCellValue("Other Adjust");
         row9Cell13.setCellStyle(style5);
 
         SXSSFCell row9Cell14 = row.createCell(14);
@@ -1712,11 +1715,11 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
         row11Cell.setCellStyle(style10);
 
         row11Cell = row.createCell(14);
-        row11Cell.setCellValue(0);
+        row11Cell.setCellValue(getNumber0(grandTotal.getVarianceQty()));
         row11Cell.setCellStyle(style11);
 
         row11Cell = row.createCell(15);
-        row11Cell.setCellValue(0);
+        row11Cell.setCellValue(getNumber0(grandTotal.getVarianceAmt()));
         row11Cell.setCellStyle(style11);
 
         row11Cell = row.createCell(16);
@@ -1750,7 +1753,7 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             cell.setCellStyle(style8);
 
             cell = row.createCell(4);
-            cell.setCellValue(item.getMaterialName());
+            cell.setCellValue(item.getDepName());
             cell.setCellStyle(style8);
 
             cell = row.createCell(5);
@@ -1803,9 +1806,17 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             cell.setCellStyle(style10);
 
             cell = row.createCell(14);
+            if(item.getVarianceQty() == null){
+                item.setVarianceQty(BigDecimal.ZERO);
+            }
+            cell.setCellValue(item.getVarianceQty().longValue());
             cell.setCellStyle(style11);
 
             cell = row.createCell(15);
+            if(item.getVarianceAmt() == null){
+                item.setVarianceAmt(BigDecimal.ZERO);
+            }
+            cell.setCellValue(item.getVarianceAmt().longValue());
             cell.setCellStyle(style11);
             // 暂时空着 end
 
@@ -2107,7 +2118,7 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
         row2Cell4.setCellStyle(style1);
 
         SXSSFCell row2Cell5 = row.createCell(13);
-        row2Cell5.setCellValue(getTimeEmpty(headInfo.getThisStartTime()));
+        row2Cell5.setCellValue(getTimeEmpty(headInfo.getExportTime().substring(8,14)));
         row2Cell5.setCellStyle(style2);
 
         // 第四行行数据
@@ -2121,9 +2132,16 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
         row4Cell4.setCellValue("Finished at");
         row4Cell4.setCellStyle(style1);
 
-        SXSSFCell row4Cell5 = row.createCell(13);
-        row4Cell5.setCellValue(getTimeEmpty(headInfo.getThisEndTime()));
-        row4Cell5.setCellStyle(style2);
+        // 若审核通过则显示审核时间，否则不显示
+        if(headInfo.getReviewStatus()!=null && headInfo.getReviewStatus()==10){
+            SXSSFCell row4Cell5 = row.createCell(13);
+            row4Cell5.setCellValue(getTimeEmpty(headInfo.getThisEndTime()));
+            row4Cell5.setCellStyle(style2);
+        }else {
+            SXSSFCell row4Cell5 = row.createCell(13);
+            row4Cell5.setCellStyle(style2);
+        }
+
 
         // 第十行SUMMARY 数据 title
         row = sheet.createRow(10);
@@ -2377,6 +2395,20 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
         }
 
 
+
+
+
+        /**
+         * 获取盘点的差异商品, 多出或者缺少的
+         * GT: 多出的
+         * LT: 缺少的
+         */
+        StocktakeReportDTO thisShortageVarianceLT3 = stocktakeProcessMapper.getStocktakeVariance(headInfo.getThisStocktakeCd(),
+                headInfo.getThisStocktakeDate(),headInfo.getStoreCd(),"LT","03");
+
+        if (thisShortageVarianceLT3==null) {
+            thisShortageVarianceLT3 = new StocktakeReportDTO();
+        }
         // 第16行 列表
         row = sheet.createRow(16);
         SXSSFCell row16Cell0 = row.createCell(1);
@@ -2391,53 +2423,110 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
         row16Cell1.setCellValue(days);
         row16Cell1.setCellStyle(style1);
 
+
         SXSSFCell row16Cell2 = row.createCell(8);
-        row16Cell2.setCellValue("Total Shortage");
+        row16Cell2.setCellValue("Service");
         row16Cell2.setCellStyle(style6);
 
         SXSSFCell row16Cell3 = row.createCell(10);
-        long thisTotalSku = getNumber0(thisShortageVarianceLT2.getSku())+getNumber0(thisShortageVarianceLT.getSku());
-        row16Cell3.setCellValue(thisTotalSku);
-        row16Cell3.setCellStyle(style5);
+        row16Cell3.setCellValue(getNumber0(thisShortageVarianceLT3.getSku()));
+        row16Cell3.setCellStyle(style8);
 
         SXSSFCell row16Cell4 = row.createCell(11);
-        long thisTotalQty = getNumber0(thisShortageVarianceLT2.getQty())+getNumber0(thisShortageVarianceLT.getQty());
-        row16Cell4.setCellValue(thisTotalQty);
-        row16Cell4.setCellStyle(style5);
+        row16Cell4.setCellValue(getNumber0(thisShortageVarianceLT3.getQty()));
+        row16Cell4.setCellStyle(style8);
 
         SXSSFCell row16Cell5 = row.createCell(12);
-        long thisTotalAmt = getNumber0(thisShortageVarianceLT2.getAmt())+getNumber0(thisShortageVarianceLT.getAmt());
-        row16Cell5.setCellValue(thisTotalAmt);
-        row16Cell5.setCellStyle(style5);
+        row16Cell5.setCellValue(getNumber0(thisShortageVarianceLT3.getAmt()));
+        row16Cell5.setCellStyle(style8);
+
+        StocktakeReportDTO lastShortageVarianceLT3 = null;
+        /**
+         * 获取盘点的差异商品, 多出或者缺少的
+         * GT: 多出的
+         * LT: 缺少的
+         */
+        // 上一次盘点的数据
+        if (!StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
+            lastShortageVarianceLT3 = stocktakeProcessMapper.getStocktakeVariance(headInfo.getLastStocktakeCd(),
+                    headInfo.getLastStocktakeDate(),headInfo.getStoreCd(),"LT","03");
+
+            if (lastShortageVarianceLT3==null) {
+                lastShortageVarianceLT3 = new StocktakeReportDTO();
+            }
+
+            SXSSFCell row16Cell6 = row.createCell(14);
+            row16Cell6.setCellValue(getNumber0(lastShortageVarianceLT3.getSku()));
+            row16Cell6.setCellStyle(style8);
+
+            SXSSFCell row16Cell7 = row.createCell(15);
+            row16Cell7.setCellValue(getNumber0(lastShortageVarianceLT3.getQty()));
+            row16Cell7.setCellStyle(style8);
+
+            SXSSFCell row16Cell8 = row.createCell(16);
+            row16Cell8.setCellValue(getNumber0(lastShortageVarianceLT3.getAmt()));
+            row16Cell8.setCellStyle(style8);
+        } else {
+            SXSSFCell row16Cell6 = row.createCell(14);
+            row16Cell6.setCellStyle(style8);
+
+            SXSSFCell row16Cell7 = row.createCell(15);
+            row16Cell7.setCellStyle(style8);
+
+            SXSSFCell row16Cell8 = row.createCell(16);
+            row16Cell8.setCellStyle(style8);
+        }
+
+
+        // 第17行 列表
+        row = sheet.createRow(17);
+        SXSSFCell row17Cell2 = row.createCell(8);
+        row17Cell2.setCellValue("Total Shortage");
+        row17Cell2.setCellStyle(style6);
+
+        SXSSFCell row17Cell3 = row.createCell(10);
+        long thisTotalSku = getNumber0(thisShortageVarianceLT2.getSku())+getNumber0(thisShortageVarianceLT.getSku())+getNumber0(thisShortageVarianceLT3.getSku());
+        row17Cell3.setCellValue(thisTotalSku);
+        row17Cell3.setCellStyle(style5);
+
+        SXSSFCell row17Cell4 = row.createCell(11);
+        long thisTotalQty = getNumber0(thisShortageVarianceLT2.getQty())+getNumber0(thisShortageVarianceLT.getQty())+getNumber0(thisShortageVarianceLT3.getQty());
+        row17Cell4.setCellValue(thisTotalQty);
+        row17Cell4.setCellStyle(style5);
+
+        SXSSFCell row17Cell5 = row.createCell(12);
+        long thisTotalAmt = getNumber0(thisShortageVarianceLT2.getAmt())+getNumber0(thisShortageVarianceLT.getAmt())+getNumber0(thisShortageVarianceLT3.getAmt());
+        row17Cell5.setCellValue(thisTotalAmt);
+        row17Cell5.setCellStyle(style5);
 
         long lastTotalSku = 0L;
         long lastTotalQty = 0L;
         long lastTotalAmt = 0L;
         // 上一次盘点的数据
         if (!StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
-            lastTotalSku = getNumber0(lastShortageVarianceLT2.getSku())+getNumber0(lastShortageVarianceLT.getSku());
-            SXSSFCell row16Cell6 = row.createCell(14);
-            row16Cell6.setCellValue(lastTotalSku);
-            row16Cell6.setCellStyle(style5);
+            lastTotalSku = getNumber0(lastShortageVarianceLT2.getSku())+getNumber0(lastShortageVarianceLT.getSku())+getNumber0(lastShortageVarianceLT3.getSku());
+            SXSSFCell row17Cell6 = row.createCell(14);
+            row17Cell6.setCellValue(lastTotalSku);
+            row17Cell6.setCellStyle(style5);
 
-            lastTotalQty = getNumber0(lastShortageVarianceLT2.getQty())+getNumber0(lastShortageVarianceLT.getQty());
-            SXSSFCell row16Cell7 = row.createCell(15);
-            row16Cell7.setCellValue(lastTotalQty);
-            row16Cell7.setCellStyle(style5);
+            lastTotalQty = getNumber0(lastShortageVarianceLT2.getQty())+getNumber0(lastShortageVarianceLT.getQty())+getNumber0(lastShortageVarianceLT3.getQty());
+            SXSSFCell row17Cell7 = row.createCell(15);
+            row17Cell7.setCellValue(lastTotalQty);
+            row17Cell7.setCellStyle(style5);
 
-            lastTotalAmt = getNumber0(lastShortageVarianceLT2.getAmt())+getNumber0(lastShortageVarianceLT.getAmt());
-            SXSSFCell row16Cell8 = row.createCell(16);
-            row16Cell8.setCellValue(lastTotalAmt);
-            row16Cell8.setCellStyle(style5);
+            lastTotalAmt = getNumber0(lastShortageVarianceLT2.getAmt())+getNumber0(lastShortageVarianceLT.getAmt())+getNumber0(lastShortageVarianceLT3.getAmt());
+            SXSSFCell row17Cell8 = row.createCell(16);
+            row17Cell8.setCellValue(lastTotalAmt);
+            row17Cell8.setCellStyle(style5);
         } else {
-            SXSSFCell row16Cell6 = row.createCell(14);
-            row16Cell6.setCellStyle(style5);
+            SXSSFCell row17Cell6 = row.createCell(14);
+            row17Cell6.setCellStyle(style5);
 
-            SXSSFCell row16Cell7 = row.createCell(15);
-            row16Cell7.setCellStyle(style5);
+            SXSSFCell row17Cell7 = row.createCell(15);
+            row17Cell7.setCellStyle(style5);
 
-            SXSSFCell row16Cell8 = row.createCell(16);
-            row16Cell8.setCellStyle(style5);
+            SXSSFCell row17Cell8 = row.createCell(16);
+            row17Cell8.setCellStyle(style5);
         }
 
 
@@ -2453,27 +2542,29 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             thisBookValue = new StocktakeReportDTO();
         }
 
-        // 第17行 列表
-        row = sheet.createRow(17);
-        SXSSFCell row17Cell2 = row.createCell(8);
-        row17Cell2.setCellValue("% Shortage/Book Value");
-        row17Cell2.setCellStyle(style6);
+        // overStock
+
+        // 第18行 列表
+        row = sheet.createRow(18);
+        SXSSFCell row18Cell2 = row.createCell(8);
+        row18Cell2.setCellValue("% Shortage/Book Value");
+        row18Cell2.setCellStyle(style6);
 
         // 两个数相除
         double thisBookValSku = divisionFun(thisTotalSku,getNumber0(thisBookValue.getSku()));
-        SXSSFCell row17Cell3 = row.createCell(10);
-        row17Cell3.setCellValue(thisBookValSku);
-        row17Cell3.setCellStyle(style9);
+        SXSSFCell row18Cell3 = row.createCell(10);
+        row18Cell3.setCellValue(thisBookValSku);
+        row18Cell3.setCellStyle(style9);
 
         double thisBookValQty = divisionFun(thisTotalQty,getNumber0(thisBookValue.getBookValQty()));
-        SXSSFCell row17Cell4 = row.createCell(11);
-        row17Cell4.setCellValue(thisBookValQty);
-        row17Cell4.setCellStyle(style9);
+        SXSSFCell row18Cell4 = row.createCell(11);
+        row18Cell4.setCellValue(thisBookValQty);
+        row18Cell4.setCellStyle(style9);
 
         double thisBookValAmt = divisionFun(thisTotalAmt,getNumber0(thisBookValue.getBookValAmt()));
-        SXSSFCell row17Cell5 = row.createCell(12);
-        row17Cell5.setCellValue(thisBookValAmt);
-        row17Cell5.setCellStyle(style9);
+        SXSSFCell row18Cell5 = row.createCell(12);
+        row18Cell5.setCellValue(thisBookValAmt);
+        row18Cell5.setCellStyle(style9);
 
 
         // 获得账面上总量(上次次盘点)
@@ -2485,38 +2576,38 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
                 lastBookValue = new StocktakeReportDTO();
             }
             double lastBookValSku = divisionFun(lastTotalSku,getNumber0(lastBookValue.getSku()));
-            SXSSFCell row17Cell6 = row.createCell(14);
-            row17Cell6.setCellValue(lastBookValSku);
-            row17Cell6.setCellStyle(style9);
+            SXSSFCell row18Cell6 = row.createCell(14);
+            row18Cell6.setCellValue(lastBookValSku);
+            row18Cell6.setCellStyle(style9);
 
             double lastBookValQty = divisionFun(lastTotalQty,getNumber0(lastBookValue.getBookValQty()));
-            SXSSFCell row17Cell7 = row.createCell(15);
-            row17Cell7.setCellValue(lastBookValQty);
-            row17Cell7.setCellStyle(style9);
+            SXSSFCell row18Cell7 = row.createCell(15);
+            row18Cell7.setCellValue(lastBookValQty);
+            row18Cell7.setCellStyle(style9);
 
             double lastBookValAmt = divisionFun(lastTotalAmt,getNumber0(lastBookValue.getBookValAmt()));
-            SXSSFCell row17Cell8 = row.createCell(16);
-            row17Cell8.setCellValue(lastBookValAmt);
-            row17Cell8.setCellStyle(style9);
+            SXSSFCell row18Cell8 = row.createCell(16);
+            row18Cell8.setCellValue(lastBookValAmt);
+            row18Cell8.setCellStyle(style9);
         } else {
-            SXSSFCell row17Cell6 = row.createCell(14);
-            row17Cell6.setCellStyle(style9);
+            SXSSFCell row18Cell6 = row.createCell(14);
+            row18Cell6.setCellStyle(style9);
 
-            SXSSFCell row17Cell7 = row.createCell(15);
-            row17Cell7.setCellStyle(style9);
+            SXSSFCell row18Cell7 = row.createCell(15);
+            row18Cell7.setCellStyle(style9);
 
-            SXSSFCell row17Cell8 = row.createCell(16);
-            row17Cell8.setCellStyle(style9);
+            SXSSFCell row18Cell8 = row.createCell(16);
+            row18Cell8.setCellStyle(style9);
         }
 
 
         // 设置区域, 加边框
-        CellRangeAddress region7 = new CellRangeAddress(16,17,10,12);
-        CellRangeAddress region8 = new CellRangeAddress(16,17,14,16);
+        CellRangeAddress region7 = new CellRangeAddress(17,18,10,12);
+        CellRangeAddress region8 = new CellRangeAddress(17,18,14,16);
         setRegionUtil(region7,sheet,wb);
         setRegionUtil(region8,sheet,wb);
 
-        // 第19行 列表 Overage 部分
+        // 第20行 列表 Overage 部分
         /**
          * 获取盘点的差异商品, 多出或者缺少的
          * GT: 多出的
@@ -2529,28 +2620,28 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             thisOverageVarianceGT = new StocktakeReportDTO();
         }
 
-        row = sheet.createRow(19);
-        SXSSFCell row19Cell2 = row.createCell(8);
-        row19Cell2.setCellValue("Overage");
-        row19Cell2.setCellStyle(style6);
-
-        // 第20行 列表
         row = sheet.createRow(20);
         SXSSFCell row20Cell2 = row.createCell(8);
-        row20Cell2.setCellValue("General Merchandise");
+        row20Cell2.setCellValue("Overage");
         row20Cell2.setCellStyle(style6);
 
-        SXSSFCell row20Cell3 = row.createCell(10);
-        row20Cell3.setCellValue(getNumber0(thisOverageVarianceGT.getSku()));
-        row20Cell3.setCellStyle(style8);
+        // 第20行 列表
+        row = sheet.createRow(21);
+        SXSSFCell row21Cell2 = row.createCell(8);
+        row21Cell2.setCellValue("General Merchandise");
+        row21Cell2.setCellStyle(style6);
 
-        SXSSFCell row20Cell4 = row.createCell(11);
-        row20Cell4.setCellValue(getNumber0(thisOverageVarianceGT.getQty()));
-        row20Cell4.setCellStyle(style8);
+        SXSSFCell row21Cell3 = row.createCell(10);
+        row21Cell3.setCellValue(getNumber0(thisOverageVarianceGT.getSku()));
+        row21Cell3.setCellStyle(style8);
 
-        SXSSFCell row20Cell5 = row.createCell(12);
-        row20Cell5.setCellValue(getNumber0(thisOverageVarianceGT.getAmt()));
-        row20Cell5.setCellStyle(style8);
+        SXSSFCell row21Cell4 = row.createCell(11);
+        row21Cell4.setCellValue(getNumber0(thisOverageVarianceGT.getQty()));
+        row21Cell4.setCellStyle(style8);
+
+        SXSSFCell row21Cell5 = row.createCell(12);
+        row21Cell5.setCellValue(getNumber0(thisOverageVarianceGT.getAmt()));
+        row21Cell5.setCellStyle(style8);
 
         /**
          * 获取盘点的差异商品, 多出或者缺少的
@@ -2566,26 +2657,26 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
                 lastOverageVarianceGT = new StocktakeReportDTO();
             }
 
-            SXSSFCell row20Cell6 = row.createCell(14);
-            row20Cell6.setCellValue(getNumber0(lastOverageVarianceGT.getSku()));
-            row20Cell6.setCellStyle(style8);
+            SXSSFCell row21Cell6 = row.createCell(14);
+            row21Cell6.setCellValue(getNumber0(lastOverageVarianceGT.getSku()));
+            row21Cell6.setCellStyle(style8);
 
-            SXSSFCell row20Cell7 = row.createCell(15);
-            row20Cell7.setCellValue(getNumber0(lastOverageVarianceGT.getQty()));
-            row20Cell7.setCellStyle(style8);
+            SXSSFCell row21Cell7 = row.createCell(15);
+            row21Cell7.setCellValue(getNumber0(lastOverageVarianceGT.getQty()));
+            row21Cell7.setCellStyle(style8);
 
-            SXSSFCell row20Cell8 = row.createCell(16);
-            row20Cell8.setCellValue(getNumber0(lastOverageVarianceGT.getAmt()));
-            row20Cell8.setCellStyle(style8);
+            SXSSFCell row21Cell8 = row.createCell(16);
+            row21Cell8.setCellValue(getNumber0(lastOverageVarianceGT.getAmt()));
+            row21Cell8.setCellStyle(style8);
         } else {
-            SXSSFCell row20Cell6 = row.createCell(14);
-            row20Cell6.setCellStyle(style8);
+            SXSSFCell row21Cell6 = row.createCell(14);
+            row21Cell6.setCellStyle(style8);
 
-            SXSSFCell row20Cell7 = row.createCell(15);
-            row20Cell7.setCellStyle(style8);
+            SXSSFCell row21Cell7 = row.createCell(15);
+            row21Cell7.setCellStyle(style8);
 
-            SXSSFCell row20Cell8 = row.createCell(16);
-            row20Cell8.setCellStyle(style8);
+            SXSSFCell row21Cell8 = row.createCell(16);
+            row21Cell8.setCellStyle(style8);
         }
 
 
@@ -2601,23 +2692,23 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             thisOverageVarianceGT2 = new StocktakeReportDTO();
         }
 
-        // 第21行 列表
-        row = sheet.createRow(21);
-        SXSSFCell row21Cell2 = row.createCell(8);
-        row21Cell2.setCellValue("Food Service");
-        row21Cell2.setCellStyle(style6);
+        // 第22行 列表
+        row = sheet.createRow(22);
+        SXSSFCell row22Cell2 = row.createCell(8);
+        row22Cell2.setCellValue("Food Service");
+        row22Cell2.setCellStyle(style6);
 
-        SXSSFCell row21Cell3 = row.createCell(10);
-        row21Cell3.setCellValue(getNumber0(thisOverageVarianceGT2.getSku()));
-        row21Cell3.setCellStyle(style8);
+        SXSSFCell row22Cell3 = row.createCell(10);
+        row22Cell3.setCellValue(getNumber0(thisOverageVarianceGT2.getSku()));
+        row22Cell3.setCellStyle(style8);
 
-        SXSSFCell row21Cell4 = row.createCell(11);
-        row21Cell4.setCellValue(getNumber0(thisOverageVarianceGT2.getQty()));
-        row21Cell4.setCellStyle(style8);
+        SXSSFCell row22Cell4 = row.createCell(11);
+        row22Cell4.setCellValue(getNumber0(thisOverageVarianceGT2.getQty()));
+        row22Cell4.setCellStyle(style8);
 
-        SXSSFCell row21Cell5 = row.createCell(12);
-        row21Cell5.setCellValue(getNumber0(thisOverageVarianceGT2.getAmt()));
-        row21Cell5.setCellStyle(style8);
+        SXSSFCell row22Cell5 = row.createCell(12);
+        row22Cell5.setCellValue(getNumber0(thisOverageVarianceGT2.getAmt()));
+        row22Cell5.setCellStyle(style8);
 
         /**
          * 获取盘点的差异商品, 多出或者缺少的
@@ -2633,281 +2724,402 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
                 lastOverageVarianceGT2 = new StocktakeReportDTO();
             }
 
-            SXSSFCell row21Cell6 = row.createCell(14);
-            row21Cell6.setCellValue(getNumber0(lastOverageVarianceGT2.getSku()));
-            row21Cell6.setCellStyle(style8);
+            SXSSFCell row22Cell6 = row.createCell(14);
+            row22Cell6.setCellValue(getNumber0(lastOverageVarianceGT2.getSku()));
+            row22Cell6.setCellStyle(style8);
 
-            SXSSFCell row21Cell7 = row.createCell(15);
-            row21Cell7.setCellValue(getNumber0(lastOverageVarianceGT2.getQty()));
-            row21Cell7.setCellStyle(style8);
+            SXSSFCell row22Cell7 = row.createCell(15);
+            row22Cell7.setCellValue(getNumber0(lastOverageVarianceGT2.getQty()));
+            row22Cell7.setCellStyle(style8);
 
-            SXSSFCell row21Cell8 = row.createCell(16);
-            row21Cell8.setCellValue(getNumber0(lastOverageVarianceGT2.getAmt()));
-            row21Cell8.setCellStyle(style8);
+            SXSSFCell row22Cell8 = row.createCell(16);
+            row22Cell8.setCellValue(getNumber0(lastOverageVarianceGT2.getAmt()));
+            row22Cell8.setCellStyle(style8);
         } else {
-            SXSSFCell row21Cell6 = row.createCell(14);
-            row21Cell6.setCellStyle(style8);
+            SXSSFCell row22Cell6 = row.createCell(14);
+            row22Cell6.setCellStyle(style8);
 
-            SXSSFCell row21Cell7 = row.createCell(15);
-            row21Cell7.setCellStyle(style8);
+            SXSSFCell row22Cell7 = row.createCell(15);
+            row22Cell7.setCellStyle(style8);
 
-            SXSSFCell row21Cell8 = row.createCell(16);
-            row21Cell8.setCellStyle(style8);
+            SXSSFCell row22Cell8 = row.createCell(16);
+            row22Cell8.setCellStyle(style8);
+        }
+
+        /**
+         * 获取盘点的差异商品, 多出或者缺少的
+         * GT: 多出的
+         * LT: 缺少的
+         */
+        StocktakeReportDTO thisOverageVarianceGT3 = stocktakeProcessMapper.getStocktakeVariance(headInfo.getThisStocktakeCd(),
+                headInfo.getThisStocktakeDate(),headInfo.getStoreCd(),"GT","03");
+
+        if (thisOverageVarianceGT3==null) {
+            thisOverageVarianceGT3 = new StocktakeReportDTO();
+        }
+
+        // 第23行 列表
+        row = sheet.createRow(23);
+        SXSSFCell row23Cell2 = row.createCell(8);
+        row23Cell2.setCellValue("Service");
+        row23Cell2.setCellStyle(style6);
+
+        SXSSFCell row23Cell3 = row.createCell(10);
+        row23Cell3.setCellValue(getNumber0(thisOverageVarianceGT3.getSku()));
+        row23Cell3.setCellStyle(style8);
+
+        SXSSFCell row23Cell4 = row.createCell(11);
+        row23Cell4.setCellValue(getNumber0(thisOverageVarianceGT3.getQty()));
+        row23Cell4.setCellStyle(style8);
+
+        SXSSFCell row23Cell5 = row.createCell(12);
+        row23Cell5.setCellValue(getNumber0(thisOverageVarianceGT3.getAmt()));
+        row23Cell5.setCellStyle(style8);
+
+        /**
+         * 获取盘点的差异商品, 多出或者缺少的
+         * GT: 多出的
+         * LT: 缺少的
+         */
+        StocktakeReportDTO lastOverageVarianceGT3 = null;
+        if (!StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
+            lastOverageVarianceGT3 = stocktakeProcessMapper.getStocktakeVariance(headInfo.getLastStocktakeCd(),
+                    headInfo.getLastStocktakeDate(),headInfo.getStoreCd(),"GT","03");
+
+            if (lastOverageVarianceGT3==null) {
+                lastOverageVarianceGT3 = new StocktakeReportDTO();
+            }
+
+            SXSSFCell row23Cell6 = row.createCell(14);
+            row23Cell6.setCellValue(getNumber0(lastOverageVarianceGT3.getSku()));
+            row23Cell6.setCellStyle(style8);
+
+            SXSSFCell row23Cell7 = row.createCell(15);
+            row23Cell7.setCellValue(getNumber0(lastOverageVarianceGT3.getQty()));
+            row23Cell7.setCellStyle(style8);
+
+            SXSSFCell row23Cell8 = row.createCell(16);
+            row23Cell8.setCellValue(getNumber0(lastOverageVarianceGT3.getAmt()));
+            row23Cell8.setCellStyle(style8);
+        } else {
+            SXSSFCell row23Cell6 = row.createCell(14);
+            row23Cell6.setCellStyle(style8);
+
+            SXSSFCell row23Cell7 = row.createCell(15);
+            row23Cell7.setCellStyle(style8);
+
+            SXSSFCell row23Cell8 = row.createCell(16);
+            row23Cell8.setCellStyle(style8);
         }
 
 
-        // 第22行 列表
-        row = sheet.createRow(22);
-        SXSSFCell row22Cell2 = row.createCell(8);
-        row22Cell2.setCellValue("Total Overage");
-        row22Cell2.setCellStyle(style6);
+        // 第24行 列表
+        row = sheet.createRow(24);
+        SXSSFCell row24Cell2 = row.createCell(8);
+        row24Cell2.setCellValue("Total Overage");
+        row24Cell2.setCellStyle(style6);
 
         // 本次盘点多出的数据
-        long thisOverageTotalSku = getNumber0(thisOverageVarianceGT.getSku())+getNumber0(thisOverageVarianceGT2.getSku());
-        SXSSFCell row22Cell3 = row.createCell(10);
-        row22Cell3.setCellValue(thisOverageTotalSku);
-        row22Cell3.setCellStyle(style5);
+        long thisOverageTotalSku = getNumber0(thisOverageVarianceGT.getSku())+getNumber0(thisOverageVarianceGT2.getSku())+getNumber0(thisOverageVarianceGT3.getSku());
+        SXSSFCell row24Cell3 = row.createCell(10);
+        row24Cell3.setCellValue(thisOverageTotalSku);
+        row24Cell3.setCellStyle(style5);
 
-        long thisOverageTotalQty = getNumber0(thisOverageVarianceGT.getQty())+getNumber0(thisOverageVarianceGT2.getQty());
-        SXSSFCell row22Cell4 = row.createCell(11);
-        row22Cell4.setCellValue(thisOverageTotalQty);
-        row22Cell4.setCellStyle(style5);
+        long thisOverageTotalQty = getNumber0(thisOverageVarianceGT.getQty())+getNumber0(thisOverageVarianceGT2.getQty())+getNumber0(thisOverageVarianceGT3.getQty());
+        SXSSFCell row24Cell4 = row.createCell(11);
+        row24Cell4.setCellValue(thisOverageTotalQty);
+        row24Cell4.setCellStyle(style5);
 
-        long thisOverageTotalAmt = getNumber0(thisOverageVarianceGT.getAmt())+getNumber0(thisOverageVarianceGT2.getAmt());
-        SXSSFCell row22Cell5 = row.createCell(12);
-        row22Cell5.setCellValue(thisOverageTotalAmt);
-        row22Cell5.setCellStyle(style5);
+        long thisOverageTotalAmt = getNumber0(thisOverageVarianceGT.getAmt())+getNumber0(thisOverageVarianceGT2.getAmt())+getNumber0(thisOverageVarianceGT3.getAmt());
+        SXSSFCell row24Cell5 = row.createCell(12);
+        row24Cell5.setCellValue(thisOverageTotalAmt);
+        row24Cell5.setCellStyle(style5);
 
         // 上一次盘点的所有多出的商品
         long lastOverageTotalSku = 0L;
         long lastOverageTotalQty = 0L;
         long lastOverageTotalAmt = 0L;
         if (!StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
-            lastOverageTotalSku = getNumber0(lastOverageVarianceGT.getSku())+getNumber0(lastOverageVarianceGT2.getSku());
-            SXSSFCell row22Cell6 = row.createCell(14);
-            row22Cell6.setCellValue(lastOverageTotalSku);
-            row22Cell6.setCellStyle(style5);
+            lastOverageTotalSku = getNumber0(lastOverageVarianceGT.getSku())+getNumber0(lastOverageVarianceGT2.getSku())+getNumber0(lastOverageVarianceGT3.getSku());
+            SXSSFCell row24Cell6 = row.createCell(14);
+            row24Cell6.setCellValue(lastOverageTotalSku);
+            row24Cell6.setCellStyle(style5);
 
-            lastOverageTotalQty = getNumber0(lastOverageVarianceGT.getQty())+getNumber0(lastOverageVarianceGT2.getQty());
-            SXSSFCell row22Cell7 = row.createCell(15);
-            row22Cell7.setCellValue(lastOverageTotalQty);
-            row22Cell7.setCellStyle(style5);
+            lastOverageTotalQty = getNumber0(lastOverageVarianceGT.getQty())+getNumber0(lastOverageVarianceGT2.getQty())+getNumber0(lastOverageVarianceGT3.getQty());
+            SXSSFCell row24Cell7 = row.createCell(15);
+            row24Cell7.setCellValue(lastOverageTotalQty);
+            row24Cell7.setCellStyle(style5);
 
-            lastOverageTotalAmt = getNumber0(lastOverageVarianceGT.getAmt())+getNumber0(lastOverageVarianceGT2.getAmt());
-            SXSSFCell row22Cell8 = row.createCell(16);
-            row22Cell8.setCellValue(lastOverageTotalAmt);
-            row22Cell8.setCellStyle(style5);
+            lastOverageTotalAmt = getNumber0(lastOverageVarianceGT.getAmt())+getNumber0(lastOverageVarianceGT2.getAmt())+getNumber0(lastOverageVarianceGT3.getAmt());
+            SXSSFCell row24Cell8 = row.createCell(16);
+            row24Cell8.setCellValue(lastOverageTotalAmt);
+            row24Cell8.setCellStyle(style5);
         } else {
-            SXSSFCell row22Cell6 = row.createCell(14);
-            row22Cell6.setCellStyle(style5);
+            SXSSFCell row24Cell6 = row.createCell(14);
+            row24Cell6.setCellStyle(style5);
 
-            SXSSFCell row22Cell7 = row.createCell(15);
-            row22Cell7.setCellStyle(style5);
+            SXSSFCell row24Cell7 = row.createCell(15);
+            row24Cell7.setCellStyle(style5);
 
-            SXSSFCell row22Cell8 = row.createCell(16);
-            row22Cell8.setCellStyle(style5);
+            SXSSFCell row24Cell8 = row.createCell(16);
+            row24Cell8.setCellStyle(style5);
         }
 
 
 
-        // 第23行 列表
-        row = sheet.createRow(23);
-        SXSSFCell row23Cell2 = row.createCell(8);
-        row23Cell2.setCellValue("% Overage/Book Value");
-        row23Cell2.setCellStyle(style6);
+        // 第25行 列表
+        row = sheet.createRow(25);
+        SXSSFCell row25Cell2 = row.createCell(8);
+        row25Cell2.setCellValue("% Overage/Book Value");
+        row25Cell2.setCellStyle(style6);
 
         // 两个数相除
         double thisOverageBookValSku = divisionFun(thisOverageTotalSku,getNumber0(thisBookValue.getSku()));
-        SXSSFCell row23Cell3 = row.createCell(10);
-        row23Cell3.setCellValue(thisOverageBookValSku);
-        row23Cell3.setCellStyle(style9);
+        SXSSFCell row25Cell3 = row.createCell(10);
+        row25Cell3.setCellValue(thisOverageBookValSku);
+        row25Cell3.setCellStyle(style9);
 
         // 两个数相除
         double thisOverageBookValQty = divisionFun(thisOverageTotalQty,getNumber0(thisBookValue.getBookValQty()));
-        SXSSFCell row23Cell4 = row.createCell(11);
-        row23Cell4.setCellValue(thisOverageBookValQty);
-        row23Cell4.setCellStyle(style9);
+        SXSSFCell row25Cell4 = row.createCell(11);
+        row25Cell4.setCellValue(thisOverageBookValQty);
+        row25Cell4.setCellStyle(style9);
 
         // 两个数相除
         double thisOverageBookValAmt = divisionFun(thisOverageTotalAmt,getNumber0(thisBookValue.getBookValAmt()));
-        SXSSFCell row23Cell5 = row.createCell(12);
-        row23Cell5.setCellValue(thisOverageBookValAmt);
-        row23Cell5.setCellStyle(style9);
+        SXSSFCell row25Cell5 = row.createCell(12);
+        row25Cell5.setCellValue(thisOverageBookValAmt);
+        row25Cell5.setCellStyle(style9);
 
         // 上一次盘点数据
         if (!StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
             // 两个数相除
             double lastOverageBookValSku = divisionFun(lastOverageTotalSku,getNumber0(lastBookValue.getSku()));
-            SXSSFCell row23Cell6 = row.createCell(14);
-            row23Cell6.setCellValue(lastOverageBookValSku);
-            row23Cell6.setCellStyle(style9);
+            SXSSFCell row25Cell6 = row.createCell(14);
+            row25Cell6.setCellValue(lastOverageBookValSku);
+            row25Cell6.setCellStyle(style9);
 
             // 两个数相除
             double lastOverageBookValQty = divisionFun(lastOverageTotalQty,getNumber0(lastBookValue.getBookValQty()));
-            SXSSFCell row23Cell7 = row.createCell(15);
-            row23Cell7.setCellValue(lastOverageBookValQty);
-            row23Cell7.setCellStyle(style9);
+            SXSSFCell row25Cell7 = row.createCell(15);
+            row25Cell7.setCellValue(lastOverageBookValQty);
+            row25Cell7.setCellStyle(style9);
 
             // 两个数相除
             double lastOverageBookValAmt = divisionFun(lastOverageTotalAmt,getNumber0(lastBookValue.getBookValAmt()));
-            SXSSFCell row23Cell8 = row.createCell(16);
-            row23Cell8.setCellValue(lastOverageBookValAmt);
-            row23Cell8.setCellStyle(style9);
+            SXSSFCell row25Cell8 = row.createCell(16);
+            row25Cell8.setCellValue(lastOverageBookValAmt);
+            row25Cell8.setCellStyle(style9);
         }  else {
             // 两个数相除
-            SXSSFCell row23Cell6 = row.createCell(14);
-            row23Cell6.setCellStyle(style9);
+            SXSSFCell row25Cell6 = row.createCell(14);
+            row25Cell6.setCellStyle(style9);
 
             // 两个数相除
-            SXSSFCell row23Cell7 = row.createCell(15);
-            row23Cell7.setCellStyle(style9);
+            SXSSFCell row25Cell7 = row.createCell(15);
+            row25Cell7.setCellStyle(style9);
 
             // 两个数相除
-            SXSSFCell row23Cell8 = row.createCell(16);
-            row23Cell8.setCellStyle(style9);
+            SXSSFCell row25Cell8 = row.createCell(16);
+            row25Cell8.setCellStyle(style9);
         }
 
 
         // 设置区域, 加边框
-        CellRangeAddress region9 = new CellRangeAddress(22,23,10,12);
-        CellRangeAddress region10 = new CellRangeAddress(22,23,14,16);
+        CellRangeAddress region9 = new CellRangeAddress(24,25,10,12);
+        CellRangeAddress region10 = new CellRangeAddress(24,25,14,16);
         setRegionUtil(region9,sheet,wb);
         setRegionUtil(region10,sheet,wb);
 
-        // 第25行 列表 Overage 部分
-        row = sheet.createRow(25);
-        SXSSFCell row25Cell2 = row.createCell(8);
-        row25Cell2.setCellValue("Total Variance");
-        row25Cell2.setCellStyle(style6);
+        // 第27行 列表 Overage 部分
+        row = sheet.createRow(27);
+        SXSSFCell row27Cell2 = row.createCell(8);
+        row27Cell2.setCellValue("Total Variance");
+        row27Cell2.setCellStyle(style6);
 
-        // 第26行 列表
-        row = sheet.createRow(26);
-        SXSSFCell row26Cell2 = row.createCell(8);
-        row26Cell2.setCellValue("General Merchandise");
-        row26Cell2.setCellStyle(style6);
+        // 第28行 列表
+        row = sheet.createRow(28);
+        SXSSFCell row28Cell2 = row.createCell(8);
+        row28Cell2.setCellValue("General Merchandise");
+        row28Cell2.setCellStyle(style6);
 
         // 两个数相加
         long thisMerchandiseVarianceTotalSku = additionFun(thisShortageVarianceLT.getSku(),thisOverageVarianceGT.getSku());
-        SXSSFCell row26Cell3 = row.createCell(10);
-        row26Cell3.setCellValue(thisMerchandiseVarianceTotalSku);
-        row26Cell3.setCellStyle(style8);
+        SXSSFCell row28Cell3 = row.createCell(10);
+        row28Cell3.setCellValue(thisMerchandiseVarianceTotalSku);
+        row28Cell3.setCellStyle(style8);
 
         // 两个数相加
         long thisMerchandiseVarianceTotalQty = additionFun(thisShortageVarianceLT.getQty(),thisOverageVarianceGT.getQty());
-        SXSSFCell row26Cell4 = row.createCell(11);
-        row26Cell4.setCellValue(thisMerchandiseVarianceTotalQty);
-        row26Cell4.setCellStyle(style8);
+        SXSSFCell row28Cell4 = row.createCell(11);
+        row28Cell4.setCellValue(thisMerchandiseVarianceTotalQty);
+        row28Cell4.setCellStyle(style8);
 
         // 两个数相加
         long thisMerchandiseVarianceTotalAmt = additionFun(thisShortageVarianceLT.getAmt(),thisOverageVarianceGT.getAmt());
-        SXSSFCell row26Cell5 = row.createCell(12);
-        row26Cell5.setCellValue(thisMerchandiseVarianceTotalAmt);
-        row26Cell5.setCellStyle(style8);
+        SXSSFCell row28Cell5 = row.createCell(12);
+        row28Cell5.setCellValue(thisMerchandiseVarianceTotalAmt);
+        row28Cell5.setCellStyle(style8);
 
         // 上一次盘点数据
         if (!StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
             // 两个数相加
             long lastMerchandiseVarianceTotalSku = additionFun(lastShortageVarianceLT.getSku(),lastOverageVarianceGT.getSku());
-            SXSSFCell row26Cell6 = row.createCell(14);
-            row26Cell6.setCellValue(lastMerchandiseVarianceTotalSku);
-            row26Cell6.setCellStyle(style8);
+            SXSSFCell row28Cell6 = row.createCell(14);
+            row28Cell6.setCellValue(lastMerchandiseVarianceTotalSku);
+            row28Cell6.setCellStyle(style8);
 
             // 两个数相加
             long lastMerchandiseVarianceTotalQty = additionFun(lastShortageVarianceLT.getQty(),lastOverageVarianceGT.getQty());
-            SXSSFCell row26Cell7 = row.createCell(15);
-            row26Cell7.setCellValue(lastMerchandiseVarianceTotalQty);
-            row26Cell7.setCellStyle(style8);
+            SXSSFCell row28Cell7 = row.createCell(15);
+            row28Cell7.setCellValue(lastMerchandiseVarianceTotalQty);
+            row28Cell7.setCellStyle(style8);
 
             // 两个数相加
             long lastMerchandiseVarianceTotalAmt = additionFun(lastShortageVarianceLT.getAmt(),lastOverageVarianceGT.getAmt());
-            SXSSFCell row26Cell8 = row.createCell(16);
-            row26Cell8.setCellValue(lastMerchandiseVarianceTotalAmt);
-            row26Cell8.setCellStyle(style8);
+            SXSSFCell row28Cell8 = row.createCell(16);
+            row28Cell8.setCellValue(lastMerchandiseVarianceTotalAmt);
+            row28Cell8.setCellStyle(style8);
         } else {
-            SXSSFCell row26Cell6 = row.createCell(14);
-            row26Cell6.setCellStyle(style8);
+            SXSSFCell row28Cell6 = row.createCell(14);
+            row28Cell6.setCellStyle(style8);
 
-            SXSSFCell row26Cell7 = row.createCell(15);
-            row26Cell7.setCellStyle(style8);
+            SXSSFCell row28Cell7 = row.createCell(15);
+            row28Cell7.setCellStyle(style8);
 
-            SXSSFCell row26Cell8 = row.createCell(16);
-            row26Cell8.setCellStyle(style8);
+            SXSSFCell row28Cell8 = row.createCell(16);
+            row28Cell8.setCellStyle(style8);
         }
 
-        // 第27行 列表
-        row = sheet.createRow(27);
-        SXSSFCell row27Cell2 = row.createCell(8);
-        row27Cell2.setCellValue("Food Service");
-        row27Cell2.setCellStyle(style6);
+        // 第29行 列表
+        row = sheet.createRow(29);
+        SXSSFCell row29Cell2 = row.createCell(8);
+        row29Cell2.setCellValue("Food Service");
+        row29Cell2.setCellStyle(style6);
 
         // 两个数相加
-        long thisServiceVarianceTotalSku = additionFun(thisShortageVarianceLT2.getSku(),thisOverageVarianceGT2.getSku());
-        SXSSFCell row27Cell3 = row.createCell(10);
-        row27Cell3.setCellValue(thisServiceVarianceTotalSku);
-        row27Cell3.setCellStyle(style8);
+        long thisFoodServiceVarianceTotalSku = additionFun(thisShortageVarianceLT2.getSku(),thisOverageVarianceGT2.getSku());
+        SXSSFCell row29Cell3 = row.createCell(10);
+        row29Cell3.setCellValue(thisFoodServiceVarianceTotalSku);
+        row29Cell3.setCellStyle(style8);
 
         // 两个数相加
-        long thisServiceVarianceTotalQty = additionFun(thisShortageVarianceLT2.getQty(),thisOverageVarianceGT2.getQty());
-        SXSSFCell row27Cell4 = row.createCell(11);
-        row27Cell4.setCellValue(thisServiceVarianceTotalQty);
-        row27Cell4.setCellStyle(style8);
+        long thisFoodServiceVarianceTotalQty = additionFun(thisShortageVarianceLT2.getQty(),thisOverageVarianceGT2.getQty());
+        SXSSFCell row29Cell4 = row.createCell(11);
+        row29Cell4.setCellValue(thisFoodServiceVarianceTotalQty);
+        row29Cell4.setCellStyle(style8);
 
         // 两个数相加
-        long thisServiceVarianceTotalAmt = additionFun(thisShortageVarianceLT2.getAmt(),thisOverageVarianceGT2.getAmt());
-        SXSSFCell row27Cell5 = row.createCell(12);
-        row27Cell5.setCellValue(thisServiceVarianceTotalAmt);
-        row27Cell5.setCellStyle(style8);
+        long thisFoodServiceVarianceTotalAmt = additionFun(thisShortageVarianceLT2.getAmt(),thisOverageVarianceGT2.getAmt());
+        SXSSFCell row29Cell5 = row.createCell(12);
+        row29Cell5.setCellValue(thisFoodServiceVarianceTotalAmt);
+        row29Cell5.setCellStyle(style8);
 
         // 上一次盘点数据
         if (!StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
             // 两个数相加
-            long lastServiceVarianceTotalSku = additionFun(lastShortageVarianceLT2.getSku(),lastOverageVarianceGT2.getSku());
-            SXSSFCell row27Cell6 = row.createCell(14);
-            row27Cell6.setCellValue(lastServiceVarianceTotalSku);
-            row27Cell6.setCellStyle(style8);
+            long lastFoodServiceVarianceTotalSku = additionFun(lastShortageVarianceLT2.getSku(),lastOverageVarianceGT2.getSku());
+            SXSSFCell row29Cell6 = row.createCell(14);
+            row29Cell6.setCellValue(lastFoodServiceVarianceTotalSku);
+            row29Cell6.setCellStyle(style8);
 
             // 两个数相加
-            long lastServiceVarianceTotalQty = additionFun(lastShortageVarianceLT2.getQty(),lastOverageVarianceGT2.getQty());
-            SXSSFCell row27Cell7 = row.createCell(15);
-            row27Cell7.setCellValue(lastServiceVarianceTotalQty);
-            row27Cell7.setCellStyle(style8);
+            long lastFoodServiceVarianceTotalQty = additionFun(lastShortageVarianceLT2.getQty(),lastOverageVarianceGT2.getQty());
+            SXSSFCell row29Cell7 = row.createCell(15);
+            row29Cell7.setCellValue(lastFoodServiceVarianceTotalQty);
+            row29Cell7.setCellStyle(style8);
 
             // 两个数相加
-            long lastServiceVarianceTotalAmt = additionFun(lastShortageVarianceLT2.getAmt(),lastOverageVarianceGT2.getAmt());
-            SXSSFCell row27Cell8 = row.createCell(16);
-            row27Cell8.setCellValue(lastServiceVarianceTotalAmt);
-            row27Cell8.setCellStyle(style8);
+            long lastFoodServiceVarianceTotalAmt = additionFun(lastShortageVarianceLT2.getAmt(),lastOverageVarianceGT2.getAmt());
+            SXSSFCell row29Cell8 = row.createCell(16);
+            row29Cell8.setCellValue(lastFoodServiceVarianceTotalAmt);
+            row29Cell8.setCellStyle(style8);
         } else {
-            SXSSFCell row27Cell6 = row.createCell(14);
-            row27Cell6.setCellStyle(style8);
+            SXSSFCell row29Cell6 = row.createCell(14);
+            row29Cell6.setCellStyle(style8);
 
-            SXSSFCell row27Cell7 = row.createCell(15);
-            row27Cell7.setCellStyle(style8);
+            SXSSFCell row29Cell7 = row.createCell(15);
+            row29Cell7.setCellStyle(style8);
 
-            SXSSFCell row27Cell8 = row.createCell(16);
-            row27Cell8.setCellStyle(style8);
+            SXSSFCell row29Cell8 = row.createCell(16);
+            row29Cell8.setCellStyle(style8);
         }
 
-        // 第28行 列表
-        row = sheet.createRow(28);
-        SXSSFCell row28Cell2 = row.createCell(8);
-        row28Cell2.setCellValue("Total IV");
-        row28Cell2.setCellStyle(style6);
+        // 第30行 列表
+        row = sheet.createRow(30);
+        SXSSFCell row30Cell2 = row.createCell(8);
+        row30Cell2.setCellValue("Service");
+        row30Cell2.setCellStyle(style6);
+
+        // 两个数相加
+        long thisServiceVarianceTotalSku = additionFun(thisShortageVarianceLT3.getSku(),thisOverageVarianceGT3.getSku());
+        SXSSFCell row30Cell3 = row.createCell(10);
+        row30Cell3.setCellValue(thisServiceVarianceTotalSku);
+        row30Cell3.setCellStyle(style8);
+
+        // 两个数相加
+        long thisServiceVarianceTotalQty = additionFun(thisShortageVarianceLT3.getQty(),thisOverageVarianceGT3.getQty());
+        SXSSFCell row30Cell4 = row.createCell(11);
+        row30Cell4.setCellValue(thisServiceVarianceTotalQty);
+        row30Cell4.setCellStyle(style8);
+
+        // 两个数相加
+        long thisServiceVarianceTotalAmt = additionFun(thisShortageVarianceLT3.getAmt(),thisOverageVarianceGT3.getAmt());
+        SXSSFCell row30Cell5 = row.createCell(12);
+        row30Cell5.setCellValue(thisServiceVarianceTotalAmt);
+        row30Cell5.setCellStyle(style8);
+
+        // 上一次盘点数据
+        if (!StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
+            // 两个数相加
+            long lastServiceVarianceTotalSku = additionFun(lastShortageVarianceLT3.getSku(),lastOverageVarianceGT3.getSku());
+            SXSSFCell row30Cell6 = row.createCell(14);
+            row30Cell6.setCellValue(lastServiceVarianceTotalSku);
+            row30Cell6.setCellStyle(style8);
+
+            // 两个数相加
+            long lastServiceVarianceTotalQty = additionFun(lastShortageVarianceLT3.getQty(),lastOverageVarianceGT3.getQty());
+            SXSSFCell row30Cell7 = row.createCell(15);
+            row30Cell7.setCellValue(lastServiceVarianceTotalQty);
+            row30Cell7.setCellStyle(style8);
+
+            // 两个数相加
+            long lastServiceVarianceTotalAmt = additionFun(lastShortageVarianceLT3.getAmt(),lastShortageVarianceLT3.getAmt());
+            SXSSFCell row30Cell8 = row.createCell(16);
+            row30Cell8.setCellValue(lastServiceVarianceTotalAmt);
+            row30Cell8.setCellStyle(style8);
+        } else {
+            SXSSFCell row30Cell6 = row.createCell(14);
+            row30Cell6.setCellStyle(style8);
+
+            SXSSFCell row30Cell7 = row.createCell(15);
+            row30Cell7.setCellStyle(style8);
+
+            SXSSFCell row30Cell8 = row.createCell(16);
+            row30Cell8.setCellStyle(style8);
+        }
+
+
+        // 第31行 列表
+        row = sheet.createRow(31);
+        SXSSFCell row31Cell2 = row.createCell(8);
+        row31Cell2.setCellValue("Total IV");
+        row31Cell2.setCellStyle(style6);
 
         long thisTotalVarianceSku = thisTotalSku+thisOverageTotalSku;
-        SXSSFCell row28Cell3 = row.createCell(10);
-        row28Cell3.setCellValue(thisTotalVarianceSku);
-        row28Cell3.setCellStyle(style5);
+        SXSSFCell row31Cell3 = row.createCell(10);
+        row31Cell3.setCellValue(thisTotalVarianceSku);
+        row31Cell3.setCellStyle(style5);
 
         long thisTotalVarianceQty = thisTotalQty+thisOverageTotalQty;
-        SXSSFCell row28Cell4 = row.createCell(11);
-        row28Cell4.setCellValue(thisTotalVarianceQty);
-        row28Cell4.setCellStyle(style5);
+        SXSSFCell row31Cell4 = row.createCell(11);
+        row31Cell4.setCellValue(thisTotalVarianceQty);
+        row31Cell4.setCellStyle(style5);
 
         long thisTotalVarianceAmt = thisTotalAmt+thisOverageTotalAmt;
-        SXSSFCell row28Cell5 = row.createCell(12);
-        row28Cell5.setCellValue(thisTotalVarianceAmt);
-        row28Cell5.setCellStyle(style5);
+        SXSSFCell row31Cell5 = row.createCell(12);
+        row31Cell5.setCellValue(thisTotalVarianceAmt);
+        row31Cell5.setCellStyle(style5);
 
         long lastTotalVarianceSku = 0L;
         long lastTotalVarianceQty = 0L;
@@ -2915,37 +3127,37 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
         // 上一次盘点数据
         if (!StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
             lastTotalVarianceSku = lastTotalSku+lastOverageTotalSku;
-            SXSSFCell row28Cell6 = row.createCell(14);
-            row28Cell6.setCellValue(lastTotalVarianceSku);
-            row28Cell6.setCellStyle(style5);
+            SXSSFCell row31Cell6 = row.createCell(14);
+            row31Cell6.setCellValue(lastTotalVarianceSku);
+            row31Cell6.setCellStyle(style5);
 
             lastTotalVarianceQty = lastTotalQty+lastOverageTotalQty;
-            SXSSFCell row28Cell7 = row.createCell(15);
-            row28Cell7.setCellValue(lastTotalVarianceQty);
-            row28Cell7.setCellStyle(style5);
+            SXSSFCell row31Cell7 = row.createCell(15);
+            row31Cell7.setCellValue(lastTotalVarianceQty);
+            row31Cell7.setCellStyle(style5);
 
             lastTotalVarianceAmt = lastTotalAmt+lastOverageTotalAmt;
-            SXSSFCell row28Cell8 = row.createCell(16);
-            row28Cell8.setCellValue(lastTotalVarianceAmt);
-            row28Cell8.setCellStyle(style5);
+            SXSSFCell row31Cell8 = row.createCell(16);
+            row31Cell8.setCellValue(lastTotalVarianceAmt);
+            row31Cell8.setCellStyle(style5);
         } else {
-            SXSSFCell row28Cell6 = row.createCell(14);
-            row28Cell6.setCellStyle(style5);
+            SXSSFCell row31Cell6 = row.createCell(14);
+            row31Cell6.setCellStyle(style5);
 
-            SXSSFCell row28Cell7 = row.createCell(15);
-            row28Cell7.setCellStyle(style5);
+            SXSSFCell row31Cell7 = row.createCell(15);
+            row31Cell7.setCellStyle(style5);
 
-            SXSSFCell row28Cell8 = row.createCell(16);
-            row28Cell8.setCellStyle(style5);
+            SXSSFCell row31Cell8 = row.createCell(16);
+            row31Cell8.setCellStyle(style5);
         }
 
 
 
-        // 第29行 列表
-        row = sheet.createRow(29);
-        SXSSFCell row29Cell2 = row.createCell(8);
-        row29Cell2.setCellValue("Average IV  per Day");
-        row29Cell2.setCellStyle(style6);
+        // 第32行 列表
+        row = sheet.createRow(32);
+        SXSSFCell row32Cell2 = row.createCell(8);
+        row32Cell2.setCellValue("Average IV  per Day");
+        row32Cell2.setCellStyle(style6);
 
         long thisAvgSku = 0L;
         long thisAvgQty = 0L;
@@ -2956,23 +3168,23 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
 
         // 计算上一次盘点到这一次盘点的平均量
         if (!StringUtils.isEmpty(headInfo.getDay()) && !"0".equals(headInfo.getDay())) {
-            long day = Long.valueOf(headInfo.getDay());
+            long day = Long.parseLong(headInfo.getDay());
             thisAvgSku = thisTotalVarianceSku/day;
             thisAvgQty = thisTotalVarianceQty/day;
             thisAvgAmt = thisTotalVarianceAmt/day;
         }
 
-        SXSSFCell row29Cell3 = row.createCell(10);
-        row29Cell3.setCellStyle(style5);
-        row29Cell3.setCellValue(thisAvgSku);
+        SXSSFCell row32Cell3 = row.createCell(10);
+        row32Cell3.setCellStyle(style5);
+        row32Cell3.setCellValue(thisAvgSku);
 
-        SXSSFCell row29Cell4 = row.createCell(11);
-        row29Cell4.setCellValue(thisAvgQty);
-        row29Cell4.setCellStyle(style5);
+        SXSSFCell row32Cell4 = row.createCell(11);
+        row32Cell4.setCellValue(thisAvgQty);
+        row32Cell4.setCellStyle(style5);
 
-        SXSSFCell row29Cell5 = row.createCell(12);
-        row29Cell5.setCellValue(thisAvgAmt);
-        row29Cell5.setCellStyle(style5);
+        SXSSFCell row32Cell5 = row.createCell(12);
+        row32Cell5.setCellValue(thisAvgAmt);
+        row32Cell5.setCellStyle(style5);
 
         // 上一次盘点数据
         if (!StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
@@ -2982,62 +3194,62 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             if (lastHeadInfo != null) {
                 // 计算上一次盘点到上上一次盘点的平均量
                 if (!StringUtils.isEmpty(lastHeadInfo.getDay()) && !"0".equals(lastHeadInfo.getDay())) {
-                    long day = Long.valueOf(lastHeadInfo.getDay());
+                    long day = Long.parseLong(lastHeadInfo.getDay());
                     lastAvgSku = thisTotalVarianceSku/day;
                     lastAvgQty = thisTotalVarianceQty/day;
                     lastAvgAmt = thisTotalVarianceAmt/day;
                 }
             }
 
-            SXSSFCell row29Cell6 = row.createCell(14);
-            row29Cell6.setCellValue(lastAvgSku);
-            row29Cell6.setCellStyle(style5);
+            SXSSFCell row32Cell6 = row.createCell(14);
+            row32Cell6.setCellValue(lastAvgSku);
+            row32Cell6.setCellStyle(style5);
 
-            SXSSFCell row29Cell7 = row.createCell(15);
-            row29Cell7.setCellValue(lastAvgQty);
-            row29Cell7.setCellStyle(style5);
+            SXSSFCell row32Cell7 = row.createCell(15);
+            row32Cell7.setCellValue(lastAvgQty);
+            row32Cell7.setCellStyle(style5);
 
-            SXSSFCell row29Cell8 = row.createCell(16);
-            row29Cell8.setCellValue(lastAvgAmt);
-            row29Cell8.setCellStyle(style5);
+            SXSSFCell row32Cell8 = row.createCell(16);
+            row32Cell8.setCellValue(lastAvgAmt);
+            row32Cell8.setCellStyle(style5);
         } else {
-            SXSSFCell row29Cell6 = row.createCell(14);
-            row29Cell6.setCellStyle(style5);
+            SXSSFCell row32Cell6 = row.createCell(14);
+            row32Cell6.setCellStyle(style5);
 
-            SXSSFCell row29Cell7 = row.createCell(15);
-            row29Cell7.setCellStyle(style5);
+            SXSSFCell row32Cell7 = row.createCell(15);
+            row32Cell7.setCellStyle(style5);
 
-            SXSSFCell row29Cell8 = row.createCell(16);
-            row29Cell8.setCellStyle(style5);
+            SXSSFCell row32Cell8 = row.createCell(16);
+            row32Cell8.setCellStyle(style5);
         }
 
         // 设置区域, 加边框
-        CellRangeAddress region11 = new CellRangeAddress(28,29,10,12);
-        CellRangeAddress region12 = new CellRangeAddress(28,29,14,16);
+        CellRangeAddress region11 = new CellRangeAddress(31,32,10,12);
+        CellRangeAddress region12 = new CellRangeAddress(31,32,14,16);
         setRegionUtil(region11,sheet,wb);
         setRegionUtil(region12,sheet,wb);
 
-        // 第30行 列表
-        row = sheet.createRow(30);
-        SXSSFCell row30Cell2 = row.createCell(8);
-        row30Cell2.setCellValue("% IV/Book Value");
-        row30Cell2.setCellStyle(style6);
+        // 第33行 列表
+        row = sheet.createRow(33);
+        SXSSFCell row33Cell2 = row.createCell(8);
+        row33Cell2.setCellValue("% IV/Book Value");
+        row33Cell2.setCellStyle(style6);
 
         if (thisBookValue.getSku() == null) {
             thisBookValue.setSku(new BigDecimal("0"));
         }
         double thisTotalVarianceSkuPer = divisionFun(thisTotalVarianceSku, thisBookValue.getSku().longValue());
-        SXSSFCell row30Cell3 = row.createCell(10);
-        row30Cell3.setCellValue(thisTotalVarianceSkuPer);
-        row30Cell3.setCellStyle(style9);
+        SXSSFCell row33Cell3 = row.createCell(10);
+        row33Cell3.setCellValue(thisTotalVarianceSkuPer);
+        row33Cell3.setCellStyle(style9);
 
         if (thisBookValue.getQty() == null) {
             thisBookValue.setQty(new BigDecimal("0"));
         }
         double thisTotalVarianceQtyPer = divisionFun(thisTotalVarianceQty, thisBookValue.getQty().longValue());
-        SXSSFCell row30Cell4 = row.createCell(11);
-        row30Cell4.setCellValue(thisTotalVarianceQtyPer);
-        row30Cell4.setCellStyle(style9);
+        SXSSFCell row33Cell4 = row.createCell(11);
+        row33Cell4.setCellValue(thisTotalVarianceQtyPer);
+        row33Cell4.setCellStyle(style9);
 
         if (thisBookValue.getQty() == null) {
             thisBookValue.setQty(new BigDecimal("0"));
@@ -3046,9 +3258,9 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             thisBookValue.setAmt(new BigDecimal(0));
         }
         double thisTotalVarianceAmtPer = divisionFun(thisTotalVarianceAmt, thisBookValue.getAmt().longValue());
-        SXSSFCell row30Cell5 = row.createCell(12);
-        row30Cell5.setCellValue(thisTotalVarianceAmtPer);
-        row30Cell5.setCellStyle(style9);
+        SXSSFCell row33Cell5 = row.createCell(12);
+        row33Cell5.setCellValue(thisTotalVarianceAmtPer);
+        row33Cell5.setCellStyle(style9);
 
         // 上一次盘点数据
         double lastTotalVarianceSkuPer = 0;
@@ -3059,61 +3271,61 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
                 lastBookValue.setSku(new BigDecimal("0"));
             }
             lastTotalVarianceSkuPer = divisionFun(lastTotalVarianceSku, lastBookValue.getSku().longValue());
-            SXSSFCell row30Cell6 = row.createCell(14);
-            row30Cell6.setCellValue(lastTotalVarianceSkuPer);
-            row30Cell6.setCellStyle(style9);
+            SXSSFCell row33Cell6 = row.createCell(14);
+            row33Cell6.setCellValue(lastTotalVarianceSkuPer);
+            row33Cell6.setCellStyle(style9);
 
             if (lastBookValue.getQty() == null) {
                 lastBookValue.setQty(new BigDecimal("0"));
             }
             lastTotalVarianceQtyPer = divisionFun(lastTotalVarianceQty, lastBookValue.getQty().longValue());
-            SXSSFCell row30Cell7 = row.createCell(15);
-            row30Cell7.setCellValue(lastTotalVarianceQtyPer);
-            row30Cell7.setCellStyle(style9);
+            SXSSFCell row33Cell7 = row.createCell(15);
+            row33Cell7.setCellValue(lastTotalVarianceQtyPer);
+            row33Cell7.setCellStyle(style9);
 
             if (lastBookValue.getAmt() == null) {
                 lastBookValue.setAmt(new BigDecimal("0"));
             }
             lastTotalVarianceAmtPer = divisionFun(lastTotalVarianceAmt, lastBookValue.getAmt().longValue());
-            SXSSFCell row30Cell8 = row.createCell(16);
-            row30Cell8.setCellValue(lastTotalVarianceAmtPer);
-            row30Cell8.setCellStyle(style9);
+            SXSSFCell row33Cell8 = row.createCell(16);
+            row33Cell8.setCellValue(lastTotalVarianceAmtPer);
+            row33Cell8.setCellStyle(style9);
         } else {
-            SXSSFCell row30Cell6 = row.createCell(14);
-            row30Cell6.setCellStyle(style9);
+            SXSSFCell row33Cell6 = row.createCell(14);
+            row33Cell6.setCellStyle(style9);
 
-            SXSSFCell row30Cell7 = row.createCell(15);
-            row30Cell7.setCellStyle(style9);
+            SXSSFCell row33Cell7 = row.createCell(15);
+            row33Cell7.setCellStyle(style9);
 
-            SXSSFCell row30Cell8 = row.createCell(16);
-            row30Cell8.setCellStyle(style9);
+            SXSSFCell row33Cell8 = row.createCell(16);
+            row33Cell8.setCellStyle(style9);
         }
 
 
 
-        // 第31行 列表
-        row = sheet.createRow(31);
-        SXSSFCell row31Cell2 = row.createCell(8);
-        row31Cell2.setCellValue("% Without IV");
-        row31Cell2.setCellStyle(style6);
+        // 第34行 列表
+        row = sheet.createRow(34);
+        SXSSFCell row34Cell2 = row.createCell(8);
+        row34Cell2.setCellValue("% Without IV");
+        row34Cell2.setCellStyle(style6);
 
         // 公式 100 - % IV/Book Value 例如: 100% - 14.06% = 85.94%
         // 因为 poi 设置 百分比格式会直接把数值 * 100 来显示, 取得的原数据时 是没有 * 100 的
         // 所以 变成 1 - % IV/Book Value  例如 1 - 0.1406 = 0.8594, poi 的百分比格式会自动 *100 显示 85.94%
         double thisWithoutIvSku = (1 - Math.abs(thisTotalVarianceSkuPer));
-        SXSSFCell row31Cell3 = row.createCell(10);
-        row31Cell3.setCellValue(thisWithoutIvSku);
-        row31Cell3.setCellStyle(style9);
+        SXSSFCell row34Cell3 = row.createCell(10);
+        row34Cell3.setCellValue(thisWithoutIvSku);
+        row34Cell3.setCellStyle(style9);
 
         double thisWithoutIvQty = (1 - Math.abs(thisTotalVarianceQtyPer));
-        SXSSFCell row31Cell4 = row.createCell(11);
-        row31Cell4.setCellValue(thisWithoutIvQty);
-        row31Cell4.setCellStyle(style9);
+        SXSSFCell row34Cell4 = row.createCell(11);
+        row34Cell4.setCellValue(thisWithoutIvQty);
+        row34Cell4.setCellStyle(style9);
 
         double thisWithoutIvAmt = (1 - Math.abs(thisTotalVarianceAmtPer));
-        SXSSFCell row31Cell5 = row.createCell(12);
-        row31Cell5.setCellValue(thisWithoutIvAmt);
-        row31Cell5.setCellStyle(style9);
+        SXSSFCell row34Cell5 = row.createCell(12);
+        row34Cell5.setCellValue(thisWithoutIvAmt);
+        row34Cell5.setCellStyle(style9);
 
         // 上一次盘点数据
         if (!StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
@@ -3121,87 +3333,87 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             // 因为 poi 设置 百分比格式会直接把数值 * 100 来显示, 取得的原数据时 是没有 * 100 的
             // 所以 变成 1 - % IV/Book Value  例如 1 - 0.1406 = 0.8594, poi 的百分比格式会自动 *100 显示 85.94%
             double lastWithoutIvSku = (1 - Math.abs(lastTotalVarianceSkuPer));
-            SXSSFCell row31Cell6 = row.createCell(14);
-            row31Cell6.setCellValue(lastWithoutIvSku);
-            row31Cell6.setCellStyle(style9);
+            SXSSFCell row34Cell6 = row.createCell(14);
+            row34Cell6.setCellValue(lastWithoutIvSku);
+            row34Cell6.setCellStyle(style9);
 
             double lastWithoutIvQty = (1 - Math.abs(lastTotalVarianceQtyPer));
-            SXSSFCell row31Cell7 = row.createCell(15);
-            row31Cell7.setCellValue(lastWithoutIvQty);
-            row31Cell7.setCellStyle(style9);
+            SXSSFCell row34Cell7 = row.createCell(15);
+            row34Cell7.setCellValue(lastWithoutIvQty);
+            row34Cell7.setCellStyle(style9);
 
             double lastWithoutIvAmt = (1 - Math.abs(lastTotalVarianceAmtPer));
-            SXSSFCell row31Cell8 = row.createCell(16);
-            row31Cell8.setCellValue(lastWithoutIvAmt);
-            row31Cell8.setCellStyle(style9);
+            SXSSFCell row34Cell8 = row.createCell(16);
+            row34Cell8.setCellValue(lastWithoutIvAmt);
+            row34Cell8.setCellStyle(style9);
         } else {
-            SXSSFCell row31Cell6 = row.createCell(14);
-            row31Cell6.setCellValue("");
-            row31Cell6.setCellStyle(style9);
+            SXSSFCell row34Cell6 = row.createCell(14);
+            row34Cell6.setCellValue("");
+            row34Cell6.setCellStyle(style9);
 
-            SXSSFCell row31Cell7 = row.createCell(15);
-            row31Cell7.setCellValue("");
-            row31Cell7.setCellStyle(style9);
+            SXSSFCell row34Cell7 = row.createCell(15);
+            row34Cell7.setCellValue("");
+            row34Cell7.setCellStyle(style9);
 
-            SXSSFCell row31Cell8 = row.createCell(16);
-            row31Cell8.setCellValue("");
-            row31Cell8.setCellStyle(style9);
+            SXSSFCell row34Cell8 = row.createCell(16);
+            row34Cell8.setCellValue("");
+            row34Cell8.setCellStyle(style9);
         }
 
-        // 第32行 列表
-        row = sheet.createRow(32);
-        SXSSFCell row32Cell2 = row.createCell(8);
-        row32Cell2.setCellValue("Book Value");
-        row32Cell2.setCellStyle(style6);
+        // 第35行 列表
+        row = sheet.createRow(35);
+        SXSSFCell row35Cell2 = row.createCell(8);
+        row35Cell2.setCellValue("Book Value");
+        row35Cell2.setCellStyle(style6);
 
-        SXSSFCell row32Cell3 = row.createCell(10);
-        row32Cell3.setCellValue(getNumber0(thisBookValue.getSku()));
-        row32Cell3.setCellStyle(style5);
+        SXSSFCell row35Cell3 = row.createCell(10);
+        row35Cell3.setCellValue(getNumber0(thisBookValue.getSku()));
+        row35Cell3.setCellStyle(style5);
 
-        SXSSFCell row32Cell4 = row.createCell(11);
-        row32Cell4.setCellValue(getNumber0(thisBookValue.getBookValQty()));
-        row32Cell4.setCellStyle(style5);
+        SXSSFCell row35Cell4 = row.createCell(11);
+        row35Cell4.setCellValue(getNumber0(thisBookValue.getBookValQty()));
+        row35Cell4.setCellStyle(style5);
 
-        SXSSFCell row32Cell5 = row.createCell(12);
-        row32Cell5.setCellValue(getNumber0(thisBookValue.getBookValAmt()));
-        row32Cell5.setCellStyle(style5);
+        SXSSFCell row35Cell5 = row.createCell(12);
+        row35Cell5.setCellValue(getNumber0(thisBookValue.getBookValAmt()));
+        row35Cell5.setCellStyle(style5);
 
         // 上一次盘点数据
         if (!StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
-            SXSSFCell row32Cell6 = row.createCell(14);
-            row32Cell6.setCellValue(getNumber0(lastBookValue.getSku()));
-            row32Cell6.setCellStyle(style5);
+            SXSSFCell row35Cell6 = row.createCell(14);
+            row35Cell6.setCellValue(getNumber0(lastBookValue.getSku()));
+            row35Cell6.setCellStyle(style5);
 
-            SXSSFCell row32Cell7 = row.createCell(15);
-            row32Cell7.setCellValue(getNumber0(lastBookValue.getBookValQty()));
-            row32Cell7.setCellStyle(style5);
+            SXSSFCell row35Cell7 = row.createCell(15);
+            row35Cell7.setCellValue(getNumber0(lastBookValue.getBookValQty()));
+            row35Cell7.setCellStyle(style5);
 
-            SXSSFCell row32Cell8 = row.createCell(16);
-            row32Cell8.setCellValue(getNumber0(lastBookValue.getBookValAmt()));
-            row32Cell8.setCellStyle(style5);
+            SXSSFCell row35Cell8 = row.createCell(16);
+            row35Cell8.setCellValue(getNumber0(lastBookValue.getBookValAmt()));
+            row35Cell8.setCellStyle(style5);
         } else {
-            SXSSFCell row32Cell6 = row.createCell(14);
-            row32Cell6.setCellStyle(style5);
+            SXSSFCell row35Cell6 = row.createCell(14);
+            row35Cell6.setCellStyle(style5);
 
-            SXSSFCell row32Cell7 = row.createCell(15);
-            row32Cell7.setCellStyle(style5);
+            SXSSFCell row35Cell7 = row.createCell(15);
+            row35Cell7.setCellStyle(style5);
 
-            SXSSFCell row32Cell8 = row.createCell(16);
-            row32Cell8.setCellStyle(style5);
+            SXSSFCell row35Cell8 = row.createCell(16);
+            row35Cell8.setCellStyle(style5);
         }
 
         // 设置区域, 加边框
-        CellRangeAddress region13 = new CellRangeAddress(30,32,10,12);
-        CellRangeAddress region14 = new CellRangeAddress(30,32,14,16);
+        CellRangeAddress region13 = new CellRangeAddress(33,35,10,12);
+        CellRangeAddress region14 = new CellRangeAddress(33,35,14,16);
         setRegionUtil(region13,sheet,wb);
         setRegionUtil(region14,sheet,wb);
 
-        // 第33行 列表
-        row = sheet.createRow(33);
-        SXSSFCell row33Cell2 = row.createCell(8);
+        // 第36行 列表
+        row = sheet.createRow(36);
+        SXSSFCell row36Cell2 = row.createCell(8);
 
-        row33Cell2.setCellValue("1/3 Sale during the stock-take");
-        row33Cell2.setCellStyle(style6);
+        row36Cell2.setCellValue("1/3 Sale during the stock-take");
+        row36Cell2.setCellStyle(style6);
 
         Integer saleAmt=null;
         if (headInfo.getThisStartTime() != null || headInfo.getThisEndTime()!=null){
@@ -3216,9 +3428,9 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             saleAmt = 0;
         }
         double _thisSaleQty = saleAmt/3;
-        SXSSFCell row33Cell5 = row.createCell(10);
-        row33Cell5.setCellValue(_thisSaleQty);
-        row33Cell5.setCellStyle(style5);
+        SXSSFCell row36Cell5 = row.createCell(10);
+        row36Cell5.setCellValue(_thisSaleQty);
+        row36Cell5.setCellStyle(style5);
 
         // 上一次盘点数据
         if (!StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
@@ -3232,81 +3444,81 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
                 lastSaleAmt = 0;
             }
             double _lastSaleQty = lastSaleAmt/3;
-            SXSSFCell row33Cell8 = row.createCell(14);
-            row33Cell8.setCellValue(_lastSaleQty);
-            row33Cell8.setCellStyle(style5);
+            SXSSFCell row36Cell8 = row.createCell(14);
+            row36Cell8.setCellValue(_lastSaleQty);
+            row36Cell8.setCellStyle(style5);
         } else {
-            SXSSFCell row33Cell8 = row.createCell(14);
-            row33Cell8.setCellStyle(style5);
+            SXSSFCell row36Cell8 = row.createCell(14);
+            row36Cell8.setCellStyle(style5);
         }
 
         // 设置区域, 加边框
-        CellRangeAddress region15 = new CellRangeAddress(33,33,10,12);
-        CellRangeAddress region16 = new CellRangeAddress(33,33,14,16);
+        CellRangeAddress region15 = new CellRangeAddress(36,36,10,12);
+        CellRangeAddress region16 = new CellRangeAddress(36,36,14,16);
         sheet.addMergedRegion(region15);
         sheet.addMergedRegion(region16);
         setRegionUtil(region15,sheet,wb);
         setRegionUtil(region16,sheet,wb);
 
-        // 第34行 列表
-        row = sheet.createRow(34);
-        SXSSFCell row34Cell2 = row.createCell(8);
-        row34Cell2.setCellValue("Sales from last counting to this counting");
-        row34Cell2.setCellStyle(style6);
+        // 第37行 列表
+        row = sheet.createRow(37);
+        SXSSFCell row37Cell2 = row.createCell(8);
+        row37Cell2.setCellValue("Sales from last counting to this counting");
+        row37Cell2.setCellStyle(style6);
 
         // 获取上次盘点到这次盘点的总销售额
         Integer thisSaleAmt = 0;
         Integer _lastToThisSaleAmt = 0;
         if (StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
             // 没有上次盘点数据就为 0
-            SXSSFCell row34Cell5 = row.createCell(10);
-            row34Cell5.setCellValue(0);
-            row34Cell5.setCellStyle(style5);
+            SXSSFCell row37Cell5 = row.createCell(10);
+            row37Cell5.setCellValue(0);
+            row37Cell5.setCellStyle(style5);
 
-            SXSSFCell row34Cell8 = row.createCell(14);
-            row34Cell8.setCellStyle(style5);
+            SXSSFCell row37Cell8 = row.createCell(14);
+            row37Cell8.setCellStyle(style5);
         } else {
             thisSaleAmt = stocktakeProcessMapper.getLastToThisSaleAmt(headInfo);
-            SXSSFCell row34Cell5 = row.createCell(10);
+            SXSSFCell row37Cell5 = row.createCell(10);
             if (thisSaleAmt==null) {
                 thisSaleAmt = 0;
             }
-            row34Cell5.setCellValue(thisSaleAmt);
-            row34Cell5.setCellStyle(style5);
+            row37Cell5.setCellValue(thisSaleAmt);
+            row37Cell5.setCellStyle(style5);
 
             // 获取上一次盘点的数据
             StocktakeReportDTO _lastHead = stocktakeProcessMapper.getStocktakingHead(headInfo.getLastStocktakeCd(),
                     headInfo.getLastStocktakeDate(), headInfo.getStoreCd());
             if (_lastHead == null || StringUtils.isEmpty(_lastHead.getLastStocktakeCd())) {
-                SXSSFCell row34Cell8 = row.createCell(14);
-                row34Cell8.setCellValue(0);
-                row34Cell8.setCellStyle(style5);
+                SXSSFCell row37Cell8 = row.createCell(14);
+                row37Cell8.setCellValue(0);
+                row37Cell8.setCellStyle(style5);
             } else {
                 // 获取上一次到上上一次的销售数据
                 _lastToThisSaleAmt = stocktakeProcessMapper.getLastToThisSaleAmt(_lastHead);
                 if (_lastToThisSaleAmt==null) {
                     _lastToThisSaleAmt = 0;
                 }
-                SXSSFCell row34Cell8 = row.createCell(14);
-                row34Cell8.setCellValue(_lastToThisSaleAmt);
-                row34Cell8.setCellStyle(style5);
+                SXSSFCell row37Cell8 = row.createCell(14);
+                row37Cell8.setCellValue(_lastToThisSaleAmt);
+                row37Cell8.setCellStyle(style5);
             }
         }
 
 
         // 设置区域, 加边框
-        CellRangeAddress region17 = new CellRangeAddress(34,34,10,12);
-        CellRangeAddress region18 = new CellRangeAddress(34,34,14,16);
+        CellRangeAddress region17 = new CellRangeAddress(37,37,10,12);
+        CellRangeAddress region18 = new CellRangeAddress(37,37,14,16);
         sheet.addMergedRegion(region17);
         sheet.addMergedRegion(region18);
         setRegionUtil(region17,sheet,wb);
         setRegionUtil(region18,sheet,wb);
 
-        // 第35行 列表
-        row = sheet.createRow(35);
-        SXSSFCell row35Cell2 = row.createCell(8);
-        row35Cell2.setCellValue("% Variance");
-        row35Cell2.setCellStyle(style6);
+        // 第38行 列表
+        row = sheet.createRow(38);
+        SXSSFCell row38Cell2 = row.createCell(8);
+        row38Cell2.setCellValue("% Variance");
+        row38Cell2.setCellStyle(style6);
 
         BigDecimal thisVarianceAmt = new BigDecimal("0");
         if (thisSaleAmt!=0) {
@@ -3314,45 +3526,45 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
                     divide(new BigDecimal(String.valueOf(thisSaleAmt)), 3, BigDecimal.ROUND_HALF_UP);
             // thisVarianceAmt = (thisTotalVarianceAmt/thisSaleAmt);
         }
-        SXSSFCell row35Cell5 = row.createCell(10);
-        row35Cell5.setCellValue(thisVarianceAmt.doubleValue());
-        row35Cell5.setCellStyle(style9);
+        SXSSFCell row38Cell5 = row.createCell(10);
+        row38Cell5.setCellValue(thisVarianceAmt.doubleValue());
+        row38Cell5.setCellStyle(style9);
 
         BigDecimal lastVarianceAmt = new BigDecimal("0");
-        SXSSFCell row35Cell8 = row.createCell(14);
+        SXSSFCell row38Cell8 = row.createCell(14);
         if (StringUtils.isEmpty(headInfo.getLastStocktakeCd())) {
-            row35Cell8.setCellValue("");
-            row35Cell8.setCellStyle(style9);
+            row38Cell8.setCellValue("");
+            row38Cell8.setCellStyle(style9);
         } else {
             if (_lastToThisSaleAmt!=0) {
                 lastVarianceAmt = new BigDecimal(String.valueOf(lastTotalVarianceAmt)).
                         divide(new BigDecimal(String.valueOf(_lastToThisSaleAmt)), 3, BigDecimal.ROUND_HALF_UP);
                 // lastVarianceAmt = (lastTotalVarianceAmt/_lastToThisSaleAmt);
             }
-            row35Cell8.setCellValue(lastVarianceAmt.doubleValue());
-            row35Cell8.setCellStyle(style9);
+            row38Cell8.setCellValue(lastVarianceAmt.doubleValue());
+            row38Cell8.setCellStyle(style9);
         }
 
         // 设置区域, 加边框
-        CellRangeAddress region20 = new CellRangeAddress(35,35,10,12);
-        CellRangeAddress region19 = new CellRangeAddress(35,35,14,16);
+        CellRangeAddress region20 = new CellRangeAddress(38,38,10,12);
+        CellRangeAddress region19 = new CellRangeAddress(38,38,14,16);
         sheet.addMergedRegion(region20);
         sheet.addMergedRegion(region19);
         setRegionUtil(region20,sheet,wb);
         setRegionUtil(region19,sheet,wb);
 
-        // 第36行 列表
-        row = sheet.createRow(36);
-        SXSSFCell row36Cell2 = row.createCell(8);
-        row36Cell2.setCellValue("Bad Merchandize");
-        row36Cell2.setCellStyle(style6);
+        // 第39行 列表
+        row = sheet.createRow(39);
+        SXSSFCell row39Cell2 = row.createCell(8);
+        row39Cell2.setCellValue("Bad Merchandize");
+        row39Cell2.setCellStyle(style6);
 
         // 本次盘点
         int thisBadQty = stocktakeProcessMapper.getBadQty(headInfo.getThisStocktakeCd(),headInfo.getThisStocktakeDate(),storeCd);
 
-        SXSSFCell row36Cell5 = row.createCell(10);
-        row36Cell5.setCellValue(thisBadQty);
-        row36Cell5.setCellStyle(style5);
+        SXSSFCell row39Cell5 = row.createCell(10);
+        row39Cell5.setCellValue(thisBadQty);
+        row39Cell5.setCellStyle(style5);
 
         // 上一次盘点
         int lastBadQty = 0;
@@ -3360,54 +3572,55 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             lastBadQty = stocktakeProcessMapper.getBadQty(headInfo.getLastStocktakeCd(),headInfo.getLastStocktakeDate(),storeCd);
         }
 
-        SXSSFCell row36Cell8 = row.createCell(14);
-        row36Cell8.setCellValue(lastBadQty);
-        row36Cell8.setCellStyle(style5);
+        SXSSFCell row39Cell8 = row.createCell(14);
+        row39Cell8.setCellValue(lastBadQty);
+        row39Cell8.setCellStyle(style5);
         /*后续添加 Bad Merchandize数据, 现在画面没有处理 end*/
 
         // 设置区域, 加边框
-        CellRangeAddress region21 = new CellRangeAddress(36,36,10,12);
-        CellRangeAddress region22 = new CellRangeAddress(36,36,14,16);
+        CellRangeAddress region21 = new CellRangeAddress(39,39,10,12);
+        CellRangeAddress region22 = new CellRangeAddress(39,39,14,16);
         sheet.addMergedRegion(region21);
         sheet.addMergedRegion(region22);
         setRegionUtil(region21,sheet,wb);
         setRegionUtil(region22,sheet,wb);
 
         // 第十行SUMMARY 数据 SUMMARY NOTES 部分
-        row = sheet.createRow(38);
-        SXSSFCell row38Cell0 = row.createCell(1);
-        row38Cell0.setCellValue("SUMMARY NOTES");
-        row38Cell0.setCellStyle(style3);
+        row = sheet.createRow(41);
+        SXSSFCell row41Cell0 = row.createCell(1);
+        row41Cell0.setCellValue("SUMMARY NOTES");
+        row41Cell0.setCellStyle(style3);
 
         // 设置区域, 加边框
-        CellRangeAddress region23 = new CellRangeAddress(40,64,1,16);
+        CellRangeAddress region23 = new CellRangeAddress(43,67,1,16);
         setRegionUtil(region23,sheet,wb);
 
         // row66Cell0 部分
-        row = sheet.createRow(66);
-        SXSSFCell row66Cell0 = row.createCell(1);
-        row66Cell0.setCellValue("FINDINGS AND ISSUES");
-        row66Cell0.setCellStyle(style3);
+        row = sheet.createRow(69);
+        SXSSFCell row69Cell0 = row.createCell(1);
+        row69Cell0.setCellValue("FINDINGS AND ISSUES");
+        row69Cell0.setCellStyle(style3);
 
         // row66Cell0 部分
-        row = sheet.createRow(68);
-        SXSSFCell row68Cell0 = row.createCell(1);
-        row68Cell0.setCellValue("Findings/Issues");
-        row68Cell0.setCellStyle(style3);
+        row = sheet.createRow(71);
+        SXSSFCell row71Cell0 = row.createCell(1);
+        row71Cell0.setCellValue("Findings/Issues");
+        row71Cell0.setCellStyle(style3);
 
         // 画一个表格区域
         int i = 10;
-        CellRangeAddress region24 = new CellRangeAddress(69,(i+69)-1,1,16);
+        CellRangeAddress region24 = new CellRangeAddress(72,(i+72)-1,1,16);
         setRegionUtil(region24,sheet,wb);
         // 遍历 10 行列表
         for (int i1 = 0; i1 < i; i1++) {
-            row = sheet.createRow((69+i1));
-            CellRangeAddress region25 = new CellRangeAddress((i1+69),(i1+69),2,4);
-            CellRangeAddress region26 = new CellRangeAddress((i1+69),(i1+69),5,8);
-            CellRangeAddress region27 = new CellRangeAddress((i1+69),(i1+69),9,12);
-            CellRangeAddress region28 = new CellRangeAddress((i1+69),(i1+69),15,16);
-            CellRangeAddress region29 = new CellRangeAddress((i1+69),(i1+69),1,1);
-            CellRangeAddress region30 = new CellRangeAddress((i1+69),(i1+69),13,14);
+            row = sheet.createRow((72+i1));
+            row = sheet.createRow((72+i1));
+            CellRangeAddress region25 = new CellRangeAddress((i1+72),(i1+72),2,4);
+            CellRangeAddress region26 = new CellRangeAddress((i1+72),(i1+72),5,8);
+            CellRangeAddress region27 = new CellRangeAddress((i1+72),(i1+72),9,12);
+            CellRangeAddress region28 = new CellRangeAddress((i1+72),(i1+72),15,16);
+            CellRangeAddress region29 = new CellRangeAddress((i1+72),(i1+72),1,1);
+            CellRangeAddress region30 = new CellRangeAddress((i1+72),(i1+72),13,14);
             sheet.addMergedRegion(region25);
             sheet.addMergedRegion(region26);
             sheet.addMergedRegion(region27);
@@ -3481,6 +3694,8 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
         List<List<StocktakeReportByDepDTO>> newList = new ArrayList<List<StocktakeReportByDepDTO>>();
         for (int i = 0; i < list.size(); i++) {
             StocktakeProcessDTO item = list.get(i);
+            if (StringUtils.isEmpty(item))
+                continue;
             // 过去的盘点结果 by Department
             List<StocktakeReportByDepDTO> result = stocktakeProcessMapper.getVarianceByDep(
                     item.getPiCd(),item.getPiDate(),item.getStoreCd());
@@ -3508,7 +3723,7 @@ public class StocktakeProcessServiceImpl implements StocktakeProcessService {
             return 0;
         }
         try {
-            BigDecimal divide = new BigDecimal(arg1 + "").divide(new BigDecimal(arg2 + ""),3, BigDecimal.ROUND_HALF_UP);
+            BigDecimal divide = new BigDecimal(arg1 + "").divide(new BigDecimal(arg2 + ""),4, BigDecimal.ROUND_HALF_UP);
             // return (arg1 / arg2) * 100;
             return divide.doubleValue();
         } catch (Exception e) {

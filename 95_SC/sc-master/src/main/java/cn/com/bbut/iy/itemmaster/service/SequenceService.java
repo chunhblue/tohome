@@ -24,4 +24,9 @@ public interface SequenceService {
      * @param arr
      */
     void updateSeq(String[] arr);
+
+    /**
+     * 重置序列
+     */
+    void updateResetSeqSeq(String seqName);
 }

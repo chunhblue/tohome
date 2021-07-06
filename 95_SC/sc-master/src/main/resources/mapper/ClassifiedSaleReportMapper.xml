@@ -66,7 +66,7 @@
         SELECT
            count (1)
         FROM
-            ia0000 ia,
+            ia0001 ia,
             ma1000 ma1,
             t_operator oper,
             cm9060 cm1
@@ -74,7 +74,7 @@
             ia.store_cd = ma1.store_cd
             AND cm1.sp_id = '0000'
             AND cm1.sp_value BETWEEN ma1.effective_start_date AND ma1.effective_end_date
-            AND ia.ofc = oper.c_operatorcode
+            AND ma1.ofc = oper.c_operatorcode
             AND ia.store_cd In
             <foreach item="store" index="index" collection="classParamdto.stores"
                      open="(" separator="," close=")">
@@ -103,10 +103,10 @@
                 AND ia.category_cd=#{classParamdto.categoryCd}
             </if>
             <if test="classParamdto.city!=null and classParamdto.city!=''">
-                AND ia.zo_cd = #{classParamdto.city}
+                AND ma1.zo_cd = #{classParamdto.city}
             </if>
             <if test="classParamdto.am!=null and classParamdto.am!=''">
-                AND ia.ofc = #{classParamdto.am}
+                AND ma1.ofc = #{classParamdto.am}
             </if>
             <if test="classParamdto.storeCd!=null and classParamdto.storeCd!=''">
                 AND ia.store_cd = #{classParamdto.storeCd}
@@ -127,7 +127,7 @@
             oper.c_operatorcode,
             oper.c_operatorname
         FROM
-            ia0000 ia,
+            ia0001 ia,
             ma1000 ma1,
             t_operator oper,
             cm9060 cm1
@@ -135,7 +135,7 @@
             ia.store_cd = ma1.store_cd
             AND cm1.sp_id = '0000'
             AND cm1.sp_value BETWEEN ma1.effective_start_date AND ma1.effective_end_date
-            AND ia.ofc = oper.c_operatorcode
+            AND ma1.ofc = oper.c_operatorcode
             AND ia.store_cd In
             <foreach item="store" index="index" collection="classParamdto.stores"
                                      open="(" separator="," close=")">
@@ -164,13 +164,13 @@
                 AND ia.category_cd=#{classParamdto.categoryCd}
             </if>
             <if test="classParamdto.city!=null and classParamdto.city!=''">
-                AND ia.zo_cd = #{classParamdto.city}
+                AND ma1.zo_cd = #{classParamdto.city}
             </if>
             <if test="classParamdto.am!=null and classParamdto.am!=''">
-                AND ia.ofc = #{classParamdto.am}
+                AND ma1.ofc = #{classParamdto.am}
             </if>
             <if test="classParamdto.storeCd!=null and classParamdto.storeCd!=''">
-                AND ia.store_cd = #{classParamdto.storeCd}
+                AND ma1.store_cd = #{classParamdto.storeCd}
             </if>
             <if test="classParamdto.flg">
                 LIMIT ${classParamdto.rows} OFFSET ${classParamdto.limitStart}
@@ -202,6 +202,56 @@
             MA0080 A
         WHERE
             A.EFFECTIVE_STS = '10'
+    </select>
+    <select id="getTotalSaleAmount" parameterType="cn.com.bbut.iy.itemmaster.dto.classifiedsalereport.clssifiedSaleParamReportDTO" resultType="BigDecimal">
+        SELECT
+        SUM (ia.sale_amt_t) AS total_sale_amount
+        FROM
+        ia0001 ia,
+        ma1000 ma1,
+        t_operator oper,
+        cm9060 cm1
+        WHERE
+        ia.store_cd = ma1.store_cd
+        AND cm1.sp_id = '0000'
+        AND cm1.sp_value BETWEEN ma1.effective_start_date AND ma1.effective_end_date
+        AND ma1.ofc = oper.c_operatorcode
+        AND ia.store_cd In
+        <foreach item="store" index="index" collection="classParamdto.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="classParamdto.startDate!=null and classParamdto.startDate!='' ">
+            <![CDATA[
+             AND ia.acc_date >= #{classParamdto.startDate}
+            ]]>
+        </if>
+        <if test="classParamdto.endDate!=null and classParamdto.endDate!='' ">
+            <![CDATA[
+             AND ia.acc_date <= #{classParamdto.endDate}
+            ]]>
+        </if>
+        <if test="classParamdto.pmaCd!=null and classParamdto.pmaCd!=''">
+            AND ia.pma_cd = #{classParamdto.pmaCd}
+        </if>
+        <if test="classParamdto.depCd!=null and classParamdto.depCd!='' and classParamdto.depCd!='999'">
+            AND ia.dep_cd = #{classParamdto.depCd}
+        </if>
+        <if test="classParamdto.subCategoryCd!=null and classParamdto.subCategoryCd!=''">
+            AND ia.sub_category_cd=#{classParamdto.subCategoryCd}
+        </if>
+        <if test="classParamdto.categoryCd!=null and classParamdto.categoryCd!=''">
+            AND ia.category_cd=#{classParamdto.categoryCd}
+        </if>
+        <if test="classParamdto.city!=null and classParamdto.city!=''">
+            AND ma1.zo_cd = #{classParamdto.city}
+        </if>
+        <if test="classParamdto.am!=null and classParamdto.am!=''">
+            AND ma1.ofc = #{classParamdto.am}
+        </if>
+        <if test="classParamdto.storeCd!=null and classParamdto.storeCd!=''">
+            AND ia.store_cd = #{classParamdto.storeCd}
+        </if>
     </select>
 
 </mapper>

@@ -243,6 +243,7 @@
 <input type="hidden" id="toKen" value="${toKen!}"/>
 <input type="hidden" id="typeId" value="${typeId!}">
 <input type="hidden" id="reviewId" value="${reviewId!}">
+<input type="hidden" id="hms" value="${hms!}">
 
 
 [@permission code="SC-ORDER-001"]<input type="hidden" class="permission-verify" id="orderButView" value="${displayVar!}" />[/@permission]

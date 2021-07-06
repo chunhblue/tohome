@@ -24,6 +24,7 @@
         <result column="amt_notax" property="writeOffAmt" jdbcType="DECIMAL" />
         <result column="adjust_reason_name" property="adjustReason" jdbcType="VARCHAR" />
         <result column="sale_qty" property="saleQty" jdbcType="DECIMAL" />
+        <result column="acc_date" property="accDate" jdbcType="VARCHAR" />
     </resultMap>
 
     <sql id="selectCondition">
@@ -38,9 +39,9 @@
         <if test="writeOffEndDate != null and writeOffEndDate != ''">
             AND #{writeOffEndDate,jdbcType=VARCHAR} >= S.voucher_date
         </if>
-        <if test="articleId != null and articleId != ''">
-            AND lower(article_id) like lower(CONCAT('%',#{articleId,jdbcType=VARCHAR},'%'))
-        </if>
+<!--        <if test="articleId != null and articleId != ''">-->
+<!--            AND lower(article_id) like lower(CONCAT('%',#{articleId,jdbcType=VARCHAR},'%'))-->
+<!--        </if>-->
 
         <if test="adjustReason != null and adjustReason != ''">
             AND adjust_reason = #{adjustReason,jdbcType=VARCHAR}
@@ -104,7 +105,7 @@
         ORDER BY T.voucher_date DESC, T.display_seq
     </select>
 
-    <select id="selectListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultMap="ReMap">
+    <select id="selectListByCondition03" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultMap="ReMap">
        drop table if exists tmp_writte_off_dayreport;
       SELECT
         T.store_cd,
@@ -314,7 +315,7 @@
         where detail_type = 's' GROUP BY article_id,store_cd,acc_date) T4
         on T4.article_id = T.article_id and T4.store_cd = T.store_cd and T4.acc_date = T.voucher_date
     </select>
-    <select id="selectCountByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultType="int">
+    <select id="selectCountByCondition01" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultType="int">
         drop table if exists tmp_writte_off_dayreport;
 
         SELECT
@@ -448,10 +449,6 @@
             tmp.article_short_name_en )) LIKE lower( CONCAT('%',#{articleName},'%') )
         </if>) tmp_alias
     </select>
-
-
-
-
     <select id="getCountItemSku1" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultType="int">
         SELECT
         count(distinct T.article_id)
@@ -523,7 +520,7 @@
         where detail_type = 's' GROUP BY article_id,store_cd,acc_date) T4
         on T4.article_id = T.article_id and T4.store_cd = T.store_cd and T4.acc_date = T.voucher_date
     </select>
-    <select id="getCountItemSku" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultType="int">
+    <select id="getCountItemSku2" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultType="int">
         drop table if exists tmp_writte_off_dayreport;
 
         SELECT
@@ -658,5 +655,683 @@
             tmp.article_short_name_en )) LIKE lower( CONCAT('%',#{articleName},'%') )
         </if>) tmp_alias
     </select>
+    <select id="getCountItemSku" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultType="int">
+        SELECT   count(DISTINCT T.article_id) from
+        (SELECT
+        S1.article_id,
+        S1.barcode
+        FROM
+        sk0010 S,
+        sk0020 S1
+        WHERE
+        S.store_cd = S1.store_cd /*审核通过*/
+        AND S.review_status = 10
+        AND S.voucher_no = S1.voucher_no
+        AND S.voucher_type = S1.voucher_type
+        AND S.voucher_date = S1.voucher_date
+        AND S.store_cd1 = S1.store_cd1
+        AND S.voucher_type = '603'
+        <if test="writeOffStartDate != null and writeOffStartDate != ''">
+            AND S.voucher_date >= #{writeOffStartDate,jdbcType=VARCHAR}
+        </if>
+        <if test="writeOffEndDate != null and writeOffEndDate != ''">
+            AND #{writeOffEndDate,jdbcType=VARCHAR} >= S.voucher_date
+        </if>
+        )  T LEFT JOIN (
+        SELECT
+        article_id,
+        article_name,
+        article_name_en,
+        article_short_name_en,
+        article_short_name,
+        effective_start_date,
+        dep_cd,
+        pma_cd,
+        category_cd,
+        sub_category_cd
+        FROM
+        ma1100
+        WHERE
+        1=1
+        AND  #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
+        AND effective_end_date
+        ) T1 ON T.article_id = T1.article_id
+       where 1=1
+        <if test="depCd != null and depCd != ''">
+            AND T1.dep_cd = #{depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="pmaCd != null and pmaCd != ''">
+            AND T1.pma_cd = #{pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="categoryCd != null and categoryCd !=''">
+            AND T1.category_cd=#{categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="subCategoryCd !=null and subCategoryCd !=''">
+            AND T1.sub_category_cd=#{subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="articleName !=null and articleName !=''">
+            AND concat(lower( T1.article_id ),'',lower(T1.article_name ),'',lower( T1.article_name_en ),'',lower(
+            T1.article_short_name_en )) LIKE lower( CONCAT('%',#{articleName},'%') )
+        </if>
+        <if test="barcode !=null and barcode !=''">
+            and T.barcode=#{barcode}
+        </if>
+    </select>
 
+
+    <select id="selectListByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultMap="ReMap">
+  SELECT
+	T.store_cd,
+	T.voucher_no,
+	T.voucher_type,
+	T.voucher_date,
+	T.article_id,
+	T.sales_unit_id,
+	T.adjust_reason,
+	T.qty1,
+	T.amt_notax,
+	T.barcode,
+	T.display_seq,
+	T0.ofc_name,
+	T0.ofc,
+	T0.store_name,
+	T1.article_name,
+	T1.article_name_en,
+	T1.article_short_name,
+	T1.article_short_name_en,
+	T1.pma_cd,
+	T2.pma_name,
+	T1.dep_cd,
+	T1.category_cd,
+	T1.sub_category_cd,
+	( SELECT dep_name FROM ma0070 WHERE ma0070.dep_cd = T1.dep_cd ) AS dep_name,
+	( SELECT category_name FROM ma0090 WHERE ma0090.category_cd = T1.category_cd AND pma_cd = T1.pma_cd AND dep_cd = T1.dep_cd ) AS category_name,
+	(
+SELECT
+	sub_category_name
+FROM
+	ma0100
+WHERE
+	ma0100.sub_category_cd = T1.sub_category_cd
+	AND ma0100.dep_cd = T1.dep_cd
+	AND ma0100.pma_cd = T1.pma_cd
+	AND MA0100.category_cd = T1.category_cd
+	) AS sub_category_name,
+	concat( T3.code_value, ' ', T3.code_name ) AS adjust_reason_name
+FROM
+	(
+SELECT
+	S.store_cd,
+	S.voucher_no,
+	S.voucher_type,
+	S.voucher_date,
+	S1.article_id,
+	S1.sales_unit_id,
+	S1.adjust_reason,
+	S1.qty1,
+	S1.amt_notax,
+	S1.barcode,
+	S1.display_seq
+FROM
+	sk0010 S,
+	sk0020 S1
+WHERE
+	S.store_cd = S1.store_cd /*审核通过*/
+	AND S.review_status = 10
+	AND S.voucher_no = S1.voucher_no
+	AND S.voucher_type = S1.voucher_type
+	AND S.voucher_date = S1.voucher_date
+	AND S.store_cd1 = S1.store_cd1
+	AND S.voucher_type = '603'
+  <include refid="selectCondition"></include>
+	) T
+	LEFT JOIN (
+	SELECT
+		store_cd,
+		store_name,
+		ofc,
+		( SELECT t_operator.c_operatorname FROM t_operator WHERE t_operator.c_operatorcode = ofc ) AS ofc_name
+	FROM
+		ma1000
+	WHERE
+	1=1
+
+      and   #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+	) T0 ON T.store_cd = T0.store_cd
+	LEFT JOIN (
+	SELECT
+		article_id,
+		article_name,
+		article_name_en,
+		article_short_name_en,
+		article_short_name,
+		effective_start_date,
+		dep_cd,
+		pma_cd,
+		category_cd,
+		sub_category_cd
+	FROM
+		ma1100
+	WHERE
+	1=1
+       AND  #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
+		AND effective_end_date
+	) T1 ON T.article_id = T1.article_id
+	LEFT JOIN ( SELECT dep_cd, pma_cd, pma_name FROM ma0080 WHERE effective_sts = '10' ) T2 ON T1.dep_cd = T2.dep_cd
+	AND T1.pma_cd = T2.pma_cd
+	LEFT JOIN ( SELECT code_value, code_name FROM cm9010 WHERE code_type = '00236' ) T3 ON T.adjust_reason = T3.code_value
+	where 1=1
+        <if test="depCd != null and depCd != ''">
+            AND T1.dep_cd = #{depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="pmaCd != null and pmaCd != ''">
+            AND T1.pma_cd = #{pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="categoryCd != null and categoryCd !=''">
+            AND T1.category_cd=#{categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="subCategoryCd !=null and subCategoryCd !=''">
+            AND T1.sub_category_cd=#{subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="articleName !=null and articleName !=''">
+            AND concat(lower( T1.article_id ),'',lower(T1.article_name ),'',lower( T1.article_name_en ),'',lower(
+            T1.article_short_name_en )) LIKE lower( CONCAT('%',#{articleName},'%') )
+        </if>
+        <if test="barcode !=null and barcode !=''">
+           and T.barcode=#{barcode}
+        </if>
+        <if test="am !=null and am !=''">
+            AND   T0.ofc=#{am,jdbcType=VARCHAR}
+        </if>
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
+    <select id="selectCountByCondition" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultType="int">
+    SELECT   COUNT (*)
+ from
+  (SELECT
+	T.store_cd,
+	T.voucher_no,
+	T.voucher_type,
+	T.voucher_date,
+	T.article_id,
+	T.sales_unit_id,
+	T.adjust_reason,
+	T.qty1,
+	T.amt_notax,
+	T.barcode,
+	T.display_seq,
+	T0.ofc_name,
+	T0.ofc,
+	T0.store_name,
+	T1.article_name,
+	T1.article_name_en,
+	T1.article_short_name,
+	T1.article_short_name_en,
+	T1.pma_cd,
+	T2.pma_name,
+	T1.dep_cd,
+	T1.category_cd,
+	T1.sub_category_cd,
+	( SELECT dep_name FROM ma0070 WHERE ma0070.dep_cd = T1.dep_cd ) AS dep_name,
+	( SELECT category_name FROM ma0090 WHERE ma0090.category_cd = T1.category_cd AND pma_cd = T1.pma_cd AND dep_cd = T1.dep_cd ) AS category_name,
+	(
+SELECT
+	sub_category_name
+FROM
+	ma0100
+WHERE
+	ma0100.sub_category_cd = T1.sub_category_cd
+	AND ma0100.dep_cd = T1.dep_cd
+	AND ma0100.pma_cd = T1.pma_cd
+	AND MA0100.category_cd = T1.category_cd
+	) AS sub_category_name,
+	concat( T3.code_value, ' ', T3.code_name ) AS adjust_reason_name
+-- 	COALESCE ( T4.sale_qty, 0 ) sale_qty
+FROM
+	(
+SELECT
+	S.store_cd,
+	S.voucher_no,
+	S.voucher_type,
+	S.voucher_date,
+	S1.article_id,
+	S1.sales_unit_id,
+	S1.adjust_reason,
+	S1.qty1,
+	S1.amt_notax,
+	S1.barcode,
+	S1.display_seq
+FROM
+	sk0010 S,
+	sk0020 S1
+WHERE
+	S.store_cd = S1.store_cd /*审核通过*/
+	AND S.review_status = 10
+	AND S.voucher_no = S1.voucher_no
+	AND S.voucher_type = S1.voucher_type
+	AND S.voucher_date = S1.voucher_date
+	AND S.store_cd1 = S1.store_cd1
+	AND S.voucher_type = '603'
+  <include refid="selectCondition"></include>
+    <if test="writeOffStartDate != null and writeOffStartDate != ''">
+            AND S.voucher_date >= #{writeOffStartDate,jdbcType=VARCHAR}
+    </if>
+  <if test="writeOffEndDate != null and writeOffEndDate != ''">
+   AND #{writeOffEndDate,jdbcType=VARCHAR} >= S.voucher_date
+   </if>
+	) T
+	LEFT JOIN (
+	SELECT
+		store_cd,
+		store_name,
+		ofc,
+		( SELECT t_operator.c_operatorname FROM t_operator WHERE t_operator.c_operatorcode = ofc ) AS ofc_name
+	FROM
+		ma1000
+	WHERE
+	1=1
+       AND  #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
+		AND effective_end_date
+	) T0 ON T.store_cd = T0.store_cd
+	LEFT JOIN (
+	SELECT
+		article_id,
+		article_name,
+		article_name_en,
+		article_short_name_en,
+		article_short_name,
+		effective_start_date,
+		dep_cd,
+		pma_cd,
+		category_cd,
+		sub_category_cd
+	FROM
+		ma1100
+	WHERE
+      1=1
+        AND #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
+		AND effective_end_date
+
+	) T1 ON T.article_id = T1.article_id
+	LEFT JOIN ( SELECT dep_cd, pma_cd, pma_name FROM ma0080 WHERE effective_sts = '10' ) T2 ON T1.dep_cd = T2.dep_cd
+	AND T1.pma_cd = T2.pma_cd
+	LEFT JOIN ( SELECT code_value, code_name FROM cm9010 WHERE code_type = '00236' ) T3 ON T.adjust_reason = T3.code_value
+        where 1=1
+        <if test="depCd != null and depCd != ''">
+            AND T1.dep_cd = #{depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="pmaCd != null and pmaCd != ''">
+            AND T1.pma_cd = #{pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="categoryCd != null and categoryCd !=''">
+            AND T1.category_cd=#{categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="subCategoryCd !=null and subCategoryCd !=''">
+            AND T1.sub_category_cd=#{subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="articleName !=null and articleName !=''">
+            AND concat(lower( T1.article_id ),'',lower(T1.article_name ),'',lower( T1.article_name_en ),'',lower(
+            T1.article_short_name_en )) LIKE lower( CONCAT('%',#{articleName},'%') )
+        </if>
+        <if test="barcode !=null and barcode !=''">
+            and T.barcode=#{barcode}
+        </if>
+        <if test="am !=null and am !=''">
+            AND   T0.ofc=#{am,jdbcType=VARCHAR}
+        </if>
+	) AS B;
+    </select>
+    <select id="getExSaleDetail" resultMap="ReMap">
+    SELECT
+    article_id,
+    store_cd,
+    (case when
+    <![CDATA[ to_char(sale_date,'HH24miss')<'060000' ]]>
+    then to_char(sale_date+ '-1 day','yyyyMMdd')
+    else to_char(sale_date,'yyyyMMdd') end) AS acc_date,
+    COALESCE ( sum( sale_qty ), 0 ) sale_qty
+    FROM
+    sa0020
+    WHERE
+    detail_type = 's'
+    and (sa0020.store_cd||'_'||sa0020.article_id || '_' ||
+    (case when
+    <![CDATA[ to_char(sale_date,'HH24miss')<'060000' ]]>
+    then to_char(sale_date+ '-1 day','yyyyMMdd')
+    else to_char(sale_date,'yyyyMMdd') end))
+    in
+    <foreach item="item" index="index" collection="list"
+             open="(" separator="," close=")">
+        #{item}
+    </foreach>
+    GROUP BY
+    article_id,
+    store_cd,
+    case when
+    <![CDATA[ to_char(sale_date,'HH24miss')<'060000' ]]>
+    then to_char(sale_date+ '-1 day','yyyyMMdd')
+    else to_char(sale_date,'yyyyMMdd') end
+</select>
+    <select id="selectSaleQty2" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultMap="ReMap">
+        select
+        COALESCE ( T4.sale_qty, 0 ) sale_qty,
+        T.qty1
+        from
+        (SELECT
+         S.store_cd,
+         S.voucher_date,
+         S1.qty1,
+         S1.barcode,
+         S1.article_id
+         FROM
+         sk0010 S,
+         sk0020 S1
+         WHERE
+         S.store_cd = S1.store_cd /*审核通过*/
+         AND S.review_status = 10
+         AND S.voucher_no = S1.voucher_no
+         AND S.voucher_type = S1.voucher_type
+         AND S.voucher_date = S1.voucher_date
+         AND S.store_cd1 = S1.store_cd1
+         AND S.voucher_type = '603'
+         <if test="dto.writeOffStartDate != null and dto.writeOffStartDate != ''">
+             AND S.voucher_date >= #{dto.writeOffStartDate,jdbcType=VARCHAR}
+         </if>
+         <if test="dto.writeOffEndDate != null and dto.writeOffEndDate != ''">
+             AND #{dto.writeOffEndDate,jdbcType=VARCHAR} >= S.voucher_date
+         </if>
+        <if test="dto.adjustReason != null and dto.adjustReason != ''">
+            AND adjust_reason = #{dto.adjustReason,jdbcType=VARCHAR}
+        </if>
+         ) as T
+        LEFT JOIN (
+        SELECT
+        store_cd,
+        ofc
+        FROM
+        ma1000
+        WHERE
+        1=1
+        and #{dto.businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        )AS T0 ON T.store_cd = T0.store_cd
+        left join (SELECT article_id,store_cd,acc_date,coalesce(SUM(sale_qty),0) sale_qty FROM sa0020
+        where detail_type = 's'
+        and (sa0020.store_cd||'_'||sa0020.article_id || '_' || sa0020.acc_date)
+        <if test="list !=null || list !=''">
+            in
+            <foreach item="item" index="index" collection="list"
+                     open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY article_id,store_cd,acc_date
+        ) T4
+        on T.article_id = T4.article_id and T.store_cd = T4.store_cd and T4.acc_date = T.voucher_date
+        LEFT JOIN (
+        SELECT
+        article_id,
+        article_name,
+        article_name_en,
+        article_short_name_en,
+        article_short_name,
+        dep_cd,
+        pma_cd,
+        category_cd,
+        sub_category_cd
+        FROM
+        ma1100
+        WHERE
+        1=1
+        AND #{dto.businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
+        AND effective_end_date
+        ) T1 ON T.article_id = T1.article_id
+        where 1=1
+        <if test="dto.depCd != null and dto.depCd != ''">
+            AND T1.dep_cd = #{dto.depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="dto.pmaCd != null and dto.pmaCd != ''">
+            AND T1.pma_cd = #{dto.pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="dto.categoryCd != null and dto.categoryCd !=''">
+            AND T1.category_cd=#{dto.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="dto.subCategoryCd !=null and dto.subCategoryCd !=''">
+            AND T1.sub_category_cd=#{dto.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="dto.articleName !=null and dto.articleName !=''">
+            AND concat(lower( T1.article_id ),'',lower(T1.article_name ),'',lower( T1.article_name_en ),'',lower(
+            T1.article_short_name_en )) LIKE lower( CONCAT('%',#{dto.articleName},'%') )
+        </if>
+        <if test="dto.barcode !=null and dto.barcode !=''">
+            and T.barcode=#{dto.barcode}
+        </if>
+        <if test="dto.articleName !=null and dto.articleName !=''">
+            AND concat(lower( T1.article_id ),'',lower(T1.article_name ),'',lower( T1.article_name_en ),'',lower(
+            T1.article_short_name_en )) LIKE lower( CONCAT('%',#{dto.articleName},'%') )
+        </if>
+        <if test="dto.am !=null and dto.am !=''">
+            AND   T0.ofc=#{dto.am,jdbcType=VARCHAR}
+        </if>
+     </select>
+    <select id="selectSaleQty" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultMap="ReMap">
+        select
+        T.store_cd,
+        T.voucher_date,
+        T.article_id,
+        T.qty1
+        from
+        (SELECT
+         S.store_cd,
+         S.voucher_date,
+         S1.qty1,
+         S1.barcode,
+         S1.article_id
+         FROM
+         sk0010 S,
+         sk0020 S1
+         WHERE
+         S.store_cd = S1.store_cd /*审核通过*/
+         AND S.review_status = 10
+         AND S.voucher_no = S1.voucher_no
+         AND S.voucher_type = S1.voucher_type
+         AND S.voucher_date = S1.voucher_date
+         AND S.store_cd1 = S1.store_cd1
+         AND S.voucher_type = '603'
+         AND S.store_cd IN
+         <foreach item="store" index="index" collection="dto.stores"
+           open="(" separator="," close=")">
+          #{store,jdbcType=VARCHAR}
+          </foreach>
+         <if test="dto.writeOffStartDate != null and dto.writeOffStartDate != ''">
+             AND S.voucher_date >= #{dto.writeOffStartDate,jdbcType=VARCHAR}
+         </if>
+         <if test="dto.writeOffEndDate != null and dto.writeOffEndDate != ''">
+             AND #{dto.writeOffEndDate,jdbcType=VARCHAR} >= S.voucher_date
+         </if>
+        <if test="dto.adjustReason != null and dto.adjustReason != ''">
+            AND adjust_reason = #{dto.adjustReason,jdbcType=VARCHAR}
+        </if>
+         ) as T
+        LEFT JOIN (
+        SELECT
+        store_cd,
+        store_name,
+        ofc,
+        ( SELECT t_operator.c_operatorname FROM t_operator WHERE t_operator.c_operatorcode = ofc ) AS ofc_name
+        FROM
+        ma1000
+        WHERE
+        1=1
+        AND  #{dto.businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
+        AND effective_end_date
+        ) T0 ON T.store_cd = T0.store_cd
+        LEFT JOIN (
+        SELECT
+        article_id,
+        article_name,
+        article_name_en,
+        article_short_name_en,
+        article_short_name,
+        effective_start_date,
+        dep_cd,
+        pma_cd,
+        category_cd,
+        sub_category_cd
+        FROM
+        ma1100
+        WHERE
+        1=1
+        AND  #{dto.businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
+        AND effective_end_date
+        ) T1 ON T.article_id = T1.article_id
+        where 1=1
+        <if test="dto.depCd != null and dto.depCd != ''">
+            AND T1.dep_cd = #{dto.depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="dto.pmaCd != null and dto.pmaCd != ''">
+            AND T1.pma_cd = #{dto.pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="dto.categoryCd != null and dto.categoryCd !=''">
+            AND T1.category_cd=#{dto.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="dto.subCategoryCd !=null and dto.subCategoryCd !=''">
+            AND T1.sub_category_cd=#{dto.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="dto.articleName !=null and dto.articleName !=''">
+            AND concat(lower( T1.article_id ),'',lower(T1.article_name ),'',lower( T1.article_name_en ),'',lower(
+            T1.article_short_name_en )) LIKE lower( CONCAT('%',#{dto.articleName},'%') )
+        </if>
+        <if test="dto.barcode !=null and dto.barcode !=''">
+            and T.barcode=#{dto.barcode}
+        </if>
+        <if test="dto.articleName !=null and dto.articleName !=''">
+            AND concat(lower( T1.article_id ),'',lower(T1.article_name ),'',lower( T1.article_name_en ),'',lower(
+            T1.article_short_name_en )) LIKE lower( CONCAT('%',#{dto.articleName},'%') )
+        </if>
+        <if test="dto.am !=null and dto.am !=''">
+            AND   T0.ofc=#{dto.am,jdbcType=VARCHAR}
+        </if>
+     </select>
+    <select id="selectSaleQty1" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultMap="ReMap">
+        SELECT
+        COALESCE ( T4.sale_qty, 0 ) sale_qty,
+        T.qty1
+        FROM
+        (
+        SELECT
+        S.store_cd,
+        S.voucher_no,
+        S.voucher_type,
+        S.voucher_date,
+        S1.article_id,
+        S1.sales_unit_id,
+        S1.adjust_reason,
+        S1.qty1,
+        S1.amt_notax,
+        S1.barcode,
+        S1.display_seq
+        FROM
+        sk0010 S,
+        sk0020 S1
+        WHERE
+        S.store_cd = S1.store_cd /*审核通过*/
+        AND S.review_status = 10
+        AND S.voucher_no = S1.voucher_no
+        AND S.voucher_type = S1.voucher_type
+        AND S.voucher_date = S1.voucher_date
+        AND S.store_cd1 = S1.store_cd1
+        AND S.voucher_type = '603'
+<!--        AND S.store_cd IN-->
+<!--&lt;!&ndash;        <foreach item="store" index="index" collection="stores"&ndash;&gt;-->
+<!--&lt;!&ndash;                 open="(" separator="," close=")">&ndash;&gt;-->
+<!--&lt;!&ndash;            #{store,jdbcType=VARCHAR}&ndash;&gt;-->
+<!--&lt;!&ndash;        </foreach>&ndash;&gt;-->
+        <if test="dto.writeOffStartDate != null and dto.writeOffStartDate != ''">
+            AND S.voucher_date >= #{writeOffStartDate,jdbcType=VARCHAR}
+        </if>
+        <if test="dto.writeOffEndDate != null and dto.writeOffEndDate != ''">
+            AND #{writeOffEndDate,jdbcType=VARCHAR} >= S.voucher_date
+        </if>
+
+        <if test="dto.adjustReason != null and dto.adjustReason != ''">
+            AND adjust_reason = #{adjustReason,jdbcType=VARCHAR}
+        </if>
+        ) T
+        left join (SELECT article_id,store_cd,acc_date,coalesce(SUM(sale_qty),0) sale_qty FROM sa0020
+        where detail_type = 's' GROUP BY article_id,store_cd,acc_date) T4
+        on T.article_id = T4.article_id and T.store_cd = T4.store_cd and T4.acc_date = T.voucher_date
+        LEFT JOIN (
+        SELECT
+        store_cd,
+        store_name,
+        ofc,
+        ( SELECT t_operator.c_operatorname FROM t_operator WHERE t_operator.c_operatorcode = ofc ) AS ofc_name
+        FROM
+        ma1000
+        WHERE
+        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        ) T0 ON T.store_cd = T0.store_cd
+        LEFT JOIN (
+        SELECT
+        article_id,
+        article_name,
+        article_name_en,
+        article_short_name_en,
+        article_short_name,
+        effective_start_date,
+        dep_cd,
+        pma_cd,
+        category_cd,
+        sub_category_cd
+        FROM
+        ma1100
+        WHERE
+        1=1
+        AND  #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
+        AND effective_end_date
+        ) T1 ON T.article_id = T1.article_id
+        LEFT JOIN ( SELECT dep_cd, pma_cd, pma_name FROM ma0080 WHERE effective_sts = '10' ) T2 ON T1.dep_cd = T2.dep_cd
+        AND T1.pma_cd = T2.pma_cd
+        LEFT JOIN ( SELECT code_value, code_name FROM cm9010 WHERE code_type = '00236' ) T3 ON T.adjust_reason = T3.code_value
+        where 1=1
+        <if test="depCd != null and depCd != ''">
+            AND T1.dep_cd = #{depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="pmaCd != null and pmaCd != ''">
+            AND T1.pma_cd = #{pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="categoryCd != null and categoryCd !=''">
+            AND T1.category_cd=#{categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="subCategoryCd !=null and subCategoryCd !=''">
+            AND T1.sub_category_cd=#{subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="articleName !=null and articleName !=''">
+            AND concat(lower( T1.article_id ),'',lower(T1.article_name ),'',lower( T1.article_name_en ),'',lower(
+            T1.article_short_name_en )) LIKE lower( CONCAT('%',#{articleName},'%') )
+        </if>
+        <if test="barcode !=null and barcode !=''">
+            and T.barcode=#{barcode}
+        </if>
+     </select>
+    <select id="getTotalSaleQty" resultType="Integer">
+        SELECT
+        COALESCE ( sum( sale_qty ), 0 ) sale_qty
+        FROM
+        sa0020
+        WHERE
+        detail_type = 's'
+        and (sa0020.store_cd||'_'||sa0020.article_id || '_' ||
+        (case when
+        <![CDATA[ to_char(sale_date,'HH24miss')<'060000' ]]>
+        then to_char(sale_date+ '-1 day','yyyyMMdd')
+        else to_char(sale_date,'yyyyMMdd') end))
+        in
+        <foreach item="item" index="index" collection="list"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
 </mapper>

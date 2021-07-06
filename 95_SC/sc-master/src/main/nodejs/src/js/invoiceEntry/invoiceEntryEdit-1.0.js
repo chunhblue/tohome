@@ -18,7 +18,7 @@ define('invoiceEntryEdit', function () {
         tempTrObjValue = {},
         systemPath = '',
         a_store = null;
-    var dataForm = [];
+    var saveTableValue = [];
     const KEY = 'INVOICE_ENTRY_TO_CUSTOMER';
     var m = {
         toKen: null,
@@ -87,7 +87,12 @@ define('invoiceEntryEdit', function () {
             m.issueBut.prop('disabled', true);
         }
 
+        window.onbeforeunload = function () {
+            // 关闭页面时清理sessionStorage
+            clear();
+        };
     }
+
 
     function setDisable(flag) {
         m.customerName.prop('disabled', flag);
@@ -160,6 +165,7 @@ define('invoiceEntryEdit', function () {
                     let obj = {
                         'receiptNo': record.receiptNo,
                         'storeNo': record.storeNo,
+                        'posId': record.posId
                     };
 
                     // 查询小票信息
@@ -208,7 +214,7 @@ define('invoiceEntryEdit', function () {
         let startDate = formatDate(m.startDate.val());
         let endDate = formatDate(m.endDate.val());
         let storeNo = m.storeNo.attr('k');
-        let receiptNo = m.searchReceiptNo.val();
+        let receiptNo = letterToNumber(m.searchReceiptNo.val());
         let posId = m.posId.val();
 
         let obj = {
@@ -342,6 +348,11 @@ define('invoiceEntryEdit', function () {
             m.startDate.focus();
             m.startDate.css("border-color","red");
             return false;
+        }else if(_common.judgeValidDate($("#startDate").val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#startDate").css("border-color","red");
+            $("#startDate").focus();
+            return false;
         }else {
             m.startDate.css("border-color","#CCC");
         }
@@ -349,6 +360,11 @@ define('invoiceEntryEdit', function () {
             _common.prompt('Please select end date!', 5, 'error');
             m.endDate.css("border-color","red");
             m.endDate.focus();
+            return false;
+        }else if(_common.judgeValidDate($("#endDate").val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#endDate").css("border-color","red");
+            $("#endDate").focus();
             return false;
         }else {
             m.endDate.css("border-color","#CCC");
@@ -412,41 +428,39 @@ define('invoiceEntryEdit', function () {
             }
 
             // 获得选中的头档
-            let checkboxTrs = tableGrid.getCheckboxTrs();
+            let checkboxTrs = saveTableValue;
 
             if (checkboxTrs == null || checkboxTrs.length < 1) {
                 // 请选择发票信息
                 _common.prompt('Please select invoice information!', 5, 'error');
                 return;
             }
-
             let receiptNo = '';
             let saleSerialNo='';
             let amt = 0;
             // 拼接 Receipt No. , 用'; ' 分割
-            for (let i = 0; i < checkboxTrs.length; i++) {
-                let item = checkboxTrs[i];
-                let col = tableGrid.getSelectColValue(item, 'receiptNo,amt,saleSerialNo');
-                amt += parseFloat(reThousands(col['amt']))
-                if (i == checkboxTrs.length - 1) {
-                    receiptNo += col['receiptNo'];
-                    saleSerialNo +=letterToNumber(col['saleSerialNo'])
+            for(let n=0;n<checkboxTrs.length; n++){
+                let item = checkboxTrs[n];
+                amt += parseFloat(reThousands(item[2]));
+                if (n === checkboxTrs.length - 1) {
+                    receiptNo += item[1];
+                    saleSerialNo +=letterToNumber(item[3]);
                 } else {
-                    receiptNo += col['receiptNo'] + ';';
-                    saleSerialNo +=letterToNumber(col['saleSerialNo'])+';';
+                    receiptNo += item[1] + ';';
+                    saleSerialNo +=letterToNumber(item[3])+';';
                 }
             }
 
             let storeNo = m.storeNo.attr('k');
 
-            let customerName = m.customerName.val();
-            let companyName = m.companyName.val();
+            let customerName =  encodeURIComponent(m.customerName.val());
+            let companyName = encodeURIComponent(m.companyName.val());
             let tax = m.tax.val();
-            let address = m.address.val();
+            let address = encodeURIComponent(m.address.val());
             let phone = m.phone.val();
             let phone2=m.phone2.val();
-            let email = m.email.val();
-            let email2=m.email2.val();
+            let email = encodeURIComponent(m.email.val());
+            let email2=encodeURIComponent(m.email2.val());
             let posId=m.posId.val();
 
             let obj = {
@@ -466,7 +480,38 @@ define('invoiceEntryEdit', function () {
                 'posId':posId,
             };
 
+            var checkFlg = true;
             let _data = JSON.stringify(obj);
+            $.myAjaxs({
+                url: url_left + '/getExistsReNos',
+                async: false,
+                cache: false,
+                type: "post",
+                data: 'record=' + _data,
+                dataType: "json",
+                success: function (result) {
+                    if (result.success) {
+                        var saleSerialNo = "";
+                        let record = result.o;
+                        for(var i=0;i<record.length;i++){
+                            if(i === record.length-1){
+                                saleSerialNo+=numberToLetter(record[i])+";";
+                            }else {
+                                saleSerialNo+=numberToLetter(record[i])+",";
+                            }
+                        }
+                        _common.prompt(result.msg+saleSerialNo, 5, "info");/*这些小票已经开过票，不能再次开票*/
+                        checkFlg = false;
+                    }
+                },
+                error: function (e) {
+                    _common.prompt("Get receiptNo failed！", 5, "error");/*获取数据失败*/
+                }
+            });
+
+            if(!checkFlg){
+                return false;
+            }
             _common.myConfirm("Are you sure you want to save?", function (result) {
                 if (result != "true") {
                     return false;
@@ -518,6 +563,7 @@ define('invoiceEntryEdit', function () {
             if (!verifySearch()) {
                 return;
             }
+            clear();
             setParamJson();
             paramGrid = "searchJson=" + m.searchJson.val();
             tableGrid.setting("url", url_left + "/searchInvoice");
@@ -606,6 +652,7 @@ define('invoiceEntryEdit', function () {
                 $("#startDate").datetimepicker('setEndDate', new Date());
             }
         });
+
     };
 
     //初始化店铺下拉
@@ -617,6 +664,7 @@ define('invoiceEntryEdit', function () {
             cleanInput: function () {
                 m.posId.attr("disabled",true);
                 $.myAutomatic.cleanSelectObj(a_store);
+                m.posId.val('');
             },
             selectEleClick: function (thisObj) {
                m.posId.attr("disabled",false);
@@ -644,7 +692,7 @@ define('invoiceEntryEdit', function () {
                 {name: "posId", type: "text", text: "right", width: "120", ishide: false, css: ""},
                 {name: "date", type: "text", text: "left", width: "120", ishide: false, getCustomValue: dateFmt},
                 {name: "receiptNo", type: "text", text: "left", width: "120", ishide: true, css: ""},
-                {name: "saleSerialNo", type: "text", text: "left", width: "120", ishide: false, css: ""},
+                {name: "saleSerialNo", type: "text", text: "left", width: "120", ishide: false, css: "",getCustomValue:getLetter},
                 {name: "amt", type: "text", text: "left", width: "120", ishide: false, css: "",getCustomValue: getThousands},
             ],//列内容
             // traverseData:data,
@@ -664,8 +712,16 @@ define('invoiceEntryEdit', function () {
                 return resData;
             },
             footerrow: true,
-            loadCompleteEvent: function (self) {
+            loadBeforeEvent: function (self) {
 
+            },
+            loadCompleteEvent: function (self) {
+                var page = self.defaults.page;
+                // sessionStorage key前缀
+                var lsKeyPrefix = page+"PageByCW:";
+
+                getCheckedInformation(self,lsKeyPrefix);
+                var idArr = getAllCheckedIdList(self,lsKeyPrefix);
             },
             userDataOnFooter: true,
             eachTrClick: function (trObj, tdObj) {//正常左侧点击
@@ -713,52 +769,294 @@ define('invoiceEntryEdit', function () {
         });
     }
 
+    var  getCheckedInformation = function (self,lsKeyPrefix) {
+        // 当前页面复选框列表选择器字符串
+        var checkBoxSelectorStr;
+
+        if(self.defaults.isCheckbox==true||self.defaults.isCheckbox=="true"){
+            var thead = $(self.table).find("thead");
+            var tbody = $(self.table).find("tbody");
+            thead.find("input[type='checkbox']").click(function(e){
+                var thid = $(this).val();  // 复选框的id 为 0
+
+                var checkFlg = '0';
+                var thidFlg;
+                // 判断若二次点击，则为未选中
+                var sessionStorageLength = sessionStorage.length;
+                for (var i = 0; i < sessionStorageLength; i++) {
+                    var key = sessionStorage.key(i);
+                    var index = key.indexOf(lsKeyPrefix+thid);
+                    if(index !== -1){
+                        if (index !== -1 && sessionStorage.getItem(key) === '1') {
+                            // 取消勾选复选框
+                            thidFlg = '0';
+                        }else{
+                            thidFlg = '1';  // 再次勾选复选框
+                        }
+                        checkFlg = '1';
+                    }
+                }
+                if (thidFlg === '0') {
+                    sessionStorage.setItem(lsKeyPrefix + thid, '0'); // thead未选中
+                    for(var j = 0;j<10;j++){
+                        sessionStorage.setItem(lsKeyPrefix + 'zgGridTtable_'+j+'_tr', '0'); // tbody未选中
+                        for(var i = 0;i<saveTableValue.length;i++){
+                            var form = saveTableValue[i];
+                            var ind = (lsKeyPrefix + 'zgGridTtable_'+j+'_tr').indexOf(form[0]);
+                            if(ind !== -1) {
+                                saveTableValue.splice(i, 1);
+                            }
+                        }
+                    }
+                }else if(thidFlg === '1'){
+                    sessionStorage.setItem(lsKeyPrefix + thid, '1'); // 选中
+                    for(var j = 0;j<10;j++){
+                        sessionStorage.setItem(lsKeyPrefix + 'zgGridTtable_'+j+'_tr', '1'); // 选中
+                        var dataForm = [];
+                        let col = tableGrid.getSelectColValue($("#"+"zgGridTtable_"+j+"_tr"), 'receiptNo,amt,saleSerialNo');
+                        dataForm.push((lsKeyPrefix + 'zgGridTtable_'+j+'_tr'),col['receiptNo'],col['amt'],col['saleSerialNo']);
+                        var flg = '1';
+                        for (var i = 0; i < saveTableValue.length; i++) {
+                            var form = saveTableValue[i];
+                            var ind = (lsKeyPrefix + 'zgGridTtable_'+j+'_tr').indexOf(form[0]);
+                            if (ind !== -1) {
+                                flg = '0';
+                            }
+                        }
+                        if(flg == '1'){
+                            saveTableValue.push(dataForm);
+                        }
+                    }
+                }
+                if(sessionStorageLength>0 && checkFlg === '0'){
+                    sessionStorage.setItem(lsKeyPrefix + thid, '1'); // 选中
+                    for(var j = 0;j<10;j++){
+                        sessionStorage.setItem(lsKeyPrefix + 'zgGridTtable_'+j+'_tr', '1'); // 选中
+                        var dataForm = [];
+                        let col = tableGrid.getSelectColValue($("#"+"zgGridTtable_"+j+"_tr"), 'receiptNo,amt,saleSerialNo');
+                        dataForm.push((lsKeyPrefix + 'zgGridTtable_'+j+'_tr'),col['receiptNo'],col['amt'],col['saleSerialNo']);
+
+                        var flg = '1';
+                        for (var i = 0; i < saveTableValue.length; i++) {
+                            var form = saveTableValue[i];
+                            var ind = (lsKeyPrefix + 'zgGridTtable_'+j+'_tr').indexOf(form[0]);
+                            if (ind !== -1) {
+                                flg = '0';
+                            }
+                        }
+                        if(flg == '1'){
+                            saveTableValue.push(dataForm);
+                        }
+                    }
+                }
+                if(sessionStorageLength === 0){
+                    sessionStorage.setItem(lsKeyPrefix + thid, '1'); // 选中
+                    for(var j = 0;j<10;j++){
+                        sessionStorage.setItem(lsKeyPrefix + 'zgGridTtable_'+j+'_tr', '1'); // 选中
+                        var dataForm = [];
+                        let col = tableGrid.getSelectColValue($("#"+"zgGridTtable_"+j+"_tr"), 'receiptNo,amt,saleSerialNo');
+                        dataForm.push((lsKeyPrefix + 'zgGridTtable_'+j+'_tr'),col['receiptNo'],col['amt'],col['saleSerialNo']);
+
+                        var flg = '1';
+                        for (var i = 0; i < saveTableValue.length; i++) {
+                            var form = saveTableValue[i];
+                            var ind = (lsKeyPrefix + 'zgGridTtable_'+j+'_tr').indexOf(form[0]);
+                            if (ind !== -1) {
+                                flg = '0';
+                            }
+                        }
+                        if(flg == '1'){
+                            saveTableValue.push(dataForm);
+                        }
+                    }
+                }
+            });
+            tbody.find("input[type='checkbox']").click(function(e){
+                var trid = $(this).val();
+                var checkFlg = '0';
+                // 判断若二次点击，则为未选中
+                var sessionStorageLength = sessionStorage.length;
+                for (var i = 0; i < sessionStorageLength; i++) {
+                    var key = sessionStorage.key(i);
+                    var index = key.indexOf(lsKeyPrefix+trid);
+                    if(index !== -1) {
+                        if (index !== -1 && sessionStorage.getItem(key) === '1') {
+                            sessionStorage.setItem(lsKeyPrefix + trid, '0'); // 未选中
+                            thead.find("input[type='checkbox']").attr('checked', false); // 标题复选框置为未选中
+                            for (var i = 0; i < saveTableValue.length; i++) {
+                                var form = saveTableValue[i];
+                                var ind = (lsKeyPrefix + trid).indexOf(form[0]);
+                                if (ind !== -1) {
+                                    saveTableValue.splice(i, 1);
+                                }
+                            }
+                        } else {
+                            sessionStorage.setItem(lsKeyPrefix + trid, '1'); // 选中
+                            var dataForm = [];
+                            let col = tableGrid.getSelectColValue($("#" + trid), 'receiptNo,amt,saleSerialNo');
+                            dataForm.push((lsKeyPrefix + trid), col['receiptNo'], col['amt'], col['saleSerialNo']);
+                            saveTableValue.push(dataForm);
+                        }
+                        checkFlg = '1';
+                    }
+                }
+                if(sessionStorageLength>0 && checkFlg === '0'){
+                    sessionStorage.setItem(lsKeyPrefix + trid, '1'); // 选中
+                    var dataForm = [];
+                    let col = tableGrid.getSelectColValue($("#"+trid), 'receiptNo,amt,saleSerialNo');
+                    dataForm.push((lsKeyPrefix + trid),col['receiptNo'],col['amt'],col['saleSerialNo']);
+                    saveTableValue.push(dataForm);
+                }
+                if(sessionStorageLength === 0){
+                    sessionStorage.setItem(lsKeyPrefix + trid, '1'); // 选中
+                    var dataForm = [];
+                    let col = tableGrid.getSelectColValue($("#"+trid), 'receiptNo,amt,saleSerialNo');
+                    dataForm.push((lsKeyPrefix + trid),col['receiptNo'],col['amt'],col['saleSerialNo']);
+                    saveTableValue.push(dataForm);
+                }
+            });
+        }
+    };
+
+    // 将选中的行id 勾选
+    function getAllCheckedIdList(self,lsKeyPrefix) {
+        var thead = $(self.table).find("thead");
+        var sessionStorageLength = sessionStorage.length;
+        for (var i = 0; i < sessionStorageLength; i++) {
+            var key = sessionStorage.key(i);
+            var id = key.substring(lsKeyPrefix.length);
+            var index = key.indexOf(lsKeyPrefix);
+            if (index !== -1 && sessionStorage.getItem(key) === '1') {
+                $("input[value='" + id + "']").prop("checked","checked");
+                if(id === '0'){
+                    thead.find("input[type='checkbox']").prop("checked","checked");
+                }
+            }
+        }
+    }
+
+    // 当页面关闭清空sessionStorage中的checked信息
+    function clear() {
+        var delKeyArr = []; // 要删除的key集合，删除会导致sessionStorage 长度动态变化，要先记录
+        var length = sessionStorage.length;
+        for (var i = 0; i < length; i++) {
+            var key = sessionStorage.key(i);
+            var index = key.indexOf("PageByCW:");
+            if (index !== -1) {
+                delKeyArr.push(key);
+            }
+        }
+
+        var delKeyLength = delKeyArr.length;
+        for (var j = 0; j < delKeyLength; j++) {
+            sessionStorage.removeItem(delKeyArr[j]);
+        }
+        saveTableValue.splice(0,saveTableValue.length);//清空数组
+    }
+
     //日期字段格式化格式
     var dateFmt = function (tdObj, value) {
         return $(tdObj).text(fmtIntDate(value));
+    };
+
+    var getLetter = function (tdObj, value) {
+        return $(tdObj).text(numberToLetter(value));
+    };
+
+    function numberToLetter(value) {
+        if(value == null || value === ""){
+            return "";
+        }
+        value = value.toUpperCase().split("");
+        var al = value.length;
+        var numout = '';
+        for (var i = 0; i < al; i++) {
+            switch (value[i]) {
+                case '1':
+                    numout+='Q';
+                    break;
+                case '2':
+                    numout+='W';
+                    break;
+                case '3':
+                    numout+='E';
+                    break;
+                case '4':
+                    numout+='R';
+                    break;
+                case '5':
+                    numout+='T';
+                    break;
+                case '6':
+                    numout+='Y';
+                    break;
+                case '7':
+                    numout+='U';
+                    break;
+                case '8':
+                    numout+='I';
+                    break;
+                case '9':
+                    numout+='O';
+                    break;
+                case '0':
+                    numout+='P';
+                    break;
+                default:
+                    numout+=value[i];
+                    break;
+            }
+        }
+        return numout;
     }
-      function letterToNumber(str) {
-              var str = str.toUpperCase().split("");
-              var al = str.length;
-              var numout = '';
-              for (var i = 0; i < al; i++) {
-               switch (str[i]) {
-                   case 'Q':
-                       numout=numout+'1'
-                     break;
-                   case 'W':
-                       numout=numout+'2'
-                       break;
-                   case 'E':
-                       numout=numout+'3'
-                       break;
-                   case 'R':
-                       numout=numout+'4'
-                       break;
-                   case 'T':
-                       numout=numout+'5'
-                       break;
-                   case 'Y':
-                       numout=numout+'6'
-                       break;
-                   case 'U':
-                       numout=numout+'7'
-                       break;
-                   case 'I':
-                       numout=numout+'8'
-                       break;
-                   case 'O':
-                       numout=numout+'9'
-                       break;
-                   case 'P':
-                       numout=numout+'0'
-                   default:
-                        numout=numout+str[i]
-                       break;
-               }
-              }
-              return numout;
+
+    function letterToNumber(str) {
+        if(str == null || str === ""){
+            return "";
+        }
+        str = str.toUpperCase().split("");
+        var al = str.length;
+        var numout = '';
+        for (var i = 0; i < al; i++) {
+            switch (str[i]) {
+                case 'Q'||'q':
+                    numout+='1';
+                    break;
+                case 'W'||'w':
+                    numout+='2';
+                    break;
+                case 'E'||'e':
+                    numout+='3';
+                    break;
+                case 'R'||'r':
+                    numout+='4';
+                    break;
+                case 'T'||'t':
+                    numout+='5';
+                    break;
+                case 'Y'||'y':
+                    numout+='6';
+                    break;
+                case 'U'||'u':
+                    numout+='7';
+                    break;
+                case 'I'||'i':
+                    numout+='8';
+                    break;
+                case 'O'||'o':
+                    numout+='9';
+                    break;
+                case 'P'||'p':
+                    numout+='0';
+                    break;
+                default:
+                    numout+=str[i];
+                    break;
+            }
+        }
+        return numout;
     }
+
     //格式化数字类型的日期
     function fmtIntDate(date) {
         if (!date) {

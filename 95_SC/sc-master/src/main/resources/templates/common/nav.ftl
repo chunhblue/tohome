@@ -19,17 +19,11 @@
 						</div>
 					</div>
 					<div class="col-xs-12 col-sm-3 col-md-3 col-lg-2 ">
-						<div class="nav-time">
-							<span class="glyphicon glyphicon-time"></span> 
-							<span>
-									<script language=JavaScript>
-										today=new Date();
-										function initArray(){this.length=initArray.arguments.length;
-										for(var i=0;i<this.length;i++) this[i+1]=initArray.arguments[i]};
-										var d=new initArray("Sunday","Monday","Tuesday", "Wednesday","Thursday","Friday","Saturday");
-										// document.write("<font class=date>",today.getFullYear(),"年",today.getMonth()+1,"月",today.getDate(),"日 ", d[today.getDay()+1],"</font>");
-										document.write("<font class=date>",today.getDate(),"/",today.getMonth()+1,"/",today.getFullYear()," ", d[today.getDay()+1],"</font>");
-									</script>
+						<div style="white-space: nowrap" class="nav-time">
+							<span class="glyphicon glyphicon-time"></span>
+							<span id="timeNow" >
+
+
 								 </span>
 						</div>
 					</div>
@@ -37,4 +31,27 @@
 			</div>
 		</div>
 	</div>	
-</div>	
+</div>
+<script language=JavaScript>
+	window.onload=function(){
+		//每1秒刷新时间
+		setInterval("getNowTime()",1000);
+	}
+	function getNowTime(){
+		today=new Date();
+		HH = today.getHours();
+		Minutes = today.getMinutes();
+		seconds = today.getSeconds();
+		Month=today.getMonth()+1;
+		function initArray(){this.length=initArray.arguments.length;
+			for(var i=0;i<this.length;i++) this[i+1]=initArray.arguments[i]};
+		var d=new initArray("Sunday","Monday","Tuesday", "Wednesday","Thursday","Friday","Saturday");
+		document.getElementById("timeNow").innerHTML=today.getDate()+"/"+Month+"/"+today.getFullYear()+" "+
+		checkZero(HH)+":"+checkZero(Minutes)+":"+checkZero(seconds)+" "+
+				d[today.getDay()+1]
+	}
+	function checkZero(i){
+		var num = (i<10)?("0"+i) : i;
+		return num;
+	}
+</script>

@@ -39,6 +39,7 @@ public class WriteOffDTO extends GridDataDTO{
     private String ofc;
      private String ofcName;
     private String barcode;
+    private String accDate;
 
 
     private String categoryCd;

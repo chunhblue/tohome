@@ -19,6 +19,7 @@
         <result column="delivery_date" property="deliveryDate" jdbcType="VARCHAR" />
         <result column="expire_date" property="expireDate" jdbcType="VARCHAR" />
         <result column="receive_date" property="receiveDate" jdbcType="VARCHAR" />
+        <result column="receive_hms" property="receiveHms" jdbcType="VARCHAR" />
         <result column="vendor_address" property="vendorAddress" jdbcType="VARCHAR" />
         <result column="store_address" property="storeAddress" jdbcType="VARCHAR" />
         <result column="order_sts" property="orderSts" jdbcType="VARCHAR" />
@@ -50,6 +51,7 @@
         <result column="receive_id" property="receiveId" jdbcType="VARCHAR" />
         <result column="received_remark" property="receivedRemark" jdbcType="VARCHAR" />
         <result column="physical_receiving_date" property="physicalReceivingDate" jdbcType="VARCHAR" />
+        <result column="physical_receiving_hms" property="physicalReceivingHms" jdbcType="VARCHAR" />
     </resultMap>
 
     <!-- 主键查询头档 -->
@@ -61,10 +63,10 @@
             SELECT * FROM (
                 SELECT
                     receive_id, store_cd, order_id, receive_amt,
-                    receive_tax, update_ymd AS receive_date,
+                    receive_tax, update_ymd AS receive_date,update_hms as receive_hms,
                     create_user_id, create_ymd, create_hms,update_ymd,update_hms,
                     n_reviewid,received_remark,
-                    physical_receiving_date
+                    physical_receiving_date,physical_receiving_hms
                 FROM OD0000_T
                 WHERE receive_id = #{receiveId,jdbcType=VARCHAR}
             ) O
@@ -172,7 +174,8 @@
         INSERT INTO OD0000_T (
 			receive_id, store_cd, order_id, receive_amt,
             receive_tax, create_user_id, create_ymd,
-            create_hms, update_ymd, update_hms,physical_receiving_date,review_status
+            create_hms, update_ymd, update_hms,physical_receiving_date,review_status,
+            physical_receiving_hms,upload_api_flg
         )
 		SELECT
 		    #{receiveId,jdbcType=VARCHAR}, store_cd, order_id,
@@ -182,8 +185,17 @@
             #{commonDTO.createHms,jdbcType=VARCHAR},
             #{commonDTO.createYmd,jdbcType=VARCHAR},
             #{commonDTO.createHms,jdbcType=VARCHAR},
-            #{commonDTO.createYmd,jdbcType=VARCHAR},
-            review_status
+            <choose>
+                <when test="checkHhtFlg == 0">
+                    #{physicalReceivingDate,jdbcType=VARCHAR},15,
+                    #{physicalReceivingHms,jdbcType=VARCHAR},
+                </when>
+                <otherwise>
+                    #{commonDTO.createYmd,jdbcType=VARCHAR},
+                    15,substr(#{commonDTO.createHms,jdbcType=VARCHAR},1,4),
+                </otherwise>
+            </choose>
+            '0'
 		FROM
 			OD0000
 		WHERE
@@ -196,7 +208,7 @@
 			receive_id, store_cd, order_id, receive_amt,
             receive_tax, create_user_id, create_ymd,
             create_hms,update_ymd,update_hms,received_remark,
-               physical_receiving_date,review_status
+               physical_receiving_date,review_status,physical_receiving_hms,upload_api_flg
         ) VALUES (
             #{receiveId,jdbcType=VARCHAR}, #{storeCd,jdbcType=VARCHAR}, #{orderId,jdbcType=VARCHAR},
             #{receiveAmt,jdbcType=DECIMAL}, #{receiveTax,jdbcType=DECIMAL},
@@ -206,7 +218,8 @@
             #{commonDTO.createYmd,jdbcType=VARCHAR},
             #{commonDTO.createHms,jdbcType=VARCHAR},
             #{receivedRemark,jdbcType=VARCHAR},
-            #{physicalReceivingDate,jdbcType=VARCHAR},15
+            #{physicalReceivingDate,jdbcType=VARCHAR},15,
+            #{physicalReceivingHms,jdbcType=VARCHAR},'0'
         )
     </insert>
 
@@ -219,19 +232,19 @@
             upload_date = '',
             order_sts = #{orderSts,jdbcType=VARCHAR},
             review_status = #{reviewSts,jdbcType=INTEGER},
-            receive_date = #{commonDTO.updateYmd,jdbcType=VARCHAR},
+            receive_date = T.physical_receiving_date,
             update_user_id = #{commonDTO.updateUserId,jdbcType=VARCHAR},
             update_ymd = #{commonDTO.updateYmd,jdbcType=VARCHAR},
             update_hms = #{commonDTO.updateHms,jdbcType=VARCHAR}
         FROM (
             SELECT
-                store_cd, order_id,
+                store_cd, order_id,physical_receiving_date,
                 SUM(receive_amt) AS receive_amt,
                 SUM(receive_tax) AS receive_tax
             FROM OD0000_T
             WHERE
                 receive_id = #{receiveId,jdbcType=VARCHAR}
-            GROUP BY store_cd, order_id
+            GROUP BY store_cd, order_id,physical_receiving_date
         ) T
         WHERE
             OD0000.store_cd = T.store_cd
@@ -241,6 +254,10 @@
     <update id="updateNewRecord"  parameterType="String">
         update od0000_t set
             review_status = 20,
+            <if test="checkMouthFlg == 0">
+                physical_receiving_date = substr(#{commonDTO.updateYmd,jdbcType=VARCHAR}, 1, 6) || '01',
+                physical_receiving_hms = '0600',
+            </if>
             update_user_id = #{commonDTO.updateUserId,jdbcType=VARCHAR},
             update_ymd = #{commonDTO.updateYmd,jdbcType=VARCHAR},
             update_hms = #{commonDTO.updateHms,jdbcType=VARCHAR}
@@ -253,6 +270,7 @@
         SELECT store_cd k, receive_id v FROM OD0000_T
         WHERE store_cd = #{storeCd,jdbcType=VARCHAR}
         AND receive_id LIKE CONCAT('%',#{v,jdbcType=VARCHAR},'%')
+        and review_status = 20
     </select>
 
     <select id="orgOrderIdCount" resultType="int" parameterType="String">
@@ -267,7 +285,6 @@
             update_user_id = #{commonDTO.updateUserId,jdbcType=VARCHAR},
             update_ymd = #{commonDTO.updateYmd,jdbcType=VARCHAR},
             update_hms = #{commonDTO.updateHms,jdbcType=VARCHAR},
-           physical_receiving_date = #{physicalReceivingDate,jdbcType=VARCHAR},
             received_remark = #{receivedRemark,jdbcType=DECIMAL}
             ,review_status = 15
         WHERE store_cd = #{storeCd,jdbcType=VARCHAR}
@@ -286,4 +303,23 @@
         where
             receive_id = #{receiveId,jdbcType=VARCHAR}
     </update>
+
+    <select id="selectByOrder" resultMap="ReOD0000TMap">
+        SELECT
+                store_cd, order_id,physical_receiving_date
+            FROM OD0000_T
+            WHERE
+                receive_id = #{receiveId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getHHTreceiveDateTime" resultMap="ReOD0000TMap">
+        SELECT
+                store_cd, order_id,receive_date as physical_receiving_date,
+                receive_time physical_receiving_hms
+            FROM od0020
+            WHERE
+                order_id = #{orderId,jdbcType=VARCHAR}
+                and store_cd = #{storeCd,jdbcType=VARCHAR}
+                order by line_num limit 1
+    </select>
 </mapper>

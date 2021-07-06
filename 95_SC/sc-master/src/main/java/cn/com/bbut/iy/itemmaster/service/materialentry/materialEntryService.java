@@ -28,4 +28,6 @@ public interface materialEntryService {
     GridDataDTO<MaterialDTO> storeAllItem(ItemInStoreDto param);
 
     PI0100DTOC getInvenDataPio(PI0100DTOC pioC);
+
+    PI0100DTOC getInvenDataPioIn(PI0100DTOC pioC);
 }

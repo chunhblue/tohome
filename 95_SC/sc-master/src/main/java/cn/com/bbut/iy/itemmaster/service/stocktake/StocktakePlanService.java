@@ -1,6 +1,5 @@
 package cn.com.bbut.iy.itemmaster.service.stocktake;
 
-import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.ReturnDTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100DTO;
@@ -9,10 +8,8 @@ import cn.com.bbut.iy.itemmaster.dto.pi0100.PI0110DTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.text.ParseException;
@@ -52,4 +49,12 @@ public interface StocktakePlanService {
     List<StocktakeItemDTO> queryExport(String piCd,String piDate,String storeCd);
 
     void updateStocktakingPlanExpired();
+
+    /**
+     * 将库存异动数据, 绑定生成excel
+     */
+    HSSFWorkbook getInventoryHSSFWorkbook(PI0100ParamDTO pi0100Param, String tempTableName);
+
+    // 将数据存入临时表
+    void insertInventoryToTemp(PI0100ParamDTO pi0100Param, String tempTableName);
 }

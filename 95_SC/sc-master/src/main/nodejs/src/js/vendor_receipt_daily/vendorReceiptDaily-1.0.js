@@ -119,9 +119,58 @@ define('vendorReceiptDaily', function () {
 
         but_event();
         // 初始化检索日期
-        _common.initDate(m.startDate,m.endDate);
+        // _common.initDate(m.startDate,m.endDate);
+        initDate(m.startDate,m.endDate);
     }
+    var initDate = function (startDate, endDate) {
+        if (startDate) {
+            startDate.datetimepicker({
+                language: 'en',
+                format: 'dd/mm/yyyy',
+                maxView: 4,
+                startView: 2,
+                minView: 2,
+                autoclose: true,
+                todayHighlight: true,
+                todayBtn: true,
+            }).on('changeDate', function (ev) {
+                if (endDate) {
+                    if (ev.date) {
+                        endDate.datetimepicker('setStartDate', new Date(ev.date.valueOf()))
+                    } else {
+                        endDate.datetimepicker('setStartDate', null);
+                    }
+                }
+            });
+            // 默认当天
+            let _start = new Date();
+            startDate.val(_start.Format('dd/MM/yyyy'));
+        }
 
+        if (endDate) {
+            endDate.datetimepicker({
+                language: 'en',
+                format: 'dd/mm/yyyy',
+                maxView: 4,
+                startView: 2,
+                minView: 2,
+                autoclose: true,
+                todayHighlight: true,
+                todayBtn: true,
+            }).on('changeDate', function (ev) {
+                if (startDate) {
+                    if (ev.date) {
+                        startDate.datetimepicker('setEndDate', new Date(ev.date.valueOf()))
+                    } else {
+                        startDate.datetimepicker('setEndDate', null);
+                    }
+                }
+            });
+            // 结束日期 当前日期 加 三天
+            let sumdate = new Date().getTime() + (86400000 * 3);
+            endDate.val(new Date(sumdate).Format('dd/MM/yyyy'));
+        }
+    }
     //初始化下拉
     var initAutoMatic = function () {
         // 获取区域经理
@@ -221,7 +270,7 @@ define('vendorReceiptDaily', function () {
                             '<td title="' + isEmpty(item.storeCd) + '" style="text-align:right;">' + isEmpty(item.storeCd) + '</td>' +
                             '<td title="' + isEmpty(item.storeName) + '" style="text-align:left;">' + isEmpty(item.storeName) + '</td>' +
                             // '<td title="' + isEmpty(item.accDate) + '" style="text-align:center;">' + isEmpty(item.accDate) + '</td>' +
-                            '<td title="' + isEmpty(item.receiveDate) + '" style="text-align:center;">' + isEmpty(item.receiveDate) + '</td>' +
+                            '<td title="' + fmtIntDate(item.receiveDate) + '" style="text-align:center;">' + fmtIntDate(item.receiveDate) + '</td>' +
                             '<td title="' + isEmpty(item.pmaName) + '" style="text-align:left;">' + isEmpty(item.pmaName) + '</td>' +
                             '<td title="' + isEmpty(item.categoryName) + '" style="text-align:left;">' + isEmpty(item.categoryName) + '</td>' +
                             '<td title="' + isEmpty(item.subCategoryName) + '" style="text-align:left;">' + isEmpty(item.subCategoryName) + '</td>' +
@@ -270,6 +319,10 @@ define('vendorReceiptDaily', function () {
             $("#startDate").focus();
             $("#startDate").css("border-color","red");
             return false;
+        }else if(_common.judgeValidDate(m.startDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#startDate").focus();
+            return false;
         }else {
             $("#startDate").css("border-color","#CCC");
         }
@@ -277,6 +330,10 @@ define('vendorReceiptDaily', function () {
             _common.prompt("Please enter a Sales Date!",5,"error"); // 结束日期不可以为空
             $("#endDate").focus();
             $("#endDate").css("border-color","red");
+            return false;
+        }else if(_common.judgeValidDate(m.endDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#endDate").focus();
             return false;
         }else {
             $("#endDate").css("border-color","#CCC");
@@ -290,8 +347,8 @@ define('vendorReceiptDaily', function () {
             var _StartDate = new Date(fmtDate($("#startDate").val())).getTime();
             var _EndDate = new Date(fmtDate($("#endDate").val())).getTime();
             var difValue = parseInt(Math.abs((_EndDate-_StartDate)/(1000*3600*24)));
-            if(difValue >62){
-                _common.prompt("Query Period cannot exceed 62 days!",5,"error"); // 日期期间取值范围不能大于62天
+            if(difValue >3){
+                _common.prompt("Query Period cannot exceed 3 days!",5,"error"); // 日期期间取值范围不能大于62天
                 $("#endDate").focus();
                 return false;
             }
@@ -311,7 +368,15 @@ define('vendorReceiptDaily', function () {
         res = date.replace(/\//g, '').replace(/^(\d{2})(\d{2})(\d{4})$/,"$3-$2-$1");
         return res;
     }
-
+    // 格式化数字类型的日期：yyyymmdd → dd/mm/yyyy
+    function fmtIntDate(date){
+        if(date==null||date.length!=8){
+            return "";
+        }
+        var res = "";
+        res = date.substring(6,8)+"/"+date.substring(4,6)+"/"+date.substring(0,4);
+        return res;
+    }
     //number格式化
     function fmtIntNum(val) {
         if (val == null || val == "") {

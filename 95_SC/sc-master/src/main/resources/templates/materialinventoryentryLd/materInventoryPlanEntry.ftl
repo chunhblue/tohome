@@ -61,6 +61,8 @@
             display:none;
         }
     </STYLE>
+    <!--页头-->
+    [@common.header][/@common.header]
 </head>
 
 <body>
@@ -69,10 +71,8 @@
 [#--		<div class="error-pcode-text"> ${useMsg!} </div>--]
 [#--		<div class="shade"></div>--]
 [#--	</div>--]
-<!--页头-->
-[@common.header][/@common.header]
 <!--导航-->
-[@common.nav "HOME&Operation&Raw Material Stock Management"][/@common.nav]
+[@common.nav "HOME&Operation&Month End Stock Count Management"][/@common.nav]
 
 <div class="container-fluid" id="main_box">
     <!--row 分割-->
@@ -139,6 +139,17 @@
                                         <input type="text" id="pd_cd" class="form-control input-sm">
                                     </div>
 
+                                    <label for="" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Status</label>
+                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+                                        <select id="dj_status" class="form-control input-sm">
+                                            <option value="">-- All/Please Select --</option>
+                                            <option value="1">Pending</option>
+                                            <option value="5">Rejected</option>
+                                            <option value="6">Withdrawn</option>
+                                            <option value="7">Expired</option>
+                                            <option value="10">Approved</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -159,6 +170,8 @@
         </div>
     </div>
 </div>
+<!--审核记录-->
+[@common.approvalRecords][/@common.approvalRecords]
 <!--页脚-->
 [@common.footer][/@common.footer]
 <input type="hidden" id="use" value="${use!}"/>

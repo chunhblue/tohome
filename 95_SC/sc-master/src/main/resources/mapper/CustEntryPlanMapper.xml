@@ -318,7 +318,13 @@
     </select>
     <select id="getAllItem" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.ItemInStoreDto" resultType="cn.com.bbut.iy.itemmaster.dto.pi0100c.CostOfDTO">
         SELECT
-        *
+        article_id,
+        article_name,
+        barcode,
+        uom,
+        material_type,
+        reason_code,
+        CONCAT(pi0170.reason_code, pi0170.reason) reason
         from pi0170
         where 1=1
         <if test="param.articleId != null and param.articleId != ''">

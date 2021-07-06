@@ -21,6 +21,7 @@ import cn.com.bbut.iy.itemmaster.dto.receipt.warehouse.WarehouseReceiptParamDTO;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.receipt.vendor.IVendorService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
 import cn.shiy.common.baseutil.Container;
@@ -55,6 +56,8 @@ public class VendorReceiptController extends BaseAction {
     private IVendorService vendorService;
     @Autowired
     private MRoleStoreService mRoleStoreService;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_ITEM_RECEIPT_VENDOR";
     private final String EXCEL_EXPORT_NAME = "Item Receiving Query(From Supplier).xlsx";
@@ -128,7 +131,7 @@ public class VendorReceiptController extends BaseAction {
             PermissionCode.CODE_SC_RR_QUERY_CONFIRM
     })
     public ModelAndView details(HttpServletRequest request, HttpSession session,
-                                   VendorReceiptParamDTO param,String orderSts) {
+                                   VendorReceiptParamDTO param,String orderSts,String reviewSts) {
         User u = this.getUser(session);
         log.debug("User:{} 进入 供应商配送验收单明细管理编辑画面", u.getUserId());
         ModelAndView mv = new ModelAndView("receipt/vendor/receiptedit");
@@ -139,6 +142,7 @@ public class VendorReceiptController extends BaseAction {
         mv.addObject("orderId", param.getOrderId());
         mv.addObject("receiveId", param.getReceiveId());
         mv.addObject("orderSts", orderSts);
+        mv.addObject("reviewSts", reviewSts);
         mv.addObject("useMsg", "供应商配送验收单明细管理编辑画面");
         mv.addObject("typeId", ConstantsAudit.TYPE_RECEIPT_VENDOR);
         mv.addObject("reviewId", ConstantsAudit.REVIEW_RECEIPT_VENDOR);
@@ -340,6 +344,9 @@ public class VendorReceiptController extends BaseAction {
             return null;
         }
         CommonDTO dto = new CommonDTO();
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         // 当前用户ID
         dto.setUpdateUserId(u.getUserId());
         dto.setCreateUserId(u.getUserId());
@@ -349,12 +356,12 @@ public class VendorReceiptController extends BaseAction {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HHmmss");
         // 当前时间年月日
         String date = dateFormat.format(now);
-        dto.setCreateYmd(date);
-        dto.setUpdateYmd(date);
+        dto.setCreateYmd(ymd);
+        dto.setUpdateYmd(ymd);
         // 当前时间时分秒
         String time = timeFormat.format(now);
-        dto.setCreateHms(time);
-        dto.setUpdateHms(time);
+        dto.setCreateHms(hms);
+        dto.setUpdateHms(hms);
         return dto;
     }
 

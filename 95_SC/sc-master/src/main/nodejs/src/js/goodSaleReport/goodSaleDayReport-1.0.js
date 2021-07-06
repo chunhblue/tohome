@@ -42,6 +42,8 @@ define('goodsSaleDayReport' , function (){
         articleId : null,
         articleName : null,
         barcode:null,
+        totalSaleAmountA:null,
+
     }
 
     // 创建js对象
@@ -104,7 +106,7 @@ define('goodsSaleDayReport' , function (){
 
         but_event();
         // 初始化检索日期
-        _common.initDate(m.startDate,m.endDate);
+        initDate(m.startDate,m.endDate);
     }
 
     var initAutoMatic=function () {
@@ -129,6 +131,55 @@ define('goodsSaleDayReport' , function (){
             startCount: 0,
         });
     }
+    var initDate = function (startDate, endDate) {
+        if (startDate) {
+            startDate.datetimepicker({
+                language: 'en',
+                format: 'dd/mm/yyyy',
+                maxView: 4,
+                startView: 2,
+                minView: 2,
+                autoclose: true,
+                todayHighlight: true,
+                todayBtn: true,
+            }).on('changeDate', function (ev) {
+                if (endDate) {
+                    if (ev.date) {
+                        endDate.datetimepicker('setStartDate', new Date(ev.date.valueOf()))
+                    } else {
+                        endDate.datetimepicker('setStartDate', null);
+                    }
+                }
+            });
+            // 默认当天
+            let _start = new Date();
+            startDate.val(_start.Format('dd/MM/yyyy'));
+        }
+
+        if (endDate) {
+            endDate.datetimepicker({
+                language: 'en',
+                format: 'dd/mm/yyyy',
+                maxView: 4,
+                startView: 2,
+                minView: 2,
+                autoclose: true,
+                todayHighlight: true,
+                todayBtn: true,
+            }).on('changeDate', function (ev) {
+                if (startDate) {
+                    if (ev.date) {
+                        startDate.datetimepicker('setEndDate', new Date(ev.date.valueOf()))
+                    } else {
+                        startDate.datetimepicker('setEndDate', null);
+                    }
+                }
+            });
+            // 结束日期 当前日期 加 三天
+            let sumdate = new Date().getTime() + (86400000 * 3);
+            endDate.val(new Date(sumdate).Format('dd/MM/yyyy'));
+        }
+    }
     var but_event=function () {
         m.reset.click(function () {
             $("#regionRemove").click();
@@ -138,6 +189,7 @@ define('goodsSaleDayReport' , function (){
             m.endDate.val('');
             m.articleId.val('');
             m.articleName.val('');
+            $("#totalSaleAmountA").val('');
             $("#startDate").css("border-color","#CCC");
             $("#endDate").css("border-color","#CCC");
             page=1;
@@ -153,7 +205,21 @@ define('goodsSaleDayReport' , function (){
                 page=1;
                 setParamJson();
                 getData(page,rows);
+                let record = m.searchJson.val();
+                $.myAjaxs({
+                    url: url_left  + "/getTotalSaleAmount",
+                    async: true,
+                    cache: false,
+                    type: "post",
+                    data: 'SearchJson='+record,
+                    dataType: "json",
+                    success: function (result) {
+                        m.totalSaleAmountA.val(toThousands(result.o.totalSaleAmount));
+                    },
+                    complete: _common.myAjaxComplete
+                });
             }
+
         })
 
         // 导出按钮点击事件
@@ -174,6 +240,13 @@ define('goodsSaleDayReport' , function (){
             return '';
         }
         return new Date(dateStr).Format('dd/MM/yyyy hh:mm:ss')
+    };
+
+    // 格式化数字类型的日期 yyyyMMdd → dd/MM/yyyy
+    function fmtStringDate(date){
+        if(!!date) {
+            return date.substring(6,8)+"/"+date.substring(4,6)+"/"+date.substring(0,4);
+        }
     };
 
     /**
@@ -206,7 +279,7 @@ define('goodsSaleDayReport' , function (){
                         let tempTrHtml = '<tr style="text-align: center;">' +
                             '<td style="text-align: left" title="'+item.storeCd+'">' + isEmpty(item.storeCd) + '</td>' +
                             '<td style="text-align: left" title="'+item.storeName+'">' + isEmpty(item.storeName) + '</td>' +
-                            '<td style="text-align: center" title="'+ formatDateTime(item.tranDate)+'">' + formatDateTime(item.tranDate) + '</td>' +
+                            '<td style="text-align: center" title="'+ fmtStringDate(item.tranDate)+'">' + fmtStringDate(item.tranDate) + '</td>' +
                             '<td style="text-align: left" title=" '+item.depName+' ">' + isEmpty(item.depName) + '</td>' +
                             '<td style="text-align: left" title="'+item.pmaName+'">' + isEmpty(item.pmaName) + '</td>' +
                             '<td style="text-align: left" title="'+item.categoryName+'">' + isEmpty(item.categoryName) + '</td>' +
@@ -275,6 +348,10 @@ define('goodsSaleDayReport' , function (){
             $("#startDate").focus();
             $("#startDate").css("border-color","red");
             return false;
+        }else if(_common.judgeValidDate(m.startDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#startDate").focus();
+            return false;
         }else {
             $("#startDate").css("border-color","#CCC");
         }
@@ -282,6 +359,10 @@ define('goodsSaleDayReport' , function (){
             _common.prompt("Please enter a Date!",5,"error"); // 结束日期不可以为空
             $("#endDate").focus();
             $("#endDate").css("border-color","red");
+            return false;
+        }else if(_common.judgeValidDate(m.endDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#endDate").focus();
             return false;
         }else {
             $("#endDate").css("border-color","#CCC");

@@ -30,4 +30,6 @@ public interface materialEntryMapper {
     void saveAllItemIn(@Param("list") List<StocktakeItemDTOC> stocktakeItemList);
 
     void updateItem(@Param("param")PI0100DTOC item);
+
+    List<StocktakeItemDTOC> getPI0140ByPrimaryIn(@Param("piCd")String piCd,@Param("articleId") String articleId);
 }

@@ -3,11 +3,13 @@ package cn.com.bbut.iy.itemmaster.serviceimpl;
 import cn.com.bbut.iy.itemmaster.dao.CashMapper;
 import cn.com.bbut.iy.itemmaster.dao.Cm9060Mapper;
 import cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO;
+import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.cash.CashDetail;
 import cn.com.bbut.iy.itemmaster.dto.cash.CashDetailParam;
 import cn.com.bbut.iy.itemmaster.entity.base.Cm9060;
 import cn.com.bbut.iy.itemmaster.service.CashService;
 import cn.com.bbut.iy.itemmaster.service.SequenceService;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +35,7 @@ public class CashServiceImpl implements CashService {
     private Cm9060Mapper cm9060Mapper;
 
     @Override
-    public List<CashDetail> getCashDetailyList(CashDetailParam dto) {
+    public GridDataDTO<CashDetail> getCashDetailyList(CashDetailParam dto) {
         String businessDate = getBusinessDate();
         dto.setBusinessDate(businessDate);
         String payAmtFlg = dto.getPayAmtFlg();
@@ -42,7 +44,11 @@ public class CashServiceImpl implements CashService {
         String vEndDate = dto.getVEndDate();
         String payAmtDiff = dto.getPayAmtDiff();
         String am = dto.getAm();
-        List<CashDetail> list = cashMapper.getCashDetailyList(stores, vStartDate, vEndDate, am);
+        int count = cashMapper.getCashDetailycount(stores, vStartDate, vEndDate, am);
+        if (count<1) {
+            return new GridDataDTO<CashDetail>();
+        }
+        List<CashDetail> list = cashMapper.getCashDetailyList(dto);
         if (list != null && list.size() > 0) {
             for (int i = 0; i < list.size() - 1; i++) {
                 if (list.get(i).getPayDate().equals(list.get(i + 1).getPayDate())
@@ -58,29 +64,32 @@ public class CashServiceImpl implements CashService {
                 }
             }
             for (int i = 0; i < list.size(); i++) {
+                list.get(i).setVoucherDate(list.get(i).getPayDate());
+                // 日期格式转换
+                list.get(i).setPayDate(Utils.getTimeStamp(list.get(i).getPayDate()));
                 //支付方式金额 20
 //                list.get(i).setPayInAmt(list.get(i).getPayInAmt0().add(list.get(i).getPayInAmt1()).add(list.get(i).getPayInAmt2()).add(list.get(i).getPayInAmt3()).add(list.get(i).getPayInAmt4()).add(list.get(i).getPayInAmt5()).add(list.get(i).getAdditional()).add(list.get(i).getOffsetClaim()));
                 //应收合计金额
-                CashDetail cashDetail = cashMapper.getPayAmt(list.get(i).getPayDate(), list.get(i).getStoreCd());
+                CashDetail cashDetail = cashMapper.getPayAmt(list.get(i).getPayDate(), list.get(i).getStoreCd(),list.get(i).getVoucherDate());
                 list.get(i).setPayAmt(cashDetail.getPayAmt());
                 if (cashDetail.getPayAmt() == null) {
                     cashDetail.setPayAmt(BigDecimal.ZERO);
                     list.get(i).setPayAmt(BigDecimal.ZERO);
                 }
-                System.out.println(cashDetail.getPayAmt());
+
+                // 2021 6 4注释
                 //获取客数 客单价  ==0
-                int customerQty = cashMapper.getCustomerQty(list.get(i).getPayDate(), list.get(i).getStoreCd());
-                if (customerQty > 0) {
-                    BigDecimal customerQtyBig = new BigDecimal(customerQty);
-                    System.out.println(customerQtyBig);
-                    list.get(i).setCustomerQty(customerQtyBig);
-                    if (cashDetail.getPayAmt().compareTo(BigDecimal.ZERO) > 0) {
-                        list.get(i).setCustomerAvgPrice(cashDetail.getPayAmt().divide(customerQtyBig,2));
-                    }
-                } else {
-                    list.get(i).setCustomerQty(BigDecimal.ZERO);
-                    list.get(i).setCustomerAvgPrice(BigDecimal.ZERO);
-                }
+//                int customerQty = cashMapper.getCustomerQty(list.get(i).getPayDate(), list.get(i).getStoreCd());
+//                if (customerQty > 0) {
+//                    BigDecimal customerQtyBig = new BigDecimal(customerQty);
+//                    list.get(i).setCustomerQty(customerQtyBig);
+//                    if (cashDetail.getPayAmt().compareTo(BigDecimal.ZERO) > 0) {
+//                        list.get(i).setCustomerAvgPrice(cashDetail.getPayAmt().divide(customerQtyBig,2));
+//                    }
+//                } else {
+//                    list.get(i).setCustomerQty(BigDecimal.ZERO);
+//                    list.get(i).setCustomerAvgPrice(BigDecimal.ZERO);
+//                }
                 //应收各项金额
                 list.get(i).setPayAmt0(cashDetail.getPayAmt0());
                 list.get(i).setPayAmt1(cashDetail.getPayAmt1());
@@ -106,7 +115,16 @@ public class CashServiceImpl implements CashService {
                 }
             }
         }
-        return list;
+
+        for(CashDetail detail:list){
+            String createYmd = detail.getCreateYmd();
+            String createHms = detail.getCreateHms();
+            String dateTime = dateFomte(createYmd, createHms);
+            detail.setCreateYmdFull(dateTime);
+            detail.setPayDate(Utils.getStringDate(detail.getPayDate()));
+        }
+        GridDataDTO<CashDetail> data = new GridDataDTO<>(list, dto.getPage(), count, dto.getRows());
+        return data;
     }
 
     @Override
@@ -122,7 +140,7 @@ public class CashServiceImpl implements CashService {
         BigDecimal sumShift1 = BigDecimal.ZERO; // 01
         BigDecimal sumShift2 = BigDecimal.ZERO; // 02
         BigDecimal sumShift3 = BigDecimal.ZERO; // 03
-        BigDecimal  sumAdd=BigDecimal.ZERO; // 04
+        BigDecimal  sumAdd = BigDecimal.ZERO; // 04
         BigDecimal  sumPiffAmount1=BigDecimal.ZERO;
         BigDecimal  sumPiffAmount2=BigDecimal.ZERO;
         BigDecimal  sumPiffAmount3=BigDecimal.ZERO;
@@ -177,11 +195,11 @@ public class CashServiceImpl implements CashService {
                     }
                     if (cahs.getPayCd().equals("04")) {
                         cahs.setPayInAmt(sumAdd);
-                        cahs.setPayAmtDiff(sumPiffAmount4);
+                        cahs.setPayAmtDiff(sumPiffAmount4); // additional
                     }
                     if (cahs.getPayCd().equals("05")) {
                         cahs.setPayInAmt(sumOfficam);
-                        cahs.setPayAmtDiff(sumPiffAmount5);
+                        cahs.setPayAmtDiff(sumPiffAmount5); // offset_claim
                     }
                 }
             }
@@ -194,17 +212,32 @@ public class CashServiceImpl implements CashService {
                     cashDetail = cashMapper.selectBaseInfo(cashDetail);
                 }
             }
-            CashDetail payAmt = cashMapper.getPayAmt(cashDetail.getPayDate(), cashDetail.getStoreCd());
+            cashDetail.setVoucherDate(cashDetail.getPayDate());
+            // 日期格式转换
+            cashDetail.setPayDate(Utils.getTimeStamp(cashDetail.getPayDate()));
+            CashDetail payAmt = cashMapper.getPayAmt(cashDetail.getPayDate(), cashDetail.getStoreCd(),cashDetail.getVoucherDate());
             for (int i = 0; i < payList.size(); i++) {
                 switch (payList.get(i).getPayCd()) {
                     case "01":
                         payList.get(i).setPayAmt(payAmt.getPayAmt0());  // shift1
+                        payList.get(i).setSalesByHht(payAmt.getPayHHTAmt0());
+                        if(payList.get(i).getPayInAmt()!= null && payAmt.getPayAmt0()!= null){
+                            payList.get(i).setPayAmtDiff(payList.get(i).getPayInAmt().subtract(payAmt.getPayAmt0()));//计算差异金额
+                        }
                         break;
                     case "02":
                         payList.get(i).setPayAmt(payAmt.getPayAmt1());  // shift2
+                        payList.get(i).setSalesByHht(payAmt.getPayHHTAmt1());
+                        if(payList.get(i).getPayInAmt()!= null && payAmt.getPayAmt1()!= null){
+                            payList.get(i).setPayAmtDiff(payList.get(i).getPayInAmt().subtract(payAmt.getPayAmt1()));
+                        }
                         break;
                     case "03":
                         payList.get(i).setPayAmt(payAmt.getPayAmt2());  // shift3
+                        payList.get(i).setSalesByHht(payAmt.getPayHHTAmt2());
+                        if(payList.get(i).getPayInAmt()!= null && payAmt.getPayAmt2()!= null) {
+                            payList.get(i).setPayAmtDiff(payList.get(i).getPayInAmt().subtract(payAmt.getPayAmt2()));
+                        }
                         break;
                 }
             }
@@ -334,6 +367,71 @@ public class CashServiceImpl implements CashService {
         return cashInfo;
     }
 
+    @Override
+    public List<CashDetail> getCashDetailList(CashDetailParam dto) {
+        dto.setFlg(false);
+        String businessDate = getBusinessDate();
+        dto.setBusinessDate(businessDate);
+        String payAmtFlg = dto.getPayAmtFlg();
+        String payAmtDiff = dto.getPayAmtDiff();
+
+        List<CashDetail> list = cashMapper.getCashDetailyList(dto);
+        if (list != null && list.size() > 0) {
+            for (int i = 0; i < list.size() - 1; i++) {
+                if (list.get(i).getPayDate().equals(list.get(i + 1).getPayDate())
+                        && list.get(i).getStoreCd().equals(list.get(i + 1).getStoreCd())
+                        && list.get(i).getPayId().equals(list.get(i + 1).getPayId())) {
+                    list.get(i).setPayInAmt0(list.get(i).getPayInAmt0().add(list.get(i + 1).getPayInAmt0()));
+                    list.get(i).setPayInAmt1(list.get(i).getPayInAmt1().add(list.get(i + 1).getPayInAmt1()));
+                    list.get(i).setPayInAmt2(list.get(i).getPayInAmt2().add(list.get(i + 1).getPayInAmt2()));
+                    list.get(i).setAdditional(list.get(i).getAdditional().add(list.get(i + 1).getAdditional()));
+                    list.get(i).setOffsetClaim(list.get(i).getOffsetClaim().add(list.get(i + 1).getOffsetClaim()));
+                    list.remove(i + 1);
+                    i--;
+                }
+            }
+            for (int i = 0; i < list.size(); i++) {
+                list.get(i).setVoucherDate(list.get(i).getPayDate());
+                // 日期格式转换
+                list.get(i).setPayDate(Utils.getTimeStamp(list.get(i).getPayDate()));
+                //支付方式金额 20
+//                list.get(i).setPayInAmt(list.get(i).getPayInAmt0().add(list.get(i).getPayInAmt1()).add(list.get(i).getPayInAmt2()).add(list.get(i).getPayInAmt3()).add(list.get(i).getPayInAmt4()).add(list.get(i).getPayInAmt5()).add(list.get(i).getAdditional()).add(list.get(i).getOffsetClaim()));
+                //应收合计金额
+                CashDetail cashDetail = cashMapper.getPayAmt(list.get(i).getPayDate(), list.get(i).getStoreCd(), list.get(i).getVoucherDate());
+                list.get(i).setPayAmt(cashDetail.getPayAmt());
+                if (cashDetail.getPayAmt() == null) {
+                    cashDetail.setPayAmt(BigDecimal.ZERO);
+                    list.get(i).setPayAmt(BigDecimal.ZERO);
+                }
+
+                //应收各项金额
+                list.get(i).setPayAmt0(cashDetail.getPayAmt0());
+                list.get(i).setPayAmt1(cashDetail.getPayAmt1());
+                list.get(i).setPayAmt2(cashDetail.getPayAmt2());
+                //差异金额
+                list.get(i).setPayAmtDiff(list.get(i).getPayInAmt().subtract(list.get(i).getPayAmt()));
+                if (StringUtils.isNotBlank(payAmtFlg) && StringUtils.isNotBlank(payAmtDiff)) {
+                    BigDecimal payAmtDiff1 = new BigDecimal(payAmtDiff);
+                    //payAmtFlg 1 <   2  ≤   3 >   4 ≥
+                    if ("1".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) >= 0) {
+                        list.remove(i);
+                        i--;
+                    } else if ("2".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) > 0) {
+                        list.remove(i);
+                        i--;
+                    } else if ("3".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) <= 0) {
+                        list.remove(i);
+                        i--;
+                    } else if ("4".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) < 0) {
+                        list.remove(i);
+                        i--;
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
     /**
      * 获取当前业务日期
      */
@@ -341,4 +439,13 @@ public class CashServiceImpl implements CashService {
         Cm9060 dto = cm9060Mapper.selectByPrimaryKey("0000");
         return dto.getSpValue();
     }
+  private String dateFomte(String date,String time){
+      String year=date.substring(0,4);
+      String month=date.substring(4,6);
+      String day=date.substring(6,8);
+      String hour=time.substring(0,2);
+      String min=time.substring(2,4);
+      String sec=time.substring(4,6);
+      return day+"/"+month+"/"+year+" "+hour+":"+min+":"+sec;
+  }
 }

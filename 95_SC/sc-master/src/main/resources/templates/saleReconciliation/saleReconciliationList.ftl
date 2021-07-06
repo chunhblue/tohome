@@ -97,7 +97,7 @@
 						<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 							<div class="form-horizontal">
 								<div class="form-group">
-									<label for="aRegion" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">Region</label>[#-- 大区 --]
+									<label for="aRegion" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">Region</label>
 									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 										<div class="aotu-pos">
 											<input type="text" class="form-control my-automatic input-sm" id="aRegion">
@@ -107,7 +107,7 @@
 									</div>
 									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 									</div>
-									<label for="aCity" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">City</label>[#-- 城市 --]
+									<label for="aCity" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">City</label>
 									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 										<div class="aotu-pos">
 											<input type="text" class="form-control my-automatic input-sm" id="aCity">
@@ -117,7 +117,7 @@
 									</div>
 								</div>
 								<div class="form-group">
-									<label for="aDistrict" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">District</label>[#-- 区域 --]
+									<label for="aDistrict" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">District</label>
 									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 										<div class="aotu-pos">
 											<input type="text" class="form-control my-automatic input-sm" id="aDistrict">
@@ -251,6 +251,7 @@
 <input type="hidden" id="tempTableType" value="-1"/>
 <input type="hidden" id="searchJson" value=""/>
 <input type="hidden" id="typeId" value="${typeId!}">
+<input type="hidden" id="position" value="${position!}">
 [@permission code="SC-SL-CF-002"]<input type="hidden" class="permission-verify" id="exportBut" value="${displayVar!}" />[/@permission]
 </body>
 </html>

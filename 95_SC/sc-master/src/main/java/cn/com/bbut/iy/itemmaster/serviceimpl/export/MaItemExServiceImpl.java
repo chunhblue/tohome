@@ -53,14 +53,14 @@ public class MaItemExServiceImpl implements ExService {
         Ma4350DetailParamDto jsonParam = gson.fromJson(paramDTO.getParam(), Ma4350DetailParamDto.class);
         // 资源权限参数设置
         jsonParam.setStores(paramDTO.getStores());
-        int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
+        /*int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
         if(i >= 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             jsonParam.setSaleStartDate(startDate);
-        }
+        }*/
         // 导出数据不需要分页
         jsonParam.setFlg(false);
         // 获取业务日期
@@ -143,11 +143,19 @@ public class MaItemExServiceImpl implements ExService {
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));
-            setCellValue(cell, ls.getSaleQty());
+            String str = String.valueOf(ls.getSaleQty());
+            Double aDouble = Double.valueOf(str);
+            String format = String.format("%,d", aDouble.intValue());
+            setCellValue(cell, format);
+
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));
-            setCellValue(cell, ls.getSalePrice());
+            String str1 = String.valueOf(ls.getSalePrice());
+            Double aDouble1 = Double.valueOf(str1);
+            String format1 = String.format("%,d", aDouble1.intValue());
+            setCellValue(cell, format1);
+
 
             curRow++;
         }

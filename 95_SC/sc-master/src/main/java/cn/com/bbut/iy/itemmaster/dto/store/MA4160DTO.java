@@ -95,4 +95,5 @@ public class MA4160DTO extends GridDataDTO {
     public MA4160DTO(List rows, long page, long records, long rowPerPage) {
         super(rows, page, records, rowPerPage);
     }
+
 }

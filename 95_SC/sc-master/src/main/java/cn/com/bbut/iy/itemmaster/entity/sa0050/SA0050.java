@@ -86,4 +86,8 @@ public class SA0050 {
 
     private String cashierEmail;
 
+    private String createUserId;
+
+    private String updateUserId;
+
 }

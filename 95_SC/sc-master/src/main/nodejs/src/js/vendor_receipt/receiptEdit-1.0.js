@@ -16,6 +16,10 @@ define('receiptEdit', function () {
 		// getThousands = null,
 		selectTrTemp = null,
 		differenceReason = null,
+		differenceReason1 = null,
+		hhtDate = "",
+		hhtTime = "",
+		table = null,
 		tempTrObjValue = {},//临时行数据存储
 		//附件
 		attachmentsParamGrid = null,
@@ -105,8 +109,9 @@ define('receiptEdit', function () {
 		attachments_event();
 		// 加载数据
 		getRecord();
+
 		//审核事件
-		approval_event();
+		//  approval_event();
 		// 设置按钮是否可用
 		if(m.viewSts.val() == 'view'){
 			setDisable();
@@ -125,7 +130,44 @@ define('receiptEdit', function () {
 			$("#remarks").prop("disabled", false);
 			m.submitAuditBut.hide();
 		}
+		bodyScroll();
+		loadTableTh();
+
 	}
+	var loadTableTh = function () {
+		var th = $(".zgGrid-thead").find("th");
+		var trHtml = "";
+		for (var i = 0; i < 9; i++) {
+			trHtml += th.eq(i).attr("style", "vertical-align:middle").prop("outerHTML");
+		}
+		for (var i = 9; i < 30; i++) {
+			trHtml += th.eq(i).attr("style", "text-align:left").prop("outerHTML");
+		}
+	}
+	// 	th.slice(0,9).remove();
+	// 	$(".zgGrid-thead").prepend(trHtml);
+	// 	$("#zgGrid-thead th").css({"display":"table-cell","vertical-align":"middle"});
+	// }
+
+	// 冻结表头时，表头可以横向移动
+	var bodyScroll  = function(){
+		$(document).ready(function() {
+			if (table.defaults.freezeHeader) {
+				var initHeaderWidth = table.table.width();
+				table.zgGridHeaderTable.width(initHeaderWidth);
+				table.zgGridBodyBox.scroll(function () {
+					var left = $(table.zgGridBodyBox).scrollLeft();
+					if (left < 0) {
+						left = 0;
+					}
+					left = (~left) + "px";
+					table.zgGridHeaderTable.stop().animate({
+						marginLeft: left
+					}, 0);
+				});
+			}
+		});
+	};
 
 	var checkSubmit = function () {
 		if(m.viewSts.val() != 'view'){
@@ -136,29 +178,41 @@ define('receiptEdit', function () {
 		_common.getRecordStatus(m._receiveId.val(),m.typeId.val(),function (result) {
 			if(result.success||result.data=='0'){
 				//检查是否允许submit 店长sm才拥有权限
-				$.myAjaxs({
-					url:url_root+"/storeOrder/checkSubmit",
-					async:true,
-					cache:false,
-					type :"post",
-					data :{
-						storeCd:m._storeCd.val()
-					},
-					dataType:"json",
-					success:function(result){
-						if(result.success){
-							m.submitAuditBut.removeAttr("disabled");
-						}else{
-							m.submitAuditBut.attr("disabled","disabled");
+				// $.myAjaxs({
+				// 	url:url_root+"/storeOrder/checkSubmit",
+				// 	async:true,
+				// 	cache:false,
+				// 	type :"post",
+				// 	data :{
+				// 		storeCd:m._storeCd.val()
+				// 	},
+				// 	dataType:"json",
+				// 	success:function(result){
+				// 		if(result.success){
+				// 			m.submitAuditBut.removeAttr("disabled");
+				// 		}else{
+				// 			m.submitAuditBut.attr("disabled","disabled");
+				// 		}
+				// 	},
+				// 	complete:_common.myAjaxComplete
+				// });
+				var position = false;
+				_common.getPositionList(m._storeCd.val(),function (result) {
+					let arr = result;
+					for(let i=0;i<arr.length;i++){
+						if(arr[i] === 4 || arr[i]==2 || arr[i]==1){
+							position =true;
 						}
-					},
-					complete:_common.myAjaxComplete
+					}
 				});
+				if(position==true){
+					m.submitAuditBut.removeAttr("disabled");
+				}
 			}else{
 				m.submitAuditBut.attr("disabled","disabled");
 			}
-		});
-	}
+		},m.reviewId.val());
+	};
 
 	//附件
 	var attachments_event = function () {
@@ -502,6 +556,9 @@ define('receiptEdit', function () {
 			$.myAutomatic.cleanSelectObj(differenceReason);
 		});
 
+
+
+
 		// 进入查看页面
 		$("#view").on("click", function (e) {
 			if(selectTrTemp==null){
@@ -646,6 +703,7 @@ define('receiptEdit', function () {
 						let msg = "are you sure to submit?";
 						$("#receiveQty2").trigger("blur change");
 						m.differenceReason = $("#differenceReason2");
+						m.differenceReason3 = $("#differenceReason3");
 						m.receiveNoQty = $("#receiveNoQty2");
 						m.receiveQty = $("#receiveQty2");
 						if (isNaN(hhtReceiveQty) || hhtReceiveQty === null || hhtReceiveQty === '') {
@@ -695,7 +753,7 @@ define('receiptEdit', function () {
 								let _price = reThousands(m.receivePrice.val());
 								let _amount = Number(accMul(receiveQty, _price)).toFixed(2);
 								let _total = accAdd(receiveQty, receiveNoQty);
-								$(this).find('td[tag=varQty]').text(toThousands(receiveQty-hhtReceiveQty));
+								$(this).find('td[tag=varQty]').text(toThousands(receiveQty-orderQty));
 								$(this).find('td[tag=receiveQty]').text(toThousands(m.receiveQty.val()));
 								$(this).find('td[tag=receiveQty1]').text(toThousands(m.receiveQty.val()));
 								$(this).find('td[tag=receiveNoChargeQty]').text(toThousands(m.receiveNoQty.val()));
@@ -704,7 +762,9 @@ define('receiptEdit', function () {
 								$(this).find('td[tag=receiveTotalQty1]').text(toThousands(_total));
 								$(this).find('td[tag=receiveTotalAmt]').text(toThousands(_amount));
 								$(this).find('td[tag=differenceReason]').text(m.differenceReason.attr('k'));
+								$(this).find('td[tag=differenceReason1]').text(m.differenceReason3.attr('k'));
 								$(this).find('td[tag=differenceReasonText]').text(m.differenceReason.attr('v'));
+								$(this).find('td[tag=differenceReasonText1]').text(m.differenceReason3.attr('v'));
 							}
 						});
 						let _amt = getAmount();
@@ -745,7 +805,6 @@ define('receiptEdit', function () {
 				m.main_box.hide();
 		}
 	}
-
 
 	/**
 	 * 发起审核并通过
@@ -876,26 +935,51 @@ define('receiptEdit', function () {
 					if (result != "true") {
 						return false;
 					}
+					_common.loading();
 					//发起审核
 					var typeId = m.typeId.val();
 					var nReviewid = m.reviewId.val();
 					var recordCd = m.receiveNo.val();
-					_common.initiateAudit(m._storeCd.val(), recordCd, typeId, nReviewid, m.toKen.val(), function (token) {
+					var detailType = "tmp_receive";
+					_common.initiateReceiveAudit(m._storeCd.val(), recordCd, typeId, nReviewid,detailType, m.toKen.val(), function (callback) {
 						// 变为查看模式
 						setDisable();
 						m.viewSts.val("view");
 						//审核按钮禁用
 						// m.approvalBut.prop("disabled",true);
 						m.submitAuditBut.prop("disabled", true);
-						m.toKen.val(token);
-						approval(recordCd);
+						m.toKen.val(callback.token);
+						if (callback.success) {
+							$("#approval_dialog").modal("hide");
+							//更新主档审核状态值
+							//_common.modifyRecordStatus(auditStepId,auditStatus);
+							m.submitAuditBut.attr("disabled","disabled");
+							// updateReceiveStatus();
+							_common.prompt("Saved Successfully!", 3, "success");// 保存审核信息成功
+						} else {
+							m.submitAuditBut.removeAttr("disabled");
+							_common.prompt(callback.message, 5, "error");// 保存审核信息失败
+						}
+						// approval(recordCd);
+						_common.loading_close();
 					});
+					_common.loading_close();
 				})
 			}
 		})
 
 		// 保存按钮
 		m.saveBtn.on("click",function(){
+			var positionFlg = true;
+			_common.checkPosition(m._storeCd.val(),function (result) {
+				if(!result.success){
+					_common.prompt("You do not have permission to submit it!",5,"info");
+					positionFlg = false;
+				}
+			});
+			if(!positionFlg){
+				return false;
+			}
 			// 还原表格
 			if(!orderAdd && verifyDialogSearch2(true)){
 				let receiveQty = parseInt(reThousands($("#receiveQty2").val()));
@@ -905,6 +989,7 @@ define('receiptEdit', function () {
 				let msg = "are you sure to submit?";
 				$("#receiveQty2").trigger("blur change");
 				m.differenceReason = $("#differenceReason2");
+				m.differenceReason3 = $("#differenceReason3");
 				m.receiveNoQty = $("#receiveNoQty2");
 				m.receiveQty = $("#receiveQty2");
 				/*if(receiveNoQty > orderNoQty){
@@ -959,7 +1044,9 @@ define('receiptEdit', function () {
 						$(this).find('td[tag=receiveTotalQty1]').text(toThousands(_total));
 						$(this).find('td[tag=receiveTotalAmt]').text(toThousands(_amount));
 						$(this).find('td[tag=differenceReason]').text(m.differenceReason.attr('k'));
+						$(this).find('td[tag=differenceReason1]').text(m.differenceReason3.attr('k'));
 						$(this).find('td[tag=differenceReasonText]').text(m.differenceReason.attr('v'));
+						$(this).find('td[tag=differenceReasonText1]').text(m.differenceReason3.attr('v'));
 					}
 				});
 				let _amt = getAmount();
@@ -1021,6 +1108,7 @@ define('receiptEdit', function () {
 						// receiveTotalQty:reThousands($(this).find('td[tag=receiveTotalQty1]').text()),
 						receiveTotalQty:_receiveTotalQty,
 						differenceReason:$(this).find('td[tag=differenceReason]').text(),
+						differenceReason1:$(this).find('td[tag=differenceReason1]').text(),
 						receiveTotalAmt:_amt,
 						receiveTotalAmtNoTax:_amtNoTax,
 						receiveTax:_tax,
@@ -1066,16 +1154,21 @@ define('receiptEdit', function () {
 					fileDetailJson = JSON.stringify(fileDetail)
 				}
 				let orderDiff = m.orderDiff.val();
+				if ($("#physicalReceivingDate").val() == null || $("#physicalReceivingDate").val() === ''
+					|| $("#physicalReceivingDate").val().length<16) {
+					$("#physicalReceivingDate").val(new Date().Format("dd/MM/yyyy hh:mm"));
+				}
 				// 处理头档数据
 				let bean = {
 					receiveId:m.receiveNo.val(),
 					storeCd:_storeCd,
 					orderId:_voucherNo,
-					receiveDate:fmtStringDate(m.receiveDate.val()),
+					// receiveDate:fmtStringDate(m.receiveDate.val()),
 					receiveAmt:_amount,
 					receiveTax:_receiveTax,
 					orderDifferentiate:orderDiff,
-					physicalReceivingDate:fmtStringDate($("#physicalReceivingDate").val()),
+					physicalReceivingDate: fmtStringDate($("#physicalReceivingDate").val().substring(0,10)),
+					physicalReceivingHms: fmtStringTime($("#physicalReceivingDate").val().substring(11)),
 					receivedRemark:m.remarks.val()
 				}
 				let _data = {
@@ -1198,7 +1291,9 @@ define('receiptEdit', function () {
 								$(this).find('td[tag=receiveTotalQty1]').text(toThousands(_total));
 								$(this).find('td[tag=receiveTotalAmt]').text(toThousands(_amount));
 								$(this).find('td[tag=differenceReason]').text(m.differenceReason.attr('k'));
+								$(this).find('td[tag=differenceReason1]').text($("#differenceReason1").attr('k'));
 								$(this).find('td[tag=differenceReasonText]').text(m.differenceReason.attr('v'));
+								$(this).find('td[tag=differenceReasonText1]').text($("#differenceReason1").attr('v'));
 							}
 						});
 						let _amt = getAmount();
@@ -1302,9 +1397,9 @@ define('receiptEdit', function () {
 					m.warehouseName.val(result.o.vendorName);
 					m.orderType.val(result.o.orderMethodName);
 					if(result.o.receiveDate == null || result.o.receiveDate === ''){
-						m.receiveDate.val(new Date().Format("dd/MM/yyyy"));
+						m.receiveDate.val(new Date().Format("dd/MM/yyyy hh:mm:ss"));
 					}else {
-						m.receiveDate.val(fmtIntDate(result.o.receiveDate));
+						m.receiveDate.val(fmtIntDate(result.o.receiveDate)+" "+fmtIntTime(result.o.receiveHms));
 					}
 					m.orderAmount.val(toThousands(result.o.orderAmt));
 					m.receiveAmount.val(toThousands(result.o.receiveAmt));
@@ -1312,7 +1407,11 @@ define('receiptEdit', function () {
 					m.remarks.val(result.o.receivedRemark);
 					m.taxRate.val(result.o.taxRate);
 					m.orderDiff.val(result.o.orderDifferentiate);
-					m.physicalReceivingDate.val(fmtIntDate(result.o.physicalReceivingDate));
+					if(m._receiveId.val()){
+						m.physicalReceivingDate.val(fmtIntDate(result.o.physicalReceivingDate)+" "+fmtIntPhyTime(result.o.physicalReceivingHms));
+						$("#creater").val(result.o.commonDTO.createUserId);
+						$("#ca_date").val(_common.formatCreateDate(result.o.commonDTO.createYmd+result.o.commonDTO.createHms));
+					}
 					//加载附件信息
 					attachmentsParamGrid = "recordCd="+result.o.receiveId+"&fileType=03";
 					attachmentsTable.setting("url", url_root + "/file/getFileList");//加载附件
@@ -1352,15 +1451,20 @@ define('receiptEdit', function () {
 			_common.prompt("Failed to get order cd!",5,"error");
 			return false;
 		}
-		temp = m.physicalReceivingDate.val();
+		/*temp = m.physicalReceivingDate.val();
 		if(temp=="" || temp==null){
 			_common.prompt("Please select the Receiving Date!",5,"error");
 			m.physicalReceivingDate.focus();
 			m.physicalReceivingDate.css("border-color","red");
 			return false;
+		}else if(_common.judgeValidDate(m.physicalReceivingDate.val())){
+			_common.prompt("Please enter a valid date!",3,"info");
+			m.physicalReceivingDate.css("border-color","red");
+			$("#physicalReceivingDate").focus();
+			return false;
 		}else {
 			m.physicalReceivingDate.css("border-color","#CCC");
-		}
+		}*/
 		return true;
 	}
 	//验证表格内的数据
@@ -1431,10 +1535,19 @@ define('receiptEdit', function () {
 
 	// 验证表格
 	var verifyDialogSearch2 = function(flag){
+		var reg = /^[0-9]*$/;
 		if(orderAdd){
 			return;
 		}
 		m.receiveQty = $('#receiveQty2');
+		if (!reg.test(m.receiveQty.val()) || m.receiveQty.val().indexOf(",")>0){
+			m.receiveQty.css("border-color", "red");
+			_common.prompt("Received Quantity can only be a pure number!", 5, "error");
+			return false;
+		}else {
+			m.receiveQty.css("border-color", "#CCCCCC");
+
+		}
 		var inputVal = reThousands(m.receiveQty.val());
 		if($.trim(inputVal)==""){
 			m.receiveQty.focus();
@@ -1478,13 +1591,14 @@ define('receiptEdit', function () {
 
 	// 添加输入框进行数据添加
 	var addInputValue = function(){
+		var reg = /^[0-9]+$/;
 		//正在修改的行不能再修改
 		if ($("#receiveQty2").length == 1) {
 			return false;
 		}
 		orderAdd = false;
 		//获取旧值
-		var cols = tableGrid.getSelectColValue(selectTrTemp, "articleId,isFreeItem,receiveQty,receiveNoChargeQty,differenceReasonText,differenceReason,orderQty,orderNoChargeQty");
+		var cols = tableGrid.getSelectColValue(selectTrTemp, "articleId,isFreeItem,receiveQty,receiveNoChargeQty,differenceReasonText,differenceReason,differenceReasonText1,differenceReason1,orderQty,orderNoChargeQty");
 		//添加input框
 		tableGrid.find(".info [tag=receiveQty]").text("").append("<input type='text' id='receiveQty2'  class='form-control my-automatic icnput-sm' placeholder='Please Entry'>");
 		// 记录article id
@@ -1496,15 +1610,25 @@ define('receiptEdit', function () {
 		}else{
 			$('#receiveQty2').val(toThousands(isNotNull(cols['receiveQty'])));
 		}
-
 		$("#receiveQty2").blur(function () {
-			$("#receiveQty2").val(toThousands(this.value));
+			if (!reg.test($("#receiveQty2").val()) ||$("#receiveQty2").val().indexOf(",")>0){
+				_common.prompt("Received Quantity can only be a pure number!", 5, "error");
+				return false;
+			}else {
+				$("#receiveQty2").val(toThousands(this.value));
+			}
 		});
 
 		//光标进入，去除金额千分位，并去除小数后面多余的0
 		$("#receiveQty2").focus(function () {
-			$("#receiveQty2").val(reThousands(this.value));
+			if (!reg.test($("#receiveQty2").val()) ||$("#receiveQty2").val().indexOf(",")>0){
+				_common.prompt("Received Quantity can only be a pure number!", 5, "error");
+				return false;
+			}else {
+				$("#receiveQty2").val(toThousands(this.value));
+			}
 		});
+
 
 		//添加input框
 		tableGrid.find(".info [tag=receiveNoChargeQty]").text("").append("<input type='text' id='receiveNoQty2' class='form-control my-automatic input-sm' placeholder='Please Entry'>");
@@ -1525,9 +1649,30 @@ define('receiptEdit', function () {
 		$("#receiveNoQty2").focus(function () {
 			$("#receiveNoQty2").val(reThousands(this.value));
 		});
+		tableGrid.find(".info [tag=differenceReasonText1]").text("").append("<div class='aotu-pos good-select' style='z-index:1;'><input type='text' class='form-control my-automatic input-sm' id='differenceReason3'  autocomplete='off' style='overflow:scroll;text-overflow:ellipsis;'>" +
+			" <a id='diffreasonRefresh3' href='javascript:void(0);' title='Refresh' class='auto-but glyphicon glyphicon-refresh refresh'></a>" +
+			" <a id='diffreasonRemove3' href='javascript:void(0);' title='Clear' class='auto-but glyphicon glyphicon-remove circle'></a></div>");
+
+		differenceReason1 = $("#differenceReason3").myAutomatic({
+			url:url_root+"/cm9010/getReceiptDifferReason",
+			ePageSize:5,
+			startCount:0,
+		});
+		$.myAutomatic.setValueTemp(differenceReason1, cols['differenceReason1'], cols['differenceReasonText1']);
+		$('td[tag=differenceReasonText1]').css("overflow","visible");
+		if(cols['differenceReasonText1']!=null&&cols['differenceReasonText1']!==''){
+			$("#differenceReason3").prop("disabled",false);
+			$("#diffreasonRefresh3").show();
+			$("#diffreasonRemove3").show();
+		}else{
+			$("#differenceReason3").prop("disabled",true);
+			$("#diffreasonRefresh3").hide();
+			$("#diffreasonRemove3").hide();
+		}
+
 
 		//添加input框
-		tableGrid.find(".info [tag=differenceReasonText]").text("").append("<div class='aotu-pos good-select' style='z-index:1;'><input type='text' class='form-control my-automatic input-sm' id='differenceReason2' style='overflow:scroll;text-overflow:ellipsis;'>" +
+			tableGrid.find(".info [tag=differenceReasonText]").text("").append("<div class='aotu-pos good-select' style='z-index:1;'><input type='text' class='form-control my-automatic input-sm' id='differenceReason2' autocomplete='off' style='overflow:scroll;text-overflow:ellipsis;'>" +
 			" <a id='diffreasonRefresh2' href='javascript:void(0);' title='Refresh' class='auto-but glyphicon glyphicon-refresh refresh'></a>" +
 			" <a id='diffreasonRemove2' href='javascript:void(0);' title='Clear' class='auto-but glyphicon glyphicon-remove circle'></a></div>");
 
@@ -1551,19 +1696,27 @@ define('receiptEdit', function () {
 		$("#receiveQty2").on("blur change", function () {
 			let receiveQty = parseInt(reThousands($("#receiveQty2").val()));
 			let receiveNoQty = parseInt(reThousands($("#receiveNoQty2").val()));
-			let orderQty = parseInt(reThousands($(".info [tag=orderQty]").text()));
-			let orderNoQty = parseInt(reThousands($(".info [tag=orderNoChargeQty]").text()));
+			let orderQty = parseInt(toThousands(isNotNull(cols['orderQty'])));
+			let orderNoQty = parseInt(reThousands(isNotNull(cols['orderNoChargeQty'])));
 			if(receiveQty < orderQty){
 				$("#differenceReason2").prop("disabled",false);
+				$("#differenceReason3").prop("disabled",false);
 				$("#diffreasonRefresh2").show();
+				$("#diffreasonRefresh3").show();
 				$("#diffreasonRemove2").show();
+				$("#diffreasonRemove3").show();
 				$.myAutomatic.replaceParam(differenceReason, '');
+				$.myAutomatic.replaceParam(differenceReason1, '');
 			}else {
 				if(receiveQty === orderQty) {
 					$("#differenceReason2").prop("disabled", true);
+					$("#differenceReason3").prop("disabled", true);
 					$.myAutomatic.cleanSelectObj(differenceReason);
+					$.myAutomatic.cleanSelectObj(differenceReason1);
 					$("#diffreasonRefresh2").hide();
+					$("#diffreasonRefresh3").hide();
 					$("#diffreasonRemove2").hide();
+					$("#diffreasonRemove3").hide();
 				}
 			}
 		});
@@ -1582,37 +1735,43 @@ define('receiptEdit', function () {
 			param:paramGrid,
 			localSort: true,
 			height: "300",
-			colNames:["Store","Order","No.","Price","Item Barcode","Item Code","Item Name","UOM",
-				"Order Qty","Order Free Qty","Total Order Qty","Order Amount","Tax Rate","HHT Receiving Qty","Receiving Qty","Receiving Qty",
+			colNames:["Store","Order","No.","Price","Item Barcode","Item Code","Item Name","UOM","Item Type",
+				"[A]<br/>Order Qty</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;","Order Free Qty","Total Order Qty","Order Amount","Tax Rate","[B]<br/>HHT Receiving Qty</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;","[C]</br>Confirmed Receiving</br>Qty","Receiving Qty",
 				"Receiving Free Qty","Receiving Free Qty","Total Receiving Qty","Total Receiving Qty","Receiving Amount",
-				"Variance Qty","Item Type","Item Type","DifferenceReason","Difference Reason"],
+				"[C-A]<br/>(Confirmed – Ordered)<br/> Variance Qty","DifferenceReason","[C – A]<br/>Variance Reason</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;","Item Type","Reason Code","[C – B]</br>(Confirmed – HHT) Variance</br>Qty","[C – B]</br>Variance Reason</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;","hht Receive Date","hht Receive Time"],
 			colModel:[
 				{name:"storeCd",type:"text",text:"right",ishide:true},
 				{name:"orderId",type:"text",text:"right",ishide:true},
 				{name:"serialNo",type:"text",text:"right",ishide:true},
 				{name:"receivePrice",type:"text",text:"right",ishide:true},
-				{name:"barcode",type:"text",text:"right",width:"130",ishide:false,css:""},
-				{name:"articleId",type:"text",text:"right",width:"110",ishide:false,css:""},
-				{name:"articleName",type:"text",text:"left",width:"150",ishide:false,css:""},
-				{name:"orderUnit",type:"text",text:"left",width:"100",ishide:false,css:""},
-				{name:"orderQty",type:"number",text:"right",width:"130",ishide:false,css:"",getCustomValue:getThousands},
+				{name:"barcode",type:"text",text:"center",width:"110",ishide:false,css:""},
+				{name:"articleId",type:"text",text:"right",width:"100",ishide:false,css:""},
+				{name:"articleName",type:"text",text:"left",width:"500",ishide:false,css:""},
+				{name:"orderUnit",type:"text",text:"left",width:"90",ishide:false,css:""},
+				{name:"isFreeItemText",type:"text",text:"left",width:"100",ishide:false,css:"",getCustomValue:getItemType},
+				{name:"orderQty",type:"number",text:"right",width:"100",ishide:false,css:"",getCustomValue:getThousands},
 				{name:"orderNoChargeQty",type:"text",text:"right",width:"160",ishide:true,css:"",getCustomValue:getThousands},
 				{name:"orderTotalQty",type:"text",text:"right",width:"150",ishide:true,css:"",getCustomValue:getThousands},
 				{name:"orderAmt",type:"text",text:"right",width:"150",ishide:true,css:"",getCustomValue:getThousands},
 				{name:"taxRate",type:"text",text:"right",width:"130",ishide:true,css:""},
 				{name:"hhtReceiveQty",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getThousands},
-				{name:"receiveQty",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getThousands},
+				{name:"receiveQty",type:"text",text:"right",width:"150",ishide:false,css:"",getCustomValue:getThousands},
 				{name:"receiveQty1",type:"text",text:"right",width:"130",ishide:true,css:"",getCustomValue:isNull},
 				{name:"receiveNoChargeQty",type:"text",text:"right",width:"160",ishide:true,css:"",getCustomValue:getThousands},
 				{name:"receiveNoChargeQty1",type:"text",text:"right",width:"160",ishide:true,css:"",getCustomValue:isNull},
 				{name:"receiveTotalQty",type:"text",text:"right",width:"160",ishide:true,css:"",getCustomValue:getThousands},
 				{name:"receiveTotalQty1",type:"text",text:"right",width:"160",ishide:true,css:"",getCustomValue:isNull},
 				{name:"receiveTotalAmt",type:"text",text:"right",width:"130",ishide:true,css:"",getCustomValue:getThousands},
-				{name:"varQty",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getThousands},
-				{name:"isFreeItem",type:"text",text:"left",ishide:true},
-				{name:"isFreeItemText",type:"text",text:"left",width:"100",ishide:false,css:"",getCustomValue:getItemType},
+				{name:"varQty",type:"text",text:"right",width:"150",ishide:false,css:"",getCustomValue:getThousands},
 				{name:"differenceReason",type:"text",text:"left",ishide:true},
-				{name:"differenceReasonText",type:"text",text:"left",width:"200",ishide:false,css:""}
+				{name:"differenceReasonText",type:"text",text:"left",width:"220",ishide:false,css:""},
+				{name:"isFreeItem",type:"text",text:"left",ishide:true},
+				{name:"differenceReason1",type:"text",text:"left",ishide:true},
+				{name:"ssHHQty",type:"text",text:"left",width:"220",ishide:false,css:"",getCustomValue:getThousands},
+				{name:"differenceReasonText1",type:"text",text:"left",width:"200",ishide:false,css:""},
+				{name:"hhtReceiveDate",type:"text",text:"left",width:"200",ishide:true,css:""},
+				{name:"hhtReceiveTime",type:"text",text:"left",width:"200",ishide:true,css:""},
+
 			],//列内容
 			width:"max",//宽度自动
 			page:1,//当前页
@@ -1628,6 +1787,7 @@ define('receiptEdit', function () {
 				return resData;
 			},
 			loadCompleteEvent:function(self){
+				table = self;
 				selectTrTemp = null;//清空选择的行
 				//更新总条数(注减一是去除标题行)
 				var total = tableGrid.find("tr").length-1;
@@ -1639,6 +1799,11 @@ define('receiptEdit', function () {
 					});
 				}
 				total_qty();
+				hhtDate = $("#zgGridTable_0_tr").find('td[tag=hhtReceiveDate]').text();
+				hhtTime = $("#zgGridTable_0_tr").find('td[tag=hhtReceiveTime]').text();
+				if(!m._receiveId.val() && $("#_reviewSts").val() == "Receiving Pending"){
+					m.physicalReceivingDate.val(fmtIntDate(hhtDate)+" "+fmtIntPhyTime(hhtTime));
+				}
 				return self;
 			},
 			eachTrClick:function(trObj,tdObj){//正常左侧点击
@@ -1680,7 +1845,7 @@ define('receiptEdit', function () {
 				// if(!isNaN(td_receiveTotalQty))
 				// 	receiveTotalQty +=  parseFloat(td_receiveTotalQty);
 			})
-			var total = "<tr style='text-align:right' id='total_qty'><td></td><td></td><td></td>" +
+			var total = "<tr style='text-align:right' id='total_qty'><td></td><td></td><td></td><td></td>" +
 				"<td>Total:</td>" +
 				"<td>"+fmtIntNum(orderQty)+"</td>" +
 				"<td>"+fmtIntNum(hhtReceiveQty)+"</td>" +
@@ -1689,7 +1854,7 @@ define('receiptEdit', function () {
 				"<td>"+fmtIntNum(receiveQty)+"</td>" +
 				// "<td>"+fmtIntNum(receiveNoChargeQty)+"</td>" +
 				// "<td>"+fmtIntNum(receiveTotalQty)+"</td>" +
-				"<td></td><td></td><td></td>"+
+				"<td></td><td></td><td></td><td></td>"+
 				"</tr>";
 			$("#total_qty").remove();
 			$("#zgGridTable_tbody").append(total);
@@ -1802,6 +1967,22 @@ define('receiptEdit', function () {
 		res = date.substring(6,8)+"/"+date.substring(4,6)+"/"+date.substring(0,4);
 		return res;
 	}
+	function fmtIntTime(time) {
+		var res = "";
+		if (time==null ||time==""){
+			return res;
+		}
+		res = time.substring(0,2)+":"+time.substring(2,4)+":"+time.substring(4,6);
+		return res;
+	}
+	function fmtIntPhyTime(time) {
+		var res = "";
+		if (time==null ||time==""){
+			return res;
+		}
+		res = time.substring(0,2)+":"+time.substring(2,4);
+		return res;
+	}
 
 	// 判断是否为null
 	function isNotNull(num){
@@ -1825,6 +2006,11 @@ define('receiptEdit', function () {
 		var res = "";
 		date = date.replace(/\//g,"");
 		res = date.substring(4,8)+date.substring(2,4)+date.substring(0,2);
+		return res;
+	}
+	function fmtStringTime(time) {
+		var res = "";
+		res = time.replace(/:/g, "");
 		return res;
 	}
 	self.init = init;

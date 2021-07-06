@@ -361,6 +361,7 @@
         AND order_sts = '04'
         AND store_cd = #{storeCd,jdbcType=VARCHAR}
         AND LOWER(order_id) LIKE LOWER(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+        and review_status = 20
     </select>
 
     <!-- 修正传票获取原数据 -->

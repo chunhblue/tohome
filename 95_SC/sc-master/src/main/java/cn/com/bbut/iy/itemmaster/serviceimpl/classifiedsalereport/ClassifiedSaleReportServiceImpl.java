@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,15 @@ public class ClassifiedSaleReportServiceImpl implements ClassifiedSaleReportServ
     @Override
     public List<MA0080> getPmaList() {
         return classifiedMapper.getPmaList();
+    }
+
+    @Override
+    public Map<String, Object> getTotalSaleAmount(clssifiedSaleParamReportDTO param) {
+         BigDecimal  totalSaleAmount = classifiedMapper.getTotalSaleAmount(param);
+        System.out.println(totalSaleAmount);
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("data",totalSaleAmount);
+        return  map;
     }
 
     private String formatDate1(String piDate) {

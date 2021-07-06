@@ -11,9 +11,11 @@ import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.order.*;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.audit.IAuditService;
 import cn.com.bbut.iy.itemmaster.service.ma1000.Ma1000Service;
 import cn.com.bbut.iy.itemmaster.service.order.OrderService;
+import cn.com.bbut.iy.itemmaster.util.DateConvert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,8 @@ public class OrderController  extends BaseAction {
     private Ma1000Service ma1000Service;
     @Autowired
     private IAuditService auditServiceImpl;
+    @Autowired
+    private Ma4320Service ma4320Service;
     /**
      * order管理画面
      *
@@ -66,8 +70,12 @@ public class OrderController  extends BaseAction {
                 Constants.SESSION_ROLES);
         //获取业务时间
         String date = cm9060Service.getValByKey("0000");
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         ModelAndView mv = new ModelAndView("order/orderList");
         mv.addObject("data", param);
+        mv.addObject("hms", hms);
         mv.addObject("use", 0);
         mv.addObject("identity", 1);
         mv.addObject("date", date);
@@ -164,6 +172,9 @@ public class OrderController  extends BaseAction {
         if(param==null){
             param = new OrderItemParamDTO();
         }
+        Date date = DateConvert.FromString(param.getOrderDate(),"yyyyMMdd");
+        int day = date.getDay();
+        param.setScheduleDay(day);
         //设置资源
         GridDataDTO<OrderItemDTO> grid = new GridDataDTO<>();
         if(StringUtils.isNotBlank(param.getOrderType())&&
@@ -191,6 +202,9 @@ public class OrderController  extends BaseAction {
                 StringUtils.isBlank(param.getOrderDate())){
             return new GridDataDTO<>();
         }
+        Date date = DateConvert.FromString(param.getOrderDate(),"yyyyMMdd");
+        int day = date.getDay();
+        param.setScheduleDay(day);
         //设置资源
         return orderService.GetOrderSpecialListDetail(param);
     }

@@ -14,6 +14,8 @@
         <result column="expense_price" property="expensePrice"></result>
         <result column="last_update_time" property="lastUpdateTime"></result>
         <result column="stock_qty" property="stockQty"></result>
+        <result column="reason" property="reason"></result>
+        <result column="fn_stock_qty" property="fnStockQty"></result>
     </resultMap>
 
     <select id="getItemInfo" parameterType="java.lang.String" resultMap="BaseItemResult">
@@ -78,8 +80,10 @@
         article_id,
         barcode,
         qty,
+        reason_code,
         update_ymd,
         update_hms,
+        fn_stock_qty,
         note
         ) VALUES
         <foreach collection="list" item="item" index="index" separator="," >
@@ -88,8 +92,10 @@
             #{item.articleId,jdbcType=VARCHAR},
             #{item.barcode,jdbcType=VARCHAR},
             #{item.qty,jdbcType=NUMERIC},
+            #{item.reasonCode,jdbcType=VARCHAR},
             #{item.updateYmd,jdbcType=VARCHAR},
             #{item.updateHms,jdbcType=VARCHAR},
+            cast( #{item.stockQty} AS NUMERIC),
             #{item.note,jdbcType=VARCHAR}
             )
         </foreach>
@@ -100,6 +106,7 @@
         article_id,
         barcode,
         qty,
+        reason_code,
         update_ymd,
         update_hms,
         note,
@@ -111,6 +118,7 @@
             #{item.articleId,jdbcType=VARCHAR},
             #{item.barcode,jdbcType=VARCHAR},
             #{item.qty,jdbcType=NUMERIC},
+            #{item.reasonCode,jdbcType=VARCHAR},
             #{item.updateYmd,jdbcType=VARCHAR},
             #{item.updateHms,jdbcType=VARCHAR},
             #{item.note,jdbcType=VARCHAR},
@@ -130,6 +138,7 @@
             M1.spec,
             M1.sales_unit_id,
             P1.qty,
+            P1.fn_stock_qty,
             CONCAT(P1.update_ymd, P1.update_hms) as last_update_time,
             P1.note
         FROM
@@ -153,10 +162,13 @@
             M1.spec,
             M1.sales_unit_id,
             P1.qty,
+            P1.fn_stock_qty,
+            M2.reason_code,
+            CONCAT(M2.reason_code,' ', M2.reason) reason,
             CONCAT(P1.update_ymd, P1.update_hms) as last_update_time,
             P1.note
         FROM
-
+            PI0170 M2,
             PI0130 P1,
             MA1100 M1,
             CM9060 C1
@@ -164,22 +176,26 @@
             P1.pi_cd = #{piCd}
             AND C1.sp_id = '0000'
             AND P1.article_id = M1.article_id
+            AND P1.article_id = M2.article_id
             AND C1.sp_value BETWEEN M1.effective_start_date
             AND M1.effective_end_date
     </select>
     <select id="getPI0130ByPrimaryIIn" resultMap="BaseItemResult">
         SELECT
+        distinct
             P1.pi_cd,
             P1.barcode,
             M1.article_id,
             M1.article_name,
             M1.spec,
+            M2.reason_code,
+            CONCAT(M2.reason_code,' ', M2.reason) reason,
             M1.sales_unit_id,
             P1.qty,
             CONCAT(P1.update_ymd, P1.update_hms) as last_update_time,
             P1.note
         FROM
-
+            PI0170 M2,
             PI0130 P1,
             MA1100 M1,
             CM9060 C1
@@ -187,6 +203,7 @@
             P1.pi_cd = #{piCd}
             AND C1.sp_id = '0000'
             AND P1.article_id = M1.article_id
+            AND P1.article_id = M2.article_id
             AND C1.sp_value BETWEEN M1.effective_start_date
             AND M1.effective_end_date
         <if test="articleId!=null and articleId!=''">

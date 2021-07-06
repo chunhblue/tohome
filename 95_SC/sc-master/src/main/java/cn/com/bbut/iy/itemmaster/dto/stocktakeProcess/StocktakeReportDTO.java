@@ -59,4 +59,10 @@ public class StocktakeReportDTO implements Serializable {
 
     // 账面上 商品库存金额
     private BigDecimal bookValAmt;
+
+    // 本次盘点计划导出时间
+    private String exportTime;
+
+    // 本次盘点variance审核状态
+    private Integer reviewStatus;
 }

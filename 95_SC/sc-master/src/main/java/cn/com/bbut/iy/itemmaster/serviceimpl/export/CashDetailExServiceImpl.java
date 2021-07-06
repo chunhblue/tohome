@@ -1,6 +1,7 @@
 package cn.com.bbut.iy.itemmaster.serviceimpl.export;
 
 import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
+import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.cash.CashDetail;
 import cn.com.bbut.iy.itemmaster.dto.cash.CashDetailParam;
 import cn.com.bbut.iy.itemmaster.entity.User;
@@ -52,14 +53,14 @@ public class CashDetailExServiceImpl implements ExService {
         CashDetailParam jsonParam = gson.fromJson(paramDTO.getParam(), CashDetailParam.class);
         // 资源权限参数设置
         jsonParam.setStores(paramDTO.getStores());
-        int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
+        /*int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
         if(i >= 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             jsonParam.setVStartDate(startDate);
-        }
+        }*/
         // 生成文件标题信息对象
         session.setHeaderListener(new CashDetailExHeaderListener(jsonParam));
         session.createWorkBook();
@@ -87,12 +88,16 @@ public class CashDetailExServiceImpl implements ExService {
      * @param curRow
      */
     private void createExcelBody(Sheet sheet, int curRow, CashDetailParam jsonParam) {
+        // 不分页
+        jsonParam.setFlg(false);
         // 查询数据
-        List<CashDetail> _list = cashService.getCashDetailyList(jsonParam);
+        GridDataDTO<CashDetail> data = cashService.getCashDetailyList(jsonParam);
+        List<CashDetail> _list = data.getRows();
         BigDecimal payInAmt0 = BigDecimal.ZERO,payInAmt1 = BigDecimal.ZERO,payInAmt2 = BigDecimal.ZERO,
                 additional=BigDecimal.ZERO,offsetClaim=BigDecimal.ZERO;
         BigDecimal payAmt0 = BigDecimal.ZERO,payAmt1 = BigDecimal.ZERO,payAmt2 = BigDecimal.ZERO,payInAmt = BigDecimal.ZERO,
                 payAmt = BigDecimal.ZERO,payAmtDiff = BigDecimal.ZERO;
+        BigDecimal customerQty=BigDecimal.ZERO;
         // 遍历数据
         int no = 1;
         for (CashDetail ls : _list) {
@@ -171,6 +176,10 @@ public class CashDetailExServiceImpl implements ExService {
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
             setCellValue(cell, formatNum(ls.getPayInAmt().toString()));
 
+            if(ls.getCustomerQty() != null){
+                customerQty = customerQty.add(ls.getCustomerQty()) ;
+            }
+
             if(ls.getPayInAmt0() != null){
                 payInAmt0 = payInAmt0.add(ls.getPayInAmt0()) ;
             }
@@ -228,14 +237,14 @@ public class CashDetailExServiceImpl implements ExService {
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
         setCellValue(cell,"");
 
-        cell = row.createCell(curCol++);
-        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
-        setCellValue(cell, "");
-
 
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
         setCellValue(cell, "Total:");
+
+        cell = row.createCell(curCol++);
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+        setCellValue(cell, formatNum(customerQty.toString()));
 
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));

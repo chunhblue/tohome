@@ -9,11 +9,8 @@
     select nextval(#{sequenceName}::regclass)
   </select>
 
-    <update id="updateSeqNum">
-        alter sequence ${sequenceName} increment by ${seq}
-    </update>
-
     <update id="resetSeq">
-        alter sequence ${sequenceName} increment by 1
+        /*alter sequence ${sequenceName} increment by 1*/
+        alter sequence ${sequenceName} restart with 1;
     </update>
 </mapper>

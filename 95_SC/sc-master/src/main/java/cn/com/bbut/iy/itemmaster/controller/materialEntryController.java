@@ -138,6 +138,23 @@ public class materialEntryController extends BaseAction {
         }
         return new ReturnDTO(true,"Query successful!",invenData);
     }
+    @GetMapping("/getInData")
+    @ResponseBody
+    public ReturnDTO getInData(String piCd,String storeCd,String  createUser, String articleId,String createYmd, HttpServletRequest request, HttpSession session) {
+        PI0100DTOC pioC=new PI0100DTOC();
+        pioC.setPiCd(piCd);
+        pioC.setCreateUserId(createUser);
+        pioC.setCreateYmd(createYmd);
+        pioC.setCreateYmd(storeCd);
+        pioC.setArticleId(articleId);
+
+//        PI0100DTOC invenData = materialentryService.getInvenData(piCd);
+        PI0100DTOC invenData = materialentryService.getInvenDataPioIn(pioC);
+        if (invenData==null) {
+            return new ReturnDTO(false,"Query result is empty!");
+        }
+        return new ReturnDTO(true,"Query successful!",invenData);
+    }
 
     @PostMapping("/save")
     @ResponseBody

@@ -20,6 +20,7 @@ public class ReturnsDailyDTO {
     private String posId;
     // 销售流水号
     private String saleSerialNo;
+    private String tranSerialNo;
     // 退货数量
     private String orderQty;
     // 实际售价
@@ -74,6 +75,8 @@ public class ReturnsDailyDTO {
 
     // 合计金额
     private BigDecimal totalAmt;
+    // 合计数量
+    private BigDecimal totalQty;
 
 
 
@@ -106,4 +109,9 @@ public class ReturnsDailyDTO {
     private String storeCd;
     private String storeName;
     private String saleFormtDate;
+    private String charDate;
+    private String tranType; // 交易类型
+    private String mode;
+    private String tranStartDate;
+    private String tranEndDate;
 }

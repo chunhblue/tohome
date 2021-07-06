@@ -37,6 +37,7 @@ public class DifferenceListResult extends GridDataDTO {
     private String deliveryCenterId;
     private String deliveryCenterName;
     private String totalAmt;
+    private String totalAmt2;
 
     private String vendorId;
     private String vendorName;

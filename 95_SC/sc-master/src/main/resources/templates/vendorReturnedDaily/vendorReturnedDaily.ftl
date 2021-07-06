@@ -337,29 +337,29 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                    <span style="float: left">Date Created：${bsDate?string('dd/MM/yyyy')}</span>
+                    <span style="float: left">Date Created：${bsDate!}</span>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="row" style="overflow: scroll">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12"  style="width: 160%;">
                     <table id="dailyTable" class="table table-hover table-striped table-condensed table-bordered zgrid-table"
                            style="margin-bottom: 10px">
                         <tr>
-                            <th title="Document No.">Document No.</th>
-                            <th title="Store No.">Store No.</th>
-                            <th title="Store Name">Store Name</th>
+                            <th title="Document No." style="width: 9%;">Document No.</th>
+                            <th title="Store No." style="width: 5%;">Store No.</th>
+                            <th title="Store Name" style="width: 6%;">Store Name</th>
                             <th title="Returned Date">Returned Date</th>
                             <th title="Department">Department</th>
                             <th title="Category">Category</th>
-                            <th title="Sub-category">Sub-category</th>
+                            <th title="Sub-category" style="width: 6%;">Sub-category</th>
                             <th title="Item Code">Item Code</th>
-                            <th title="Item Name">Item Name</th>
-                            <th title="Barcode">Barcode</th>
+                            <th title="Item Name" style="width: 6%;">Item Name</th>
+                            <th title="Barcode" style="width: 6%;">Barcode</th>
                             <th title="Vendor Code">Vendor Code</th>
-                            <th title="Vendor Name">Vendor Name</th>
-                            <th title="Area Manager Name">Area Manager Name</th>
-                            <th title="Operation Manager Name">Operation Manager Name</th>
-                            <th title="Returned Quantity">Returned Quantity</th>[#--退货数量--]
+                            <th title="Vendor Name" style="width: 8%;">Vendor Name</th>
+                            <th title="Area Manager Name" style="width: 8%;">Area Manager Name</th>
+                            <th title="Operation Manager Name" style="width: 8%;">Operation Manager Name</th>
+                            <th title="Returned Quantity" style="width: 6%;">Returned Quantity</th>[#--退货数量--]
                             <th title="Created By">Created By</th>
                             <th title="Remark">Remark</th>
                         </tr>

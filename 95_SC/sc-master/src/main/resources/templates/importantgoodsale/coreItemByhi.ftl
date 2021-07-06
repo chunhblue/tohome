@@ -305,11 +305,11 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                    <span style="float: left">Date Created:${bsDate?string('dd/MM/yyyy')}</span>
+                    <span style="float: left">Date Created:${bsDate!}</span>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="row" style="overflow: scroll">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="width: 160%;">
                     <table id="dailyTable" class="table table-hover table-striped table-condensed table-bordered zgrid-table"
                            style="margin-bottom: 10px">
                         <tr>

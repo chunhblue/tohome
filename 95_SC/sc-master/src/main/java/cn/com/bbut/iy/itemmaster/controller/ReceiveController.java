@@ -9,6 +9,7 @@ import cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TDTO;
 import cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.od0010_t.OD0010TDTO;
 import cn.com.bbut.iy.itemmaster.entity.User;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.ReceiveService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -39,6 +40,9 @@ public class ReceiveController extends BaseAction {
 
     @Autowired
     private ReceiveService service;
+
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     /**
      * 保存收货数据
@@ -100,6 +104,60 @@ public class ReceiveController extends BaseAction {
         }
         return res;
     }
+
+
+
+
+
+    @ResponseBody
+    @RequestMapping(value = "/saveDocumentUrl")
+//    @Permission(codes = { PermissionCode.CODE_SC_RR_QUERY_CONFIRM })
+    public AjaxResultDto saveDocumentUrl(HttpServletRequest request, HttpSession session,
+                              String searchJson, String listJson,String fileDetailJson) {
+        AjaxResultDto res = ajaxRepeatSubmitCheck(request, session);
+
+        if(StringUtils.isBlank(searchJson)){
+            res.setMsg("Parameter cannot be empty!");
+            return res;
+        }
+        // 转换参数对象
+        Gson gson = new Gson();
+        OD0000TDTO _dto = gson.fromJson(searchJson, OD0000TDTO.class);
+        if(_dto == null){
+            res.setMsg("Failed to get subpoena information");/*获取传票信息失败*/
+            return res;
+        }
+        // 获取当前用户、时间
+        CommonDTO dto = getCommonDTO(session);
+        if(dto == null){
+            res.setMsg("Failed to get user information!");
+            return res;
+        }
+        // 执行保存
+        _dto.setCommonDTO(dto);
+        _dto.setFileDetailJson(fileDetailJson);
+        Integer count = service.insertDocumentUrl(_dto);
+        if(count==0){
+            res.setMsg("Data saved Failure！");
+        }else {
+            res.setMsg("Data saved Successfully！");
+            res.setSuccess(true);
+        }
+        return res;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * 快速收货
@@ -259,6 +317,9 @@ public class ReceiveController extends BaseAction {
             return null;
         }
         CommonDTO dto = new CommonDTO();
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         // 当前用户ID
         dto.setUpdateUserId(u.getUserId());
         dto.setCreateUserId(u.getUserId());
@@ -268,12 +329,12 @@ public class ReceiveController extends BaseAction {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HHmmss");
         // 当前时间年月日
         String date = dateFormat.format(now);
-        dto.setCreateYmd(date);
-        dto.setUpdateYmd(date);
+        dto.setCreateYmd(ymd);
+        dto.setUpdateYmd(ymd);
         // 当前时间时分秒
         String time = timeFormat.format(now);
-        dto.setCreateHms(time);
-        dto.setUpdateHms(time);
+        dto.setCreateHms(hms);
+        dto.setUpdateHms(hms);
         return dto;
     }
 

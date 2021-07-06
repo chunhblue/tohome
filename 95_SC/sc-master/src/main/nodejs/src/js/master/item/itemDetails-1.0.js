@@ -355,7 +355,7 @@ define('itemDetails', function () {
 				{name:"adviseSalePrice",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getThousands},
 				{name:"baseSalePrice",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getThousands},
 				{name:"memberPrice",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getThousands},
-				{name:"saleFlg",type:"text",text:"center",width:"100",ishide:false,css:"",getCustomValue:isYesOrNo},
+				{name:"salePauseFlg",type:"text",text:"center",width:"100",ishide:false,css:"",getCustomValue:isYesOrNo},
 				{name:"saleInactive",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue:isYesOrNo}
 			],//列内容
 			width:"max",//宽度自动

@@ -63,9 +63,6 @@
         [id$="_tr_ckline"]{
             width: 50px;
         }
-        #zgGridTtable_main_body{
-            overflow-y: scroll;
-        }
 
     </STYLE>
 [@common.header][/@common.header]

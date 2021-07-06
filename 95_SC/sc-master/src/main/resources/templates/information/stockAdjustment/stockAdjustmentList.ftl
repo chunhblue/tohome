@@ -287,28 +287,28 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                    <span style="float: left;margin-left:20px;">Created Date:${bsDate?string('dd/MM/yyyy')}</span>
+                    <span style="float: left;margin-left:20px;">Created Date:${bsDate!}</span>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="row" style="overflow: scroll">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="width: 160%;">
                     <table id="daily_table" class="table table-hover table-striped table-condensed table-bordered">
                         <tr>
                             <th title="Store No.">Store No.</th>
-                            <th title="Store Name">Store Name</th>
+                            <th title="Store Name" style="width: 6%;">Store Name</th>
                             <th title="Inventory Date">Inventory Date</th>
                             <th title="Top Department">Top Department</th>
-                            <th title="Department">Department</th>
-                            <th title="Category">Category </th>
-                            <th title="Sub-Category">Sub-Category</th>
+                            <th title="Department" style="width: 7%;">Department</th>
+                            <th title="Category" style="width: 7%;">Category </th>
+                            <th title="Sub-Category" style="width: 7%;">Sub-Category</th>
                             <th title="Item Code">Item Code</th>
-                            <th title="Item Name">Item Name</th>
+                            <th title="Item Name" style="width: 6%;">Item Name</th>
                             <th title="Barcode">Barcode</th>
                             <th title="UOM">UOM</th>
-                            <th title="Adjustment Quantity">Adjustment Quantity</th>
-                            <th title="Adjustment Reason">Adjustment Reason</th>
-                            <th title="Are Manager Code">Are Manager Code</th>
-                            <th title="Are Manager Name">Are Manager Name</th>
+                            <th title="Adjustment Quantity" style="width: 7%;">Adjustment Quantity</th>
+                            <th title="Adjustment Reason" style="width: 7%;">Adjustment Reason</th>
+                            <th title="Are Manager Code" style="width: 8%;">Are Manager Code</th>
+                            <th title="Are Manager Name" style="width: 8%;">Are Manager Name</th>
                         </tr>
                     </table>
 

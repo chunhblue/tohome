@@ -28,7 +28,7 @@
 			(#{insertBean.nReviewid}, #{insertBean.nTypeid}, #{insertBean.cRecordCd},
 			 #{insertBean.storeCd},#{insertBean.distinguishId}, #{insertBean.subNo},
 			#{insertBean.cStep}, #{insertBean.cAuditstatus}, #{insertBean.nOperatorid},
-			#{insertBean.dAuditTime}, #{insertBean.cAuditContent}, #{insertBean.dInsertTime}, '1')
+			now()::TIMESTAMP, #{insertBean.cAuditContent}, now()::TIMESTAMP, '1')
 	</insert>
 
   <update id="invalidAudit">
@@ -56,7 +56,7 @@
 		UPDATE
 			t_audit_tab
 		SET
-			audit_time = #{_AuditInfo.dAuditTime},
+			audit_time = now()::TIMESTAMP,
 			audit_content = #{_AuditInfo.cAuditContent},
 			n_operatorid = #{_AuditInfo.nOperatorid}
 		WHERE
@@ -159,7 +159,14 @@
 	</update>
 
 	<select id="getAuditStatus" resultType="integer" >
-		select REVIEW_STATUS
+		select distinct REVIEW_STATUS
+		from ${table}
+		where ${key} = #{recordCd}
+	</select>
+
+	<select id="getOrderAuditStatus" resultType="integer" >
+		select distinct
+		case when order_sts='01' then 7 else review_status end as review_status
 		from ${table}
 		where ${key} = #{recordCd}
 	</select>

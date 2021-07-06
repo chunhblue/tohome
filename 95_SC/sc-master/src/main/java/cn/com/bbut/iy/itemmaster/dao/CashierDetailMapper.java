@@ -27,4 +27,8 @@ public interface CashierDetailMapper {
     List<SA0050> getCashier(@Param("storeCd") String storeCd, @Param("posId")String posId);
 
     BigDecimal getSaleHeadAmount(CashierDetailParam param);
+
+    List<SaleDetail> getExSaleDetail(@Param("storeCd") String storeCd,@Param("list")List<String> storePosTranNoList);
+
+    List<PayMethod> getExPayDetail(@Param("storeCd") String storeCd,@Param("list")List<String> storePosTranNoList);
 }

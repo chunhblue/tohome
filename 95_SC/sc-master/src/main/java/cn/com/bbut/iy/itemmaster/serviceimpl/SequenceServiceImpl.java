@@ -1,7 +1,9 @@
 package cn.com.bbut.iy.itemmaster.serviceimpl;
 
 import cn.com.bbut.iy.itemmaster.dao.SequenceMapper;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.SequenceService;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +14,8 @@ import java.util.Date;
 public class SequenceServiceImpl implements SequenceService {
     @Autowired
     private SequenceMapper sequenceMapper;
-
+    @Autowired
+    private Ma4320Service ma4320Service;
     @Override
     public String getSequence(String sequenceName) {
         return sequenceMapper.getSequence(sequenceName);
@@ -28,8 +31,9 @@ public class SequenceServiceImpl implements SequenceService {
         StringBuilder sb = new StringBuilder(prefix);
         String seq = sequenceMapper.getSequence(sequenceName);
         seq = String.format("%03d", Integer.parseInt(seq));
-        String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
-        sb.append(date).append(seq).append(storeCd);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        sb.append(ymd).append(seq).append(storeCd);
         return sb.toString();
     }
 
@@ -40,27 +44,19 @@ public class SequenceServiceImpl implements SequenceService {
      */
     @Override
     public void updateSeq(String[] arr) {
-
         // 取出序列名称重置为0
         for (int i = 0; i < arr.length; i++) {
             String seqName = arr[i];
-            String val = sequenceMapper.getSequence(seqName);
-            Integer seq = Integer.parseInt(val)*(-1);
-            this.updateSequence(seqName,seq);
+            sequenceMapper.resetSeq(seqName);
         }
     }
 
     /**
-     * 修改序列得状态
+     * 重置序列
      * @param seqName
-     * @param seq
      */
-    private void updateSequence(String seqName, Integer seq) {
-        // 修改序列当前值
-        sequenceMapper.updateSeqNum(seqName,seq);
-        // 再查一遍，走一下,重置为1了
-        sequenceMapper.getSequence(seqName);
-        // 还原
+    @Override
+    public void updateResetSeqSeq(String seqName) {
         sequenceMapper.resetSeq(seqName);
     }
 }

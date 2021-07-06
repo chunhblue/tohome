@@ -312,6 +312,10 @@ define('storeInventoryDaily', function () {
 			$("#writeOffStartDate").focus();
 			$("#writeOffStartDate").css("border-color","red");
 			return false;
+		}else if(_common.judgeValidDate(m.writeOffStartDate.val())){
+			_common.prompt("Please enter a valid date!",3,"info");
+			$("#writeOffStartDate").focus();
+			return false;
 		}else {
 			$("#writeOffStartDate").css("border-color","#CCC");
 		}

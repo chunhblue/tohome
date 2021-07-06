@@ -69,13 +69,13 @@
 			border: 1px solid #ddd;
 			border-radius: 4px;
 			font-size: 12px;
-			max-height: 510px;
+            max-width: 370px;
+			max-height: 660px;
 			overflow-y: scroll;
 		}
         pre {
             white-space: pre-wrap;
             white-space: -moz-pre-wrap;
-            white-space: -pre-wrap;
             white-space: -o-pre-wrap;
             *word-wrap: break-word;
             *white-space : normal ;
@@ -147,15 +147,15 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="saleStartDate"  class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label not-null">Sales  Date</label>
+                                        <label for="saleDate"  class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label not-null">Sales Date</label>
                                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
 [#--                                            <input id="saleStartDate" readonly="true" nextele="saleEndDate" placeholder="Start Date" class="form-control input-sm select-date" type="text" value="">--]
-                                            <input id="saleStartDate"  nextele="saleEndDate" placeholder="Start Date" class="form-control input-sm select-date" type="text" value="">
+                                            <input id="saleDate"  nextele="saleDate" placeholder="Sales Date" class="form-control input-sm select-date" type="text" value="">
                                         </div>
-                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-[#--                                            <input  id="saleEndDate" readonly="true" placeholder="End Date" class="form-control input-sm select-date" type="text" value="">--]
+                                        [#--<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+--][#--                                            <input  id="saleEndDate" readonly="true" placeholder="End Date" class="form-control input-sm select-date" type="text" value="">--][#--
                                             <input  id="saleEndDate" placeholder="End Date" class="form-control input-sm select-date" type="text" value="">
-                                        </div>
+                                        </div>--]
                                     </div><!-- form-group -->
 
                                     <div class="form-group">
@@ -173,9 +173,22 @@
                                     </div><!-- form-group -->
 
                                     <div class="form-group">
-                                        <label for="saleNo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label not-null">Receipt No</label>
+                                        <label for="saleNo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">NRI Receipt No.</label>
                                         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                                             <input type="text" id="saleNo" class="form-control input-sm">
+                                        </div>
+                                    </div><!-- form-group -->
+
+                                    <div class="form-group">
+                                        <label for="sapSaleNo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">SAP Receipt No.</label>
+                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                            <input type="text" id="sapSaleNo" class="form-control input-sm">
+                                        </div>
+                                    </div><!-- form-group -->
+                                    <div class="form-group">
+                                        <label for="billSaleNo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">SAP Bill No.</label>
+                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                            <input type="text" id="billSaleNo" class="form-control input-sm">
                                         </div>
                                     </div><!-- form-group -->
                                     <div class="form-group">
@@ -205,9 +218,21 @@
                                                 <option value="">-- All/Please Select --</option>
                                                 <option value="sale">Sale</option>
                                                 <option value="return">Refund</option>
+                                                <option value="reprint">Reprint</option>
                                             </select>
                                         </div>
+
                                     </div>
+[#--                                    <div class="form-group">--]
+[#--                                        <label for="receiptType"  class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">Trans Type</label>--]
+[#--                                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">--]
+[#--                                            <select id="transType" class="form-control input-sm" nextele="" autocomplete="off">--]
+[#--                                                <option value="">-- All/Please Select --</option>--]
+[#--                                                <option value="sale">Sale</option>--]
+[#--                                             --]
+[#--                                            </select>--]
+[#--                                        </div>--]
+[#--                                    </div>--]
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -256,5 +281,12 @@
 	<input type="hidden" id="searchJson" value=""/>
 	<input type="hidden" id="_startIndex" value="0"/>
 	<input type="hidden" id="_oldContent" value=""/>
+	<input type="hidden" id="businessDate" value="${businessDate!}"/>
+	<input type="hidden" id="position" value="${position!}"/>
+    <input type="hidden" id="logoPath" value="${m.staticpath}/electronic.png"/>
+[#--	<input type="hidden" id="nriLogo" value="${imagePath}"/>--]
+    [#--<div id="nriImage" class="content" style="vertical-align: middle;" hidden>
+        <img  style="width: 200px;height:80px;text-align: center " src="${m.staticpath}/electronic.png" />
+    </div>--]
 </body>
 </html>

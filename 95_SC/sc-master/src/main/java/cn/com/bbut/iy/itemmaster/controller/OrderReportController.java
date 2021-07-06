@@ -15,8 +15,10 @@ import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
 
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.orderreport.OrderReportService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +53,8 @@ public class OrderReportController extends BaseAction{
     private MRoleStoreService mRoleStoreService;
     @Autowired
     private OrderReportService orderReportService;
-
+    @Autowired
+    private Ma4320Service ma4320Service;
     private final String EXCEL_EXPORT_KEY = "EXCEL_ORDER_REPORT_REPORT";
     private final String EXCEL_EXPORT_NAME = "Order Report.xlsx";
 
@@ -60,12 +63,14 @@ public class OrderReportController extends BaseAction{
     public ModelAndView tolistView(HttpServletRequest request, HttpSession session,
                                    Map<String, ?> model) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
         String date = cm9060Service.getValByKey("0000");
       //  log.debug("User:{} 进入商品销售日报", u.getUserId());
         ModelAndView mv = new ModelAndView("orderReport/orderreport");
         mv.addObject("useMsg", "商品销售日报");
         mv.addObject("date", date);
-        mv.addObject("bsDate", new Date());
+        mv.addObject("bsDate", Utils.getFormateDate(ymd));
         mv.addObject("userName",u.getUserName());
         return mv;
     }

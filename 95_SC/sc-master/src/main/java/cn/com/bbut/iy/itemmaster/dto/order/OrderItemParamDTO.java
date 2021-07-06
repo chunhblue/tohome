@@ -116,4 +116,6 @@ public class OrderItemParamDTO extends GridParamDTO {
 
     // 上传文件Cd
     private String pogCd;
+
+    private int scheduleDay;
 }

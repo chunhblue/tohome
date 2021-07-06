@@ -158,6 +158,7 @@ define('storeItemRelationship', function () {
 				if (result != "true") {
 					return false;
 				}
+				$("#audit_affirm").prop("disabled",true);
 				$.myAjaxs({
 					url: _common.config.surl + "/audit/submit",
 					async: true,
@@ -191,27 +192,6 @@ define('storeItemRelationship', function () {
 		})
 	};
 
-    var updateShelf = function () {
-		$.myAjaxs({
-			url: url_left + "/updateShelf",
-			async: true,
-			cache: false,
-			type: "post",
-			data: {
-				storeCd: $("#aStore").attr("k")
-			},
-			dataType: "json",
-			success: function (result) {
-				if (result.success) {
-					m.approvalBut.prop("disabled", true);
-					_common.prompt("Saved Successfully!", 3, "success");// 保存审核信息成功
-				} else {
-					m.approvalBut.prop("disabled", false);
-					_common.prompt("Saved Shelf Failure!", 5, "error");// 保存审核信息失败
-				}
-			}
-		});
-	};
 
 	// 初始化下拉列表
 	function initSelectValue(){
@@ -342,8 +322,28 @@ define('storeItemRelationship', function () {
 
 	//表格内按钮点击事件
 	var table_event = function(){
+
 		// 导出按钮点击事件
 		$("#export").on("click",function(){
+			var _storeCd = $("#aStore").attr("k");
+			if (_storeCd == null || _storeCd == "") {
+				$("#aStore").css("border-color","red");
+				$("#aStore").focus();
+				_common.prompt("Please select a store first!", 3, "info");
+				return false;
+			}else {
+				$("#aStore").css("border-color","#CCC");
+			}
+			if (m.createDate.val()) {
+				if(_common.judgeValidDate(m.createDate.val())){
+					_common.prompt("Please enter a valid date!",3,"info");
+					$("#createDate").css("border-color","red");
+					m.createDate.focus();
+					return false;
+				}else {
+					m.createDate.css("border-color", "#CCC");
+				}
+			}
 			// 拼接检索参数
 			var searchJsonStr ={
 				storeCd:$("#aStore").attr("k"),
@@ -363,6 +363,7 @@ define('storeItemRelationship', function () {
 				pmaCd:$("#pma").attr("k"),
 				categoryCd:$("#category").attr("k"),
 				subCategoryCd:$("#subCategory").attr("k"),
+				excelName:$("#excelName").val(),
 			};
 			paramGrid = "searchJson=" + JSON.stringify(searchJsonStr);
 			var url = url_left + "/export?" + paramGrid;
@@ -389,7 +390,7 @@ define('storeItemRelationship', function () {
 			approvalRecordsTableGrid.loadData(null);
 			$('#approvalRecords_dialog').modal("show");
 		});
-	}
+	};
 
     var showResponse = function(data,textStatus, xhr){
     	selectTrTemp = null;
@@ -421,10 +422,12 @@ define('storeItemRelationship', function () {
 			$("#loc").val("");
 			$("#itemCode").val("");
 			$("#vFacing").val("");
+			$("#fileData").val("");
 			$("#hFacing").val("");
 			$("#dFacing").val("");
 			$("#totalFacing").val("");
 			$("#createDate").val("");
+			$("#excelName").val("");
 			$("#depRemove").click();
 			$("#maCd").prop("disabled", true);
 			$("#maCdRefresh").hide();
@@ -436,7 +439,9 @@ define('storeItemRelationship', function () {
 		})
 		// 导入excle
 		$("#import").on("click", function () {
+			$.myAutomatic.cleanSelectObj(aStore);
 			$.myAutomatic.cleanSelectObj(a_store);
+			$("#fileData").val("");
 			$('#storeItemRelationship_dialog').modal("show");
 			m.affirm.prop("disabled",true);
 		});
@@ -455,17 +460,50 @@ define('storeItemRelationship', function () {
 			var storeCd = $("#a_store").attr("k");
 			if(storeCd==null||storeCd==''){
 				_common.prompt("Please select a store first!",5,"error");
+				$("#a_store").focus();
+				$("#a_store").css("border-color","red");
 				return;
+			}else {
+				$("#a_store").css("border-color","#CCC");
 			}
-			if($('#fileData')[0].files[0]==undefined||$('#fileData')[0].files[0]==null){
-				_common.prompt("Import file cannot be empty!",5,"error");
-				return;
+
+			var filrarr = document.getElementById("fileData").files;
+			for(var i = 0; i < filrarr.length; i++){
+				if(filrarr[i]==undefined||filrarr[i]==null){
+					_common.prompt("Import file cannot be empty!",5,"error");
+					$("#fileData").focus();
+					$("#fileData").css("border-color","red");
+					return;
+				}else {
+					$("#fileData").css("border-color","#CCC");
+				}
 			}
+
+
+			var position = 0;
+			_common.getPositionList($("#a_store").attr("k"),function (result) {
+				let arr = result;
+				for(let i=0;i<arr.length;i++){
+					if(arr[i] === 4){
+						position = arr[i];
+					}
+				}
+			});
+			if(position!==4){
+				_common.prompt("You do not have permission to upload!",5,"info");
+				return false;
+			}
+
 			_common.myConfirm("Are you sure want to upload？",function(result){
 				if(result=="true"){
+
 					var formData = new FormData();
 					formData.append("storeCd",storeCd);
-					formData.append("fileData",$('#fileData')[0].files[0]);
+					var filrarr = document.getElementById("fileData").files;
+					for(var i = 0; i < filrarr.length; i++){
+						formData.append("fileData", filrarr[i]);
+					}
+
 					formData.append("toKen",m.toKen);
 					$.myAjaxs({
 						url:url_left+"/upload",
@@ -485,7 +523,7 @@ define('storeItemRelationship', function () {
 							var typeId = m.typeId.val();
 							var nReviewid = m.reviewId.val();
 							var recordCd =storeCd;
-							if(data.success==true){
+							if(data.success===true){
 								_common.prompt("Operation Succeeded!",2,"success",function(){
 									$('#storeItemRelationship_dialog').modal("hide");
 									m.search.click();
@@ -497,8 +535,8 @@ define('storeItemRelationship', function () {
 									})
 								},true);
 							}else{
-								if(data.source!=null&&data.source!=''){
-									_common.myConfirm(data.message+"Is coverage determined？",function(result){//是否确认覆盖
+								if(data.source!=null&&data.source!==''){
+									_common.myConfirm(data.message+", are you sure to overwrite?",function(result){//是否确认覆盖
 										if(result=="true"){
 											formData.append("isCoverage",true);
 											$.myAjaxs({
@@ -512,11 +550,11 @@ define('storeItemRelationship', function () {
 												contentType: false,
 												success: function (data, textStatus, xhr) {
 													var resp = xhr.responseJSON;
-													if( resp.result == false){
+													if( resp.result === false){
 														top.location = resp.s+"?errMsg="+resp.errorMessage;
 														return ;
 													}
-													if(data.success==true){
+													if(data.success===true){
 														_common.prompt("Operation Succeeded!",2,"success",function(){
 															$('#storeItemRelationship_dialog').modal("hide");
 															m.search.click();
@@ -566,6 +604,15 @@ define('storeItemRelationship', function () {
 			}else {
 				$("#aStore").css("border-color","#CCC");
 			}
+			if (m.createDate.val()) {
+				if(_common.judgeValidDate(m.createDate.val())){
+					_common.prompt("Please enter a valid date!",3,"info");
+					m.createDate.focus();
+					return false;
+				}else {
+					m.createDate.css("border-color", "#CCC");
+				}
+			}
 			// 创建请求字符串
 			var searchJsonStr ={
 				storeCd:$("#aStore").attr("k"),
@@ -585,6 +632,7 @@ define('storeItemRelationship', function () {
 				pmaCd:$("#pma").attr("k"),
 				categoryCd:$("#category").attr("k"),
 				subCategoryCd:$("#subCategory").attr("k"),
+				excelName:$("#excelName").val(),
 			};
 			m.searchJson.val(JSON.stringify(searchJsonStr));
 			paramGrid = "searchJson="+m.searchJson.val();

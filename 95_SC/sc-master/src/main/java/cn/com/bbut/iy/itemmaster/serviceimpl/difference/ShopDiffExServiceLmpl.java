@@ -122,7 +122,16 @@ public class ShopDiffExServiceLmpl  implements ExService {
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
-            setCellValue(cell, ls.getTotalAmt());
+            String str = String.valueOf(ls.getTotalAmt2());
+            Double dou=Double.valueOf(str);
+            setCellValue(cell, String.format("%,d",dou.intValue()));
+
+            cell = row.createCell(curCol++);
+            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
+            String str1 = String.valueOf(ls.getTotalAmt());
+            Double dou1=Double.valueOf(str1);
+            setCellValue(cell, String.format("%,d",dou1.intValue()));
+
 
             curRow++;
         }
@@ -130,6 +139,7 @@ public class ShopDiffExServiceLmpl  implements ExService {
         int columnIndex = 0;
         sheet.setColumnWidth(columnIndex++, 5 * 256);
         sheet.setColumnWidth(columnIndex++, 18 * 256);
+        sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);

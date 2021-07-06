@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.remoteUpdate.RemoteUpdateMapper">
+
+    <resultMap id="ReMap" type="cn.com.bbut.iy.itemmaster.dto.remoteUpdate.RemoteUpdateDto">
+        <result column="id" property="id" jdbcType="INTEGER" />
+        <result column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <result column="inform_cd" property="informCd" jdbcType="VARCHAR" />
+        <result column="group_name" property="groupName" jdbcType="VARCHAR" />
+        <result column="update_type" property="updateType" jdbcType="VARCHAR" />
+        <result column="update_type_name" property="updateTypeName" jdbcType="VARCHAR" />
+        <result column="create_user_id" jdbcType="VARCHAR" property="createUserId" />
+        <result column="create_ymd" jdbcType="CHAR" property="createYmd" />
+        <result column="create_hms" jdbcType="CHAR" property="createHms" />
+        <result column="update_user_id" jdbcType="VARCHAR" property="updateUserId" />
+        <result column="update_ymd" jdbcType="CHAR" property="updateYmd" />
+        <result column="update_hms" jdbcType="CHAR" property="updateHms" />
+        <result column="start_date" jdbcType="VARCHAR" property="startDate" />
+    </resultMap>
+
+    <resultMap id="ReSaveMap" type="cn.com.bbut.iy.itemmaster.dto.remoteUpdate.RemoteUpdateSaveDto">
+        <result column="id" property="id" jdbcType="INTEGER" />
+        <result column="inform_cd" property="informCd" jdbcType="VARCHAR" />
+        <result column="group_name" property="groupName" jdbcType="VARCHAR" />
+        <result column="update_type" property="updateType" jdbcType="VARCHAR" />
+        <result column="create_user_id" jdbcType="VARCHAR" property="createUserId" />
+        <result column="create_ymd" jdbcType="CHAR" property="createYmd" />
+        <result column="create_hms" jdbcType="CHAR" property="createHms" />
+        <result column="update_user_id" jdbcType="VARCHAR" property="updateUserId" />
+        <result column="update_ymd" jdbcType="CHAR" property="updateYmd" />
+        <result column="update_hms" jdbcType="CHAR" property="updateHms" />
+        <result column="start_date" jdbcType="VARCHAR" property="startDate" />
+        <result column="ftp_update_file_path" jdbcType="VARCHAR" property="ftpFilePath" />
+        <result column="old_ftp_update_file_path" jdbcType="VARCHAR" property="oldFtpFilePath" />
+    </resultMap>
+
+    <sql id="allCloumn">
+        a.id,a.store_cd,a.inform_cd,a.group_name,a.create_user_id,a.create_ymd,a.create_hms,
+        a.update_user_id,a.update_ymd,a.update_hms,a.update_type,a.start_date
+    </sql>
+
+    <select id="getList" parameterType="cn.com.bbut.iy.itemmaster.dto.remoteUpdate.RemoteUpdateDto" resultMap="ReMap">
+        select
+        <include refid="allCloumn"/>,b.store_name,c.code_name as update_type_name
+        from "public".sa0720 a,"public".ma1000 b,"public".cm9010 c
+        <where>
+            a.store_cd = b.store_cd
+            and a.update_type = c.code_value
+            and c.effective_sts = '10'
+            and c.code_type = '00920'
+            <if test="storeCd != null and storeCd != ''">
+                and a.store_cd = #{storeCd}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and a.start_date = #{startDate}
+            </if>
+            <if test="updateType != null and updateType != ''">
+                and a.update_type = #{updateType}
+            </if>
+            <if test="groupName != null and groupName != ''">
+                and lower(a.group_name) like lower(CONCAT('%',#{groupName},'%'))
+            </if>
+        </where>
+        <if test="limitStart >= 0">
+            limit ${limitEnd} offset ${limitStart}
+        </if>
+    </select>
+
+    <select id="getListCount" parameterType="cn.com.bbut.iy.itemmaster.dto.remoteUpdate.RemoteUpdateDto" resultType="integer">
+        select
+        count(*)
+        from "public".sa0720 a,"public".ma1000 b,"public".cm9010 c
+        <where>
+            a.store_cd = b.store_cd
+            and a.update_type = c.code_value
+            and c.effective_sts = '10'
+            and c.code_type = '00920'
+            <if test="storeCd != null and storeCd != ''">
+                and a.store_cd = #{storeCd}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and a.start_date = #{startDate}
+            </if>
+            <if test="updateType != null and updateType != ''">
+                and a.update_type = #{updateType}
+            </if>
+            <if test="groupName != null and groupName != ''">
+                and lower(a.group_name) like lower(CONCAT('%',#{groupName},'%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="getAllStores" parameterType="integer" resultType="cn.com.bbut.iy.itemmaster.dto.ma0020.MA0020DTO">
+        select
+            a.structure_cd as structureCd,a.admin_structure_cd as adminStructureCd,a.structure_name as structureName,
+            a.structure_level as structureLevel,
+            case when b.checked = '1' then true else false end as isCheck,
+            case when b.expanded = '1' then true else false end as expanded
+        from ma0020 a
+             left join sa0720 b on a.structure_cd = b.store_cd and b.id = #{id}
+        where
+            a.effective_sts = '10'
+        order by a.structure_level,structure_cd
+    </select>
+
+    <select id="checkStoresCanAdd" parameterType="cn.com.bbut.iy.itemmaster.dto.remoteUpdate.RemoteUpdateCheckStoresDto" resultType="cn.com.bbut.iy.itemmaster.dto.remoteUpdate.RemoteUpdateDto">
+            select
+            <include refid="allCloumn"/>,b.store_name,c.code_name as update_type_name
+            from "public".sa0720 a,"public".ma1000 b,"public".cm9010 c
+            <where>
+                a.store_cd = b.store_cd
+                and a.update_type = c.code_value
+                and c.effective_sts = '10'
+                and c.code_type = '00920'
+                and a.store_cd in
+                <foreach collection="storeCds" item="storeCd" separator="," open="(" close=")">
+                    split_part(#{storeCd},':', 1)
+                </foreach>
+                and a.start_date = #{startDate}
+                and a.update_type = #{updateType}
+                <if test="id != null">
+                    and a.id != #{id}
+                </if>
+            </where>
+    </select>
+
+    <select id="selectMaxId" resultType="integer">
+        select max(id)+1 from sa0720;
+    </select>
+
+    <insert id="insertAll" parameterType="cn.com.bbut.iy.itemmaster.dto.remoteUpdate.RemoteUpdateSaveDto">
+        insert into "public".sa0720
+        (id,store_cd,inform_cd,group_name,create_user_id,create_ymd,create_hms,update_type,start_date,
+        ftp_update_file_path,expanded,checked)
+        values
+        <foreach collection ="storeList" item="storeCd" separator =",">
+            (#{id}, split_part(#{storeCd},':', 1), #{informCd},#{groupName},#{createUserId},#{createYmd},#{createHms},#{updateType},
+            #{startDate},#{ftpFilePath},split_part(#{storeCd},':', 2),split_part(#{storeCd},':', 3))
+        </foreach >
+    </insert>
+
+    <select id="selectRemoteUpdate" parameterType="cn.com.bbut.iy.itemmaster.dto.remoteUpdate.RemoteUpdateSaveDto" resultMap="ReSaveMap">
+        select
+            id,store_cd,inform_cd,group_name,update_type,start_date,ftp_update_file_path,ftp_update_file_path as old_ftp_update_file_path
+        from "public".sa0720
+        where
+            id = #{id}
+        limit 1
+    </select>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        delete from "public".sa0720 where id = #{id}
+    </delete>
+
+</mapper>

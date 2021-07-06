@@ -73,9 +73,24 @@ public interface BusinessDailyMapper {
      * @param
      * @return
      */
-    BusinessDailyDto getSubtotalDue(@Param("accDate")String businessDate, @Param("storeCd")String storeCd);
+    BusinessDailyDto getSubtotalDue(@Param("accDate")String businessDate, @Param("storeCd")String storeCd,@Param("payDate")String payDate);
 
     Integer getcountCustomer(@Param("accDate") String businessDate, @Param("storeCd") String storeCd);
 
     Double getLastMonthSalesAmount(@Param("startDate") String startDate,@Param("endDate") String endDate, @Param("storeCd") String storeCd);
+
+    List<PaymentAmtDto> getPayName();
+
+    List<PaymentAmtDto> getCountCustomerByPayCd(@Param("accDate") String businessDate, @Param("storeCd") String storeCd);
+
+    /**
+     * 获取service金额
+     * @param payDate
+     * @param storeCd
+     * @return
+     */
+    PaymentAmtDto getServiceAmt(@Param("payDate")String payDate, @Param("storeCd")String storeCd);
+    PaymentAmtDto getCountByService(@Param("payDate")String payDate, @Param("storeCd")String storeCd);
+
+    int getCashBalanceCount(@Param("businessDate")String businessDate, @Param("storeCd")String storeCd);
 }

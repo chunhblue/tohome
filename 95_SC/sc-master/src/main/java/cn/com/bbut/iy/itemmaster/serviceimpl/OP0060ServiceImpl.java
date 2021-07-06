@@ -147,13 +147,13 @@ public class OP0060ServiceImpl implements OP0060Service {
             paragraph.setSpacingAfter(10f); //设置段落下空白
             document.add(paragraph);
 
-            PdfPTable table = new PdfPTable(12);
+            PdfPTable table = new PdfPTable(13);
             // 设置表格宽度比例为%100
             table.setWidthPercentage(100);
             // 设置表格的宽度
             table.setTotalWidth(800);
             // 也可以每列分别设置宽度
-            table.setTotalWidth(new float[] { 40, 65, 75, 75, 75, 75, 75, 75, 60, 65, 75, 50 });
+            table.setTotalWidth(new float[] { 40, 65, 70, 70, 70, 70, 70, 70, 60, 60, 65, 75, 50 });
             // 锁住宽度
             table.setLockedWidth(true);
             // 设置表格上面空白宽度
@@ -238,13 +238,21 @@ public class OP0060ServiceImpl implements OP0060Service {
             cell8.setVerticalAlignment(Element.ALIGN_MIDDLE);
             table.addCell(cell8);
 
-            PdfPCell cell9 = new PdfPCell(new Paragraph("Deposit Date", subhead));
+            PdfPCell cell9 = new PdfPCell(new Paragraph("Business Date", subhead));
             cell9.setBorderColor(BaseColor.GRAY);
             cell9.setPaddingLeft(0);
             cell9.setFixedHeight(40);
             cell9.setHorizontalAlignment(Element.ALIGN_CENTER);
             cell9.setVerticalAlignment(Element.ALIGN_MIDDLE);
             table.addCell(cell9);
+
+            PdfPCell cell9_5 = new PdfPCell(new Paragraph("Deposit Date", subhead));
+            cell9_5.setBorderColor(BaseColor.GRAY);
+            cell9_5.setPaddingLeft(0);
+            cell9_5.setFixedHeight(40);
+            cell9_5.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell9_5.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            table.addCell(cell9_5);
 
             PdfPCell cell10 = new PdfPCell(new Paragraph("Store Manager", subhead));
             cell10.setBorderColor(BaseColor.GRAY);
@@ -334,6 +342,13 @@ public class OP0060ServiceImpl implements OP0060Service {
                 cell9.setVerticalAlignment(Element.ALIGN_MIDDLE);
                 table.addCell(cell9);
 
+                cell9_5 = new PdfPCell(new Paragraph(fmtDateToStr(_list.get(i).getDepositDate()), font));
+                cell9_5.setFixedHeight(40);
+                cell9_5.setBorderColor(BaseColor.GRAY);
+                cell9_5.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell9_5.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                table.addCell(cell9_5);
+
                 cell10 = new PdfPCell(new Paragraph(_list.get(i).getPayPerson(), font));
                 cell10.setFixedHeight(40);
                 cell10.setBorderColor(BaseColor.GRAY);
@@ -365,6 +380,12 @@ public class OP0060ServiceImpl implements OP0060Service {
         }
         return null;
     }
+
+    @Override
+    public Integer searhSameDayInsert(OP0060ParamDto param) {
+        return op0060Mapper.searhSameDayInsert(param);
+    }
+
 
     /**
      * 四舍五入,不保留小数,千分位

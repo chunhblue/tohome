@@ -199,6 +199,16 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="form-group" id="ini_password">
+                            <label for="inital_password" class="col-sm-3 control-label not-null">Password</label>
+                            <div class="col-sm-5">
+                                <div class="aotu-pos">
+                                    <input type="password" class="form-control my-automatic input-sm" id="inital_password" autocomplete="off" name="initalPassword">
+                                    <span>(Please enter 1-8 digit.)</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label for="i_cashierEmail" class="col-sm-3 control-label">Email Address
                             </label>
@@ -297,7 +307,7 @@
                             <div class="col-sm-5">
                                 <div class="aotu-pos">
                                     <input type="password" class="form-control my-automatic input-sm" id="oldPassword" autocomplete="off" name="oldPassword">
-                                    <span>(Please enter 1-6 digit.)</span>
+                                    [#--<span>(Please enter 1-6 digit.)</span>--]
                                 </div>
                             </div>
                         </div>

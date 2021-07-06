@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * @ClassName goodSaleReportDTO
@@ -34,12 +35,13 @@ public class goodSaleReportDTO  {
     private String categoryName;
     private String subCategoryCd;
     private String subCategoryName;
-    private String saleAmount;
+    private BigDecimal saleAmount;
     private String priceActual; // 实际售价
     private String accDate; // 营业日期
-    private String saleQty;
+    private BigDecimal saleQty;
     private String amCd;
     private String amName;
+    private BigDecimal totalSaleAmount;
 
 
 }

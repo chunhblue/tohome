@@ -10,7 +10,7 @@ define('receiptReturnVendor', function () {
     var self = {};
     var url_left = "",
         paramGrid = null,
-		    approvalRecordsParamGrid = null,
+        approvalRecordsParamGrid = null,
         reThousands = null,
         toThousands = null,
         getThousands = null,
@@ -139,11 +139,11 @@ define('receiptReturnVendor', function () {
                 _common.prompt("Please select at least one row of data!",5,"error");
                 return false;
             }else{
-        				var cols = tableGrid.getSelectColValue(selectTrTemp,"orderSts,reviewStatus,status");
+        	    var cols = tableGrid.getSelectColValue(selectTrTemp,"orderSts,reviewStatus,status");
                 var orderSts = cols["orderSts"];
-          			var reviewStatus = cols["reviewStatus"];
+          		var reviewStatus = cols["reviewStatus"];
                 //判断是否已经收货
-        				if(orderSts!='04'&&reviewStatus=='Approved'){
+        		if(orderSts!='04'&&reviewStatus=='Approved'){
                     //获取数据审核状态
                     _common.getRecordStatus(tempTrOrderId, m.typeId.val(), function (result) {
             						if(result.success){
@@ -249,7 +249,7 @@ define('receiptReturnVendor', function () {
             return false;
         }else{
             _StartDate = new Date(fmtDate($("#rt_start_date").val())).getTime();
-            if(judgeNaN(_StartDate)){
+            if(_common.judgeValidDate($("#rt_start_date").val())){
                 _common.prompt("Please enter a valid date!",3,"info");
                 $("#rt_start_date").focus();
                 return false;
@@ -262,7 +262,7 @@ define('receiptReturnVendor', function () {
             return false;
         }else{
             _EndDate = new Date(fmtDate($("#rt_end_date").val())).getTime();
-            if(judgeNaN(_EndDate)){
+            if(_common.judgeValidDate($("#rt_end_date").val())){
                 _common.prompt("Please enter a valid date!",3,"info");
                 $("#rt_end_date").focus();
                 return false;

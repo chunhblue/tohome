@@ -2,6 +2,7 @@ package cn.com.bbut.iy.itemmaster.serviceimpl.invoiceEntry;
 
 import cn.com.bbut.iy.itemmaster.dao.Cm9060Mapper;
 import cn.com.bbut.iy.itemmaster.dao.InvoiceEntryMapper;
+import cn.com.bbut.iy.itemmaster.dao.MA4320Mapper;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.ReturnDTO;
 import cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceDataDTO;
@@ -29,6 +30,8 @@ public class InvoiceEntryServiceImpl implements InvoiceEntryService {
     private InvoiceEntryMapper invoiceEntryMapper;
     @Autowired
     private Cm9060Mapper cm9060Mapper;
+    @Autowired
+    private MA4320Mapper ma4320Mapper;
 
     /**
      * 获取当前业务日期
@@ -88,6 +91,50 @@ public class InvoiceEntryServiceImpl implements InvoiceEntryService {
         return new GridDataDTO<InvoiceItemsDTO>(list, invoiceEntryParam.getPage(), list.get(0).getNum(), invoiceEntryParam.getRows());
     }
 
+    @Override
+    public List<String> getExistsReceiptNoList(String record) {
+
+        if (record == null || StringUtils.isEmpty(record)) {
+
+            return null;
+        }
+        Gson gson = new Gson();
+        InvoiceDataDTO invoice = gson.fromJson(record, InvoiceDataDTO.class);
+
+        // 获取选中的 sale Serial No.
+        List<String> receiptNos = CollectionUtils.arrayToList(invoice.getReceiptNo().split(";"));
+
+        // 获取该店已经开过的小票list
+        List<Map<String,String>> existsReceiptNos = new ArrayList<>();
+        List<InvoiceDataDTO> existsReceiptNoLists = invoiceEntryMapper.getReceiptNoByStore(invoice.getStoreNo(),invoice.getPosId());
+        for(InvoiceDataDTO rec : existsReceiptNoLists){
+            List<String> recList = CollectionUtils.arrayToList(rec.getReceiptNo().split(";"));
+            List<String> saleSerialList = CollectionUtils.arrayToList(rec.getSaleSerialNo().split(";"));
+
+            for(int i=0;i<recList.size();i++){
+                Map<String,String> map = new HashMap<>();
+                map.put(recList.get(i),saleSerialList.get(i));
+                existsReceiptNos.add(map);
+            }
+        }
+
+        // 得到选中的小票中已经开过的小票部分
+        List<String> getexistsReNos = new ArrayList<>();
+        for(String selectNo:receiptNos){
+            for(Map<String,String> isRecNo:existsReceiptNos){
+                Iterator<String> iter = isRecNo.keySet().iterator();
+                while(iter.hasNext()){
+                    String key = iter.next();
+                    String value = isRecNo.get(key);
+                    if(selectNo.equals(key)){
+                        getexistsReNos.add(value);
+                    }
+                }
+            }
+        }
+        return getexistsReNos;
+    }
+
     /**
      * 提交保存
      */
@@ -106,8 +153,9 @@ public class InvoiceEntryServiceImpl implements InvoiceEntryService {
         Gson gson = new Gson();
         InvoiceDataDTO invoice = gson.fromJson(record, InvoiceDataDTO.class);
         String dateStr = new SimpleDateFormat("yyyyMMdd-HHmmss").format(date);
-        String ymd = dateStr.split("-")[0];
-        String hms = dateStr.split("-")[1];
+        String nowDate = ma4320Mapper.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
 
         invoice.setCreateUserId(user.getUserId());
         invoice.setCreateYmd(ymd);
@@ -202,7 +250,7 @@ public class InvoiceEntryServiceImpl implements InvoiceEntryService {
         // 切分拼接的 Receipt No.
         List<String> receiptNos = CollectionUtils.arrayToList(invoiceEntryParam.getReceiptNo().split(";"));
 
-        List<InvoiceEntryDTO> list = invoiceEntryMapper.getInvoiceByReceiptNo(invoiceEntryParam.getStoreNo(),receiptNos,rows,limitStart);
+        List<InvoiceEntryDTO> list = invoiceEntryMapper.getInvoiceByReceiptNo(invoiceEntryParam.getStoreNo(),invoiceEntryParam.getPosId(),receiptNos,rows,limitStart);
 
         if (list == null || list.size() < 1) {
             return new GridDataDTO<InvoiceEntryDTO>();

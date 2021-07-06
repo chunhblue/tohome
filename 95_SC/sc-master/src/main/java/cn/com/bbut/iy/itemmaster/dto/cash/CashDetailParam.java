@@ -3,6 +3,7 @@ package cn.com.bbut.iy.itemmaster.dto.cash;
 import cn.com.bbut.iy.itemmaster.dto.base.GridParamDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Collection;
@@ -16,6 +17,7 @@ import java.util.Collection;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class CashDetailParam extends GridParamDTO {
 
     private String storeName;
@@ -49,4 +51,8 @@ public class CashDetailParam extends GridParamDTO {
     private Collection<String> stores;
     // 业务日期
     private String businessDate;
+
+    private int limitStart;
+
+    private boolean flg = true;
 }

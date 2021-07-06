@@ -33,7 +33,7 @@ public class WriteOffExHeaderListener implements ExEventListener {
 
         // 列标题
         String row2 = "NO,Store No.,Store Name,Write Off Date,TopDepartment,Department,Category, SubCategory,Item Code,Item Name,Barcode,Uom,Write Off Quantity," +
-                "Sale Quantity,Write Off Reason,Area Manager Code,Area Manager Name";
+                "Write Off Reason,Area Manager Code,Area Manager Name";
         String[] titles = row2.split(",");
 
         // 开始拼接excel头信息

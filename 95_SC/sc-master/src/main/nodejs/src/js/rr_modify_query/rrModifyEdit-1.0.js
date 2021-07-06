@@ -398,8 +398,19 @@ define('receiptEdit', function () {
 				}else{
 					batchFlg = true;
 				}
-			})
-			if(!batchFlg){return batchFlg};
+			});
+			if(!batchFlg){return batchFlg}
+			var positionFlg = true;
+			_common.checkPosition($("#orVoucherNo").attr("k"),function (result) {
+				if(!result.success){
+					_common.prompt("You do not have permission to submit it!",5,"info");
+					positionFlg = false;
+				}
+			});
+			if(!positionFlg){
+				return false;
+			}
+
 			// 判断是否允许保存
 			let _sts = m.viewSts.val();
 			if(_sts=="view"){return;}

@@ -117,6 +117,18 @@ define('orderReport', function () {
         // }else {
         //     $("#aRegion").css("border-color","#CCC");
         // }
+        if(m.order_date.val()==""||m.order_date.val()==null){
+            _common.prompt("Please enter a Order Date!",5,"error"); // 日期不可以为空
+            $("#order_date").focus();
+            $("#order_date").css("border-color","red");
+            return false;
+        }else if(_common.judgeValidDate(m.order_date.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#order_date").focus();
+            return false;
+        }else {
+            $("#order_date").css("border-color","#CCC");
+        }
         return true;
     }
     var getData = function (page, rows) {

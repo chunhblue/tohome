@@ -307,6 +307,10 @@ define('stockAdjustment', function () {
 			$("#adjustmentStartDate").focus();
 			$("#adjustmentStartDate").css("border-color","red");
 			return false;
+		}else if(_common.judgeValidDate(m.adjustmentStartDate.val())){
+			_common.prompt("Please enter a valid date!",3,"info");
+			$("#adjustmentStartDate").focus();
+			return false;
 		}else {
 			$("#adjustmentStartDate").css("border-color","#CCC");
 		}
@@ -314,6 +318,10 @@ define('stockAdjustment', function () {
 			_common.prompt("Please enter a Date!",5,"error"); // 结束日期不可以为空
 			$("#adjustmentEndDate").focus();
 			$("#adjustmentEndDate").css("border-color","red");
+			return false;
+		}else if(_common.judgeValidDate(m.adjustmentEndDate.val())){
+			_common.prompt("Please enter a valid date!",3,"info");
+			$("#adjustmentEndDate").focus();
 			return false;
 		}else {
 			$("#adjustmentEndDate").css("border-color","#CCC");

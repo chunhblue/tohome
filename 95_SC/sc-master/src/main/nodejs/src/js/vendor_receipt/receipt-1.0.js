@@ -234,7 +234,7 @@ define('receipt', function () {
 				_common.prompt("Please select at least one row of data!",5,"info");
 				return false;
 			}
-			let cols = tableGrid.getSelectColValue(_list[0],"receiveId,reveiveStatus,storeCd,orderId,orderSts,multipleFlg");
+			let cols = tableGrid.getSelectColValue(_list[0],"receiveId,reviewSts,storeCd,orderId,orderSts,multipleFlg");
 			if(cols["orderSts"]=='04'){
 				_common.prompt("This order does not allow for duplicate receiving!",3,"info");/*订单不允许重复收货*/
 				return false;
@@ -248,6 +248,7 @@ define('receipt', function () {
 				orderSts = "edit";
 				param += "&orderSts="+orderSts;
 				param += "&receiveId="+cols["receiveId"];
+				param += "&reviewSts="+cols["reviewSts"];
 				//获取数据审核状态
 				_common.getRecordStatus(cols["receiveId"],m.typeId.val(),function (result) {
 					if(result.success){
@@ -258,6 +259,7 @@ define('receipt', function () {
 				});
 			}else{
 				param += "&orderSts="+orderSts;
+				param += "&reviewSts="+cols["reviewSts"];
 				top.location = url_left+"/details?"+param;
 			}
 		})
@@ -280,9 +282,17 @@ define('receipt', function () {
 				_common.prompt("Please select the data to confirm receipt!",3,"info");
 				return false;
 			}
+			var positionFlg = true;
 			let _params = [], _flg = false, _temp = '';
 			for(let i = 0; i < _list.length; i++){
-				let cols = tableGrid.getSelectColValue(_list[i],"receiveId,reveiveStatus,storeCd,orderId,orderSts,multipleFlg,orderDifferentiate");
+				let cols = tableGrid.getSelectColValue(_list[i],"receiveId,reveiveStatus,storeCd,orderId,orderSts,multipleFlg,orderDifferentiate,reviewSts");
+				_common.checkPosition(cols['storeCd'],function (result) {
+					if(!result.success){
+						_common.prompt("You do not have permission to quick receive "+cols['storeCd']+"!",5,"info");
+						positionFlg = false;
+					}
+				});
+
 				if(cols["orderSts"]=='04'||!!cols["reveiveStatus"]){
 					if(!_flg){
 						_flg = true;
@@ -295,8 +305,12 @@ define('receipt', function () {
 					storeCd:cols['storeCd'],
 					orderId:cols['orderId'],
 					orderDifferentiate:cols['orderDifferentiate'],
+					reviewSts:getIntStatus(cols['reviewSts']),
 				};
 				_params.push(_param);
+			}
+			if(!positionFlg){
+				return false;
 			}
 			if(_flg){
 				_common.prompt(_temp +" order does not allow for duplicate receiving!",3,"info");/* 订单不允许重复收货 */
@@ -359,7 +373,7 @@ define('receipt', function () {
 				_common.prompt("Please select at least one row of data!",3,"info");/*请选择要查看的数据*/
 				return false;
 			}
-			let cols = rrTableGrid.getSelectColValue(selectTrTemp,"receiveId");
+			let cols = tableGrid.getSelectColValue(selectTrTemp,"receiveId");
 			if(cols["receiveId"]==null||cols["receiveId"]==""){
 				_common.prompt("This order is not allowed to be viewed!",3,"info");
 				return false;
@@ -472,7 +486,7 @@ define('receipt', function () {
 			return false;
 		}else{
 			_StartDate = new Date(fmtDate($("#yy_start_date").val())).getTime();
-			if(judgeNaN(_StartDate)){
+			if(_common.judgeValidDate($("#yy_start_date").val())){
 				_common.prompt("Please enter a valid date!",3,"info");
 				$("#yy_start_date").focus();
 				return false;
@@ -485,7 +499,7 @@ define('receipt', function () {
 			return false;
 		}else{
 			_EndDate = new Date(fmtDate($("#yy_end_date").val())).getTime();
-			if(judgeNaN(_EndDate)){
+			if(_common.judgeValidDate($("#yy_end_date").val())){
 				_common.prompt("Please enter a valid date!",3,"info");
 				$("#yy_end_date").focus();
 				return false;
@@ -503,19 +517,24 @@ define('receipt', function () {
 			return false;
 		}
 
-		if(m.ys_start_date.val()!="" && m.ys_end_date.val()!=""){
-			let _yyStartDate = new Date(fmtDate($("#ys_start_date").val())).getTime();
-			if(judgeNaN(_yyStartDate)){
+		let _yyStartDate = null, _yyEndDate = null;
+		if(m.ys_start_date.val()){
+			_yyStartDate = new Date(fmtDate($("#ys_start_date").val())).getTime();
+			if(_common.judgeValidDate($("#ys_start_date").val())){
 				_common.prompt("Please enter a valid date!",3,"info");
 				$("#ys_start_date").focus();
 				return false;
 			}
-			let _yyEndDate = new Date(fmtDate($("#ys_end_date").val())).getTime();
-			if(judgeNaN(_yyEndDate)){
+		}
+		if(m.ys_end_date.val()){
+			_yyEndDate = new Date(fmtDate($("#ys_end_date").val())).getTime();
+			if(_common.judgeValidDate($("#ys_end_date").val())){
 				_common.prompt("Please enter a valid date!",3,"info");
 				$("#ys_end_date").focus();
 				return false;
 			}
+		}
+		if(_yyStartDate && _yyEndDate){
 			if(_yyStartDate>_yyEndDate){
 				_common.prompt("The start date cannot be greater than the end date!",3,"info");/*开始时间不能大于结束时间*/
 				$("#ys_end_date").focus();
@@ -567,9 +586,11 @@ define('receipt', function () {
 		if(_list == null || _list.length != 1){
 			$("#update").prop("disabled",true);
 			$("#receiveRecord").prop("disabled",true);
+			$("#approvalRecords").prop("disabled",true);
 		}else{
 			$("#update").prop("disabled",false);
 			$("#receiveRecord").prop("disabled",false);
+			$("#approvalRecords").prop("disabled",false);
 		}
 	}
 
@@ -616,6 +637,10 @@ define('receipt', function () {
 			eachTrClick:function(trObj,tdObj){//正常左侧点击
 				selectTrTemp = trObj;
 				isDisabledBtn()
+				let _list = tableGrid.getCheckboxTrs();
+				if(_list.length<1){
+					selectTrTemp = null;//清空选择的行
+				}
 			},
 			buttonGroup:[
 				// {butType:"custom",butHtml:"<button id='receiveRecord' type='button' class='btn  btn-info   btn-sm ' ><span class='glyphicon glyphicon-list-alt'></span> Receiving Records</button>"},
@@ -787,7 +812,40 @@ define('receipt', function () {
 				value = "";
 		}
 		return $(tdObj).text(value);
-	}
+	};
+
+	var getIntStatus = function(value){
+		let temp = 0;
+		switch (value) {
+			case "Pending":
+				temp = 1;
+				break;
+			case "Rejected":
+				temp = 5;
+				break;
+			case "Withdrawn":
+				temp = 6;
+				break;
+			case "Expired":
+				temp = 7;
+				break;
+			case "Approved":
+				temp = 10;
+				break;
+			case "Receiving Pending":
+				temp = 15;
+				break;
+			case "Received":
+				temp = 20;
+				break;
+			case "Paid":
+				temp = 30;
+				break;
+			default:
+				temp = 0;
+		}
+		return temp;
+	};
 
 	//字符串日期格式转换：dd/mm/yyyy → yyyymmdd
 	function fmtStringDate(date){

@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public interface InvoiceEntryMapper {
@@ -23,8 +24,12 @@ public interface InvoiceEntryMapper {
 
     InvoiceDataDTO getData(@Param("accId") String accId, @Param("storeNo") String storeNo);
 
-    List<InvoiceEntryDTO> getInvoiceByReceiptNo(@Param("storeNo") String storeNo, @Param("list") List<String> receiptNos,
+    List<InvoiceEntryDTO> getInvoiceByReceiptNo(@Param("storeNo") String storeNo,@Param("posId") String posId,
+                                                @Param("list") List<String> receiptNos,
                                                 @Param("rows")int rows, @Param("limitStart")int limitStart);
 
     void updateStatus(@Param("param")InvoiceDataDTO invoice);
+
+    List<InvoiceDataDTO> getReceiptNoByStore(@Param("storeNo") String storeNo,@Param("posId") String posId);
+
 }

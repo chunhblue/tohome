@@ -14,9 +14,11 @@ import cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.base.DefaultRoleService;
 import cn.com.bbut.iy.itemmaster.service.importantgoodsale.CoreItemService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
@@ -52,7 +54,8 @@ public class CoreItemController extends BaseAction {
     private MRoleStoreService mRoleStoreService;
     @Autowired
     private DefaultRoleService defaultRoleService;
-
+    @Autowired
+    private Ma4320Service ma4320Service;
     @Autowired
     private CoreItemService service;
     private final String EXCEL_EXPORT_KEY = "EXCEL_CORE_ITEM_BY_DAILY";
@@ -63,10 +66,13 @@ public class CoreItemController extends BaseAction {
     public ModelAndView tolistView(HttpServletRequest request, HttpSession session,
                                    Map<String, ?> model) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入重点商品销售日报", u.getUserId());
         ModelAndView mv = new ModelAndView("importantgoodsale/coreItemByhi");
         mv.addObject("useMsg", "重点商品销售日报(by Hierarchy)");
-        mv.addObject("bsDate", new Date());
+        mv.addObject("bsDate", Utils.getFormateDate(ymd));
         return mv;
     }
 
@@ -89,14 +95,14 @@ public class CoreItemController extends BaseAction {
             return new ReturnDTO(false,"Query failed!",null);
         }
         User u = this.getUser(session);
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             paramDTO.setStartDate(startDate);
-        }
+        }*/
         paramDTO.setStores(stores);
         paramDTO.setLimitStart((paramDTO.getPage() - 1) * paramDTO.getRows());
         Map<String,Object>  _list=service.getData(paramDTO);

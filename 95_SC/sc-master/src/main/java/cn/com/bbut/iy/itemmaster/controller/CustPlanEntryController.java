@@ -12,6 +12,7 @@ import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100ParamDTOC;
 import cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0110DTOC;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.opreationmanagement.CustOfEntryPlanService;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,8 @@ public class CustPlanEntryController extends BaseAction {
     private CustOfEntryPlanService custOfEntryPlanService;
     @Autowired
     private MRoleStoreService mRoleStoreService;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
 
     /**
@@ -151,7 +154,7 @@ public class CustPlanEntryController extends BaseAction {
 
         if (loginUser==null) {
             // 没有登陆
-            return new ReturnDTO(false,"请先登录!");
+            return new ReturnDTO(false,"Please login first!");
         }
 
         if (StringUtils.isEmpty(record)) {
@@ -176,21 +179,19 @@ public class CustPlanEntryController extends BaseAction {
             return new ReturnDTO(false,"Parameter exception!");
         }
         if (pi0100c.getDetails().size()<1) {
-            return new ReturnDTO(false,"明细数据不能为空!");
+            return new ReturnDTO(false,"The detail data cannot be empty!");
         }
 
         if (StringUtils.isEmpty(pi0100c.getFlag()) ||
                 (!"add".equals(pi0100c.getFlag()) &&
              !"update".equals(pi0100c.getFlag()))) {
-            return new ReturnDTO(false,"操作状态错误!");
+            return new ReturnDTO(false,"Operation status error!");
         }
         String flag = pi0100c.getFlag();
 
-        Date now = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");
-        String dateStr = sdf.format(now);
-        String ymd = dateStr.split("-")[0];
-        String hms = dateStr.split("-")[1];
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
 
         // 明细数据
         List<PI0110DTOC> pi0110List = pi0100c.getDetails();
@@ -211,9 +212,9 @@ public class CustPlanEntryController extends BaseAction {
         }
 
         if (row==-1) {
-            return new ReturnDTO(false,"保存盘点计划失败!");
+            return new ReturnDTO(false,"Failed to save inventory plan!");
         }
-        return new ReturnDTO(true,"保存盘点计划成功");
+        return new ReturnDTO(true,"Preservation Inventory Program Success");
     }
 
     /**

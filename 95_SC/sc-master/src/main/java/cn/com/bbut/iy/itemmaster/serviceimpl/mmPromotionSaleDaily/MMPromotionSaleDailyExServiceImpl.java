@@ -63,14 +63,14 @@ public class MMPromotionSaleDailyExServiceImpl implements ExService {
         jsonParam.setStores(paramDTO.getStores());
         jsonParam.setResources(paramDTO.getResources());
         jsonParam.setBusinessDate(cm9060Service.getValByKey("0000"));
-        int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
+        /*int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
         if(i >= 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             jsonParam.setStartDate(startDate);
-        }
+        }*/
         // 生成文件标题信息对象
         session.setHeaderListener(new MMPromotionSaleDailyExHeaderListener(jsonParam));
         session.createWorkBook();

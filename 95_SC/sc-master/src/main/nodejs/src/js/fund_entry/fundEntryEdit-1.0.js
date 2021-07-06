@@ -127,6 +127,7 @@ define('fundEntryEdit', function () {
 				if (result != "true") {
 					return false;
 				}
+				$("#audit_affirm").prop("disabled",true);
 				$.myAjaxs({
 					url: _common.config.surl + "/audit/submit",
 					async: true,
@@ -672,6 +673,11 @@ define('fundEntryEdit', function () {
 			_common.prompt("Business date cannot be empty!",5,"error");/*业务日期不能为空*/
 			$("#businessDate").focus();
 			return false;
+		}else if(_common.judgeValidDate($("#businessDate").val())){
+			_common.prompt("Please enter a valid date!",3,"info");
+			$("#businessDate").css("border-color","red");
+			$("#businessDate").focus();
+			return false;
 		}else {
 			$("#businessDate").css("border-color","#CCCCCC");
 		}
@@ -744,15 +750,15 @@ define('fundEntryEdit', function () {
 			$("#paymentType").css("border-color","#CCCCCC");
 		}
 
-		temp = m.expenditureStatus.val();
-		if(temp==null||$.trim(temp)==''){
-			$("#expenditureStatus").css("border-color","red");
-			_common.prompt("Expenditure Status cannot be empty!",5,"error");/*经费状态不能为空*/
-			$("#expenditureStatus").focus();
-			return false;
-		}else {
-			$("#expenditureStatus").css("border-color","#CCCCCC");
-		}
+		// temp = m.expenditureStatus.val();
+		// if(temp==null||$.trim(temp)==''){
+		// 	$("#expenditureStatus").css("border-color","red");
+		// 	_common.prompt("Expenditure Status cannot be empty!",5,"error");/*经费状态不能为空*/
+		// 	$("#expenditureStatus").focus();
+		// 	return false;
+		// }else {
+		// 	$("#expenditureStatus").css("border-color","#CCCCCC");
+		// }
 		temp = m.operator.val();
 		if(temp==null||$.trim(temp)==''){
 			$("#operator").css("border-color","red");
@@ -880,18 +886,18 @@ define('fundEntryEdit', function () {
 	}
 
 	// 加载经费状态下拉
-	function initExpenditureStatus(){
-		var param = "codeValue=00225";
-		getSelectOptions("Expenditure Status","/cm9010/getCode", param,function(res){
-			var selectObj = $("#expenditureStatus");
-			selectObj.find("option:not(:first)").remove();
-			for (var i = 0; i < res.length; i++) {
-				var optionValue = res[i].codeValue;
-				var optionText = res[i].codeValue+' '+res[i].codeName;
-				selectObj.append(new Option(optionText, optionValue));
-			}
-		});
-	}
+	// function initExpenditureStatus(){
+	// 	var param = "codeValue=00225";
+	// 	getSelectOptions("Expenditure Status","/cm9010/getCode", param,function(res){
+	// 		var selectObj = $("#expenditureStatus");
+	// 		selectObj.find("option:not(:first)").remove();
+	// 		for (var i = 0; i < res.length; i++) {
+	// 			var optionValue = res[i].codeValue;
+	// 			var optionText = res[i].codeValue+' '+res[i].codeName;
+	// 			selectObj.append(new Option(optionText, optionValue));
+	// 		}
+	// 	});
+	// }
 
 	// 加载经办人下拉
 	// function initOperator(){
@@ -938,7 +944,7 @@ define('fundEntryEdit', function () {
 		// 加载经费科目下拉
 		initExpenditureSubject();
 		// 加载经费状态下拉
-		initExpenditureStatus();
+		// initExpenditureStatus();
 		// // 加载经办人下拉
 		// initOperator();
 	}

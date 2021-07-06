@@ -577,13 +577,13 @@ define('common',['messenger'],function(messenger) {
 			return '0';
 		}
 		dit = typeof dit !== 'undefined' ? dit : 0;
-		num = num + ''
-		const reg = /\d{1,3}(?=(\d{3})+$)/g
-		let intNum = ''
-		let decimalNum = ''
+		num = num + '';
+		const reg = /\d{1,3}(?=(\d{3})+$)/g;
+		let intNum = '';
+		let decimalNum = '';
 		if (num.indexOf('.') > -1) {
-			if (num.indexOf(',') != -1) {
-				num = num.replace(/\,/g, '');
+			if (num.indexOf(',') !== -1) {
+				num = num.replace(/,/g, '');
 			}
 			num = parseFloat(num).toFixed(dit);
 			// intNum = num.substring(0, num.indexOf('.'))
@@ -1302,6 +1302,74 @@ var checkOnlyRole=function (recordId,typeId,callback) {
 		if (obj.subCategoryCd) {
 			$.myAutomatic.setValueTemp(a_subCategory,obj.subCategoryCd,obj.subCategoryName);
 		}
+	};
+
+	// 判断时间格式是否有效
+	var judgeValidDate = function (date) {
+		if(date == null || date.length<10){
+			return true;
+		}
+		var res = '';
+		// DD/MM/YYYY to YYYY-MM-DD  格式转换
+		res = date.replace(/\//g, '').replace(/^(\d{2})(\d{2})(\d{4})$/,"$3-$2-$1");
+		let day = date.replace(/\//g, '').replace(/^(\d{2})(\d{2})(\d{4})$/,"$1");
+		let mouth = date.replace(/\//g, '').replace(/^(\d{2})(\d{2})(\d{4})$/,"$2");
+		let edate = new Date(res);
+		if(edate == null || edate === 'undefined'|| edate === ''||isNaN(edate.getMonth())){
+			return true;
+		}
+		let mouthIndex = parseInt(mouth);
+		if(parseInt(day) > getDaysInMonth(edate,mouthIndex-1)){
+			return true;
+		}
+		let value = new Date(res).getTime();
+		return value !== value;
+	};
+	// 判断hh:mm:ss的有效性
+	var judgeValidTime = function (time) {
+		if(time == null){
+			return true;
+		}
+		var sp = ":";
+		var result = [];
+		result = time.split(sp);
+		if(result.length != 3){
+			return true;
+		}
+		for(var i = 0 ; i < result.length; i++) {
+			var lstr = result[i].replace(/^\s+|\s+$/g, '');
+			var num = parseInt(lstr);
+			if (num === false) {
+				return true;
+			}
+			if(lstr.length<2){
+				return true;
+			}
+			if( lstr != num || num < 0){
+				return true;
+			}
+			//24小时制
+			if(i == 0 && num >= 24){
+				return true;
+			}
+			if(i >= 1 && num >= 60){
+				return true;
+			}
+		}
+		return false;
+	};
+
+	// 判断是否是闰年
+	function isLeapYear(eDate) {
+		var year = eDate.getFullYear();
+		return (((0 === year % 4) && (0 !== (year % 100))) || (0 === year % 400));
+	}
+
+	// 获取月份的总天数
+	function getDaysInMonth(eDate,mouthIndex) {
+		var daysInMonth = [31,28,31,30,31,30,31,31,30,31,30,31];
+		daysInMonth[1] = isLeapYear(eDate) ? 29 : 28;
+		return daysInMonth[mouthIndex];
 	}
 
 	var forCreateTime=function (tdObj, str) {
@@ -1406,6 +1474,80 @@ var checkOnlyRole=function (recordId,typeId,callback) {
 		}
 	}
 
+	var checkPosition = function(storeCd,callback){
+		$.myAjaxs({
+			url:config.surl+"/officeManagement/checkPosition",
+			async:true,
+			cache:false,
+			type :"post",
+			data :"storeCd="+storeCd,
+			dataType:"json",
+			success:function(result){
+				callback(result);
+			},
+			error:function () {
+				_common.prompt("Get permission error",5,"error");
+			}
+		})
+	};
+
+	var getPositionList = function(storeCd,callback){
+		$.myAjaxs({
+			url:config.surl+"/officeManagement/getPositionList",
+			async:false,
+			cache:false,
+			type :"post",
+			data :"storeCd="+storeCd,
+			dataType:"json",
+			success:function(result){
+				if(result.success){
+					callback(result.data);
+				}else {
+					_common.prompt(result.message,5,"error");
+				}
+			},
+			error:function () {
+				_common.prompt("Get permission error",5,"error");
+			}
+		})
+	};
+
+	/**
+	 * 收货发起审核，并且进行审核
+	 * @param 店铺cd 数据id
+	 * @param recordCd 数据id
+	 * @param typeId 类型id
+	 * @param nReviewid 流程id
+	 * @param toKen
+	 * @param callback
+	 */
+	var initiateReceiveAudit = function (storeCd,recordCd,typeId,nReviewid,detailType,toKen,callback) {
+		if(!storeCd){
+			storeCd = "";
+		}
+		$.myAjaxs({
+			url:config.surl+"/audit/saveReceiveAudit",
+			async:true,
+			cache:false,
+			type :"put",
+			data :{
+				storeCd:storeCd,
+				typeId:typeId,
+				nReviewid:nReviewid,
+				recordCd:recordCd,
+				detailType:detailType,
+				toKen:toKen
+			},
+			dataType:"json",
+			success:function(result){
+					//回调
+				callback(result);},
+			error : function(e){
+				prompt("The request failed, Please try again!",5,"error");// 请求失败
+			}
+		});
+	};
+
 	self.setToArray = setToArray;// 将set对象内容遍历成数组
 	self.decimal = decimal;// 回车换下一个元素
 	self.nextElement = nextElement;// 回车换下一个元素
@@ -1464,7 +1606,12 @@ var checkOnlyRole=function (recordId,typeId,callback) {
 	self.forCreateDate = forCreateDate;//格式话日期和时间
 	self.forCreateNewDate =forCreateNewDate;//格式话日期和时间
     self.forCreateTime=forCreateTime;
+    self.judgeValidDate=judgeValidDate;  // DD/MM/YYYY 判断是否为有效日期 (返回true为无效)
+    self.judgeValidTime=judgeValidTime;  // 验证hh:mm:ss是否有效 (返回true为无效)
 
 	self.initDate = initDate;
+	self.checkPosition = checkPosition; // 判断是否为SM AM,OM权限
+	self.getPositionList = getPositionList; // 得到用户的职位
+	self.initiateReceiveAudit = initiateReceiveAudit;//发起审核，并审核成功
 	return self;
 });

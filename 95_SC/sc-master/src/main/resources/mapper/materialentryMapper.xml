@@ -25,6 +25,9 @@
         <result column="second_qty" property="secondQty"></result>
         <result column="expense_price" property="expensePrice"></result>
         <result column="stock_qty" property="stockQty"></result>
+        <result column="reason" property="reason"></result>
+        <result column="reason_code" property="reasonCode"></result>
+        <result column="fn_stock_qty" property="fnStockQty"></result>
     </resultMap>
 
     <select id="getItemInfo" parameterType="java.lang.String" resultMap="BaseItemResult">
@@ -104,6 +107,8 @@
         pi_cd,
         article_id,
         barcode,
+        reason_code,
+        fn_stock_qty,
         qty
         ) VALUES
         <foreach collection="list" item="item" index="index" separator="," >
@@ -111,6 +116,8 @@
             #{item.piCd,jdbcType=VARCHAR},
             #{item.articleId,jdbcType=VARCHAR},
             #{item.barcode,jdbcType=VARCHAR},
+            #{item.reasonCode,jdbcType=VARCHAR},
+            cast( #{item.fnStockQty} AS NUMERIC ),
             #{item.qty,jdbcType=NUMERIC}
             )
         </foreach>
@@ -121,6 +128,7 @@
         article_id,
         barcode,
         fn_stock_qty,
+        reason_code,
         qty
         ) VALUES
         <foreach collection="list" item="item" index="index" separator="," >
@@ -128,7 +136,8 @@
             #{item.piCd,jdbcType=VARCHAR},
             #{item.articleId,jdbcType=VARCHAR},
             #{item.barcode,jdbcType=VARCHAR},
-            cast( #{item.stockQty} AS NUMERIC),
+            cast( #{item.stockQty} AS DECIMAL ),
+            #{item.reasonCode},
             #{item.qty,jdbcType=NUMERIC}
             )
         </foreach>
@@ -140,22 +149,54 @@
             P1.barcode,
             M1.article_id,
             M1.article_name,
+           CONCAT(M2.reason_code, M2.reason) reason,
             M1.spec,
             M1.sales_unit_id,
-            P1.qty
+            M2.reason_code,
+            P1.qty,
+            P1.fn_stock_qty
 
         FROM
             PI0150 P1,
             MA1100 M1,
+            PI0160 M2,
 
             CM9060 C1
         WHERE
             P1.pi_cd = #{piCd}
             AND C1.sp_id = '0000'
             AND P1.article_id = M1.article_id
+            AND P1.article_id=M2.article_id
             AND C1.sp_value BETWEEN M1.effective_start_date
             AND M1.effective_end_date
 
+    </select>
+    <select id="getPI0140ByPrimaryIn" resultMap="BaseItemResult2">
+        SELECT
+            P1.pi_cd,
+            P1.barcode,
+            M1.article_id,
+            M1.article_name,
+            M1.spec,
+            M1.sales_unit_id,
+            P1.reason_code,
+            CONCAT(P1.reason_code,' ', M2.reason) reason,
+            P1.qty
+        FROM
+            PI0150 P1,
+            MA1100 M1,
+            PI0160 M2,
+            CM9060 C1
+        WHERE
+            P1.pi_cd = #{piCd}
+            AND C1.sp_id = '0000'
+            AND P1.article_id = M1.article_id
+            AND P1.article_id = M2.article_id
+            AND C1.sp_value BETWEEN M1.effective_start_date
+            AND M1.effective_end_date
+           <if test="articleId!=null and articleId!=''">
+            AND M1.article_id=#{articleId}
+           </if>
     </select>
 
 </mapper>

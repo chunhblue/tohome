@@ -857,6 +857,11 @@ define('informEdit', function () {
 				_common.prompt("Please enter the display start time！",5,"info");/*请输入显示开始时间*/
 				m.inform_start_date.focus();
 				return false;
+			}else if(_common.judgeValidDate($("#inform_start_date").val())){
+				_common.prompt("Please enter a valid date!",3,"info");
+				$("#inform_start_date").css("border-color","red");
+				$("#inform_start_date").focus();
+				return false;
 			}else {
 				m.inform_start_date.css("border-color","#CCCCCC");
 			}
@@ -864,6 +869,11 @@ define('informEdit', function () {
 				m.inform_end_date.css("border-color","red");
 				_common.prompt("Please enter the display end time！",5,"info");/*请输入显示结束时间*/
 				m.inform_end_date.focus();
+				return false;
+			}else if(_common.judgeValidDate($("#inform_end_date").val())){
+				_common.prompt("Please enter a valid date!",3,"info");
+				$("#inform_end_date").css("border-color","red");
+				$("#inform_end_date").focus();
 				return false;
 			}else {
 				m.inform_end_date.css("border-color","#CCCCCC");

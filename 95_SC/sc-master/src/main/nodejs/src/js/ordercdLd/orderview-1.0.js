@@ -77,9 +77,9 @@ define('orderview', function () {
             // receivingDifferences:m.receivingDifferences.val(),
             // deliveryDate:m.deliveryDate.val(),
         }
-        m.searchJson.val(JSON.stringify(searchJsonStr))
-        paramGrid ="searchJson="+m.searchJson.val();
-         m.search.on("click",function () {
+          m.searchJson.val(JSON.stringify(searchJsonStr));
+          paramGrid ="searchJson="+m.searchJson.val();
+          m.search.on("click",function () {
           tableGrid.setting("url",url_left+"/getItemsByOrder");
           tableGrid.setting("param", paramGrid);
           tableGrid.loadData(null);
@@ -138,16 +138,21 @@ define('orderview', function () {
             },
             loadCompleteEvent: function (self) {
                 selectTrTemp = null;//清空选择的行
+                var total = tableGrid.find("tr").length-1;
+                $("#records").text(total);
                 return self;
             },
             eachTrClick: function (trObj, tdObj) {//正常左侧点击
                 selectTrTemp = trObj;
             },
-            // buttonGroup:[
-            //     {butType:"custom",butHtml:"<button id='export' type='button' class='btn btn-info btn-sm'><span class='glyphicon glyphicon-export'></span> Export</button>"},
-            //     {butType:"custom",butHtml:"<button id='view' type='button' class='btn btn-info btn-sm'><span class='glyphicon glyphicon-view'></span> View</button>"}
-            // ]
+
+            buttonGroup:[
+                // {butType:"custom",butHtml:"<button id='export' type='button' class='btn btn-info btn-sm'><span class='glyphicon glyphicon-export'></span> Export</button>"},
+                // {butType:"custom",butHtml:"<button id='view' type='button' class='btn btn-info btn-sm'><span class='glyphicon glyphicon-view'></span> View</button>"}
+            ]
+
         });
+        $("#zgGridTable_main_foot").append("<div class='zgGrid-tfoot-td' id='zgGridTable_tfoot_box'><span class='zg-page-records'>Total: <span id='records'>0</span> items</span></div>");
     }
     function subfmtDate(date){
         var res = "";

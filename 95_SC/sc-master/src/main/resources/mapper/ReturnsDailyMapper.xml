@@ -34,6 +34,7 @@
         <result column="totalAmt" property="totalAmt"></result>
         <result column="c_operatorcode" property="amCd"></result>
         <result column="c_operatorname" property="amName"></result>
+        <result column="tran_serial_no" property="tranSerialNo"></result>
     </resultMap>
 
     <select id="selectByStoreCd" parameterType="java.lang.String"
@@ -139,6 +140,9 @@
         <if test="param.cashierCd!=null and param.cashierCd!=''">
             and A.cashier_id = trim(#{param.cashierCd})
         </if>
+        <if test="param.nonSaleType!=null and param.nonSaleType!=''">
+            and sa21.non_sale_type = trim(#{param.nonSaleType})
+        </if>
         <if test="param.am!=null and param.am!=''">
             and E.ofc = #{param.am}
         </if>
@@ -174,4 +178,742 @@
         </if>
     </select>
 
+    <select id="searchNoSale" parameterType="cn.com.bbut.iy.itemmaster.dto.returnsDaily.ReturnsDailyParamDTO"
+            resultMap="returnMap">
+        select
+        A.article_id,
+        C.article_name,
+        to_char(A.tran_date, 'yyyyMMdd') as charDate,
+        A.tran_date,
+       /* B.barcode,*/
+        A.pos_id,
+        A.tran_serial_no,
+        A.qty sale_qty,
+        coalesce(A.qty * M13.base_sale_price,0) as totalAmt,
+        sa21.non_sale_type,
+        A.cashier_id,
+        D.cashier_name,
+        E.store_cd,
+        E.store_name,
+        oper.c_operatorcode,
+        oper.c_operatorname
+        FROM
+        SA0580
+        A LEFT JOIN SA0050 D ON A.cashier_id = D.cashier_id
+        AND A.store_cd = D.store_cd
+        LEFT JOIN sa0021 sa21 ON sa21.acc_date = A.acc_date
+        AND sa21.store_cd = A.store_cd
+        AND sa21.pos_id = A.pos_id
+        AND sa21.tran_serial_no = A.tran_serial_no
+        AND sa21.item_code = A.article_id,
+        MA1100 C,
+        MA1130 M13,
+        MA1000 E,
+        t_operator oper
+        WHERE
+        A.store_cd = E.store_cd
+        AND A.acc_date BETWEEN E.effective_start_date
+        AND E.effective_end_date
+        AND E.ofc = oper.c_operatorcode
+        AND A.article_id = C.article_id
+        AND to_char(A.tran_date, 'yyyyMMdd') BETWEEN C.effective_start_date
+        AND C.effective_end_date
+        AND M13.article_id = C.article_id
+        and M13.effective_start_date = C.effective_start_date
+        and M13.structure_cd =
+        (SELECT admin_structure_cd FROM ma0020 WHERE structure_cd=(SELECT admin_structure_cd FROM ma0020 WHERE structure_cd=A.store_cd))
+        AND A.store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        /*--早班*/
+        <if test="param.shift!=null and param.shift=='00'">
+            <![CDATA[
+                and A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                ]]>
+        </if>
+        /*--中班*/
+        <if test="param.shift!=null and param.shift=='01'">
+            <![CDATA[
+                and A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss')
+                ]]>
+        </if>
+        /*--晚班*/
+        <if test="param.shift!=null and param.shift=='02'">
+            <![CDATA[
+                and (A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                or A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss'))
+                ]]>
+        </if>
+        <if test="param.returnDate!=null and param.returnDate!=''">
+            <![CDATA[
+        AND A.tran_date >= TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        and (A.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        ]]>
+        </if>
+
+        <if test="param.cashierCd!=null and param.cashierCd!=''">
+            and A.cashier_id = trim(#{param.cashierCd})
+        </if>
+        <if test="param.nonSaleType!=null and param.nonSaleType!=''">
+            and sa21.non_sale_type = trim(#{param.nonSaleType})
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            and E.ofc = #{param.am}
+        </if>
+
+        <if test="param.depCd != null and param.depCd != ''">
+            and C.dep_cd = #{param.depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.pmaCd != null and param.pmaCd != ''">
+            and C.pma_cd = #{param.pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.categoryCd != null and param.categoryCd != ''">
+            and C.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
+            and C.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.articleName!=null and param.articleName!=''">
+            AND concat(lower( C.article_id ),'',lower( C.article_name ),'',lower( C.article_name_en ),'',lower(
+            C.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
+        </if>
+        <if test="param.totalAmt != null and param.totalAmt != '' and param.calType != null and param.calType != ''" >
+            <![CDATA[
+            and coalesce(A.qty * M13.base_sale_price,0) ${param.calType} cast(#{param.totalAmt,jdbcType=VARCHAR} as NUMERIC)
+            ]]>
+        </if>
+
+        <!--<if test="param.barcode != null and param.barcode != ''" >
+            and B.barcode LIKE lower(CONCAT('%',#{param.barcode},'%')
+        </if>-->
+
+        union
+
+        SELECT B
+        .article_id,
+        C.article_name,
+        to_char( A.tran_date, 'yyyyMMdd' ) AS charDate,
+        A.tran_date,
+        /* B.barcode,*/
+        A.pos_id,
+        A.tran_serial_no,
+        B.sale_qty sale_qty,
+        COALESCE ( B.sale_qty * M13.base_sale_price, 0 ) AS totalAmt,
+        sa21.non_sale_type,
+        A.cashier_id,
+        D.cashier_name,
+        E.store_cd,
+        E.store_name,
+        oper.c_operatorcode,
+        oper.c_operatorname
+        FROM
+        SA0010
+        A join SA0020 B
+        on A.tran_serial_no = B.tran_serial_no
+        AND A.acc_date = B.acc_date
+        AND A.store_cd = B.store_cd
+        AND A.pos_id = B.pos_id
+        LEFT JOIN SA0050 D ON A.cashier_id = D.cashier_id
+        AND A.store_cd = D.store_cd
+        LEFT JOIN sa0021 sa21 ON to_char(a.tran_date, 'dd/mm/yyyy') = sa21.tran_date
+        and to_char(a.tran_date, 'HH24:MI:ss') = sa21.tran_time
+        AND sa21.store_cd = A.store_cd
+        AND sa21.pos_id = A.pos_id
+        AND sa21.tran_serial_no = A.tran_serial_no
+        AND sa21.item_code = B.article_id,
+        MA1100 C,
+        MA1130 M13,
+        MA1000 E,
+        t_operator oper
+        WHERE
+        A.tran_type = 'return'
+        AND B.detail_type in ( 'r','ra')
+        AND A.store_cd = E.store_cd
+        AND to_char( A.tran_date, 'yyyyMMdd' ) BETWEEN E.effective_start_date
+        AND E.effective_end_date
+        AND E.ofc = oper.c_operatorcode
+        AND B.article_id = C.article_id
+        AND to_char( A.tran_date, 'yyyyMMdd' ) BETWEEN C.effective_start_date
+        AND C.effective_end_date
+        AND M13.article_id = C.article_id
+        AND M13.effective_start_date = C.effective_start_date
+        AND M13.structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd = A.store_cd ) )
+        AND A.store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.shift!=null and param.shift=='00'">
+            <![CDATA[
+                and A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                ]]>
+        </if>
+        <if test="param.shift!=null and param.shift=='01'">
+            <![CDATA[
+                and A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss')
+                ]]>
+        </if>
+        <if test="param.shift!=null and param.shift=='02'">
+            <![CDATA[
+                and (A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                or A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss'))
+                ]]>
+        </if>
+        <if test="param.returnDate!=null and param.returnDate!=''">
+            <![CDATA[
+        AND A.tran_date >= TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        and (A.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        ]]>
+        </if>
+
+        <if test="param.cashierCd!=null and param.cashierCd!=''">
+            and A.cashier_id = trim(#{param.cashierCd})
+        </if>
+        <if test="param.nonSaleType!=null and param.nonSaleType!=''">
+            and sa21.non_sale_type = trim(#{param.nonSaleType})
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            and E.ofc = #{param.am}
+        </if>
+
+        <if test="param.depCd != null and param.depCd != ''">
+            and C.dep_cd = #{param.depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.pmaCd != null and param.pmaCd != ''">
+            and C.pma_cd = #{param.pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.categoryCd != null and param.categoryCd != ''">
+            and C.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
+            and C.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.articleName!=null and param.articleName!=''">
+            AND concat(lower( C.article_id ),'',lower( C.article_name ),'',lower( C.article_name_en ),'',lower(
+            C.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
+        </if>
+        <if test="param.totalAmt != null and param.totalAmt != '' and param.calType != null and param.calType != ''" >
+            <![CDATA[
+            and coalesce(B.sale_qty * M13.base_sale_price,0) ${param.calType} cast(#{param.totalAmt,jdbcType=VARCHAR} as NUMERIC)
+            ]]>
+        </if>
+        <!--<if test="param.barcode != null and param.barcode != ''" >
+            and B.barcode LIKE lower(CONCAT('%',#{param.barcode},'%')
+        </if>-->
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+
+    <select id="getAllTranTime" parameterType="cn.com.bbut.iy.itemmaster.dto.returnsDaily.ReturnsDailyParamDTO"
+            resultMap="returnMap">
+        select
+        store_cd,
+        pos_id,
+        tran_date,
+        tran_type
+        from sa0010
+        WHERE
+        tran_type in ('train_start','train_end')
+        AND store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.returnDate!=null and param.returnDate!=''">
+            <![CDATA[
+        AND tran_date >= TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        and (tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        ]]>
+        </if>
+        ORDER BY store_cd,pos_id,tran_date
+    </select>
+
+    <select id="searchNoSaleCount" parameterType="cn.com.bbut.iy.itemmaster.dto.returnsDaily.ReturnsDailyParamDTO"
+            resultType="Integer">
+        select
+        count(*)
+        FROM
+        (
+        select
+        A.article_id,
+        C.article_name,
+        to_char(A.tran_date, 'yyyyMMdd') as charDate,
+        A.tran_date,
+        /* B.barcode,*/
+        A.pos_id,
+        A.tran_serial_no,
+        A.qty sale_qty,
+        coalesce(A.qty * M13.base_sale_price,0) as totalAmt,
+        sa21.non_sale_type,
+        A.cashier_id,
+        D.cashier_name,
+        E.store_cd,
+        E.store_name,
+        oper.c_operatorcode,
+        oper.c_operatorname
+        FROM
+        SA0580
+        A LEFT JOIN SA0050 D ON A.cashier_id = D.cashier_id
+        AND A.store_cd = D.store_cd
+        LEFT JOIN sa0021 sa21 ON sa21.acc_date = A.acc_date
+        AND sa21.store_cd = A.store_cd
+        AND sa21.pos_id = A.pos_id
+        AND sa21.tran_serial_no = A.tran_serial_no
+        AND sa21.item_code = A.article_id,
+        MA1100 C,
+        MA1130 M13,
+        MA1000 E,
+        t_operator oper
+        WHERE
+        A.store_cd = E.store_cd
+        AND A.acc_date BETWEEN E.effective_start_date
+        AND E.effective_end_date
+        AND E.ofc = oper.c_operatorcode
+        AND A.article_id = C.article_id
+        AND to_char(A.tran_date, 'yyyyMMdd') BETWEEN C.effective_start_date
+        AND C.effective_end_date
+        AND M13.article_id = C.article_id
+        and M13.effective_start_date = C.effective_start_date
+        and M13.structure_cd =
+        (SELECT admin_structure_cd FROM ma0020 WHERE structure_cd=(SELECT admin_structure_cd FROM ma0020 WHERE structure_cd=A.store_cd))
+        AND A.store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        /*--早班*/
+        <if test="param.shift!=null and param.shift=='00'">
+            <![CDATA[
+                and A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                ]]>
+        </if>
+        /*--中班*/
+        <if test="param.shift!=null and param.shift=='01'">
+            <![CDATA[
+                and A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss')
+                ]]>
+        </if>
+        /*--晚班*/
+        <if test="param.shift!=null and param.shift=='02'">
+            <![CDATA[
+                and (A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                or A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss'))
+                ]]>
+        </if>
+        <if test="param.returnDate!=null and param.returnDate!=''">
+            <![CDATA[
+        AND A.tran_date >= TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        and (A.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        ]]>
+        </if>
+
+        <if test="param.cashierCd!=null and param.cashierCd!=''">
+            and A.cashier_id = trim(#{param.cashierCd})
+        </if>
+        <if test="param.nonSaleType!=null and param.nonSaleType!=''">
+            and sa21.non_sale_type = trim(#{param.nonSaleType})
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            and E.ofc = #{param.am}
+        </if>
+
+        <if test="param.depCd != null and param.depCd != ''">
+            and C.dep_cd = #{param.depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.pmaCd != null and param.pmaCd != ''">
+            and C.pma_cd = #{param.pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.categoryCd != null and param.categoryCd != ''">
+            and C.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
+            and C.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.articleName!=null and param.articleName!=''">
+            AND concat(lower( C.article_id ),'',lower( C.article_name ),'',lower( C.article_name_en ),'',lower(
+            C.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
+        </if>
+        <if test="param.totalAmt != null and param.totalAmt != '' and param.calType != null and param.calType != ''" >
+            <![CDATA[
+            and coalesce(A.qty * M13.base_sale_price,0) ${param.calType} cast(#{param.totalAmt,jdbcType=VARCHAR} as NUMERIC)
+            ]]>
+        </if>
+
+        <!--<if test="param.barcode != null and param.barcode != ''" >
+            and B.barcode LIKE lower(CONCAT('%',#{param.barcode},'%')
+        </if>-->
+
+        union
+
+        SELECT B
+        .article_id,
+        C.article_name,
+        to_char( A.tran_date, 'yyyyMMdd' ) AS charDate,
+        A.tran_date,
+        /* B.barcode,*/
+        A.pos_id,
+        A.tran_serial_no,
+        B.sale_qty sale_qty,
+        COALESCE ( B.sale_qty * M13.base_sale_price, 0 ) AS totalAmt,
+        sa21.non_sale_type,
+        A.cashier_id,
+        D.cashier_name,
+        E.store_cd,
+        E.store_name,
+        oper.c_operatorcode,
+        oper.c_operatorname
+        FROM
+        SA0010
+        A join SA0020 B
+        on A.tran_serial_no = B.tran_serial_no
+        AND A.acc_date = B.acc_date
+        AND A.store_cd = B.store_cd
+        AND A.pos_id = B.pos_id
+        LEFT JOIN SA0050 D ON A.cashier_id = D.cashier_id
+        AND A.store_cd = D.store_cd
+        LEFT JOIN sa0021 sa21 ON to_char(a.tran_date, 'dd/mm/yyyy') = sa21.tran_date
+        and to_char(a.tran_date, 'HH24:MI:ss') = sa21.tran_time
+        AND sa21.store_cd = A.store_cd
+        AND sa21.pos_id = A.pos_id
+        AND sa21.tran_serial_no = A.tran_serial_no
+        AND sa21.item_code = B.article_id,
+        MA1100 C,
+        MA1130 M13,
+        MA1000 E,
+        t_operator oper
+        WHERE
+        A.tran_type = 'return'
+        AND B.detail_type in ( 'r','ra')
+        AND A.store_cd = E.store_cd
+        AND to_char( A.tran_date, 'yyyyMMdd' ) BETWEEN E.effective_start_date
+        AND E.effective_end_date
+        AND E.ofc = oper.c_operatorcode
+        AND B.article_id = C.article_id
+        AND to_char( A.tran_date, 'yyyyMMdd' ) BETWEEN C.effective_start_date
+        AND C.effective_end_date
+        AND M13.article_id = C.article_id
+        AND M13.effective_start_date = C.effective_start_date
+        AND M13.structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd = A.store_cd ) )
+        AND A.store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.shift!=null and param.shift=='00'">
+            <![CDATA[
+                and A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                ]]>
+        </if>
+        <if test="param.shift!=null and param.shift=='01'">
+            <![CDATA[
+                and A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss')
+                ]]>
+        </if>
+        <if test="param.shift!=null and param.shift=='02'">
+            <![CDATA[
+                and (A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                or A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss'))
+                ]]>
+        </if>
+        <if test="param.returnDate!=null and param.returnDate!=''">
+            <![CDATA[
+        AND A.tran_date >= TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        and (A.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        ]]>
+        </if>
+
+        <if test="param.cashierCd!=null and param.cashierCd!=''">
+            and A.cashier_id = trim(#{param.cashierCd})
+        </if>
+        <if test="param.nonSaleType!=null and param.nonSaleType!=''">
+            and sa21.non_sale_type = trim(#{param.nonSaleType})
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            and E.ofc = #{param.am}
+        </if>
+
+        <if test="param.depCd != null and param.depCd != ''">
+            and C.dep_cd = #{param.depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.pmaCd != null and param.pmaCd != ''">
+            and C.pma_cd = #{param.pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.categoryCd != null and param.categoryCd != ''">
+            and C.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
+            and C.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.articleName!=null and param.articleName!=''">
+            AND concat(lower( C.article_id ),'',lower( C.article_name ),'',lower( C.article_name_en ),'',lower(
+            C.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
+        </if>
+        <if test="param.totalAmt != null and param.totalAmt != '' and param.calType != null and param.calType != ''" >
+            <![CDATA[
+            and coalesce(B.sale_qty * M13.base_sale_price,0) ${param.calType} cast(#{param.totalAmt,jdbcType=VARCHAR} as NUMERIC)
+            ]]>
+        </if>
+        <!--<if test="param.barcode != null and param.barcode != ''" >
+            and B.barcode LIKE lower(CONCAT('%',#{param.barcode},'%')
+        </if>-->
+        ) v
+    </select>
+
+    <select id="getItemTotal" parameterType="cn.com.bbut.iy.itemmaster.dto.returnsDaily.ReturnsDailyParamDTO"
+            resultMap="returnMap">
+        select
+        sum(v.sale_qty) totalQty ,
+        sum(v.totalAmt) as totalAmt
+        FROM
+        (
+        select
+        A.article_id,
+        C.article_name,
+        to_char(A.tran_date, 'yyyyMMdd') as charDate,
+        A.tran_date,
+        /* B.barcode,*/
+        A.pos_id,
+        A.tran_serial_no,
+        A.qty sale_qty,
+        coalesce(A.qty * M13.base_sale_price,0) as totalAmt,
+        sa21.non_sale_type,
+        A.cashier_id,
+        D.cashier_name,
+        E.store_cd,
+        E.store_name,
+        oper.c_operatorcode,
+        oper.c_operatorname
+        FROM
+        SA0580
+        A LEFT JOIN SA0050 D ON A.cashier_id = D.cashier_id
+        AND A.store_cd = D.store_cd
+        LEFT JOIN sa0021 sa21 ON sa21.acc_date = A.acc_date
+        AND sa21.store_cd = A.store_cd
+        AND sa21.pos_id = A.pos_id
+        AND sa21.tran_serial_no = A.tran_serial_no
+        AND sa21.item_code = A.article_id,
+        MA1100 C,
+        MA1130 M13,
+        MA1000 E,
+        t_operator oper
+        WHERE
+        A.store_cd = E.store_cd
+        AND A.acc_date BETWEEN E.effective_start_date
+        AND E.effective_end_date
+        AND E.ofc = oper.c_operatorcode
+        AND A.article_id = C.article_id
+        AND to_char(A.tran_date, 'yyyyMMdd') BETWEEN C.effective_start_date
+        AND C.effective_end_date
+        AND M13.article_id = C.article_id
+        and M13.effective_start_date = C.effective_start_date
+        and M13.structure_cd =
+        (SELECT admin_structure_cd FROM ma0020 WHERE structure_cd=(SELECT admin_structure_cd FROM ma0020 WHERE structure_cd=A.store_cd))
+        AND A.store_cd IN
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        /*--早班*/
+        <if test="param.shift!=null and param.shift=='00'">
+            <![CDATA[
+                and A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                ]]>
+        </if>
+        /*--中班*/
+        <if test="param.shift!=null and param.shift=='01'">
+            <![CDATA[
+                and A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss')
+                ]]>
+        </if>
+        /*--晚班*/
+        <if test="param.shift!=null and param.shift=='02'">
+            <![CDATA[
+                and (A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                or A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss'))
+                ]]>
+        </if>
+        <if test="param.returnDate!=null and param.returnDate!=''">
+            <![CDATA[
+        AND A.tran_date >= TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        and (A.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        ]]>
+        </if>
+
+        <if test="param.cashierCd!=null and param.cashierCd!=''">
+            and A.cashier_id = trim(#{param.cashierCd})
+        </if>
+        <if test="param.nonSaleType!=null and param.nonSaleType!=''">
+            and sa21.non_sale_type = trim(#{param.nonSaleType})
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            and E.ofc = #{param.am}
+        </if>
+
+        <if test="param.depCd != null and param.depCd != ''">
+            and C.dep_cd = #{param.depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.pmaCd != null and param.pmaCd != ''">
+            and C.pma_cd = #{param.pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.categoryCd != null and param.categoryCd != ''">
+            and C.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
+            and C.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.articleName!=null and param.articleName!=''">
+            AND concat(lower( C.article_id ),'',lower( C.article_name ),'',lower( C.article_name_en ),'',lower(
+            C.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
+        </if>
+        <if test="param.totalAmt != null and param.totalAmt != '' and param.calType != null and param.calType != ''" >
+            <![CDATA[
+            and coalesce(A.qty * M13.base_sale_price,0) ${param.calType} cast(#{param.totalAmt,jdbcType=VARCHAR} as NUMERIC)
+            ]]>
+        </if>
+
+        <!--<if test="param.barcode != null and param.barcode != ''" >
+            and B.barcode LIKE lower(CONCAT('%',#{param.barcode},'%')
+        </if>-->
+
+        union
+
+        SELECT B
+        .article_id,
+        C.article_name,
+        to_char( A.tran_date, 'yyyyMMdd' ) AS charDate,
+        A.tran_date,
+        /* B.barcode,*/
+        A.pos_id,
+        A.tran_serial_no,
+        B.sale_qty sale_qty,
+        COALESCE ( B.sale_qty * M13.base_sale_price, 0 ) AS totalAmt,
+        sa21.non_sale_type,
+        A.cashier_id,
+        D.cashier_name,
+        E.store_cd,
+        E.store_name,
+        oper.c_operatorcode,
+        oper.c_operatorname
+        FROM
+        SA0010
+        A join SA0020 B
+        on A.tran_serial_no = B.tran_serial_no
+        AND A.acc_date = B.acc_date
+        AND A.store_cd = B.store_cd
+        AND A.pos_id = B.pos_id
+        LEFT JOIN SA0050 D ON A.cashier_id = D.cashier_id
+        AND A.store_cd = D.store_cd
+        LEFT JOIN sa0021 sa21 ON to_char(a.tran_date, 'dd/mm/yyyy') = sa21.tran_date
+        and to_char(a.tran_date, 'HH24:MI:ss') = sa21.tran_time
+        AND sa21.store_cd = A.store_cd
+        AND sa21.pos_id = A.pos_id
+        AND sa21.tran_serial_no = A.tran_serial_no
+        AND sa21.item_code = B.article_id,
+        MA1100 C,
+        MA1130 M13,
+        MA1000 E,
+        t_operator oper
+        WHERE
+        A.tran_type = 'return'
+        AND B.detail_type in ( 'r','ra')
+        AND A.store_cd = E.store_cd
+        AND to_char( A.tran_date, 'yyyyMMdd' ) BETWEEN E.effective_start_date
+        AND E.effective_end_date
+        AND E.ofc = oper.c_operatorcode
+        AND B.article_id = C.article_id
+        AND to_char( A.tran_date, 'yyyyMMdd' ) BETWEEN C.effective_start_date
+        AND C.effective_end_date
+        AND M13.article_id = C.article_id
+        AND M13.effective_start_date = C.effective_start_date
+        AND M13.structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd = A.store_cd ) )
+        AND A.store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="param.shift!=null and param.shift=='00'">
+            <![CDATA[
+                and A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                ]]>
+        </if>
+        <if test="param.shift!=null and param.shift=='01'">
+            <![CDATA[
+                and A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 14:00:00','yyyyMMdd hh24:mi:ss')
+                and A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss')
+                ]]>
+        </if>
+        <if test="param.shift!=null and param.shift=='02'">
+            <![CDATA[
+                and (A.tran_date < to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 06:00:00','yyyyMMdd hh24:mi:ss')
+                or A.tran_date >= to_timestamp(to_char(A.tran_date,'yyyyMMdd')||' 22:00:00','yyyyMMdd hh24:mi:ss'))
+                ]]>
+        </if>
+        <if test="param.returnDate!=null and param.returnDate!=''">
+            <![CDATA[
+        AND A.tran_date >= TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        and (A.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{param.returnDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        ]]>
+        </if>
+
+        <if test="param.cashierCd!=null and param.cashierCd!=''">
+            and A.cashier_id = trim(#{param.cashierCd})
+        </if>
+        <if test="param.nonSaleType!=null and param.nonSaleType!=''">
+            and sa21.non_sale_type = trim(#{param.nonSaleType})
+        </if>
+        <if test="param.am!=null and param.am!=''">
+            and E.ofc = #{param.am}
+        </if>
+
+        <if test="param.depCd != null and param.depCd != ''">
+            and C.dep_cd = #{param.depCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.pmaCd != null and param.pmaCd != ''">
+            and C.pma_cd = #{param.pmaCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.categoryCd != null and param.categoryCd != ''">
+            and C.category_cd = #{param.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.subCategoryCd != null and param.subCategoryCd != ''">
+            and C.sub_category_cd = #{param.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="param.articleName!=null and param.articleName!=''">
+            AND concat(lower( C.article_id ),'',lower( C.article_name ),'',lower( C.article_name_en ),'',lower(
+            C.article_short_name_en )) LIKE lower( CONCAT('%',#{param.articleName},'%') )
+        </if>
+        <if test="param.totalAmt != null and param.totalAmt != '' and param.calType != null and param.calType != ''" >
+            <![CDATA[
+            and coalesce(B.sale_qty * M13.base_sale_price,0) ${param.calType} cast(#{param.totalAmt,jdbcType=VARCHAR} as NUMERIC)
+            ]]>
+        </if>
+        <!--<if test="param.barcode != null and param.barcode != ''" >
+            and B.barcode LIKE lower(CONCAT('%',#{param.barcode},'%')
+        </if>-->
+        ) v
+ </select>
+
+    <select id="getNextTranTime" parameterType="String" resultMap="returnMap">
+        select
+        store_cd,pos_id,tran_date,tran_type
+        from sa0010
+        WHERE
+        store_cd = #{storeCd,jdbcType=VARCHAR}
+				and pos_id = #{posId,jdbcType=VARCHAR}
+        AND tran_date > to_timestamp(#{tranDate,jdbcType=VARCHAR},'YYYY-MM-DD HH24:MI:SS')
+        ORDER BY store_cd,pos_id,tran_date limit 1;
+    </select>
 </mapper>

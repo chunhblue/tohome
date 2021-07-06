@@ -99,7 +99,7 @@ mybatis:
   mapper-locations: classpath*:/mapper/*Mapper.xml
   configuration:
     map-underscore-to-camel-case: true
-    default-fetch-size: 100
+    default-fetch-size: 1000
     default-statement-timeout: 30
 
 management:

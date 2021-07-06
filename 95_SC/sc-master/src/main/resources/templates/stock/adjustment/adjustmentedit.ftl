@@ -207,7 +207,7 @@
 					<div class="form-horizontal" >
 						<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 							<div class="form-group">
-								<label for="item_input"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label not-null">Item Code</label>
+								<label for="item_input"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label not-null">Item Code/Barcode</label>
 								<div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
 									<div class="aotu-pos good-select">
 										<input type="text" class="form-control my-automatic input-sm" placeholder="Please enter 3 digit" id="item_input" style="overflow:scroll;text-overflow:ellipsis;">

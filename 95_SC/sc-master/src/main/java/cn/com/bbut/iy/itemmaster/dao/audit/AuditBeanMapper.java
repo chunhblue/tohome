@@ -114,6 +114,11 @@ public interface AuditBeanMapper{
     Integer getAuditStatus(@Param("table")String table,@Param("key")String key,@Param("recordCd")String recordCd);
 
     /**
+     * 获取订单查询专用审核状态
+     */
+    Integer getOrderAuditStatus(@Param("table")String table,@Param("key")String key,@Param("recordCd")String recordCd);
+
+    /**
      * 检查用户是否拥有审核权限
      * @param storeCd 审核记录id
      * @param userId 审核状态 1：通过 0：不通过

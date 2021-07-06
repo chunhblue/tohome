@@ -10,7 +10,9 @@ var _myAjax=require("myAjax");
 define('businessDaily', function () {
     var self = {};
     var url_left = "",
+    	url_root = "",
 		systemPath = "",
+		dateStr = null,
 		reThousands = null,
 		toThousands = null,
 		getThousands = null,
@@ -46,7 +48,11 @@ define('businessDaily', function () {
     	createJqueryObj();
 		var businessDate = m.businessDate.val();
 		if(businessDate!=null&&businessDate!='') {
-			m.date.val(businessDate);
+			let date = new Date(new Date(dateInfmt(businessDate))-1000*60*60*24);
+			var mouth = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+			var day = date.getDate() < 10 ? "0" + (date.getDate()) : date.getDate();
+			dateStr = day+"/"+mouth+"/"+date.getFullYear();
+			m.date.val(dateStr);
 		}
     	url_left=_common.config.surl+"/businessDaily";
 		url_root = _common.config.surl;
@@ -146,7 +152,31 @@ define('businessDaily', function () {
 		$.myAutomatic.cleanSelectObj(a_pma);
 		$.myAutomatic.cleanSelectObj(a_category);
 		$.myAutomatic.cleanSelectObj(a_subCategory);
-	}
+
+		$.myAjaxs({
+			url: url_left + "/getPayName",
+			async: true,
+			cache: false,
+			type: "post",
+			data: {
+				storeCd:m.aStore.attr('k'),
+				businessDate:formatDate(m.date.val())
+			},
+			dataType: "json",
+			success: function (result) {
+				//支付方式
+				var payAmt = result.data;
+				$("#payCd0").text(payAmt.payCd0);
+				$("#payCd1").text(payAmt.payCd1);
+				$("#payCd2").text(payAmt.payCd2);
+				$("#payCd3").text(payAmt.payCd3);
+				$("#payCd4").text(payAmt.payCd4);
+				$("#payCd5").text(payAmt.payCd5);
+				$("#payCd6").text(payAmt.payCd6);
+			}
+		})
+
+	};
 
 	var but_event = function () {
 		// 导出按钮事件
@@ -160,6 +190,31 @@ define('businessDaily', function () {
 				return;
 			}else {
 				$("#aStore").css("border-color","#CCC");
+			}var businessDate = m.businessDate.val();
+			if(businessDate!=null&&businessDate!='') {
+				let date = new Date(new Date(dateInfmt(businessDate))-1000*60*60*24);
+				var mouth = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+				var day = date.getDate() < 10 ? "0" + (date.getDate()) : date.getDate();
+				dateStr = day+"/"+mouth+"/"+date.getFullYear();
+			}
+
+			if (!m.date.val()) {
+				_common.prompt("The business date cannot be empty!", 5, "error");/*业务日期不能为空*/
+				m.date.focus();
+				m.date.css("border-color", "red");
+				return false;
+			} else {
+				if(_common.judgeValidDate(m.date.val())){
+					_common.prompt("Please enter a valid date!",3,"info");
+					m.date.focus();
+					return false;
+				}else if(parseInt(formatDate(m.date.val()))>parseInt(formatDate(dateStr))){
+					_common.prompt("Only dates prior to today can be selected!",3,"info");
+					m.date.focus();
+					return false;
+				}else {
+					m.date.css("border-color", "#CCC");
+				}
 			}
 			let obj = {
 				'storeCd': store,
@@ -184,44 +239,39 @@ define('businessDaily', function () {
 			}else {
 				$("#aStore").css("border-color","#CCC");
 			}
-			var dep = m.dep.val();
-			//delte by lyz 20200623 方便计算改为不能查询department
-			// 判断是否选择Top Department
-			/*if(dep==null || dep==''){
-				_common.prompt("Please select Top Department!",5,"info");
-				$("#dep").focus();
-				$("#dep").css("border-color","red");
-				return;
-			}else {
-				$("#dep").css("border-color","#CCC");
+			var businessDate = m.businessDate.val();
+			if(businessDate!=null&&businessDate!='') {
+				let date = new Date(new Date(dateInfmt(businessDate))-1000*60*60*24);
+				var mouth = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+				var day = date.getDate() < 10 ? "0" + (date.getDate()) : date.getDate();
+				dateStr = day+"/"+mouth+"/"+date.getFullYear();
 			}
-			var pma = m.pma.val();*/
-			// 判断是否选择Department
-			/*if(dep != 'All Top Department'){
-				if(pma==null || pma==''){
-					_common.prompt("Please select Department!",5,"info");
-					$("#pma").focus();
-					$("#pma").css("border-color","red");
-					return;
+
+			if (!m.date.val()) {
+				_common.prompt("The business date cannot be empty!", 5, "error");/*业务日期不能为空*/
+				m.date.focus();
+				m.date.css("border-color", "red");
+				return false;
+			} else {
+				if(_common.judgeValidDate(m.date.val())){
+					_common.prompt("Please enter a valid date!",3,"info");
+					m.date.focus();
+					return false;
+				}else if(parseInt(formatDate(m.date.val()))>parseInt(formatDate(dateStr))){
+					_common.prompt("Only dates prior to today can be selected!",3,"info");
+					m.date.focus();
+					return false;
 				}else {
-					$("#pma").css("border-color","#CCC");
+					m.date.css("border-color", "#CCC");
 				}
-			}*/
-			// 判断是否选择Category
-			/*var category = m.category.val();
-			if(dep != 'All Top Department' && pma != 'All Department'){
-				if(category==null || category==''){
-					_common.prompt("Please select Category!",5,"info");
-					$("#category").focus();
-					$("#category").css("border-color","red");
-					return;
-				}else {
-					$("#category").css("border-color","#CCC");
-				}
-			}*/
+			}
+
 			var storeName = m.aStore.val();
+
+
 			// 初始化营业日报
 			initBusinessDaily();
+			_common.loading();
 			$.myAjaxs({
 				url:url_left+"/getData",
 				async:true,
@@ -233,7 +283,7 @@ define('businessDaily', function () {
 				},
 				dataType:"json",
 				success:function(result){
-					if(result!=null){
+					if(result.flag === "0"){
 						m.storeName.text("Store："+storeName);
 						m.bsDate.text(m.date.val());
 						//打印日期
@@ -241,8 +291,6 @@ define('businessDaily', function () {
 						$("#printDate").text("Print Date："+printDate);
 						//销售日报
 						var saleData = result.data.saleData;
-						console.log(result.data.lastMonthSalesAmount);
-						console.log(result.data.countCustomer);
 						$("#grossSaleAmount").text(toThousands(saleData.grossSaleAmount));//销售金额
 						$("#discountAmount").text(toThousands(saleData.discountAmount));//折扣金额
 						$("#saleAmount").text(toThousands(saleData.saleAmount));//实际销售额
@@ -252,20 +300,87 @@ define('businessDaily', function () {
 						$("#serviceAmount").text(toThousands(saleData.serviceAmount));//服务费
 						$("#chargeAmount").text(toThousands(saleData.chargeAmount));//充值费用
 						$("#chargeRefundAmount").text(toThousands(saleData.chargeRefundAmount));//充值退款费用
-						$("#countCustomer").text(toThousands(result.data.countCustomer));//统计该天早班顾客数目
+						$("#countCustomer").text(toThousands(result.data.countCustomer));//统计该天顾客数目
 						//统计过去28天的平均金额
 						$("#Average4WeekSalesAmount").text(toThousands(((result.data.lastMonthSalesAmount/28).toFixed(2))));
 
 						//支付方式
 						var payAmt = result.data.payAmt;
+						$("#payCd0").text(payAmt.payCd0);
+						$("#payCd1").text(payAmt.payCd1);
+						$("#payCd2").text(payAmt.payCd2);
+						$("#payCd3").text(payAmt.payCd3);
+						$("#payCd4").text(payAmt.payCd4);
+						$("#payCd5").text(payAmt.payCd5);
+						$("#payCd6").text(payAmt.payCd6);
 						$("#payAmt0").text(toThousands(payAmt.payAmt0));
 						$("#payAmt1").text(toThousands(payAmt.payAmt1));
 						$("#payAmt2").text(toThousands(payAmt.payAmt2));
 						$("#payAmt3").text(toThousands(payAmt.payAmt3));
 						$("#payAmt4").text(toThousands(payAmt.payAmt4));
 						$("#payAmt5").text(toThousands(payAmt.payAmt5));
+						$("#payAmt6").text(toThousands(payAmt.payAmt6));
 						$("#payAmt").text(toThousands(payAmt.payAmt));
+						$("#Contribution0").text((100-(payAmt.payAmt1*100/payAmt.payAmt).toFixed(1)
+							-(payAmt.payAmt2*100/payAmt.payAmt).toFixed(1)
+							-(payAmt.payAmt3*100/payAmt.payAmt).toFixed(1)
+							-(payAmt.payAmt4*100/payAmt.payAmt).toFixed(1)
+							-(payAmt.payAmt5*100/payAmt.payAmt).toFixed(1)
+							-(payAmt.payAmt6*100/payAmt.payAmt).toFixed(1)).toFixed(1));
+						$("#Contribution1").text((payAmt.payAmt1*100/payAmt.payAmt).toFixed(1));
+						$("#Contribution2").text((payAmt.payAmt2*100/payAmt.payAmt).toFixed(1));
+						$("#Contribution3").text((payAmt.payAmt3*100/payAmt.payAmt).toFixed(1));
+						$("#Contribution4").text((payAmt.payAmt4*100/payAmt.payAmt).toFixed(1));
+						$("#Contribution5").text((payAmt.payAmt5*100/payAmt.payAmt).toFixed(1));
+						$("#Contribution6").text((payAmt.payAmt6*100/payAmt.payAmt).toFixed(1));
+						$("#Contribution").text("100 %");
+						if($("#payAmt").text() === '0'){
+							$("#Contribution0").text('0.0');
+							$("#Contribution1").text('0.0');$("#Contribution2").text('0.0');
+							$("#Contribution3").text('0.0');$("#Contribution4").text('0.0');
+							$("#Contribution5").text('0.0');$("#Contribution6").text('0.0');
+							$("#Contribution").text("0 %");
+						}
 
+						$("#customerCount0").text(toThousands(payAmt.customerCount0));
+						$("#customerCount1").text(toThousands(payAmt.customerCount1));
+						$("#customerCount2").text(toThousands(payAmt.customerCount2));
+						$("#customerCount3").text(toThousands(payAmt.customerCount3));
+						$("#customerCount4").text(toThousands(payAmt.customerCount4));
+						$("#customerCount5").text(toThousands(payAmt.customerCount5));
+						$("#customerCount6").text(toThousands(payAmt.customerCount6));
+						$("#customerCount").text(toThousands(payAmt.customerCount));
+						// 充值金额（只含现金）
+						var serviceAmt = result.data.serviceAmt;
+						$("#servicePayAmt0").text(toThousands(serviceAmt.payooAmt));
+						$("#servicePayAmtPayBill").text(toThousands(serviceAmt.payooBillAmt));
+						$("#servicePayAmtPayCode").text(toThousands(serviceAmt.payooCodeAmt));
+						$("#servicePayAmt1").text(toThousands(serviceAmt.momoCashInAmt));
+						$("#servicePayAmt2").text(toThousands(serviceAmt.viettelAmt));
+						$("#servicePayAmt").text(toThousands(serviceAmt.servicePayAmt));
+						$("#serviceContributionPayBill").text((serviceAmt.payooBillAmt*100/serviceAmt.servicePayAmt).toFixed(1));
+						$("#serviceContributionPayCode").text((serviceAmt.payooCodeAmt*100/serviceAmt.servicePayAmt).toFixed(1));
+						$("#serviceContribution0").text((parseFloat($("#serviceContributionPayBill").text())
+							+parseFloat($("#serviceContributionPayCode").text())).toFixed(1));
+						$("#serviceContribution2").text((serviceAmt.viettelAmt*100/serviceAmt.servicePayAmt).toFixed(1));
+						$("#serviceContribution1").text(100-parseFloat($("#serviceContribution0").text())
+							-parseFloat($("#serviceContribution2").text()));
+
+						$("#serviceContribution").text("100 %");
+
+						if($("#servicePayAmt").text() === '0'){
+							$("#serviceContribution0").text('0');$("#serviceContribution1").text('0');
+							$("#serviceContributionPayBill").text('0');$("#serviceContributionPayCode").text('0');
+							$("#serviceContribution2").text('0');
+							$("#serviceContribution").text("0 %");
+						}
+
+						$("#customerService0").text(toThousands(serviceAmt.payooCount));
+						$("#customerServicePayBill").text(toThousands(serviceAmt.payooBillCount));
+						$("#customerServicePayCode").text(toThousands(serviceAmt.payooCodeCount));
+						$("#customerService1").text(toThousands(serviceAmt.momoCashIncount));
+						$("#customerService2").text(toThousands(serviceAmt.viettelCount));
+						$("#customerService").text(toThousands(serviceAmt.serviceCount));
 
 						//经费
 						var expenditureAmt = result.data.expenditureAmt;
@@ -294,9 +409,9 @@ define('businessDaily', function () {
 							//今日现金小计
 							$("#cashAmount").text(toThousands(bankDeposit.cashAmount));
 							//应收金额
-							$("#receivablesAmount").text(toThousands(bankDeposit.receivablesAmount));
+							$("#bankDepositAmount").text(toThousands(bankDeposit.bankDepositAmount));
 							//合计
-							$("#bankDepositTotal").text(toThousands(bankDeposit.retentionAmount+bankDeposit.cashAmount/*+bankDeposit.receivablesAmount*/));
+							$("#bankDepositTotal").text(toThousands(bankDeposit.retentionAmount+bankDeposit.cashAmount+bankDeposit.bankDepositAmount));
 
 						//会员积分
 
@@ -341,10 +456,16 @@ define('businessDaily', function () {
 							});
 							$("#saleAmountTotal").text(toThousands(saleAmountTotal));
 						}
+					}else if(result.flag === "1"){
+						_common.prompt(result.message,5,"info");
+					}else if(result.flag === "2"){
+						_common.prompt(result.message,5,"error"); // 请首先录入cash balancing entry 画面的数据
 					}
+					_common.loading_close();
 				},
 				error : function(e){
 					_common.prompt("Failed to load data!",5,"error");/*营业日报加载失败*/
+					_common.loading_close();
 				}
 			});
 		});
@@ -364,7 +485,10 @@ define('businessDaily', function () {
 			// $("#pma").css("border-color","#CCC");
 			// $("#category").css("border-color","#CCC");
 			//默认为业务日期
-			m.bsDate.text(m.businessDate.val());
+			let date = new Date(new Date(dateInfmt(m.businessDate.val()))-1000*60*60*24);
+			var mouth = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+			let dateStr = date.getDate()+"/"+mouth+"/"+date.getFullYear();
+			m.bsDate.text(dateStr);
 			// 初始化营业日报
 			initBusinessDaily();
 		});
@@ -388,6 +512,10 @@ define('businessDaily', function () {
 				_common.prompt("Please select a store first!",5,"info");
 			}
 		});
+		let date = new Date(new Date(dateInfmt(m.businessDate.val()))-1000*60*60*24);
+		var mouth = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+		let dateTime = date.getFullYear()+"-"+mouth+"-"+date.getDate();
+		let dateStr = date.getDate()+"/"+mouth+"/"+date.getFullYear();
 
 		m.date.datetimepicker({
 			language:'en',
@@ -398,6 +526,7 @@ define('businessDaily', function () {
 			autoclose:true,
 			todayHighlight:true,
 			todayBtn:true,
+			endDate:new Date(dateTime)
 		});
 
 		m.date.focus(function(){
@@ -408,6 +537,7 @@ define('businessDaily', function () {
 			}
 		});
 	}
+
 
 	//初始化销售日报
 	var initBusinessDaily = function () {
@@ -461,6 +591,13 @@ define('businessDaily', function () {
 		if (Number(exportBut) != 1) {
 			$("#export").remove();
 		}
+	}
+
+	//格式化数字类型的日期
+	function dateInfmt(date) {
+		var res = "";
+		res = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
+		return res;
 	}
 
 	//number格式化

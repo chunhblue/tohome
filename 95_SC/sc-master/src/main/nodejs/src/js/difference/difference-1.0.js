@@ -194,27 +194,29 @@ define('difference', function () {
             _common.prompt("Please select a start date!",3,"info");/*请选择开始日期*/
             $("#rd_start_date").focus();
             return false;
-        }else{
-            _StartDate = new Date(fmtDate($("#rd_start_date").val())).getTime();
-            if(judgeNaN(_StartDate)){
-                _common.prompt("Please enter a valid date!",3,"info");
-                $("#rd_start_date").focus();
-                return false;
-            }
+        }else if(_common.judgeValidDate($("#rd_start_date").val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#rd_start_date").css("border-color","red");
+            $("#rd_start_date").focus();
+            return false;
+        }else {
+            $("#rd_start_date").css("border-color","#CCCCCC");
         }
         let _EndDate = null;
         if(!$("#rd_end_date").val()){
             _common.prompt("Please select a end date!",3,"info");/*请选择结束日期*/
             $("#rd_end_date").focus();
             return false;
-        }else{
-            _EndDate = new Date(fmtDate($("#rd_end_date").val())).getTime();
-            if(judgeNaN(_EndDate)){
-                _common.prompt("Please enter a valid date!",3,"info");
-                $("#rd_end_date").focus();
-                return false;
-            }
+        }else if(_common.judgeValidDate($("#rd_end_date").val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#rd_end_date").css("border-color","red");
+            $("#rd_end_date").focus();
+            return false;
+        }else {
+            $("#rd_end_date").css("border-color","#CCCCCC");
         }
+        _StartDate = new Date(fmtDate($("#rd_start_date").val())).getTime();
+        _EndDate = new Date(fmtDate($("#rd_end_date").val())).getTime();
         if(_StartDate>_EndDate){
             $("#rd_end_date").focus();
             _common.prompt("The start date cannot be greater than the end date!",3,"info");/*开始时间不能大于结束时间*/
@@ -225,6 +227,82 @@ define('difference', function () {
             _common.prompt("Query Period cannot exceed 62 days!",3,"info"); // 日期期间取值范围不能大于62天
             $("#rd_end_date").focus();
             return false;
+        }
+
+        let _odStartDate = null;
+        if($("#od_start_date").val()) {
+            if (_common.judgeValidDate($("#od_start_date").val())) {
+                _common.prompt("Please enter a valid date!", 3, "info");
+                $("#od_start_date").css("border-color", "red");
+                $("#od_start_date").focus();
+                return false;
+            } else {
+                $("#od_start_date").css("border-color", "#CCCCCC");
+            }
+        }
+        let _odEndDate = null;
+        if($("#od_end_date").val()) {
+            if (_common.judgeValidDate($("#od_end_date").val())) {
+                _common.prompt("Please enter a valid date!", 3, "info");
+                $("#od_end_date").css("border-color", "red");
+                $("#od_end_date").focus();
+                return false;
+            } else {
+                $("#od_end_date").css("border-color", "#CCCCCC");
+            }
+        }
+        if($("#od_start_date").val() && $("#od_end_date").val()) {
+            _odStartDate = new Date(fmtDate($("#od_start_date").val())).getTime();
+            _odEndDate = new Date(fmtDate($("#od_end_date").val())).getTime();
+            if (_odStartDate > _odEndDate) {
+                $("#od_end_date").focus();
+                _common.prompt("The start date cannot be greater than the end date!", 3, "info");/*开始时间不能大于结束时间*/
+                return false;
+            }
+            let odDifValue = parseInt(Math.abs((_odEndDate - _odStartDate) / (1000 * 3600 * 24)));
+            if (odDifValue > 62) {
+                _common.prompt("Query Period cannot exceed 62 days!", 3, "info"); // 日期期间取值范围不能大于62天
+                $("#od_end_date").focus();
+                return false;
+            }
+        }
+
+        let _vdStartDate = null;
+        if($("#vd_start_date").val()) {
+            if (_common.judgeValidDate($("#vd_start_date").val())) {
+                _common.prompt("Please enter a valid date!", 3, "info");
+                $("#vd_start_date").css("border-color", "red");
+                $("#vd_start_date").focus();
+                return false;
+            } else {
+                $("#vd_start_date").css("border-color", "#CCCCCC");
+            }
+        }
+        let _vdEndDate = null;
+        if($("#vd_end_date").val()) {
+            if (_common.judgeValidDate($("#vd_end_date").val())) {
+                _common.prompt("Please enter a valid date!", 3, "info");
+                $("#vd_end_date").css("border-color", "red");
+                $("#vd_end_date").focus();
+                return false;
+            } else {
+                $("#vd_end_date").css("border-color", "#CCCCCC");
+            }
+        }
+        if($("#vd_start_date").val() && $("#vd_end_date").val()) {
+            _vdStartDate = new Date(fmtDate($("#vd_start_date").val())).getTime();
+            _vdEndDate = new Date(fmtDate($("#vd_end_date").val())).getTime();
+            if (_vdStartDate > _vdEndDate) {
+                $("#vd_end_date").focus();
+                _common.prompt("The start date cannot be greater than the end date!", 3, "info");/*开始时间不能大于结束时间*/
+                return false;
+            }
+            let vdDifValue = parseInt(Math.abs((_vdStartDate - _vdEndDate) / (1000 * 3600 * 24)));
+            if (vdDifValue > 62) {
+                _common.prompt("Query Period cannot exceed 62 days!", 3, "info"); // 日期期间取值范围不能大于62天
+                $("#vd_end_date").focus();
+                return false;
+            }
         }
         return true;
     }

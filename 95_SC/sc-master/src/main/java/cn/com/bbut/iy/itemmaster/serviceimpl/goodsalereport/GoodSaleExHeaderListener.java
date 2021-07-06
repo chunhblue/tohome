@@ -33,7 +33,7 @@ public class GoodSaleExHeaderListener implements ExEventListener {
 
         // 列标题
         String row2 = "NO.,Store No.,Store Name,Sale Date,Top Department,Department,Category,Sub-Category,Item Code,Item Name,Barcode,Sales Quantity," +
-                "Selling Price,Area Manager ID,Area Manager Name";
+                "Selling Price,Amount,Area Manager ID,Area Manager Name";
         String[] titles = row2.split(",");
 
         // 开始拼接excel头信息

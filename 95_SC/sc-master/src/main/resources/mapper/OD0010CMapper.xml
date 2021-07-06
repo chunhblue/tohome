@@ -515,7 +515,9 @@
     FROM (
     SELECT
     distinct
-    store_cd,order_id,order_date,review_status,vendor_id,delivery_date,A.order_method
+    store_cd,order_id,order_date,
+    case when order_sts='01' then 7 else A.review_status end as review_status,
+    vendor_id,delivery_date,A.order_method
     FROM
     OD0000 A
     WHERE A.order_type = '01'
@@ -546,7 +548,15 @@
       AND lower(A.order_id) like lower(CONCAT('%',#{param.orderId},'%'))
     </if>
     <if test="param.reviewStatus!=null and param.reviewStatus!=''">
-      AND A.review_status= cast(#{param.reviewStatus}  as NUMERIC )
+        <choose>
+          <when test="param.reviewStatus == '7'.toString()">
+            AND (A.review_status= cast(#{param.reviewStatus}  as NUMERIC )
+            or A.order_sts='01')
+          </when>
+          <otherwise>
+            AND A.review_status= cast(#{param.reviewStatus}  as NUMERIC )
+          </otherwise>
+        </choose>
     </if>
     <if test="param.vendorId!=null and param.vendorId!=''">
       AND A.vendor_id = #{param.vendorId}
@@ -604,7 +614,15 @@ FROM
       AND lower(A.order_id) like lower(CONCAT('%',#{param.orderId},'%'))
     </if>
     <if test="param.reviewStatus!=null and param.reviewStatus!=''">
-      AND A.review_status= cast(#{param.reviewStatus} as NUMERIC )
+      <choose>
+        <when test="param.reviewStatus == '7'.toString()">
+          AND (A.review_status= cast(#{param.reviewStatus}  as NUMERIC )
+          or A.order_sts='01')
+        </when>
+        <otherwise>
+          AND A.review_status= cast(#{param.reviewStatus}  as NUMERIC )
+        </otherwise>
+      </choose>
     </if>
     <if test="param.vendorId!=null and param.vendorId!=''">
       AND A.vendor_id = #{param.vendorId}
@@ -629,7 +647,9 @@ FROM
     FROM (
     SELECT
     distinct
-    store_cd,order_id,order_date,A.review_status,vendor_id,delivery_date,A.order_method,A.order_method order_method1
+    store_cd,order_id,order_date,
+    case when order_sts='01' then 7 else A.review_status end as review_status,
+    vendor_id,delivery_date,A.order_method,A.order_method order_method1
     FROM
     OD0000 A
     WHERE A.order_type = '01'
@@ -661,7 +681,15 @@ FROM
       AND lower(A.order_id) like lower(CONCAT('%',#{param.orderId},'%'))
     </if>
     <if test="param.reviewStatus!=null and param.reviewStatus!=''">
-      AND A.review_status=  cast(#{param.reviewStatus}  as NUMERIC )
+      <choose>
+        <when test="param.reviewStatus == '7'.toString()">
+          AND (A.review_status= cast(#{param.reviewStatus}  as NUMERIC )
+          or A.order_sts='01')
+        </when>
+        <otherwise>
+          AND A.review_status= cast(#{param.reviewStatus}  as NUMERIC )
+        </otherwise>
+      </choose>
     </if>
     AND A.order_differentiate = #{param.orderDifferentiate}
     ) AS T
@@ -722,7 +750,15 @@ FROM
       AND lower(A.order_id) like lower(CONCAT('%',#{param.orderId},'%'))
     </if>
     <if test="param.reviewStatus!=null and param.reviewStatus!=''">
-      AND A.review_status= cast(#{param.reviewStatus} as NUMERIC )
+      <choose>
+        <when test="param.reviewStatus == '7'.toString()">
+          AND (A.review_status= cast(#{param.reviewStatus}  as NUMERIC )
+          or A.order_sts='01')
+        </when>
+        <otherwise>
+          AND A.review_status= cast(#{param.reviewStatus}  as NUMERIC )
+        </otherwise>
+      </choose>
     </if>
     AND A.order_differentiate = #{param.orderDifferentiate}
     ) AS T
@@ -1731,23 +1767,26 @@ FROM
         COALESCE(dc_m_order_qty,0) as dc_m_order_qty,
             ma1110.order_tax_type_cd,/*税率cd*/
             ma1100.min_display_qty,
-            sk0000.advise_qty AS auto_order_qty,
+            coalesce(ma8070.soq,0 ) AS auto_order_qty,
             od0010.order_unit AS unit_id,
             ma0220.unit_name,
             od0010.order_qty AS order_qty,
             od0010.order_nocharge_qty,
-            ( SELECT ma8070.psd ma8070 FROM ma8070 WHERE ma8070.store_cd = #{param.storeCd,jdbcType=VARCHAR} AND ma8070.article_id = od0010.article_id ) AS psd,
+           coalesce(ma8070.psd,0 ) AS psd,
             od0010.order_amt AS order_total_amt
         FROM
             ma1000,
             ma1100,
             ma1110,
-            od0010 LEFT JOIN sk0000 on
-            od0010.article_id = sk0000.article_id
-            AND sk0000.store_cd = #{param.storeCd,jdbcType=VARCHAR}
-            AND sk0000.store_cd = od0010.store_cd
-            AND sk0000.effective_date = #{param.orderDate,jdbcType=VARCHAR}
+            od0010 LEFT JOIN sk0000_today on
+            od0010.article_id = sk0000_today.article_id
+            AND sk0000_today.store_cd = #{param.storeCd,jdbcType=VARCHAR}
+            AND sk0000_today.store_cd = od0010.store_cd
+            AND sk0000_today.effective_date = #{param.orderDate,jdbcType=VARCHAR}
             LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id
+            LEFT JOIN ma8070 ON ma8070.store_cd = #{param.storeCd}
+            AND ma8070.article_id = od0010.article_id
+
         WHERE
             ma1100.article_id = od0010.article_id
             AND ma1000.store_cd = od0010.store_cd
@@ -1786,7 +1825,7 @@ FROM
             ma1110.min_order_qty,
             ma1110.order_tax_type_cd,/*税率cd*/
             ma1100.min_display_qty,
-            sk0000.advise_qty AS auto_order_qty,
+             coalesce(ma8070.soq,0 ) AS auto_order_qty,
             od0010.order_unit AS unit_id,
             ma0220.unit_name,
             od0010.order_qty AS order_qty,
@@ -1797,12 +1836,14 @@ FROM
             ma1000,
             ma1100,
             ma1110,
-            od0010 LEFT JOIN sk0000 on
-            od0010.article_id = sk0000.article_id
-            AND sk0000.store_cd = #{param.storeCd,jdbcType=VARCHAR}
-            AND sk0000.store_cd = od0010.store_cd
-            AND sk0000.effective_date = #{param.orderDate,jdbcType=VARCHAR}
+            od0010 LEFT JOIN sk0000_today on
+            od0010.article_id = sk0000_today.article_id
+            AND sk0000_today.store_cd = #{param.storeCd,jdbcType=VARCHAR}
+            AND sk0000_today.store_cd = od0010.store_cd
+            AND sk0000_today.effective_date = #{param.orderDate,jdbcType=VARCHAR}
             LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id
+            LEFT JOIN ma8070 ON ma8070.store_cd = #{param.storeCd}
+            AND ma8070.article_id = od0010.article_id
         WHERE
             ma1100.article_id = od0010.article_id
             AND ma1000.store_cd = od0010.store_cd

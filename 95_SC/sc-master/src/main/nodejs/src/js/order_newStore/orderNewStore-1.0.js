@@ -225,12 +225,13 @@ define('orderNewStore', function () {
 				// shelf_init();
 				if(thisObj.attr('k')!== null && thisObj.attr('k')!==''){
 					$.myAutomatic.replaceParam(excelName, "&storeCd=" +thisObj.attr('k'));
+					$("#update").removeAttr("disabled");
 					$("#excelName").prop("disabled", false);
 					$("#excelNameRefresh").show();
 					$("#excelNameRemove").show();
 					//获取数据审核状态
 					_common.getRecordStatus(m.aStore.attr('k')+subfmtDate(m.order_date.val()),m.typeId.val(),function (result) {
-						if(result.success||result.data=='0'){
+						if(result.success||result.data===1){
 							//检查是否允许submit 店长sm才拥有权限
 							$.myAjaxs({
 								url:url_left+"/checkSubmit",
@@ -244,6 +245,11 @@ define('orderNewStore', function () {
 								success:function(result){
 									if(result.success){
 										$("#submitAuditBut").removeAttr("disabled");
+										// 北京时间下午两点之后，不允许订货，不允许审核
+										if(parseInt($("#hms").val()) > 130000){
+											$("#update").attr("disabled","disabled");
+											$("#submitAuditBut").attr("disabled","disabled");
+										}
 									}else{
 										$("#submitAuditBut").attr("disabled","disabled");
 									}
@@ -251,6 +257,11 @@ define('orderNewStore', function () {
 								complete:_common.myAjaxComplete
 							});
 						}else{
+							$("#submitAuditBut").attr("disabled","disabled");
+						}
+						// 北京时间下午两点之后，不允许订货，不允许审核
+						if(parseInt($("#hms").val()) > 130000){
+							$("#update").attr("disabled","disabled");
 							$("#submitAuditBut").attr("disabled","disabled");
 						}
 					});
@@ -261,6 +272,7 @@ define('orderNewStore', function () {
 				setShelfResourceValue("shelf", "");
 				$.myAutomatic.cleanSelectObj(excelName);
 				$("#submitAuditBut").removeAttr("disabled");
+				$("#update").removeAttr("disabled");
 				initDisabled();
 			}
 		});

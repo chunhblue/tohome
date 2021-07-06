@@ -91,6 +91,8 @@
             }
         }
     </STYLE>
+    <!--页头-->
+    [@common.header][/@common.header]
 </head>
 
 <body>
@@ -99,8 +101,6 @@
 [#--		<div class="error-pcode-text"> ${useMsg!} </div>--]
 [#--		<div class="shade"></div>--]
 [#--	</div>--]
-<!--页头-->
-[@common.header][/@common.header]
 <!--导航-->
 [@common.nav "HOME&Report&Store Inventory Daily Report"][/@common.nav]
 <div class="container-fluid" id="main_box">
@@ -265,11 +265,11 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                    <span style="float: left;margin-left:20px;">Date Created：${bsDate?string('dd/MM/yyyy')}</span>
+                    <span style="float: left;margin-left:20px;">Date Created：${bsDate!}</span>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="row" style="overflow: scroll">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="width: 130%;">
                     <table id="daily_table" class="table table-hover table-striped table-condensed table-bordered">
                         <tr>
                             <th title="Store No.">Store No.</th>

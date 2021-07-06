@@ -18,6 +18,7 @@ import cn.com.bbut.iy.itemmaster.entity.SK0010;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.inventory.InventoryVouchersService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
 import cn.shiy.common.baseutil.Container;
@@ -52,6 +53,8 @@ public class StoreTransferController extends BaseAction {
     private InventoryVouchersService service;
     @Autowired
     private MRoleStoreService mRoleStoreService;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_STORE_TRANSFER_OUT";
     private final String EXCEL_EXPORT_NAME = "Store Transfer Out Query.xlsx";
@@ -238,6 +241,9 @@ public class StoreTransferController extends BaseAction {
             return null;
         }
         CommonDTO dto = new CommonDTO();
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         // 当前用户ID
         dto.setUpdateUserId(u.getUserId());
         dto.setCreateUserId(u.getUserId());
@@ -247,12 +253,12 @@ public class StoreTransferController extends BaseAction {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HHmmss");
         // 当前时间年月日
         String date = dateFormat.format(now);
-        dto.setCreateYmd(date);
-        dto.setUpdateYmd(date);
+        dto.setCreateYmd(ymd);
+        dto.setUpdateYmd(ymd);
         // 当前时间时分秒
         String time = timeFormat.format(now);
-        dto.setCreateHms(time);
-        dto.setUpdateHms(time);
+        dto.setCreateHms(hms);
+        dto.setUpdateHms(hms);
         return dto;
     }
 

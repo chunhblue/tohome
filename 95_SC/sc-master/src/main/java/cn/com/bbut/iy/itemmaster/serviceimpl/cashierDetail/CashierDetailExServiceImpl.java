@@ -84,33 +84,65 @@ public class CashierDetailExServiceImpl implements ExService {
      * @param wb
      */
     private void createExcelBody(Sheet sheet, int curRow, CashierDetailParam param, Workbook wb) {
+        param.setStartDate(Utils.getDateTime(param.getStartDate()));
+        param.setEndDate(Utils.getDateTime(param.getEndDate()));
+        if(param.getBillSaleNo() != null && !"".equals(param.getBillSaleNo())){
+            if(param.getBillSaleNo().contains("NRISV")){
+                param.setBillFlg(1);
+            }else {
+                param.setBillFlg(0);
+            }
+        }
 
         // 查询销售主档数据
         List<SaleHead> headList = cashierDetailMapper.getSaleHead(param);
+        log.info("head size:"+headList.size());
 
         // 获得销售明细和支付方式
         SaleHeadParam headParam = new SaleHeadParam();
         List<CellRangeAddress> regionList = new ArrayList<CellRangeAddress>();
+        List<String> storePosTranNoList = new ArrayList<>();
         for (SaleHead saleHead : headList) {
             // 封装参数
-            headParam.setAccDate(saleHead.getAccDate());
-            headParam.setStoreCd(saleHead.getStoreCd());
-            headParam.setPosId(saleHead.getPosId());
-            headParam.setTranSerialNo(saleHead.getTranSerialNo());
-            headParam.setFlg(false);
-            List<SaleDetail> saleDetailList = cashierDetailMapper.getSaleDetail(headParam);
-            List<PayMethod> payDetailList = cashierDetailMapper.getPayDetail(headParam);
+//            headParam.setAccDate(saleHead.getAccDate());
+//            headParam.setStoreCd(saleHead.getStoreCd());
+//            headParam.setPosId(saleHead.getPosId());
+//            headParam.setTranSerialNo(saleHead.getTranSerialNo());
+            String storePosTranNo = saleHead.getStoreCd()+"_"+saleHead.getPosId()+"_"+saleHead.getTranSerialNo();
+            storePosTranNoList.add(storePosTranNo);
 
-            // 只取 使用的支付方式
-            List<PayMethod> newPayList = new ArrayList<PayMethod>();
-            for (PayMethod pay : payDetailList) {
-                if (pay.getPayAmount().compareTo(BigDecimal.ZERO)!=0) {
-                    newPayList.add(pay);
+        }
+        headParam.setFlg(false);
+        List<SaleDetail> saleDetailLists = cashierDetailMapper.getExSaleDetail(param.getStoreCd(),storePosTranNoList);
+        List<PayMethod> payDetailLists = cashierDetailMapper.getExPayDetail(param.getStoreCd(),storePosTranNoList);
+
+        // 只取 使用的支付方式
+        List<PayMethod> newPayList = new ArrayList<PayMethod>();
+        for (PayMethod pay : payDetailLists) {
+            if (pay.getPayAmount().compareTo(BigDecimal.ZERO)!=0) {
+                newPayList.add(pay);
+            }
+        }
+
+        for (SaleHead saleHead : headList) {
+            List<SaleDetail> saleDetails = new ArrayList<>();
+            List<PayMethod> payLists = new ArrayList<PayMethod>();
+
+            for(SaleDetail saleDetail :saleDetailLists){
+                if(saleHead.getStoreCd().equals(saleDetail.getStoreCd()) && saleDetail.getPosId().equals(saleDetail.getPosId())
+                        && saleHead.getTranSerialNo()==saleDetail.getTranSerialNo()){
+                    saleDetails.add(saleDetail);
                 }
             }
 
-            saleHead.setPayMethodList(newPayList);
-            saleHead.setSaleDetailList(saleDetailList);
+            for(PayMethod newPay :newPayList){
+                if(saleHead.getStoreCd().equals(newPay.getStoreCd()) && newPay.getPosId().equals(newPay.getPosId())
+                        && saleHead.getTranSerialNo()==newPay.getTranSerialNo()){
+                    payLists.add(newPay);
+                }
+            }
+            saleHead.setPayMethodList(payLists);
+            saleHead.setSaleDetailList(saleDetails);
         }
 
         Row row = null;
@@ -162,7 +194,21 @@ public class CashierDetailExServiceImpl implements ExService {
             // Receipt No.
             cell = row.createCell(curCol++, Cell.CELL_TYPE_STRING);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
+            setCellValue(cell,getLetter(String.valueOf(saleHead.getSaleSerialNo())));
+            // 保存region
+            setRegionList(regionList,maxSize,(curRow - 1),(curCol-1));
+
+            // SAP Receipt No.
+            cell = row.createCell(curCol++, Cell.CELL_TYPE_STRING);
+            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));
             setCellValue(cell,saleHead.getTranSerialNo());
+            // 保存region
+            setRegionList(regionList,maxSize,(curRow - 1),(curCol-1));
+
+            // billSaleNo
+            cell = row.createCell(curCol++, Cell.CELL_TYPE_STRING);
+            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
+            setCellValue(cell,saleHead.getBillSaleNo());
             // 保存region
             setRegionList(regionList,maxSize,(curRow - 1),(curCol-1));
 
@@ -213,10 +259,13 @@ public class CashierDetailExServiceImpl implements ExService {
             if(saySize >= paySize){
                 // 记录支付方式数据真实索引
                 int payNum= 0;
-                // 分摊几次单元格
-                int payRowDiv = saySize / paySize;
-                // 取余数
-                int payRowRem = saySize % paySize;
+                int payRowDiv = 0,payRowRem = 0;
+                if(paySize>0){
+                    // 分摊几次单元格
+                    payRowDiv = saySize / paySize;
+                    // 取余数
+                    payRowRem = saySize % paySize;
+                }
                 // 记录合并单元格起始行数
                 int payRow = curRow;
                 // 合并多少个单元格
@@ -376,10 +425,13 @@ public class CashierDetailExServiceImpl implements ExService {
             }else {
                 // 记录支付方式数据真实索引
                 int payNum= 0;
-                // 分摊几次单元格
-                int payRowDiv = paySize / saySize;
-                // 取余数
-                int payRowRem = paySize % saySize;
+                int payRowDiv = 0,payRowRem = 0;
+                if(saySize>0){
+                    // 分摊几次单元格
+                    payRowDiv = paySize / saySize;
+                    // 取余数
+                    payRowRem = paySize % saySize;
+                }
                 // 记录合并单元格起始行数
                 int payRow = curRow;
                 // 合并多少个单元格
@@ -531,12 +583,16 @@ public class CashierDetailExServiceImpl implements ExService {
 
         // 合并单元格
         for (CellRangeAddress region : regionList) {
-            sheet.addMergedRegion(region);
-            setRegionUtil(region, sheet, wb);
+            if(region.getLastRow()>region.getFirstRow() || region.getLastColumn()>region.getFirstColumn()){
+                sheet.addMergedRegion(region);
+//                setRegionUtil(region, sheet, wb);
+            }
         }
 
         // 设置列宽
         int columnIndex = 0;
+        sheet.setColumnWidth(columnIndex++, 20 * 256);
+        sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);
@@ -576,5 +632,52 @@ public class CashierDetailExServiceImpl implements ExService {
         RegionUtil.setBorderTop(CellStyle.BORDER_THIN, region, sheet, wb);
         RegionUtil.setBorderLeft(CellStyle.BORDER_THIN, region, sheet, wb);
         RegionUtil.setBorderRight(CellStyle.BORDER_THIN, region, sheet, wb);
+    }
+
+    public String getLetter(String value){
+        if(value == null || value.equals("")){
+            return "";
+        }
+        String[] arrs = value.split("");
+        int al = arrs.length;
+        StringBuilder numout = new StringBuilder();
+        for (int i = 0; i < al; i++) {
+            switch (arrs[i]) {
+                case "1":
+                    numout.append('Q');
+                    break;
+                case "2":
+                    numout.append('W');
+                    break;
+                case "3":
+                    numout.append('E');
+                    break;
+                case "4":
+                    numout.append('R');
+                    break;
+                case "5":
+                    numout.append('T');
+                    break;
+                case "6":
+                    numout.append('Y');
+                    break;
+                case "7":
+                    numout.append('U');
+                    break;
+                case "8":
+                    numout.append('I');
+                    break;
+                case "9":
+                    numout.append('O');
+                    break;
+                case "0":
+                    numout.append('P');
+                    break;
+                default:
+                    numout.append(arrs[i]);
+                    break;
+            }
+        }
+        return numout.toString();
     }
 }

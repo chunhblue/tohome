@@ -100,7 +100,6 @@
         ma1100
         INNER JOIN sk0000_today iv ON iv.article_id = ma1100.article_id
         AND iv.store_cd = #{storeCd,jdbcType=VARCHAR}
-        LEFT JOIN ma2240 on ma2240.article_id = iv.article_id and ma2240.store_cd = #{storeCd,jdbcType=VARCHAR}
         LEFT JOIN (select  DISTinct  ma1110.default_barcode,MA1110.article_id,MA1110.vendor_id,structure_cd  FROM MA1110  WHERE
             1=1
             <if test="stockDate != null and stockDate != ''">
@@ -109,7 +108,7 @@
             and ma1110.structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
             (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd,jdbcType=VARCHAR}))
         ) AS T
-       ON  iv.article_id = T.article_id and T.vendor_id = ma2240.vendor_id
+       ON  iv.article_id = T.article_id and T.vendor_id = iv.major_vendor_id
        left join ma2000
             on T.vendor_id = ma2000.vendor_id
         left join ma0070 on ma1100.dep_cd = ma0070.dep_cd
@@ -176,7 +175,6 @@
             ma1100
             INNER JOIN sk0000_today iv ON iv.article_id = ma1100.article_id
             AND iv.store_cd = #{storeCd,jdbcType=VARCHAR}
-            LEFT JOIN ma2240 on ma2240.article_id = iv.article_id and ma2240.store_cd = #{storeCd,jdbcType=VARCHAR}
             LEFT JOIN (select  DISTinct  ma1110.default_barcode,MA1110.article_id,MA1110.vendor_id,structure_cd  FROM MA1110  WHERE
             1=1
             <if test="stockDate != null and stockDate != ''">
@@ -185,7 +183,7 @@
             and ma1110.structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
             (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd,jdbcType=VARCHAR}))
             ) AS T
-            ON  iv.article_id = T.article_id and T.vendor_id = ma2240.vendor_id
+            ON  iv.article_id = T.article_id and T.vendor_id = iv.major_vendor_id
             left join ma2000
                 on T.vendor_id = ma2000.vendor_id
             left join ma0070 on ma1100.dep_cd = ma0070.dep_cd
@@ -395,7 +393,7 @@
             #{saveInQty.articleId},
             #{saveInQty.detailType},
             NOW()::TIMESTAMP,
-            to_char(NOW(),'yyyyMMddhhmmss'),
+            to_char(NOW(),'yyyyMMddhh24miss'),
             '0',
             #{saveInQty.depCd},
             #{saveInQty.pmaCd},

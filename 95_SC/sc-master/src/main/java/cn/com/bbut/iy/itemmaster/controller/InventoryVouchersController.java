@@ -69,6 +69,8 @@ public class InventoryVouchersController extends BaseAction {
     private String inventoryUrl;
     @Autowired
     private DefaultRoleService defaultRoleService;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_Inventory_Voucher";
     private final String EXCEL_EXPORT_NAME = "Inventory Voucher Query.xlsx";
@@ -351,6 +353,13 @@ public class InventoryVouchersController extends BaseAction {
         List<AutoCompleteDTO> _list = service.getOutStoreList(v,zoCd);
         return _list;
     }
+    @ResponseBody
+    @RequestMapping(value = "/getStoreListByInStore")
+    public List<AutoCompleteDTO> getStoreListByInStore(String v,String vstore) {
+        List<AutoCompleteDTO> _list = service.getStoreListByInStore(v,vstore);
+        return _list;
+    }
+
     /**
      * 判断商品是否已经转出
      * @param storeCd
@@ -812,6 +821,9 @@ public class InventoryVouchersController extends BaseAction {
         if(u == null){
             return null;
         }
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         CommonDTO dto = new CommonDTO();
         // 当前用户ID
         dto.setUpdateUserId(u.getUserId());
@@ -822,12 +834,12 @@ public class InventoryVouchersController extends BaseAction {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HHmmss");
         // 当前时间年月日
         String date = dateFormat.format(now);
-        dto.setCreateYmd(date);
-        dto.setUpdateYmd(date);
+        dto.setCreateYmd(ymd);
+        dto.setUpdateYmd(ymd);
         // 当前时间时分秒
         String time = timeFormat.format(now);
-        dto.setCreateHms(time);
-        dto.setUpdateHms(time);
+        dto.setCreateHms(hms);
+        dto.setUpdateHms(hms);
         return dto;
     }
 

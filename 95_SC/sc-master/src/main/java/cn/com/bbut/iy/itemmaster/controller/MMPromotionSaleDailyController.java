@@ -12,9 +12,11 @@ import cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.base.DefaultRoleService;
 import cn.com.bbut.iy.itemmaster.service.mmPromotionSaleDaily.MMPromotionSaleDailyService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +50,8 @@ public class MMPromotionSaleDailyController extends BaseAction {
     private MRoleStoreService mRoleStoreService;
     @Autowired
     private DefaultRoleService defaultRoleService;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_MM_PROMOTION_SALES_DAILY";
     private final String EXCEL_EXPORT_NAME = "MM Promotion Sales Daily Report.xlsx";
@@ -64,14 +68,16 @@ public class MMPromotionSaleDailyController extends BaseAction {
     public ModelAndView tolistView(HttpServletRequest request, HttpSession session,
                                    Map<String, ?> model) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入 累计商品的 MM 销售金额", u.getUserId());
         Collection<Integer> roleIds = (Collection<Integer>) request.getSession().getAttribute(
                 Constants.SESSION_ROLES);
-
         ModelAndView mv = new ModelAndView("mmPromotionSaleDaily/mmPromotionSaleDaily");
         mv.addObject("useMsg", "累计商品的 MM 销售金额");
-        mv.addObject("bsDate", new Date());
-        mv.addObject("printTime", new Date());
+        mv.addObject("bsDate",  Utils.getFormateDate(ymd));
+        mv.addObject("printTime",  Utils.getFormateDate(ymd));
         mv.addObject("userName",u.getUserName());
         return mv;
     }
@@ -123,14 +129,14 @@ public class MMPromotionSaleDailyController extends BaseAction {
             return new ReturnDTO(false,"Query failed!",null);
         }
         User u = this.getUser(session);
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             param.setStartDate(startDate);
-        }
+        }*/
         param.setStores(stores);
         Map<String, Object> result = mmPromotionSaleDailyService.search(param);
         return new ReturnDTO(true,"ok",result);

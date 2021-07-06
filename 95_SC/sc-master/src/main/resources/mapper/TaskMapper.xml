@@ -4,6 +4,7 @@
 	<select id="getApprovalType" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
     SELECT n_typeid k, c_type_name v
     FROM t_audit_type
+    where n_typeid != 6
     order by n_typeId
   </select>
 
@@ -142,6 +143,7 @@
 		where
 				t_backlog.c_enable = '1'
 				and t_backlog.n_typeid = t_audit_type.n_typeid
+	  			and t_audit_type.n_typeid != 6
 	  			and t_backlog.n_typeid = audit_tab.n_typeid
 				and t_backlog.record_cd = audit_tab.record_cd
 				and ma4200.emp_num_id = audit_tab.n_operatorid
@@ -199,6 +201,7 @@
 		where
 		t_backlog.c_enable = '1'
 		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_audit_type.n_typeid != 6
 		and t_backlog.n_typeid = audit_tab.n_typeid
 		and t_backlog.record_cd = audit_tab.record_cd
 		and ma4200.emp_num_id = audit_tab.n_operatorid
@@ -254,6 +257,7 @@
 		where
 		t_backlog.c_enable in ('5')
 		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_audit_type.n_typeid != 6
 		and t_backlog.n_typeid = audit_tab.n_typeid
 		and t_backlog.record_cd = audit_tab.record_cd
 		and ma4200.emp_num_id = audit_tab.n_operatorid
@@ -307,6 +311,7 @@
 		where
 		t_backlog.c_enable in ('5')
 		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_audit_type.n_typeid != 6
 		and t_backlog.n_typeid = audit_tab.n_typeid
 		and t_backlog.record_cd = audit_tab.record_cd
 		and ma4200.emp_num_id = audit_tab.n_operatorid
@@ -356,6 +361,7 @@
 		where
 		t_backlog.c_enable in ('1','5','6','7','10')
 		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_audit_type.n_typeid != 6
 		and t_backlog.n_typeid = audit_tab.n_typeid
 		and t_backlog.record_cd = audit_tab.record_cd
 		and ma4200.emp_num_id = audit_tab.n_operatorid
@@ -414,6 +420,7 @@
 		where
 		t_backlog.c_enable in ('1','5','6','7','10')
 		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_audit_type.n_typeid != 6
 		and t_backlog.n_typeid = audit_tab.n_typeid
 		and t_backlog.record_cd = audit_tab.record_cd
 		and ma4200.emp_num_id = audit_tab.n_operatorid
@@ -469,6 +476,7 @@
 		where
 		t_backlog.c_enable = '1'
 		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_audit_type.n_typeid != 6
 		and t_backlog.n_typeid = audit_tab.n_typeid
 		and t_backlog.record_cd = audit_tab.record_cd
 		and ma4200.emp_num_id = audit_tab.n_operatorid
@@ -572,6 +580,7 @@
 		where
 		t_backlog.c_enable = '1'
 		and t_backlog.n_typeid = t_audit_type.n_typeid
+		and t_audit_type.n_typeid != 6
 		and t_backlog.n_typeid = audit_tab.n_typeid
 		and t_backlog.record_cd = audit_tab.record_cd
 		and ma4200.emp_num_id = audit_tab.n_operatorid

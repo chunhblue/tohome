@@ -143,7 +143,6 @@
                                             <option value="6">Withdrawn</option>
                                             <option value="7">Expired</option>
                                             <option value="10">Approved</option>
-                                            <option value="20">Received</option>
                                         </select>
                                     </div>
 

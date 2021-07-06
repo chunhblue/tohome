@@ -14,5 +14,15 @@ public interface ReturnsDailyMapper {
     // 查询退货数据
     List<ReturnsDailyDTO> search(@Param("param") ReturnsDailyParamDTO param);
 
+    List<ReturnsDailyDTO> searchNoSale(@Param("param") ReturnsDailyParamDTO param);
+
+    ReturnsDailyDTO getItemTotal(@Param("param") ReturnsDailyParamDTO param);
+
+    Integer searchNoSaleCount(@Param("param") ReturnsDailyParamDTO param);
+
+    List<ReturnsDailyDTO> getAllTranTime(@Param("param") ReturnsDailyParamDTO param);
+
     Ma1000 selectByStoreCd(@Param("storeCd") String storeCd, @Param("businessDate") String businessDate);
+
+    ReturnsDailyDTO getNextTranTime(@Param("storeCd") String storeCd,@Param("posId") String posId,@Param("tranDate")String tranDate);
 }

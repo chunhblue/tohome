@@ -63,7 +63,7 @@ public class ReviewTaskGridDTO extends GridDataDTO {
     /**
      * 发起时间
      */
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private Date auditTime;
     /**
      * 地址

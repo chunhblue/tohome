@@ -8,14 +8,10 @@ import cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100DTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100ParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.PI0110DTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO;
-import cn.com.bbut.iy.itemmaster.dto.pi0100c.StocktakeItemDTOC;
 import cn.com.bbut.iy.itemmaster.dto.rtInventory.RTInventoryQueryDTO;
-import cn.com.bbut.iy.itemmaster.service.CM9060Service;
-import cn.com.bbut.iy.itemmaster.service.Ma1200Service;
-import cn.com.bbut.iy.itemmaster.service.RealTimeInventoryQueryService;
-import cn.com.bbut.iy.itemmaster.service.SequenceService;
-import cn.com.bbut.iy.itemmaster.service.stocktake.StocktakeEntryService;
+import cn.com.bbut.iy.itemmaster.service.*;
 import cn.com.bbut.iy.itemmaster.service.stocktake.StocktakePlanService;
+import cn.com.bbut.iy.itemmaster.util.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
@@ -28,9 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.math.BigDecimal;
@@ -62,7 +56,7 @@ public class StocktakePlanServiceImpl implements StocktakePlanService {
     @Value("${file.fileDir}")
     private String fileDir;//target
     @Autowired
-    private StocktakeEntryService stocktakeEntryService;
+    private Ma4320Service ma4320Service;
 
     @Override
     @Transactional
@@ -91,6 +85,14 @@ public class StocktakePlanServiceImpl implements StocktakePlanService {
             stocktakePlanMapper.savePI0110(list);
             //添加审核信息
             stocktakePlanMapper.insertAudit(piCd);
+            String businessDate = cm9060Service.getValByKey("0000");
+            if(!piDate.equals(businessDate)){
+                // 如果不是审核当天，就默认审核通过
+                pi0100.setUpdateUserId(createUserId);
+                pi0100.setUpdateYmd(createYmd);
+                pi0100.setUpdateHms(createHms);
+                stocktakePlanMapper.updateAudit(pi0100);
+            }
             return piCd;
         } catch (Exception e) {
             e.printStackTrace();
@@ -434,6 +436,153 @@ public class StocktakePlanServiceImpl implements StocktakePlanService {
     }
 
 
+    /**
+     * 将库存异动数据生成excel
+     */
+    @Override
+    public HSSFWorkbook getInventoryHSSFWorkbook(PI0100ParamDTO pi0100Param, String tempTableName) {
+
+        List<Map<String, Object>> list = stocktakePlanMapper.getInventoryData(pi0100Param,tempTableName);
+
+        if (list == null || list.size() == 0) {
+            return null;
+        }
+
+        String[] excelHeader0 = {"SAPItemCode", "FromDate", "Todate", "SalesQty", "ReceivingQty", "TransferInQty",
+                "TransferOutQty", "ReturnQty","StockIn", "StockOut (writeoff, …)"};
+
+        // 声明一个工作簿
+        HSSFWorkbook wb = new HSSFWorkbook();
+        // 生成一个表格
+        HSSFSheet sheet = wb.createSheet();
+
+        // 生成一种样式
+        HSSFCellStyle style = wb.createCellStyle();
+        // 设置样式
+        style.setFillForegroundColor(HSSFColor.WHITE.index);
+        style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        style.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        style.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        style.setBorderRight(HSSFCellStyle.BORDER_THIN);
+        style.setBorderTop(HSSFCellStyle.BORDER_THIN);
+        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        style.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
+
+        // 生成一种字体
+        HSSFFont font = wb.createFont();
+        // 设置字体
+        font.setFontName("Microsoft JhengHei");
+        // 设置字体大小
+        font.setFontHeightInPoints((short) 10);
+        // 在样式中引用这种字体
+        style.setFont(font);
+
+        // 行号标记
+        int rowNum = 0;
+        // 表头
+        HSSFRow row = sheet.createRow(rowNum++);
+        for (int i = 0; i < excelHeader0.length; i++) {
+            HSSFCell cell = row.createCell(i);
+            cell.setCellValue(excelHeader0[i]);
+            cell.setCellStyle(style);
+        }
+        // 转换日期
+        String startTime = CommonUtils.fmtDateAndTimeToStr(pi0100Param.getPiDate()+"060000");
+        String endTime = CommonUtils.fmtDateAndTimeToStr(pi0100Param.getPiDate()+pi0100Param.getStartTime());
+        // 遍历内容
+        HSSFCell cell = null;
+        Map<String, Object> map = null;
+        for (int i = 0; i < list.size(); i++) {
+            map = list.get(i);
+            int callNum = 0;
+            row = sheet.createRow(rowNum++);
+            // article id
+            cell = row.createCell(callNum++);
+            cell.setCellValue(map.get("article_id").toString());
+            cell.setCellStyle(style);
+
+            // startTime
+            cell = row.createCell(callNum++);
+            cell.setCellValue(startTime);
+            cell.setCellStyle(style);
+
+            // endTime
+            cell = row.createCell(callNum++);
+            cell.setCellValue(endTime);
+            cell.setCellStyle(style);
+
+            double sale_qty = Double.valueOf(map.get("sale_qty").toString());
+            double receive_qty = Double.valueOf(map.get("receive_qty").toString());
+            double trans_in_qty = Double.valueOf(map.get("trans_in_qty").toString());
+            double trans_out_qty = Double.valueOf(map.get("trans_out_qty").toString());
+            double return_qty = Double.valueOf(map.get("return_qty").toString());
+            double item_trans_in_qty = Double.valueOf(map.get("item_trans_in_qty").toString());
+            double item_trans_out_qty = Double.valueOf(map.get("item_trans_out_qty").toString());
+            double receive_corr_qty = Double.valueOf(map.get("receive_corr_qty").toString());
+            double return_corr_qty = Double.valueOf(map.get("return_corr_qty").toString());
+            double write_off_qty = Double.valueOf(map.get("write_off_qty").toString());
+            double positive_adjust_qty = Double.valueOf(map.get("positive_adjust_qty").toString());
+            double negative_adjust_qty = Double.valueOf(map.get("negative_adjust_qty").toString());
+            receive_qty = receive_corr_qty != 0?receive_corr_qty:receive_qty;
+            return_qty = return_corr_qty != 0?return_corr_qty:return_qty;
+
+            // sale_qty
+            cell = row.createCell(callNum++);
+            cell.setCellValue(sale_qty);
+            cell.setCellStyle(style);
+
+            // receive_qty
+            cell = row.createCell(callNum++);
+            cell.setCellValue(receive_qty);
+            cell.setCellStyle(style);
+
+            // trans_in_qty
+            cell = row.createCell(callNum++);
+            cell.setCellValue(trans_in_qty);
+            cell.setCellStyle(style);
+
+            // trans_out_qty
+            cell = row.createCell(callNum++);
+            cell.setCellValue(trans_out_qty);
+            cell.setCellStyle(style);
+
+            // return_qty
+            cell = row.createCell(callNum++);
+            cell.setCellValue(return_qty);
+            cell.setCellStyle(style);
+
+            // 转入合计
+//            double stockIn = receive_qty+trans_in_qty+item_trans_in_qty;
+            double stockIn = positive_adjust_qty+item_trans_in_qty;
+            // 转出合计
+//            double stockOut = return_qty+trans_out_qty+write_off_qty+item_trans_out_qty;
+            double stockOut = negative_adjust_qty+write_off_qty+item_trans_out_qty;
+
+            // StockIn
+            cell = row.createCell(callNum++);
+            cell.setCellValue(stockIn);
+            cell.setCellStyle(style);
+
+            // StockOut
+            cell = row.createCell(callNum++);
+            cell.setCellValue(stockOut);
+            cell.setCellStyle(style);
+        }
+
+        for (int i = 0; i < excelHeader0.length; i++) {
+            //根据字段长度自动调整列的宽度
+            sheet.autoSizeColumn(i, true);
+        }
+        return wb;
+    }
+
+    @Override
+    public void insertInventoryToTemp(PI0100ParamDTO pi0100Param, String tempTableName) {
+        // 将数据存入临时表
+        stocktakePlanMapper.insertInventoryToTemp(pi0100Param,tempTableName);
+    }
+
+
     @Override
     public HSSFWorkbook getExportHSSFWorkbook(List<StocktakeItemDTO> list) {
 
@@ -661,8 +810,36 @@ public class StocktakePlanServiceImpl implements StocktakePlanService {
     @Override
     @Async
     public Future<String> insertExportItemsToDB(String piCd, String piDate, String storeCd, List<StocktakeItemDTO> list) {
+        String tempTableName = "temp_item";
+        stocktakePlanMapper.createTempTable(tempTableName);
+        // 批量保存数据到临时表
+        int totalSize1 = list.size(); //总记录数
+        int pageSize1 = 1000; //每页N条
+        int totalPage1 = totalSize1/pageSize1; //共N页
+
+        if (totalSize1 % pageSize1 != 0) {
+            totalPage1 += 1;
+            if (totalSize1 < pageSize1) {
+                pageSize1 = list.size();
+            }
+        }
+        for (int pageNum1 = 1; pageNum1 < totalPage1+1; pageNum1++) {
+            int starNum1 = (pageNum1-1)*pageSize1;
+            int endNum1 = Math.min(pageNum1 * pageSize1, totalSize1);
+
+            // 用来存入新的集合
+            List<StocktakeItemDTO> newList = new ArrayList<>();
+            for (int i = starNum1; i < endNum1; i++) {
+                newList.add(list.get(i));
+            }
+            // 保存数据到临时表里
+            stocktakePlanMapper.saveToTempTable(tempTableName,newList);
+        }
+
+        // 过滤掉 inventory =no/non-count/cost_item = Yes 的商品
+        List<StocktakeItemDTO> list1 = stocktakePlanMapper.getstockList(tempTableName);
         List<StocktakeItemDTO> oldList = new ArrayList<>();
-        for(StocktakeItemDTO dto:list){
+        for(StocktakeItemDTO dto:list1){
            boolean flg = false;
            for(StocktakeItemDTO oldItem:oldList){
                if(dto.getArticleId().equals(oldItem.getArticleId())){
@@ -673,9 +850,10 @@ public class StocktakePlanServiceImpl implements StocktakePlanService {
                oldList.add(dto);
            }
         }
-
+        stocktakeEntryMapper.deleteTempTable(tempTableName);
         // 获取导出时间
-        String exportTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        String exportTime = ma4320Service.getNowDate();
+//        String exportTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
 
         //2.分页数据信息
         int totalSize = oldList.size(); //总记录数
@@ -699,9 +877,9 @@ public class StocktakePlanServiceImpl implements StocktakePlanService {
         }
         // 没有保存过代表第一次 导出, 记录 导出时间
         stocktakePlanMapper.modifyPI0100ExportTime(piCd, piDate, storeCd, exportTime);
-        // 将第一次的导出时间更新到Start Time
-        String startTime = exportTime.substring(8,14);
-        stocktakePlanMapper.modifyPI0100StartTime(piCd, piDate, storeCd, startTime);
+        // 将第一次的导出时间更新到Start Time 注释 2021/03/30
+//        String startTime = exportTime.substring(8,14);
+//        stocktakePlanMapper.modifyPI0100StartTime(piCd, piDate, storeCd, startTime);
 
         for (int pageNum = 1; pageNum < totalPage + 1; pageNum++) {
             int starNum = (pageNum - 1) * pageSize;

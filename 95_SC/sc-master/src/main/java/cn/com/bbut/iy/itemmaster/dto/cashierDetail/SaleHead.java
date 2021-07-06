@@ -133,4 +133,6 @@ public class SaleHead extends GridDataDTO {
      * 支付方式
      */
     private List<PayMethod> payMethodList;
+
+    private String billSaleNo;
 }

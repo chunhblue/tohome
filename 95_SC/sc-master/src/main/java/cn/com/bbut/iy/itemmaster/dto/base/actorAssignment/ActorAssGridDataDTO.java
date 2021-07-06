@@ -26,8 +26,9 @@ public class ActorAssGridDataDTO implements Serializable {
 
     private String userName;
 
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+//    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date startDate;
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date endDate;
 }

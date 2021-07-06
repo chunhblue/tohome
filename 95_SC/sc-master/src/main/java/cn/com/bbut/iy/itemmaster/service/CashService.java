@@ -1,6 +1,7 @@
 package cn.com.bbut.iy.itemmaster.service;
 
 import cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO;
+import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.cash.CashDetail;
 import cn.com.bbut.iy.itemmaster.dto.cash.CashDetailParam;
 
@@ -13,7 +14,8 @@ import java.util.List;
  * @author zcz
  */
 public interface CashService {
-    List<CashDetail> getCashDetailyList(CashDetailParam dto);
+    GridDataDTO<CashDetail> getCashDetailyList(CashDetailParam dto);
+    List<CashDetail> getCashDetailList(CashDetailParam dto);
 
     String getUserName(String userId);
 

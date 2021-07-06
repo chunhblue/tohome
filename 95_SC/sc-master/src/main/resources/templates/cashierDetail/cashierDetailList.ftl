@@ -173,7 +173,7 @@
 										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 											<input type="text" id="articleShortName" class="form-control input-sm">
 										</div>
-										<label for="Total Amount"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Total Amount</label>
+										<label for="Total Amount"   id="totalAmountA" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Total Amount</label>
 										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 											<input type="text" id="totalAmount" class="form-control input-sm" disabled="disabled">
 										</div>
@@ -182,6 +182,16 @@
 										<label for="saleSerialNo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Receipt No.</label>
 										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 											<input type="text" id="saleSerialNo" class="form-control input-sm">
+										</div>
+
+										<label for="tranSerialNo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">SAP Receipt No</label>
+										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+											<input type="text" id="tranSerialNo" class="form-control input-sm">
+										</div>
+
+										<label for="billSaleNo"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">SAP Bill No.</label>
+										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+											<input type="text" id="billSaleNo" class="form-control input-sm">
 										</div>
 									</div>
 								</div>

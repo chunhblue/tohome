@@ -100,6 +100,8 @@
 			display:none;
 		}
 	</STYLE>
+	<!--页头-->
+	[@common.header][/@common.header]
 </head>
 
 <body>
@@ -108,8 +110,6 @@
 [#--		<div class="error-pcode-text"> ${useMsg!} </div>--]
 [#--		<div class="shade"></div>--]
 [#--	</div>--]
-<!--页头-->
-[@common.header][/@common.header]
 <!--导航-->
 [@common.nav "HOME&Sale&Invoice Entry Detils"][/@common.nav]
 <div class="container-fluid" id="main_box">
@@ -215,13 +215,13 @@
 									</div>
 								</div>
 								<div class="form-group ">
-										<label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">The Receipt Number</label>
+										<label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">Receipt No.</label>
 										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 											<div class="aotu-pos good-select">
 												<input type="text" id="searchReceiptNo" class="form-control input-sm">
 											</div>
 										</div>
-									    <label for=""  class="col-xs-12 col-sm-4 col-md-2 col-lg-3 control-label" style="white-space: nowrap">Pos Id</label>
+									    <label for=""  class="col-xs-12 col-sm-4 col-md-2 col-lg-3 control-label not-null" style="white-space: nowrap">Pos Id</label>
 										<div id="posID" class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 											<select id="posId" class="form-control input-sm" nextele="" autocomplete="off" disabled="disabled">
 												<option value="">-- All/Please Select --</option>
@@ -270,14 +270,14 @@
 		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 			<div class="form-horizontal">
 				<div class="form-group ">
-					<label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">Submit</label>
+					<label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">Submitter</label>
 					<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 						<div class="aotu-pos good-select">
 							<input type="text" id="submitter" readonly="readonly" class="form-control input-sm">
 						</div>
 					</div>
 
-					<label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">Date</label>
+					<label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">Submission Time</label>
 					<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 						<div class="aotu-pos good-select">
 							<input type="text" id="submitDate" readonly="readonly" class="form-control input-sm">

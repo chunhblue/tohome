@@ -16,8 +16,10 @@ import cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.adjustmentDaily.AdjustmentDailyService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +50,8 @@ public class AdjustmentDailyController extends BaseAction {
     private AdjustmentDailyService service;
     @Autowired
     private MRoleStoreService mRoleStoreService;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_ADJUSTMENT_DAILY";
     private final String EXCEL_EXPORT_NAME = "Store Inventory Adjustment Daily Report.xlsx";
@@ -62,12 +66,15 @@ public class AdjustmentDailyController extends BaseAction {
     @RequestMapping(method = RequestMethod.GET)
     public ModelAndView tolistView(HttpServletRequest request, HttpSession session) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入 门店库存调整日报", u.getUserId());
         ModelAndView mv = new ModelAndView("information/stockAdjustment/stockAdjustmentList");
         mv.addObject("use", 0);
         mv.addObject("identity", 1);
         mv.addObject("author", u.getUserName());
-        mv.addObject("bsDate", new Date());
+        mv.addObject("bsDate", Utils.getFormateDate(ymd));
         mv.addObject("useMsg", "门店库存调整日报一览画面");
         return mv;
     }
@@ -81,14 +88,18 @@ public class AdjustmentDailyController extends BaseAction {
     @RequestMapping(value = "/print", method = RequestMethod.GET)
     public ModelAndView toupdateView(HttpServletRequest request, HttpSession session,
                                      String searchJson) {
+
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入 门店库存调整日报打印画面", u.getUserId());
         ModelAndView mv = new ModelAndView("information/stockAdjustment/stockAdjustmentListPrint");
         mv.addObject("use", 0);
         mv.addObject("identity", 1);
         mv.addObject("searchJson", searchJson);
         mv.addObject("author", u.getUserName());
-        mv.addObject("bsDate", new Date());
+        mv.addObject("bsDate", Utils.getFormateDate(ymd));
         mv.addObject("useMsg", "门店库存调整日报打印画面");
         return mv;
     }

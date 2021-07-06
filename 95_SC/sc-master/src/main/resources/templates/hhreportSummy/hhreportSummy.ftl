@@ -150,7 +150,7 @@
 		<div class="shade"></div>
 	</div>
 <!--导航-->
-[@common.nav "HOME&Report&HHT-Receiving Report"][/@common.nav]
+[@common.nav "HOME&Report&PO Status Daily Report"][/@common.nav]
 <div class="container-fluid" id="main_box">
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -225,7 +225,7 @@
                                     <div class="wire"></div>
                                     <button id="search" type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-search icon-right"></span>Inquire</button>
                                     <button id='reset' type='button' class='btn btn-primary btn-sm'><span class='glyphicon glyphicon-refresh icon-right'></span>Reset</button>
-[#--                                    <button id='export' type='button' class='btn btn-primary btn-sm'><span class='glyphicon glyphicon-export icon-right'></span>Export</button>--]
+                                    <button id='export' type='button' class='btn btn-primary btn-sm'><span class='glyphicon glyphicon-export icon-right'></span>Export</button>
                                 </div>
                             </div>
                         </div>
@@ -237,7 +237,7 @@
     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 businessDaily_box">
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="text-align: center">
-                    <span style="font-size: 25px;font-weight: bold">HHT-Receiving Report</span>
+                    <span style="font-size: 25px;font-weight: bold">PO Status Daily Report</span>
                 </div>
             </div>
             <div class="row">
@@ -247,7 +247,7 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                    <span style="float: left">Date Created：${bsDate?string('dd/MM/yyyy')}</span>
+                    <span style="float: left">Date Created：${bsDate!}</span>
                 </div>
             </div>
             <div class="row">

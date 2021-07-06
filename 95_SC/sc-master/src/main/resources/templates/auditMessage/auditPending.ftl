@@ -17,8 +17,8 @@
     [#--[if lt IE  9]>--]
 
 
+    [@common.header][/@common.header]
 </head>
-[@common.header][/@common.header]
 <!--导航-->
 [@common.nav "HOME&Message&Pending Approvals"][/@common.nav]
 <div class="container-fluid" id="main_box">

@@ -163,14 +163,14 @@ public class InvoiceEntryController extends BaseAction {
             return new GridDataDTO<InvoiceDataDTO>();
         }
         User u = this.getUser(session);
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             invoiceEntryParam.setStartDate(startDate);
-        }
+        }*/
         invoiceEntryParam.setStores(stores);
         invoiceEntryParam.setPage(page);
         invoiceEntryParam.setRows(rows);
@@ -211,6 +211,25 @@ public class InvoiceEntryController extends BaseAction {
             return new ReturnDTO(false,"Please login first!");
         }
         return invoiceEntryService.insertInvoice(record,user,request,session);
+    }
+
+    @PostMapping("/getExistsReNos")
+    @ResponseBody
+    public ReturnDTO getReceiptNos(String record){
+        ReturnDTO _return = new ReturnDTO();
+
+        if (record == null || StringUtils.isEmpty(record)) {
+            _return.setSuccess(false);
+            _return.setMsg("Parameter is empty!");
+            return _return;
+        }
+        List<String> getExistsReNos = invoiceEntryService.getExistsReceiptNoList(record);
+        if(getExistsReNos.size()>0){
+            _return.setMsg("invoice request for below receipt already exists:<br>");
+            _return.setO(getExistsReNos);
+            _return.setSuccess(true);
+        }
+        return _return;
     }
 
     /**

@@ -45,7 +45,9 @@ define('cashierDetail', function () {
         payType: null,//支付类型
         calType: null,
         saleSerialNo: null, // 电子小票编号
+        tranSerialNo: null,
         totalAmount:null,
+        totalAmountA:null,
         payAmt: null//支付金额
     }
     // 创建js对象
@@ -69,7 +71,7 @@ define('cashierDetail', function () {
         // 初始化店铺运营组织检索
         // _common.initOrganization();
         // 初始化检索日期
-        _common.initDate(m.sale_start_date, m.sale_end_date);
+        initDateTime(m.sale_start_date, m.sale_end_date);
         //初始化店铺名称下拉
         _common.initStoreform();
         // 验证权限
@@ -86,6 +88,61 @@ define('cashierDetail', function () {
         $("#itemDetailTable > .zgGrid-tbody").empty();
     };
 
+    var initDateTime = function(startDate,endDate) {
+        if (startDate) {
+            startDate.datetimepicker({
+                language:'en',
+                format: 'dd/mm/yyyy hh:ii:ss',
+                maxView: 4,
+                startView: 2,
+                minView: 0,
+                minuteStep:1,
+                forceParse: true,
+                autoclose: true,
+                todayHighlight: true,
+                todayBtn: true,
+            }).on('changeDate', function (ev) {
+                if (endDate) {
+                    if (ev.date) {
+                        endDate.datetimepicker('setStartDate', new Date(ev.date.valueOf()))
+                    } else {
+                        endDate.datetimepicker('setStartDate', null);
+                    }
+                }
+            });
+            // 倒推两个月
+            let _start = new Date(new Date().setMonth(new Date().getMonth()-2));
+            if (!endDate) {
+                _start = new Date();
+            }
+            startDate.val(_start.Format('dd/MM/yyyy hh:mm:ss'));
+        }
+
+        if (endDate) {
+            endDate.datetimepicker({
+                language:'en',
+                format: 'dd/mm/yyyy hh:ii:ss',
+                maxView: 4,
+                startView: 2,
+                minView: 0,
+                minuteStep:1,
+                autoclose: true,
+                todayHighlight: true,
+                todayBtn: true,
+            }).on('changeDate', function (ev) {
+                if (startDate) {
+                    if (ev.date) {
+                        startDate.datetimepicker('setEndDate', new Date(ev.date.valueOf()))
+                    } else {
+                        startDate.datetimepicker('setEndDate', null);
+                    }
+                }
+            });
+            // 默认日期当天
+            endDate.val(new Date().Format('dd/MM/yyyy hh:mm:ss'));
+        }
+    };
+
     //画面按钮点击事件
     var but_event = function () {
         // 导出按钮事件
@@ -93,18 +150,19 @@ define('cashierDetail', function () {
             if (!verifySearch()) {
                 return;
             }
-
             var storeCd = $("#aStore").attr("k");
             var startDate = subfmtDate(m.sale_start_date.val());
             var endDate = subfmtDate(m.sale_end_date.val());
             var posId = m.posId.val().trim();
             var cashierId = m.cashierId.val().trim();
-            var saleSerialNo = m.saleSerialNo.val();
+            var tranSerialNo = m.tranSerialNo.val().trim();
+            var billSaleNo = $("#billSaleNo").val().trim();
+            var saleSerialNo = letterToNumber(m.saleSerialNo.val());
             var shift = m.shift.val().trim();
             var payType, calType, payAmt;
             paramGrid = "storeCd=" + storeCd + "&startDate=" + startDate + "&endDate="
-                + endDate + "&cashierId=" + cashierId + "&shift=" + shift + "&posId=" + posId+ "&saleSerialNo="+saleSerialNo;
-            if ((m.payType.val() != null && m.payType.val() !== '')  || (m.payAmt.val() != null && m.payAmt.val() !== '')) {
+                + endDate + "&cashierId=" + cashierId + "&shift=" + shift + "&posId=" + posId + "&saleSerialNo="+saleSerialNo+"&tranSerialNo="+tranSerialNo+"&billSaleNo="+billSaleNo;
+            if ((m.payType.val() != null && m.payType.val() !== '') || (m.payAmt.val() != null && m.payAmt.val() !== '')) {
                 payType = m.payType.val().trim();
                 calType = m.calType.val().trim();
                 payAmt = reThousands(m.payAmt.val().trim());
@@ -133,9 +191,16 @@ define('cashierDetail', function () {
             let storeCd = m.aStore.attr('k');
             if (!storeCd) {
                 m.posId.find("option:not(:first)").remove();
+                m.cashierId.find("option:not(:first)").remove();
                 return;
             }
             getSelectPosId(storeCd);
+        });
+
+        $("#storeRemove").on("click", function (e) {
+            $.myAutomatic.cleanSelectObj(aStore);
+            m.posId.find("option:not(:first)").remove();
+            m.cashierId.find("option:not(:first)").remove();
         });
 
         //清空日期
@@ -145,18 +210,19 @@ define('cashierDetail', function () {
         });
         //检索按钮点击事件
         m.search.on("click", function () {
-
             if (verifySearch()) {
                 var storeCd = $("#aStore").attr("k");
                 var startDate = subfmtDate(m.sale_start_date.val());
                 var endDate = subfmtDate(m.sale_end_date.val());
                 var posId = m.posId.val().trim();
                 var cashierId = m.cashierId.val().trim();
-                var saleSerialNo = m.saleSerialNo.val();
+                var tranSerialNo = m.tranSerialNo.val().trim();
+                var billSaleNo = $("#billSaleNo").val().trim();
+                var saleSerialNo = letterToNumber(m.saleSerialNo.val());
                 var shift = m.shift.val().trim();
                 var payType, calType, payAmt;
                 paramGrid = "storeCd=" + storeCd + "&startDate=" + startDate + "&endDate="
-                    + endDate + "&cashierId=" + cashierId + "&shift=" + shift + "&posId=" + posId + "&saleSerialNo="+saleSerialNo;
+                    + endDate + "&cashierId=" + cashierId + "&shift=" + shift + "&posId=" + posId + "&saleSerialNo="+saleSerialNo+"&tranSerialNo="+tranSerialNo+"&billSaleNo="+billSaleNo;
                 if ((m.payType.val() != null && m.payType.val() !== '') || (m.payAmt.val() != null && m.payAmt.val() !== '')) {
                     payType = m.payType.val().trim();
                     calType = m.calType.val().trim();
@@ -181,6 +247,8 @@ define('cashierDetail', function () {
                     data:paramGrid,
                     dataType: "json",
                     success:function (result) {
+                          m.totalAmount.css("display",result.s);
+                          m.totalAmountA.css("display",result.s);
                           m.totalAmount.val(toThousands(result.data));
                     }
                 })
@@ -276,8 +344,11 @@ define('cashierDetail', function () {
                 complete: _common.myAjaxComplete
             });
         }
-    }
+    };
 
+    var judgeNaN = function (value) {
+        return value !== value;
+    }
 
     //验证检索项是否合法
     var verifySearch = function () {
@@ -302,6 +373,30 @@ define('cashierDetail', function () {
         }
         if (m.sale_start_date.val() != null && m.sale_start_date.val() != "" &&
             m.sale_end_date.val() != null && m.sale_end_date.val() != "") {
+            let startValue = new Date(fmtDate(m.sale_start_date.val())).getTime();
+            let endValue = new Date(fmtDate(m.sale_end_date.val())).getTime();
+
+            let _startDate = m.sale_start_date.val().split(" ")[0];
+            let _startTime = m.sale_start_date.val().split(" ")[1];
+            if(_common.judgeValidDate(_startDate) || _common.judgeValidTime(_startTime)){
+                _common.prompt("Please enter a valid date!",3,"info");
+                $("#sale_start_date").css("border-color","red");
+                $("#sale_start_date").focus();
+                return false;
+            }else {
+                $("#sale_start_date").css("border-color","#CCC");
+            }
+            let _endDate = m.sale_end_date.val().split(" ")[0];
+            let _endTime = m.sale_end_date.val().split(" ")[1];
+            if(_common.judgeValidDate(_endDate) || _common.judgeValidTime(_endTime)){
+                _common.prompt("Please enter a valid date!",3,"info");
+                $("#sale_end_date").focus();
+                $("#sale_end_date").css("border-color","red");
+                return false;
+            }else {
+                $("#sale_end_date").css("border-color","#CCC");
+            }
+
             var startDate = parseInt(subfmtDate(m.sale_start_date.val()));
             var endDate = parseInt(subfmtDate(m.sale_end_date.val()));
             if (startDate > endDate) {
@@ -366,16 +461,17 @@ define('cashierDetail', function () {
         tableGrid = $("#zgGridTtable").zgGrid({
             title: "Selling List(Click a record to view the item details.)",
             param: paramGrid,
-            colNames: ["Store No.", "Tran Serial No", "Acc Date", "Sales Date", "POS No.", "Cashier", "Shift", "Receipt No.", "Selling Time", "Membership ID", "Subtotal",  "Over Amount", "Total"],
+            colNames: ["Store No.", "Acc Date", "Sales Date", "POS No.", "Cashier", "Shift", "Receipt No.","SAP Receipt No.","SAP Bill No.", "Selling Time", "Membership ID", "Subtotal",  "Over Amount", "Total"],
             colModel: [
                 {name: "storeCd", type: "text", text: "right", width: "100", ishide: true, css: ""},
-                {name: "tranSerialNo", type: "text", text: "right", width: "100", ishide: true, css: ""},
                 {name: "accDate", type: "text", text: "center", width: "100", ishide: true, css: ""},
                 {name: "tranDate", type: "text", text: "center", width: "130", ishide: false, css: "", getCustomValue: dateFmt},
                 {name: "posId", type: "text", text: "right", width: "130", ishide: false, css: ""},
                 {name: "cashierId", type: "text", text: "right", width: "130", ishide: false, css: ""},
                 {name: "shift", type: "text", text: "left", width: "130", ishide: false, css: ""},
-                {name: "saleSerialNo", type: "text", text: "right", width: "130", ishide: false, css: ""},
+                {name: "saleSerialNo", type: "text", text: "right", width: "130", ishide: false, css: "",getCustomValue:getLetter},
+                {name: "tranSerialNo", type: "text", text: "right", width: "140", ishide: false, css: ""},
+                {name: "billSaleNo", type: "text", text: "right", width: "140", ishide: false, css: ""},
                 {name: "tranTime", type: "text", text: "center", width: "130", ishide: false, css: ""},
                 {name: "memberId", type: "text", text: "right", width: "150", ishide: false, css: ""},
                 {name: "saleAmount", type: "text", text: "right", width: "150", ishide: false, css: "", getCustomValue: _common.getThousands},
@@ -544,12 +640,16 @@ define('cashierDetail', function () {
 
     // 按钮权限验证
     var isButPermission = function () {
+
+
+
+
+
         var exportBut = $("#exportBut").val();
         if (Number(exportBut) != 1) {
             $("#export").remove();
         }
     }
-
     //日期字段格式化格式
     var dateFmt = function (tdObj, value) {
         return $(tdObj).text(fmtIntDate(value));
@@ -589,17 +689,23 @@ define('cashierDetail', function () {
         return res;
     }
 
-    // DD/MM/YYYY to YYYY-MM-DD  格式转换
+    // DD/MM/YYYY hh:ii:ss to YYYY-MM-DD hh:ii:ss  格式转换
     function fmtDate(date) {
+        var year = date.substring(0,10);
+        var hour = date.substring(10,19);
         var res = '';
-        res = date.replace(/\//g, '').replace(/^(\d{2})(\d{2})(\d{4})$/, "$3-$2-$1");
+        res = year.replace(/\//g, '').replace(/^(\d{2})(\d{2})(\d{4})$/, "$3-$2-$1");
+        res += hour;
         return res;
     }
 
-    // -> "mmddyyyy"
+    // -> "yyyyMMddHHmmss"
     function subfmtDate(date) {
+        var year = date.substring(0,10);
+        var hour = date.substring(11,19);
         var res = "";
-        res = date.replace(/\//g, '').replace(/^(\d{2})(\d{2})(\d{4})$/, '$3$2$1');
+        res = year.replace(/\//g, '').replace(/^(\d{2})(\d{2})(\d{4})$/, '$3$2$1')
+        + hour.replace(/:/g,'');
         return res;
     }
 
@@ -608,6 +714,105 @@ define('cashierDetail', function () {
         var res = "";
         res = strDate.replace(/-/g, "");
         return res;
+    }
+
+    var getLetter = function (tdObj, value) {
+        return $(tdObj).text(numberToLetter(value));
+    };
+
+    function numberToLetter(value) {
+        if(value == null || value === ""){
+            return "";
+        }
+        value = value.toString();
+        value = value.toUpperCase().split("");
+        var al = value.length;
+        var numout = '';
+        for (var i = 0; i < al; i++) {
+            switch (value[i]) {
+                case '1':
+                    numout+='Q';
+                    break;
+                case '2':
+                    numout+='W';
+                    break;
+                case '3':
+                    numout+='E';
+                    break;
+                case '4':
+                    numout+='R';
+                    break;
+                case '5':
+                    numout+='T';
+                    break;
+                case '6':
+                    numout+='Y';
+                    break;
+                case '7':
+                    numout+='U';
+                    break;
+                case '8':
+                    numout+='I';
+                    break;
+                case '9':
+                    numout+='O';
+                    break;
+                case '0':
+                    numout+='P';
+                    break;
+                default:
+                    numout+=value[i];
+                    break;
+            }
+        }
+        return numout;
+    }
+
+    function letterToNumber(str) {
+        if(str == null || str === ""){
+            return "";
+        }
+        str = str.toUpperCase().split("");
+        var al = str.length;
+        var numout = '';
+        for (var i = 0; i < al; i++) {
+            switch (str[i]) {
+                case 'Q'||'q':
+                    numout+='1';
+                    break;
+                case 'W'||'w':
+                    numout+='2';
+                    break;
+                case 'E'||'e':
+                    numout+='3';
+                    break;
+                case 'R'||'r':
+                    numout+='4';
+                    break;
+                case 'T'||'t':
+                    numout+='5';
+                    break;
+                case 'Y'||'y':
+                    numout+='6';
+                    break;
+                case 'U'||'u':
+                    numout+='7';
+                    break;
+                case 'I'||'i':
+                    numout+='8';
+                    break;
+                case 'O'||'o':
+                    numout+='9';
+                    break;
+                case 'P'||'p':
+                    numout+='0';
+                    break;
+                default:
+                    numout+=str[i];
+                    break;
+            }
+        }
+        return numout;
     }
 
     self.init = init;

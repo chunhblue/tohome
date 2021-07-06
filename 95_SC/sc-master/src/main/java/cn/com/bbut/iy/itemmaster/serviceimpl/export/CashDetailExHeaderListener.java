@@ -34,7 +34,7 @@ public class CashDetailExHeaderListener implements ExEventListener {
         // 列标题
         String row2 = "NO.,Store No.,Store Name, Area Manager ID,Area Manager Name,Business Date,Customer Count," +
                 "Shift1,Shift2,Shift3,Additional,Offset Claim,Total Amount Received,Shift1 Received,Shift2 Received," +
-                "Shift3 Received,Variance Amount,Total Amount";
+                "Shift3 Received,Variance Amount,Actual Counted Amount(User Entered)";
         String[] titles = row2.split(",");
 
         // 开始拼接excel头信息

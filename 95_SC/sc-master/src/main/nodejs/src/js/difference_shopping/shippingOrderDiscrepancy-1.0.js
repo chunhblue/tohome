@@ -177,10 +177,13 @@ define('shoppingOrderDifference', function () {
             return false;
         }else{
             _StartDate = new Date(fmtDate($("#rd_start_date").val())).getTime();
-            if(judgeNaN(_StartDate)){
+            if(_common.judgeValidDate($("#rd_start_date").val())){
                 _common.prompt("Please enter a valid date!",3,"info");
+                $("#rd_start_date").css("border-color","red");
                 $("#rd_start_date").focus();
                 return false;
+            }else {
+                $("#rd_start_date").css("border-color","#CCCCCC");
             }
         }
         let _EndDate = null;
@@ -190,10 +193,13 @@ define('shoppingOrderDifference', function () {
             return false;
         }else{
             _EndDate = new Date(fmtDate($("#rd_end_date").val())).getTime();
-            if(judgeNaN(_EndDate)){
+            if(_common.judgeValidDate($("#rd_end_date").val())){
                 _common.prompt("Please enter a valid date!",3,"info");
+                $("#rd_end_date").css("border-color","red");
                 $("#rd_end_date").focus();
                 return false;
+            }else {
+                $("#rd_end_date").css("border-color","#CCCCCC");
             }
         }
         if(_StartDate>_EndDate){
@@ -207,6 +213,45 @@ define('shoppingOrderDifference', function () {
             $("#rd_end_date").focus();
             return false;
         }
+
+        let _deliveryStartDate = 0;
+        if($("#delivery_start_date").val()){
+            _deliveryStartDate = new Date(fmtDate($("#delivery_start_date").val())).getTime();
+            if (_common.judgeValidDate($("#delivery_start_date").val())) {
+                _common.prompt("Please enter a valid date!", 3, "info");
+                $("#delivery_start_date").css("border-color", "red");
+                $("#delivery_start_date").focus();
+                return false;
+            } else {
+                $("#delivery_start_date").css("border-color", "#CCC");
+            }
+        }
+        let _deliveryEndDate = 0;
+        if($("#delivery_end_date").val()){
+            _deliveryEndDate = new Date(fmtDate($("#delivery_end_date").val())).getTime();
+            if (_common.judgeValidDate($("#delivery_end_date").val())) {
+                _common.prompt("Please enter a valid date!", 3, "info");
+                $("#delivery_end_date").css("border-color", "red");
+                $("#delivery_end_date").focus();
+                return false;
+            } else {
+                $("#delivery_end_date").css("border-color", "#CCC");
+            }
+        }
+        if($("#delivery_start_date").val() && $("#delivery_end_date").val()){
+            if(_deliveryStartDate>_deliveryEndDate){
+                $("#delivery_end_date").focus();
+                _common.prompt("The start date cannot be greater than the end date!",3,"info");/*开始时间不能大于结束时间*/
+                return false;
+            }
+            let deliveryDifValue = parseInt(Math.abs((_deliveryEndDate-_deliveryStartDate)/(1000*3600*24)));
+            if(deliveryDifValue>62){
+                _common.prompt("Query Period cannot exceed 62 days!",3,"info"); // 日期期间取值范围不能大于62天
+                $("#delivery_end_date").focus();
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -306,7 +351,7 @@ define('shoppingOrderDifference', function () {
             title:"Query Result",
             param:paramGrid,
             localSort: true,
-            colNames:["PO No.","Delivery Order Id","Delivery Date","Last Date Received","Last Received No.","Store No.","Store Name","DC No.","DC Name","Total Variance Quantity"],
+            colNames:["PO No.","Delivery Order Id","Delivery Date","Last Date Received","Last Received No.","Store No.","Store Name","DC No.","DC Name","(Ordered-DC Picked) Qty","(DC Picked-Received)Qty"],
             colModel:[
                 {name:"orderId",type:"text",text:"right",width:"130",ishide:false,css:""},
                 {name:"deliveryOrderId",type:"text",text:"right",width:"130",ishide:true,css:""},
@@ -317,6 +362,7 @@ define('shoppingOrderDifference', function () {
                 {name:"storeName",type:"text",text:"left",width:"160",ishide:false,css:""},
                 {name:"deliveryCenterId",type:"text",text:"right",width:"160",ishide:false,css:""},
                 {name:"deliveryCenterName",type:"text",text:"left",width:"160",ishide:false,css:""},
+                {name:"totalAmt2",type:"text",text:"right",width:"150",ishide:false,getCustomValue:getThousands},
                 {name:"totalAmt",type:"text",text:"right",width:"150",ishide:false,getCustomValue:getThousands},
             ],//列内容
             // traverseData:data,

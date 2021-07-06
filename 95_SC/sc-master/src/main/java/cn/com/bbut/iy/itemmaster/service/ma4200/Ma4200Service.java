@@ -49,4 +49,6 @@ public interface Ma4200Service {
      * @return
      */
     AjaxResultDto delete(String empNumId);
+
+    GridDataDTO<MA4200GridDTO> getStore(String userCode,int page,int rows);
 }

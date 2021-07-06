@@ -11,6 +11,7 @@ import cn.com.bbut.iy.itemmaster.dto.base.ReturnDTO;
 import cn.com.bbut.iy.itemmaster.dto.expenditure.ExpenditureDTO;
 import cn.com.bbut.iy.itemmaster.dto.expenditure.ExpenditureParamDTO;
 import cn.com.bbut.iy.itemmaster.entity.User;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.expenditure.ExpenditureService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -44,6 +45,8 @@ public class FundEntryController extends BaseAction {
 
     @Autowired
     private ExpenditureService service;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     /**
      * 经费新增画面
@@ -325,6 +328,9 @@ public class FundEntryController extends BaseAction {
         if(u == null){
             return null;
         }
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         CommonDTO dto = new CommonDTO();
         // 当前用户ID
         dto.setUpdateUserId(u.getUserId());
@@ -335,12 +341,12 @@ public class FundEntryController extends BaseAction {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HHmmss");
         // 当前时间年月日
         String date = dateFormat.format(now);
-        dto.setCreateYmd(date);
-        dto.setUpdateYmd(date);
+        dto.setCreateYmd(ymd);
+        dto.setUpdateYmd(ymd);
         // 当前时间时分秒
         String time = timeFormat.format(now);
-        dto.setCreateHms(time);
-        dto.setUpdateHms(time);
+        dto.setCreateHms(hms);
+        dto.setUpdateHms(hms);
         return dto;
     }
 

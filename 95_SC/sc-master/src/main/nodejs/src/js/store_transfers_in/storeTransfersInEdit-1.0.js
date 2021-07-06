@@ -535,6 +535,7 @@ define('storeTransfersInEdit', function () {
 				if (result != "true") {
 					return false;
 				}
+				$("#audit_affirm").prop("disabled",true);
 				var detailType = "tmp_transfer_in";
 				$.myAjaxs({
 					url: url_left + '/update',
@@ -1391,29 +1392,34 @@ define('storeTransfersInEdit', function () {
 		$("#outcdRemove").hide();
 		// 转入门店选择
 		vstore = $("#vstore").myAutomatic({
-			url: url_root+"/inventoryVoucher/getStoreList",
+			url: url_root+"/ma1000/getStoreByPM",
 			ePageSize: 5,
 			startCount: 0,
 			cleanInput: function() {
 				$("#zgGridTtable>.zgGrid-tbody tr").empty();
 				$("#search").prop("disabled",true);
 				$.myAutomatic.cleanSelectObj(getSelectDOC1);
+				$.myAutomatic.cleanSelectObj(tstore);
 			},
 			selectEleClick: function (thisObject) {
 				$("#out_cd").val("");
+				$.myAutomatic.cleanSelectObj(tstore);
 				$("#zgGridTtable>.zgGrid-tbody tr").empty();
-				let tstore = $("#tstore").attr('k');
+				if(thisObject.attr('k')!==null&&thisObject.attr('k') !== ""){
+					$.myAutomatic.replaceParam(tstore, "&vstore=" + thisObject.attr("k"));
+				}
+				let tstore1 = $("#tstore").attr('k');
 				if(thisObject.attr('k') == m.tstore.attr('k')){
 					m.vstore.focus();
 					m.vstore.val("").attr('k','').attr('v','');
 					_common.prompt("A transfer out of a store cannot be the same as a transfer into a store!",3,"info"); // 转出门店不能和转入门店相同
 					return false;
-				}else if(tstore!==null&&tstore!=="" && thisObject.attr('k')!==null&&thisObject.attr('k') !== ""){
+				}else if(tstore1!==null&&tstore1!=="" && thisObject.attr('k')!==null&&thisObject.attr('k') !== ""){
 					$("#out_cd").prop("disabled",false);
 					$("#outcdRefresh").show();
 					$("#outcdRemove").show();
 					$.myAutomatic.cleanSelectObj(getSelectDOC1);
-					var strm = "&vstore=" + thisObject.attr("k")+"&tstore=" + tstore;
+					var strm = "&vstore=" + thisObject.attr("k")+"&tstore=" + tstore1;
 					$.myAutomatic.replaceParam(getSelectDOC1, strm);
 				}
 				getSouthOrNorth(thisObject.attr('k'));
@@ -1425,14 +1431,9 @@ define('storeTransfersInEdit', function () {
 
 		// 转出门店选择
 		tstore = $("#tstore").myAutomatic({
-			url: url_root+"/inventoryVoucher/getOutStoreList",
+			url: url_root+"/inventoryVoucher/getStoreListByInStore",
 			ePageSize: 5,
 			startCount: 0,
-			param:[{
-				'k':'zoCd',
-				'v':'nouthOrsouth'
-
-			}],
 			cleanInput: function() {
 				$("#zgGridTtable>.zgGrid-tbody tr").empty();
 				$("#search").prop("disabled",true);
@@ -1441,7 +1442,7 @@ define('storeTransfersInEdit', function () {
 			selectEleClick: function (thisObject) {
 				let vstore = $("#vstore").attr('k');
 				$("#out_cd").val("");
-				if(thisObject.attr('k') == m.vstore.attr('k')){
+				if(thisObject.attr('k') === m.vstore.attr('k')){
 					m.tstore.focus();
 					m.tstore.val("").attr('k','').attr('v','');
 					_common.prompt("A transfer out of a store cannot be the same as a transfer into a store!",3,"info"); // 转出门店不能和转入门店相同
@@ -1459,6 +1460,7 @@ define('storeTransfersInEdit', function () {
 			}
 
 		});
+
 
 		// 选择转出单号
 		getSelectDOC1 = $("#out_cd").myAutomatic({

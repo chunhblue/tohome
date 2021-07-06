@@ -61,12 +61,12 @@
 
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <span style="float: left;margin-left:20px;">Created Staff：${author}</span>
+                <span style="float: left;margin-left:20px;">Created Staff：${author!}</span>
             </div>
         </div>
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <span style="float: left;margin-left:20px;">Date Prepared：${bsDate?string('dd/MM/yyyy')}</span>
+                <span style="float: left;margin-left:20px;">Date Prepared：${bsDate!}</span>
             </div>
         </div>
         <div class="row">
@@ -84,7 +84,7 @@
                         <th title="Item Name">Item Name</th>
                         <th title="Barcode">Barcode</th>
                         <th title="UOM">UOM</th>
-                        <th title="Write Off Quantity">Write Off Quantity</th>
+                        <th title="Write Off Quantity">Adjustment Quantity</th>
                         <th title="Adjustment Reason">Adjustment Reason</th>
                         <th title="Are Manager Code">Are Manager Code</th>
                         <th title="Are Manager Name">Are Manager Name</th>

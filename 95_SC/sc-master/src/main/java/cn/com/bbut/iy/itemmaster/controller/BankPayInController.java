@@ -4,6 +4,7 @@ import cn.com.bbut.iy.itemmaster.annotation.Permission;
 import cn.com.bbut.iy.itemmaster.annotation.Secure;
 import cn.com.bbut.iy.itemmaster.constant.Constants;
 import cn.com.bbut.iy.itemmaster.constant.PermissionCode;
+import cn.com.bbut.iy.itemmaster.dto.AjaxResultDto;
 import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam;
@@ -15,13 +16,12 @@ import cn.com.bbut.iy.itemmaster.entity.op0060.OP0060;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.OP0060Service;
 import cn.com.bbut.iy.itemmaster.service.base.DefaultRoleService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +58,8 @@ public class BankPayInController extends BaseAction {
     private CM9060Service cm9060Service;
     @Autowired
     private DefaultRoleService defaultRoleService;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_DEPOSIT_JOURNAL";
     private final String EXCEL_EXPORT_NAME = "Deposit Journal Query.xlsx";
@@ -104,14 +106,14 @@ public class BankPayInController extends BaseAction {
             return new GridDataDTO<OP0060GridDto>();
         }
         User u = this.getUser(session);
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             paramDto.setStartDate(startDate);
-        }
+        }*/
         paramDto.setStores(stores);
         GridDataDTO<OP0060GridDto> grid = op0060Service.getList(paramDto);
         return grid;
@@ -132,12 +134,15 @@ public class BankPayInController extends BaseAction {
     public ResultDto save(HttpServletRequest request, HttpSession session,
                           Map<String, ?> model, OP0060 param , String flg) {
         User u = this.getUser(session);
-        Date date = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMdd");
-        SimpleDateFormat sdf1 = new SimpleDateFormat("HHmmss");
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
+//        Date date = new Date();
+//        SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMdd");
+//        SimpleDateFormat sdf1 = new SimpleDateFormat("HHmmss");
         param.setUpdateUserId(u.getUserId());
-        param.setUpdateYmd(sdf.format(date));
-        param.setUpdateHms(sdf1.format(date));
+        param.setUpdateYmd(ymd);
+        param.setUpdateHms(hms);
         ResultDto resultDto = new ResultDto();
         resultDto.setSuccess(false);
         if(param!=null&&StringUtils.isNotBlank(flg)&&
@@ -147,8 +152,8 @@ public class BankPayInController extends BaseAction {
         ){
             if("add".equals(flg)){
                 param.setCreateUserId(u.getUserId());
-                param.setCreateYmd(sdf.format(date));
-                param.setCreateHms(sdf1.format(date));
+                param.setCreateYmd(ymd);
+                param.setCreateHms(hms);
             }
             try {
                 int result = op0060Service.insertOrUpdate(param,flg);
@@ -167,6 +172,24 @@ public class BankPayInController extends BaseAction {
         }
         return resultDto;
     }
+
+
+    @ResponseBody
+    @RequestMapping(value = "/searchStoresInsert")
+    public AjaxResultDto searhSameDayInsert(OP0060ParamDto param){
+        AjaxResultDto ajaxResultDto = new AjaxResultDto();
+        Integer items= op0060Service.searhSameDayInsert(param);
+       if (items>=2){
+           Integer nextItem=items+1;
+           ajaxResultDto.setData(items);
+           ajaxResultDto.setSuccess(true);
+           ajaxResultDto.setS("deposit data "+' '+items+' '+"records already exists in system, are you sure to enter the Next one?");
+           return  ajaxResultDto;
+       }else {
+           return  ajaxResultDto;
+       }
+    }
+
 
     /**
      * 删除银行缴款信息
@@ -263,14 +286,14 @@ public class BankPayInController extends BaseAction {
             return;
         }
         User u = this.getUser(session);
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             param.setStartDate(startDate);
-        }
+        }*/
         param.setStores(stores);
 
         String fileName = "Bank Deposit.pdf";

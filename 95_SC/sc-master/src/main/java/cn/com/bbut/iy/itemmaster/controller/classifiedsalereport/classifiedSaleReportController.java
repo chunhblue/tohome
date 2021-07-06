@@ -14,9 +14,11 @@ import cn.com.bbut.iy.itemmaster.entity.ma0020.MA0020C;
 import cn.com.bbut.iy.itemmaster.entity.ma0080.MA0080;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.base.DefaultRoleService;
 import cn.com.bbut.iy.itemmaster.service.classifiedsalereport.ClassifiedSaleReportService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +54,8 @@ public class classifiedSaleReportController  extends BaseAction {
     private MRoleStoreService mRoleStoreService;
     @Autowired
     private DefaultRoleService defaultRoleService;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_CATEGORY_SALE_REPORT";
     private final String EXCEL_EXPORT_NAME = "Department Sales Daily Report.xlsx";
@@ -61,13 +65,16 @@ public class classifiedSaleReportController  extends BaseAction {
     public ModelAndView tolistView(HttpServletRequest request, HttpSession session,
                                    Map<String, ?> model) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
        log.debug("User:{} 进入分类销售日报", u.getUserId());
         Collection<Integer> roleIds = (Collection<Integer>) request.getSession().getAttribute(
                 Constants.SESSION_ROLES);
         ModelAndView mv = new ModelAndView("classifiedsalereport/classifiedSaleReport");
         mv.addObject("useMsg", "分类销售日报");
-        mv.addObject("bsDate", new Date());
-        mv.addObject("printTime", new Date());
+        mv.addObject("bsDate", Utils.getFormateDate(ymd));
+        mv.addObject("printTime", Utils.getFormateDate(ymd));
         mv.addObject("storeName", "117007 胡志明店");
         return mv;
     }
@@ -94,14 +101,14 @@ public class classifiedSaleReportController  extends BaseAction {
             param = new clssifiedSaleParamReportDTO();
         }
         User u = this.getUser(session);
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             param.setStartDate(startDate);
-        }
+        }*/
         // 获取当前角色店铺权限
         Collection<String> stores = getStores(session, param);
         if(stores.size() == 0){
@@ -113,7 +120,37 @@ public class classifiedSaleReportController  extends BaseAction {
         Map<String,Object> result = classifiedSaleReportService.search(param);
         return new ReturnDTO(true,"ok",result);
     }
-
+    @RequestMapping(value ="/getTotalSaleAmount",method = RequestMethod.POST)
+    @ResponseBody
+    public ReturnDTO getTotalSaleAmount(String SearchJson, HttpServletRequest request, HttpSession session) {
+        clssifiedSaleParamReportDTO param = null;
+        if (SearchJson != null && !StringUtils.isEmpty(SearchJson)) {
+            Gson gson = new Gson();
+            param = gson.fromJson(SearchJson, clssifiedSaleParamReportDTO.class);
+        }
+        if (param == null) {
+            param = new clssifiedSaleParamReportDTO();
+        }
+        User u = this.getUser(session);
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DATE, -1);
+            String startDate = sdf.format(calendar.getTime());
+            param.setStartDate(startDate);
+        }*/
+        // 获取当前角色店铺权限
+        Collection<String> stores = getStores(session, param);
+        if(stores.size() == 0){
+            log.info(">>>>>>>>>>>>>>>>>>>>> get stores is null");
+            return new ReturnDTO(false,"Query failed!",null);
+        }
+        param.setLimitStart((param.getPage() - 1)*param.getRows());
+        param.setStores(stores);
+        Map<String,Object> result = classifiedSaleReportService.getTotalSaleAmount(param);
+        return new ReturnDTO(true,"ok",result);
+    }
     @RequestMapping(value ="/getAMList",method = RequestMethod.POST)
     @ResponseBody
     public ReturnDTO getAMList(HttpServletRequest request, HttpSession session) {
@@ -134,7 +171,13 @@ public class classifiedSaleReportController  extends BaseAction {
         return new ReturnDTO(true,"ok",result);
     }
 
-    /**
+
+
+
+
+
+
+      /**
      * 导出查询结果
      *
      * @param request
@@ -170,6 +213,12 @@ public class classifiedSaleReportController  extends BaseAction {
         ExService service = Container.getBean("categorySaleExService", ExService.class);
         return ExportUtil.export(EXCEL_EXPORT_KEY, request, service, exParam);
     }
+
+
+
+
+
+
 
     /**
      * 根据画面选择，获取Store权限

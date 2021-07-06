@@ -142,6 +142,57 @@ define('stocktakePlan', function () {
                 window.open(encodeURI(url), "excelprint", "width=1400,height=600,scrollbars=yes");
             }
         });
+
+        // 导出盘点前的异动数据
+        $("#exportDataCapture").on("click",function(){
+            if (selectTrTemp==null) {
+                _common.prompt("Please select at least one row of data!",5,"error");
+                return;
+            }
+            var cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,piDate,storeCd,piStartTime,piEndTime");
+
+            let piDate = formatDate(cols['piDate']);
+            let businessDate = $("#businessDate").val();
+
+            /*if (piDate !== businessDate) {
+                // 请在盘点当天完成
+                _common.prompt("Please complete the entry on the day of stocktaking!",5,"error");
+                return;
+            }*/
+
+            // 封装参数
+            var jsonStr = JSON.stringify({
+                'piCd': cols['piCd'],
+                'piDate': formatDate(cols['piDate']),
+                'storeCd': cols['storeCd'],
+                'startTime': formatTime(cols["piStartTime"])
+            });
+
+            _common.loading();
+            $.myAjaxs({
+                url:url_left+"/exportDataCapture",
+                async:true,
+                timeout: 60000, // 一分钟超时
+                cache:false,
+                data:'jsonStr='+jsonStr,
+                type :"post",
+                dataType:"json",
+                success:function(result){
+                    if(result.success){
+                        //导出excle
+                        window.location.href=url_left+"/download?piCd="+cols["piCd"]+"&fileName=StockTake_DataCapture";
+                    } else {
+                        _common.prompt(result.msg,5,"error");
+                    }
+                    _common.loading_close();
+                },
+                error : function(e){
+                    _common.prompt("Export failed!",5,"error");
+                    _common.loading_close();
+                },
+            });
+        });
+
         // 导出按钮点击事件
         $("#exportInfo").on("click",function(){
             if(verifySearch()){
@@ -152,6 +203,7 @@ define('stocktakePlan', function () {
                 window.open(encodeURI(url), "excelExportWin", "width=450,height=300,scrollbars=yes");
             }
         });
+        // 导出盘点明细商品
         $("#exportItems").on("click",function(){
             if (selectTrTemp==null) {
                 _common.prompt("Please select at least one row of data!",5,"error");
@@ -210,7 +262,7 @@ define('stocktakePlan', function () {
                     success:function(result){
                         if(result.success){
                             //导出excle
-                            // window.location.href=url_left+"/download?piCd="+cols["piCd"];
+                            // window.location.href=url_left+"/download?piCd="+cols["piCd"]+"&fileName=Stocktake_Items";
                             window.location.href=url_left+"/downloadCsv?piCd="+cols["piCd"];
                         } else {
                             _common.prompt(result.msg,5,"error");
@@ -521,7 +573,11 @@ define('stocktakePlan', function () {
                 {
                     butType:"custom",
                     butHtml:"<button id='exportItems' type='button' class='btn btn-info btn-sm'><span class='glyphicon glyphicon-export'></span> Export Stocktaking Items</button>"
-                }
+                },
+                {
+                    butType:"custom",
+                    butHtml:"<button id='exportDataCapture' type='button' class='btn btn-info btn-sm'><span class='glyphicon glyphicon-export'></span> Export Data Capture</button>"
+                },
             ],
         });
 

@@ -3,8 +3,8 @@
 <mapper namespace="cn.com.bbut.iy.itemmaster.dao.MA4200Mapper">
   <select id="selectList"  parameterType="cn.com.bbut.iy.itemmaster.dto.ma4200.MA4200ParamDTO"
           resultType="cn.com.bbut.iy.itemmaster.dto.ma4200.MA4200GridDTO">
-    SELECT
-    emp_num_id, emp_id, ma4200.store_cd,ma1000.store_name,
+    SELECT DISTINCT
+    emp_num_id, emp_id,
     ma4200.job_type_cd,ma4160.job_catagory_name, effective_status, emp_name,
     emp_gender, emp_country, telephone_no, mobile_phone_no, emp_birthdate, emp_education,
     emp_date, emp_leave_date, emp_address, emp_postal_code, emp_comment, emp_email, md,
@@ -21,6 +21,7 @@
         on ma4200.store_cd=ma1000.store_cd
         and #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
     left join ma4160 on ma4200.job_type_cd = ma4160.job_type_cd
+    left join ma4210 on emp_num_id = ma4210.user_code
     <where>
       <if test="empNumId!=null and empNumId!=''">
         AND lower(emp_num_id)  like concat('%',lower(#{empNumId,jdbcType=VARCHAR}),'%')
@@ -29,7 +30,7 @@
         AND lower(emp_name) like concat('%',lower(#{empName,jdbcType=VARCHAR}),'%')
       </if>
       <if test="storeCd !=null and storeCd!='' ">
-        AND ma4200.store_cd=#{storeCd,jdbcType=VARCHAR}
+        AND ma4210.store_cd=#{storeCd,jdbcType=VARCHAR}
       </if>
       <if test="jobTypeCd !=null and jobTypeCd!='' ">
         AND ma4200.job_type_cd=#{jobTypeCd,jdbcType=VARCHAR}
@@ -46,21 +47,35 @@
   <select id="selectListCount"  parameterType="cn.com.bbut.iy.itemmaster.dto.ma4200.MA4200ParamDTO"
           resultType="long">
     SELECT
-    count(*)
+    count(a.*)
+    FROM (SELECT DISTINCT
+    emp_num_id, emp_id,
+    ma4200.job_type_cd,ma4160.job_catagory_name, effective_status, emp_name,
+    emp_gender, emp_country, telephone_no, mobile_phone_no, emp_birthdate, emp_education,
+    emp_date, emp_leave_date, emp_address, emp_postal_code, emp_comment, emp_email, md,
+    (select code_name from cm9010
+    where cm9010.code_type='00270'
+    and cm9010.code_value=ma4200.emp_gender
+    ) as emp_gender_name,
+    (select code_name from cm9010
+    where cm9010.code_type='00220'
+    and cm9010.code_value=ma4200.effective_status
+    ) as effective_status_name
     FROM ma4200
     left join ma1000
     on ma4200.store_cd=ma1000.store_cd
     and #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
     left join ma4160 on ma4200.job_type_cd = ma4160.job_type_cd
+    left join ma4210 on emp_num_id = ma4210.user_code
     <where>
       <if test="empNumId!=null and empNumId!=''">
-        AND emp_num_id  like concat('%',#{empNumId,jdbcType=VARCHAR},'%')
+        AND lower(emp_num_id) like concat('%',lower(#{empNumId,jdbcType=VARCHAR}),'%')
       </if>
       <if test="empName !=null and empName !='' ">
-        AND emp_name like concat('%',#{empName,jdbcType=VARCHAR},'%')
+        AND lower(emp_name) like concat('%',lower(#{empName,jdbcType=VARCHAR}),'%')
       </if>
       <if test="storeCd !=null and storeCd!='' ">
-        AND ma4200.store_cd=#{storeCd,jdbcType=VARCHAR}
+        AND ma4210.store_cd=#{storeCd,jdbcType=VARCHAR}
       </if>
       <if test="jobTypeCd !=null and jobTypeCd!='' ">
         AND ma4200.job_type_cd=#{jobTypeCd,jdbcType=VARCHAR}
@@ -69,6 +84,7 @@
         AND ma4200.effective_status=#{effectiveStatus,jdbcType=CHAR}
       </if>
     </where>
+    ) as a
   </select>
   <update id="updateUserInfo" parameterType="cn.com.bbut.iy.itemmaster.entity.MA4200">
     update ma4200
@@ -126,5 +142,37 @@
         AND emp_num_id=#{empNumId,jdbcType=VARCHAR}
         AND emp_password=#{empPassword,jdbcType=VARCHAR}
     </where>
+  </update>
+
+  <select id="getStoreInfoByuser" resultType="cn.com.bbut.iy.itemmaster.dto.ma4200.MA4200GridDTO">
+     select distinct ma4210.store_cd as store_detail_cd,ma1000.store_name as store_detail_name from ma4210
+     left join ma1000
+        on ma4210.store_cd=ma1000.store_cd
+        and #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        where ma4210.user_code = #{userCode,jdbcType=VARCHAR}
+        order by ma4210.store_cd
+        <if test="rows>0">
+          limit ${rows} offset ${limitStartRow}
+        </if>
+  </select>
+
+  <select id="countStoreByUser" resultType="INT">
+    select count(distinct store_cd) from ma4210
+     where user_code = #{userCode,jdbcType=VARCHAR}
+  </select>
+
+  <insert id="insertUserToMa4210" >
+    insert into ma4210
+    values(
+    #{storeCd,jdbcType=VARCHAR},
+    #{empNumId,jdbcType=VARCHAR},4
+    )
+  </insert>
+
+  <update id="updateMa4200ByUser">
+    update ma4210 set
+     store_cd = #{storeCd,jdbcType=VARCHAR}
+    where
+        user_code=#{empNumId,jdbcType=VARCHAR}
   </update>
 </mapper>

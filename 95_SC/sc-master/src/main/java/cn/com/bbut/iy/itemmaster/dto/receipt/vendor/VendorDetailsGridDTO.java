@@ -94,6 +94,7 @@ public class VendorDetailsGridDTO extends GridDataDTO {
 
     // 实收搭赠数
     private BigDecimal receiveNoChargeQty1;
+    private BigDecimal ssHHQty;
 
 
     // 总收货含税
@@ -133,4 +134,7 @@ public class VendorDetailsGridDTO extends GridDataDTO {
     private String isFreeItem;
 
     private String isFreeItemText;
+    // hht收货时间
+    private String hhtReceiveDate;
+    private String hhtReceiveTime;
 }

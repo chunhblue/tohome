@@ -4,6 +4,7 @@
   <select id="getApprovalType" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
     SELECT n_typeid k, c_type_name v
     FROM t_audit_type
+    where n_typeid != 6
     order by n_typeId
   </select>
 

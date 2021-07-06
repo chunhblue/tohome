@@ -4,6 +4,7 @@ import cn.com.bbut.iy.itemmaster.annotation.Permission;
 import cn.com.bbut.iy.itemmaster.annotation.Secure;
 import cn.com.bbut.iy.itemmaster.constant.Constants;
 import cn.com.bbut.iy.itemmaster.constant.PermissionCode;
+import cn.com.bbut.iy.itemmaster.dto.AjaxResultDto;
 import cn.com.bbut.iy.itemmaster.dto.article.ArticleDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.store.MA4160DTO;
@@ -13,6 +14,7 @@ import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.service.Ma4160Service;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -92,5 +94,80 @@ public class Ma4160Controller extends  BaseAction{
         ma4160ParamDTO.setLimitStart((page-1)*rows);
         GridDataDTO<MA4160DTO> data= ma4160Service.search(ma4160ParamDTO);
         return data;
+    }
+
+    /**
+     * 判断是否有SM AM权限
+     * @param request
+     * @param session
+     * @param storeCd
+     * @return
+     */
+    @RequestMapping(value = "/checkPosition")
+    @ResponseBody
+    public AjaxResultDto checkPosition(HttpServletRequest request, HttpSession session,String storeCd) {
+        User u = this.getUser(session);
+        AjaxResultDto res = ajaxRepeatSubmitCheck(request, session);
+//        if (!res.isSuccess()) {
+//            res.setToKen(res.getToKen());
+//            return res;
+//        }
+        if(StringUtils.isBlank(storeCd)||
+                StringUtils.isBlank(u.getUserId())){
+            res.setSuccess(false);
+            res.setMessage("Submitted failed,The store or userId cannot be empty!");
+            return res;
+        }
+        int num = ma4160Service.getPositionByStoreCd(storeCd,u.getUserId());
+        if(num<=0){
+            res.setMessage("You do not have permission to submit it!");
+            res.setSuccess(false);
+            return res;
+        }
+        res.setSuccess(true);
+        return res;
+    }
+
+    @RequestMapping(value = "/checkUserRole")
+    @ResponseBody
+    public AjaxResultDto checkUserRole(HttpServletRequest request, HttpSession session
+            ,String storeCd) {
+        User u = this.getUser(session);
+        AjaxResultDto res = ajaxRepeatSubmitCheck(request, session);
+        if(StringUtils.isBlank(storeCd)||
+                StringUtils.isBlank(u.getUserId())){
+            res.setSuccess(false);
+            res.setMessage("The store or userId cannot be empty!");
+            return res;
+        }
+        int count = ma4160Service.checkAuditByStoreCdAndUserId(storeCd,u.getUserId());
+        if(count==0){
+            res.setSuccess(false);
+            return res;
+        }
+        res.setSuccess(true);
+        return res;
+    }
+
+    @RequestMapping(value = "/getPositionList")
+    @ResponseBody
+    public AjaxResultDto getPosition(HttpServletRequest request, HttpSession session,String storeCd) {
+        User u = this.getUser(session);
+        AjaxResultDto res = ajaxRepeatSubmitCheck(request, session);
+        if(StringUtils.isBlank(storeCd)||
+                StringUtils.isBlank(u.getUserId())){
+            res.setSuccess(false);
+            res.setMessage("Submitted failed,The store or userId cannot be empty!");
+            return res;
+        }
+        List<Integer> _list = ma4160Service.getPositionList(storeCd,u.getUserId());
+        if(_list.size() ==0 ){
+            res.setMessage("You do not have permission!");
+            res.setSuccess(false);
+            return res;
+        }
+        res.setData(_list);
+        res.setSuccess(true);
+        return res;
     }
 }

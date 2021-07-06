@@ -53,14 +53,14 @@ public class SerciceTypeExServiceImpl  implements ExService {
         jsonParam.setFlg(false);
         // 资源权限参数设置
         jsonParam.setStores(paramDTO.getStores());
-        int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
+        /*int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
         if(i >= 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             jsonParam.setStartDate(startDate);
-        }
+        }*/
         // 生成文件标题信息对象
         session.setHeaderListener(new ServiceTypeExHeaderListener(jsonParam));
         session.createWorkBook();

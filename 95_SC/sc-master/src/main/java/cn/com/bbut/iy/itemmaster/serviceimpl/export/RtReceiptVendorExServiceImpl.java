@@ -122,11 +122,15 @@ public class RtReceiptVendorExServiceImpl implements ExService {
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
-            setCellValue(cell, getIfQty(ls.getOrderQty()));
+            String str = getIfQty(ls.getOrderQty());
+            Double aDouble = Double.valueOf(str);
+            setCellValue(cell, String.format("%,d",aDouble.intValue()));
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
-            setCellValue(cell, getIfQty(ls.getReceiveQty()));
+            String str1 = getIfQty(ls.getReceiveQty());
+            Double aDouble1 = Double.valueOf(str1);
+            setCellValue(cell, String.format("%,d",aDouble1.intValue()));
 
             curRow++;
         }

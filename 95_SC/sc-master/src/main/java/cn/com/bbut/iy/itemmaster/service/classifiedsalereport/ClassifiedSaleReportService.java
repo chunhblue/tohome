@@ -18,4 +18,6 @@ public interface ClassifiedSaleReportService {
     List<MA0020C> getCity();
 
     List<MA0080> getPmaList();
+
+    Map<String, Object> getTotalSaleAmount(clssifiedSaleParamReportDTO param);
 }

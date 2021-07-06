@@ -72,6 +72,8 @@
             ]]>
             /*搭赠商品不能退货*/
             and od0010.is_free_item = '0'
+            AND ma1100.aging_stock_returnable='1'
+            AND MA1100.INVENTORY_item='1'
             and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
             <if test="orderId !=null and orderId!='' ">
                 and od0010.order_id = #{orderId,jdbcType=VARCHAR}

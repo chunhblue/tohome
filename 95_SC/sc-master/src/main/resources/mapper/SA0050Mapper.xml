@@ -326,6 +326,8 @@
       <if test="cashierEmail != null">
         cashier_email,
       </if>
+      upload_flg,upload_date,create_user_id,create_ymd,create_hms,update_user_id,
+      update_ymd,update_hms,update_screen_id,update_ip_address,nr_update_flg,nr_ymd,nr_hms
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="cashierId != null">
@@ -355,6 +357,12 @@
       <if test="cashierEmail != null">
         #{cashierEmail,jdbcType=CHAR},
       </if>
+      null,null,
+      <if test="cashierEmail != null">
+        #{createUserId,jdbcType=VARCHAR},
+      </if>
+      to_char(now(),'yyyyMMdd'),to_char(now(),'hh24miss'),
+      null,null,null,null,null,null,null,null
     </trim>
   </insert>
   <select id="countByExample" parameterType="cn.com.bbut.iy.itemmaster.entity.sa0050.SA0050Example" resultType="java.lang.Long">
@@ -486,6 +494,11 @@
       <if test="storeCd != null">
         store_cd = #{storeCd,jdbcType=CHAR},
       </if>
+      <if test="updateUserId != null">
+        update_user_id = #{updateUserId,jdbcType=CHAR},
+      </if>
+      update_ymd=to_char(now(),'yyyyMMdd'),
+      update_hms=to_char(now(),'hh24miss')
     </set>
     where cashier_id = #{cashierId,jdbcType=CHAR}
     AND store_cd=#{storeCd,jdbcType=CHAR}

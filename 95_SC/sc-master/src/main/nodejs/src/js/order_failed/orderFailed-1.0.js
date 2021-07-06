@@ -149,10 +149,13 @@ define('dayOrderFailure', function () {
 			return false;
 		}else{
 			_StartDate = new Date(fmtDate($("#bf_start_date").val())).getTime();
-			if(judgeNaN(_StartDate)){
+			if(_common.judgeValidDate($("#bf_start_date").val())){
 				_common.prompt("Please enter a valid date!",3,"info");
+				$("#bf_start_date").css("border-color","red");
 				$("#bf_start_date").focus();
 				return false;
+			}else {
+				$("#bf_start_date").css("border-color","#CCCCCC");
 			}
 		}
 		let _EndDate = null;
@@ -162,10 +165,13 @@ define('dayOrderFailure', function () {
 			return false;
 		}else{
 			_EndDate = new Date(fmtDate($("#bf_end_date").val())).getTime();
-			if(judgeNaN(_EndDate)){
+			if(_common.judgeValidDate($("#bf_end_date").val())){
 				_common.prompt("Please enter a valid date!",3,"info");
+				$("#bf_end_date").css("border-color","red");
 				$("#bf_end_date").focus();
 				return false;
+			}else {
+				$("#bf_end_date").css("border-color","#CCCCCC");
 			}
 		}
 		if(_StartDate>_EndDate){

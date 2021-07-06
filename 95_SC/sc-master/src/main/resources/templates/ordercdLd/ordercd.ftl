@@ -18,7 +18,6 @@
     <!--<script type="text/javascript" src="${m.staticpath}/[@spring.message 'js.html5shiv'/]"></script>-->
     <!--<script type="text/javascript" src="${m.staticpath}/[@spring.message 'js.respond'/]"></script>-->
     [#--<![endif]--]
-
     <STYLE>
         .box div.radio-inline {
             margin-left: 0;

@@ -17,6 +17,7 @@ define('receiptEdit', function () {
         selectTrTemp = null,
         differenceReason = null,
         Sts = null,
+        table = null,
         tempTrObjValue = {},//临时行数据存储
         //附件
         attachmentsParamGrid = null,
@@ -104,13 +105,16 @@ define('receiptEdit', function () {
         table_event();
         //附件事件
         attachments_event();
-        // 加载数据
-        getRecord();
         //审核事件
         // approval_event();
         // 设置按钮是否可用
         if (m.viewSts.val() == 'view') {
             setDisable();
+            if (m.submitAuditBut.attr("disabled",true)){
+                $("#addByFile").attr("disabled",true);
+                $("#updateByFile").attr("disabled",true);
+                $("#deleteByFile").attr("disabled",true);
+            }
             //检查是否允许审核
             // _common.checkRole(m._receiveId.val(),m.typeId.val(),function (success) {
             // 	if(success){
@@ -126,7 +130,30 @@ define('receiptEdit', function () {
             $("#remarks").prop("disabled", false);
             m.submitAuditBut.hide();
         }
+        // 加载数据
+        getRecord();
+        bodyScroll();
     }
+
+    // 冻结表头时，表头可以横向移动
+    var bodyScroll  = function(){
+        $(document).ready(function() {
+            if (table.defaults.freezeHeader) {
+                var initHeaderWidth = table.table.width();
+                table.zgGridHeaderTable.width(initHeaderWidth);
+                table.zgGridBodyBox.scroll(function () {
+                    var left = $(table.zgGridBodyBox).scrollLeft();
+                    if (left < 0) {
+                        left = 0;
+                    }
+                    left = (~left) + "px";
+                    table.zgGridHeaderTable.stop().animate({
+                        marginLeft: left
+                    }, 0);
+                });
+            }
+        });
+    };
 
     var checkSubmit = function () {
         if (m.viewSts.val() != 'view') {
@@ -137,29 +164,43 @@ define('receiptEdit', function () {
         _common.getRecordStatus(m._receiveId.val(), m.typeId.val(), function (result) {
             if (result.success || result.data == '0') {
                 //检查是否允许submit 店长sm才拥有权限
-                $.myAjaxs({
-                    url: url_root + "/storeOrder/checkSubmit",
-                    async: true,
-                    cache: false,
-                    type: "post",
-                    data: {
-                        storeCd: m._storeCd.val()
-                    },
-                    dataType: "json",
-                    success: function (result) {
-                        if (result.success) {
-                            m.submitAuditBut.removeAttr("disabled");
-                        } else {
-                            m.submitAuditBut.attr("disabled", "disabled");
+                // $.myAjaxs({
+                //     url: url_root + "/storeOrder/checkSubmit",
+                //     async: true,
+                //     cache: false,
+                //     type: "post",
+                //     data: {
+                //         storeCd: m._storeCd.val()
+                //     },
+                //     dataType: "json",
+                //     success: function (result) {
+                //         if (result.success) {
+                //             m.submitAuditBut.removeAttr("disabled");
+                //         } else {
+                //             m.submitAuditBut.attr("disabled", "disabled");
+                //         }
+                //     },
+                //     complete: _common.myAjaxComplete
+                // });
+
+                var position = false;
+                _common.getPositionList(m._storeCd.val(),function (result) {
+                    let arr = result;
+                    for(let i=0;i<arr.length;i++){
+                        if(arr[i] === 4 || arr[i]==2 || arr[i]==1){
+                            position =true;
                         }
-                    },
-                    complete: _common.myAjaxComplete
+                    }
                 });
+                if(position){
+                    m.submitAuditBut.removeAttr("disabled");
+                }
+
             } else {
                 m.submitAuditBut.attr("disabled", "disabled");
             }
-        });
-    }
+        },m.reviewId.val());
+    };
 
     //附件
     var attachments_event = function () {
@@ -438,9 +479,9 @@ define('receiptEdit', function () {
         $("#saveBtn").prop("disabled", true);
         $("#submitAuditBut").prop("disabled", true);
         //附件按钮
-        $("#addByFile").prop("disabled", true);
-        $("#updateByFile").prop("disabled", true);
-        $("#deleteByFile").prop("disabled", true);
+        $("#addByFile").prop("disabled", false);
+        $("#updateByFile").prop("disabled", false);
+        $("#deleteByFile").prop("disabled", false);
     }
 
     // 表格内按钮事件
@@ -622,6 +663,8 @@ define('receiptEdit', function () {
                     //还原input输入框
                     var cols = tableGrid.getSelectColValue(thisParent, "articleId,isFreeItem");
                     let articleId = tableGrid.find('.info td[tag=articleId]').text();
+                    let deliveryQty2 = isNotNull(tableGrid.find('.info td[tag=deliveryQty]').text());
+                    let receiveQty2= isNotNull( $("#receiveQty2").val());
                     let isFreeItem = tableGrid.find('.info td[tag=isFreeItem]').text();
                     let selArticleId = m.articleId.val();
                     let selIsFreeItem = m.isFreeItem.val();
@@ -629,16 +672,21 @@ define('receiptEdit', function () {
                         && !orderAdd && verifyDialogSearch2(true)) {
                         let receiveQty = parseInt(reThousands($("#receiveQty2").val()));
                         let hhtReceiveQty = parseInt(reThousands($(".info [tag=hhtReceiveQty]").text()));
+                        let deliveryQty = parseInt(reThousands($(".info [tag=deliveryQty]").text()));
                         let receiveNoQty = parseInt(reThousands($("#receiveNoQty2").val()));
                         let orderQty = parseInt(reThousands($(".info [tag=orderQty]").text()));
                         let orderNoQty = parseInt(reThousands($(".info [tag=orderNoChargeQty]").text()));
                         let msg = "are you sure to submit?";
-                        $("#receiveQty2").trigger("blur change");
+                        // $("#receiveQty2").trigger("blur change");
+                        $("#receiveQty2").trigger("focus change");
                         m.differenceReason = $("#differenceReason2");
                         m.receiveNoQty = $("#receiveNoQty2");
                         m.receiveQty = $("#receiveQty2");
                         if (isNaN(hhtReceiveQty) || hhtReceiveQty === null || hhtReceiveQty === '') {
                             hhtReceiveQty = 0;
+                        }
+                        if (isNaN(deliveryQty) || deliveryQty === null || deliveryQty === '') {
+                            deliveryQty = 0;
                         }
                         /*if(receiveNoQty > orderNoQty){
 							// msg = "receiving free quantity is greater than order free quantity, " + msg;
@@ -659,12 +707,24 @@ define('receiptEdit', function () {
 							msg = "receiving free quantity is less than order free quantity, " + msg;
 						}*/
                         if (receiveQty > orderQty) {
-                            _common.prompt("receiving qty can not be greater than order qty!");
+                            /*_common.prompt("receiving qty can not be greater than order qty!");
                             m.receiveQty.focus();
                             $("#receiveQty2").css("border-color", "red");
-                            return false;
+                            return false;*/
+                            _common.prompt("receiving quantity is more than order quantity!", 3, "info");
                         } else if (receiveQty < orderQty) {
                             $("#receiveQty2").css("border-color", "#CCC");
+                            // if (m.differenceReason.val().trim() == '') {
+                            //     _common.prompt("Differnece Reason cannot be empty!");
+                            //     m.differenceReason.focus();
+                            //     m.differenceReason.css("border-color", "red");
+                            //     return false;
+                            // } else {
+                            //     m.differenceReason.css("border-color", "#CCCCCC");
+                            // }
+                            msg = "receiving quantity is less than order quantity, " + msg;
+                        }
+                        if(deliveryQty2-receiveQty2 !=0){
                             if (m.differenceReason.val().trim() == '') {
                                 _common.prompt("Differnece Reason cannot be empty!");
                                 m.differenceReason.focus();
@@ -673,7 +733,6 @@ define('receiptEdit', function () {
                             } else {
                                 m.differenceReason.css("border-color", "#CCCCCC");
                             }
-                            msg = "receiving quantity is less than order quantity, " + msg;
                         }
                         msg = msg.substring(0, 1).toUpperCase() + msg.substring(1);
                         let cols = tableGrid.getSelectColValue(selectTrTemp, "articleId,isFreeItem");
@@ -684,7 +743,8 @@ define('receiptEdit', function () {
                                 let _price = reThousands(m.receivePrice.val());
                                 let _amount = Number(accMul(receiveQty, _price)).toFixed(2);
                                 let _total = accAdd(receiveQty, receiveNoQty);
-                                $(this).find('td[tag=varQty]').text(toThousands(receiveQty-hhtReceiveQty));
+                                // $(this).find('td[tag=varQty]').text(toThousands(receiveQty-hhtReceiveQty));
+                                $(this).find('td[tag=varQty]').text(toThousands(deliveryQty-receiveQty));
                                 $(this).find('td[tag=receiveQty]').text(toThousands(m.receiveQty.val()));
                                 $(this).find('td[tag=receiveQty1]').text(toThousands(m.receiveQty.val()));
                                 $(this).find('td[tag=receiveNoChargeQty]').text(toThousands(m.receiveNoQty.val()));
@@ -717,10 +777,19 @@ define('receiptEdit', function () {
         }
     }// 验证表格
     var verifyDialogSearch2 = function (flag) {
+        var reg = /^[0-9]*$/;
         if (orderAdd) {
             return;
         }
         m.receiveQty = $('#receiveQty2');
+        if (!reg.test(m.receiveQty.val()) || m.receiveQty.val().indexOf(",")>0){
+            m.receiveQty.css("border-color", "red");
+            _common.prompt("Received Quantity can only be a pure number!", 5, "error");
+            return false;
+        }else {
+            m.receiveQty.css("border-color", "#CCCCCC");
+
+        }
         var inputVal = reThousands(m.receiveQty.val());
         if ($.trim(inputVal) == "") {
             m.receiveQty.focus();
@@ -769,7 +838,7 @@ define('receiptEdit', function () {
         }
         orderAdd = false;
         //获取旧值
-        var cols = tableGrid.getSelectColValue(selectTrTemp, "articleId,isFreeItem,receiveQty,receiveNoChargeQty,differenceReasonText,differenceReason,orderQty,orderNoChargeQty");
+        var cols = tableGrid.getSelectColValue(selectTrTemp, "articleId,isFreeItem,receiveQty,deliveryQty,receiveNoChargeQty,differenceReasonText,differenceReason,orderQty,orderNoChargeQty");
         //添加input框
         tableGrid.find(".info [tag=receiveQty]").text("").append("<input type='text' id='receiveQty2'  class='form-control my-automatic input-sm' placeholder='Please Entry'>");
         // 记录article id
@@ -777,19 +846,23 @@ define('receiptEdit', function () {
         m.isFreeItem.val(cols['isFreeItem'])
         //赋值
         if (checkNotNull(cols['receiveQty'])) {
-            $('#receiveQty2').val(toThousands(isNotNull(cols['orderQty'])));
+            $('#receiveQty2').val(isNotNull(cols['orderQty']));
         } else {
-            $('#receiveQty2').val(toThousands(isNotNull(cols['receiveQty'])));
+            $('#receiveQty2').val(isNotNull(cols['receiveQty']));
         }
 
-
+        var reg = /^[0-9]*$/;
         $("#receiveQty2").blur(function () {
-            $("#receiveQty2").val(toThousands(this.value));
+            if (reg.test($("#receiveQty2").val()) && $("#receiveQty2").val().indexOf(",")<0){
+                $("#receiveQty2").val(this.value);
+            }
         });
 
         //光标进入，去除金额千分位，并去除小数后面多余的0
         $("#receiveQty2").focus(function () {
-            $("#receiveQty2").val(reThousands(this.value));
+            if (reg.test($("#receiveQty2").val()) && $("#receiveQty2").val().indexOf(",")<0){
+                $("#receiveQty2").val(this.value);
+            }
         });
 
         //添加input框
@@ -834,24 +907,41 @@ define('receiptEdit', function () {
             $("#diffreasonRemove2").hide();
         }
 
-        $("#receiveQty2").on("blur change", function () {
-            let receiveQty = parseInt(reThousands($("#receiveQty2").val()));
-            let receiveNoQty = parseInt(reThousands($("#receiveNoQty2").val()));
-            let orderQty = parseInt(reThousands($(".info [tag=orderQty]").text()));
-            let orderNoQty = parseInt(reThousands($(".info [tag=orderNoChargeQty]").text()));
-            if (receiveQty < orderQty) {
+        $("#receiveQty2").on("focus change", function () {
+            var  deliveryQty=isNotNull(tableGrid.find('.info td[tag=deliveryQty]').text());
+            var receiveQty2 = $("#receiveQty2").val();
+            var  varQtyval= deliveryQty-receiveQty2;
+            tableGrid.find('.info td[tag=varQty]').text(varQtyval);
+            var varQty=tableGrid.find('.info td[tag=varQty]').text();
+            // let receiveNoQty = parseInt(reThousands($("#receiveNoQty2").val()));
+            // let orderQty = parseInt(reThousands($(".info [tag=orderQty]").text()));
+            // let orderNoQty = parseInt(reThousands($(".info [tag=orderNoChargeQty]").text()));
+            if(varQty!=0){
                 $("#differenceReason2").prop("disabled", false);
                 $("#diffreasonRefresh2").show();
                 $("#diffreasonRemove2").show();
                 $.myAutomatic.replaceParam(differenceReason, '');
-            } else {
-                if (receiveQty === orderQty) {
+            }else {
+                if (varQty==0) {
                     $("#differenceReason2").prop("disabled", true);
                     $.myAutomatic.cleanSelectObj(differenceReason);
                     $("#diffreasonRefresh2").hide();
                     $("#diffreasonRemove2").hide();
                 }
             }
+            // if (receiveQty < orderQty) {
+            //     $("#differenceReason2").prop("disabled", false);
+            //     $("#diffreasonRefresh2").show();
+            //     $("#diffreasonRemove2").show();
+            //     $.myAutomatic.replaceParam(differenceReason, '');
+            // } else {
+            //     if (receiveQty === orderQty) {
+            //         $("#differenceReason2").prop("disabled", true);
+            //         $.myAutomatic.cleanSelectObj(differenceReason);
+            //         $("#diffreasonRefresh2").hide();
+            //         $("#diffreasonRemove2").hide();
+            //     }
+            // }
         });
     }
     // 根据权限类型的不同初始化不同的画面样式
@@ -996,44 +1086,105 @@ define('receiptEdit', function () {
 
         // 发起审核, 直接通过
         m.submitAuditBut.on("click", function (){
-                if (verifyTable()){
-                    _common.myConfirm("Are you sure to submit?", function (result) {
+            if (verifyTable()){
+                _common.myConfirm("Are you sure to submit?", function (result) {
                     if (result != "true") {
                         return false;
                     }
                     if (result == "true") {
+                        _common.loading();
                         //发起审核
                         var typeId = m.typeId.val();
                         var nReviewid = m.reviewId.val();
                         var recordCd = m.receiveNo.val();
-                        _common.initiateAudit(m._storeCd.val(), recordCd, typeId, nReviewid, m.toKen.val(), function (token) {
+                        var detailType = "tmp_receive";
+
+                        var fileDetail = [], fileDetailJson = "";
+                        $("#attachmentsTable>.zgGrid-tbody tr").each(function () {
+                            var file = {
+                                informCd: m.receiveNo.val(),
+                                fileType: '03',//文件类型 - 收货
+                                fileName: $(this).find('td[tag=fileName]').text(),//文件名称
+                                filePath: $(this).find('td>a').attr("filepath"),//文件路径
+                            }
+                            fileDetail.push(file);
+                        });
+                        if (fileDetail.length > 0) {
+                            fileDetailJson = JSON.stringify(fileDetail)
+                        }
+                        // 处理头档数据
+                        if (fileDetail.length > 0){
+                            let bean = {
+                                receiveId: m.receiveNo.val(),
+                                // receiveDate: fmtStringDate(m.receiveDate.val()),
+                            }
+                            let _data = {
+                                searchJson: JSON.stringify(bean),
+                                fileDetailJson: fileDetailJson,
+                                toKen: m.toKen.val()
+                            }
+                            $.myAjaxs({
+                                url: url_root + '/receive/saveDocumentUrl',
+                                async: true,
+                                cache: false,
+                                timeout: 50000,
+                                type: "post",
+                                data: _data,
+                                dataType: "json",
+                            });
+                        }
+                        _common.initiateReceiveAudit(m._storeCd.val(), recordCd, typeId, nReviewid,detailType, m.toKen.val(), function (callback) {
                             // 变为查看模式
                             setDisable();
                             m.viewSts.val("view");
                             //审核按钮禁用
                             // m.approvalBut.prop("disabled",true);
                             m.submitAuditBut.prop("disabled", true);
-                            m.toKen.val(token);
-                            approval(recordCd);
+                            m.toKen.val(callback.token);
+                            if (callback.success) {
+                                $("#approval_dialog").modal("hide");
+                                //更新主档审核状态值
+                                //_common.modifyRecordStatus(auditStepId,auditStatus);
+                                m.submitAuditBut.attr("disabled","disabled");
+                                // updateReceiveStatus();
+                                _common.prompt("Saved Successfully!", 3, "success");// 保存审核信息成功
+                            } else {
+                                m.submitAuditBut.removeAttr("disabled");
+                                _common.prompt(callback.message, 5, "error");// 保存审核信息失败
+                            }
+                            _common.loading_close();
+                            // approval(recordCd);
                         });
+                        _common.loading_close();
                     }
 
-            })
-                }
+                })
+            }
 
         })
 
         // 保存按钮
         m.saveBtn.on("click", function () {
-
+            var positionFlg = true;
+            _common.checkPosition(m._storeCd.val(),function (result) {
+                if(!result.success){
+                    _common.prompt("You do not have permission to submit it!",5,"info");
+                    positionFlg = false;
+                }
+            });
+            if(!positionFlg){
+                return false;
+            }
             // 还原表格
             if (!orderAdd && verifyDialogSearch2(true)) {
+                let varQty = tableGrid.find('.info td[tag=varQty]').text();
                 let receiveQty = parseInt(reThousands($("#receiveQty2").val()));
                 let receiveNoQty = parseInt(reThousands($("#receiveNoQty2").val()));
                 let orderQty = parseInt(reThousands($(".info [tag=orderQty]").text()));
                 let orderNoQty = parseInt(reThousands($(".info [tag=orderNoChargeQty]").text()));
                 let msg = "are you sure to submit?";
-                $("#receiveQty2").trigger("blur change");
+                // $("#receiveQty2").trigger("blur change");
+                $("#receiveQty2").trigger("focus change");
                 m.differenceReason = $("#differenceReason2");
                 m.receiveNoQty = $("#receiveNoQty2");
                 m.receiveQty = $("#receiveQty2");
@@ -1056,12 +1207,16 @@ define('receiptEdit', function () {
 					msg = "receiving free quantity is less than order free quantity, " + msg;
 				}*/
                 if (receiveQty > orderQty) {
-                    _common.prompt("receiving qty can not be greater than order qty!");
+                    /*_common.prompt("receiving qty can not be greater than order qty!");
                     m.receiveQty.focus();
                     $("#receiveQty2").css("border-color", "red");
-                    return false;
+                    return false;*/
+                    _common.prompt("receiving quantity is more than order quantity!", 3, "info");
                 } else if (receiveQty < orderQty) {
                     $("#receiveQty2").css("border-color", "#CCC");
+                    msg = "receiving quantity is less than order quantity, " + msg;
+                }
+                if (varQty !==0){
                     if (m.differenceReason.val().trim() == '') {
                         _common.prompt("Differnece Reason cannot be empty!");
                         m.differenceReason.focus();
@@ -1070,7 +1225,6 @@ define('receiptEdit', function () {
                     } else {
                         m.differenceReason.css("border-color", "#CCCCCC");
                     }
-                    msg = "receiving quantity is less than order quantity, " + msg;
                 }
                 msg = msg.substring(0, 1).toUpperCase() + msg.substring(1);
                 let cols = tableGrid.getSelectColValue(selectTrTemp, "articleId");
@@ -1108,6 +1262,7 @@ define('receiptEdit', function () {
                 // 获取单据编号
                 let _storeCd = m._storeCd.val();
                 let _voucherNo = m._orderId.val();
+
                 // 遍历List，处理求和
                 // let _taxRate = m.taxRate.val();
                 let itemDetail = [], _amount = 0, _receiveTax = 0;
@@ -1115,6 +1270,7 @@ define('receiptEdit', function () {
                     // 数据计算
                     let _qty = reThousands($(this).find('td[tag=receiveQty]').text());
                     let orderQty = reThousands($(this).find('td[tag=orderQty]').text());
+                    let varQty = reThousands($(this).find('td[tag=varQty]').text());
                     if (_qty == "") {
                         _qty = null;
                     }
@@ -1142,6 +1298,7 @@ define('receiptEdit', function () {
                         articleId: $(this).find('td[tag=articleId]').text(),
                         receiveQty: _qty,
                         orderQty:orderQty,
+                        varQty:varQty,
                         // receiveNoChargeQty:reThousands($(this).find('td[tag=receiveNoChargeQty1]').text()),
                         receiveNoChargeQty: _receiveNoChargeQty,
                         // receiveTotalQty:reThousands($(this).find('td[tag=receiveTotalQty1]').text()),
@@ -1168,7 +1325,13 @@ define('receiptEdit', function () {
                     if (itemDetail[i].receiveQty == null) {
                         continue;
                     }
-                    if (itemDetail[i].receiveQty < itemDetail[i].orderQty) {
+                    // if (itemDetail[i].receiveQty < itemDetail[i].orderQty) {
+                    //     if(itemDetail[i].differenceReason==''){
+                    //         _common.prompt("Item "+itemDetail[i].articleId+" Differnece Reason cannot be empty!");
+                    //         return false;
+                    //     }
+                    // }
+                    if (itemDetail[i].varQty!=0) {
                         if(itemDetail[i].differenceReason==''){
                             _common.prompt("Item "+itemDetail[i].articleId+" Differnece Reason cannot be empty!");
                             return false;
@@ -1183,31 +1346,36 @@ define('receiptEdit', function () {
                         fileType: '03',//文件类型 - 收货
                         fileName: $(this).find('td[tag=fileName]').text(),//文件名称
                         filePath: $(this).find('td>a').attr("filepath"),//文件路径
-                    }
+                    };
                     fileDetail.push(file);
                 });
                 if (fileDetail.length > 0) {
                     fileDetailJson = JSON.stringify(fileDetail)
                 }
                 let orderDiff = m.orderDiff.val();
+                if ($("#physicalReceivingDate").val() == null || $("#physicalReceivingDate").val() === ''
+                   || $("#physicalReceivingDate").val().length<16) {
+                    $("#physicalReceivingDate").val(new Date().Format("dd/MM/yyyy hh:mm"));
+                }
                 // 处理头档数据
                 let bean = {
                     receiveId: m.receiveNo.val(),
                     storeCd: _storeCd,
                     orderId: _voucherNo,
-                    receiveDate: fmtStringDate(m.receiveDate.val()),
+                    // receiveDate: fmtStringDate(m.receiveDate.val()),
                     receiveAmt: _amount,
                     receiveTax: _receiveTax,
-                    physicalReceivingDate: fmtStringDate($("#physicalReceivingDate").val()),
+                    physicalReceivingDate: fmtStringDate($("#physicalReceivingDate").val().substring(0,10)),
+                    physicalReceivingHms: fmtStringTime($("#physicalReceivingDate").val().substring(11)),
                     orderDifferentiate: orderDiff,
                     receivedRemark: m.remarks.val()
-                }
+                };
                 let _data = {
                     searchJson: JSON.stringify(bean),
                     listJson: JSON.stringify(itemDetail),
                     fileDetailJson: fileDetailJson,
                     toKen: m.toKen.val()
-                }
+                };
                 _common.myConfirm("Are you sure you want to save?", function (result) {
                     if (result != "true") {
                         return false;
@@ -1431,9 +1599,9 @@ define('receiptEdit', function () {
                     m.warehouseName.val(result.o.vendorName);
                     m.orderType.val(result.o.orderMethodName);
                     if (result.o.receiveDate == null || result.o.receiveDate === '') {
-                        m.receiveDate.val(new Date().Format("dd/MM/yyyy"));
+                        m.receiveDate.val(new Date().Format("dd/MM/yyyy hh:mm:ss"));
                     } else {
-                        m.receiveDate.val(fmtIntDate(result.o.receiveDate));
+                        m.receiveDate.val(fmtIntDate(result.o.receiveDate)+" "+fmtIntTime(result.o.receiveHms));
                     }
                     m.orderAmount.val(toThousands(result.o.orderAmt));
                     m.receiveAmount.val(toThousands(result.o.receiveAmt));
@@ -1441,7 +1609,11 @@ define('receiptEdit', function () {
                     m.remarks.val(result.o.receivedRemark);
                     m.taxRate.val(result.o.taxRate);
                     m.orderDiff.val(result.o.orderDifferentiate);
-                    m.physicalReceivingDate.val(fmtIntDate(result.o.physicalReceivingDate));
+                    if(m._receiveId.val()){
+                        m.physicalReceivingDate.val(fmtIntDate(result.o.physicalReceivingDate)+" "+fmtIntPhyTime(result.o.physicalReceivingHms));
+                        $("#creater").val(result.o.commonDTO.createUserId);
+                        $("#ca_date").val(_common.formatCreateDate(result.o.commonDTO.createYmd+result.o.commonDTO.createHms));
+                    }
                     //加载附件信息
                     attachmentsParamGrid = "recordCd=" + result.o.receiveId + "&fileType=03";
                     attachmentsTable.setting("url", url_root + "/file/getFileList");//加载附件
@@ -1481,15 +1653,20 @@ define('receiptEdit', function () {
             _common.prompt("Failed to get order cd!", 5, "error");
             return false;
         }
-        temp = m.physicalReceivingDate.val();
+        /*temp = m.physicalReceivingDate.val();
         if (temp == "" || temp == null) {
             _common.prompt("Please select the Receiving Date!", 5, "error");
             m.physicalReceivingDate.focus();
             m.physicalReceivingDate.css("border-color", "red");
             return false;
+        }else if(_common.judgeValidDate(m.physicalReceivingDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            m.physicalReceivingDate.css("border-color","red");
+            $("#physicalReceivingDate").focus();
+            return false;
         } else {
             m.physicalReceivingDate.css("border-color", "#CCC");
-        }
+        }*/
         return true;
     }
 
@@ -1554,7 +1731,7 @@ define('receiptEdit', function () {
             colNames: ["Store", "Order", "No.", "Price", "Item Barcode", "Item Code", "Item Name", "UOM",
                 "Order Qty", "Order Free Qty", "Total Order Qty", "Order Amount", "Tax Rate"," SO Transfer Qty","HHT Receiving Qty", "Receiving Qty", "Receiving Qty",
                 "Receiving Free Qty", "Receiving Free Qty", "Total Receiving Qty", "Total Receiving Qty", "Receiving Amount",
-                "Variance Qty","Item Type", "Item Type", "DifferenceReason", "Difference Reason"],
+                "Variance Qty","Item Type", "Item Type", "DifferenceReason", "Difference Reason","hht Receive Date","hht Receive Time"],
             colModel: [
                 {name: "storeCd", type: "text", text: "right", ishide: true},
                 {name: "orderId", type: "text", text: "right", ishide: true},
@@ -1562,14 +1739,14 @@ define('receiptEdit', function () {
                 {name: "receivePrice", type: "text", text: "right", ishide: true},
                 {name: "barcode", type: "text", text: "right", width: "130", ishide: false, css: ""},
                 {name: "articleId", type: "text", text: "right", width: "110", ishide: false, css: ""},
-                {name: "articleName", type: "text", text: "left", width: "150", ishide: false, css: ""},
+                {name: "articleName", type: "text", text: "left", width: "500", ishide: false, css: ""},
                 {name: "orderUnit", type: "text", text: "left", width: "100", ishide: false, css: ""},
                 {name: "orderQty",type: "text",text: "right",width: "130",ishide: false,css: "",getCustomValue: getThousands},
                 {name: "orderNoChargeQty", type: "text", text: "right", width: "160", ishide: true, css: "", getCustomValue: getThousands},
                 {name: "orderTotalQty", type: "text", text: "right", width: "150", ishide: true, css: "", getCustomValue: getThousands},
                 {name: "orderAmt", type: "text", text: "right", width: "150", ishide: true, css: "", getCustomValue: getThousands},
                 {name: "taxRate", type: "text", text: "right", width: "130", ishide: true, css: ""},
-                {name: "deliveryQty",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getThousands},
+                {name: "deliveryQty",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getValue},
                 {name: "hhtReceiveQty",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getThousands},
                 {name: "receiveQty", type: "text", text: "right", width: "130", ishide: false, css: "", getCustomValue: getThousands},
                 {name: "receiveQty1", type: "text", text: "right", width: "130", ishide: true, css: "", getCustomValue: isNull},
@@ -1582,7 +1759,9 @@ define('receiptEdit', function () {
                 {name: "isFreeItem", type: "text", text: "left", ishide: true},
                 {name: "isFreeItemText", type: "text", text: "left", width: "100", ishide: false, css: "", getCustomValue: getItemType},
                 {name: "differenceReason", type: "text", text: "left", ishide: true},
-                {name: "differenceReasonText", type: "text", text: "left", width: "130", ishide: false, css: ""}
+                {name: "differenceReasonText", type: "text", text: "left", width: "210", ishide: false, css: ""},
+                {name:"hhtReceiveDate",type:"text",text:"left",width:"200",ishide:true,css:""},
+                {name:"hhtReceiveTime",type:"text",text:"left",width:"200",ishide:true,css:""},
             ],//列内容
             width: "max",//宽度自动
             page: 1,//当前页
@@ -1600,6 +1779,7 @@ define('receiptEdit', function () {
                 return resData;
             },
             loadCompleteEvent: function (self) {
+                table = self;
                 selectTrTemp = null;//清空选择的行
                 //更新总条数(注减一是去除标题行)
                 var total = tableGrid.find("tr").length - 1;
@@ -1610,6 +1790,12 @@ define('receiptEdit', function () {
                     });
                 }
                 total_qty();
+                var hhtDate = $("#zgGridTable_0_tr").find('td[tag=hhtReceiveDate]').text();
+                var hhtTime = $("#zgGridTable_0_tr").find('td[tag=hhtReceiveTime]').text();
+                if(!m._receiveId.val() && $("#_reviewSts").val() == "Receiving Pending"){
+                    m.physicalReceivingDate.val(fmtIntDate(hhtDate)+" "+fmtIntPhyTime(hhtTime));
+                }
+
                 return self;
             },
             eachTrClick: function (trObj, tdObj) {//正常左侧点击
@@ -1689,6 +1875,22 @@ define('receiptEdit', function () {
         }
         return $(tdObj).text(toThousands(value));
     }
+    function fmtIntTime(time) {
+        var res = "";
+        if (time==null ||time==""){
+            return res;
+        }
+        res = time.substring(0,2)+":"+time.substring(2,4)+":"+time.substring(4,6);
+        return res;
+    }
+    function fmtIntPhyTime(time) {
+        var res = "";
+        if (time==null ||time==""){
+            return res;
+        }
+        res = time.substring(0,2)+":"+time.substring(2,4);
+        return res;
+    }
 
     // 为0返回'0'
     function getString0(tdObj, value) {
@@ -1698,6 +1900,13 @@ define('receiptEdit', function () {
 
     function isNull(tdObj, value) {
         return $(tdObj).text("");
+    }
+    function getValue(tdObj, value) {
+         if (value=="" || value==null){
+             return $(tdObj).text("0");
+         }else {
+             return $(tdObj).text(toThousands(value));
+         }
     }
 
     // 运算
@@ -1776,9 +1985,9 @@ define('receiptEdit', function () {
         if ($("#zgGridTable>.zgGrid-tbody tr").length > 0) {
             var blankReason = 0;
             $("#zgGridTable>.zgGrid-tbody tr:not(:last-child)").each(function () {
-                var td_orderQty = parseFloat($(this).find('td[tag=orderQty]').text().replace(/,/g, ""));
-                var td_receiveQty = parseFloat($(this).find('td[tag=receiveQty]').text().replace(/,/g, ""));
-                if (td_orderQty != td_receiveQty) {
+                var td_deliveryQty = isNotNull(parseFloat($(this).find('td[tag=deliveryQty]').text().replace(/,/g, "")));
+                var td_receiveQty = isNotNull(parseFloat($(this).find('td[tag=receiveQty]').text().replace(/,/g, "")));
+                if (td_deliveryQty !== td_receiveQty) {
                     if (($(this).find('td[tag=differenceReasonText]').text()).trim() === "" || ($(this).find('td[tag=differenceReason]').text()).trim() === null) {
                         //添加input框
                         $(this).find("td[tag=differenceReasonText]").text("").append("<input type='text' readonly='true' class='form-control my-automatic input-sm' style='border-color: red'>");
@@ -1786,8 +1995,8 @@ define('receiptEdit', function () {
                     }
                 }
             })
-            if (blankReason != 0) {
-                _common.prompt("Differnece Reason cannot be empty at the red mark!"); // 请输入店铺
+            if (blankReason !== 0) {
+                _common.prompt("Difference Reason cannot be empty at the red mark!"); // 请输入店铺
                 return false;
             }
             return true;
@@ -1841,6 +2050,12 @@ define('receiptEdit', function () {
         return res;
     }
 
+    function fmtStringTime(time) {
+        var res = "";
+        res = time.replace(/:/g, "");
+        return res;
+    }
+
     // 判断是否为null
     function checkNotNull(num) {
         var _return = false;
@@ -1852,7 +2067,7 @@ define('receiptEdit', function () {
 
     // 判断是否为null
     function isNotNull(num) {
-        if (num === null || num === '') {
+        if (num === null || num === '' || isNaN(num)) {
             num = 0;
         }
         return num;

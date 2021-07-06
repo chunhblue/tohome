@@ -47,6 +47,7 @@ define('operatorLog', function () {
         _common.initDate(m.startDate,m.endDate);
     }
 
+
     // 拼接搜素参数
     var but_event = function () {
         m.reset.on("click", function () {
@@ -62,12 +63,14 @@ define('operatorLog', function () {
         })
 
         m.search.on("click", function () {
-            paramSentence();
-            paramGrid = "searchJson=" + m.searchJson.val();
-            tableGrid.setting("url", url_left + '/search');
-            tableGrid.setting("param", paramGrid);
-            tableGrid.setting("page", 1);
-            tableGrid.loadData();
+            if(verifySearch()){
+                paramSentence();
+                paramGrid = "searchJson=" + m.searchJson.val();
+                tableGrid.setting("url", url_left + '/search');
+                tableGrid.setting("param", paramGrid);
+                tableGrid.setting("page", 1);
+                tableGrid.loadData();
+            }
         });
 
         //开始时间
@@ -113,7 +116,71 @@ define('operatorLog', function () {
                 $("#startTime").datetimepicker('setEndDate', null);
             }
         });
-    }
+    };
+    //验证检索项是否合法
+    var verifySearch = function(){
+        if(m.startDate.val()!==""&&m.startDate.val()!=null){
+            if(_common.judgeValidDate(m.startDate.val())){
+                _common.prompt("Please enter a valid date!",3,"info");
+                $("#startDate").focus();
+                return false;
+            }
+        }
+        if(m.endDate.val()!==""&&m.endDate.val()!=null){
+            if(_common.judgeValidDate(m.endDate.val())){
+                _common.prompt("Please enter a valid date!",3,"info");
+                $("#endDate").focus();
+                return false;
+            }
+        }
+        if(m.startDate.val()!=""&&m.endDate.val()!="") {
+            var _StartDate = new Date(fmtDate($("#startDate").val())).getTime();
+            var _EndDate = new Date(fmtDate($("#endDate").val())).getTime();
+            if(_StartDate>_EndDate){
+                _common.prompt("The start date cannot be greater than the end date!!", 5, "error"); //开始时间不能大于结束时间
+                $("#endDate").focus();
+                return false;
+            }
+
+            var difValue = parseInt(Math.abs((_EndDate - _StartDate) / (1000 * 3600 * 24)));
+            if (difValue > 62) {
+                _common.prompt("Query Period cannot exceed 62 days!", 5, "error"); // 日期期间取值范围不能大于62天
+                $("#endDate").focus();
+                return false;
+            }
+        }
+        if(m.startTime.val()!="") {
+            if(_common.judgeValidTime($("#startTime").val())){
+                _common.prompt("Please enter a valid time!",3,"info");
+                $("#startTime").css("border-color","red");
+                $("#startTime").focus();
+                return false;
+            }else {
+                $("#startTime").css("border-color","#CCCCCC");
+            }
+        }
+        if(m.endTime.val()!="") {
+            if(_common.judgeValidTime($("#endTime").val())){
+                _common.prompt("Please enter a valid time!",3,"info");
+                $("#endTime").css("border-color","red");
+                $("#endTime").focus();
+                return false;
+            }else {
+                $("#endTime").css("border-color","#CCCCCC");
+            }
+        }
+
+        if(m.startTime.val()!=""&&m.endTime.val()!="") {
+            var _startTime = parseInt(formatTime($("#startTime").val()));
+            var _endTime = parseInt(fmtDate($("#endDate").val()));
+            if (_startTime > _endTime) {
+                _common.prompt("The start date cannot be greater than the end date!!", 5, "error"); // 日期期间取值范围不能大于62天
+                $("#endDate").focus();
+                return false;
+            }
+        }
+        return true;
+    };
     var paramSentence = function () {
         let userName = m.userName.val().trim();
         let menuName = m.menuName.val().trim();
@@ -154,7 +221,7 @@ define('operatorLog', function () {
             value = value.replace(/^(\d{4})(\d{2})(\d{2})$/, '$3/$2/$1');
         }
         return $(tdObj).text(value);
-    }
+    };
 
     // 时间字段格式化格式
     var timeFmt = function(tdObj, value){
@@ -162,6 +229,12 @@ define('operatorLog', function () {
             value = value.replace(/^(\d{2})(\d{2})(\d{2})$/, '$1:$2:$3');
         }
         return $(tdObj).text(value);
+    };
+    // DD/MM/YYYY to YYYY-MM-DD  格式转换
+    function fmtDate(date) {
+        var res = '';
+        res = date.replace(/\//g, '').replace(/^(\d{2})(\d{2})(\d{4})$/,"$3-$2-$1");
+        return res;
     }
 
     //表格初始

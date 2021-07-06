@@ -840,25 +840,29 @@
           COALESCE(E.total_order_qty,0)-COALESCE(E.total_receive_qty,0) AS totalAmt,
           A.update_ymd
       FROM
-          od0000 A,
-          od0000_t B,
-          (SELECT A.order_id,MAX (CONCAT(A.create_ymd,A.create_hms)) create_ymdhms FROM od0000_t A GROUP BY A.order_id ) C,
+          od0000 A join
+          (SELECT A.order_id, SUM (A.order_qty) total_order_qty, SUM ( A.receive_qty ) total_receive_qty
+          FROM od0010 A GROUP BY A.order_id)
+          E on A.order_id = E.order_id,
+          od0000_t B join (
+          SELECT A.order_id, MAX(CONCAT(A.create_ymd, A.create_hms)) AS create_ymdhms
+          FROM od0000_t A
+          GROUP BY A.order_id
+          )
+          C on B.order_id = C.order_id
+          AND B.create_ymd = LEFT(C.create_ymdhms, 8)
+          AND B.create_hms = RIGHT(C.create_ymdhms, 6),
           MA1000 D,
           <if test='orderDifferentiate=="0"' >
-            MA2000 F,
+            MA2000 F
           </if>
           <if test='orderDifferentiate=="1"' >
-            MA5321 G,
+            MA5321 G
           </if>
-          (SELECT A.order_id, SUM (A.order_qty) total_order_qty, SUM ( A.receive_qty ) total_receive_qty
-          FROM od0010 A GROUP BY A.order_id) E
       WHERE
           1=1
           AND A.order_differentiate = #{orderDifferentiate}
           AND A.order_id = B.order_id
-          AND B.order_id = C.order_id
-          AND B.create_ymd = LEFT (C.create_ymdhms,8)
-          AND B.create_hms = RIGHT (C.create_ymdhms,6)
           AND A.store_cd = D.store_cd
         <if test='orderDifferentiate=="0"' >
           AND A.vendor_id = F.vendor_id
@@ -867,9 +871,8 @@
         <if test='orderDifferentiate=="1"' >
           AND A.delivery_center_id = G.warehouse_no
         </if>
-          AND A.order_date BETWEEN D.effective_start_date AND D.effective_end_date
-          AND A.order_id = E.order_id
-          AND COALESCE(E.total_order_qty,0)-COALESCE(E.total_receive_qty,0) !=0
+         /* AND A.order_date BETWEEN D.effective_start_date AND D.effective_end_date*/
+--           AND COALESCE(E.total_order_qty,0)-COALESCE(E.total_receive_qty,0) !=0
           AND a.store_cd IN
           <foreach item="store" index="index" collection="stores"
                    open="(" separator="," close=")">
@@ -916,25 +919,29 @@
     SELECT
       COUNT (A.order_id)
     FROM
-      od0000 A,
-      od0000_t B,
-      (SELECT A.order_id, MAX (CONCAT(A.create_ymd,A.create_hms)) create_ymdhms FROM od0000_t A GROUP BY A.order_id ) C,
+      od0000 A join
+      (SELECT A.order_id, SUM (A.order_qty) total_order_qty, SUM ( A.receive_qty ) total_receive_qty
+      FROM od0010 A GROUP BY A.order_id)
+      E on A.order_id = E.order_id,
+      od0000_t B join (
+      SELECT A.order_id, MAX(CONCAT(A.create_ymd, A.create_hms)) AS create_ymdhms
+      FROM od0000_t A
+      GROUP BY A.order_id
+      )
+      C on B.order_id = C.order_id
+      AND B.create_ymd = LEFT(C.create_ymdhms, 8)
+      AND B.create_hms = RIGHT(C.create_ymdhms, 6),
       MA1000 D,
       <if test='orderDifferentiate=="0"' >
-        MA2000 F,
+        MA2000 F
       </if>
       <if test='orderDifferentiate=="1"' >
-        MA5321 G,
+        MA5321 G
       </if>
-      (SELECT A.order_id, SUM (A.order_qty) total_order_qty, SUM ( A.receive_qty ) total_receive_qty
-      FROM od0010 A GROUP BY A.order_id) E
     WHERE
       1=1
       AND A.order_differentiate = #{orderDifferentiate}
       AND A.order_id = B.order_id
-      AND B.order_id = C.order_id
-      AND B.create_ymd = LEFT (C.create_ymdhms,8)
-      AND B.create_hms = RIGHT (C.create_ymdhms,6)
       AND A.store_cd = D.store_cd
       <if test='orderDifferentiate=="0"' >
         AND A.vendor_id = F.vendor_id
@@ -943,9 +950,8 @@
       <if test='orderDifferentiate=="1"' >
         AND A.delivery_center_id = G.warehouse_no
       </if>
-      AND A.order_date BETWEEN D.effective_start_date AND D.effective_end_date
-      AND A.order_id = E.order_id
-      AND COALESCE(E.total_order_qty,0)-COALESCE(E.total_receive_qty,0) !=0
+      /*AND A.order_date BETWEEN D.effective_start_date AND D.effective_end_date*/
+--       AND COALESCE(E.total_order_qty,0)-COALESCE(E.total_receive_qty,0) !=0
       and a.store_cd IN
       <foreach item="store" index="index" collection="stores"
                open="(" separator="," close=")">
@@ -1113,7 +1119,7 @@
   <!--差异商品-->
   <select id="selectByOrderId" resultType="cn.com.bbut.iy.itemmaster.dto.difference.DifferenceItemsResult" parameterType="cn.com.bbut.iy.itemmaster.dto.difference.DifferenceListParam">
     SELECT DISTINCT
-        G.barcode,
+        A.barcode,
         A.article_id,
         d.article_name,
         e.unit_name,
@@ -1128,8 +1134,6 @@
         A LEFT JOIN od0000 b ON b.order_id = A.order_id
         LEFT JOIN ma1100 d ON d.article_id = A.article_id
         LEFT JOIN ma0220 e ON e.unit_id = d.sales_unit_id
-        LEFT JOIN ma1140 G ON G.article_id = A.article_id
-        AND G.is_default = '1'
     WHERE
         1 = 1
         AND a.order_id = #{orderId}
@@ -1306,6 +1310,7 @@
     COALESCE(E.total_order_qty,0) AS total_order_qty,
     COALESCE(F.total_receive_qty,0) AS total_receive_qty,
     COALESCE(E.total_order_qty,0)-COALESCE(F.total_receive_qty,0) AS totalAmt,
+    COALESCE ( F.total_ordered_qty, 0 ) - COALESCE (  E.total_order_qty, 0 ) AS totalAmt2,
     A.create_ymd
     FROM
     od0001 A,
@@ -1316,7 +1321,7 @@
     MA5321 G,
     (SELECT delivery_order_id, SUM (order_qty) total_order_qty
     FROM od0011  GROUP BY delivery_order_id) E,
-    (SELECT receive_id, SUM ( receive_qty ) total_receive_qty
+    (SELECT receive_id,SUM ( order_qty ) total_ordered_qty, SUM ( receive_qty ) total_receive_qty
     FROM od0010_t  GROUP BY receive_id) F
     WHERE
     1=1
@@ -1419,10 +1424,17 @@
   </select>
 
   <select id="selectShopDiffByOrderId" resultType="cn.com.bbut.iy.itemmaster.dto.difference.DifferenceItemsResult" parameterType="cn.com.bbut.iy.itemmaster.dto.difference.DifferenceListParam">
-    SELECT DISTINCT T.barcode, A.article_id, d.article_name, e.unit_name, A.order_tax
-	, A.order_qty, f.receive_qty
-	, COALESCE(A.order_qty, 0) - COALESCE(f.receive_qty, 0) AS adjustQty
-FROM od0011 A
+    SELECT DISTINCT T.barcode,
+    A.article_id,
+    d.article_name,
+    e.unit_name,
+    A.order_tax,
+    A.order_qty dc_picked_qty,
+	f.receive_qty,
+	f.order_qty ordered_qty,
+	COALESCE(f.order_qty, 0) - COALESCE( A.order_qty, 0) AS orderqty_dc_picked_qty,
+	COALESCE(A.order_qty, 0) - COALESCE(f.receive_qty, 0) AS adjustQty
+    FROM od0011 A
 	LEFT JOIN od0001 b ON b.order_id = A.delivery_order_id
 	LEFT JOIN ma1100 d ON d.article_id = A.article_id
 	LEFT JOIN ma0220 e ON e.unit_id = d.sales_unit_id
@@ -1430,6 +1442,7 @@ FROM od0011 A
 	SELECT
 		order_id,
 		article_id,
+		order_qty,
 		receive_qty
 	FROM
 		od0010_t

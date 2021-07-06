@@ -22,6 +22,8 @@ public class StocktakeReportItemDTO implements Serializable {
     private String categoryCd;
     // 分类名称
     private String categoryName;
+    // Top Department
+    private String depName;
     // 商品材料类型
     private String materialName;
     // 单位
@@ -38,4 +40,8 @@ public class StocktakeReportItemDTO implements Serializable {
     private BigDecimal varianceAmt;
     // 不良数量
     private BigDecimal badQty;
+
+    private Integer reviewStatus; // 审核状态
+
+    private String empName; // 审核者名称
 }

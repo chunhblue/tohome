@@ -40,18 +40,20 @@ public class VendorReceiptDailyServiceImpl implements VendorReceiptDailyService 
         int totalPage = 0;
         if (param.isFlg()) {
 //            // 创建前先删除临时表 2021/1/30
-           vendorReceiptDailyMapper.deleteTempTable("tmp_order_article");
+        //   vendorReceiptDailyMapper.deleteTempTable("tmp_order_article");
             // 总条数
             count = vendorReceiptDailyMapper.SearchCount(param);
             // 获取总页数
             totalPage = (count % param.getRows() == 0) ? (count / param.getRows()) : (count / param.getRows()) + 1;
         }
 //        // 创建前先删除临时表 2021/1/30
-        vendorReceiptDailyMapper.deleteTempTable("tmp_order_article");
+       // vendorReceiptDailyMapper.deleteTempTable("tmp_order_article");
+
+
         List<VendorReceiptDailyDTO> result = vendorReceiptDailyMapper.search(param);
-        for (VendorReceiptDailyDTO item : result) {
-            item.setReceiveDate(formatDate(item.getReceiveDate()));
-        }
+//        for (VendorReceiptDailyDTO item : result) {
+//            item.setReceiveDate(formatDate(item.getReceiveDate()));
+//        }
 
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("totalPage",totalPage);
@@ -109,10 +111,10 @@ public class VendorReceiptDailyServiceImpl implements VendorReceiptDailyService 
 
         // 获取总页数
         int totalPage = (count % param.getRows() == 0) ? (count / param.getRows()) : (count / param.getRows()) + 1;
-        vendorReceiptDailyMapper.deleteTempTable("tmp_dc_order_article");
+//        vendorReceiptDailyMapper.deleteTempTable("tmp_dc_order_article");
         List<VendorReceiptDailyDTO> result = vendorReceiptDailyMapper.searchDcReceipt(param);
         param.setFlg(false);
-        vendorReceiptDailyMapper.deleteTempTable("tmp_dc_order_article");
+//        vendorReceiptDailyMapper.deleteTempTable("tmp_dc_order_article");
         List<VendorReceiptDailyDTO> AllArticle = vendorReceiptDailyMapper.searchDcReceipt(param);
         for (VendorReceiptDailyDTO item:AllArticle) {
             BigDecimal bigDecimal = new BigDecimal(item.getReceiveTotalQty());

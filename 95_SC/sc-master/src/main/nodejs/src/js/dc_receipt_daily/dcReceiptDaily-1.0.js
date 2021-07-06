@@ -116,9 +116,57 @@ define('dcReceiptDaily', function () {
 
         but_event();
         // 初始化检索日期
-        _common.initDate(m.startDate,m.endDate);
+        initDate(m.startDate,m.endDate);
     }
+    var initDate = function (startDate, endDate) {
+        if (startDate) {
+            startDate.datetimepicker({
+                language: 'en',
+                format: 'dd/mm/yyyy',
+                maxView: 4,
+                startView: 2,
+                minView: 2,
+                autoclose: true,
+                todayHighlight: true,
+                todayBtn: true,
+            }).on('changeDate', function (ev) {
+                if (endDate) {
+                    if (ev.date) {
+                        endDate.datetimepicker('setStartDate', new Date(ev.date.valueOf()))
+                    } else {
+                        endDate.datetimepicker('setStartDate', null);
+                    }
+                }
+            });
+            // 默认当天
+            let _start = new Date();
+            startDate.val(_start.Format('dd/MM/yyyy'));
+        }
 
+        if (endDate) {
+            endDate.datetimepicker({
+                language: 'en',
+                format: 'dd/mm/yyyy',
+                maxView: 4,
+                startView: 2,
+                minView: 2,
+                autoclose: true,
+                todayHighlight: true,
+                todayBtn: true,
+            }).on('changeDate', function (ev) {
+                if (startDate) {
+                    if (ev.date) {
+                        startDate.datetimepicker('setEndDate', new Date(ev.date.valueOf()))
+                    } else {
+                        startDate.datetimepicker('setEndDate', null);
+                    }
+                }
+            });
+            // 结束日期 当前日期 加 三天
+            let sumdate = new Date().getTime() + (86400000 * 1);
+            endDate.val(new Date(sumdate).Format('dd/MM/yyyy'));
+        }
+    }
     //初始化下拉
     var initAutoMatic = function () {
         // 获取区域经理
@@ -244,10 +292,10 @@ define('dcReceiptDaily', function () {
                         "<td></td>" +
                         "<td style='text-align:right'>Total:</td>" +
                         "<td style='text-align:right'>total Item</td>" +
-                        "<td style='text-align:right'>"+result.o.totalItemSKU+"</td>"+
+                        "<td style='text-align:right'>"+toThousands(result.o.totalItemSKU)+"</td>"+
                         "<td></td>"+
                         "<td style='text-align:right'>total qty </td>"+
-                        "<td style='text-align:right'>"+result.o.totalReceiveQty+"</td>"+
+                        "<td style='text-align:right'>"+toThousands(result.o.totalReceiveQty)+"</td>"+
                         "<td></td>" +
                         "<td></td>" +
                         "</tr>";
@@ -287,12 +335,20 @@ define('dcReceiptDaily', function () {
             $("#startDate").css("border-color","red");
             $("#startDate").focus();
             return false;
+        }else if(_common.judgeValidDate(m.startDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#startDate").focus();
+            return false;
         }else {
             $("#startDate").css("border-color","#CCC");
         }
         if(m.endDate.val()==""||m.endDate.val()==null){
             _common.prompt("Please enter a Date!",5,"error"); // 结束日期不可以为空
             $("#endDate").css("border-color","red");
+            $("#endDate").focus();
+            return false;
+        }else if(_common.judgeValidDate(m.endDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
             $("#endDate").focus();
             return false;
         }else {
@@ -307,8 +363,8 @@ define('dcReceiptDaily', function () {
             var _StartDate = new Date(fmtDate($("#startDate").val())).getTime();
             var _EndDate = new Date(fmtDate($("#endDate").val())).getTime();
             var difValue = parseInt(Math.abs((_EndDate-_StartDate)/(1000*3600*24)));
-            if(difValue >62){
-                _common.prompt("Query Period cannot exceed 62 days!",5,"error"); // 日期期间取值范围不能大于62天
+            if(difValue >3){
+                _common.prompt("Query Period cannot exceed 3 days!",5,"error"); // 日期期间取值范围不能大于62天
                 $("#endDate").focus();
                 return false;
             }

@@ -32,7 +32,7 @@ public class DepositJournalExHeaderListener implements ExEventListener {
         String row1 = "";
 
         // 列标题
-        String row2 = "NO.,Store No.,Store Name,Area Manager Code,Area Manager Name,Operation Manager Code,Operation Manager Name,Operation Controller Code,Operation Controller Name,Deposit Date,Store Manager,Bank Deposit Amount,Remarks";
+        String row2 = "NO.,Store No.,Store Name,Area Manager Code,Area Manager Name,Operation Manager Code,Operation Manager Name,Operation Controller Code,Operation Controller Name,Business Date,Deposit Date,Store Manager,Bank Deposit Amount,Remarks";
         String[] titles = row2.split(",");
 
         // 开始拼接excel头信息

@@ -381,7 +381,7 @@ define('fundQuery', function () {
             paymentType:m.paymentType.val().trim(),
             expenditureSubject:m.expenditureSubject.val().trim(),
             expenditureCd:m.expenditureCd.val().trim(),
-            expenditureStatus:m.expenditureStatus.val().trim(),
+            // expenditureStatus:m.expenditureStatus.val().trim(),
             operator:$("#operator").attr("k"),
             status:m.status.val().trim()
         };
@@ -407,7 +407,7 @@ define('fundQuery', function () {
             param:paramGrid,
             localSort: true,
             colNames:["Business Date","Expenditure Code","Store No.","Store Name","Department","Expenditure Subject","Expense Type","Expenditure Amount",
-                "Payment Type","Expenditure Description","Expenditure Remarks","Expenditure Status","Document status","Operator",
+                "Payment Type","Expenditure Description","Expenditure Remarks","Document status","Operator",
                 "Date Created","Created By"],
             colModel:[
                 {name:"accDate",type:"text",text:"center",width:"110",ishide:false,css:"",getCustomValue:dateFmt},
@@ -421,7 +421,7 @@ define('fundQuery', function () {
                 {name:"payName",type:"text",text:"left",width:"110",ishide:false,css:""},
                 {name:"description",type:"text",text:"left",width:"180",ishide:false,css:""},
                 {name:"remark",type:"text",text:"left",width:"180",ishide:false,css:""},
-                {name:"statusName",type:"text",text:"left",width:"130",ishide:false,css:""},
+                // {name:"statusName",type:"text",text:"left",width:"130",ishide:false,css:""},
                 {name:"status",type:"text",text:"left",width:"120",ishide:false,css:"",getCustomValue:getStatus},
                 {name:"userName",type:"text",text:"left",width:"120",ishide:false,css:""},
                 {name:"createYmd",type:"text",text:"center",width:"100",ishide:false,css:"",getCustomValue:_common.formatDateAndTime},

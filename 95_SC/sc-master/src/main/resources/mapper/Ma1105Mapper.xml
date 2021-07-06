@@ -218,6 +218,9 @@
       <if test="createDate != null and createDate != ''">
         and create_date = #{createDate,jdbcType=VARCHAR}
       </if>
+      <if test="excelName != null and excelName !=''">
+        AND lower(pog_name) like lower(CONCAT('%',#{excelName,jdbcType=VARCHAR},'%'))
+      </if>
       <if test="orderByClause != null">
         order by ${orderByClause}
       </if>
@@ -421,6 +424,9 @@
       </if>
       <if test="createDate != null and createDate != ''">
         and create_date = #{createDate,jdbcType=VARCHAR}
+      </if>
+      <if test="excelName != null and excelName !=''">
+        AND lower(pog_name) like lower(CONCAT('%',#{excelName,jdbcType=VARCHAR},'%'))
       </if>
     </where>
   </select>
@@ -655,7 +661,7 @@
 
   <select id="getTempShelf" resultType="cn.com.bbut.iy.itemmaster.entity.base.Ma1105" parameterType="String">
         select store_cd,shelf from ma1105_t
-        WHERE store_cd = #{storeCd,jdbcType=VARCHAR}
+        WHERE store_cd = #{storeCd,jdbcType=VARCHAR} and pog_name like concat(#{pogName},'%')
   </select>
 
   <delete id="deleteMa1105Byshelf" parameterType="cn.com.bbut.iy.itemmaster.entity.base.Ma1105">
@@ -665,6 +671,7 @@
        #{item.storeCd,jdbcType=VARCHAR},#{item.shelf,jdbcType=VARCHAR}
       )
     </foreach>
+    and pog_name like concat(#{pogName},'%')
   </delete>
 
   <insert id="insertShelfToMall05" parameterType="String">
@@ -693,7 +700,7 @@ and (create_ymd || create_hms) = (select max(create_ymd || create_hms) from ma11
   <update id="updatePOGIsExpiredStatus" parameterType="cn.com.bbut.iy.itemmaster.dto.ma1105.Ma1104Dto">
     update  ma1104 set is_expired = '1' where store_cd = #{storeCd,jdbcType=VARCHAR}
     and (create_ymd || create_hms)  &lt;  (select max(create_ymd || create_hms) from ma1104 where store_cd = #{storeCd,jdbcType=VARCHAR})
-    and pog_name = #{pogName,jdbcType=VARCHAR};
+    and pog_name like concat(#{pogName,jdbcType=VARCHAR},'%');
   </update>
 
   <select id="countPogName" resultType="java.lang.Integer">
@@ -719,4 +726,9 @@ and (create_ymd || create_hms) = (select max(create_ymd || create_hms) from ma11
     WHERE
     store_cd = #{recordCd}
   </update>
+
+  <!-- 截取位置从1开始 -->
+  <select id="getPogNamePrefix" resultType="String">
+    select distinct replace(split_part(pog_name,'-',1),' ','') pogNamePrefix from ma1105 where store_cd = #{storeCd,jdbcType=VARCHAR};
+  </select>
 </mapper>

@@ -65,4 +65,7 @@ public class CostOfDTO extends GridDataDTO {
     // 描述
     private String note;
     private String materialType;
+    private String reasonCode;
+    private String reason;
+    private String fnStockQty;
 }

@@ -24,10 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author mxy
@@ -99,7 +96,12 @@ public class ReceiveServiceImpl implements ReceiveService {
         String businessDate = getBusinessDate();
         dto.setBusinessDate(businessDate);
         GridDataDTO<OD0010TDTO> data = new GridDataDTO<OD0010TDTO>();
-        List<OD0010TDTO> _list = od0010TMapper.selectDetail(dto);
+        List<OD0010TDTO> _list;
+        if(dto.getOrderType().equals("0")){
+            _list = od0010TMapper.selectDcDetail(dto);
+        }else {
+            _list = od0010TMapper.selectVendorDetail(dto);
+        }
         data.setRows(_list);
         return data;
     }
@@ -133,8 +135,19 @@ public class ReceiveServiceImpl implements ReceiveService {
                 }
                 warehouseMapper.modifyReviewStatus(_dto.getOrderId());
                 _dto.setReceiveId(receiveId);
+                OD0000TDTO tdto = od0000TMapper.getHHTreceiveDateTime(_dto.getOrderId(),_dto.getStoreCd());
+                if(tdto != null){
+                    _dto.setCheckHhtFlg(0);
+                    _dto.setPhysicalReceivingDate(tdto.getPhysicalReceivingDate());
+                    _dto.setPhysicalReceivingHms(tdto.getPhysicalReceivingHms());
+                }
                 od0000TMapper.insertByCopy(_dto);
-                od0010TMapper.insertByCopy(_dto);
+                if("0".equals(orderDiff)){
+                    od0010TMapper.insertByCopy(_dto);
+                } else if ("1".equals(orderDiff)) {
+                    od0010TMapper.insertDCByCopy(_dto);
+                }
+
                 /*_dto.setOrderSts("04");
                 _dto.setReviewSts(20);
                 od0000TMapper.updateOldRecord(_dto);
@@ -248,8 +261,32 @@ public class ReceiveServiceImpl implements ReceiveService {
     }
 
     @Override
+    public Integer insertDocumentUrl(OD0000TDTO dto) {
+        Integer countFil=0;
+        String receiveId = dto.getReceiveId();
+        MA4320Example example = new MA4320Example();
+        example.or().andInformCdEqualTo(receiveId).andFileTypeEqualTo("03");
+        ma4320Mapper.deleteByExample(example);
+        if(StringUtils.isNotBlank(dto.getFileDetailJson())){
+            List<MA4320> ma4320List = new Gson().fromJson(dto.getFileDetailJson(), new TypeToken<List<MA4320>>(){}.getType());
+            for (int i = 0; i < ma4320List.size(); i++) {
+                MA4320 ma4320 = ma4320List.get(i);
+                ma4320.setInformCd(receiveId);
+                ma4320.setCreateUserId(dto.getCommonDTO().getCreateUserId());
+                ma4320.setCreateYmd(dto.getCommonDTO().getCreateYmd());
+                ma4320.setCreateHms(dto.getCommonDTO().getCreateHms());
+                countFil++;
+                 ma4320Mapper.insertSelective(ma4320);
+            }
+            return  countFil;
+        }else {
+            return null  ;
+        }
+    }
+
+    @Override
     public int updateStatus(String receiveId,CommonDTO dto) {
-        return od0000TMapper.updateNewRecord(receiveId,dto);
+        return od0000TMapper.updateNewRecord(receiveId,dto,1);
     }
 
     /**

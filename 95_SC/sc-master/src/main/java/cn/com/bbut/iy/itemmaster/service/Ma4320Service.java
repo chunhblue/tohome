@@ -14,4 +14,6 @@ public interface Ma4320Service {
      * @return
      */
     List<MA4320> getMa4320List(String recordCd, String fileType);
+
+    String getNowDate();
 }

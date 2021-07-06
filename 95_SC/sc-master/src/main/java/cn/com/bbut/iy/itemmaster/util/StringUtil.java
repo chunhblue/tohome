@@ -252,4 +252,24 @@ public class StringUtil extends StringUtils {
     {
     	return StringUtil.rightPad(oldText, length, parse);
     }
+
+    /**
+     * yyyymmdd 格式转换为 dd/mm/yyyy格式字符串
+     * @Description:
+     * @param @param date
+     * @param @return 参数类型
+     * @return String 返回类型
+     * @param date
+     * @return
+     */
+    public static String getFormatDate(String date) {
+        date = StringUtil.trimToNull(date);
+        if (date == null) {
+            return "";
+        }
+        if (date.length() != 8) {
+            return date;
+        }
+        return date.substring(6, 8)+"/"+date.substring(4, 6)+"/"+date.substring(0, 4);
+    }
 }

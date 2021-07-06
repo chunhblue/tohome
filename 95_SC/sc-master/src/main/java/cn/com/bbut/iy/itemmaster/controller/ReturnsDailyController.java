@@ -15,10 +15,12 @@ import cn.com.bbut.iy.itemmaster.entity.sa0050.SA0050;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.SA0050Service;
 import cn.com.bbut.iy.itemmaster.service.base.DefaultRoleService;
 import cn.com.bbut.iy.itemmaster.service.returnsDaily.ReturnsDailyService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +60,8 @@ public class ReturnsDailyController extends BaseAction {
     private CM9060Service cm9060Service;
     @Autowired
     private DefaultRoleService defaultRoleService;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_CUSTOMER_RETURN";
     private final String EXCEL_EXPORT_NAME = "Customer Refund Daily Report.xlsx";
@@ -74,17 +78,20 @@ public class ReturnsDailyController extends BaseAction {
     public ModelAndView tolistView(HttpServletRequest request, HttpSession session,
                                    Map<String, ?> model) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         String checkFlg = "0";
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
             checkFlg = "1";
-        }
+        }*/
         log.debug("User:{} 进入 每日顾客退货明细表", u.getUserId());
         SA0050 cashier = sa0050Service.getCashier(u.getUserId());
         ModelAndView mv = new ModelAndView("returnsDaily/returnsDaily");
         mv.addObject("useMsg", "每日顾客退货明细表");
-        mv.addObject("bsDate", new Date());
-        mv.addObject("printTime", new Date());
+        mv.addObject("bsDate", Utils.getFormateDate(ymd));
+        mv.addObject("printTime", Utils.getFormateDate(ymd));
         mv.addObject("userName",u.getUserName());
         mv.addObject("businessDate",cm9060Service.getValByKey("0000"));
         mv.addObject("checkFlg", checkFlg);
@@ -108,6 +115,7 @@ public class ReturnsDailyController extends BaseAction {
         if (param==null) {
             param = new ReturnsDailyParamDTO();
         }
+        param.setLimitStart((param.getPage() - 1) * param.getRows());
         // 获取当前角色店铺权限
         Collection<String> stores = getStores(session, param);
         if(stores.size() == 0){
@@ -115,7 +123,7 @@ public class ReturnsDailyController extends BaseAction {
             return new ReturnDTO(false,"Query failed!",null);
         }
         param.setStores(stores);
-        List<ReturnsDailyDTO> result = returnsDailyService.search(param);
+        Map<String,Object> result = returnsDailyService.search(param);
         return new ReturnDTO(true,"ok",result);
     }
 
@@ -191,13 +199,15 @@ public class ReturnsDailyController extends BaseAction {
     public ModelAndView toPrintlistView(HttpServletRequest request, HttpSession session,
                                    Map<String, ?> model,String searchJson) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
         log.debug("User:{} 进入 每日顾客退货明细打印画面", u.getUserId());
         SA0050 cashier = sa0050Service.getCashier(u.getUserId());
         ModelAndView mv = new ModelAndView("returnsDaily/returnsDailyPrint");
         mv.addObject("useMsg", "每日顾客退货明细打印画面");
-        mv.addObject("bsDate", new Date());
+        mv.addObject("bsDate", Utils.getFormateDate(ymd));
         mv.addObject("searchJson", searchJson);
-        mv.addObject("printTime", new Date());
+        mv.addObject("printTime", Utils.getFormateDate(ymd));
         mv.addObject("userName",u.getUserName());
         if (cashier!=null) {
             Ma1000 ma1000 = returnsDailyService.selectByStoreCd(cashier.getStoreCd());
@@ -226,7 +236,7 @@ public class ReturnsDailyController extends BaseAction {
             return new ReturnDTO(false,"Query failed!",null);
         }
         param.setStores(stores);
-        List<ReturnsDailyDTO> result = returnsDailyService.search(param);
+        Map<String,Object> result = returnsDailyService.getPrintDate(param);
         return new ReturnDTO(true,"ok",result);
     }
 }

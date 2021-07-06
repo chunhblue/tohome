@@ -87,7 +87,7 @@
         }
 
         #dailyTable,#dailyPosTable { table-layout: fixed;}
-        #dailyTable th,#dailyTable td{
+        #dailyPosTable th,#dailyPosTable td{
             overflow:hidden;
             white-space:nowrap;
             text-overflow:ellipsis;
@@ -95,7 +95,7 @@
             -moz-text-overflow: ellipsis;
             -webkit-text-overflow: ellipsis;
         }
-        #dailyPosTable th, #dailyPosTable td{
+        #dailyTable th, #dailyTable td{
             overflow:hidden;
             white-space:nowrap;
             text-overflow:ellipsis;
@@ -103,11 +103,11 @@
             -moz-text-overflow: ellipsis;
             -webkit-text-overflow: ellipsis;
         }
-        #dailyTable tr,#dailyPosTable tr {
+        #dailyTable th,#dailyTable tr {
             height: 28px;
             line-height: 28px;
         }
-        #dailyPosTable th, #dailyTable th{
+        #dailyPosTable th, #dailyPosTable tr{
             height: 28px;
             line-height: 28px;
          }
@@ -215,13 +215,13 @@
                                         <div class="radio-inline">
                                             <label>
                                                 <input type="radio" name="order_type" id="order_type_1" nextele="order_type_2" value="1">
-                                                System Date
+                                                POS Business Date
                                             </label>
                                         </div>
                                         <div class="radio-inline">
                                             <label>
                                                 <input type="radio" name="order_type" id="order_type_2" value="2"  />
-                                                POS Business Date
+                                                System Date
                                             </label>
                                         </div>
                                     </div>
@@ -246,11 +246,12 @@
                                                class="auto-but glyphicon glyphicon-remove circle"></a>
                                         </div>
                                     </div>
-                                    <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Include/Exclude Service</label>
+                                    <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Include/Exclude Services</label>
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                                     <select id="include_services" class="form-control input-sm">
-                                        <option value="10">Include Service</option>
-                                        <option value="20">Exclude Service</option>
+                                        <option value="20">Exclude Services</option>
+                                        <option value="10">Include Services</option>
+
                                     </select>
                                     </div>
                                 </div>
@@ -290,21 +291,21 @@
         </div>
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <span style="float: left">Date Created：${bsDate?string('dd/MM/yyyy')}</span></br>
+                <span style="float: left">Date Created：${bsDate!}</span></br>
                 <span style="float: left">Sales data during POS Internet crush(e.g., power off) period will be synchronize back to NRI store system once internet connection back
                  (POS sales data will save to local during isolated period)
                 </span>
             </div>
         </div>
-        <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="row" id="dataTables_scroll" style="overflow: scroll">
+            <div id="data_scollHead" class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="positon: relative;width: 170%;overflow: auto">
                 <table id="dailyPosTable" class="table table-hover table-striped table-condensed table-bordered zgrid-table"
-                       style="margin-bottom: 10px">
+                       cellspacing="0" cellpadding="5" style="margin-bottom: 10px">
                     <tr>
                         <th title="Store No.">Store No.</th>
-                        <th title="Store Name">Store Name</th>
-                        <th title="Date">Date</th>
-                        <th title="Customer Count">Customer Count</th>
+                        <th title="Store Name" style="width: 8%">Store Name</th>
+                        <th title="Date" style="width: 6%">Date</th>
+                        <th title="Customer Count" style="width: 7%">Customer Count</th>
                         <th title="6h-8h">6h-8h</th>
                         <th title="8h-10h">8h-10h</th>
                         <th title="10h-12h">10h-12h</th>
@@ -321,33 +322,54 @@
                         <th title="4h-6h">4h-6h</th>
                         <th title="Shift3">shift3</th>
                         <th title="Total Amt">Total Amt</th>
-                        <th title="Area Manager Name">Area Manager Name</th>
+                        <th title="Area Manager Name" style="width: 10%">Area Manager Name</th>
                     </tr>
                 </table>[#--分页--]
                 <table id="dailyTable" class="table table-hover table-striped table-condensed table-bordered zgrid-table"
                        style="margin-bottom: 10px">
                     <tr>
                         <th title="Store No.">Store No.</th>
-                        <th title="Store Name">Store Name</th>
-                        <th title="Date">Date</th>
-                        <th title="Customer Count">Customer Count</th>
-                        <th title="12h-14h">12h-14h</th>
-                        <th title="14h-16h">14h-16h</th>
-                        <th title="16h-18h">16h-18h</th>
-                        <th title="18h-20h">18h-20h</th>
-                        <th title="Shift1">Shift1</th>
-                        <th title="20h-22h">20h-22h</th>
-                        <th title="22h-24h">22h-24h</th>
-                        <th title="0h-2h">0h-2h</th>
-                        <th title="2h-4h">2h-4h</th>
-                        <th title="Shift2">Shift2</th>
-                        <th title="4h-6h">4h-6h</th>
+                        <th title="Store Name" style="width: 8%">Store Name</th>
+                        <th title="Date"  style="width: 6%">Date</th>
+                        <th title="Customer Count" style="width: 6%">Customer Count</th>
                         <th title="6h-8h">6h-8h</th>
                         <th title="8h-10h">8h-10h</th>
                         <th title="10h-12h">10h-12h</th>
+                        <th title="12h-14h">12h-14h</th>
+                        <th title="Shift1">Shift1</th>
+                        <th title="14h-16h">14h-16h</th>
+                        <th title="16h-18h">16h-18h</th>
+                        <th title="18h-20h">18h-20h</th>
+                        <th title="20h-22h">20h-22h</th>
+                        <th title="Shift2">Shift2</th>
+                        <th title="22h-24h">22h-24h</th>
+                        <th title="0h-2h">0h-2h</th>
+                        <th title="2h-4h">2h-4h</th>
+                        <th title="4h-6h">4h-6h</th>
                         <th title="Shift3">shift3</th>
                         <th title="Total Amt">Total Amt</th>
-                        <th title="Area Manager Name">Area Manager Name</th>
+                        <th title="Area Manager Name" style="width: 10%">Area Manager Name</th>
+[#--                        <th title="Store No.">Store No.</th>--]
+[#--                        <th title="Store Name">Store Name</th>--]
+[#--                        <th title="Date">Date</th>--]
+[#--                        <th title="Customer Count">Customer Count</th>--]
+[#--                        <th title="12h-14h">12h-14h</th>--]
+[#--                        <th title="14h-16h">14h-16h</th>--]
+[#--                        <th title="16h-18h">16h-18h</th>--]
+[#--                        <th title="18h-20h">18h-20h</th>--]
+[#--                        <th title="Shift1">Shift1</th>--]
+[#--                        <th title="20h-22h">20h-22h</th>--]
+[#--                        <th title="22h-24h">22h-24h</th>--]
+[#--                        <th title="0h-2h">0h-2h</th>--]
+[#--                        <th title="2h-4h">2h-4h</th>--]
+[#--                        <th title="Shift2">Shift2</th>--]
+[#--                        <th title="4h-6h">4h-6h</th>--]
+[#--                        <th title="6h-8h">6h-8h</th>--]
+[#--                        <th title="8h-10h">8h-10h</th>--]
+[#--                        <th title="10h-12h">10h-12h</th>--]
+[#--                        <th title="Shift3">shift3</th>--]
+[#--                        <th title="Total Amt">Total Amt</th>--]
+[#--                        <th title="Area Manager Name">Area Manager Name</th>--]
                     </tr>
                 </table>[#--分页--]
                 <nav aria-label="Page navigation" style="text-align: right">

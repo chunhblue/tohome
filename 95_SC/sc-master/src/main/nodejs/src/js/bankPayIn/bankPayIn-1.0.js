@@ -16,6 +16,7 @@ define('bankPayIn', function () {
 		toThousands = null,
 		getThousands = null,
 		i_a_store = null,
+		flg_add=null,
 		tempTrObjValue = {},//临时行数据存储
 		//附件
 		attachmentsParamGrid = null,
@@ -30,6 +31,7 @@ define('bankPayIn', function () {
 		bs_start_date: null,
 		bs_end_date: null,
 		bs_date: null,
+		depositDate: null,
 		s_payPerson:null,//搜索 缴款人
 		payPerson: null,//缴款人
 		payAmt: null,//缴款金额
@@ -43,6 +45,7 @@ define('bankPayIn', function () {
 		aCity : null,
 		aDistrict : null,
 		aStore : null,
+		msg:null,
 		update_payPerSon_name:null,
 	}
 	// 创建js对象
@@ -378,6 +381,7 @@ define('bankPayIn', function () {
 				$("#s_payPerson").find("option:not(:first)").remove();
 				
 				$("#s_payPerson").prop("disabled",true);
+				$("#s_payPerson").val("");
 			}
 		});
 		function getSelectCashierPrivilege(storeCd,val) {
@@ -533,13 +537,15 @@ define('bankPayIn', function () {
 	var table_event = function(){
 		$("#add").on("click", function () {
 			initDialog();
+			flg_add=1;
 			$('#payPerson').attr("disable",true);
 			$('#add_store').show();
 			$('#update_store').hide();
 			$('#payPerson').show();
 			$('#update_payPerSon').hide();
-			m.bs_date.prop("disabled",true);
+			// m.bs_date.prop("disabled",true);
 			m.bs_date.val(fmtIntDate(m.businessDate.val()));
+			m.depositDate.val(fmtIntDate(m.businessDate.val()));
 			//m.bs_date.removeAttr("disabled");
 			$("#attachmentsTable>.zgGrid-tbody").empty();
 			$('#bankPayIn_dialog').modal("show");
@@ -553,8 +559,8 @@ define('bankPayIn', function () {
 				$('#update_payPerSon').show();
 				// $('#payPerson').hide();
 				$('#payPerson').hide();
-				m.bs_date.attr("disabled","disabled");
-				var cols = tableGrid.getSelectColValue(selectTrTemp,"deltaNo,storeCd,storeName,accDate,payPerson,payAmt,description");
+				// m.bs_date.attr("disabled","disabled");
+				var cols = tableGrid.getSelectColValue(selectTrTemp,"deltaNo,storeCd,storeName,accDate,depositDate,payPerson,payAmt,description");
 				$('#i_a_store').val(cols["storeName"]).attr("k",cols["storeCd"]).attr("v",cols["storeName"]);
 				$("#update_store_name").val(cols["storeName"]);
 				$("#payPerson").hide();
@@ -562,6 +568,7 @@ define('bankPayIn', function () {
 				m.update_payPerSon_name.val(cols["payPerson"]);
 				m.deltaNo.val(cols["deltaNo"]);
 				m.bs_date.val(cols["accDate"]);
+				m.depositDate.val(cols["depositDate"]);
 				m.payAmt.val(cols["payAmt"]);
 				m.description.val(cols["description"]);
 				//加载附件信息
@@ -655,7 +662,7 @@ define('bankPayIn', function () {
 					om:$("#om").attr("k"),
 					startDate: startDate,
 					endDate: endDate,
-					payPerson:m.s_payPerson.val()
+					payPerson:isEmpty(m.s_payPerson.val())
 				};
 				paramGrid = "searchJson=" + JSON.stringify(searchJsonStr);
 				var url = url_left + "/export?" + paramGrid;
@@ -683,7 +690,7 @@ define('bankPayIn', function () {
 					om:$("#om").attr("k"),
 					startDate: startDate,
 					endDate: endDate,
-					payPerson:m.s_payPerson.val()
+					payPerson:isEmpty(m.s_payPerson.val())
 				};
 				paramGrid = "searchJson=" + JSON.stringify(searchJsonStr);
 				var url = url_left + "/toPdf?" + paramGrid;
@@ -694,14 +701,14 @@ define('bankPayIn', function () {
 
 	//画面按钮点击事件
 	var but_event = function(){
-		// $("#payAmt").blur(function () {
-		// 	$("#payAmt").val(toThousands(this.value));
-		// });
-		//
-		// //光标进入，去除金额千分位，并去除小数后面多余的0
-		// $("#payAmt").focus(function(){
-		// 	$("#payAmt").val(reThousands(this.value));
-		// });
+		$("#payAmt").blur(function () {
+			$("#payAmt").val(toThousands(this.value));
+		});
+
+		//光标进入，去除金额千分位，并去除小数后面多余的0
+		$("#payAmt").focus(function(){
+			$("#payAmt").val(reThousands(this.value));
+		});
 
 		//清空日期
 		m.clear_bs_date.on("click",function(){
@@ -710,6 +717,19 @@ define('bankPayIn', function () {
 		});
 		//营业日期
 		m.bs_date.datetimepicker({
+			language:'en',
+			format: 'dd/mm/yyyy',
+			maxView:4,
+			startView:2,
+			startDate: fmtDate(m.businessDate.val()),
+			minView:2,
+			autoclose:true,
+			todayHighlight:true,
+			todayBtn:true
+		});
+
+		//存款日期
+		m.depositDate.datetimepicker({
 			language:'en',
 			format: 'dd/mm/yyyy',
 			maxView:4,
@@ -750,7 +770,7 @@ define('bankPayIn', function () {
 				if(m.bs_end_date.val()!=null&&m.bs_end_date.val()!=""){
 					endDate = subfmtDate(m.bs_end_date.val())
 				}
-				var payPerson = m.s_payPerson.val().trim();
+				var payPerson = isEmpty(m.s_payPerson.val());
 				paramGrid = "regionCd="+regionCd+"&cityCd="+cityCd+"&districtCd="+districtCd+"&storeCd="+storeCd+
 					"&startDate="+startDate+"&endDate="+endDate+"&payPerson="+payPerson+"&ofc="+ofc+"&om="+om+"&oc="+oc;
 				tableGrid.setting("url",url_left+"/getList");
@@ -764,6 +784,7 @@ define('bankPayIn', function () {
 			_common.myConfirm("Are you sure you want to cancel",function(result){
 				$("#i_a_store").css("border-color","#CCCCCC");
 				$("#bs_date").css("border-color","#CCCCCC");
+				$("#depositDate").css("border-color","#CCCCCC");
 				$("#payPerson").css("border-color","#CCCCCC");
 				$("#payAmt").css("border-color","#CCCCCC");
 				if(result=="true"){
@@ -784,14 +805,36 @@ define('bankPayIn', function () {
 				$("#i_a_store").css("border-color","#CCCCCC");
 			}
 			var accDate = m.bs_date.val();
+			var depositDate = m.depositDate.val();
 			if(isNull(accDate)){
 				m.bs_date.focus();
 				$("#bs_date").css("border-color","red");
 				_common.prompt("The business date cannot be empty!",5,"info");/*业务日期不能为空*/
 				return;
+			}else if(_common.judgeValidDate($("#bs_date").val())){
+					_common.prompt("Please enter a valid date!",3,"info");
+					$("#bs_date").css("border-color","red");
+					$("#bs_date").focus();
+					return false;
 			}else {
-				$("#bs_date").css("border-color","#CCCCCC");
+				$("#bs_date").css("border-color","#CCC");
 			}
+
+
+			if(isNull(depositDate)){
+				m.depositDate.focus();
+				$("#depositDate").css("border-color","red");
+				_common.prompt("The business date cannot be empty!",5,"info");/*业务日期不能为空*/
+				return;
+			}else if(_common.judgeValidDate($("#depositDate").val())){
+				_common.prompt("Please enter a valid date!",3,"info");
+				$("#depositDate").css("border-color","red");
+				$("#depositDate").focus();
+				return false;
+			}else {
+				$("#depositDate").css("border-color","#CCC");
+			}
+
 			var payPerson = m.payPerson.val();
 			var updatePerson = m.update_payPerSon_name.val();
 			if(isNull(payPerson)){
@@ -809,7 +852,7 @@ define('bankPayIn', function () {
 			}
 			//金额正则
 			var reg = /((^[1-9]\d*)|^0)(\,\.\d{0,2}){0,1}$/;
-			var payAmt = m.payAmt.val().trim();
+			var payAmt = reThousands(m.payAmt.val());
 			if(isNull(payAmt)){
 				m.payAmt.focus();
 				$("#payAmt").css("border-color","red");
@@ -838,7 +881,23 @@ define('bankPayIn', function () {
 					$("#payAmt").css("border-color","#CCCCCC");
 				}
 			}
-			var description = m.description.val();
+			var arr ;
+			var description = "";
+			if($("#description").val() != null){
+				arr = $("#description").val().split('\n');
+				if(arr != null ){
+					for(var i=0;i<arr.length;i++){
+						if(i==arr.length-1){
+							description += arr[i];
+						}else {
+							description = description + arr[i]+'\\n';
+						}
+					}
+				}
+				// description = $("#description").val().replaceAll('\t','\\t');
+				// description = description.replaceAll('\n','\\n');
+			}
+			// var description = m.description.val();
 			// if(isNull(description)){
 			// 	description = null;
 			// }
@@ -854,51 +913,77 @@ define('bankPayIn', function () {
 					fileType:'05',//文件类型 - 银行缴款
 					fileName:$(this).find('td[tag=fileName]').text(),//文件名称
 					filePath:$(this).find('td>a').attr("filepath"),//文件路径
-				}
+				};
 				fileDetail.push(file);
 			});
 			if(fileDetail.length>0){
 				fileDetailJson = JSON.stringify(fileDetail)
 			}
-			_common.myConfirm("Are you sure you want to save",function(result){
-				if(result=="true"){
-					var  deltaNo = m.deltaNo.val();
-					var flg = "add";
-					if(!isNull(deltaNo)){
-						flg = "update";
-					}
-					var date = {
-						storeCd:storeCd,
-						accDate:subfmtDate(accDate),
-						payPerson:payPerson,
-						payAmt:_common.reThousands(payAmt),
-						description:description,
-						deltaNo:deltaNo,
-						fileDetailJson:fileDetailJson,
-						flg:flg
-					};
-					$.myAjaxs({
-						url:url_left+"/save",
-						async:true,
-						cache:false,
-						type :"post",
-						data :date,
-						dataType:"json",
-						success:function(result){
-							if(result.success){
-								$('#bankPayIn_dialog').modal("hide");
-								m.search.click();
-								_common.prompt("Data saved successfully！",5,"info");/*保存成功*/
-							}else{
-								_common.prompt(result.message,5,"error");
-							}
-						},
-						error : function(e){
-							_common.prompt("Data saved failed！",5,"error"); // 保存失败
-						}
-					});
+			if (isNull(m.deltaNo.val()) ){
+				var date = {
+					storeCd:storeCd,
+					businessDate:subfmtDate(m.bs_date.val()),
 				}
-			});
+				$.myAjaxs({
+					url:url_left+"/searchStoresInsert",
+					async:false,   //同步 异步
+					cache:false,
+					type :"post",
+					data :date,
+					dataType:"json",
+					success:function(result){
+						if (result.success){
+							$("#msg").val(result.s);
+						}
+					}
+				});
+
+			}
+			  var val =$("#msg").val();
+			// 2021/6/8 添加开始
+			_common.myConfirm(val+"Are you sure you want to save?",function(result){
+				$("#msg").val("");
+				if(result=="true"){
+						//  2021./6/9
+						var  deltaNo = m.deltaNo.val();
+						var flg = "add";
+						if(!isNull(deltaNo)){
+							flg = "update";
+						}
+						var date = {
+							storeCd:storeCd,
+							accDate:subfmtDate(accDate),
+							depositDate:subfmtDate(depositDate),
+							payPerson:payPerson,
+							payAmt:_common.reThousands(payAmt),
+							description:description,
+							deltaNo:deltaNo,
+							fileDetailJson:fileDetailJson,
+							flg:flg
+						};
+						$.myAjaxs({
+							url:url_left+"/save",
+							async:true,
+							cache:false,
+							type :"post",
+							data :date,
+							dataType:"json",
+							success:function(result){
+								if(result.success){
+									$('#bankPayIn_dialog').modal("hide");
+									m.search.click();
+									_common.prompt("Data saved successfully！",5,"info");/*保存成功*/
+								}else{
+									_common.prompt(result.message,5,"error");
+								}
+							},
+							error : function(e){
+								_common.prompt("Data saved failed！",5,"error"); // 保存失败
+							}
+						});
+
+					}
+				});
 		})
 
 	}
@@ -917,7 +1002,7 @@ define('bankPayIn', function () {
 		tableGrid = $("#zgGridTtable").zgGrid({
 			title:"Query Result",
 			param:paramGrid,
-			colNames:["delta No","Store No.","Store Name","Area Manager Code","Area Manager Name","Operation Manager Code","Operation Manager Name","Operation Controller Code","Operation Controller Name","Deposit Date","Store Manager","Bank Deposit Amount","Remarks"],
+			colNames:["delta No","Store No.","Store Name","Area Manager Code","Area Manager Name","Operation Manager Code","Operation Manager Name","Operation Controller Code","Operation Controller Name","Business Date","Deposit Date","Store Manager","Bank Deposit Amount","Remarks"],
 			colModel:[
 				{name:"deltaNo",type:"text",text:"right",width:"100",ishide:true,css:""},
 				{name:"storeCd",type:"text",text:"right",width:"100",ishide:false,css:""},
@@ -929,6 +1014,7 @@ define('bankPayIn', function () {
 				{name:"oc",type:"text",text:"left",width:"200",ishide:false,css:""},
 				{name:"ocName",type:"text",text:"center",width:"200",ishide:false,css:"",getCustomValue:dateFmt},
 				{name:"accDate",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue:dateFmt},
+				{name:"depositDate",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue:dateFmt},
 				{name:"payPerson",type:"text",text:"left",width:"130",ishide:false,css:""},
 				{name:"payAmt",type:"text",text:"right",width:"150",ishide:false,css:"",getCustomValue:formatNum},
 				{name:"description",type:"text",text:"right",width:"130",ishide:false,css:""},
@@ -1010,10 +1096,13 @@ define('bankPayIn', function () {
 			return false;
 		}else{
 			_StartDate = new Date(fmtDate($("#bs_start_date").val())).getTime();
-			if(judgeNaN(_StartDate)){
+			if(_common.judgeValidDate($("#bs_start_date").val())){
 				_common.prompt("Please enter a valid date!",3,"info");
+				$("#bs_start_date").css("border-color","red");
 				$("#bs_start_date").focus();
 				return false;
+			}else {
+				$("#bs_start_date").css("border-color","#CCC");
 			}
 		}
 		let _EndDate = null;
@@ -1023,10 +1112,13 @@ define('bankPayIn', function () {
 			return false;
 		}else{
 			_EndDate = new Date(fmtDate($("#bs_end_date").val())).getTime();
-			if(judgeNaN(_EndDate)){
+			if(_common.judgeValidDate($("#bs_end_date").val())){
 				_common.prompt("Please enter a valid date!",3,"info");
+				$("#bs_end_date").css("border-color","red");
 				$("#bs_end_date").focus();
 				return false;
+			}else {
+				$("#bs_end_date").css("border-color","#CCC");
 			}
 		}
 		if(_StartDate>_EndDate){
@@ -1083,6 +1175,12 @@ define('bankPayIn', function () {
 		res = date.replace(/^(\d{4})(\d{2})(\d{2})$/, '$3/$2/$1');
 		return res;
 	}
+	var isEmpty = function (str) {
+		if (str == null || str === undefined || str === '') {
+			return '';
+		}
+		return str;
+	};
 
 	function subfmtDate(date){
 		var res = "";

@@ -52,9 +52,9 @@ public interface Ma1105Mapper extends Ma1105GenMapper {
 
     int insertMa1105tSelective(@Param("ma1105s") Collection<Ma1105> ma1105s);
 
-    List<Ma1105> getTempShelf(String storeCd);
+    List<Ma1105> getTempShelf(String storeCd,String pogName);
 
-    int deleteMa1105Byshelf(@Param("ma1105s")Collection<Ma1105> ma1105s);
+    int deleteMa1105Byshelf(@Param("ma1105s")Collection<Ma1105> ma1105s,String pogName);
 
     int insertShelfToMall05(String storeCd);
 
@@ -65,7 +65,7 @@ public interface Ma1105Mapper extends Ma1105GenMapper {
      * @param storeCd
      * @return
      */
-    Ma1104Dto getPOGInformation(String storeCd);
+    List<Ma1104Dto> getPOGInformation(String storeCd);
 
     int updatePOGAuditStatus(Ma1104Dto ma1104Dto);
 
@@ -76,4 +76,6 @@ public interface Ma1105Mapper extends Ma1105GenMapper {
     int countPogName(String excelName,String storeCd);
 
     int modifyPOGStatus(int status,String recordCd);
+
+    List<String> getPogNamePrefix(@Param("storeCd") String storeCd);
 }

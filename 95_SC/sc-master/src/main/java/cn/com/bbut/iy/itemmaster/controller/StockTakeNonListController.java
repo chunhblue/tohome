@@ -10,6 +10,7 @@ import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.stocktake.StocktakeEntryService;
 import cn.com.bbut.iy.itemmaster.util.ExcelBaseUtil;
 import com.google.gson.Gson;
@@ -37,6 +38,8 @@ public class StockTakeNonListController extends BaseAction {
     private CM9060Service cm9060Service;
     @Autowired
     private StocktakeEntryService service;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
 //    @Permission(codes = { PermissionCode.CODE_SC_PD_SETTING_LIST_VIEW})
     @RequestMapping(method = RequestMethod.GET)
@@ -130,7 +133,11 @@ public class StockTakeNonListController extends BaseAction {
         if(u == null){
             return null;
         }
+
         CommonDTO dto = new CommonDTO();
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         // 当前用户ID
         dto.setUpdateUserId(u.getUserId());
         dto.setCreateUserId(u.getUserId());
@@ -140,12 +147,12 @@ public class StockTakeNonListController extends BaseAction {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HHmmss");
         // 当前时间年月日
         String date = dateFormat.format(now);
-        dto.setCreateYmd(date);
-        dto.setUpdateYmd(date);
+        dto.setCreateYmd(ymd);
+        dto.setUpdateYmd(ymd);
         // 当前时间时分秒
         String time = timeFormat.format(now);
-        dto.setCreateHms(time);
-        dto.setUpdateHms(time);
+        dto.setCreateHms(hms);
+        dto.setUpdateHms(hms);
         return dto;
     }
 }

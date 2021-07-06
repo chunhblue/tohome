@@ -190,7 +190,7 @@
     <!--  查询组合明细  -->
     <select id="selectPackDetailsByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.unpack.UnpackParamDTO" resultMap="ReDetails">
         SELECT distinct
-            T.*, T1.article_name, T2.barcode, T3.sale_price AS sales_price
+            T.*, T1.article_name, T2.barcode, T3.base_sale_price AS sales_price
         FROM (
             SELECT distinct
                 ma12.id AS serial_no, ma12.child_article_id, ma12.quantity AS unpack_qty,
@@ -209,20 +209,15 @@
         ) T1
         ON T.child_article_id = T1.article_id
         LEFT JOIN (
-            SELECT article_id, vendor_id,default_barcode barcode
+            SELECT article_id, vendor_id,default_barcode barcode,structure_cd,effective_start_date,ma_cd
             FROM MA1110
             WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
             and structure_cd = (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
             (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd,jdbcType=VARCHAR}))
         ) T2
         ON T.child_article_id = T2.article_id AND T.vendor_id = T2.vendor_id
-        LEFT JOIN (
-            SELECT article_id, sale_price
-            FROM SK0000
-            WHERE store_cd = #{storeCd,jdbcType=VARCHAR}
-            AND effective_date = #{unpackDate,jdbcType=VARCHAR}
-        ) T3
-        ON T.child_article_id = T3.article_id
+        left join ma1130 T3 on T.child_article_id = T3.ARTICLE_ID and T2.EFFECTIVE_START_DATE = T3.EFFECTIVE_START_DATE
+        and T3.structure_cd = T2.structure_cd
         ORDER BY T.serial_no
     </select>
 

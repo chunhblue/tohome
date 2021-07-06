@@ -77,8 +77,8 @@ define('writeOffPrint', function () {
                             '<td title="'+isEmpty(item.barcode)+'" style="text-align: right">'+isEmpty(item.barcode)+'</td>' +
                             '<td title="' + isEmpty(item.uom) + '" style="text-align: left">' + isEmpty(item.uom) + '</td>' +
                             '<td title="'+toThousands(item.writeOffQty)+'" style="text-align:right;">'+toThousands(item.writeOffQty)+'</td>' +
-                            '<td title="' + toThousands(item.saleQty) + '" style="text-align:right;">' + toThousands(item.saleQty) + '</td>' +
-                            //'<td title="'+toThousands(item.writeOffAmt) +'" style="text-align:left;">'+toThousands(item.writeOffAmt) +'</td>' +
+                            // '<td title="' + toThousands(item.saleQty) + '" style="text-align:right;">' + toThousands(item.saleQty) + '</td>' +
+                            // //'<td title="'+toThousands(item.writeOffAmt) +'" style="text-align:left;">'+toThousands(item.writeOffAmt) +'</td>' +
                             "<td style='text-align:left;'>" + isEmpty(item.adjustReason) + "</td>" +
                             '<td title="'+isEmpty(item.ofc)+'" style="text-align: left">'+isEmpty(item.ofc)+'</td>' +
                             '<td title="'+isEmpty(item.ofcName)+'" style="text-align: left">'+isEmpty(item.ofcName)+'</td>' +
@@ -98,7 +98,7 @@ define('writeOffPrint', function () {
                         "<td></td>"+
                         "<td style='text-align:right'>total qty </td>"+
                         "<td style='text-align:right'>"+toThousands(result.o.ItemQty)+"</td>"+
-                        "<td style='text-align:right'>"+toThousands(result.o.itemSaleQty)+"</td>" +
+                        // "<td style='text-align:right'>"+toThousands(result.o.itemSaleQty)+"</td>" +
                         "<td></td>" +
                         "<td></td>" +
                         "<td></td>" +

@@ -282,6 +282,10 @@
                                             <a id="amRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
                                         </div>
                                     </div>
+                                    <label for="Total Amount"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Total Sale Amount</label>
+                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+                                        <input type="text" id="totalSaleAmountA" class="form-control input-sm" disabled="disabled">
+                                    </div>
                                 </div>
                                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                     <div class="wire"></div>
@@ -310,29 +314,29 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                    <span style="float: left">Date Created:${bsDate?string('dd/MM/yyyy')}</span>
+                    <span style="float: left">Date Created:${bsDate!}</span>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="row" style="overflow: scroll">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="width: 160%;">
                     <table id="dailyTable" class="table table-hover table-striped table-condensed table-bordered zgrid-table"
                            style="margin-bottom: 10px">
                         <tr>
-                            <th title="Store No.">Store No.</th>
-                            <th title="Store Name">Store Name</th>
+                            <th title="Store No." style="width: 5%;">Store No.</th>
+                            <th title="Store Name" style="width: 6%;">Store Name</th>
                             <th title="Sales Date">Sales Date</th>
                             <th title="Top Department">Top Department</th>
-                            <th title="Department">Department</th>
-                            <th title="Category">Category</th>
-                            <th title="Sub-Category">Sub-Category</th>
+                            <th title="Department" style="width: 6%;">Department</th>
+                            <th title="Category" style="width: 7%;">Category</th>
+                            <th title="Sub-Category" style="width: 7%;">Sub-Category</th>
                             <th title="Item Code">Item Code</th>
-                            <th title="Item Name">Item Name</th>
+                            <th title="Item Name" style="width: 6%;">Item Name</th>
                             <th title="Barcode">Barcode</th>
-                            <th title="Sales Quantity">Sales Quantity</th>
+                            <th title="Sales Quantity" style="width: 6%;">Sales Quantity</th>
                             <th title="Selling Price">Selling Price</th>
                             <th title="Sale Amount">Sale Amount</th>
-                            <th title="Area Manager ID">Area Manager ID</th>
-                            <th title="Area Manager Name">Area Manager Name</th>
+                            <th title="Area Manager ID" style="width: 6%;">Area Manager ID</th>
+                            <th title="Area Manager Name" style="width: 7%;">Area Manager Name</th>
                         </tr>
                     </table>
 

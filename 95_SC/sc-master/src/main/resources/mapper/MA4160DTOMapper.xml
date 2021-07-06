@@ -41,6 +41,9 @@
     <select id="selectAllma4160"  parameterType="cn.com.bbut.iy.itemmaster.dto.store.MA4160DTO" resultMap="BaseResultMap">
         select * from ma4160
         where effective_sts = '10'
+        <if test="flg">
+            and position = 4
+        </if>
     </select>
     <select id="search" parameterType="cn.com.bbut.iy.itemmaster.dto.store.MA4160ParamDTO" resultMap="BaseResultMap">
         select * from ma4160
@@ -56,5 +59,33 @@
             </if>
         </where>
         LIMIT ${ma4160ParamDTO.rows} OFFSET ${ma4160ParamDTO.limitStart}
+    </select>
+
+    <select id="countSMByStoreCd" resultType="INT">
+        select count(*) from ma4200,ma4160
+        where ma4200.job_type_cd = ma4160.job_type_cd
+        and ma4200.emp_num_id = #{userId}
+        and ma4200.store_cd = #{storeCd}
+        and ma4160.position = 4
+    </select>
+
+    <select id="countAMByStoreCd" resultType="INT">
+        select count(*) from ma4210 where
+        store_cd = #{storeCd}
+        and user_code = #{userId}
+        and position in  (1,2,4)
+    </select>
+
+    <select id="getPositionList" resultType="INTEGER">
+        select position from ma4210 where
+        store_cd = #{storeCd}
+        and user_code = #{userId}
+    </select>
+
+    <select id="countFinanceByStoreCd" resultType="INT">
+        select count(*) from ma4210 where
+        store_cd = #{storeCd}
+        and user_code = #{userId}
+        and position = 6
     </select>
 </mapper>

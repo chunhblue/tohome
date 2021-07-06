@@ -116,14 +116,14 @@ public class BomSaleController extends BaseAction {
         Gson gson = new Gson();
         BomSaleParamDTO param = gson.fromJson(searchJson, BomSaleParamDTO.class);
         User u = this.getUser(session);
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             param.setSaleStartDate(startDate);
-        }
+        }*/
 
         List<BomSaleDTO> _list = service.getList(param);
         if(_list == null || _list.size() < 1){

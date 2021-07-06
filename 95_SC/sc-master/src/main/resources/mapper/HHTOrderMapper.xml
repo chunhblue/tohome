@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.orderHHT.OrderHHTMapper">
+    <resultMap id="BaseResultMap" type="cn.com.bbut.iy.itemmaster.dto.orderHHT.OrderHHTGridDTO">
+        <result column="article_id" property="articleId"></result>
+        <result column="article_name" property="articleName"></result>
+        <result column="qty" property="qty"></result>
+        <result column="order_date" property="orderDate"></result>
+        <result column="store_name" property="storeName"></result>
+        <result column="store_cd" property="storeCd"></result>
+        <result column="upload_time" property="uploadTime"></result>
+        <result column="item_code" property="itemCode"></result>
+        <result column="ord_date" property="ordDate"></result>
+        <result column="vendor_name" property="vendorName"></result>
+        <result column="vendor_id" property="vendorId"></result>
+        <result column="barcode" property="barcode"></result>
+    </resultMap>
+    <select id="getDataList" parameterType="cn.com.bbut.iy.itemmaster.dto.orderHHT.OrderHHTParamDto"  resultMap="BaseResultMap">
+        SELECT DISTINCT f.*, d.vendor_id, g.default_barcode AS barcode, e.vendor_name
+        FROM (
+        SELECT DISTINCT a.item_code, c.article_name, a.whs_code AS store_cd, b.store_name
+        , SUM(A.qty) AS qty
+        , to_char(a.ord_date, 'yyyymmdd') AS ord_date
+        , to_char(a.upload_time, 'yyyyMMddhh24miss') AS upload_time
+        FROM hht_purchase_order_upload_his a
+        LEFT JOIN ma1000 b ON a.whs_code = b.store_cd
+        LEFT JOIN ma1100 c ON a.item_code = c.article_id
+        WHERE 1 = 1
+        AND a.whs_code = b.store_cd
+        <if test="param.articleId!=null and param.articleId!=''">
+            and  (
+            LOWER (c.article_id) like lower(CONCAT('%', #{param.articleId,jdbcType=VARCHAR},'%'))
+            or  LOWER (c.article_name) like lower(CONCAT('%', #{param.articleId,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        <if test="param.orderStartDate!=null and param.orderStartDate!=''">
+            <![CDATA[
+              and to_char(a.ord_date,'yyyymmdd') >= #{param.orderStartDate,jdbcType=VARCHAR}
+             ]]>
+        </if>
+        <if test="param.orderEndDate!=null and param.orderEndDate!=''">
+            <![CDATA[
+             and to_char(a.ord_date,'yyyymmdd') <= #{param.orderEndDate,jdbcType=VARCHAR}
+          ]]>
+        </if>
+        <if test="param.orderDifferentiate==1 and param.orderDifferentiate==1 ">
+            and a.dc='Y'
+        </if>
+        <if test="param.orderDifferentiate==0 and param.orderDifferentiate==0 ">
+            and a.dc='N'
+        </if>
+        GROUP BY a.item_code, a.whs_code, b.store_name, a.ord_date, upload_time, C.article_name
+        ) f, ma2240 d, ma2000 e, ma1110 g
+        WHERE 1 = 1
+        AND f.item_code = d.article_id
+        <if test="param.vendorId!=null and param.vendorId!=''">
+            and lower (e.vendor_id ) like lower(CONCAT('%', #{param.vendorId,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="param.storeCd!=null and param.storeCd!=''">
+            and f.store_cd= #{param.storeCd,jdbcType=VARCHAR}
+        </if>
+
+        <if test="param.barcode!=null and param.barcode!=''">
+            and  lower (g.default_barcode) like lower(CONCAT('%', #{param.barcode,jdbcType=VARCHAR},'%'))
+        </if>
+        AND d.store_cd = f.store_cd
+        AND d.vendor_id = e.vendor_id
+        AND g.vendor_id = d.vendor_id
+        AND g.article_id = f.item_code
+        AND g.structure_cd = (
+        SELECT
+        admin_structure_cd
+        FROM
+        MA0020
+        WHERE
+        1=1
+        AND structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = f.store_cd AND effective_sts = '10' )
+        AND effective_sts = '10'
+        )
+
+        AND f.ord_date  between e.effective_start_date and e.effective_end_date
+        AND f.ord_date  between g.effective_start_date and g.effective_end_date
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+
+    <select id="getDataListCount"  parameterType="cn.com.bbut.iy.itemmaster.dto.orderHHT.OrderHHTParamDto" resultType="INT">
+        SELECT count(*)
+        FROM (
+        SELECT DISTINCT a.item_code, c.article_name, a.whs_code AS store_cd, b.store_name
+        , SUM(A.qty) AS qty
+        , to_char(a.ord_date, 'yyyymmdd') AS ord_date
+        , to_char(a.upload_time, 'yyyyMMddhh24miss') AS upload_time
+        FROM hht_purchase_order_upload_his a
+        LEFT JOIN ma1000 b ON a.whs_code = b.store_cd
+        LEFT JOIN ma1100 c ON a.item_code = c.article_id
+        WHERE 1 = 1
+        AND a.whs_code = b.store_cd
+        <if test="param.articleId!=null and param.articleId!=''">
+            and  (
+            LOWER (c.article_id) like lower(CONCAT('%', #{param.articleId,jdbcType=VARCHAR},'%'))
+            or  LOWER (c.article_name) like lower(CONCAT('%', #{param.articleId,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        <if test="param.orderStartDate!=null and param.orderStartDate!=''">
+            <![CDATA[
+         and to_char(a.ord_date,'yyyymmdd') >= #{param.orderStartDate,jdbcType=VARCHAR}
+         ]]>
+        </if>
+        <if test="param.orderEndDate!=null and param.orderEndDate!=''">
+            <![CDATA[
+             and to_char(a.ord_date,'yyyymmdd') <= #{param.orderEndDate,jdbcType=VARCHAR}
+          ]]>
+        </if>
+        <if test="param.orderDifferentiate==1 and param.orderDifferentiate==1 ">
+            and a.dc='Y'
+        </if>
+        <if test="param.orderDifferentiate==0 and param.orderDifferentiate==0 ">
+            and a.dc='N'
+        </if>
+        GROUP BY a.item_code, a.whs_code, b.store_name, a.ord_date, upload_time, C.article_name
+        ) f, ma2240 d, ma2000 e, ma1110 g
+        WHERE 1 = 1
+        AND f.item_code = d.article_id
+        <if test="param.vendorId!=null and param.vendorId!=''">
+            and lower (e.vendor_id ) like lower(CONCAT('%', #{param.vendorId,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="param.storeCd!=null and param.storeCd!=''">
+            and f.store_cd= #{param.storeCd,jdbcType=VARCHAR}
+        </if>
+
+        <if test="param.barcode!=null and param.barcode!=''">
+            and  lower (g.default_barcode) like lower(CONCAT('%', #{param.barcode,jdbcType=VARCHAR},'%'))
+        </if>
+        AND d.store_cd = f.store_cd
+        AND d.vendor_id = e.vendor_id
+        AND g.vendor_id = d.vendor_id
+        AND g.article_id = f.item_code
+        AND g.structure_cd = (
+        SELECT
+        admin_structure_cd
+        FROM
+        MA0020
+        WHERE
+        1=1
+        AND structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = f.store_cd AND effective_sts = '10' )
+        AND effective_sts = '10'
+        )
+        AND f.ord_date  between e.effective_start_date and e.effective_end_date
+        AND f.ord_date  between g.effective_start_date and g.effective_end_date
+    </select>
+</mapper>

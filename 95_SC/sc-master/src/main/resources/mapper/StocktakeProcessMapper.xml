@@ -45,32 +45,37 @@
             pi1.pi_cd = #{piCd}
             AND pi1.pi_date = #{piDate}
             AND pi1.store_cd = #{storeCd}
-            AND pi1.bad_qty	IS NOT NULL
+            AND COALESCE(pi1.bad_qty,0) > 0
             AND ma2.article_id = pi1.article_id
             AND #{businessDate} BETWEEN ma2.effective_start_date AND ma2.effective_end_date
     </select>
 
     <select id="getBadQty" resultType="int">
         SELECT
-            COALESCE(sum(pi1.bad_qty*ma2.base_order_price),0)
+            COALESCE(sum(pi1.bad_qty*ma111.base_order_price),0)
         FROM
             pi0120 pi1,
-            ma1110 ma2,
-            ma1000 ma3
+			ma1110 ma111
         WHERE
             pi1.pi_cd = #{piCd}
             AND pi1.pi_date = #{piDate}
             AND pi1.store_cd = #{storeCd}
-            AND ma3.store_cd = #{storeCd}
-            AND ma2.article_id = pi1.article_id
-            AND ma2.structure_cd = ma3.zo_cd
+            AND pi1.article_id = ma111.article_id
+            AND pi1.pi_date BETWEEN ma111.effective_start_date and ma111.effective_end_date
+            and ma111.is_default ='1'
+            AND ma111.structure_cd = (
+            SELECT admin_structure_cd
+            FROM MA0020
+            WHERE
+            structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = pi1.store_cd AND effective_sts = '10' )
+            AND effective_sts = '10')
     </select>
 
     <select id="getPastPiCd" parameterType="string" resultType="cn.com.bbut.iy.itemmaster.dto.stocktakeProcess.StocktakeProcessDTO">
         SELECT
-            pi2.pi_cd,
-            pi2.pi_date,
-            pi2.store_cd
+            COALESCE(pi2.pi_cd,pi1.pi_cd) as pi_cd,
+            COALESCE(pi2.pi_date,pi1.pi_date) as pi_date,
+            COALESCE(pi2.store_cd,pi1.store_cd) as store_cd
         FROM
             pi0100 pi1
             LEFT JOIN pi0100 pi2 ON pi1.store_cd = pi2.store_cd AND pi2.pi_status = '03'
@@ -93,15 +98,15 @@
             pi1.store_cd,
             ma4.pma_cd,
             ma5.pma_name,
-            sum(pi2.variance_qty*ma6.base_sale_price) AS varianceAmt
+            sum(pi2.variance_qty*ma111.base_order_price) AS varianceAmt
         FROM
             pi0120 pi1,
             pi0125 pi2,
             ma1000 ma2,
             cm9060 cm3,
             ma1100 ma4,
-            ma0080 ma5,
-            ma1130 ma6
+            ma1110 ma111,
+            ma0080 ma5
         WHERE
             pi1.store_cd = #{storeCd}
             AND pi1.pi_cd = #{piCd}
@@ -115,11 +120,26 @@
             AND cm3.sp_value BETWEEN ma2.effective_start_date
             AND ma2.effective_end_date
             AND ma4.article_id = pi1.article_id
+            AND ma4.inventory_item = '1'
+            AND ma4.cost_item = '0'
+            AND ma4.article_id NOT IN (
+                SELECT article_id
+                FROM pi0126
+            )
             AND cm3.sp_value BETWEEN ma4.effective_start_date
             AND ma4.effective_end_date
             AND ma5.pma_cd = ma4.pma_cd
-            AND ma6.article_id = pi2.article_id
-            AND ma6.structure_cd = ma2.zo_cd
+
+            AND ma4.effective_start_date = ma111.effective_start_date
+            AND ma4.article_id = ma111.article_id
+            AND cm3.sp_value BETWEEN ma111.effective_start_date and ma111.effective_end_date
+            and ma111.is_default ='1'
+            AND ma111.structure_cd = (
+            SELECT admin_structure_cd
+            FROM MA0020
+            WHERE
+            structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = #{storeCd} AND effective_sts = '10' )
+            AND effective_sts = '10')
         GROUP BY
             pi1.pi_cd,
             pi1.pi_date,
@@ -139,15 +159,14 @@
             ma5.category_name,
             COUNT(pi1.article_id) AS sku,
             SUM(pi1.real_time_qty) AS inventoryQty,
-            SUM(ma3.base_sale_price) AS base_sale_price,
+            SUM(ma111.base_order_price) AS base_sale_price,
             SUM ( pi1.variance_qty ) AS variance_qty,
-            SUM ( pi1.variance_qty * ma3.base_sale_price ) AS variance_amt
+            SUM ( pi1.variance_qty * ma111.base_order_price ) AS variance_amt
         FROM
             pi0125 pi1,
             pi0120 pi2,
             ma1100 ma2,
-            ma1130 ma3,
-            ma1000 ma4,
+            ma1110 ma111,
             ma0090 ma5
         WHERE
             pi1.pi_cd = #{piCd}
@@ -161,13 +180,16 @@
             AND #{businessDate} BETWEEN ma2.effective_start_date
             AND ma2.effective_end_date
             AND ma5.category_cd = ma2.category_cd
-            AND ma4.store_cd = #{storeCd}
-            AND #{businessDate} BETWEEN ma4.effective_start_date
-            AND ma4.effective_end_date
-            AND ma3.article_id = ma2.article_id
-            AND #{businessDate} BETWEEN ma3.effective_start_date
-            AND ma3.effective_end_date
-            AND ma3.structure_cd = ma4.zo_cd
+            AND ma2.effective_start_date = ma111.effective_start_date
+            AND ma2.article_id = ma111.article_id
+            AND #{businessDate} BETWEEN ma111.effective_start_date and ma111.effective_end_date
+            and ma111.is_default ='1'
+            AND ma111.structure_cd = (
+            SELECT admin_structure_cd
+            FROM MA0020
+            WHERE
+            structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = pi1.store_cd AND effective_sts = '10' )
+            AND effective_sts = '10')
         <if test="flg != null and flg=='LT'">
             AND 0 > pi1.variance_qty
         </if>
@@ -187,18 +209,23 @@
         SELECT
             ma3.store_cd AS storeCd,
 		    ma3.store_name AS storeName,
+		    pi3.review_status,
+			ma4200.emp_name,
             SUM(pi2.real_time_qty) AS inventoryQty,
             SUM(pi2.pi_qty) AS piQty,
-            SUM(ma4.base_sale_price) AS baseSalePrice,
+            SUM(ma111.base_order_price) AS baseSalePrice,
             SUM(pi2.variance_qty) AS varianceQty,
-            SUM(pi2.variance_qty*ma4.base_sale_price) AS varianceAmt,
+            SUM(pi2.variance_qty*ma111.base_order_price) AS varianceAmt,
             SUM(pi1.bad_qty) AS badQty
         FROM
             pi0120 pi1,
+            ma1110 ma111,
             pi0125 pi2,
             ma1000 ma3,
-            ma1130 ma4,
-            cm9060 cm5
+            cm9060 cm5,
+			pi0100 pi3
+			inner join ma4200 on pi3.update_user_id = ma4200.emp_num_id
+			and ma4200.effective_status = '10'
         WHERE
             pi1.pi_cd = #{piCd}
             AND pi1.pi_date = #{piDate}
@@ -210,11 +237,21 @@
             AND ma3.store_cd = #{storeCd}
             AND cm5.sp_id = '0000'
             AND cm5.sp_value BETWEEN ma3.effective_start_date AND ma3.effective_end_date
-            AND ma4.article_id = pi1.article_id
-            AND ma4.structure_cd = ma3.zo_cd
+            AND pi1.pi_cd = pi3.pi_cd
+
+            AND pi1.article_id = ma111.article_id
+            AND cm5.sp_value BETWEEN ma111.effective_start_date and ma111.effective_end_date
+            and ma111.is_default ='1'
+            AND ma111.structure_cd = (
+            SELECT admin_structure_cd
+            FROM MA0020
+            WHERE
+            structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = #{storeCd} AND effective_sts = '10' )
+            AND effective_sts = '10')
         GROUP BY
 		    ma3.store_cd,
-		    ma3.store_name
+		    ma3.store_name,
+		    pi3.review_status,ma4200.emp_name
     </select>
 
     <select id="getStocktakeReportItems" parameterType="string"
@@ -224,22 +261,23 @@
             ma2.article_name AS articleName,
             ma2.category_cd AS categoryCd,
             ma3.category_name AS categoryName,
+            ma07.dep_name depName,
             ma4.material_type_name AS materialName,
             ma2.sales_unit_id AS uom,
             pi1.real_time_qty AS inventoryQty,
             pi1.pi_qty AS piQty,
-            ma7.base_sale_price AS baseSalePrice,
+            ma111.base_order_price AS baseSalePrice,
             pi5.bad_qty AS badQty,
             (pi1.pi_qty-pi1.real_time_qty) AS varianceQty,
-            (ma7.base_sale_price*(pi1.pi_qty-pi1.real_time_qty)) AS varianceAmt
+            (ma111.base_order_price*(pi1.pi_qty-pi1.real_time_qty)) AS varianceAmt
         FROM
             pi0125 pi1,
             ma1100 ma2,
             ma0090 ma3,
+            ma0070 ma07,
             ma4140 ma4,
             pi0120 pi5,
-            ma1000 ma6,
-            ma1130 ma7,
+            ma1110 ma111,
             cm9060 cm8
         WHERE
             pi1.pi_cd = #{piCd}
@@ -250,18 +288,25 @@
             AND pi5.store_cd = pi1.store_cd
             AND pi5.article_id = pi1.article_id
             AND ma2.article_id = pi1.article_id
-            /* 不盘点原材料商品 */
-            AND ma2.material_type != '04'
+            AND ma2.inventory_item = '1'
+	        AND ma2.cost_item = '0'
             and ma2.article_id not in
             (select article_id from pi0126)
-            AND ma6.store_cd = #{storeCd}
             AND cm8.sp_id = '0000'
-            AND cm8.sp_value BETWEEN ma6.effective_start_date AND ma6.effective_end_date
             AND cm8.sp_value BETWEEN ma2.effective_start_date AND ma2.effective_end_date
-            AND ma7.structure_cd = ma6.zo_cd
             AND ma2.category_cd = ma3.category_cd
+            and ma3.dep_cd = ma07.dep_cd
             AND ma2.material_type = ma4.material_type_id
-            AND ma7.article_id = pi5.article_id
+            AND ma2.effective_start_date = ma111.effective_start_date
+            AND ma2.article_id = ma111.article_id
+            AND cm8.sp_value BETWEEN ma111.effective_start_date and ma111.effective_end_date
+            and ma111.is_default ='1'
+            AND ma111.structure_cd = (
+            SELECT admin_structure_cd
+            FROM MA0020
+            WHERE
+            structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = #{storeCd} AND effective_sts = '10' )
+            AND effective_sts = '10')
     </select>
 
     <select id="getLastToThisSaleAmt" parameterType="cn.com.bbut.iy.itemmaster.dto.stocktakeProcess.StocktakeReportDTO"
@@ -270,9 +315,16 @@
             sum(sa1.sale_amount)
         FROM
             sa0020 sa1
+            join ma1100 ma1
+						on sa1.article_id = ma1.article_id
+						and to_char(sa1.sale_date,'yyyyMMdd') between ma1.effective_start_date and ma1.effective_end_date
+						and ma1.inventory_item = '1'
+						AND ma1.cost_item = '0'
         WHERE
             sa1.store_cd = #{param.storeCd}
             AND sa1.detail_type = 's'
+            AND sa1.dep_cd in ('01','02')
+            and sa1.article_id not in (select article_id from pi0126)
             AND to_char(sa1.sale_date,'yyyyMMddhh24miss')
             BETWEEN concat(#{param.lastStocktakeDate},#{param.lastEndTime}) AND concat(#{param.thisStocktakeDate},#{param.thisStartTime})
     </select>
@@ -282,9 +334,16 @@
             sum(sa1.sale_amount)
         FROM
             sa0020 sa1
+            join ma1100 ma1
+						on sa1.article_id = ma1.article_id
+						and to_char(sa1.sale_date,'yyyyMMdd') between ma1.effective_start_date and ma1.effective_end_date
+						and ma1.inventory_item = '1'
+						AND ma1.cost_item = '0'
         WHERE
             sa1.store_cd = #{storeCd}
             AND sa1.detail_type = 's'
+            AND sa1.dep_cd in ('01','02')
+            and sa1.article_id not in (select article_id from pi0126)
             AND to_char(sa1.sale_date,'yyyyMMddhh24miss')
 
             BETWEEN
@@ -300,17 +359,15 @@
             pi1.store_cd,
             /*ma3.dep_cd,*/
             SUM(pi2.real_time_qty) bookValQty,
-            SUM(pi2.real_time_qty*ma4.base_sale_price) bookValAmt,
+            SUM(pi2.real_time_qty*ma4.base_order_price) bookValAmt,
             count(pi1.article_id) AS sku, /*sku*/
             sum(pi2.variance_qty) AS qty, /*qty*/
-            sum(pi2.variance_qty*ma4.base_sale_price) AS amt /*amt*/
+            sum(pi2.variance_qty*ma4.base_order_price) AS amt /*amt*/
         FROM
             pi0120 pi1,
             pi0125 pi2,
             ma1100 ma3,
-            ma1130 ma4,
-            (SELECT ma2.admin_structure_cd FROM ma0020 ma2 WHERE ma2.structure_cd =
-            (SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd})) ma5,
+            ma1110 ma4,
             cm9060 cm6
         WHERE
             pi1.pi_cd = #{piCd}
@@ -322,10 +379,23 @@
             AND pi1.store_cd = pi2.store_cd
             AND pi1.article_id = pi2.article_id
             AND ma3.article_id = pi1.article_id
-            AND ma4.article_id = ma3.article_id
-            AND ma4.structure_cd = ma5.admin_structure_cd
-            AND ma4.effective_start_date = ma3.effective_start_date
+            AND ma3.inventory_item = '1'
+            AND ma3.cost_item = '0'
+            AND ma3.article_id NOT IN (
+            SELECT article_id
+            FROM pi0126
+            )
             AND cm6.sp_value BETWEEN ma3.effective_start_date and ma3.effective_end_date
+            AND ma3.effective_start_date = ma4.effective_start_date
+            AND ma3.article_id = ma4.article_id
+            AND cm6.sp_value BETWEEN ma4.effective_start_date and ma4.effective_end_date
+            and ma4.is_default ='1'
+            AND ma4.structure_cd = (
+            SELECT admin_structure_cd
+            FROM MA0020
+            WHERE
+            structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = pi1.store_cd AND effective_sts = '10' )
+            AND effective_sts = '10')
         <if test="flg != null and flg=='LT'">
             AND 0 > pi2.variance_qty
         </if>
@@ -358,7 +428,9 @@
             pi2.pi_cd AS lastStocktakeCd, /*上次盘点cd*/
             pi2.pi_start_time AS lastStartTime, /*上次盘点开始时间*/
             pi2.pi_end_time AS lastEndTime, /*上次盘点结束时间*/
-            date_part('day', cast(pi1.pi_date AS TIMESTAMP)- cast(pi2.pi_date AS TIMESTAMP)) AS day /*距离上次盘点相差的天数*/
+            date_part('day', cast(pi1.pi_date AS TIMESTAMP)- cast(pi2.pi_date AS TIMESTAMP)) AS day, /*距离上次盘点相差的天数*/
+            pi1.export_time as exportTime, /*本次盘点计划第一次导出时间*/
+            pi1.review_status as reviewStatus /*本次盘点审核状态*/
         FROM
             pi0100 pi1
             LEFT JOIN pi0100 pi2 ON pi1.store_cd = pi2.store_cd AND pi2.pi_status = '03'
@@ -389,36 +461,42 @@
         AND pi1.pi_date = pi2.pi_date
         AND pi1.article_id = pi2.article_id,
         ma1100 ma1,
-        ma1130 ma2,
-        ma1000 ma3
+        ma1110 ma111
         WHERE
         pi1.pi_cd = #{piCd}
         AND pi1.pi_date = #{piDate}
         AND pi1.store_cd = #{storeCd}
         AND pi1.article_id = ma1.article_id
-        AND #{businessDate} BETWEEN ma1.effective_start_date AND ma1.effective_end_date
         /* 不盘点原材料商品 */
-        AND ma1.material_type != '04'
+        and ma1.inventory_item = '1'
+        AND ma1.cost_item = '0'
         and ma1.article_id not in
         (select article_id from pi0126)
+        AND #{businessDate} BETWEEN ma1.effective_start_date AND ma1.effective_end_date
+
+        AND ma1.effective_start_date = ma111.effective_start_date
+        AND ma1.article_id = ma111.article_id
+        AND #{businessDate} BETWEEN ma111.effective_start_date and ma111.effective_end_date
+        and ma111.is_default ='1'
+        AND ma111.structure_cd = (
+        SELECT admin_structure_cd
+        FROM MA0020
+        WHERE
+        structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = pi1.store_cd AND effective_sts = '10' )
+        AND effective_sts = '10')
         AND pi1.pi_qty IS NOT NULL
         AND pi1.real_time_qty <![CDATA[<>]]> 0
-        AND pi1.article_id = ma2.article_id
-        AND #{businessDate} BETWEEN ma2.effective_start_date and ma2.effective_end_date
-        AND ma3.store_cd = pi1.store_cd
-        AND ma3.zo_cd = ma2.structure_cd
-        AND #{businessDate} BETWEEN ma3.effective_start_date and ma3.effective_end_date
         <if test="startQty != null">
             AND pi1.variance_qty >= #{startQty}
         </if>
         <if test="endQty != null">
-            AND #{endQty} >= pi1.variance_qty
+            AND #{endQty} >= (pi1.variance_qty)
         </if>
         <if test="startAmt != null">
-            AND (ma2.base_sale_price*pi1.variance_qty) >= #{startAmt}
+            AND (ma111.base_order_price*pi1.variance_qty) >= #{startAmt}
         </if>
         <if test="endAmt != null">
-            AND #{endAmt} >= (ma2.base_sale_price*pi1.variance_qty)
+            AND #{endAmt} >= (ma111.base_order_price*pi1.variance_qty)
         </if>
         <if test="searchVal!=null and searchVal!=''">
             AND (
@@ -452,23 +530,17 @@
         ma0020 ma2
         WHERE
         ma2.structure_cd = ( SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd} )
-        ),
-        ma1130 ma3,
-        ma1000 ma4
+        )
         WHERE
         pi1.pi_cd = #{piCd}
         AND pi1.pi_date = #{piDate}
         AND pi1.store_cd = #{storeCd}
         AND pi1.article_id = ma1.article_id
         /* 不盘点原材料商品 */
-        AND ma1.material_type != '04'
+        and ma1.inventory_item = '1'
+        AND ma1.cost_item = '0'
         and ma1.article_id not in
         (select article_id from pi0126)
-        AND pi1.article_id = ma3.article_id
-        AND #{businessDate} BETWEEN ma3.effective_start_date and ma3.effective_end_date
-        AND ma4.store_cd = pi1.store_cd
-        AND ma4.zo_cd = ma3.structure_cd
-        AND #{businessDate} BETWEEN ma4.effective_start_date AND ma4.effective_end_date
         AND #{businessDate} BETWEEN ma1.effective_start_date AND ma1.effective_end_date
         AND pi1.pi_qty IS NULL
         AND ma22.article_id = ma1.article_id
@@ -480,10 +552,10 @@
             AND #{endQty} >= pi1.variance_qty
         </if>
         <if test="startAmt != null">
-            AND (ma3.base_sale_price*pi1.variance_qty) >= #{startAmt}
+            AND (ma2.base_order_price*pi1.variance_qty) >= #{startAmt}
         </if>
         <if test="endAmt != null">
-            AND #{endAmt} >= (ma3.base_sale_price*pi1.variance_qty)
+            AND #{endAmt} >= (ma2.base_order_price*pi1.variance_qty)
         </if>
         <if test="searchVal!=null and searchVal!=''">
             AND (
@@ -495,31 +567,37 @@
     <select id="getTableData3Count" resultType="int">
         SELECT
         count (pi1.article_id)
-        FROM
+        from
         pi0125 pi1
         LEFT JOIN pi0120 pi2
         ON pi1.store_cd = pi2.store_cd
         AND pi1.pi_cd = pi2.pi_cd
         AND pi1.pi_date = pi2.pi_date
         AND pi1.article_id = pi2.article_id,
-        ma1100 ma1,
-        ma1130 ma2,
-        ma1000 ma3
+        ma1110 ma111,
+        ma1100 ma1
         WHERE
         pi1.pi_cd = #{piCd}
         AND pi1.pi_date = #{piDate}
         AND pi1.store_cd = #{storeCd}
         AND pi1.article_id = ma1.article_id
         /* 不盘点原材料商品 */
-        AND ma1.material_type != '04'
+        and ma1.inventory_item = '1'
+        AND ma1.cost_item = '0'
         and ma1.article_id not in
         (select article_id from pi0126)
-        AND pi1.article_id = ma2.article_id
-        AND #{businessDate} BETWEEN ma2.effective_start_date and ma2.effective_end_date
-        AND ma3.store_cd = pi1.store_cd
-        AND ma3.zo_cd = ma2.structure_cd
-        AND #{businessDate} BETWEEN ma3.effective_start_date AND ma3.effective_end_date
         AND #{businessDate} BETWEEN ma1.effective_start_date AND ma1.effective_end_date
+
+        AND ma1.effective_start_date = ma111.effective_start_date
+        AND ma1.article_id = ma111.article_id
+        AND #{businessDate} BETWEEN ma111.effective_start_date and ma111.effective_end_date
+        and ma111.is_default ='1'
+        AND ma111.structure_cd = (
+        SELECT admin_structure_cd
+        FROM MA0020
+        WHERE
+        structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = #{storeCd} AND effective_sts = '10' )
+        AND effective_sts = '10')
         AND pi1.pi_qty IS NOT NULL
         AND pi1.real_time_qty = 0
         <if test="startQty != null">
@@ -529,10 +607,10 @@
             AND #{endQty} >= pi1.variance_qty
         </if>
         <if test="startAmt != null">
-            AND (ma2.base_sale_price*pi1.variance_qty) >= #{startAmt}
+            AND (ma111.base_order_price*pi1.variance_qty) >= #{startAmt}
         </if>
         <if test="endAmt != null">
-            AND #{endAmt} >= (ma2.base_sale_price*pi1.variance_qty)
+            AND #{endAmt} >= (ma111.base_order_price*pi1.variance_qty)
         </if>
         <if test="searchVal!=null and searchVal!=''">
             AND (
@@ -554,7 +632,7 @@
         pi2.bad_qty,
         pi1.pi_qty AS second_qty,
         pi1.variance_qty AS variance,
-        ma2.base_sale_price
+        ma111.base_order_price base_sale_price
         FROM
         pi0125 pi1
         LEFT JOIN pi0120 pi2
@@ -563,23 +641,29 @@
         AND pi1.pi_date = pi2.pi_date
         AND pi1.article_id = pi2.article_id,
         ma1100 ma1,
-        ma1130 ma2,
-        ma1000 ma3
+        ma1110 ma111
         WHERE
         pi1.pi_cd = #{piCd}
         AND pi1.pi_date = #{piDate}
         AND pi1.store_cd = #{storeCd}
         AND pi1.article_id = ma1.article_id
         /* 不盘点原材料商品 */
-        AND ma1.material_type != '04'
+        and ma1.inventory_item = '1'
+        AND ma1.cost_item = '0'
         and ma1.article_id not in
         (select article_id from pi0126)
-        AND pi1.article_id = ma2.article_id
-        AND #{businessDate} BETWEEN ma2.effective_start_date and ma2.effective_end_date
-        AND ma3.store_cd = pi1.store_cd
-        AND ma3.zo_cd = ma2.structure_cd
-        AND #{businessDate} BETWEEN ma3.effective_start_date AND ma3.effective_end_date
         AND #{businessDate} BETWEEN ma1.effective_start_date AND ma1.effective_end_date
+
+        AND ma1.effective_start_date = ma111.effective_start_date
+        AND ma1.article_id = ma111.article_id
+        AND #{businessDate} BETWEEN ma111.effective_start_date and ma111.effective_end_date
+        and ma111.is_default ='1'
+        AND ma111.structure_cd = (
+        SELECT admin_structure_cd
+        FROM MA0020
+        WHERE
+        structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = pi1.store_cd AND effective_sts = '10' )
+        AND effective_sts = '10')
         AND pi1.pi_qty IS NOT NULL
         AND pi1.real_time_qty <![CDATA[<>]]> 0
         <if test="startQty != null">
@@ -589,10 +673,10 @@
             AND #{endQty} >= (pi1.variance_qty)
         </if>
         <if test="startAmt != null">
-            AND (ma2.base_sale_price*pi1.variance_qty) >= #{startAmt}
+            AND (ma111.base_order_price*pi1.variance_qty) >= #{startAmt}
         </if>
         <if test="endAmt != null">
-            AND #{endAmt} >= (ma2.base_sale_price*pi1.variance_qty)
+            AND #{endAmt} >= (ma111.base_order_price*pi1.variance_qty)
         </if>
         <if test="searchVal!=null and searchVal!=''">
             AND (
@@ -605,7 +689,7 @@
             <when test="sidx != null and sidx != ''">
                 <choose>
                     <when test="sidx == 'base_sale_price'">
-                        (ma2.base_sale_price * pi1.variance_qty) ${sord}
+                        (ma111.base_order_price * pi1.variance_qty) ${sord}
                     </when>
                     <otherwise>
                         ${sidx} ${sord}
@@ -631,7 +715,7 @@
         pi2.bad_qty,
         pi1.pi_qty AS second_qty,
         pi1.variance_qty AS variance,
-        ma3.base_sale_price
+        ma2.base_order_price base_sale_price
         FROM
         pi0125 pi1
         LEFT JOIN pi0120 pi2
@@ -653,23 +737,17 @@
         ma0020 ma2
         WHERE
         ma2.structure_cd = ( SELECT ma1.admin_structure_cd FROM ma0020 ma1 WHERE ma1.structure_cd = #{storeCd} )
-        ),
-        ma1130 ma3,
-        ma1000 ma4
+        )
         WHERE
         pi1.pi_cd = #{piCd}
         AND pi1.pi_date = #{piDate}
         AND pi1.store_cd = #{storeCd}
         AND pi1.article_id = ma1.article_id
         /* 不盘点原材料商品 */
-        AND ma1.material_type != '04'
+        and ma1.inventory_item = '1'
+        AND ma1.cost_item = '0'
         and ma1.article_id not in
         (select article_id from pi0126)
-        AND pi1.article_id = ma3.article_id
-        AND #{businessDate} BETWEEN ma3.effective_start_date and ma3.effective_end_date
-        AND ma4.store_cd = pi1.store_cd
-        AND ma4.zo_cd = ma3.structure_cd
-        AND #{businessDate} BETWEEN ma4.effective_start_date AND ma4.effective_end_date
         AND #{businessDate} BETWEEN ma1.effective_start_date AND ma1.effective_end_date
         AND pi1.pi_qty IS NULL
         AND ma22.article_id = ma1.article_id
@@ -681,10 +759,10 @@
             AND #{endQty} >= pi1.variance_qty
         </if>
         <if test="startAmt != null">
-            AND (ma3.base_sale_price*pi1.variance_qty) >= #{startAmt}
+            AND (ma2.base_order_price*pi1.variance_qty) >= #{startAmt}
         </if>
         <if test="endAmt != null">
-            AND #{endAmt} >= (ma3.base_sale_price*pi1.variance_qty)
+            AND #{endAmt} >= (ma2.base_order_price*pi1.variance_qty)
         </if>
         <if test="searchVal!=null and searchVal!=''">
             AND (
@@ -707,7 +785,7 @@
         pi2.bad_qty,
         pi1.pi_qty AS second_qty,
         pi1.variance_qty AS variance,
-        ma2.base_sale_price
+        ma111.base_order_price base_sale_price
         FROM
         pi0125 pi1
         LEFT JOIN pi0120 pi2
@@ -715,24 +793,30 @@
         AND pi1.pi_cd = pi2.pi_cd
         AND pi1.pi_date = pi2.pi_date
         AND pi1.article_id = pi2.article_id,
-        ma1100 ma1,
-        ma1130 ma2,
-        ma1000 ma3
+        ma1110 ma111,
+        ma1100 ma1
         WHERE
         pi1.pi_cd = #{piCd}
         AND pi1.pi_date = #{piDate}
         AND pi1.store_cd = #{storeCd}
         AND pi1.article_id = ma1.article_id
         /* 不盘点原材料商品 */
-        AND ma1.material_type != '04'
+        and ma1.inventory_item = '1'
+        AND ma1.cost_item = '0'
         and ma1.article_id not in
         (select article_id from pi0126)
-        AND pi1.article_id = ma2.article_id
-        AND #{businessDate} BETWEEN ma2.effective_start_date and ma2.effective_end_date
-        AND ma3.store_cd = pi1.store_cd
-        AND ma3.zo_cd = ma2.structure_cd
-        AND #{businessDate} BETWEEN ma3.effective_start_date AND ma3.effective_end_date
         AND #{businessDate} BETWEEN ma1.effective_start_date AND ma1.effective_end_date
+
+        AND ma1.effective_start_date = ma111.effective_start_date
+        AND ma1.article_id = ma111.article_id
+        AND #{businessDate} BETWEEN ma111.effective_start_date and ma111.effective_end_date
+        and ma111.is_default ='1'
+        AND ma111.structure_cd = (
+        SELECT admin_structure_cd
+        FROM MA0020
+        WHERE
+        structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = #{storeCd} AND effective_sts = '10' )
+        AND effective_sts = '10')
         AND pi1.pi_qty IS NOT NULL
         AND pi1.real_time_qty = 0
         <if test="startQty != null">
@@ -742,10 +826,10 @@
             AND #{endQty} >= pi1.variance_qty
         </if>
         <if test="startAmt != null">
-            AND (ma2.base_sale_price*pi1.variance_qty) >= #{startAmt}
+            AND (ma111.base_order_price*pi1.variance_qty) >= #{startAmt}
         </if>
         <if test="endAmt != null">
-            AND #{endAmt} >= (ma2.base_sale_price*pi1.variance_qty)
+            AND #{endAmt} >= (ma111.base_order_price*pi1.variance_qty)
         </if>
         <if test="searchVal!=null and searchVal!=''">
             AND (
@@ -758,7 +842,7 @@
             <when test="sidx != null and sidx != ''">
                 <choose>
                     <when test="sidx == 'base_sale_price'">
-                        (ma2.base_sale_price * pi1.variance_qty) ${sord}
+                        (ma111.base_order_price * pi1.variance_qty) ${sord}
                     </when>
                     <otherwise>
                         ${sidx} ${sord}

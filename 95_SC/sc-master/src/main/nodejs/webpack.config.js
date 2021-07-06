@@ -56,7 +56,7 @@ module.exports = {
         orderNewStoreEdit: './js/order_newStore/orderNewStoreEdit-1.0.js',
         stockAdjustment: './js/stock_adjustment/stockAdjustment-1.0.js',
         stockAdjustmentEdit: './js/stock_adjustment/stockAdjustmentEdit-1.0.js',
-		orderDetails: './js/order_details/orderDetails-1.0.js',
+        orderDetails: './js/order_details/orderDetails-1.0.js',
         orderDetailsEdit: './js/order_details/orderDetailsEdit-1.0.js',
         orderDcEdit: './js/order_dc_urgent/orderDcEdit-1.0.js',
         storeTransfers:'./js/store_transfers_out/storeTransfers-1.0.js',
@@ -111,7 +111,7 @@ module.exports = {
         operationExpress:'./js/information/express/express-1.0.js',
         cashierDetail:'./js/cashierDetail/cashierDetail-1.0.js',
         saleReconciliation:'./js/saleReconciliation/saleReconciliation-1.0.js',
-		rrModifyQuery:'./js/rr_modify_query/rrModifyQuery-1.0.js',
+        rrModifyQuery:'./js/rr_modify_query/rrModifyQuery-1.0.js',
         rrModifyEdit:'./js/rr_modify_query/rrModifyEdit-1.0.js',
         rrVoucherQuery:'./js/rr_voucher_query/rrVoucherQuery-1.0.js',
         rrVoucherQueryPrint:'./js/rr_voucher_query/rrVoucherQueryPrint-1.0.js',
@@ -220,6 +220,9 @@ module.exports = {
         // NoServiceReport:'./js/customer_noservice/NoServiceReport-1.0.js',
         yearPromotionReport:'./js/yearPromotion/yearPromotionReport-1.0.js',
         hhreportSummy:'./js/hhreportSummy/hhreportSummy-1.0.js',
+        orderHHt:'./js/hhtorder/hhtorder-1.0.js',
+        remoteUpdate:'./js/remoteUpdate/remoteUpdate-1.0.js',
+        remoteUpdateEdit:'./js/remoteUpdate/remoteUpdateEdit-1.0.js',
         clearInventory:'./js/clear_stock/clearInventory-1.0.js',
     },
     output: {
@@ -286,6 +289,7 @@ module.exports = {
             // 'bootstrap-table-zh-CN': path.join(srcPath, './lib/bootstrap/bootstrap-table-zh-CN.js'),
             'jqprint': path.join(srcPath, './lib/jquery.jqprint-1.6.js'),
             'checkboxGrid': path.join(srcPath, './js/base/zgGrid.js'),
+            'checkboxInPage': path.join(srcPath, './lib/checkboxInPage.js'),
             //图表
             'echarts': path.join(srcPath, './lib/echarts.min.js'),
             'validator': path.join(__dirname, "node_modules/bootstrap-validator/dist/validator.min.js"),
@@ -293,6 +297,7 @@ module.exports = {
             'math': path.join(srcPath, './lib/math.min.js'),
             'select2': path.join(srcPath, './lib/select2.js'),
             'JsBarcode': path.join(srcPath, './lib/JsBarcode.all.js'),
+            'qrcode': path.join(srcPath, './lib/jquery.qrcode.min.js'),
             //css
             "bootstrap.css": path.join(srcPath, '../node_modules/bootstrap/dist/css/bootstrap.css'),
             "bootstrapValidator.css": path.join(srcPath, '/css/bootstrapValidator.min.css'),

@@ -24,6 +24,7 @@
       <result column="nr_update_flg" jdbcType="CHAR" property="nrUpdateFlg" />
       <result column="nr_ymd" jdbcType="CHAR" property="nrYmd" />
       <result column="nr_hms" jdbcType="CHAR" property="nrHms" />
+      <result column="deposit_date" jdbcType="VARCHAR" property="depositDate" />
     </resultMap>
 
     <resultMap id="BaseResultMap1" type="cn.com.bbut.iy.itemmaster.dto.op0060.OP0060GridDto">
@@ -34,6 +35,7 @@
       <id column="acc_date" jdbcType="VARCHAR" property="accDate" />
       <id column="store_cd" jdbcType="VARCHAR" property="storeCd" />
       <id column="delta_no" jdbcType="BIGINT" property="deltaNo" />
+      <result column="deposit_date" jdbcType="VARCHAR" property="depositDate" />
       <result column="store_name" jdbcType="VARCHAR" property="storeName" />
       <result column="pay_person" jdbcType="VARCHAR" property="payPerson" />
       <result column="description" jdbcType="VARCHAR" property="description" />
@@ -131,7 +133,7 @@
       -->
       acc_date, store_cd, delta_no, pay_person, description, pay_amt, record_sts, create_user_id,
       create_ymd, create_hms, update_user_id, update_ymd, update_hms, update_screen_id,
-      update_ip_address, nr_update_flg, nr_ymd, nr_hms
+      update_ip_address, nr_update_flg, nr_ymd, nr_hms, deposit_date
     </sql>
     <select id="selectByExample" parameterType="cn.com.bbut.iy.itemmaster.entity.op0060.OP0060Example" resultMap="BaseResultMap">
       <!--
@@ -158,7 +160,7 @@
       </if>
     </select>
     <select id="getList" parameterType="cn.com.bbut.iy.itemmaster.dto.op0060.OP0060ParamDto" resultMap="BaseResultMap1">
-      select acc_date, op0060.store_cd,store_name, delta_no, pay_person, description, pay_amt, record_sts,	MA1000.ofc,
+      select acc_date,op0060.deposit_date, op0060.store_cd,store_name, delta_no, pay_person, description, pay_amt, record_sts,	MA1000.ofc,
       t_operator.c_operatorname ofc_name,
       MA1000.om,
       a.c_operatorname om_name,
@@ -292,13 +294,13 @@
       record_sts, create_user_id, create_ymd,
       create_hms, update_user_id, update_ymd,
       update_hms, update_screen_id, update_ip_address,
-      nr_update_flg, nr_ymd, nr_hms)
+      nr_update_flg, nr_ymd, nr_hms,deposit_date)
       values (#{accDate,jdbcType=VARCHAR}, #{storeCd,jdbcType=VARCHAR}, #{deltaNo,jdbcType=BIGINT},
       #{payPerson,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, #{payAmt,jdbcType=NUMERIC},
       #{recordSts,jdbcType=VARCHAR}, #{createUserId,jdbcType=CHAR}, #{createYmd,jdbcType=CHAR},
       #{createHms,jdbcType=CHAR}, #{updateUserId,jdbcType=CHAR}, #{updateYmd,jdbcType=CHAR},
       #{updateHms,jdbcType=CHAR}, #{updateScreenId,jdbcType=VARCHAR}, #{updateIpAddress,jdbcType=VARCHAR},
-      #{nrUpdateFlg,jdbcType=CHAR}, #{nrYmd,jdbcType=CHAR}, #{nrHms,jdbcType=CHAR})
+      #{nrUpdateFlg,jdbcType=CHAR}, #{nrYmd,jdbcType=CHAR}, #{nrHms,jdbcType=CHAR}),#{depositDate,jdbcType=VARCHAR}
     </insert>
     <insert id="insertSelective" parameterType="cn.com.bbut.iy.itemmaster.entity.op0060.OP0060">
       <!--
@@ -309,6 +311,9 @@
       <trim prefix="(" suffix=")" suffixOverrides=",">
         <if test="accDate != null">
           acc_date,
+        </if>
+        <if test="depositDate != null">
+          deposit_date,
         </if>
         <if test="storeCd != null">
           store_cd,
@@ -365,6 +370,9 @@
       <trim prefix="values (" suffix=")" suffixOverrides=",">
         <if test="accDate != null">
           #{accDate,jdbcType=VARCHAR},
+        </if>
+        <if test="depositDate != null">
+          #{depositDate,jdbcType=VARCHAR},
         </if>
         <if test="storeCd != null">
           #{storeCd,jdbcType=VARCHAR},
@@ -439,6 +447,9 @@
         <if test="record.accDate != null">
           acc_date = #{record.accDate,jdbcType=VARCHAR},
         </if>
+        <if test="record.depositDate != null">
+          deposit_date = #{depositDate,jdbcType=VARCHAR},
+        </if>
         <if test="record.storeCd != null">
           store_cd = #{record.storeCd,jdbcType=VARCHAR},
         </if>
@@ -502,6 +513,7 @@
       -->
       update op0060
       set acc_date = #{record.accDate,jdbcType=VARCHAR},
+      deposit_date = #{depositDate,jdbcType=VARCHAR},
       store_cd = #{record.storeCd,jdbcType=VARCHAR},
       delta_no = #{record.deltaNo,jdbcType=BIGINT},
       pay_person = #{record.payPerson,jdbcType=VARCHAR},
@@ -530,6 +542,9 @@
       -->
       update op0060
       <set>
+        <if test="accDate != null">
+          acc_date = #{accDate,jdbcType=VARCHAR},
+        </if>
         <if test="payPerson != null">
           pay_person = #{payPerson,jdbcType=VARCHAR},
         </if>
@@ -575,9 +590,12 @@
         <if test="nrHms != null">
           nr_hms = #{nrHms,jdbcType=CHAR},
         </if>
+        <if test="depositDate != null">
+          deposit_date = #{depositDate,jdbcType=VARCHAR},
+        </if>
       </set>
-      where acc_date = #{accDate,jdbcType=VARCHAR}
-      and store_cd = #{storeCd,jdbcType=VARCHAR}
+      where
+      store_cd = #{storeCd,jdbcType=VARCHAR}
       and delta_no = #{deltaNo,jdbcType=BIGINT}
     </update>
     <update id="updateByPrimaryKey" parameterType="cn.com.bbut.iy.itemmaster.entity.op0060.OP0060">
@@ -589,6 +607,7 @@
       set pay_person = #{payPerson,jdbcType=VARCHAR},
       description = #{description,jdbcType=VARCHAR},
       pay_amt = #{payAmt,jdbcType=NUMERIC},
+      deposit_date = #{depositDate,jdbcType=VARCHAR},
       record_sts = #{recordSts,jdbcType=VARCHAR},
       create_user_id = #{createUserId,jdbcType=CHAR},
       create_ymd = #{createYmd,jdbcType=CHAR},
@@ -612,4 +631,13 @@
       -->
       select FOUND_ROWS()
     </select>
+    <select id="searhSameDayInsert" resultType="java.lang.Integer">
+      select  count(1)  from op0060
+      where 1=1
+      AND op0060.store_cd=#{param.storeCd}
+      AND op0060.acc_date=#{param.businessDate}
+    </select>
+
+
+
   </mapper>

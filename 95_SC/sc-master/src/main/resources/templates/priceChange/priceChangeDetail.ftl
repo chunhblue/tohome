@@ -187,5 +187,8 @@
 	 </div>
 	<!--页脚-->
 	[@common.footer][/@common.footer]
+<input type="hidden" id="toKen" value="${toKen!}"/>
+<input type="hidden" id="typeId" value="${typeId!}">
+<input type="hidden" id="reviewId" value="${reviewId!}">
 </body>
 </html>

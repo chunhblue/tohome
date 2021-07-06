@@ -1,5 +1,6 @@
 package cn.com.bbut.iy.itemmaster.schedule;
 
+import cn.com.bbut.iy.itemmaster.service.SequenceService;
 import cn.com.bbut.iy.itemmaster.service.operatorLog.OperatorLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -22,6 +23,8 @@ public class ScheduleTask {
     private IymActorAssignmentService aaService;
 //    @Autowired
 //    private OperatorLogService operatorLogService;
+    @Autowired
+    private SequenceService sequenceService;
 
     @Async
     @Scheduled(cron = "0 0 1 * * ?")
@@ -29,6 +32,14 @@ public class ScheduleTask {
         log.debug("定时清除超期的代审授权信息开始......");
         aaService.updateReviewRoleStatus(TimeUtil.getDate());
         log.debug("定时清除超期的代审授权信息结束......");
+    }
+
+    @Async
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void resetSeq() {
+        log.debug("定时重置序列开始......");
+        sequenceService.updateResetSeqSeq("od0000_order_id_v_seq");
+        log.debug("定时重置序列结束......");
     }
 
 //    @Async

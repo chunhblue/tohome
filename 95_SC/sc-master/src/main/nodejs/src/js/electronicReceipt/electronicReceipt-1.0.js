@@ -4,6 +4,8 @@ require("bootstrap-datetimepicker.css");
 require("zgGrid");
 require("myAutomatic");
 var _datetimepicker = require("datetimepicker");
+require("JsBarcode");
+require("qrcode");
 
 var _myAjax = require("myAjax");
 define('electronicReceipt', function () {
@@ -12,6 +14,7 @@ define('electronicReceipt', function () {
         url_root = "",
         paramGrid = null,
         selectTrTemp = null,
+        itemInfo = null,
         tempTrObjValue = {},//临时行数据存储
         bmCodeOrItem = 0,//0 bmCode 1：item
         common = null;
@@ -27,15 +30,17 @@ define('electronicReceipt', function () {
         aDistrict: null,
         aStore: null,
         hidStore: null,
-        saleStartDate: null,
+        saleDate: null,
         saleEndDate: null,
         posNo: null,
         saleNo: null,
+        sapSaleNo: null,
         keywords: null,
         keywordTemp: null,
         _startIndex: null,
         _oldContent: null,
         transSaleNo: null,
+        billSaleNo: null,
         tranType: null,
         receiptType: null,
         // 按钮
@@ -55,14 +60,13 @@ define('electronicReceipt', function () {
         createJqueryObj();
         url_root = _common.config.surl;
         url_left = url_root + "/electronicReceipt";
+        initAutoMatic();
         // 按钮事件绑定
         but_event();
 
         // 初始化店铺运营组织检索
         initOrganization();
-        initAutoMatic();
-        // 初始化检索日期
-        _common.initDate(m.saleStartDate, m.saleEndDate);
+
     }
 
     var initOrganization = function () {
@@ -251,27 +255,25 @@ define('electronicReceipt', function () {
     }
     // 根据商店CD 获取小票类型
     var initAutoMatic = function () {
-        /*receiptType = $("#receiptType").myAutomatic({
-            url: url_left + "/getReceiptType",
-            ePageSize: 5,
-            startCount: 0,
-            param: [
-                {
-                    'k': 'storeCd',
-                    'v': 'hidStore'
+        var businessDate = $("#businessDate").val();
+        if(businessDate!=null&&businessDate!==''){
+            businessDate = fmtIntDate(businessDate);
+            m.saleDate.val(businessDate);
+        }
 
-                }, {
-                    'k': 'posId',
-                    'v': 'posNo'
-                }, {
-                    'k': 'startDate',
-                    'v': 'saleStartDate'
-                }, {
-                    'k': 'endDate',
-                    'v': 'saleEndDate'
-                },
-            ],
-        })*/
+        var busiDate = fmtDate(fmtIntDate($("#businessDate").val()));
+        let sMdate = new Date(new Date(busiDate).getTime()-24*60*60*1000);
+
+        m.saleDate.datetimepicker({
+            language:'en',
+            format: 'dd/mm/yyyy',
+            maxView: 4,
+            startView: 2,
+            minView: 2,
+            autoclose: true,
+            todayHighlight: true,
+            todayBtn: true
+        });
 
         itemInfo = $("#itemInfo").myAutomatic({
             url: url_left + "/getSa0020Item",
@@ -286,12 +288,8 @@ define('electronicReceipt', function () {
                     'v': 'posNo'
                 },
                 {
-                    'k': 'startDate',
-                    'v': 'saleStartDate'
-                },
-                {
-                    'k': 'endDate',
-                    'v': 'saleEndDate'
+                    'k': 'saleDate',
+                    'v': 'saleDate'
                 }
             ]
         });
@@ -327,10 +325,63 @@ define('electronicReceipt', function () {
                             var _result = "";
                             var _list = result.o;
                             for (var i = 0; i < _list.length; i++) {
+                                var sapSaleNo = _list[i].tranSerialNo;
+                                var billSaleNo = _list[i].billno;
+                                var transId = _list[i].transId;
+                                $("#receipts").append(getFontBy("SAP Receipt No:"+isEmpty(sapSaleNo)));
+                                $("#receipts").append(getFontBy("SAP Bill No:"+isEmpty(billSaleNo)+isEmpty(transId)));
                                 var temp = _list[i].receiptContent;
-                                _result = _result + "<pre>" + temp + "</pre>";
+                                let logoPath = $("#logoPath").val();
+                                let logo = '<div style="text-align: center;">' +
+                                    '<img id="nriImage" style="width: 220px;height:80px;text-align: center " src="'+logoPath+'" /></div>';
+                                $("#receipts").append(logo);
+                                temp = temp.split("$LOGO")[1];
+                                var arrs = [];
+                                if(temp){
+                                    arrs = temp.split("\n");
+                                }
+                                for(let n=0;n<arrs.length;n++){
+                                    if((arrs[n]).indexOf("$ExtraInfo")!==-1 || (arrs[n]).indexOf("$CUT_PAPER")!==-1){
+                                        arrs[n] = "";
+                                    }
+                                    if((arrs[n]).indexOf("$ReceiptBarcode")!==-1 && arrs[n+1]!=null && arrs[n+1]!==""){
+                                        arrs[n] = "";
+                                       let barcode = '<div style="text-align: center;">' +
+                                            '<img id="'+(arrs[n+1])+'" /></div>';
+                                        $(".receipt").append(barcode);
+                                        $('#'+(arrs[n+1] )).JsBarcode(arrs[n+1],{
+                                            text:arrs[n+1],
+                                            width: 2,
+                                            height: 60,
+                                            displayValue: true,
+                                            fontOptions: 'bold',
+                                            fontSize: 10,
+                                        });
+                                        arrs[n+1] = "";
+                                        continue;
+                                    }
+                                    if((arrs[n]).indexOf("$QRCode")!==-1 && arrs[n+1]!=null && arrs[n+1]!==""){
+                                        arrs[n] = "";
+                                        let qrcode = '<div style="text-align: center;">' +
+                                            '<img id="'+(arrs[n+1])+'" /></div>';
+                                        $('#'+arrs[n+1]).qrcode({
+                                            text: utf16to8(arrs[n+1]),
+                                            render: "table",
+                                            width: 60,
+                                            height: 60,
+                                            typeNumber:-1,//计算模式
+                                            correctLevel:2,//二维码纠错级别 0~3
+                                            background:"#ffffff",//背景颜色
+                                            foreground:"#000000"  //二维码颜色
+                                        });
+                                        $(".receipt").append(qrcode);
+                                        arrs[n+1] = "";
+                                        continue;
+                                    }
+                                    _result = getFontBy(arrs[n]);
+                                    $("#receipts").append(_result);
+                                }
                             }
-                            $("#receipts").html(_result);
                             // 重置关键字检索记录参数
                             m.keywordTemp.val("");
                             m._startIndex.val("0");
@@ -352,11 +403,12 @@ define('electronicReceipt', function () {
                     $("#receiptRemove").click();
                     $("#itemInfoRemove").click();
                     $("#regionRemove").click();
-                    m.saleStartDate.val("");
-                    m.saleEndDate.val("");
+                    m.saleDate.val("");
                     m.posNo.val("");
                     m.saleNo.val("");
+                    m.sapSaleNo.val("");
                     m.tranType.val("");
+                    m.sapSaleNo.css("bold-color","#CCC");
                     //$("#receipts").remove();
                     var _temp = m._oldContent.val("");
                     $("#receipts").html(_temp);
@@ -459,6 +511,88 @@ define('electronicReceipt', function () {
         });
     };
 
+    var getFontBy = function (cont) {
+        //设置字体
+        let p = "";
+        if(cont.indexOf("{Center;Bold}") !== -1){
+            cont=cont.replace("{Center;Bold}", "");
+            p = '<div class="content">' +
+                '<h5 style="text-align: center;font-weight: bold;">'+cont+'</h5>' +
+                '</div>';
+        }else if(cont.indexOf("{Bold;Center}") !== -1){
+            cont = cont.replace("{Bold;Center}","");
+            p = '<div class="content">' +
+                '<h5 style="text-align: center;font-weight: bold;">'+cont+'</h5>' +
+                '</div>';
+        }else if(cont.indexOf("{Center}") !== -1){
+            cont=cont.replace("{Center}","");
+            p = '<div class="content">' +
+                '<h5 style="text-align: center;">'+cont+'</h5>' +
+                '</div>';
+        }else if(cont.indexOf("{Bold}") !== -1){
+            cont=cont.replace("{Bold}","");
+            p = '<div class="content">' +
+                '<h5 style="font-weight: bold;">'+cont+'</h5>' +
+                '</div>';
+        }else if(cont.indexOf("{Bold;Right}") !== -1){
+            cont=cont.replace("{Bold;Right}","");
+            p = '<div class="content">' +
+                '<h5 style="text-align: right;font-weight: bold;">'+cont+'</h5>' +
+                '</div>';
+        }else if(cont.indexOf("{Right}") !== -1){
+            cont=cont.replace("{Right}","");
+            p = '<div class="content">' +
+                '<h5 style="text-align: right;">'+cont+'</h5>' +
+                '</div>';
+        }else if(cont.indexOf("{Right;Bold;Height}") !== -1){
+            cont=cont.replace("{Right;Bold;Height}","");
+            p = '<div class="content">' +
+                '<h5 style="text-align: right;font-weight: bold;">'+cont+'</h5>' +
+                '</div>';;
+        }else if(cont.indexOf("{Right;Bold}") !== -1){
+            cont = cont.replace("{Right;Bold}","");
+            p = '<div class="content">' +
+                '<h5 style="text-align: right;font-weight: bold;">'+cont+'</h5>' +
+                '</div>';
+        }else if(cont.indexOf("-------") !== -1){
+            cont = cont.replace("-------","------------------");
+            // cont.substring(0,62);
+            p = '<div class="content">' +
+                '<h5 style="">'+cont+'</h5>' +
+                '</div>';
+        }else if(cont.indexOf("=======") !== -1){
+            p = '<div class="content">' +
+                '<h5 style="">'+cont+'</h5>' +
+                '</div>';
+        }else {
+            p = '<div class="content">' +
+                '<h5 style="">'+cont+'</h5>' +
+                '</div>';
+        }
+        return p;
+    };
+
+    //中文编码格式转换
+    function utf16to8(str) {
+        var out, i, len, c;
+        out = "";
+        len = str.length;
+        for (i = 0; i < len; i++) {
+            c = str.charCodeAt(i);
+            if ((c >= 0x0001) && (c <= 0x007F)) {
+                out += str.charAt(i);
+            } else if (c > 0x07FF) {
+                out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+            } else {
+                out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+            }
+        }
+        return out;
+    }
+
     //获取pos机号下拉
     var getSelectPosId = function (storeCd) {
         if (storeCd != null && storeCd != '') {
@@ -495,16 +629,20 @@ define('electronicReceipt', function () {
     // 验证检索项是否合法
     var verifySearch = function () {
         let _StartDate = null;
-        if (!$("#saleStartDate").val()) {
-            _common.prompt("Please select a start date!", 3, "info");/*请选择开始日期*/
-            $("#saleStartDate").focus();
+        if (!$("#saleDate").val()) {
+            _common.prompt("Please select a Sales Date!", 3, "info");/*请选择开始日期*/
+            $("#saleDate").focus();
+            $("#saleDate").css("border-color", "red");
             return false;
         } else {
-            _StartDate = new Date(fmtDate($("#saleStartDate").val())).getTime();
-            if (judgeNaN(_StartDate)) {
+            _StartDate = new Date(fmtDate($("#saleDate").val())).getTime();
+            if (_common.judgeValidDate($("#saleDate").val())) {
                 _common.prompt("Please enter a valid date!", 3, "info");
-                $("#saleStartDate").focus();
+                $("#saleDate").focus();
+                $("#saleDate").css("border-color", "red");
                 return false;
+            }else {
+                $("#saleDate").css("border-color", "#CCC");
             }
         }
 
@@ -514,36 +652,17 @@ define('electronicReceipt', function () {
             return false;
         }
 
-        if (m.saleNo.val() === null || m.saleNo.val() === '') {
-            _common.prompt("Please enter the receipt no!", 3, "info");
+        if ((m.saleNo.val() === null || m.saleNo.val() === '')
+        && (m.sapSaleNo.val() === null || m.sapSaleNo.val() === '')
+            && ($("#itemInfo").attr('k') == null || $("#itemInfo").attr('k') === '')) {
+            _common.prompt("Please enter receipt no, SAP Receipt No or Item Name!", 3, "info");
             m.saleNo.focus();
+            m.saleNo.css("bold-color","red");
             return false;
+        }else {
+            m.saleNo.css("bold-color","#CCC");
         }
 
-        let _EndDate = null;
-        if (!$("#saleEndDate").val()) {
-            _common.prompt("Please select a end date!", 3, "info");/*请选择结束日期*/
-            $("#saleEndDate").focus();
-            return false;
-        } else {
-            _EndDate = new Date(fmtDate($("#saleEndDate").val())).getTime();
-            if (judgeNaN(_EndDate)) {
-                _common.prompt("Please enter a valid date!", 3, "info");
-                $("#saleEndDate").focus();
-                return false;
-            }
-        }
-        if (_StartDate > _EndDate) {
-            $("#saleEndDate").focus();
-            _common.prompt("The start date cannot be greater than the end date!", 3, "info");/*开始时间不能大于结束时间*/
-            return false;
-        }
-        let difValue = parseInt(Math.abs((_EndDate - _StartDate) / (1000 * 3600 * 24)));
-        if (difValue > 62) {
-            _common.prompt("Query Period cannot exceed 62 days!", 3, "info"); // 日期期间取值范围不能大于62天
-            $("#saleEndDate").focus();
-            return false;
-        }
         let reg = /^[0-9]*$/;
         /*let temp = m.posNo.val();
         if(temp!=null && $.trim(temp)!='' && !reg.test(temp)){
@@ -551,11 +670,14 @@ define('electronicReceipt', function () {
             _common.prompt("The POS number must be a pure number!",3,"info"); // POS机号必须是纯数字
             return false;
         }*/
-        let temp = m.saleNo.val();
-        if (temp != null && $.trim(temp) != '' && !reg.test(temp)) {
-            m.saleNo.focus();
-            _common.prompt("The sales sequence must be a pure number!", 3, "info"); // 销售序号必须是纯数字
+        let temp = m.sapSaleNo.val();
+        if (temp != null && $.trim(temp) !== '' && !reg.test(temp)) {
+            m.sapSaleNo.focus();
+            _common.prompt("The SAP Receipt No must be a pure number!", 3, "info"); // 销售序号必须是纯数字
+            m.sapSaleNo.css("bold-color","red");
             return false;
+        }else {
+            m.sapSaleNo.css("bold-color","#CCC");
         }
         return true;
     }
@@ -563,22 +685,23 @@ define('electronicReceipt', function () {
     // 拼接检索参数
     var setParamJson = function () {
         // 日期格式转换
-        var _startDate = fmtStringDate(m.saleStartDate.val()) || null;
-        var _endDate = fmtStringDate(m.saleEndDate.val()) || null;
-        var _no = m.saleNo.val().trim() || 0;
+        var _startDate = fmtStringDate(m.saleDate.val()) || null;
+        var _no = m.saleNo.val().trim();
+        var _sapno = m.sapSaleNo.val().trim() || 0;
         // 创建请求字符串
         var searchJsonStr = {
-            articleId: $("#ItemInfo").attr("k"),
+            articleId: $("#itemInfo").attr("v"),
             // tranType: $("#receiptType").attr("v"),
             tranType: $("#receiptType").val(),
             regionCd: $("#aRegion").attr("k"),
             cityCd: $("#aCity").attr("k"),
             districtCd: $("#aDistrict").attr("k"),
             storeCd: $("#aStore").attr("k"),
-            saleStartDate: _startDate,
-            saleEndDate: _endDate,
+            saleDate: _startDate,
             posNo: m.posNo.val().trim(),
-            saleNo: _no
+            billSaleNo: $("#billSaleNo").val(),
+            tranSerialNo: _sapno,
+            saleNo: letterToNumber(_no)
         };
         m.searchJson.val(JSON.stringify(searchJsonStr));
     }
@@ -609,6 +732,59 @@ define('electronicReceipt', function () {
         var res = "";
         res = strDate.replace(/-/g, "");
         return res;
+    }
+    var isEmpty = function (str) {
+        if (str == null || str === '') {
+            return '';
+        }
+        return str;
+    };
+
+    function letterToNumber(str) {
+        if(str == null || str === ""){
+            return "";
+        }
+        str = str.toUpperCase().split("");
+        var al = str.length;
+        var numout = '';
+        for (var i = 0; i < al; i++) {
+            switch (str[i]) {
+                case 'Q'||'q':
+                    numout+='1';
+                    break;
+                case 'W'||'w':
+                    numout+='2';
+                    break;
+                case 'E'||'e':
+                    numout+='3';
+                    break;
+                case 'R'||'r':
+                    numout+='4';
+                    break;
+                case 'T'||'t':
+                    numout+='5';
+                    break;
+                case 'Y'||'y':
+                    numout+='6';
+                    break;
+                case 'U'||'u':
+                    numout+='7';
+                    break;
+                case 'I'||'i':
+                    numout+='8';
+                    break;
+                case 'O'||'o':
+                    numout+='9';
+                    break;
+                case 'P'||'p':
+                    numout+='0';
+                    break;
+                default:
+                    numout+=str[i];
+                    break;
+            }
+        }
+        return numout;
     }
 
     self.init = init;

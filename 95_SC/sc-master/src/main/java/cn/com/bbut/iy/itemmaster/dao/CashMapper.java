@@ -2,6 +2,7 @@ package cn.com.bbut.iy.itemmaster.dao;
 
 import cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO;
 import cn.com.bbut.iy.itemmaster.dto.cash.CashDetail;
+import cn.com.bbut.iy.itemmaster.dto.cash.CashDetailParam;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -13,12 +14,14 @@ import java.util.List;
 @Mapper
 @Component
 public interface CashMapper {
-    List<CashDetail> getCashDetailyList(@Param("stores")List<String> stores,@Param("vStartDate")String vStartDate,
+    List<CashDetail> getCashDetailyList(CashDetailParam dto);
+
+    int getCashDetailycount(@Param("stores")List<String> stores,@Param("vStartDate")String vStartDate,
                                         @Param("vEndDate")String vEndDate,@Param("am")String am);
 
     int getCustomerQty(@Param("payDate")String payDate,@Param("storeCd")String storeCd);
 
-    CashDetail getPayAmt(@Param("payDate")String payDate,@Param("storeCd")String storeCd);
+    CashDetail getPayAmt(@Param("payDate")String payDate,@Param("storeCd")String storeCd,@Param("voucherDate")String voucherDate);
 
     /**
      * 获取营业员一览

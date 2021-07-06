@@ -26,6 +26,7 @@ define('receiptEdit', function () {
     var dataForm = [];
     var m = {
         toKen: null,
+        businessDate: null,
         use: null,
         up: null,
         error_pcode: null,
@@ -515,10 +516,13 @@ define('receiptEdit', function () {
                                 var	nReviewid =m.reviewId.val();
                                 var	recordCd = $("#storeNo").val();
                                 var storeCd = m.store.attr('k');
-                                _common.initiateAudit(storeCd,recordCd,typeId,nReviewid,m.toKen.val(),function (token) {
-                                    m.toKen.val(token);
-                                    m.enterFlag.val('view');
-                                });
+                                // // 如果不是审核当天，就没有审核流程
+                                if(skDate === m.businessDate.val()){
+                                    _common.initiateAudit(storeCd,recordCd,typeId,nReviewid,m.toKen.val(),function (token) {
+                                        m.toKen.val(token);
+                                        m.enterFlag.val('view');
+                                    });
+                                }
                             } else {
                                 _common.prompt(result.msg, 5, "error");
                             }
@@ -532,7 +536,7 @@ define('receiptEdit', function () {
                 })
 
             } else {
-                _common.prompt("Please fill in all required information!", 5, "error");
+                // _common.prompt("Please fill in all required information!", 5, "error");
                 return false;
             }
         });
@@ -773,6 +777,12 @@ define('receiptEdit', function () {
         if(isNull(pd_date)){
             $("#pd_date").css("border-color","red");
             $("#pd_date").focus();
+            _common.prompt("Please fill in all required information!", 5, "error");
+            return false;
+        }else if(_common.judgeValidDate($("#pd_date").val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#pd_date").css("border-color","red");
+            $("#pd_date").focus();
             return false;
         }else {
             $("#pd_date").css("border-color","#CCCCCC");
@@ -780,6 +790,7 @@ define('receiptEdit', function () {
         if(isNull(store)){
             $("#store").css("border-color","red");
             $("#store").focus();
+            _common.prompt("Please fill in all required information!", 5, "error");
             return false;
         }else {
             $("#store").css("border-color","#CCCCCC");
@@ -787,11 +798,23 @@ define('receiptEdit', function () {
         if(isNull(skType)){
             $("#skType").css("border-color","red");
             $("#skType").focus();
+            _common.prompt("Please fill in all required information!", 5, "error");
             return false;
         }else {
             $("#skType").css("border-color","#CCCCCC");
         }
         if(isNull(pd_start_time)){
+            $("#pd_start_time").css("border-color","red");
+            _common.prompt("Please fill in all required information!", 5, "error");
+            $("#pd_start_time").focus();
+            return false;
+        }else if(_common.judgeValidTime($("#pd_start_time").val())){
+            _common.prompt("Please enter a valid time!",3,"info");
+            $("#pd_start_time").css("border-color","red");
+            $("#pd_start_time").focus();
+            return false;
+        }else if(judgeSixTime($("#pd_start_time").val())){
+            _common.prompt("Please take inventory of items after 6:00 am!", 5, "error");
             $("#pd_start_time").css("border-color","red");
             $("#pd_start_time").focus();
             return false;
@@ -799,6 +822,17 @@ define('receiptEdit', function () {
             $("#pd_start_time").css("border-color","#CCCCCC");
         }
         if(isNull(pd_end_time)){
+            _common.prompt("Please fill in all required information!", 5, "error");
+            $("#pd_end_time").css("border-color","red");
+            $("#pd_end_time").focus();
+            return false;
+        }else if(_common.judgeValidTime($("#pd_end_time").val())){
+            _common.prompt("Please enter a valid time!",3,"info");
+            $("#pd_end_time").css("border-color","red");
+            $("#pd_end_time").focus();
+            return false;
+        }else if(judgeSixTime($("#pd_end_time").val())){
+            _common.prompt("Please take inventory of items after 6:00 am!", 5, "error");
             $("#pd_end_time").css("border-color","red");
             $("#pd_end_time").focus();
             return false;
@@ -807,6 +841,26 @@ define('receiptEdit', function () {
         }
         return true;
     }
+
+    var judgeSixTime = function (time) {
+        var result = [];
+        result = time.split(':');
+        for(var i = 0 ; i < result.length; i++) {
+            var lstr = result[i].replace(/^\s+|\s+$/g, '');
+            var num = parseInt(lstr);
+            if (num === false) {
+                return true;
+            }
+            if( lstr != num || num < 0){
+                return true;
+            }
+            //6点之前不可以盘点
+            if(i == 0 && num < 6){
+                return true;
+            }
+        }
+        return false;
+    };
 
     //初始化店铺下拉
     var initAutoMatic = function () {

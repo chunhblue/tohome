@@ -189,8 +189,6 @@ public interface InventoryVouchersMapper {
         List<Sk0020DTO> adjustDetailsList(Sk0020ParamDTO sk0020);
         Integer adjustItemSKU(Sk0020ParamDTO sk0020);
 
-        Sk0020DTO  getGeneralReason(@Param("detailedLevelCd") String detailedLevelCd);
-
         int selectSumArticle(Sk0020ParamDTO sk0020);
 
         List<AutoCompleteDTO> getReasondetailAndGeneralReason(@Param("v") String v);
@@ -202,4 +200,10 @@ public interface InventoryVouchersMapper {
         Ma1000DTO getSouthOrNouth(@Param("storeCd") String storeCd);
 
         List<AutoCompleteDTO> getOutStoreList(@Param("v") String v,@Param("zoCd") String zoCd,@Param("businessDate") String businessDate);
+        List<AutoCompleteDTO> getStoreListByInStore(@Param("v") String v,@Param("vstore") String vstore,@Param("businessDate") String businessDate);
+
+        // 获取上次店间修正的修正单号
+        String getLastCorrTransfer(@Param("voucherNo1")String voucherNo1,@Param("voucherType")String voucherType);
+
+        List<Sk0020DTO> getLastCorrQty(String voucherNo);
 }

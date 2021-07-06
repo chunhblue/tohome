@@ -61,6 +61,7 @@ public interface ReceiveService {
      * @return
      */
     String updateReceive(OD0000TDTO dto, List<OD0010TDTO> list);
+    Integer insertDocumentUrl(OD0000TDTO dto);
 
     int updateStatus(String receiveId,CommonDTO dto);
  

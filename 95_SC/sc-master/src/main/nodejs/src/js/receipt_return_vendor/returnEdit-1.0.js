@@ -159,6 +159,7 @@ define('receiptReturnVendorEdit', function () {
 				if (result != "true") {
 					return false;
 				}
+                $("#audit_affirm").prop("disabled",true);
                 var detailType = "tmp_return";
 				$.myAjaxs({
 					url: _common.config.surl + "/audit/submit",

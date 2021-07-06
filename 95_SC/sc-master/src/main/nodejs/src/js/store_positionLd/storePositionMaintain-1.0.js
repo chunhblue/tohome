@@ -16,6 +16,7 @@ define('storePositionMaintain', function () {
         selectTrTemp = null,
         tempTrObjValue = {},//临时行数据存储
         a_store=null,
+        storesParamGrid=null,
         common = null;
 
     var m = {
@@ -89,7 +90,59 @@ define('storePositionMaintain', function () {
         isButPermission();
         initAutoMatic();
         // m.search.click();
+        stores_event();
     }
+    var stores_event = function () {
+        //店铺明细一览表格
+        storesTable = $("#storesTable").zgGrid({
+            title: "Store Information",
+            param: storesParamGrid,
+            colNames: ["Store ID", "Store Name"],
+            colModel: [
+                {name: "storeDetailCd", type: "text", text: "center", width: "100", ishide: false, css: ""},
+                {name: "storeDetailName", type: "text", text: "center", width: "150", ishide: false, css: ""},
+            ],//列内容
+            width: "max",//宽度自动
+            page: 1,//当前页
+            rowPerPage: 10,//每页数据量
+            isPage: true,//是否需要分页
+            isCheckbox: false,
+            loadEachBeforeEvent: function (trObj) {
+                return trObj;
+            },
+            ajaxSuccess: function (resData) {
+                return resData;
+            },
+            loadCompleteEvent: function (self) {
+                selectTrTempFile = null;//清空选择的行
+                return self;
+            },
+            eachTrClick: function (trObj, tdObj) {//正常左侧点击
+                selectTrTempFile = trObj;
+            },
+
+        });
+
+        //店铺明细一览
+        $("#viewStores").on("click",function () {
+            if(selectTrTemp==null){
+                _common.prompt("Please select at least one row of data!",5,"error");
+                return false;
+            }
+            let cols = tableGrid.getSelectColValue(selectTrTemp,"empNumId");
+            storesParamGrid = "userCode="+cols["empNumId"];
+            storesTable.setting("url",url_left +"/getStoreInformation");
+            storesTable.setting("param", storesParamGrid);
+            storesTable.setting("page", 1);
+            storesTable.loadData(null);
+            $('#stores_dialog').modal("show");
+        });
+        //店铺明细关闭
+        $("#colseStoresTable").on("click",function () {
+            $('#stores_dialog').modal("hide");
+        })
+    };
+
     var initAutoMatic = function (){
         // $("#empDepart").myAutomatic({
         //      url: systemPath + "/ma1000/getStoreAll",
@@ -249,6 +302,13 @@ define('storePositionMaintain', function () {
                             min: 6,
                             max: 8,
                             message: 'The User Name must be more than 6 and less than 8 characters long'
+                        }
+                    }
+                },
+                a_store: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please enter all required fields(marked with red color)!'
                         }
                     }
                 },
@@ -459,7 +519,7 @@ define('storePositionMaintain', function () {
             async:true,
             cache:false,
             type :"get",
-            data :"",
+            data :"selectId="+selectId,
             dataType:"json",
             success:function(result){
                 var selectObj = $("#" + selectId);
@@ -470,7 +530,7 @@ define('storePositionMaintain', function () {
                 }
             },
             error : function(e){
-                _common.prompt(title+"Failed to load data!",5,"error");
+                _common.prompt(selectId+"Failed to load data!",5,"error");
             },
             complete: _common.myAjaxComplete
         });
@@ -479,11 +539,14 @@ define('storePositionMaintain', function () {
     var table_event = function () {
         $("#add").on("click", function () {
             m.operateFlg.val("add");
+            $("#job_type_cd1").hide();
+            $("#job_type_cd").show();
             //显示重置保存按钮
             $("#resetForm").show();
             $("#affirm").show();
             $("#storeCdRefresh").show();
             $("#storeCdClear").show();
+            $("#storeGroup").show();
             //重新发起校验
             $("#userform").data('bootstrapValidator').destroy();
             $('#userform').data('bootstrapValidator', null);
@@ -499,6 +562,9 @@ define('storePositionMaintain', function () {
                 _common.prompt("Please select at least one row of data!", 5, "info");
                 return false;
             }
+            $("#job_type_cd").show();
+            $("#job_type_cd1").hide();
+            $("#storeGroup").show();
             //显示重置保存按钮
             $("#resetForm").show();
             $("#affirm").show();
@@ -530,8 +596,11 @@ define('storePositionMaintain', function () {
             $("#userform").data('bootstrapValidator').resetForm();
             $("fieldset").prop("disabled",true);
             $("#password").hide();
+            $("#job_type_cd").hide();
+            $("#job_type_cd1").show();
             userFormSet();
             $('#user_dialog').modal("show");
+            $("#storeGroup").hide();
         })
         m.resetForm.on("click", function () {
             _common.myConfirm("Are you sure you want to reset?",function(result){
@@ -717,8 +786,9 @@ define('storePositionMaintain', function () {
         $("#emp_num_id").val(tempTrObjValue.empNumId);
         $("#emp_name").val(tempTrObjValue.empName);
         $("#emp_password").val(tempTrObjValue.empPassword);
-        $("#storeCd").val(tempTrObjValue.storeName).attr("k",tempTrObjValue.storeCd).attr("v",tempTrObjValue.storeName);
+        $("#storeCd").val(tempTrObjValue.storeCd+' '+tempTrObjValue.storeName).attr("k",tempTrObjValue.storeCd).attr("v",tempTrObjValue.storeName);
         $("#job_type_cd").val(tempTrObjValue.jobTypeCd);
+        $("#job_type_cd1").val(tempTrObjValue.jobCatagoryName);
         $("#effective_status").val(tempTrObjValue.effectiveStatus);
         $("#emp_gender").val(tempTrObjValue.empGender);
         $("#emp_country").val(tempTrObjValue.empCountry);
@@ -809,8 +879,8 @@ define('storePositionMaintain', function () {
                 {name: "empId", type: "text", text: "center", width: "160", ishide: true, css: ""},
                 {name:"empNumId",type:"text", text: "right", width: "160", ishide: false, css: ""},
                 {name: "empName", type: "text", text: "left", width: "160", ishide: false, css: ""},
-                {name:"storeCd",type: "text", text: "right", width: "160", ishide:false, css: ""},
-                {name:"storeName",type: "text", text: "left", width: "160", ishide:false, css: ""},
+                {name:"storeCd",type: "text", text: "right", width: "160", ishide:true, css: ""},
+                {name:"storeName",type: "text", text: "left", width: "160", ishide:true, css: ""},
                 {name:"jobTypeCd",type: "text", text: "right", width: "160", ishide: true, css: ""},
                 {name:"jobCatagoryName",type: "text", text: "left", width: "160", ishide:false, css: ""},
                 {name:"empGender",type: "text", text: "right", width: "160", ishide:true, css: ""},
@@ -859,6 +929,7 @@ define('storePositionMaintain', function () {
                 tempTrObjValue.storeCd = cols["storeCd"];
                 tempTrObjValue.storeName = cols["storeName"];
                 tempTrObjValue.jobTypeCd = cols["jobTypeCd"];
+                tempTrObjValue.jobCatagoryName = cols["jobCatagoryName"];
                 tempTrObjValue.empGender = cols["empGender"];
                 tempTrObjValue.effectiveStatus = cols["effectiveStatus"];
                 tempTrObjValue.telephoneNo = cols["telephoneNo"];
@@ -872,12 +943,12 @@ define('storePositionMaintain', function () {
                 tempTrObjValue.empPostalCode = cols["empPostalCode"];
                 tempTrObjValue.empEmail = cols["empEmail"];
                 tempTrObjValue.empComment = cols["empComment"];
-                if(cols["md"]=="1"){
-                    $("#updateEmpPassword").prop("disabled",true);
+                if(cols["md"]==="1"){
+                    // $("#updateEmpPassword").prop("disabled",true);
                     $("#Modify").prop("disabled",true);
                     $("#delete").prop("disabled",true);
                 }else{
-                    $("#updateEmpPassword").prop("disabled",false);
+                    // $("#updateEmpPassword").prop("disabled",false);
                     $("#Modify").prop("disabled",false);
                     $("#delete").prop("disabled",false);
                 }
@@ -907,10 +978,16 @@ define('storePositionMaintain', function () {
                     butId:  "View",
                     butSize: ""
                 },
-                {
+                /*{
                     butType: "delete",
                     butText: "Delete",
                     butId:  "delete",
+                    butSize: ""
+                },*/
+                {
+                    butType: "view",
+                    butText: "View Store",
+                    butId:  "viewStores",
                     butSize: ""
                 },
             ],

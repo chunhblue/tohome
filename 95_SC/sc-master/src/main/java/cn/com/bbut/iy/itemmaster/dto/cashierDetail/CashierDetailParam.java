@@ -90,4 +90,10 @@ public class CashierDetailParam  extends GridParamDTO {
      */
     private String saleSerialNo;
 
+    private String tranSerialNo;
+
+    private String billSaleNo;
+
+    // 1:JE  0:AR
+    private Integer billFlg;
 }

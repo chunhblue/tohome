@@ -67,6 +67,7 @@ public class OD0010TDTO extends GridDataDTO {
 
     // 订货总数量
     private BigDecimal orderTotalQty;
+    private BigDecimal ssHHQty;
 
     // 订购单价
     private BigDecimal orderPrice;
@@ -114,8 +115,10 @@ public class OD0010TDTO extends GridDataDTO {
     private CommonDTO commonDTO;
 
     private String differenceReason;
+    private String differenceReason1;
 
     private String differenceReasonText;
+    private String differenceReasonText1;
     // 收货日期
     private String receivingDate;
 

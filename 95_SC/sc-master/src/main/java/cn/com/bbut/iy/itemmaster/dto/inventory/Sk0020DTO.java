@@ -81,6 +81,8 @@ public class Sk0020DTO extends GridDataDTO {
     // 店间调入的数量
     private BigDecimal qty1;
     private BigDecimal bqty1;
+    // 店内转入的数量
+    private BigDecimal transferInQty;
 
     // 店间调出的数量
     private BigDecimal qty2;

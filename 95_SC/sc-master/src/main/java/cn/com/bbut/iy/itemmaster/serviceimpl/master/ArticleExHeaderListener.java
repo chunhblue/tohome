@@ -26,7 +26,7 @@ public class ArticleExHeaderListener implements ExEventListener {
     public void action(Workbook wb) {
         Sheet sheet = wb.getSheet(Constants.EXCEL_SHEET_DEF_NAME);
         // 大标题
-        String row0 = "Article Master Query List";
+        String row0 = "Item Master Query List";
 
         // 二号标题
         String row1 = "";

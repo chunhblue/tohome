@@ -21,16 +21,23 @@ import java.util.Collection;
 public class ElectronicReceiptParam {
 
     // 销售日期
-    private String saleStartDate;
+    private String saleDate;
     private String saleEndDate;
     // 交易类型
     private String tranType;
+    private String transType;
     // POS机号
     private String posNo;
    // 商品Id
     private String articleId;
     // 销售序号
-    private Integer saleNo;
+    private String saleNo;
+
+    private Integer tranSerialNo;
+    // Bill No(AR) or TransID(JE)
+    private String billSaleNo;
+    // 1:JE  0:AR
+    private Integer billFlg;
 
     /** 大区CD */
     private String regionCd;

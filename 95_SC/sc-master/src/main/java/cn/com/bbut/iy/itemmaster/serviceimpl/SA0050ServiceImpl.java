@@ -65,7 +65,7 @@ public class SA0050ServiceImpl implements SA0050Service {
     @Override
     public int insertCashier(SA0050 sa0050) {
         //获取初始密码
-        String password = this.pwd(firstPwd,flagLock);
+        String password = this.pwd(sa0050.getCashierPassword(),flagLock);
         sa0050.setCashierPassword(password);
         //获取权限参数
         SA0055 sa0055 = sa0055Mapper.selectByPrimaryKey(sa0050.getCashierLevel());
@@ -150,41 +150,37 @@ public class SA0050ServiceImpl implements SA0050Service {
             return sa0050Mapper.selectByPrimaryKey1(cashierId,storeCd);
     }
 
-
-    /**
-     * 字符串加密方法
-     * @param code
-     * @param flag
-     * @return
-     */
     private String pwd(String code, String flag){
-        String result = "";
+        StringBuilder result = new StringBuilder();
         Random rd = new Random();
         if (flag.equals("lock"))
         {
             for (int i = 0; i < code.length(); i++)
             {
-                result = result + (9 - Integer.parseInt(code.substring(i, i+1)));
-                if (i < code.length())
-                {
-                    result = result + (char)(rd.nextInt(62) + 48);
+                result.append(9 - Integer.parseInt(code.substring(i, i + 1)));
+                int ascc = rd.nextInt(75) + 48;
+                if ((ascc>=48 && ascc<=57) || (ascc>=65 && ascc<=90) || (ascc>=97 && ascc<=122)){
+                    result.append((char) ascc);
+                } else {
+                    result.append("a");
                 }
             }
+            System.out.println(result);
         }
         else if (flag.equals("unlock"))
         {
             if (code.length() == 0)
-                result = "0";
+                result = new StringBuilder("0");
             else
             {
                 for (int i = 0; i < code.length(); i++)
                 {
-                    result = result + (9 - Integer.parseInt(code.substring(i,i+1)));
+                    result.append(9 - Integer.parseInt(code.substring(i, i + 1)));
                     i++;
                 }
             }
         }
-        return result;
+        return result.toString();
     }
 
 }

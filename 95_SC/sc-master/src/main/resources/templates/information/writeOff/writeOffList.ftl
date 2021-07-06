@@ -324,31 +324,32 @@
                         <span style="float: left;margin-left:20px;">Created Date:${bsDate?string('dd/MM/yyyy')}</span>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="row" style="overflow: scroll">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="width: 160%;">
                         <table id="daily_table" class="table table-hover table-striped table-condensed table-bordered  zgrid-table"  style="margin-bottom: 10px">
                             <tr>
                                 <th title="Store No.">Store No.</th>
-                                <th title="Store Name">Store Name</th>
+                                <th title="Store Name" style="width: 6%;">Store Name</th>
                                 <th title="Date">Date</th>
 [#--                                <th>Top Department Code</th>--]
                                 <th title="Top Department">Top Department</th>
 [#--                                <th>Department Code</th>--]
-                                <th title="Department">Department</th>
+                                <th title="Department" style="width: 7%;">Department</th>
 [#--                                <th>Category Code</th>--]
-                                <th title="Category">Category </th>
+                                <th title="Category" style="width: 7%;">Category </th>
 [#--                                <th>Sub-Category-Code</th>--]
-                                <th title="Sub-Category">Sub-Category</th>
+                                <th title="Sub-Category" style="width: 7%;">Sub-Category</th>
                                 <th title="Item Code">Item Code</th>
-                                <th title="Item Name">Item Name</th>
+                                <th title="Item Name" style="width: 7%;">Item Name</th>
                                 <th title="Barcode">Barcode</th>
                                 <th title="UOM">UOM</th>
-                                <th title="Write Off Quantity">Write Off Quantity</th>
+                                <th title="Write Off Quantity" style="width: 6%;">Write Off Quantity</th>
+[#--                                sale_qty 暂时注释--]
                                 <th title="Sale Quantity">Sale Quantity</th>
 [#--                                <th title="Write Off Amount">Write Off Amount</th>--]
                                 <th title="Write Off Reason">Write Off Reason</th>
-                                <th title="Area Manager Code">Area Manager Code</th>
-                                <th title="Area Manager Name">Area Manager Name</th>
+                                <th title="Area Manager Code" style="width: 8%;">Area Manager Code</th>
+                                <th title="Area Manager Name" style="width: 8%;">Area Manager Name</th>
                             </tr>
                         </table>
 
@@ -370,5 +371,8 @@
 	<input type="hidden" id="use" value="${use!}"/>
 	<input type="hidden" id="identity" value="${identity!}"/>
 	<input type="hidden" id="searchJson" value=""/>
+	<input type="hidden" id="totalDoc" value=""/>
+	<input type="hidden" id="toTotalQty" value=""/>
+	<input type="hidden" id="itemSaleQty" value=""/>
 </body>
 </html>

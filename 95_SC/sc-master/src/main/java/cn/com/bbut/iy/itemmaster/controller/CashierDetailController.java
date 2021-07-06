@@ -50,8 +50,7 @@ public class CashierDetailController extends BaseAction {
     private CM9060Service cm9060Service;
     @Autowired
     private MRoleStoreService mRoleStoreService;
-    @Autowired
-    private DefaultRoleService defaultRoleService;
+
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_SALE_INFORMATION_QUERY";
     private final String EXCEL_EXPORT_NAME = "Sale Information Report.xlsx";
@@ -110,14 +109,14 @@ public class CashierDetailController extends BaseAction {
             return new GridDataDTO<SaleHead>();
         }
         User u = this.getUser(session);
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             param.setStartDate(startDate);
-        }
+        }*/
         param.setStores(stores);
         GridDataDTO<SaleHead> grid = service.getSaleHeadList(param);
         return grid;
@@ -135,17 +134,19 @@ public class CashierDetailController extends BaseAction {
             return null;
         }
         User u = this.getUser(session);
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        String userId = u.getUserId();
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             param.setStartDate(startDate);
-        }
+        }*/
             param.setStores(stores);
-        Map totalAmount = service.getTotalAmount(param);
+        Map totalAmount = service.getTotalAmount(userId,param);
         ajaxResultDto.setData(totalAmount.get("totalAmount"));
+        ajaxResultDto.setS(totalAmount.get("status").toString());
         ajaxResultDto.setSuccess(true);
         return ajaxResultDto;
     }
@@ -167,14 +168,14 @@ public class CashierDetailController extends BaseAction {
             return null;
         }
         User u = this.getUser(session);
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             param.setStartDate(startDate);
-        }
+        }*/
         // 获取当前角色店铺权限
         Collection<String> stores = getStores(session, param);
         param.setStores(stores);

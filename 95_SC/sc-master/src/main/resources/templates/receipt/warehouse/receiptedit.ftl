@@ -125,7 +125,7 @@
                                     </div>
                                     <label for="physicalReceivingDatee" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null">Receiving Date</label>
                                     <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
-                                        <input id="physicalReceivingDate" class="form-control input-sm" type="text" >
+                                        <input id="physicalReceivingDate" readonly="true" class="form-control input-sm" type="text" >
                                     </div>
                                 </div><!-- form-group -->
 
@@ -156,12 +156,16 @@
                                     </div>
                                 </div>
 
-                                [#--<div class="form-group">
-                                    <label for="remarks"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Remarks</label>
-                                    <div class="col-xs-4 col-sm-4 col-md-3 col-lg-8">
-                                        <input type="text" id="remarks" readonly="true" class="form-control input-sm">
+                                <div class="form-group">
+                                    <label for="creater"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Created By</label>
+                                    <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
+                                        <input type="text" readonly="true" id="creater" class="form-control input-sm">
                                     </div>
-                                </div>--]
+                                    <label for="ca_date"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Date Created</label>
+                                    <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
+                                        <input id="ca_date" readonly="true" placeholder="Created Date" class="form-control input-sm" type="text" value="">
+                                    </div>
+                                </div>
 
                             </div>
                         </div>
@@ -173,7 +177,7 @@
 	<!--row 分割-->
 	<div class="row">
 		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-			<table id="zgGridTable"></table>
+			<table id="zgGridTable" ></table>
 		</div>
 	</div>
 	<div class="row">
@@ -292,6 +296,7 @@
 <input type="hidden" id="_storeCd" value="${storeCd!}"/>
 <input type="hidden" id="_orderId" value="${orderId!}"/>
 <input type="hidden" id="_receiveId" value="${receiveId!}"/>
+<input type="hidden" id="_reviewSts" value="${reviewSts!}"/>
 <input type="hidden" id="viewSts" value="${orderSts!}"/>
 <input type="hidden" id="typeId" value="${typeId!}">
 <input type="hidden" id="reviewId" value="${reviewId!}">

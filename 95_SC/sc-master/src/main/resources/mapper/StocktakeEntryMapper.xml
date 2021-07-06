@@ -70,6 +70,12 @@
             ma1110 t3
         WHERE
             t2.article_id = t1.article_id
+            AND t2.inventory_item = '1'
+            AND t2.cost_item = '0'
+            AND t2.article_id NOT IN (
+                SELECT article_id
+                FROM pi0126
+            )
             AND #{businessDate} BETWEEN t2.effective_start_date AND t2.effective_end_date
             AND ma22.article_id = t1.article_id
             AND ma22.store_cd = #{storeCd,jdbcType=VARCHAR}
@@ -147,21 +153,68 @@
 
     <select id="getTempTxtItemList" resultType="cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO">
         SELECT
-            t1.article_id AS articleId,
-            t1.article_name AS articleName,
-            t1.barcode AS barcode,
-            t1.unit AS uom,
-            t1.bad_qty AS badQty,
-            t1.pi_qty AS firstQty,
-            t1.region,
-            t1.stocktake_time AS stocktakeTime,
-            t2.spec
-        FROM
-            ${tableName} t1
-            left join
-            ma1100 t2
-            on t2.article_id = t1.article_id
-            AND #{businessDate} BETWEEN t2.effective_start_date AND t2.effective_end_date
+            a.articleId,
+            a.articleName,
+            a.barcode,
+            a.uom,
+            sum(a.badQty) as badQty,
+            sum(a.firstQty) as firstQty,
+            max(a.stocktakeTime) as stocktakeTime,
+            a.spec
+        FROM (
+            SELECT
+                coalesce(t5.article_id,t1.article_id) AS articleId,
+                coalesce(t5.article_name,t1.article_name) AS articleName,
+                coalesce(t7.default_barcode,t1.barcode) AS barcode,
+                coalesce(t5.sales_unit_id,t1.unit) AS uom,
+                coalesce(t1.bad_qty::numeric,0)*coalesce(t4.quantity,1) AS badQty,
+                coalesce(t1.pi_qty::numeric,0)*coalesce(t4.quantity,1) AS firstQty,
+                t2.inventory_item,
+                t2.cost_item,
+                t1.region,
+                t1.stocktake_time AS stocktakeTime,
+                coalesce(t5.spec,t2.spec) AS spec
+            FROM
+                ${tableName} t1
+                left JOIN ma1100 t2
+                ON t2.article_id = t1.article_id
+                AND t2.article_id NOT IN (SELECT article_id FROM pi0126)
+                left join (
+                    select b.parent_article_id,b.effective_start_date
+                    from ma1200 a, ma1210 b
+                    where
+                        #{businessDate} between a.effective_start_date and a.effective_end_date
+                        and a.parent_article_id = b.parent_article_id
+                        and a.effective_start_date = b.effective_start_date
+                        and a.review_status = 10
+                    group by
+                        b.parent_article_id,b.effective_start_date
+                    /*having count(child_article_id)=1*/
+                    order by b.parent_article_id
+                ) t3 on t1.article_id = t3.parent_article_id
+                left join ma1210 t4 on t4.parent_article_id = t3.parent_article_id
+                and t4.effective_start_date = t3.effective_start_date
+                left join ma1100 t5 on t4.child_article_id = t5.article_id
+                and t5.inventory_item = '1'
+                AND t5.cost_item = '0'
+                and #{businessDate} between t5.effective_start_date and t5.effective_end_date
+                left join ma2240 t6 on coalesce(t5.article_id,t1.article_id) = t6.article_id
+                and #{storeCd} = t6.store_cd
+                left join ma1110 t7 on t6.article_id = t7.article_id
+                and t6.vendor_id = t7.vendor_id
+                and t7.structure_cd = #{structureCd}
+                where t1.article_id not in (select article_id from pi0126)
+                and ((t2.inventory_item = '1'
+                AND t2.cost_item = '0'
+                and #{businessDate} between t2.effective_start_date and t2.effective_end_date)
+                 or t1.article_id = '' or t1.article_id = null)
+        ) a
+        GROUP BY
+            a.articleId,
+            a.articleName,
+            a.barcode,
+            a.uom,
+            a.spec
     </select>
 
     <select id="selectCountByParam" resultType="int" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100ParamDTO">
@@ -253,63 +306,54 @@
     </select>
 
     <update id="updateStocktakingVarianceReport">
-        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
-            UPDATE pi0125
-            <set >
-                <if test="item.cQty != null" >
-                    c_qty = #{item.cQty},
-                </if>
-                <if test="item.secondQty != null" >
-                    pi_qty = CAST (#{item.secondQty} AS NUMERIC),
-                </if>
-                <if test="item.lastVarianceQty != null" >
-                    last_variance_qty = #{item.lastVarianceQty},
-                </if>
-                <if test="item.varianceQty != null" >
-                    variance_qty = #{item.varianceQty},
-                </if>
-                <if test="item.exportTime != null" >
-                    pi_end_time = #{item.exportTime},
-                </if>
-            </set>
-            where
-            pi_cd = #{item.piCd}
-            AND pi_date = #{item.piDate}
-            AND store_cd = #{item.storeCd}
-            AND article_id = #{item.articleId}
-        </foreach>
+                UPDATE pi0125
+        SET c_qty = tam.c_qty,
+        pi_qty = tam.pi_qty,
+        last_variance_qty = tam.last_variance_qty,
+        variance_qty = tam.variance_qty,
+        pi_end_time = tam.pi_end_time
+        FROM
+            (
+            SELECT
+                tv.pi_cd,
+                tv.pi_date,
+                tv.store_cd,
+                tv.article_id,
+                tv.c_qty,
+                tv.pi_qty,
+                tv.last_variance_qty,
+                tv.variance_qty,
+                tv.pi_end_time
+            FROM
+                ${tableName} tv
+                INNER JOIN pi0125 p1 ON tv.pi_cd = p1.pi_cd
+                AND tv.pi_date = p1.pi_date
+                AND tv.store_cd = p1.store_cd
+                AND tv.article_id = p1.article_id
+            ) AS tam
+        WHERE
+            tam.pi_cd = pi0125.pi_cd
+            AND tam.pi_date = pi0125.pi_date
+            AND tam.store_cd = pi0125.store_cd
+            AND tam.article_id = pi0125.article_id
     </update>
 
     <update id="updatePi0125">
-        UPDATE PI0125
-SET pi_qty = NULL,
-variance_qty = NULL
-WHERE
-	EXISTS (
-	SELECT
-	DISTINCT P.article_id
-	FROM
-		pi0125 P,
-		(
-		SELECT DISTINCT A
-			.article_id
-		FROM
-			PI0125 A
-		WHERE
-			A.pi_cd = #{ piCd }
-			AND A.pi_date = #{ piDate }
-			AND A.store_cd = #{ storeCd }
-			AND A.article_id NOT in ( SELECT article_id FROM PI0120 WHERE pi_cd = #{ piCd } AND pi_date = #{ piDate } AND store_cd = #{ storeCd } )
-		) A
-	WHERE
-		P.article_id = A.article_id
-	)
-	AND pi_cd = #{ piCd }
-	AND pi_date = #{ piDate }
-	AND store_cd = #{ storeCd }
+        UPDATE PI0125 A SET pi_qty = NULL,variance_qty = NULL
+        WHERE
+          A.pi_cd = #{ piCd }
+          AND A.pi_date = #{ piDate }
+          AND A.store_cd = #{ storeCd }
+          AND NOT EXISTS (
+           SELECT article_id FROM PI0120 b
+           WHERE b.pi_cd = A.pi_cd
+           AND b.pi_date =A.pi_date
+           AND b.store_cd = A.store_cd
+           AND b.article_id = A.article_id
+          )
     </update>
 
-    <select id="getItemVarianceReport" resultMap="BaseItemResult">
+    <select id="getItemVarianceReport" resultMap="BaseItemResult" parameterType="String">
         SELECT
             pi1.pi_cd,
             pi1.pi_date,
@@ -320,18 +364,12 @@ WHERE
             pi1.variance_qty,
             sa3.bad_qty,
             COALESCE(sa3.first_qty,0)+COALESCE(sa3.second_qty,0) second_qty,
-            /*CASE WHEN sa3.second_qty IS NOT NULL THEN sa3.second_qty ELSE sa3.first_qty END second_qty,*/
             COALESCE(sa3.sale_qty_total,0) AS sale_qty_total
         FROM
-            pi0125 pi1 LEFT JOIN
-            (SELECT pi.pi_cd,pi.pi_date,pi.article_id,pi.store_cd,pi.first_qty,
-                pi.bad_qty,pi.second_qty,SUM(sa.sale_qty) AS sale_qty_total
-            FROM pi0120 pi LEFT JOIN pi0100 pi2 ON pi.pi_cd = pi2.pi_cd AND pi.store_cd = pi2.store_cd
-                AND pi.pi_date = pi2.pi_date LEFT JOIN sa0020 sa ON pi.store_cd = sa.store_cd AND sa.detail_type = 's'
-                AND sa.article_id = pi.article_id AND to_char(sa.sale_date,'yyyymmddhh24miss') BETWEEN pi2.export_time AND pi.stocktake_time
-            WHERE pi.pi_cd = #{piCd} AND pi.pi_date = #{piDate} AND pi.store_cd = #{storeCd}
-            GROUP BY pi.pi_cd, pi.pi_date, pi.article_id, pi.store_cd, pi.first_qty, pi.second_qty,pi.bad_qty
-			) sa3 ON pi1.pi_cd = sa3.pi_cd and pi1.store_cd = sa3.store_cd and pi1.article_id = sa3.article_id
+            pi0125 pi1
+            LEFT JOIN
+            ${tableName} sa3
+            ON pi1.pi_cd = sa3.pi_cd and pi1.store_cd = sa3.store_cd and pi1.article_id = sa3.article_id
         WHERE
             pi1.pi_cd = #{piCd}
             AND pi1.pi_date = #{piDate}
@@ -704,4 +742,98 @@ WHERE
     where
     p.store_cd = #{storeCd} and p.pi_cd = #{piCd}
     </select>
+
+    <update id="createVarianceTempTable">
+        DROP TABLE IF EXISTS ${tableName};
+        create temporary table ${tableName} (
+            pi_cd varchar(255),
+            pi_date varchar(255),
+            store_cd varchar(255),
+            article_id varchar(255),
+            c_qty numeric(9,0),
+            pi_qty numeric(9,0),
+            last_variance_qty numeric(9,0),
+            variance_qty numeric(9,0),
+            pi_end_time varchar(255)
+        );
+    </update>
+
+    <insert id="saveToVarianceTempTable" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO">
+        INSERT INTO ${tableName}
+        VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (
+            #{item.piCd,jdbcType=VARCHAR},
+            #{item.piDate,jdbcType=VARCHAR},
+            #{item.storeCd,jdbcType=VARCHAR},
+            #{item.articleId,jdbcType=VARCHAR},
+            #{item.cQty},
+            CAST (#{item.secondQty} AS NUMERIC),
+            #{item.lastVarianceQty},
+            #{item.varianceQty},
+            #{item.exportTime}
+            )
+        </foreach>
+    </insert>
+
+    <update id="createSaleTempTable">
+        DROP TABLE IF EXISTS ${tableName};
+        create temporary table ${tableName} (
+            pi_cd varchar(255),
+            pi_date varchar(255),
+            article_id varchar(255),
+            store_cd varchar(255),
+            first_qty numeric(9,0),
+            bad_qty numeric(9,0),
+            second_qty numeric(9,0),
+            sale_qty_total numeric(9,0)
+        );
+    </update>
+
+    <select id="getSalesItemReport" resultMap="BaseItemResult" parameterType="String">
+                SELECT
+                    pi.pi_cd,
+                    pi.pi_date,
+                    pi.article_id,
+                    pi.store_cd,
+                    pi.first_qty,
+                    pi.bad_qty,
+                    pi.second_qty,
+                    SUM(sa.sale_qty) AS sale_qty_total
+                FROM
+                    pi0120 pi
+                    LEFT JOIN pi0100 pi2
+                    ON pi.pi_cd = pi2.pi_cd
+                    AND pi.store_cd = pi2.store_cd
+                    AND pi.pi_date = pi2.pi_date
+                    LEFT JOIN sa0020 sa
+                    ON pi.store_cd = sa.store_cd
+                    AND sa.article_id = pi.article_id
+                    AND to_char(sa.sale_date,'yyyymmddhh24miss') <![CDATA[>= ]]> pi2.export_time
+                    AND to_char(sa.sale_date,'yyyymmddhh24miss') <![CDATA[<= ]]> pi.stocktake_time
+                WHERE
+                    pi.pi_cd = #{piCd}
+                    AND pi.pi_date = #{piDate}
+                    AND pi.store_cd = #{storeCd}
+                GROUP BY
+                    pi.pi_cd, pi.pi_date, pi.article_id,
+                    pi.store_cd, pi.first_qty,pi.bad_qty, pi.second_qty
+    </select>
+
+    <insert id="saveSaleTempTable" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO">
+        INSERT INTO ${tableName}
+        VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (
+            #{item.piCd,jdbcType=VARCHAR},
+            #{item.piDate,jdbcType=VARCHAR},
+            #{item.articleId,jdbcType=VARCHAR},
+            #{item.storeCd,jdbcType=VARCHAR},
+            CAST (#{item.firstQty} AS NUMERIC),
+            CAST (#{item.badQty} AS NUMERIC),
+            CAST (#{item.secondQty} AS NUMERIC),
+            #{item.saleQtyTotal}
+            )
+        </foreach>
+    </insert>
 </mapper>

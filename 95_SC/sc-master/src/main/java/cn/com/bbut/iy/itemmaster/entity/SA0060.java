@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class SA0060 extends SA0060Key {
@@ -123,4 +123,10 @@ public class SA0060 extends SA0060Key {
      * @mbggenerated
      */
     private String nrHms;
+
+    private Integer tranSerialNo;
+
+    private String billno;
+
+    private String transId;
 }

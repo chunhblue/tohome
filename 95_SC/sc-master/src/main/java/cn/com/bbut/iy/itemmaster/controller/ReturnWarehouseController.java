@@ -21,6 +21,7 @@ import cn.com.bbut.iy.itemmaster.entity.od0010.OD0010;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.*;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +62,8 @@ public class ReturnWarehouseController extends BaseAction {
 
     @Autowired
     private MRoleStoreService mRoleStoreService;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     /**
      * 退供应商申请单管理一览画面
@@ -511,24 +514,28 @@ public class ReturnWarehouseController extends BaseAction {
     @RequestMapping(value = "/print")
     public ModelAndView toPrintView(HttpServletRequest request, HttpSession session,
                                               String searchJson,String returnType) {
+
+        User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
+
       if(returnType.equals("20")) {
-          User u = this.getUser(session);
           log.debug("User:{} 退仓库申请单打印一览画面", u.getUserId());
           ModelAndView mv = new ModelAndView("return/warehouse/returnPrint");
           mv.addObject("searchJson", searchJson);
           mv.addObject("reType", returnType);
           mv.addObject("userName", u.getUserName());
-          mv.addObject("printTime", new Date());
+          mv.addObject("printTime", Utils.getFormateDate(ymd));
           mv.addObject("useMsg", "退仓库申请单打印画面");
           return mv;
       }else {
-          User u = this.getUser(session);
           log.debug("User:{} 退仓库申请单打印一览画面", u.getUserId());
           ModelAndView mv = new ModelAndView("return/warehouse/returnOrgPrint");
           mv.addObject("searchJson", searchJson);
           mv.addObject("reType", returnType);
           mv.addObject("userName", u.getUserName());
-          mv.addObject("printTime", new Date());
+          mv.addObject("printTime", Utils.getFormateDate(ymd));
           mv.addObject("useMsg", "退仓库申请单打印画面");
           return mv;
       }
@@ -545,6 +552,9 @@ public class ReturnWarehouseController extends BaseAction {
     public ModelAndView toReceiptPrintView(HttpServletRequest request, HttpSession session,
                                               String searchJson,RWHListParamDTO param) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 退仓库确认退货打印一览画面", u.getUserId());
         // 获取当前角色店铺权限
         RWHListParam dto = new Gson().fromJson(param.getSearchJson(),RWHListParam.class);
@@ -552,7 +562,7 @@ public class ReturnWarehouseController extends BaseAction {
         ModelAndView mv = new ModelAndView("receipt/return_warehouse/returnPrint");
         mv.addObject("searchJson", searchJson);
         mv.addObject("userName", u.getUserName());
-        mv.addObject("printTime", new Date());
+        mv.addObject("printTime",  Utils.getFormateDate(ymd));
         mv.addObject("dto", dto);
 
         mv.addObject("useMsg", "退仓库确认退货打印画面");

@@ -56,14 +56,14 @@ public class GoodSaleExServiceImpl implements ExService {
         // 资源权限参数设置
         jsonParam.setStores(paramDTO.getStores());
         jsonParam.setResources(paramDTO.getResources());
-        int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
+        /*int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
         if(i >= 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             jsonParam.setStartDate(startDate);
-        }
+        }*/
         // 生成文件标题信息对象
         session.setHeaderListener(new GoodSaleExHeaderListener(jsonParam));
         session.createWorkBook();
@@ -97,14 +97,15 @@ public class GoodSaleExServiceImpl implements ExService {
         // 查询数据
         jsonParam.setFlg(false);
         List<goodSaleReportDTO> _list = mapper.search(jsonParam);
+        BigDecimal totalSaleAmount = mapper.getTotalSaleAmount(jsonParam);
         int itemSKU=mapper.getArticleCount(jsonParam);
-        BigDecimal sumSaleAmount=BigDecimal.ZERO;
+//        BigDecimal sumSaleAmount=BigDecimal.ZERO;
         BigDecimal sumSaleQty=BigDecimal.ZERO;
         // 遍历数据
         int no = 1;
         for (goodSaleReportDTO ls : _list) {
-            sumSaleAmount=sumSaleAmount.add(new BigDecimal(ls.getSaleAmount()));
-            sumSaleQty=sumSaleQty.add(new BigDecimal(ls.getSaleQty()));
+//            sumSaleAmount=sumSaleAmount.add(new BigDecimal(ls.getSaleAmount()));
+            sumSaleQty=sumSaleQty.add(ls.getSaleQty());
             int curCol = 0;
             Row row = sheet.createRow(curRow);
             Cell cell = row.createCell(curCol++);
@@ -122,7 +123,7 @@ public class GoodSaleExServiceImpl implements ExService {
             String tranDate = ls.getTranDate();
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
-            setCellValue(cell, fmtDateAndTimeToStr19(tranDate));
+            setCellValue(cell, fmtDateToStr(tranDate));
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));
@@ -154,11 +155,15 @@ public class GoodSaleExServiceImpl implements ExService {
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
-            setCellValue(cell, formatNum(ls.getSaleQty()));
+            setCellValue(cell, formatNum(ls.getSaleQty().toString()));
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
             setCellValue(cell, formatNum(ls.getPriceActual()));
+
+            cell = row.createCell(curCol++);
+            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+            setCellValue(cell, formatNum(ls.getSaleAmount()+""));
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
@@ -194,7 +199,7 @@ public class GoodSaleExServiceImpl implements ExService {
 
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
-        setCellValue(cell, "Total item Qty:");
+        setCellValue(cell, "Total item:");
 
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
@@ -204,19 +209,14 @@ public class GoodSaleExServiceImpl implements ExService {
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
         setCellValue(cell, "");
 
-
         cell = row.createCell(curCol++);
-        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
-        setCellValue(cell, "Total Sale Amount:");
-
-
-        cell = row.createCell(curCol++);
-        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
-        setCellValue(cell, formatNum(sumSaleAmount.toString()));
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
+        setCellValue(cell, "");
 
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
         setCellValue(cell, "");
+
 
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
@@ -225,6 +225,14 @@ public class GoodSaleExServiceImpl implements ExService {
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
         setCellValue(cell, formatNum(sumSaleQty.toString()));
+
+        cell = row.createCell(curCol++);
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+        setCellValue(cell, "Total Sale Amount:");
+
+        cell = row.createCell(curCol++);
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+        setCellValue(cell, formatNum(totalSaleAmount.toString()));
 
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
@@ -246,6 +254,7 @@ public class GoodSaleExServiceImpl implements ExService {
         sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 22 * 256);
         sheet.setColumnWidth(columnIndex++, 40 * 256);
+        sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);

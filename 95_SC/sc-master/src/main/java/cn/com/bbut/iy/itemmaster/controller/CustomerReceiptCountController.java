@@ -78,14 +78,14 @@ public class CustomerReceiptCountController extends BaseAction {
             param = new CustomerCountParamDto();
         }
         User u = this.getUser(session);
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             param.setStartDate(startDate);
-        }
+        }*/
         // 获取当前角色店铺权限
         Collection<String> stores = getStores(session, param);
         if(stores.size() == 0){

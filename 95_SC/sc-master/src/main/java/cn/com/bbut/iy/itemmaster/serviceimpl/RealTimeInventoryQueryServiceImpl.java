@@ -2,13 +2,17 @@ package cn.com.bbut.iy.itemmaster.serviceimpl;
 
 
 import cn.com.bbut.iy.itemmaster.dao.Cm9060Mapper;
+import cn.com.bbut.iy.itemmaster.dao.MA4320Mapper;
 import cn.com.bbut.iy.itemmaster.dao.RealTimeInventoryQueryMapper;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100c.StocktakeItemDTOC;
+import cn.com.bbut.iy.itemmaster.dto.promotion.PromotionParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.rtInventory.*;
 import cn.com.bbut.iy.itemmaster.entity.base.Cm9060;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.RealTimeInventoryQueryService;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -49,8 +53,10 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
 
     @Autowired
     private CM9060Service cm9060Service;
-
-
+    @Autowired
+    private MA4320Mapper ma4320Mapper;
+    @Autowired
+    private Ma4320Service ma4320Service;
     @Override
     public GridDataDTO<RTInventoryQueryDTO> getInventoryList(RTInventoryQueryParamDTO rTParamDTO) {
         String inEsTime = cm9060Service.getValByKey("1206");
@@ -84,6 +90,12 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
                 return data;
             }
             Gson gson = new Gson();
+            /*RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+            if("500".equals(param.getStatus()) || param.getContent() == null){
+                String message = "Failed to connect to live inventory data！";
+                data.setMessage(message);
+                return data;
+            }*/
             // 获取第一层的信息
             ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
 
@@ -192,6 +204,12 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
                     return data;
                 }
 
+                /*RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+                if("500".equals(param.getStatus()) || param.getContent() == null){
+                    String message = "Failed to connect to live inventory data！";
+                    data.setMessage(message);
+                    return data;
+                }*/
                 // 获取第一层的信息
                 ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
 
@@ -237,6 +255,12 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
                 return data;
             }
             Gson gson = new Gson();
+            /*RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+            if("500".equals(param.getStatus()) || param.getContent() == null){
+                String message = "Failed to connect to live inventory data！";
+                data.setMessage(message);
+                return data;
+            }*/
             // 获取第一层的信息
             ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
 
@@ -362,6 +386,12 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
         }
         Gson gson = new Gson();
         // 获取第一层的信息
+        /*RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+        if("500".equals(param.getStatus()) || param.getContent() == null){
+            String message = "Failed to connect to live inventory data！";
+            data.setMessage(message);
+            return data;
+        }*/
         ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
 
         RtInvContent rtInvContent = rtInvContent2.get(0);
@@ -405,6 +435,11 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
             return rtList;
         }
         Gson gson = new Gson();
+        /*RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+        if("500".equals(param.getStatus()) || param.getContent() == null){
+            String message = "Failed to connect to live inventory data！";
+            return rtList;
+        }*/
         // 获取第一层的信息
         ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
 
@@ -460,6 +495,11 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
             }
             Gson gson = new Gson();
             // 获取第一层的信息
+            /*RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+            if("500".equals(param.getStatus()) || param.getContent() == null){
+                String message = "Failed to connect to live inventory data！";
+                return rtList;
+            }*/
             ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
 
             RtInvContent rtInvContent = rtInvContent2.get(0);
@@ -504,9 +544,14 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
         RtInvContent rtInvContent = new RtInvContent();
         List<String> itemList = new ArrayList<>();
         for(int i=0;i<saveRtQtyList.size();i++){
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+//            saveRtQtyList.get(i).setAccDate(sdf.format(new Date()));
+            String nowDate = ma4320Service.getNowDate();
+            String ymd = nowDate.substring(0,8);
+            saveRtQtyList.get(i).setAccDate(Utils.getFormateDateStr(ymd));
             String detailType = saveRtQtyList.get(i).getDetailType();
             float qty = saveRtQtyList.get(i).getInventoryQty();
-            saveRtQtyList.get(i).setInEsTime(new Timestamp(new Date().getTime()));
+            saveRtQtyList.get(i).setInEsTime(ma4320Mapper.getNowDate());
             switch (detailType) {
                 case "tmp_receive":
                     saveRtQtyList.get(i).setReceiveQty(qty);
@@ -577,7 +622,10 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
             String url = inventoryUrl+"/SaveRelTimeInventory";
             String urlData = RequestPost(jsonStr,url);
 //            String urlData = null;
-            if(urlData == null || "".equals(urlData)){
+            if(urlData != null){
+                rtInvContent = new Gson().fromJson(urlData,RtInvContent.class);
+            }
+            if(urlData == null || "".equals(urlData) || !"0".equals(rtInvContent.getStatus())){
                int re = realTimeInventoryQueryMapper.addRtQtyListToEs(saveRtQtyList);
                if(re > 0){
                    String message = "Failed to connect to ES,but save successfully！";
@@ -588,7 +636,7 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
                }
                 return rtInvContent;
             }
-            rtInvContent = new Gson().fromJson(urlData,RtInvContent.class);
+
         } catch (JsonProcessingException e) {
             rtInvContent.setMessage("类对象转jackJson字符串异常");
             e.printStackTrace();
@@ -747,11 +795,16 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
             // 查看当前articleId是否在当天存在库存
         List<StoreItemWarehousCk> addAllList = new ArrayList<>();
 
-        Date date = new Date();
-        String yearMonthDay = new SimpleDateFormat("yyyyMMdd").format(date);
-        String yearMonth = yearMonthDay.substring(0,6);
-        String warehousDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
+//        Date date = new Date();
+//        String yearMonthDay = new SimpleDateFormat("yyyyMMdd").format(date);
+//        String yearMonth = yearMonthDay.substring(0,6);
+//        String warehousDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
 
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String yearMonthDay = Utils.getFormateDateStr(ymd);
+        String yearMonth = yearMonthDay.substring(0,6);
+        String warehousDate=Utils.getTimeStamp(ymd);
         for(SaveInventoryQty swh :saveRtQtyList) {
             // 计算修改Bi库存后的金额
             BigDecimal gapsAmt = swh.getAvgCostNotax().multiply(new BigDecimal(swh.getInventoryQty()));
@@ -816,11 +869,15 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
             // 计算修改Bi库存后的金额
             BigDecimal gapsAmt = new BigDecimal(qty * (-1)).multiply(avgCostNotax);
 
-            Date date = new Date();
-            String yearMonthDay = new SimpleDateFormat("yyyyMMdd").format(date);
-            String yearMonth = yearMonthDay.substring(0, 6);
-            String warehousDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
-
+//            Date date = new Date();
+//            String yearMonthDay = new SimpleDateFormat("yyyyMMdd").format(date);
+//            String yearMonth = yearMonthDay.substring(0, 6);
+//            String warehousDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
+            String nowDate = ma4320Service.getNowDate();
+            String ymd = nowDate.substring(0,8);
+            String yearMonthDay = Utils.getFormateDateStr(ymd);
+            String yearMonth = yearMonthDay.substring(0,6);
+            String warehousDate=Utils.getTimeStamp(ymd);
             StoreItemWarehousCk itemWarehousCk = new StoreItemWarehousCk();
             itemWarehousCk.setWarehousDate(warehousDate);
             itemWarehousCk.setCompanyCd("01");
@@ -842,8 +899,11 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
             float minStockQty = Float.parseFloat(warehousDateList.get(0).getBIStockQty().toString());
             if(minStockQty<0){
                 // 若最小时间的库存量为负
-                Date date = new Date();
-                String yearMonthDay = new SimpleDateFormat("yyyyMMdd").format(date);
+//                Date date = new Date();
+////                String yearMonthDay = new SimpleDateFormat("yyyyMMdd").format(date);
+                String nowDate = ma4320Service.getNowDate();
+                String ymd = nowDate.substring(0,8);
+                String yearMonthDay = Utils.getFormateDateStr(ymd);
                 int maxNum = warehousDateList.size()-1;
                 qty = -qty;
                 if(yearMonthDay.equals(warehousDateList.get(maxNum).getWarehousDate())){
@@ -1028,11 +1088,15 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
         String msg = null;
         Collection<StoreItemWarehousCk> addBIList = new ArrayList<>();
         if(wareCkList.size()>0){
-            Date date = new Date();
-            String yearMonthDay = new SimpleDateFormat("yyyyMMdd").format(date);
+//            Date date = new Date();
+//            String yearMonthDay = new SimpleDateFormat("yyyyMMdd").format(date);
+//            String yearMonth = yearMonthDay.substring(0,6);
+//            String warehousDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
+            String nowDate = ma4320Service.getNowDate();
+            String ymd = nowDate.substring(0,8);
+            String yearMonthDay = Utils.getFormateDateStr(ymd);
             String yearMonth = yearMonthDay.substring(0,6);
-            String warehousDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
-
+            String warehousDate=Utils.getTimeStamp(ymd);
             for(StoreItemWarehousCk swh :wareCkList){
                 // 计算修改Bi库存后的金额
                 BigDecimal gapsAmt = swh.getStockQty().multiply(swh.getAvgCostNotax());

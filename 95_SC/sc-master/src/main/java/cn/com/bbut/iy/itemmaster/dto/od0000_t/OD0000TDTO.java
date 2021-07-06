@@ -84,6 +84,8 @@ public class OD0000TDTO extends GridDataDTO {
 
     // 收货日期
     private String receiveDate;
+    // 收货时间
+    private String receiveHms;
 
     // 物流中心地址
     private String vendorAddress;
@@ -163,6 +165,22 @@ public class OD0000TDTO extends GridDataDTO {
     private CommonDTO commonDTO;
     //physical_receiving_date
     private String physicalReceivingDate;
+    // 时间收货时分
+    private String physicalReceivingHms;
 
     private String freeOrderId;
+
+    private String differentReasons1;
+
+    /**
+     *  0:审核月份与实际收货月份不同
+     *  1:审核月份与实际收货月份相同
+     */
+    private Integer checkMouthFlg;
+
+    /**
+     *  0:该订单为hht收过货
+     *  1:该订单属于ss 系统收货
+     */
+    private Integer checkHhtFlg;
 }

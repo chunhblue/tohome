@@ -61,6 +61,10 @@ define('informList', function () {
 			m.create_start_date.css("border-color","red");
 			m.create_start_date.focus();
 			return false;
+		}else if(_common.judgeValidDate(m.create_start_date.val())){
+			_common.prompt("Please enter a valid date!",3,"info");
+			$("#create_start_date").focus();
+			return false;
 		}else {
 			m.create_start_date.css("border-color","#CCC");
 		}
@@ -69,10 +73,14 @@ define('informList', function () {
 			m.create_end_date.css("border-color","red");
 			m.create_end_date.focus();
 			return false;
+		}else if(_common.judgeValidDate(m.create_end_date.val())){
+			_common.prompt("Please enter a valid date!",3,"info");
+			$("#create_end_date").focus();
+			return false;
 		}else {
 			m.create_end_date.css("border-color","#CCC");
 		}
-		if(m.create_start_date.val()!=""&&m.create_end_date.val()!=""){
+		if(m.create_start_date.val()!==""&&m.create_end_date.val()!==""){
 			var intStartDate = fmtStringDate(m.create_start_date.val());
 			var intEndDate = fmtStringDate(m.create_end_date.val());
 			if(intStartDate>intEndDate){

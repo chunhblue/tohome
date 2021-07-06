@@ -17,10 +17,12 @@ import cn.com.bbut.iy.itemmaster.dto.pi0100c.StocktakeItemDTOC;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.fsInvenoryentry.fsInventoryEntryService;
 import cn.com.bbut.iy.itemmaster.service.opreationmanagement.CustOfEntryPlanService;
 import cn.com.bbut.iy.itemmaster.service.opreationmanagement.CustOfEntryService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -61,6 +63,8 @@ public class CustEntryController extends BaseAction{
     private MRoleStoreService mRoleStoreService;
     @Autowired
     private fsInventoryEntryService fsInventoryentryService;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_EXPENSE_LIST";
     private final String EXCEL_EXPORT_NAME = "Expense Query List.xlsx";
@@ -274,6 +278,9 @@ public class CustEntryController extends BaseAction{
     })
     public ModelAndView stocktakeProcessPrint(HttpServletRequest request, HttpSession session,String searchJson) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入费用录入打印一览画面", u.getUserId());
         Collection<Integer> roleIds = (Collection<Integer>) request.getSession().getAttribute(
                 Constants.SESSION_ROLES);
@@ -281,7 +288,7 @@ public class CustEntryController extends BaseAction{
         mv.addObject("use", 0);
         mv.addObject("identity", 1);
         mv.addObject("userName", u.getUserName());
-        mv.addObject("printTime", new Date());
+        mv.addObject("printTime", Utils.getFormateDate(ymd));
         mv.addObject("searchJson",searchJson); // 操作状态
         mv.addObject("useMsg", "费用录入打印画面");
         return mv;
@@ -348,9 +355,7 @@ public class CustEntryController extends BaseAction{
             return new GridDataDTO<CostOfDTO>();
         }
         param.setStores(stores);
-//        param.setPage(page);
         param.setRows(rows);
-//        param.setLimitStart((page - 1)*rows);
         GridDataDTO<CostOfDTO> data = custOfEntryPlanService.storeAllItem(param);
         return data;
     }

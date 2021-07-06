@@ -56,14 +56,14 @@ public class coreItemByExServiceImpl implements ExService {
 
         // 导出不需要分页
         paramdto.setFlg(false);
-        int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
+        /*int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
         if(i >= 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             paramdto.setStartDate(startDate);
-        }
+        }*/
         // 资源权限参数设置
         paramdto.setStores(paramDTO.getStores());
         paramdto.setResources(paramDTO.getResources());

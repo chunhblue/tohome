@@ -65,7 +65,7 @@
         </div>
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <span style="float: left;margin-left:20px;">Date Created：${bsDate?string('dd/MM/yyyy')}</span>
+                <span style="float: left;margin-left:20px;">Date Created：${bsDate!}</span>
             </div>
         </div>
         <div class="row">

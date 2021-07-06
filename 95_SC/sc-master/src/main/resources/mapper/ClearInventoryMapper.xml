@@ -114,19 +114,36 @@
             concat(a.article_id,' ',a.article_name) as v
         FROM
             ma1100 a,
-            sk0000_today b
+             ma1110 c
+             LEFT JOIN ma1130 d ON d.article_id = C.article_id
+             /*,sk0000_today b*/
         <where>
-            a.article_id = b.article_id
-            and b.effective_date = #{bsDate}
+            /*a.article_id = b.article_id AND*/
+             a.article_id=c.article_id
+            AND a.inventory_item = '1'
+            AND d.sale_inactive = '0'
             <if test="v!=null and v!=''">
                 AND (
                     lower(a.article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
                     OR lower(a.article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                    OR lower(c.default_barcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
                 )
             </if>
+            AND c.article_id NOT IN (
+            SELECT ma1200.parent_article_id
+            FROM ma1200
+            WHERE 1 = 1
+            AND #{bsDate,jdbcType=VARCHAR} BETWEEN ma1200.effective_start_date AND ma1200.effective_end_date
+            )
+            AND C.article_id NOT IN (
+            SELECT ma1170.formula_id
+            FROM ma1170
+            WHERE #{bsDate,jdbcType=VARCHAR} BETWEEN ma1170.effective_start_date AND ma1170.effective_end_date
+            )
         </where>
         GROUP BY
-            b.article_id,
+           /* b.article_id,*/
+            C.default_barcode,
             a.article_id,
             a.article_name
     </select>
@@ -168,6 +185,8 @@
 			on_hand_qty =  #{param.onHandQty},
 			update_user_id = #{param.createUserId},
 			update_ymd = #{param.createYmd},
+			upload_flg = null,
+			upload_date = null,
 			update_hms = #{param.createHms}
     </insert>
 </mapper>

@@ -125,7 +125,7 @@
 									<div class="form-group ">
 [#--                                    </div>--]
 [#--									<div class="form-group">--]
-										<label for="bs_start_date"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null" style="white-space:nowrap">Deposit Date</label>
+										<label for="bs_start_date"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null" style="white-space:nowrap">Business Date</label>
 										<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 [#--											<input id="bs_start_date" readonly="true" nextele="sale_end_date" placeholder="Start Date" class="form-control input-sm select-date" type="text" value="">--]
 											<input id="bs_start_date"  nextele="sale_end_date" placeholder="Start Date" class="form-control input-sm select-date" type="text" value="">
@@ -232,6 +232,12 @@
 							</div>
 						</div>
 						<div class="form-group">
+							<label for="depositDate"  class="col-sm-4 control-label not-null">Deposit Date</label>
+							<div class="col-sm-5">
+								<input id="depositDate"  placeholder="Deposit Date" class="form-control input-sm select-date" type="text" value="">
+							</div>
+						</div>
+						<div class="form-group">
 							<label for="payPerson"  class="col-sm-4 control-label not-null">Store Manager</label>[#--缴款人--]
 							<div class="col-sm-5">
 								<div class="aotu-pos">
@@ -282,6 +288,7 @@
 	<input type="hidden" id="tempTableType" value="-1"/>
 	<input type="hidden" id="searchJson" value=""/>
      <input type="hidden" id="businessDate" value="${businessDate!}"/>
+     <input type="hidden" id="msg" value=""/>
 	[@permission code="SC-PI-001"]<input type="hidden" class="permission-verify" id="addBut" value="${displayVar!}" />[/@permission]
 	[@permission code="SC-PI-002"]<input type="hidden" class="permission-verify" id="editBut" value="${displayVar!}" />[/@permission]
 	[@permission code="SC-PI-003"]<input type="hidden" class="permission-verify" id="delBut" value="${displayVar!}" />[/@permission]

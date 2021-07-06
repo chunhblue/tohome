@@ -114,5 +114,23 @@ public interface StocktakePlanMapper {
      */
     int insertAudit(@Param("piCd")String piCd);
 
+    int updateAudit(@Param("pi0100")PI0100DTO pi0100);
+
     List<Integer> getDayOfEnd(String piDate,String storeCd);
+
+    /**
+     * 获取时间段内库存异动的数据
+     */
+    List<Map<String, Object>> getInventoryData(@Param("param") PI0100ParamDTO param, @Param("tableName")String tableName);
+
+    void createTempTable(@Param("tableName") String tempTableName);
+
+    void saveToTempTable(@Param("tableName")String tempTableName, @Param("list") List<StocktakeItemDTO> list);
+
+    List<StocktakeItemDTO> getstockList(@Param("tableName")String tempTableName);
+
+    /**
+     * 将数据存入临时表
+     */
+    void insertInventoryToTemp(@Param("param")PI0100ParamDTO param, @Param("tableName")String tableName);
 }

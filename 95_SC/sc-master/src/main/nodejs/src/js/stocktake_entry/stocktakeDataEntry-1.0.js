@@ -99,7 +99,7 @@ define('receiptEdit', function () {
             $("#saveBut").prop("disabled", false);
             $("#updatePlanDetails").prop("disabled", false);
             $("#importResult").prop("disabled", false);
-            $("#deletePlanDetails").prop("disabled", false);
+            // $("#deletePlanDetails").prop("disabled", false);
             //附件按钮
             $("#addByFile").prop("disabled",false);
             $("#updateByFile").prop("disabled",false);
@@ -713,27 +713,7 @@ define('receiptEdit', function () {
             var record = encodeURIComponent(JSON.stringify(dataForm));
             _common.myConfirm("Are you sure you want to save?",function(result){
                 if(result!=="true"){return false;}
-                // 根据item code限制重复数据
-                /*var checkFlg = true;
-                let articleName = "";let orginValue = "";
-                let orginValue_list = $("#zgGridTtable>.zgGrid-tbody tr td[tag=articleId]");
-                let orginName_list = $("#zgGridTtable>.zgGrid-tbody tr td[tag=articleName]");
-                for(let i=0;i<orginValue_list.length;i++){
-                    orginValue = orginValue_list.eq(i).text();
-                    for(var j =0;j<i;j++){
-                        let articleId = orginValue_list.eq(j).text();
-                        articleName = orginName_list.eq(j).text();
-                        if(orginValue.trim() === articleId.trim()){
-                            checkFlg = false;
-                            _common.prompt("Item:" + orginValue + "  " + articleName + "  is repeated!"
-                                +"<br>"+"Please remove duplicate items!", 5, "error");
-                            return false;
-                        }
-                    }
-                }
-                if(!checkFlg){
-                    return false;
-                }*/
+                _common.loading();
                 $.myAjaxs({
                     url:url_left+"/save",
                     async:true,
@@ -746,13 +726,13 @@ define('receiptEdit', function () {
                             // 变为查看模式
                             setDisable(true);
                             m.enterFlag='view';
-                            _common.prompt("Data saved successfully！",2,"success",function(){/*保存成功*/
+                            _common.prompt("Data saved successfully！",5,"success",function(){/*保存成功*/
                                 // 为 null 代表 第一次 提交, 没有submit , 需要手动submit,
                                 // 不为null 表示 审核驳回后的修改, 自动 submit
                                 if (reviewStatus==null||reviewStatus=='') {
                                     return;
                                 }
-
+                                _common.loading_close();
                                 //发起审核
                                 var typeId =m.typeId.val();
                                 var	nReviewid =m.reviewId.val();
@@ -766,9 +746,12 @@ define('receiptEdit', function () {
                         }else{
                             _common.prompt(result.msg,5,"error");
                         }
+                        _common.loading_close();
                     },
                     error : function(e){
+                        // setTimeout(" _common.prompt(\"Data saved failed！\",5,\"error\")",30000)
                         _common.prompt("Data saved failed！",5,"error");/*保存失败*/
+                        _common.loading_close();
                     }
                 });
             })
@@ -1101,7 +1084,7 @@ define('receiptEdit', function () {
         $("#saveBut").prop("disabled", flag);
         $("#updatePlanDetails").prop("disabled", flag);
         $("#importResult").prop("disabled", flag);
-        $("#deletePlanDetails").prop("disabled", flag);
+        // $("#deletePlanDetails").prop("disabled", flag);
         //附件按钮
         $("#addByFile").prop("disabled",flag);
         $("#updateByFile").prop("disabled",flag);
@@ -1261,7 +1244,7 @@ define('receiptEdit', function () {
             buttonGroup: [
                 {butType: "update", butId: "updatePlanDetails", butText: "Modify", butSize: ""},
                 {butType: "upload", butId: "importResult", butText: "Import Stocktake Result", butSize: ""},
-                {butType: "delete", butId: "deletePlanDetails", butText: "Delete", butSize: ""},
+                // {butType: "delete", butId: "deletePlanDetails", butText: "Delete", butSize: ""},
                 {butType:"custom",butHtml:"<button id='attachments_view' type='button' class='btn btn-primary btn-sm'><span class='glyphicon glyphicon glyphicon-file'></span> Attachments</button>"},//附件
                 {
                     butType:"custom",

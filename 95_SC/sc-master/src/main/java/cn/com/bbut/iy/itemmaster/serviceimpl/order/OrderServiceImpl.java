@@ -18,6 +18,7 @@ import cn.com.bbut.iy.itemmaster.service.CM9060Service;
 import cn.com.bbut.iy.itemmaster.service.RealTimeInventoryQueryService;
 import cn.com.bbut.iy.itemmaster.service.order.OrderService;
 import cn.com.bbut.iy.itemmaster.util.CommonUtils;
+import cn.com.bbut.iy.itemmaster.util.DateConvert;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,8 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static cn.com.bbut.iy.itemmaster.util.CommonUtils.fmtDateToStr;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -84,7 +87,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public GridDataDTO<OrderItemDetailDTO> GetOrderDetailList(OrderItemParamDTO dto) {
         if (StringUtils.isNotBlank(dto.getOrderType())) {
-
+            Date date = DateConvert.FromString(dto.getOrderDate(),"yyyyMMdd");
+            int day = date.getDay();
+            dto.setScheduleDay(day);
             if ("1".equals(dto.getOrderType())) {
                 dto.setShelf(null);
                 dto.setSubShelf(null);

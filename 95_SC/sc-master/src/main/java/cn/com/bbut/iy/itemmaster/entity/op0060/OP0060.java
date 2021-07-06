@@ -147,6 +147,8 @@ public class OP0060 extends OP0060Key {
      */
     private String nrHms;
 
+    private String depositDate;
+
     //附件信息
     private String fileDetailJson;
 }

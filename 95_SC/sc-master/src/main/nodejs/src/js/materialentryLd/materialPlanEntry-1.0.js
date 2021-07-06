@@ -11,6 +11,7 @@ define('materialPlanEntry', function () {
     var url_left = "",
         paramGrid = null,
         selectTrTemp = null,
+        approvalRecordsParamGrid = null,
         tempTrObjValue = {},//临时行数据存储
         systemPath=null,
         tableGrid=null;
@@ -37,6 +38,10 @@ define('materialPlanEntry', function () {
         pd_status:null,
         enterFlag:null,
         piCdParam:null,
+        dj_status:null, // 审核状态
+        //审核
+        typeId:null,
+        reviewId:null
     }
     // 创建js对象
     var  createJqueryObj = function(){
@@ -81,6 +86,7 @@ define('materialPlanEntry', function () {
         m.pd_end_date.val(obj.piEndDate);
         m.pd_status.val(obj.piStatus);
         m.pd_cd.val(obj.piCd);
+        m.dj_status.val(obj.reviewSts);
         // 设置组织架构回显
         _common.setAutomaticVal(obj);
 
@@ -124,13 +130,21 @@ define('materialPlanEntry', function () {
                 _common.prompt("Please select at least one row of data!",5,"error");
                 return;
             }
-            var cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,storeCd,storeName,createUserName,createYmd");
+            var cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,storeCd,storeName,createUserName,createYmd,uploadFlg");
             if(cols==null){
                 _common.prompt("Please select at least one row of data!",5,"error");
-            }else{
-                saveParamToSession();
-                top.location = url_left+"/edit?identity="+m.identity.val()+"&enterFlag=update&piCdParam="+cols['piCd']+"&piDateParam="+cols['createYmd']+"&storeCd="+cols['storeCd']+"&storeName="+cols['storeName']+"&createBy="+cols['createUserName'];
-
+            }if (cols["uploadFlg"]=="1"){
+                _common.prompt("This data can not be changed!",5,"error");
+            } else{
+                //获取数据审核状态
+                _common.getRecordStatus(cols['piCd'],m.typeId.val(),function (result) {
+                    if (result.success){
+                        saveParamToSession();
+                        top.location = url_left+"/edit?identity="+m.identity.val()+"&enterFlag=update&piCdParam="+cols['piCd']+"&piDateParam="+cols['createYmd']+"&storeCd="+cols['storeCd']+"&storeName="+cols['storeName']+"&createBy="+cols['createUserName'];
+                    }else{
+                        _common.prompt(result.message,5,"error");
+                    }
+                },m.reviewId.val())
             }
         });
 
@@ -172,7 +186,21 @@ define('materialPlanEntry', function () {
 
             }
         });
-
+        //审核记录
+        $("#approvalRecords").on("click",function(){
+            if(selectTrTemp==null){
+                _common.prompt("Please select at least one row of data!",5,"error");
+                return false;
+            }
+            var cols = tableGrid.getSelectColValue(selectTrTemp,"piCd");
+            approvalRecordsParamGrid = "id="+cols["piCd"]+
+                "&typeIdArray="+m.typeId.val();
+            approvalRecordsTableGrid.setting("url",_common.config.surl+"/approvalRecords/getApprovalRecords");
+            approvalRecordsTableGrid.setting("param", approvalRecordsParamGrid);
+            approvalRecordsTableGrid.setting("page", 1);
+            approvalRecordsTableGrid.loadData(null);
+            $('#approvalRecords_dialog').modal("show");
+        });
     }
 
     //画面按钮点击事件
@@ -188,6 +216,7 @@ define('materialPlanEntry', function () {
             m.pd_start_date.val("");
             m.pd_end_date.val("");
             m.pd_cd.val('');
+            m.dj_status.val('');
             selectTrTemp = null;
             _common.clearTable();
         });
@@ -276,7 +305,8 @@ define('materialPlanEntry', function () {
             'piStartDate':_startDate,
             'piEndDate':_endDate,
             'piCd':m.pd_cd.val().trim(),
-            'piStatus':piStatus
+            'piStatus':piStatus,
+            'reviewSts':m.dj_status.val()
         };
         m.searchJson.val(JSON.stringify(searchJsonStr));
     }
@@ -287,14 +317,16 @@ define('materialPlanEntry', function () {
             title:"Query Result",
             param:paramGrid,
             localSort: true,
-            colNames:["Store No.","Store Name","Document No.","Remarks","Created by","Date Created"],
+            colNames:["Store No.","Store Name","Document No.","Status","Remarks","Created by","Date Created","Upload Flg"],
             colModel:[
                 {name:"storeCd",type:"text",text:"right",width:"100",ishide:false,css:"",getCustomValue:null},
                 {name:"storeName",type:"text",text:"left",width:"130",ishide:false,css:"",getCustomValue:null},
                 {name:"piCd",type:"text",text:"left",width:"130",ishide:false,css:""},
+                {name:"reviewSts",type:"text",text:"left",width:"130",ishide:false,getCustomValue:getStatus},
                 {name:"remarks",type:"text",text:"left",width:"130",ishide:false,css:"",getCustomValue:null},
                 {name:"createUserName",type:"text",text:"left",width:"130",ishide:false,css:"",getCustomValue:null},
                 {name:"createYmd",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue:_common.formatDateAndTime},
+                {name:"uploadFlg",type:"text",text:"center",width:"130",ishide:true,css:""},
             ],//列内容
             width:"max",//宽度自动
             page:1,//当前页
@@ -348,7 +380,38 @@ define('materialPlanEntry', function () {
                     butType:"custom",
                     butHtml:"<button id='printPlan' type='button' class='btn btn-info btn-sm'><span class='glyphicon glyphicon-print'></span> Print Actual Stocktake Files</button>"
                 },
+                {
+                    butType:"custom",
+                    butHtml:"<button id='approvalRecords' type='button' class='btn btn-info btn-sm'><span class='glyphicon glyphicon-record'></span> Approval Records</button>"
+                }
             ],
+        });
+        //审核记录
+        approvalRecordsTableGrid = $("#approvalRecordsTable").zgGrid({
+            title:"Approval Records",
+            param:approvalRecordsParamGrid,
+            colNames:["Approval Type","Result","User Code","User Name","Date Time","Comments"],
+            colModel:[
+                {name:"typeName",type:"text",text:"left",width:"100",ishide:false,css:""},
+                {name:"result",type:"text",text:"left",width:"100",ishide:false,css:""},
+                {name:"userCode",type:"text",text:"right",width:"100",ishide:false,css:""},
+                {name:"userName",type:"text",text:"left",width:"100",ishide:false,css:""},
+                {name:"dateTime",type:"text",text:"center",width:"130",ishide:false,css:""},
+                {name:"comments",type:"text",text:"left",width:"200",ishide:false,css:""},
+            ],//列内容
+            width:"max",//宽度自动
+            page:1,//当前页
+            rowPerPage:10,//每页数据量
+            isPage:true,//是否需要分页
+            sidx:"",//排序字段
+            sord:"",//升降序
+            isCheckbox:false,
+            loadEachBeforeEvent:function(trObj){
+                return trObj;
+            },
+            ajaxSuccess:function(resData){
+                return resData;
+            }
         });
 
     }
@@ -380,6 +443,36 @@ define('materialPlanEntry', function () {
             $("#printPlan").remove();
         }
     }
+
+    // 获取审核状态
+    var getStatus = function(tdObj, value){
+        switch (value) {
+            case "1":
+                value = "Pending";
+                break;
+            case "5":
+                value = "Rejected";
+                break;
+            case "6":
+                value = "Withdrawn";
+                break;
+            case "7":
+                value = "Expired";
+                break;
+            case "10":
+                value = "Approved";
+                break;
+            case "20":
+                value = "Received";
+                break;
+            case "30":
+                value = "Paid";
+                break;
+            default:
+                value = "";
+        }
+        return $(tdObj).text(value);
+    };
 
     // DD/MM/YYYY to YYYY-MM-DD  格式转换
     function fmtDate(date) {

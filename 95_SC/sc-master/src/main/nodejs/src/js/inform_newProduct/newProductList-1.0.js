@@ -94,6 +94,20 @@ define('newProductList', function () {
 		});
     	//检索按钮点击事件
     	m.search.on("click",function(){
+			if(m.launching_time.val()!==""&&m.launching_time.val()!=null){
+				if(_common.judgeValidDate(m.launching_time.val())){
+					_common.prompt("Please enter a valid date!",3,"info");
+					$("#launching_time").focus();
+					return false;
+				}
+			}
+			if(m.start_order_date.val()!==""&&m.start_order_date.val()!=null){
+				if(_common.judgeValidDate(m.start_order_date.val())){
+					_common.prompt("Please enter a valid date!",3,"info");
+					$("#start_order_date").focus();
+					return false;
+				}
+			}
 			paramGrid = "productType="+m.product_type.val()+
 				"&startOrderDate="+subfmtDate(m.start_order_date.val())+
 				"&launchingTime="+subfmtDate(m.launching_time.val())+

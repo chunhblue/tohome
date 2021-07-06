@@ -262,7 +262,12 @@ public class PriceLabelController extends BaseAction {
         priceLabelParamDTO.setFlg(false);
         priceLabelParamDTO.setStores(stores);
         priceLabelParamDTO.setBusinessDate(cm9060Service.getValByKey("0000"));
-        List<PriceLabelDTO> _list = priceLabelMapper.search(priceLabelParamDTO);
+        List<PriceLabelDTO> _list;
+        if(!priceLabelParamDTO.getType().equals("03")){
+            _list = priceLabelMapper.search(priceLabelParamDTO);
+        }else {
+            _list = priceLabelMapper.selectListByCondition(priceLabelParamDTO);
+        }
         String fileName = "Price Lable Management.pdf";
         try {
             response.setContentType("application/pdf");

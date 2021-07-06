@@ -56,12 +56,12 @@
             display:none;
         }
     </STYLE>
+    <!--页头-->
+    [@common.header][/@common.header]
 </head>
 
 <body>
 
-<!--页头-->
-[@common.header][/@common.header]
 <!--导航-->
 [@common.nav "HOME&Ordering&Failed Order List of the day"][/@common.nav]
 <div class="container-fluid" id="main_box">

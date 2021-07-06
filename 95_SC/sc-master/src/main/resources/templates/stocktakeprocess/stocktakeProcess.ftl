@@ -168,6 +168,8 @@
 </div>
 <!--审核记录-->
 [@common.approvalRecords][/@common.approvalRecords]
+<!--审核-->
+[@common.audit][/@common.audit]
 <!--页脚-->
 [@common.footer][/@common.footer]
 <input type="hidden" id="use" value="${use!}"/>
@@ -180,6 +182,8 @@
 <input type="hidden" id="typeId" value="${typeId!}">
 <input type="hidden" id="reviewId" value="${reviewId!}">
 <input type="hidden" id="businessDate" value="${businessDate!}">
+<input type="hidden" id="piCdParam" value=""/>
+<input type="hidden" id="piDateParam" value=""/>
 [@permission code="SC-PD-PROCESS-001"]<input type="hidden" class="permission-verify" id="viewButPm" value="${displayVar!}" />[/@permission]
 [@permission code="SC-PD-PROCESS-003"]<input type="hidden" class="permission-verify" id="exportButPm" value="${displayVar!}" />[/@permission]
 [@permission code="SC-PD-PROCESS-002"]<input type="hidden" class="permission-verify" id="printButPm" value="${displayVar!}" />[/@permission]

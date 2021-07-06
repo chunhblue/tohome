@@ -36,6 +36,7 @@ public class DifferenceListParam  extends GridParamDTO {
     private String vendorId;
     private String dc;
 
+
     private String deliveryOrderId; // 发货单编号
     private String deliveryStartDate; // 发货单开始日期
     private String deliveryEndDate; // 发货单结束日期

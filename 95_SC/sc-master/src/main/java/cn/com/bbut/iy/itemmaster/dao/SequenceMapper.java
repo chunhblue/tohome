@@ -17,6 +17,10 @@ public interface SequenceMapper{
      * @param seq
      */
     void updateSeqNum(@Param("sequenceName")String seqName, @Param("seq")Integer seq);
-
+	
+	 /**
+     * 重置序列为 1
+     * @param seqName
+     */
     void resetSeq(@Param("sequenceName")String seqName);
 }

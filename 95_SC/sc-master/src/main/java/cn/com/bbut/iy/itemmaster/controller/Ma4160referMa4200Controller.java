@@ -26,9 +26,14 @@ public class Ma4160referMa4200Controller extends  BaseAction{
     private Ma4160referService ma4160referService;
    @RequestMapping(value = "/getJobcatagoryName")
    @ResponseBody
-    public List<MA4160DTO>  getJobcatagoryName(HttpSession session, HttpServletRequest req , MA4160DTO ma4160DTO){
+    public List<MA4160DTO>  getJobcatagoryName(HttpSession session, HttpServletRequest req ,String selectId){
        //System.out.println("1111");
-       return  ma4160referService.getLJobTye();
+       boolean flg = false;
+       if(selectId.equals("job_type_cd")){
+           flg = true;
+       }
+       List<MA4160DTO> list =  ma4160referService.getLJobTye(flg);
+       return list;
    }
     @RequestMapping(value = "/getStructureName")
     @ResponseBody

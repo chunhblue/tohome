@@ -9,7 +9,7 @@
         <id column="no_of_confi_po" property="noOfConfiPo"/>
         <id column="no_of_pending_grpo" property="noOfPendingGrpo"/>
     </resultMap>
-    <select id="selectData" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultMap="reMap">
+    <select id="selectData1" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultMap="reMap">
         SELECT a.*,B.*,c.* ,d.*,e.store_name
         from
         ma1000 e right join
@@ -24,8 +24,7 @@
             #{store,jdbcType=VARCHAR}
         </foreach>
         and
-
-        order_date > #{param.hhstartDate} AND #{param.hhendDate}>order_date AND  order_sts !='01'  GROUP BY store_cd) a
+            order_date > #{param.hhstartDate} AND #{param.hhendDate}>order_date AND  order_sts !='01'  GROUP BY store_cd) a
         on e.store_cd=a.store_cd
         left join
         (select store_cd, COALESCE(count(store_cd),0) as no_of_confi_po from od0000  where 1=1
@@ -72,7 +71,7 @@
        </foreach>
          LIMIT ${param.rows} OFFSET ${param.limitStart}
     </select>
-    <select id="selectDataCount" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultType="INT">
+    <select id="selectDataCount01" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultType="INT">
         SELECT count(1)
         from
         ma1000 e right join
@@ -133,5 +132,313 @@
                  open="(" separator="," close=")">
         #{store,jdbcType=VARCHAR}
         </foreach>
+    </select>
+    <select id="selectData" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultMap="reMap">
+        SELECT a.*,B.*,c.* ,d.*,e.store_name
+        from
+        ma1000 e right join
+        (select store_cd,
+        COALESCE(count(store_cd),0) AS total_open_po from od0000  where
+        1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and
+        order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
+        AND order_type='01'
+        AND order_differentiate IN ('0','1')
+        GROUP BY store_cd) a
+        on e.store_cd=a.store_cd
+        left join
+        (select
+        (
+        SELECT MA1000.store_cd FROM  MA1000 WHERE 1=1 and MA1000.store_cd=#{param.storeCd}
+        ) store_cd,
+
+        COALESCE(count(store_cd),0) as no_of_confi_po from od0000  where 1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and  order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
+        AND order_differentiate IN ('0','1')
+          AND  review_status='20'
+        AND order_type='01'
+           )  b
+        on a.store_cd=b.store_cd  left join
+        (select
+        (
+        SELECT MA1000.store_cd FROM  MA1000 WHERE MA1000.store_cd=#{param.storeCd}
+        ) store_cd,
+        COALESCE(count(store_cd),0)  as  no_of_pending_grpo from od0000  where 1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and  order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
+        AND order_differentiate IN ('0','1')
+         AND  review_status='15' ) c
+        on b.store_cd=c.store_cd left join
+        (select
+        (
+        SELECT MA1000.store_cd FROM  MA1000 WHERE MA1000.store_cd=#{param.storeCd}
+        ) store_cd,
+        COALESCE(count(store_cd),0)  AS grpo_of_qty from od0000  where 1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and  order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
+        AND order_differentiate IN ('0','1')
+        AND  review_status='10'
+        AND order_type='01'
+        )
+        d  on d.store_cd=c.store_cd
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  c.store_cd=#{param.storeCd}
+        </if>
+        and  c.store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        LIMIT ${param.rows} OFFSET ${param.limitStart}
+    </select>
+    <select id="selectDataToal01" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultMap="reMap">
+        SELECT a.*,e.store_name
+        from
+        ma1000 e right join
+        (select store_cd,order_date,
+        COALESCE(count(store_cd),0) AS total_open_po from od0000  where
+        1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and
+        order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
+        AND order_type='01'
+        AND order_differentiate IN ('0','1')
+        GROUP BY store_cd,
+          order_date
+        ) a
+        on a.store_cd=e.store_cd
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+    <select id="selectDataToal" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultMap="reMap">
+        SELECT a.*,e.store_name
+        from
+        ma1000 e right join
+        (select store_cd,
+        COALESCE(count(store_cd),0) AS total_open_po from od0000  where
+        1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and
+        order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
+        AND order_type='01'
+        AND order_differentiate IN ('0','1')
+        GROUP BY store_cd
+        ) a
+        on a.store_cd=e.store_cd
+        <if test="param.flg">
+            LIMIT ${param.rows} OFFSET ${param.limitStart}
+        </if>
+    </select>
+    <select id="selectDataCount" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultType="INT">
+        SELECT count(1)
+        from
+        ma1000 e right join
+        (select store_cd,
+        COALESCE(count(store_cd),0) AS total_open_po from od0000  where
+        1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and
+        order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
+        AND order_type='01'
+        AND order_differentiate IN ('0','1')
+        GROUP BY store_cd) a
+        on a.store_cd=e.store_cd
+    </select>
+
+    <select id="selectReceivingPend01" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultMap="reMap">
+        SELECT a.*,e.store_name
+        from
+        ma1000 e right join
+        (select store_cd,order_date,
+        COALESCE(count(store_cd),0) AS no_of_pending_grpo from od0000  where
+        1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and
+        order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
+        AND order_type='01'
+        AND review_status='15'
+        AND order_differentiate IN ('0','1')
+        GROUP BY store_cd,
+          order_date) a
+        on a.store_cd=e.store_cd
+    </select>
+    <select id="selectReceivingPend" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultMap="reMap">
+        SELECT a.*,e.store_name
+        from
+        ma1000 e right join
+        (select store_cd,
+        COALESCE(count(store_cd),0) AS no_of_pending_grpo from od0000  where
+        1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and
+        order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
+        AND order_type='01'
+        AND review_status='15'
+        AND order_differentiate IN ('0','1')
+        GROUP BY store_cd
+    ) a
+        on a.store_cd=e.store_cd
+    </select>
+    <select id="selectApproved01" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultMap="reMap">
+        SELECT a.*,e.store_name
+        from
+        ma1000 e right join
+        (select store_cd,order_date,
+        COALESCE(count(store_cd),0) AS grpo_of_qty from od0000  where
+        1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and
+        order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
+        AND order_type='01'
+        AND review_status='10'
+        AND order_differentiate IN ('0','1')
+        GROUP BY store_cd,
+        order_date) a
+        on a.store_cd=e.store_cd
+    </select>
+    <select id="selectApproved" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultMap="reMap">
+        SELECT a.*,e.store_name
+        from
+        ma1000 e right join
+        (select store_cd,
+        COALESCE(count(store_cd),0) AS grpo_of_qty from od0000  where
+        1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and
+        order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
+        AND order_type='01'
+        AND review_status='10'
+        AND order_differentiate IN ('0','1')
+        GROUP BY store_cd
+      ) a
+        on a.store_cd=e.store_cd
+    </select>
+    <select id="selectReceived01" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultMap="reMap">
+        SELECT a.*,e.store_name
+        from
+        ma1000 e right join
+        (select store_cd,order_date,
+        COALESCE(count(store_cd),0) AS no_of_confi_po from od0000  where
+        1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and
+        order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
+        AND order_type='01'
+        AND review_status='20'
+        AND order_differentiate IN ('0','1')
+        GROUP BY store_cd,
+        order_date) a
+        on a.store_cd=e.store_cd
+    </select>
+    <select id="selectReceived" parameterType="cn.com.bbut.iy.itemmaster.dto.hhtReport.hhtReportParamDto" resultMap="reMap">
+        SELECT a.*,e.store_name
+        from
+        ma1000 e right join
+        (select store_cd,
+        COALESCE(count(store_cd),0) AS no_of_confi_po from od0000  where
+        1=1
+        <if test="param.storeCd !='' and param.storeCd !=null">
+            and  store_cd=#{param.storeCd}
+        </if>
+        and store_cd in
+        <foreach item="store" index="index" collection="param.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        and
+        order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
+        AND order_type='01'
+        AND review_status='20'
+        AND order_differentiate IN ('0','1')
+        GROUP BY store_cd
+      ) a
+        on a.store_cd=e.store_cd
     </select>
 </mapper>

@@ -15,7 +15,6 @@ public interface ElectronicReceiptService {
 
    List<AutoCompleteDTO> getReceiptType(String v, String storeCd, String posId,String startDate,String endDate);
 
-    List<AutoCompleteDTO> getItemInfo(String v, String storeCd, String posId, String startDate,String endDate);
+    List<AutoCompleteDTO> getItemInfo(String v, String storeCd, String posId, String salesDate);
 
-    List<SA0060> getContentList(ElectronicReceiptParam dto);
 }

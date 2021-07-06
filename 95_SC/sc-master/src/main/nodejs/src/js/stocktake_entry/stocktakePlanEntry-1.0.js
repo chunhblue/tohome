@@ -539,7 +539,7 @@ define('receipt', function () {
                 let cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,piDate,piStatusCode");
                 _common.getRecordStatus(cols['piCd'],m.typeId.val(),function (result) {
                     _result = result;
-                    $('#importFiles').prop('disabled',(_result.data!=null));
+                    // $('#importFiles').prop('disabled',(_result.data!=null));
                 });
             },
             buttonGroup:[
@@ -556,11 +556,11 @@ define('receipt', function () {
                 }, {
                     butType:"custom",
                     butHtml:"<button id='exportFiles' type='button' class='btn btn-info btn-sm'><span class='glyphicon glyphicon-print'></span> Export</button>"
-                },{
+                },/*{
                     butType: "upload",
                     butId: "importFiles",
                     butText: "Import Stocktaking",
-                },{
+                },*/{
                     butType:"custom",
                     butHtml:"<button id='printPlan' type='button' class='btn btn-info btn-sm'><span class='glyphicon glyphicon-print'></span> Print Actual Stocktaking Files</button>"
                 },
@@ -610,10 +610,10 @@ define('receipt', function () {
         if (Number(exportButPm) != 1) {
             $("#exportFiles").remove();
         }
-        var importButPm = $("#importButPm").val();
+        /*var importButPm = $("#importButPm").val();
         if (Number(importButPm) != 1) {
             $("#importFiles").remove();
-        }
+        }*/
         var printButPm = $("#printButPm").val();
         if (Number(printButPm) != 1) {
             $("#printPlan").remove();

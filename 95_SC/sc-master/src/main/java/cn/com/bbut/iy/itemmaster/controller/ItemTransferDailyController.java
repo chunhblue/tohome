@@ -12,8 +12,10 @@ import cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamD
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.itemTransferDaily.ItemTransferDailyService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +46,8 @@ public class ItemTransferDailyController  extends BaseAction {
     private ItemTransferDailyService itemTransferDailyService;
     @Autowired
     private MRoleStoreService mRoleStoreService;
-
+    @Autowired
+    private Ma4320Service ma4320Service;
     private final String EXCEL_EXPORT_KEY = "ITEM_TRANSFER_DAILY_REPORT";
     private final String EXCEL_EXPORT_NAME = "Item Transfer Daily Report.xlsx";
 
@@ -54,11 +57,14 @@ public class ItemTransferDailyController  extends BaseAction {
     })
     public ModelAndView tolistView(HttpServletRequest request, HttpSession session, HttpServletResponse response) throws IOException {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入 店内调拨日报(按商品)", u.getUserId());
         ModelAndView mv = new ModelAndView("itemTransferDaily/itemTransferDaily");
         mv.addObject("useMsg", "店内调拨日报(按商品)");
-        mv.addObject("bsDate", new Date());
-        mv.addObject("printTime", new Date());
+        mv.addObject("bsDate", Utils.getFormateDate(ymd));
+        mv.addObject("printTime",Utils.getFormateDate(ymd));
         mv.addObject("userName",u.getUserName());
         return mv;
     }
@@ -130,11 +136,14 @@ public class ItemTransferDailyController  extends BaseAction {
     public ModelAndView toPrintlistView(HttpServletRequest request, HttpSession session, HttpServletResponse response
                                     ,String searchJson) throws IOException {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入 店内调拨日报(按商品)打印", u.getUserId());
         ModelAndView mv = new ModelAndView("itemTransferDaily/itemTransferDailyPrint");
         mv.addObject("useMsg", "店内调拨日报(按商品)打印");
-        mv.addObject("bsDate", new Date());
-        mv.addObject("printTime", new Date());
+        mv.addObject("bsDate",  Utils.getFormateDate(ymd));
+        mv.addObject("printTime",  Utils.getFormateDate(ymd));
         mv.addObject("searchJson", searchJson);
         mv.addObject("userName",u.getUserName());
         return mv;

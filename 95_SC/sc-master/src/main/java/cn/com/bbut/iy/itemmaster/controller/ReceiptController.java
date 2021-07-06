@@ -19,8 +19,10 @@ import cn.com.bbut.iy.itemmaster.dto.receipt.warehouse.WarehouseReceiptParamDTO;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.receipt.warehouse.IWarehouseService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -53,6 +55,9 @@ public class ReceiptController extends BaseAction {
     private IWarehouseService warehouseService;
     @Autowired
     private MRoleStoreService mRoleStoreService;
+    @Autowired
+    private Ma4320Service ma4320Service;
+
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_ITEM_RECEIPT_DC";
     private final String EXCEL_EXPORT_NAME = "Item Receiving Query(From DC).xlsx";
@@ -126,7 +131,7 @@ public class ReceiptController extends BaseAction {
             PermissionCode.CODE_SC_RR_QUERY_CONFIRM
     })
     public ModelAndView details(HttpServletRequest request, HttpSession session,
-                                   WarehouseReceiptParamDTO param,String orderSts) {
+                                   WarehouseReceiptParamDTO param,String orderSts,String reviewSts) {
         User u = this.getUser(session);
         log.debug("User:{} 进入 仓库配送验收单明细管理编辑画面", u.getUserId());
         ModelAndView mv = new ModelAndView("receipt/warehouse/receiptedit");
@@ -137,6 +142,7 @@ public class ReceiptController extends BaseAction {
         mv.addObject("orderId", param.getOrderId());
         mv.addObject("receiveId", param.getReceiveId());
 		mv.addObject("orderSts", orderSts);
+		mv.addObject("reviewSts", reviewSts);
         mv.addObject("useMsg", "仓库配送验收单明细管理编辑画面");
         mv.addObject("typeId", ConstantsAudit.TYPE_RECEIPT_WAREHOUSE);
         mv.addObject("reviewId", ConstantsAudit.REVIEW_RECEIPT_WAREHOUSE);
@@ -306,6 +312,9 @@ public class ReceiptController extends BaseAction {
     public ModelAndView receiptPrint(HttpServletRequest request, HttpSession session,
                                      Map<String, ?> model,String searchJson) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入仓库配送验收单明细管理打印一览", u.getUserId());
         Collection<Integer> roleIds = (Collection<Integer>) request.getSession().getAttribute(
                 Constants.SESSION_ROLES);
@@ -314,7 +323,7 @@ public class ReceiptController extends BaseAction {
         mv.addObject("identity", 1);
         mv.addObject("userName", u.getUserName());
         mv.addObject("searchJson", searchJson);
-        mv.addObject("printTime", new Date());
+        mv.addObject("printTime", Utils.getFormateDate(ymd));
         mv.addObject("typeId", ConstantsAudit.TYPE_ORDER_TAKE_STOCK);
         mv.addObject("useMsg", "仓库配送验收单明细管理打印画面");
         return mv;
@@ -383,6 +392,9 @@ public class ReceiptController extends BaseAction {
             return null;
         }
         CommonDTO dto = new CommonDTO();
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         // 当前用户ID
         dto.setUpdateUserId(u.getUserId());
         dto.setCreateUserId(u.getUserId());
@@ -392,12 +404,12 @@ public class ReceiptController extends BaseAction {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HHmmss");
         // 当前时间年月日
         String date = dateFormat.format(now);
-        dto.setCreateYmd(date);
-        dto.setUpdateYmd(date);
+        dto.setCreateYmd(ymd);
+        dto.setUpdateYmd(ymd);
         // 当前时间时分秒
         String time = timeFormat.format(now);
-        dto.setCreateHms(time);
-        dto.setUpdateHms(time);
+        dto.setCreateHms(hms);
+        dto.setUpdateHms(hms);
         return dto;
     }
 

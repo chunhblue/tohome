@@ -995,8 +995,9 @@ define('returnVendorEdit', function () {
                 }
             }
             var reg = /((^[1-9]\d*)|^0)(\.\d+)?$/;
-            var orderQty = reThousands(m.orderQty.val().trim());//退货数量
-            if (!reg.test(orderQty)) {
+            // var orderQty = reThousands(m.orderQty.val().trim());//退货数量
+            var orderQty = m.orderQty.val().trim();//退货数量
+            if (!reg.test(orderQty)|| orderQty.indexOf(",")>0) {
                 $("#orderQty").css("border-color", "red");
                 _common.prompt("Please enter with correct data type!", 3, "info");
                 m.orderQty.focus();
@@ -1303,17 +1304,23 @@ define('returnVendorEdit', function () {
 
         //退货数量失去焦点计算总退货金额
         $("#orderQty").blur(function () {
-            var orderQty = reThousands(m.orderQty.val());
-            var price = reThousands(m.orderPrice.val());
-            if (!!orderQty) {
-                m.orderAmount.val(parseFloat(orderQty * price).toFixed(2));//保留两位小数
+            var reg = /((^[1-9]\d*)|^0)(\.\d+)?$/;
+            if (reg.test($("#orderQty").val()) && $("#orderQty").val().indexOf(",")<1){
+                var orderQty = reThousands(m.orderQty.val());
+                var price = reThousands(m.orderPrice.val());
+                if (!!orderQty) {
+                    m.orderAmount.val(parseFloat(orderQty * price).toFixed(2));//保留两位小数
+                }
+                $("#orderQty").val(toThousands(this.value));
             }
-            $("#orderQty").val(toThousands(this.value));
         });
 
         //光标进入，去除金额千分位，并去除小数后面多余的0
         $("#orderQty").focus(function () {
-            $("#orderQty").val(reThousands(this.value));
+            var reg = /((^[1-9]\d*)|^0)(\.\d+)?$/;
+            if (reg.test($("#orderQty").val()) && $("#orderQty").val().indexOf(",")<1){
+                $("#orderQty").val(reThousands(this.value));
+            }
         });
 
         //退货搭赠数量失去焦点计算总退货金额
@@ -1734,6 +1741,7 @@ define('returnVendorEdit', function () {
                 if (result != "true") {
                     return false;
                 }
+                $("#audit_affirm").prop("disabled",true);
                 $.myAjaxs({
                     url: _common.config.surl + "/audit/submit",
                     async: true,

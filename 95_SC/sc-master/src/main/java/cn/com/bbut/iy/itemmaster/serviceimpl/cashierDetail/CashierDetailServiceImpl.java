@@ -1,16 +1,17 @@
 package cn.com.bbut.iy.itemmaster.serviceimpl.cashierDetail;
 
 import cn.com.bbut.iy.itemmaster.dao.CashierDetailMapper;
+import cn.com.bbut.iy.itemmaster.dao.MA4160DTOMapper;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.cashierDetail.*;
+import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.entity.sa0050.SA0050;
+import cn.com.bbut.iy.itemmaster.service.audit.IAuditService;
 import cn.com.bbut.iy.itemmaster.service.cashierDetail.CashierDetailService;
 import cn.com.bbut.iy.itemmaster.util.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.rmi.runtime.Log;
-
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +22,10 @@ import java.util.Map;
 public class CashierDetailServiceImpl implements CashierDetailService {
     @Autowired
     private CashierDetailMapper cashierDetailMapper;
-
+    @Autowired
+    private MA4160DTOMapper ma4160DTOMapper;
+    @Autowired
+    private IAuditService auditServiceImpl;
     @Override
     public List<PayMethod> getAllPay() {
         return cashierDetailMapper.getAllPay();
@@ -29,8 +33,15 @@ public class CashierDetailServiceImpl implements CashierDetailService {
 
     @Override
     public GridDataDTO<SaleHead> getSaleHeadList(CashierDetailParam dto) {
-        dto.setStartDate(getTimeStamp(dto.getStartDate()));
-        dto.setEndDate(getTimeStamp(dto.getEndDate()));
+        dto.setStartDate(Utils.getDateTime(dto.getStartDate()));
+        dto.setEndDate(Utils.getDateTime(dto.getEndDate()));
+        if(dto.getBillSaleNo() != null && !"".equals(dto.getBillSaleNo())){
+            if(dto.getBillSaleNo().contains("NRISV")){
+                dto.setBillFlg(1);
+            }else {
+                dto.setBillFlg(0);
+            }
+        }
         List<SaleHead> list = cashierDetailMapper.getSaleHead(dto);
         long count = cashierDetailMapper.getSaleHeadCount(dto);
         return new GridDataDTO<>(list, dto.getPage(), count,
@@ -91,12 +102,35 @@ public class CashierDetailServiceImpl implements CashierDetailService {
     }
 
     @Override
-    public Map getTotalAmount(CashierDetailParam param) {
-        param.setStartDate(Utils.getTimeStamp(param.getStartDate()));
-        param.setEndDate(Utils.getTimeStamp(param.getEndDate()));
-        BigDecimal totalAmount = cashierDetailMapper.getSaleHeadAmount(param);
+    public Map getTotalAmount(String userId, CashierDetailParam param) {
         HashMap<String, Object> map = new HashMap<>();
-        map.put("totalAmount",totalAmount);
+        Integer post=0;
+        // SM 权限
+
+        List<Integer> aMcount = ma4160DTOMapper.getPositionList(param.getStoreCd(),userId);
+        for (Integer dto1  :aMcount) {
+             if (dto1 !=4){
+                 post=dto1;
+             }
+        }
+        if (post>0){
+            param.setStartDate(Utils.getDateTime(param.getStartDate()));
+            param.setEndDate(Utils.getDateTime(param.getEndDate()));
+            BigDecimal totalAmount = cashierDetailMapper.getSaleHeadAmount(param);
+            map.put("totalAmount", totalAmount);
+            map.put("status", "block");
+
+        }else {
+            map.put("status", "none");
+        }
+        if (param.getBillSaleNo() != null && !"".equals(param.getBillSaleNo())) {
+            if (param.getBillSaleNo().contains("NRISV")) {
+                param.setBillFlg(1);
+            } else {
+                param.setBillFlg(0);
+            }
+        }
+
         return map;
     }
 }

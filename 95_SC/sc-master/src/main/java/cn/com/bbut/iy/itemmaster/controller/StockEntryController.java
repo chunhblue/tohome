@@ -17,9 +17,11 @@ import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.stocktake.StocktakeEntryService;
 import cn.com.bbut.iy.itemmaster.service.stocktake.StocktakePlanService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -62,6 +64,8 @@ public class StockEntryController extends BaseAction {
     private MRoleStoreService mRoleStoreService;
     @Autowired
     private CM9060Service cm9060Service;
+    @Autowired
+    private Ma4320Service ma4320Service;
     private SXSSFWorkbook wb;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_STOCKTAKE_RESULT_QUERY";
@@ -433,6 +437,8 @@ public class StockEntryController extends BaseAction {
     public ModelAndView stocktakeEntryPrint(HttpServletRequest request, HttpSession session,
                                               Map<String, ?> model,String searchJson) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
         log.debug("User:{} 进入盘点结果打印一览画面", u.getUserId());
         Collection<Integer> roleIds = (Collection<Integer>) request.getSession().getAttribute(
                 Constants.SESSION_ROLES);
@@ -441,7 +447,7 @@ public class StockEntryController extends BaseAction {
         mv.addObject("identity", 1);
         mv.addObject("userName", u.getUserName());
         mv.addObject("searchJson", searchJson);
-        mv.addObject("printTime", new Date());
+        mv.addObject("printTime", Utils.getFormateDate(ymd));
         mv.addObject("useMsg", "盘点结果打印一览画面");
         return mv;
     }

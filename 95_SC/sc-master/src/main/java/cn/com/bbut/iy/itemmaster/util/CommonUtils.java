@@ -38,6 +38,8 @@ public class CommonUtils {
     public static final String STYPE_KEY_5 = "style_5";
     /** 率，右对齐，两位小数，含%号 */
     public static final String STYPE_KEY_6 = "style_6";
+    /** 数字居中，无小数 */
+    public static final String STYPE_KEY_7 = "style_6";
 
 
     /**
@@ -390,5 +392,17 @@ public class CommonUtils {
         style.setAlignment(HorizontalAlignment.RIGHT);
         style.setVerticalAlignment(VerticalAlignment.CENTER);// 单元格内容上下对其方式
         MAP_STYLE.put(STYPE_KEY_6, style);
+
+        // 数字右对齐，无小数
+        style = (XSSFCellStyle) wb.createCellStyle();
+        style.setFont(font);
+        style.setDataFormat(df.getFormat("#,###,##0"));
+        style.setBorderBottom(CellStyle.BORDER_THIN);
+        style.setBorderLeft(CellStyle.BORDER_THIN);
+        style.setBorderRight(CellStyle.BORDER_THIN);
+        style.setBorderTop(CellStyle.BORDER_THIN);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);// 单元格内容上下对其方式
+        MAP_STYLE.put(STYPE_KEY_7, style);
     }
 }

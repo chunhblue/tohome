@@ -23,6 +23,7 @@ define('storeTransfersEdit', function () {
 	    tempTrObjValue = {},//临时行数据存储
 		//附件
 		attachmentsParamGrid = null,
+		selectTrTempFile = null,
     	common=null;
 	const KEY = 'STORE_TRANSFER_OUT_ENTRY';
     var m = {
@@ -500,7 +501,7 @@ define('storeTransfersEdit', function () {
 					qty1:_actualQty,
 					actualAmt:_amt1,
 					displaySeq:num
-				}
+				};
 				itemDetail.push(orderItem);
 			});
 			if(itemDetail.length < 1){
@@ -515,6 +516,7 @@ define('storeTransfersEdit', function () {
 				if (result != "true") {
 					return false;
 				}
+				$("#audit_affirm").prop("disabled",true);
 				var detailType = "tmp_transfer_out";
 				$.myAjaxs({
 					url: url_left + '/update',
@@ -632,7 +634,7 @@ define('storeTransfersEdit', function () {
 		$("#addByFile").prop("disabled",flag);
 		$("#updateByFile").prop("disabled",flag);
 		$("#deleteByFile").prop("disabled",flag);
-	}
+	};
 
 	// 设置弹窗内容是否允许编辑
 	var setDialogDisable = function (flag) {
@@ -809,14 +811,15 @@ define('storeTransfersEdit', function () {
 		$("#item_input_tamount").blur(function () {
 			let reg = /^-?[1-9]\d*$/;
 			if (reg.test( this.value)&& this.value.indexOf(",")<0){
-				$("#item_input_tamount").val(toThousands(this.value));
+				$("#item_input_tamount").val(this.value);
 			}
+			$("#actualQty").val($("#item_input_tamount").val());
 		});
 		//光标进入，去除金额千分位，并去除小数后面多余的0
 		$("#item_input_tamount").focus(function(){
 			let reg = /^-?[1-9]\d*$/;
 			if (reg.test( this.value)&& this.value.indexOf(",")<0){
-				$("#item_input_tamount").val(toThousands(this.value));
+				$("#item_input_tamount").val(this.value);
 			}
 		});
 		//光标进入，去除金额千分位，并去除小数后面多余的0
@@ -916,7 +919,8 @@ define('storeTransfersEdit', function () {
 						voucherAmtNoTax:_amountNoTax,
 						voucherTax:_taxAmt,
 						voucherAmt:_amount,
-						remark:$("#cRemark").val()
+						remark:$("#cRemark").val(),
+						fileType:'04'//文件类型 - 调拨
 					}
 					let _data = {
 						searchJson : JSON.stringify(bean),
@@ -1201,7 +1205,7 @@ define('storeTransfersEdit', function () {
 
 		// 转出门店选择
 		vstore = $("#vstore").myAutomatic({
-			url: url_root+"/inventoryVoucher/getStoreList",
+			url: url_root+"/ma1000/getStoreByPM",
 			ePageSize: 5,
 			startCount: 0,
 			cleanInput: function() {
@@ -1226,6 +1230,14 @@ define('storeTransfersEdit', function () {
 				$.myAutomatic.replaceParam(itemInput, str);
 			}
 		});
+		$("#tstore").on("focus",function () {
+			var vStore = $("#vstore").attr('k');
+			if(vStore==null||vStore===""){
+				$.myAutomatic.cleanSelectObj(tstore);
+				_common.prompt("Please select From Store firstly!",3,"info"); // 请先下拉转出门店
+				return false;
+			}
+		});
 
 		// 转入门店选择
 		tstore = $("#tstore").myAutomatic({
@@ -1238,7 +1250,7 @@ define('storeTransfersEdit', function () {
 
 		     }],
 			selectEleClick: function (thisObject) {
-				if(thisObject.attr('k') == m.vstore.attr('k')){
+				if(thisObject.attr('k') === m.vstore.attr('k')){
 					m.tstore.focus();
 					m.tstore.val("").attr('k','').attr('v','');
 					_common.prompt("A transfer out of a store cannot be the same as a transfer into a store!",3,"info"); // 转出门店不能和转入门店相同

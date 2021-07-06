@@ -18,6 +18,9 @@ define('stockScrapEdit', function () {
 		reThousands = null,
 		toThousands = null,
 		getThousands = null,
+		//附件
+		attachmentsParamGrid = null,
+		selectTrTempFile = null,
 	    selectTrTemp = null,
 	    tempTrObjValue = {},//临时行数据存储
 	    bmCodeOrItem = 0,//0 bmCode 1：item
@@ -99,6 +102,8 @@ define('stockScrapEdit', function () {
 		initPageBytype(m.identity.val());
     	// 表格内按钮事件
     	table_event();
+		//附件事件
+		attachments_event();
 		// 根据跳转加载数据，设置操作模式
 		setValueByType();
 		//审核事件
@@ -106,6 +111,208 @@ define('stockScrapEdit', function () {
 		// 初始化选择
 		initAutomatic();
     }
+
+	//附件
+	var attachments_event = function () {
+		//附件一览表格
+		attachmentsTable = $("#attachmentsTable").zgGrid({
+			title:"Attachments",
+			param:attachmentsParamGrid,
+			colNames:["File Name","Download","PreView"],
+			colModel:[
+				{name:"fileName",type:"text",text:"center",width:"130",ishide:false,css:""},
+				{name:"filePath",type:"text",text:"center",width:"100",ishide:false,css:"",getCustomValue:function(tdObj, value){
+						var obj = value.split(",");
+						var html = '<a href="javascript:void(0);" title="DownLoad" class="downLoad" " fileName="'+obj[0]+'" filePath="'+obj[1]+'"><span class="glyphicon glyphicon-cloud-download icon-right"></span></a>';
+						return $(tdObj).html(html);
+					}
+				},
+				{name:"filePath1",type:"text",text:"center",width:"100",ishide:false,css:"",getCustomValue:function(tdObj, value){
+						var obj = value.split(",");
+						var html = '<a href="javascript:void(0);" title="Preview" class="preview" " fileName="'+obj[0]+'" filePath="'+obj[1]+'"><span class="glyphicon glyphicon-zoom-in icon-right"></span></a>';
+						return $(tdObj).html(html);
+					}
+				}
+			],//列内容
+			width:"max",//宽度自动
+			isPage:false,//是否需要分页
+			isCheckbox:false,
+			loadEachBeforeEvent:function(trObj){
+				return trObj;
+			},
+			ajaxSuccess:function(resData){
+				return resData;
+			},
+			loadCompleteEvent:function(self){
+				selectTrTempFile = null;//清空选择的行
+				return self;
+			},
+			eachTrClick:function(trObj,tdObj){//正常左侧点击
+				selectTrTempFile = trObj;
+			},
+			buttonGroup:[
+				{butType: "add",butId: "addByFile",butText: "Add",butSize: ""},//新增
+				{butType: "update",butId: "updateByFile",butText: "Modify",butSize: ""},//修改
+				{butType: "delete",butId: "deleteByFile",butText: "Delete",butSize: ""},//删除
+			],
+		});
+		//附件表格新增
+		var appendTrByFile = function (fileName,filePath) {
+			var rowindex = 0;
+			var trId = $("#attachmentsTable>.zgGrid-tbody tr:last").attr("id");
+			if(trId!=null&&trId!=''){
+				rowindex = parseInt(trId.substring(trId.indexOf("_")+1,trId.indexOf("_")+2))+1;
+			}
+			var tr = '<tr id="attachmentsTable_'+rowindex+'_tr" class="">' +
+				'<td tag="fileName" width="130" title="'+fileName+'" align="center" id="attachmentsTable_'+rowindex+'_tr_fileName" tdindex="attachmentsTable_fileName">'+fileName+'</td>' +
+				'<td tag="filePath" width="100" title="Download" align="center" id="attachmentsTable_'+rowindex+'_tr_filePath" tdindex="attachmentsTable_filePath">'+
+				'<a href="javascript:void(0);" title="DownLoad" class="downLoad" " fileName="'+fileName+'" filePath="'+filePath+'"><span class="glyphicon glyphicon-cloud-download icon-right"></span></a>'+'</td>' +
+				'<td tag="filePath1" width="100" title="Preview" align="center" id="attachmentsTable_'+rowindex+'_tr_filePath1" tdindex="attachmentsTable_filePath1">'+
+				'<a href="javascript:void(0);" title="Preview" class="preview" " fileName="'+fileName+'" filePath="'+filePath+'"><span class="glyphicon glyphicon-zoom-in icon-right"></span></a>'+
+				'</td>' +
+				'</tr>';
+			// style="display: none;"
+			$("#attachmentsTable>.zgGrid-tbody").append(tr);
+		}
+
+		//附件一览显示
+		$("#attachments").on("click",function () {
+			$('#attachments_dialog').modal("show");
+		});
+		//附件一览关闭
+		$("#cancelByAttachments").on("click",function () {
+			_common.myConfirm("Are you sure you want to cancel?",function(result){
+				if (result=="true"){
+					$('#attachments_dialog').modal("hide");
+				}
+			})
+		})
+		//添加文件
+		$("#addByFile").on("click", function () {
+			$('#fileUpload_dialog').modal("show");
+			$("#operateFlgByFile").val("1");
+			$("#file_name").val("");
+			$("#fileData").val("");
+			$("#fileData").parent().parent().show();
+		});
+		//修改文件名称
+		$("#updateByFile").on("click", function () {
+			if(selectTrTempFile == null){
+				_common.prompt("Please select at least one row of data!",5,"info");
+				return;
+			}
+			$('#fileUpload_dialog').modal("show");
+			$("#operateFlgByFile").val("2");
+			$("#fileData").parent().parent().hide();
+			var cols = attachmentsTable.getSelectColValue(selectTrTempFile,"fileName");
+			var fileName = cols["fileName"];
+			$("#file_name").val(fileName);
+		});
+		//删除文件
+		$("#deleteByFile").on("click",function(){
+			if(selectTrTempFile == null){
+				_common.prompt("Please select at least one row of data!",5,"info");
+				return;
+			}
+			_common.myConfirm("Please confirm whether you want to delete the selected data？",function(result){
+				if(result=="true"){
+					$(selectTrTempFile[0]).remove();
+					selectTrTempFile = null;
+				}
+			});
+		});
+
+		//提交按钮点击事件 文件上传
+		$("#affirmByFile").on("click",function(){
+			if($("#file_name").val()==null||$("#file_name").val()==''){
+				$("#file_name").css("border-color","red");
+				_common.prompt("File name cannot be empty!",5,"error");
+				$("#file_name").focus();
+				return;
+			}else {
+				$("#file_name").css("border-color","#CCCCCC");
+			}
+			_common.myConfirm("Are you sure you want to upload？",function(result){
+				if(result=="true"){
+					var flg = $("#operateFlgByFile").val();
+					if(flg=="1"){ // add
+						if($('#fileData')[0].files[0]==undefined||$('#fileData')[0].files[0]==null){
+							$("#fileData").css("border-color","red");
+							_common.prompt("File cannot be empty!",5,"error");
+							$("#fileData").focus();
+							return;
+						}else {
+							$("#fileData").css("border-color","#CCCCCC");
+						}
+						var formData = new FormData();
+						formData.append("fileData",$('#fileData')[0].files[0]);
+						formData.append("toKen",m.toKen.val());
+						$.myAjaxs({
+							url:_common.config.surl+"/file/upload",
+							async:false,
+							cache:false,
+							type :"post",
+							data :formData,
+							dataType:"json",
+							processData:false,
+							contentType:false,
+							success:function(data,textStatus, xhr){
+								var resp = xhr.responseJSON;
+								if( resp.result == false){
+									top.location = resp.s+"?errMsg="+resp.errorMessage;
+									return ;
+								}
+								if(data.success==true){
+									var fileName = $("#file_name").val();
+									var filePath = data.data.filePath;
+									appendTrByFile(fileName,filePath);
+									_common.prompt("Operation Succeeded!",2,"success");
+									$('#fileUpload_dialog').modal("hide");
+								}else{
+									_common.prompt(data.message,5,"error");
+								}
+								m.toKen.val(data.toKen);
+							},
+							complete:_common.myAjaxComplete
+						});
+					}else if(flg=="2"){ // modify
+						var fileName = $("#file_name").val();
+						$(selectTrTempFile[0]).find('td').eq(0).text(fileName);
+						_common.prompt("Operation Succeeded!",2,"success");
+						$('#fileUpload_dialog').modal("hide");
+					}
+				}
+			});
+		});
+
+		$("#cancelByFile").on("click",function () {
+			_common.myConfirm("Are you sure you want to cancel?",function(result){
+				if (result=="true"){
+					$("#file_name").css("border-color","#CCCCCC");
+					$("#fileData").css("border-color","#CCCCCC");
+					$('#fileUpload_dialog').modal("hide");
+				}
+			})
+		})
+
+		//下载
+		$("#attachments_dialog").on("click","a[class*='downLoad']",function(){
+			if($("#saveBtn").attr("disabled") !== 'disabled'){
+				_common.prompt("Before downloading, please save the information!",3,"info");
+				return false;
+			}
+			var fileName = $(this).attr("fileName");
+			var filePath = $(this).attr("filePath");
+			window.open(_common.config.surl+"/file/download?fileName="+fileName+"&filePath="+filePath,"_self");
+		});
+		//预览
+		$("#attachments_dialog").on("click","a[class*='preview']",function(){
+			var fileName = $(this).attr("fileName");
+			var filePath = $(this).attr("filePath");
+			var url = _common.config.surl+"/file/preview?fileName="+fileName+"&filePath="+filePath;
+			window.open(encodeURI(url),"toPreview");
+		});
+	};
 
     // 表格内按钮事件
     var table_event = function(){
@@ -272,6 +479,10 @@ define('stockScrapEdit', function () {
 		$("#addItemDetails").prop("disabled", flag);
 		$("#updateItemDetails").prop("disabled", flag);
 		$("#deleteItemDetails").prop("disabled", flag);
+		//附件按钮
+		$("#addByFile").prop("disabled",flag);
+		$("#updateByFile").prop("disabled",flag);
+		$("#deleteByFile").prop("disabled",flag);
 	}
 
 	// 设置弹窗内容是否允许编辑
@@ -347,6 +558,7 @@ define('stockScrapEdit', function () {
 					return false;
 				}
 				var detailType = "tmp_write_off";
+				$("#audit_affirm").prop("disabled",true);
 				$.myAjaxs({
 					url: _common.config.surl + "/audit/submit",
 					async: true,
@@ -487,15 +699,15 @@ define('stockScrapEdit', function () {
 
 		$("#item_input_tamount").blur(function () {
 			let reg = /^-?[1-9]\d*$/;
-			if (!reg.test( this.value)|| this.value.indexOf(",")<0){
-				$("#item_input_tamount").val(toThousands(this.value));
+			if (reg.test( this.value)|| this.value.indexOf(",")<0){
+				$("#item_input_tamount").val(this.value);
 			}
 		});
 		//光标进入，去除金额千分位，并去除小数后面多余的0
 		$("#item_input_tamount").focus(function(){
 			let reg = /^-?[1-9]\d*$/;
-			if (!reg.test( this.value)|| this.value.indexOf(",")<0){
-				$("#item_input_tamount").val(toThousands(this.value));
+			if (reg.test( this.value)|| this.value.indexOf(",")<0){
+				$("#item_input_tamount").val(this.value);
 			}
 		});
 		// 重置按钮
@@ -567,6 +779,20 @@ define('stockScrapEdit', function () {
 					_common.prompt("Commodity information cannot be empty!",5,"error");
 					return false;
 				}
+				//附件信息
+				var fileDetail = [],fileDetailJson = "";
+				$("#attachmentsTable>.zgGrid-tbody tr").each(function () {
+					var file = {
+						informCd:_voucherNo,
+						fileType:'10',//文件类型 - 报废
+						fileName:$(this).find('td[tag=fileName]').text(),//文件名称
+						filePath:$(this).find('td>a').attr("filepath"),//文件路径
+					};
+					fileDetail.push(file);
+				});
+				if(fileDetail.length>0){
+					fileDetailJson = JSON.stringify(fileDetail)
+				}
 				// 处理传票头档信息
 				let bean = {
 					storeCd:_storeCd,
@@ -577,11 +803,13 @@ define('stockScrapEdit', function () {
 					voucherAmtNoTax:_amountNoTax,
 					voucherTax:_taxAmt,
 					voucherAmt:_amount,
-					remark:$("#cRemark").val()
-				}
+					remark:$("#cRemark").val(),
+					fileType:'10'//文件类型 - 调拨
+				};
 				let _data = {
 					searchJson : JSON.stringify(bean),
 					listJson : JSON.stringify(itemDetail),
+					fileDetailJson : fileDetailJson,
 					pageType : '0'
 				}
 				let _url = '/inventoryVoucher/save';
@@ -698,7 +926,7 @@ define('stockScrapEdit', function () {
 				if(result == "true"){
 					if(flg=='add'){
 						let rowindex = 0;
-						let trId = $("#zgGridTtable>.zgGrid-tbody tr:last").attr("id");
+						let trId = $("#zgGridTtable>.zgGrid-tbody tr:nth-last-child(2)").attr("id");
 						if(trId!=null&&trId!=''){
 							rowindex = parseInt(trId.substring(trId.indexOf("_")+1,trId.indexOf("_")+2))+1;
 						}
@@ -798,6 +1026,12 @@ define('stockScrapEdit', function () {
 					// 替换商品下拉查询参数
 					let str = "&storeCd=" + result.o.storeCd;
 					$.myAutomatic.replaceParam(itemInput, str);
+
+					//加载附件信息
+					attachmentsParamGrid = "recordCd="+result.o.voucherNo+"&fileType=10";
+					attachmentsTable.setting("url", url_root + "/file/getFileList");//加载附件
+					attachmentsTable.setting("param", attachmentsParamGrid);
+					attachmentsTable.loadData(null);
 				}else{
 					_common.prompt(result.msg,5,"error");
 					let _sts = m.viewSts.val();
@@ -1055,7 +1289,8 @@ define('stockScrapEdit', function () {
 					butId: "deleteItemDetails",
 					butText: "Delete",
 					butSize: ""//,
-				}
+				},
+				{butType:"custom",butHtml:"<button id='attachments' type='button' class='btn btn-primary btn-sm'><span class='glyphicon glyphicon glyphicon-file'></span> Attachments</button>"},//附件
 			],
 		});
 	}

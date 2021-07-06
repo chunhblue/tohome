@@ -83,7 +83,10 @@ public class BusinessDailyDto {
      * 支付方式金额_5/Viettel
      */
     private BigDecimal payAmt5;
-
+    /**
+     * 支付方式金额_6/GrabMoca
+     */
+    private BigDecimal payAmt6;
     /**
      * 大分类cd
      */
@@ -110,9 +113,9 @@ public class BusinessDailyDto {
     private List<ResourceViewDTO> resources;
 
     /**
-     * 应收金额
+     * 银行缴款
      */
-    private BigDecimal receivablesAmount;
+    private BigDecimal bankDepositAmount;
 
     /**
      * 现金小计
@@ -123,5 +126,50 @@ public class BusinessDailyDto {
      * 昨日留存金
      */
     private BigDecimal retentionAmount;
+
+    /**
+     * 支付方式名称
+     */
+    private String payCd0;
+    private String payCd1;
+    private String payCd2;
+    private String payCd3;
+    private String payCd4;
+    private String payCd5;
+    private String payCd6;
+
+    /**
+     * 根据支付方式统计客数
+     */
+    private Integer customerCount;
+    private Integer customerCount0;
+    private Integer customerCount1;
+    private Integer customerCount2;
+    private Integer customerCount3;
+    private Integer customerCount4;
+    private Integer customerCount5;
+    private Integer customerCount6;
+
+    /**
+     * service 金额
+     * Mo mo cash - IN : 218556
+     * Payoo: 168604, 240448
+     * Viettel on POS: all item code with the sub-catecode = 432
+     */
+    private BigDecimal momoCashInAmt;
+    private BigDecimal payooAmt;// payoo 合计金额
+    private BigDecimal payooCodeAmt;
+    private BigDecimal payooBillAmt;
+    private BigDecimal viettelAmt;
+    private BigDecimal otherServiceAmt;
+    private BigDecimal servicePayAmt; // 合计金额
+
+    private Integer momoCashIncount;
+    private Integer payooCount; // payoo 合计人数
+    private Integer payooCodeCount;
+    private Integer payooBillCount;
+    private Integer viettelCount;
+    private Integer otherServiceCount;
+    private Integer serviceCount;  // 合计人数
 
 }

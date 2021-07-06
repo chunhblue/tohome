@@ -134,7 +134,7 @@
         concat(T1.category_cd,' ',T4.category_name) category_name,
         concat(T1.sub_category_cd,' ',T5.sub_category_name) sub_category_name
         FROM
-        SK0000 T,
+        sk0000 T,
         ma1000 T0,
         ma1100 T1,
         ma0070 T2,
@@ -164,7 +164,7 @@
         SELECT
         COUNT(T.article_id)
         FROM
-        SK0000 T,
+        sk0000 T,
         ma1000 T0,
         ma1100 T1,
         ma0070 T2,
@@ -190,69 +190,7 @@
 
     </select>
 
-    <select id="getData" parameterType="cn.com.bbut.iy.itemmaster.dto.orderReport.OrderReportParamDTO"
-            resultMap="BaseResultMap">
-       SELECT DISTINCT
-             ma1000.store_name,
-             ma1000.store_cd,
-             sk0000.on_hand_qty qty1,
-             od0010.barcode,
-             od0010.order_date,
-             od0010.article_id,
-             ma1100.article_name,
-             od0010.vendor_id,
-             od0010.order_unit purchase_unit_id,
-             od0010.order_price,
-             ma1100.converter,
-             ma1100.spec,
-            COALESCE(receive_qty,0) as receive_qty,
-            ma1110.order_batch_qty,
-            ma1110.min_order_amt_tax,/*最低订货金额*/
-          COALESCE(min_order_qty,0) as min_order_qty,
-           COALESCE(dc_m_order_qty,0) as dc_m_order_qty,
-            ma1110.order_tax_type_cd,/*税率cd*/
-            ma1100.min_display_qty,
-            COALESCE(sk0000.advise_qty) AS auto_order_qty,
-            od0010.order_unit AS unit_id,
-            ma0220.unit_name,
-            od0010.order_qty AS order_qty,
-            od0010.order_nocharge_qty,
-       od0010.order_qty +  COALESCE(od0010.order_nocharge_qty,0) as real_qty,
-            ( SELECT ma8070.psd FROM ma8070,OD0010 WHERE ma8070.store_cd = #{param.storeCd}AND ma8070.article_id = od0010.article_id ) AS psd,
-           (select  od0000.order_date from  od0000 where od0000.order_id=od0010.order_id)  AS order_date,
-            od0010.order_amt AS order_total_amt
-        FROM
-            ma1000,
-            ma1100,
-            ma1110,
-            PI0125 PI1 LEFT JOIN PI0120 PI2
-            AND pi1.pi_cd = pi2.pi_cd
-            AND pi1.pi_date = pi2.pi_date
-            AND pi1.article_id = pi2.article_id,
-            od0010 LEFT JOIN sk0000 on
-            od0010.article_id = sk0000.article_id
-            AND sk0000.store_cd = #{param.storeCd}
-            AND sk0000.store_cd = od0010.store_cd
-            AND sk0000.effective_date =#{param.orderDate}
-            LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id
-        WHERE
-            ma1100.article_id = od0010.article_id
-              AND pi1.store_cd = #{storeCd}
-             AND pi1.article_id = ma1100.article_id
-            AND ma1000.store_cd = od0010.store_cd
-            AND #{param.orderDate} BETWEEN ma1000.effective_start_date
-            AND ma1000.effective_end_date
-            AND #{param.orderDate} BETWEEN ma1100.effective_start_date
-            AND ma1100.effective_end_date
-            AND ma1100.article_id = ma1110.article_id
-            AND ma1110.structure_cd = (
-                select admin_structure_cd from MA0020 where structure_cd =
-                (SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = od0010.store_cd and effective_sts = '10') and effective_sts = '10'
-                )
-            AND od0010.vendor_id = ma1110.vendor_id
-        LIMIT ${param.rows} OFFSET ${param.limitStart}
 
-    </select>
     <select id="getData01" parameterType="cn.com.bbut.iy.itemmaster.dto.orderReport.OrderReportParamDTO"
             resultMap="BaseResultMap">
        SELECT B.*,
@@ -383,7 +321,6 @@
         ma1000.store_name,
       COALESCE(PI1.variance_qty,0) variance_qty,
       OD0010.order_id,
-      sk0000.on_hand_qty qty1,
       od0010.barcode,
       od0010.article_id,
       ma1100.article_name,
@@ -401,7 +338,7 @@
       ma1110.order_tax_type_cd,
       /*税率cd*/
       ma1100.min_display_qty,
-      coalesce (sk0000.advise_qty,0) AS auto_order_qty,
+      COALESCE ((SELECT soq FROM ma8070 WHERE ma8070.store_cd = #{param.storeCd} AND od0010.article_id=ma8070.article_id),0) AS auto_order_qty,
       od0010.order_unit AS unit_id,
       ma0220.unit_name,
       od0010.order_qty AS order_qty,
@@ -414,15 +351,14 @@
       ma1100 left join
         PI0125 PI1
         on pi1.article_id = ma1100.article_id and pi1.store_cd =#{param.storeCd}
-        LEFT JOIN PI0120 PI2 ON pi1.pi_cd = pi2.pi_cd
+        RIGHT JOIN PI0120 PI2 ON pi1.pi_cd = pi2.pi_cd
         AND pi1.pi_date = pi2.pi_date
         AND pi1.article_id = pi2.article_id,
+        <if test="param.articleId != null and param.articleId != ''">
+            AND PI1.article_id=#{param.articleId}
+        </if>
       ma1110,
       od0010
-      LEFT JOIN sk0000 ON od0010.article_id = sk0000.article_id
-      AND sk0000.store_cd = #{param.storeCd}
-      AND sk0000.store_cd = od0010.store_cd
-      AND sk0000.effective_date = #{param.orderDate}
       LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id
       WHERE
       ma1100.article_id = od0010.article_id
@@ -497,13 +433,13 @@
         ma1110.order_tax_type_cd,
         /*税率cd*/
         ma1100.min_display_qty,
-        sk0000.advise_qty AS auto_order_qty,
+        coalesce(ma8070.soq,0 ) AS auto_order_qty,
         od0010.order_unit AS unit_id,
         ma0220.unit_name,
         od0010.order_qty AS order_qty,
         od0010.order_nocharge_qty,
         od0010.order_qty + COALESCE ( od0010.order_nocharge_qty, 0 ) AS real_qty,
-        ( SELECT ma8070.psd ma8070 FROM ma8070 WHERE ma8070.store_cd = #{param.storeCd} AND ma8070.article_id = od0010.article_id ) AS psd,
+        coalesce(ma8070.psd,0 ) AS psd,
         od0010.order_amt AS order_total_amt
         FROM
         ma1000,
@@ -515,10 +451,9 @@
         AND pi1.article_id = pi2.article_id,
         ma1110,
         od0010
-        LEFT JOIN sk0000 ON od0010.article_id = sk0000.article_id
-        AND sk0000.store_cd = #{param.storeCd}
-        AND sk0000.store_cd = od0010.store_cd
-        AND sk0000.effective_date = #{param.orderDate}
+        LEFT JOIN ma8070 ON ma8070.store_cd = #{param.storeCd}
+        AND ma8070.article_id = od0010.article_id
+
         LEFT JOIN ma0220 ON od0010.order_unit = ma0220.unit_id
         WHERE
         ma1100.article_id = od0010.article_id

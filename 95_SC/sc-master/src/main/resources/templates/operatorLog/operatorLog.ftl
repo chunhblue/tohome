@@ -62,12 +62,13 @@
             display:none;
         }
     </STYLE>
+    <!--页头-->
+    [@common.header][/@common.header]
 </head>
 
 <body>
 
-<!--页头-->
-[@common.header][/@common.header]
+
 <!--导航-->
 [@common.nav "HOME&Basic&Operator Log"][/@common.nav]
 <div class="container-fluid" id="main_box">

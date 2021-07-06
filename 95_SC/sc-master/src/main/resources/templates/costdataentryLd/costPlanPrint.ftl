@@ -61,7 +61,7 @@
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <span style="float: left" id="userName">User Name：${userName!}</span>
-                <span style="float: right">Print Date：${printTime?string('dd/MM/yyyy')}</span>
+                <span style="float: right">Print Date：${printTime!}</span>
             </div>
         </div>
         <table id="grid_table" class="gridTable table table-hover table-striped table-condensed table-bordered zgrid-table">

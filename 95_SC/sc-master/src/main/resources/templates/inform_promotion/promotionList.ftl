@@ -64,6 +64,8 @@
             display:none;
         }
     </STYLE>
+    <!--页头-->
+    [@common.header][/@common.header]
 </head>
 
 <body>
@@ -72,8 +74,6 @@
 [#--		<div class="error-pcode-text"> ${useMsg!} </div>--]
 [#--		<div class="shade"></div>--]
 [#--	</div>--]
-<!--页头-->
-[@common.header][/@common.header]
 <!--导航-->
 [@common.nav "HOME&Message&MM Promotion Notifications"][/@common.nav]
 <div class="container-fluid" id="main_box">

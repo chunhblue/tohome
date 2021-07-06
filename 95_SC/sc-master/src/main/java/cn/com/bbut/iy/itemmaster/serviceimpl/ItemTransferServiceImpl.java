@@ -2,6 +2,7 @@ package cn.com.bbut.iy.itemmaster.serviceimpl;
 
 import cn.com.bbut.iy.itemmaster.dao.Cm9010Mapper;
 import cn.com.bbut.iy.itemmaster.dao.Cm9060Mapper;
+import cn.com.bbut.iy.itemmaster.dao.SK0010Mapper;
 import cn.com.bbut.iy.itemmaster.dao.inventory.InventoryVouchersMapper;
 import cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
@@ -46,6 +47,8 @@ public class ItemTransferServiceImpl implements ItemTransferService {
     private CM9060Service cm9060Service;
     @Autowired
     private RealTimeInventoryQueryService rtInventoryService;
+    @Autowired
+    private SK0010Mapper sK0010Mapper;
 
     /*
      * 类型&条件查询数据
@@ -93,13 +96,21 @@ public class ItemTransferServiceImpl implements ItemTransferService {
     public String insert(Sk0010DTO sk0010, List<Sk0020DTO> sk0020List) {
         String _id = "";
         try{
-        if ("602".equals(sk0010.getVoucherType())) {
-            _id = sequenceService.getSequence("sk0010_ist_id_seq","IST",sk0010.getStoreCd());
-        } else if ("601".equals(sk0010.getVoucherType())) {
-            _id = sequenceService.getSequence("sk0010_ist_id_seq","IST",sk0010.getStoreCd());
-        }
-        _id = _id.substring(0,10)+(Integer.parseInt(_id.substring(10, 14)) - 1) +_id.substring(14);
-        sk0010.setVoucherNo(_id);
+            if ("602".equals(sk0010.getVoucherType())) {
+                _id = sequenceService.getSequence("sk0010_ist_id_seq","IST",sk0010.getStoreCd());
+            } else if ("601".equals(sk0010.getVoucherType())) {
+                _id = sequenceService.getSequence("sk0010_ist_id_seq","IST",sk0010.getStoreCd());
+            }
+            if(StringUtils.isBlank(_id)){
+                throw new RuntimeException("生成传票编号失败");
+            }
+            _id = _id.substring(0,10)+(Integer.parseInt(_id.substring(10, 14)) - 1) +_id.substring(14);
+            sk0010.setVoucherNo(_id);
+
+            // 是否上传初始为No
+            sk0010.setUploadFlg("0");
+            inventoryVouchersMapper.insertSk0010(sk0010);
+            log.error("voucherType:"+sk0010.getVoucherType()+"<br>"+"sk0010:"+sk0010);
             // 保存明细
             for(Sk0020DTO bean : sk0020List){
                 bean.setVoucherNo(sk0010.getVoucherNo());
@@ -125,6 +136,8 @@ public class ItemTransferServiceImpl implements ItemTransferService {
     public int update(SK0010 sk0010, List<Sk0020DTO> sk0020List) {
         int i = 0;
         try {
+            // 保存头档
+            sK0010Mapper.updateByPrimaryKeySelective(sk0010);
             // 保存明细
             inventoryVouchersMapper.deleteSk0020ByKey(sk0020List.get(0));
             for(Sk0020DTO bean : sk0020List){

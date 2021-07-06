@@ -67,7 +67,7 @@
         concat(T1.category_cd,' ',T4.category_name) category_name,
         concat(T1.sub_category_cd,' ',T5.sub_category_name) sub_category_name
         FROM
-        SK0000 T,
+        sk0000_today T,
         ma1000 T0,
         ma1100 T1,
         ma0070 T2,
@@ -125,7 +125,7 @@
         SELECT
         COUNT(T.article_id)
         FROM
-        SK0000 T,
+        sk0000_today T,
         ma1000 T0,
         ma1100 T1,
         ma0070 T2,

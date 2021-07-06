@@ -53,14 +53,14 @@ public class UnpackExServiceImpl implements ExService {
         UnpackParamDTO jsonParam = gson.fromJson(paramDTO.getParam(), UnpackParamDTO.class);
         // 资源权限参数设置
         jsonParam.setStores(paramDTO.getStores());
-        int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
+        /*int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
         if(i >= 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             jsonParam.setUnpackStartDate(startDate);
-        }
+        }*/
         jsonParam.setResources(paramDTO.getResources());
         // 导出数据不需要分页
         jsonParam.setFlg(false);

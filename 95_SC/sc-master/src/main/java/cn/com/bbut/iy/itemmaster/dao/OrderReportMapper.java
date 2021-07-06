@@ -5,10 +5,11 @@ import cn.com.bbut.iy.itemmaster.dto.orderReport.OrderReportParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.vendorReceiptDaily.VendorReceiptDailyParamDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Mapper
+@Repository
 public interface OrderReportMapper {
 
 

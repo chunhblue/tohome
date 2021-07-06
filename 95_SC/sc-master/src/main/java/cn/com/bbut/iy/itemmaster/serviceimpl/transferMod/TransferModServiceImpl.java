@@ -160,10 +160,43 @@ public class TransferModServiceImpl implements TransferModService {
             if(StringUtils.isBlank(_id)){
                 throw new RuntimeException("Failed to generate document No., please try again!");
             }
+
+            List<Sk0020DTO> lastCorrList;
+            String lastVoucherNo =  inventoryMapper.getLastCorrTransfer(sk0010.getVoucherNo1(),sk0010.getVoucherType());
+            if(lastVoucherNo == null || "".equals(lastVoucherNo)){
+                // 如果是第一次修正，将原转移数量放入qty2
+                lastCorrList = inventoryMapper.getLastCorrQty(sk0010.getVoucherNo1());
+                for(Sk0020DTO bean : list){
+                    for(Sk0020DTO lastCorr : lastCorrList){
+                        if(bean.getArticleId().equals(lastCorr.getArticleId())
+                                && bean.getBarcode().equals(lastCorr.getBarcode())){
+                            if("504".equals(bean.getVoucherType())){
+                                bean.setQty2(lastCorr.getQty1());
+                            }else {
+                                bean.setQty2(lastCorr.getQty2());
+                            }
+                        }
+                    }
+                }
+            }else {
+                // 若是多次修正，将上一次的修正数量放入qty2
+                lastCorrList = inventoryMapper.getLastCorrQty(lastVoucherNo);
+                for(Sk0020DTO bean : list){
+                    for(Sk0020DTO lastCorr : lastCorrList){
+                        if(bean.getArticleId().equals(lastCorr.getArticleId())
+                                && bean.getBarcode().equals(lastCorr.getBarcode())){
+                            bean.setQty2(lastCorr.getActualQty());
+                        }
+                    }
+                }
+            }
+
+
             // 执行保存
             if("add".equals(upFlg)){
                 sk0010.setVoucherNo(_id);
                 inventoryMapper.insertSk0010(sk0010);
+                log.error("voucherType:"+sk0010.getVoucherType()+"<br>"+"sk0010:"+sk0010);
             }else if ("edit".equals(upFlg)){
                 inventoryMapper.updateSk0010(sk0010);
                 //删除明细数据

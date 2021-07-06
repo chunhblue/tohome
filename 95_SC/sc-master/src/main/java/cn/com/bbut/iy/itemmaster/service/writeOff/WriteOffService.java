@@ -24,6 +24,9 @@ public interface WriteOffService {
 //    WriteOffDTO getOffQty(WriteOffParamDTO dto);
 
     WriteOffDTO deleteGetOffQty(WriteOffParamDTO jsonParam);
+
+    Map<String, Object> deleteGetListPrint(WriteOffParamDTO param);
+
 //
 //    List<WriteOffDTO> deleteGetList1(WriteOffParamDTO param);
 }

@@ -21,7 +21,7 @@
                 processData:true,//布尔值，用于对data参数进行序列化处理。
                 contentType: "application/x-www-form-urlencoded; charset=utf-8",//发送信息至服务器时内容编码类型
                 mimeType: null,//模拟类型
-				timeout:10000, //设置本地的请求超时时间（以毫秒计）。10秒
+				timeout:30000, //设置本地的请求超时时间（以毫秒计）。30秒
 				beforeSend:null,//发送请求前运行的函数
 				complete:null,//请求完成时运行的函数（在请求成功或失败之后均调用，即在 success 和 error 函数之后）。
 				error:null,//如果请求失败要运行的函数。

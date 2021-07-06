@@ -107,20 +107,32 @@ define('hhreportSummy',function () {
                 }
             });
             // 结束日期 当前日期 加 三天
+            // let sumdate = new Date().getTime() - (86400000 * 3);
             let sumdate = new Date().getTime() - (86400000 * 7);
             startDate.val(new Date(sumdate).Format('dd/MM/yyyy'));
         }
     }
     var but_event=function(){
         m.search.click(function () {
+            // _common.loading_close();
             if(verifySearch()){
                 _common.loadPaging(1,1,1,10);
                 page=1;
                 setParamJson();
+                // _common.loading();
                 getData(page,rows);
+                // _common.loading_close();
             }
-
         })
+        $("#export").on("click",function(){
+            if(verifySearch()) {
+                // 拼接检索参数
+                setParamJson();
+                paramGrid = "searchJson=" + m.searchJson.val();
+                var url = url_left + "/export?" + paramGrid;
+                window.open(encodeURI(url), "excelExportWin", "width=450,height=300,scrollbars=yes");
+            }
+        });
         m.reset.click(function () {
             m.am.val('');
             m.startDate.val('');
@@ -136,6 +148,7 @@ define('hhreportSummy',function () {
         });
     }
     var getData = function (page,rows) {
+
         let record = m.searchJson.val();
         $.myAjaxs({
             url: url_left + "/search",
@@ -166,16 +179,23 @@ define('hhreportSummy',function () {
                             '</tr>';
                         m.dailyTable.append(tempTrHtml);
                     }
-                    // 加载分页条数据
+                      // 加载分页条数据
                     _common.loadPaging(totalPage,count,page,rows);
+                    // _common.loading_close();
+
                 }
-                // 激活 分页按钮点击
+
                 but_paging();
+                // _common.loading_close();
+
+                // 激活 分页按钮点击
+
             },
             error: function (e) {
-
+                // _common.loading_close();
             }
         });
+        // _common.loading_close();
     }
     // 分页按钮事件
     var but_paging = function () {
@@ -184,8 +204,10 @@ define('hhreportSummy',function () {
             if(verifySearch()){
                 // 拼接检索参数
                 setParamJson();
+                // _common.loading();
                 // 分页获取数据
                 getData(page,rows);
+                // _common.loading_close();
             }
         });
     }
@@ -223,7 +245,51 @@ define('hhreportSummy',function () {
         return str;
     };
     var verifySearch=function(){
+        if(m.startDate.val()==""||m.startDate.val()==null){
+            _common.prompt("Please enter a Sales Date!",5,"error"); // 开始日期不可以为空
+            $("#startDate").focus();
+            $("#startDate").css("border-color","red");
+            return false;
+        }else if(_common.judgeValidDate(m.startDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#startDate").focus();
+            return false;
+        }else {
+            $("#startDate").css("border-color","#CCC");
+        }
+        if(m.endDate.val()==""||m.endDate.val()==null){
+            _common.prompt("Please enter a Sales Date!",5,"error"); // 结束日期不可以为空
+            $("#endDate").focus();
+            $("#endDate").css("border-color","red");
+            return false;
+        }else if(_common.judgeValidDate(m.endDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#endDate").focus();
+            return false;
+        }else {
+            $("#endDate").css("border-color","#CCC");
+        }
+        if(new Date(fmtDate(m.startDate.val())).getTime()>new Date(fmtDate(m.endDate.val())).getTime()){
+            $("#endDate").focus();
+            _common.prompt("The start date cannot be greater than the end date!",5,"error");/*开始时间不能大于结束时间*/
+            return false;
+        }
+        if(m.startDate.val()!=""&&m.endDate.val()!=""){
+            var _StartDate = new Date(fmtDate($("#startDate").val())).getTime();
+            var _EndDate = new Date(fmtDate($("#endDate").val())).getTime();
+            var difValue = parseInt(Math.abs((_EndDate-_StartDate)/(1000*3600*24)));
+            if(difValue >7){
+                _common.prompt("Query Period cannot exceed 7 days!",5,"error"); // 日期期间取值范围不能大于62天
+                $("#endDate").focus();
+                return false;
+            }
+        }
           return  true;
+    };
+    function fmtDate(date) {
+        var res = '';
+        res = date.replace(/\//g, '').replace(/^(\d{2})(\d{2})(\d{4})$/,"$3-$2-$1");
+        return res;
     }
     self.init = init;
     return self

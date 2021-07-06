@@ -1,6 +1,7 @@
 package cn.com.bbut.iy.itemmaster.dao.receipt.warehouse;
 
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
+import cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TDTO;
 import cn.com.bbut.iy.itemmaster.dto.receipt.warehouse.WarehouseDetailsGridDTO;
 import cn.com.bbut.iy.itemmaster.dto.receipt.warehouse.WarehouseDetailsParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.receipt.warehouse.WarehouseReceiptGridDTO;

@@ -19,6 +19,7 @@ define('itemTransfersEdit', function () {
         toThousands = null,
         getThousands = null,
         selectTrTemp = null,
+        table = null,
         submitFlag=false,
         tempTrObjValue = {},//临时行数据存储
         //附件
@@ -117,7 +118,27 @@ define('itemTransfersEdit', function () {
         approval_event();
         // 初始化选择
         initAutomatic();
+        bodyScroll();
     }
+    // 冻结表头时，表头可以横向移动
+    var bodyScroll  = function(){
+        $(document).ready(function() {
+            if (table.defaults.freezeHeader) {
+                var initHeaderWidth = table.table.width();
+                table.zgGridHeaderTable.width(initHeaderWidth);
+                table.zgGridBodyBox.scroll(function () {
+                    var left = $(table.zgGridBodyBox).scrollLeft();
+                    if (left < 0) {
+                        left = 0;
+                    }
+                    left = (~left) + "px";
+                    table.zgGridHeaderTable.stop().animate({
+                        marginLeft: left
+                    }, 0);
+                });
+            }
+        });
+    };
 
     //附件
     var attachments_event = function () {
@@ -151,6 +172,7 @@ define('itemTransfersEdit', function () {
                 return resData;
             },
             loadCompleteEvent:function(self){
+                table = self;
                 selectTrTempFile = null;//清空选择的行
                 return self;
             },
@@ -373,7 +395,7 @@ define('itemTransfersEdit', function () {
                 $("#aStore").css("border-color","#CCC");
             }
             let cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,spec,priceNoTax,taxRate,bqty1,adjustReason,adjustReasonText" +
-                ",barcode1,articleId1,articleName1,uom1,spec1,priceNoTax1,taxRate1");
+                ",barcode1,articleId1,articleName1,uom1,spec1,priceNoTax1,taxRate1,transferInQty");
             $("#item_input_cd").val(cols['barcode']);
             $.myAutomatic.setValueTemp(itemInput,cols['articleId'],cols['articleName']);
             $("#item_input_uom").val(cols['uom']);
@@ -381,6 +403,7 @@ define('itemTransfersEdit', function () {
             $("#item_input_price").val(cols['priceNoTax']);
             $("#tax_rate").val(cols['taxRate']);
             $("#actualQty").val(cols['bqty1']);
+            $("#transferInQty").val(cols['transferInQty']);
             $.myAutomatic.setValueTemp(adjustReason,cols['adjustReason'],cols['adjustReasonText']);
             $("#In_item_input_cd").val(cols['barcode1']);
             $.myAutomatic.setValueTemp(InItemInput,cols['articleId1'],cols['articleName1']);
@@ -395,7 +418,8 @@ define('itemTransfersEdit', function () {
             $('#update_dialog').attr("flg","upt");
             $('#update_dialog').modal("show");
             // 查询实时库存
-            getStock(_storeCd, cols['articleId']);
+            getStock(_storeCd, cols['articleId'],'out');
+            getStock(_storeCd, cols['articleId1'],'in');
         });
 
         // 查看
@@ -406,13 +430,14 @@ define('itemTransfersEdit', function () {
             }else{
                 let _storeCd = $("#aStore").attr('k');
                 let cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,spec,priceNoTax,bqty1,adjustReasonText" +
-                    ",barcode1,articleId1,articleName1,uom1,spec1,priceNoTax1,taxRate1");
+                    ",barcode1,articleId1,articleName1,uom1,spec1,priceNoTax1,taxRate1,transferInQty");
                 $("#item_input_cd").val(cols['barcode']);
                 $.myAutomatic.setValueTemp(itemInput,cols['articleId'],cols['articleName']);
                 $("#item_input_uom").val(cols['uom']);
                 $("#item_input_spec").val(cols['spec']);
                 $("#item_input_price").val(cols['priceNoTax']);
                 $("#actualQty").val(cols['bqty1']);
+                $("#transferInQty").val(cols['transferInQty']);
                 $.myAutomatic.setValueTemp(adjustReason,'',cols['adjustReasonText']);
                 $("#In_item_input_cd").val(cols['barcode1']);
                 $.myAutomatic.setValueTemp(InItemInput,cols['articleId1'],cols['articleName1']);
@@ -424,7 +449,8 @@ define('itemTransfersEdit', function () {
                 $('#update_dialog').attr("flg","view");
                 $('#update_dialog').modal("show");
                 // 查询实时库存
-                getStock(_storeCd, cols['articleId']);
+                getStock(_storeCd, cols['articleId'],'out');
+                getStock(_storeCd, cols['articleId1'],'in');
             }
         });
 
@@ -446,7 +472,7 @@ define('itemTransfersEdit', function () {
                 });
             }
         });
-    }
+    };
 
     //审核事件
     var approval_event = function () {
@@ -494,7 +520,7 @@ define('itemTransfersEdit', function () {
                 // 转入商品
                 let _price1 = $(this).find('td[tag=priceNoTax1]').text();
                 let _qty1 = parseInt(reThousands($(this).find('td[tag=qty2]').text()))||0;
-                let _actualQty1 = parseInt(reThousands($(this).find('td[tag=bqty1]').text()))||0;
+                let _actualQty1 = parseInt(reThousands($(this).find('td[tag=transferInQty]').text()))||0;
                 let _rate1 = reThousands($(this).find('td[tag=taxRate1]').text())||0;
                 let _amtNoTax1 = accMul(_price, Math.abs(_actualQty1));
                 let _amt1 = Number(accMul(_amtNoTax1, accAdd(1,_rate1))).toFixed(2);
@@ -560,7 +586,8 @@ define('itemTransfersEdit', function () {
                 if (result != "true") {
                     return false;
                 }
-                var detailType = "tmp_transfer_out";
+                $("#audit_affirm").prop("disabled",true);
+                // var detailType = "tmp_transfer_out";
                 $.myAjaxs({
                     url: url_left + '/update',
                     async: true,
@@ -696,6 +723,7 @@ define('itemTransfersEdit', function () {
         if(flag==2){ // modify
             $("#dialog_affirm").prop("disabled", false);
             $("#actualQty").prop("disabled", false);
+            $("#transferInQty").prop("disabled", false);
             $("#item_input").prop("disabled", false);
             $("#In_item_input").prop("disabled", false);
             $("#itemRefresh").show();
@@ -705,6 +733,7 @@ define('itemTransfersEdit', function () {
         }else{
             $("#dialog_affirm").prop("disabled", flg);
             $("#actualQty").prop("disabled", flg);
+            $("#transferInQty").prop("disabled", flg);
             $("#itemRefresh").hide();
             $("#itemRemove").hide();
             $("#In_itemRefresh").hide();
@@ -748,6 +777,8 @@ define('itemTransfersEdit', function () {
         $("#In_item_input_spec").val("");
         $("#In_item_input_price").val("");
         $("#In_tax_rate").val("");
+        $("#transferInQty").val("");
+        $('#inventoryInQty').val("");
     }
 
     // 根据权限类型的不同初始化不同的画面样式
@@ -882,10 +913,19 @@ define('itemTransfersEdit', function () {
 
         $("#actualQty").blur(function () {
             $("#actualQty").val(toThousands(this.value));
+            $("#transferInQty").val($("#actualQty").val());
         });
         //光标进入，去除金额千分位，并去除小数后面多余的0
         $("#actualQty").focus(function(){
             $("#actualQty").val(reThousands(this.value));
+        });
+
+        $("#transferInQty").blur(function () {
+            $("#transferInQty").val(toThousands(this.value));
+        });
+        //光标进入，去除金额千分位，并去除小数后面多余的0
+        $("#transferInQty").focus(function(){
+            $("#transferInQty").val(reThousands(this.value));
         });
 
         // 重置按钮
@@ -928,7 +968,7 @@ define('itemTransfersEdit', function () {
                     // 转入商品
                     let _price1 = $(this).find('td[tag=priceNoTax1]').text();
                     let _qty1 = parseInt(reThousands($(this).find('td[tag=qty2]').text()))||0;
-                    let _actualQty1 = parseInt(reThousands($(this).find('td[tag=bqty1]').text()))||0;
+                    let _actualQty1 = parseInt(reThousands($(this).find('td[tag=transferInQty]').text()))||0;
                     let _rate1 = reThousands($(this).find('td[tag=taxRate1]').text())||0;
                     let _amtNoTax1 = accMul(_price, Math.abs(_actualQty1));
                     let _amt1 = Number(accMul(_amtNoTax1, accAdd(1,_rate1))).toFixed(2);
@@ -974,8 +1014,7 @@ define('itemTransfersEdit', function () {
                         qty1:_actualQty1,
                         actualAmt:_amt1,
                         displaySeq:num
-                    }
-                    console.log(orderInItem);
+                    };
                     inItemDetail.push(orderInItem);
 
                     _amountNoTax = accAdd(_amountNoTax, _amtNoTax);
@@ -1004,7 +1043,18 @@ define('itemTransfersEdit', function () {
                 let bean = {
                     storeCd:_storeCd,
                     voucherNo:_voucherNo,
-                    voucherType:_type,
+                    voucherType:'602',
+                    voucherDate:_date,
+                    storeCd1:_storeCd1,
+                    voucherAmtNoTax:_amountNoTax,
+                    voucherTax:_taxAmt,
+                    voucherAmt:_amount,
+                    remark:$("#cRemark").val()
+                };
+                let bean1 = {
+                    storeCd:_storeCd,
+                    voucherNo:_voucherNo,
+                    voucherType:'601',
                     voucherDate:_date,
                     storeCd1:_storeCd1,
                     voucherAmtNoTax:_amountNoTax,
@@ -1019,7 +1069,7 @@ define('itemTransfersEdit', function () {
                     pageType : '0'
                 };
                 let _inItem = {
-                    searchJson : JSON.stringify(bean),
+                    searchJson : JSON.stringify(bean1),
                     listJson : JSON.stringify(inItemDetail),
                     pageType : '0'
                 }
@@ -1122,12 +1172,12 @@ define('itemTransfersEdit', function () {
                 _select = cols['articleId'];
                 _inselect = cols['articleId1'];
             }
-            if(flg=='add' || _select != _itemId && _inselect != _inItemId){
+            if(flg==='add' || _select !== _itemId && _inselect !== _inItemId){
                 let _addFlg = true;
                 $("#zgGridTtable>.zgGrid-tbody tr").each(function () {
                     let articleId = $(this).find('td[tag=articleId]').text();
                     let articleId1 = $(this).find('td[tag=articleId1]').text();
-                    if (articleId == _itemId && articleId1 == _inItemId) {
+                    if (articleId === _itemId && articleId1 === _inItemId) {
                         _addFlg = false;
                         return false; // 结束遍历
                     }
@@ -1147,24 +1197,26 @@ define('itemTransfersEdit', function () {
                         }
                         let tr = '<tr id="zgGridTtable_'+rowindex+'_tr" class="">' +
                             '<td tag="ckline" align="center" style="color:#428bca;" id="zgGridTtable_'+rowindex+'_tr_ckline" tdindex="zgGridTtable_ckline"><input type="checkbox" value="zgGridTtable_'+rowindex+'_tr" name="zgGridTtable"> </td>' +
-                            '<td align="right" width="130" tag="barcode" title="'+m.item_input_cd.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_barcode" tdindex="zgGridTtable_barcode">'+m.item_input_cd.val()+'</td>' +
-                            '<td align="right" width="130" tag="articleId" title="'+m.item_input.attr('k')+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId" tdindex="zgGridTtable_articleId">'+m.item_input.attr('k')+'</td>' +
-                            '<td align="left" width="130" tag="articleName" title="'+m.item_input.attr('v')+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleName" tdindex="zgGridTtable_articleName">'+m.item_input.attr('v')+'</td>' +
+                            '<td align="right" width="120" tag="barcode" title="'+m.item_input_cd.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_barcode" tdindex="zgGridTtable_barcode">'+m.item_input_cd.val()+'</td>' +
+                            '<td align="right" width="120" tag="articleId" title="'+m.item_input.attr('k')+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId" tdindex="zgGridTtable_articleId">'+m.item_input.attr('k')+'</td>' +
+                            '<td align="left" width="110" tag="articleName" title="'+m.item_input.attr('v')+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleName" tdindex="zgGridTtable_articleName">'+m.item_input.attr('v')+'</td>' +
                             '<td align="left" width="60" tag="uom" title="'+m.item_input_uom.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_uom" tdindex="zgGridTtable_uom">'+m.item_input_uom.val()+'</td>' +
                             '<td align="left" width="100" tag="spec" title="'+m.item_input_spec.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_spec" tdindex="zgGridTtable_spec">'+m.item_input_spec.val()+'</td>' +
                             '<td align="right" tag="priceNoTax" style="display: none;" title="'+m.item_input_price.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_priceNoTax" tdindex="zgGridTtable_priceNoTax">'+m.item_input_price.val()+'</td>' +
                             '<td align="right" tag="taxRate" style="display: none;" title="'+m.tax_rate.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_taxRate" tdindex="zgGridTtable_taxRate">'+m.tax_rate.val()+'</td>' +
 
-                            '<td align="right" width="130" tag="barcode1" title="'+m.In_item_input_cd.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_barcode1" tdindex="zgGridTtable_barcode1">'+m.In_item_input_cd.val()+'</td>' +
-                            '<td align="right" width="130" tag="articleId1" title="'+m.In_item_input.attr('k')+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId1" tdindex="zgGridTtable_articleId1">'+m.In_item_input.attr('k')+'</td>' +
-                            '<td align="left" width="130" tag="articleName1" title="'+m.In_item_input.attr('v')+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleName1" tdindex="zgGridTtable_articleName1">'+m.In_item_input.attr('v')+'</td>' +
+                            '<td align="right" width="110" tag="barcode1" title="'+m.In_item_input_cd.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_barcode1" tdindex="zgGridTtable_barcode1">'+m.In_item_input_cd.val()+'</td>' +
+                            '<td align="right" width="110" tag="articleId1" title="'+m.In_item_input.attr('k')+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId1" tdindex="zgGridTtable_articleId1">'+m.In_item_input.attr('k')+'</td>' +
+                            '<td align="left" width="110" tag="articleName1" title="'+m.In_item_input.attr('v')+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleName1" tdindex="zgGridTtable_articleName1">'+m.In_item_input.attr('v')+'</td>' +
                             '<td align="left" width="60" tag="uom1" title="'+m.In_item_input_uom.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_uom1" tdindex="zgGridTtable_uom1">'+m.In_item_input_uom.val()+'</td>' +
                             '<td align="left" width="100" tag="spec1" title="'+m.In_item_input_spec.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_spec1" tdindex="zgGridTtable_spec1">'+m.In_item_input_spec.val()+'</td>' +
                             '<td align="right" tag="priceNoTax1" style="display: none;" title="'+m.In_item_input_price.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_priceNoTax1" tdindex="zgGridTtable_priceNoTax1">'+m.In_item_input_price.val()+'</td>' +
                             '<td align="right" tag="taxRate1" style="display: none;" title="'+m.In_tax_rate.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_taxRate1" tdindex="zgGridTtable_taxRate1">'+m.In_tax_rate.val()+'</td>' +
 
-                            '<td align="right" width="90" tag="bqty1" title="'+m.actualQty.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_bqty1" tdindex="zgGridTtable_bqty1">'+m.actualQty.val()+'</td>' +
-                            '<td align="right" width="100" tag="inventoryQty" title="'+m.inventoryQty.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_inventoryQty" tdindex="zgGridTtable_inventoryQty">'+m.inventoryQty.val()+'</td>' +
+                            '<td align="right" width="120" tag="bqty1" title="'+m.actualQty.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_bqty1" tdindex="zgGridTtable_bqty1">'+m.actualQty.val()+'</td>' +
+                            '<td align="right" width="100" tag="inventoryQty" style="display: none;" title="'+m.inventoryQty.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_inventoryQty" tdindex="zgGridTtable_inventoryQty">'+m.inventoryQty.val()+'</td>' +
+                            '<td align="right" width="120" tag="transferInQty" title="'+$('#transferInQty').val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_transferInQty" tdindex="zgGridTtable_transferInQty">'+$('#transferInQty').val()+'</td>' +
+                            '<td align="right" width="100" tag="inventoryInQty" style="display: none;" title="'+$('#inventoryInQty').val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_inventoryInQty" tdindex="zgGridTtable_inventoryInQty">'+$('#inventoryInQty').val()+'</td>' +
                             '<td align="left" tag="adjustReason" style="display: none;" title="'+m.adjustReason.attr("k")+'" align="center" id="zgGridTtable_'+rowindex+'_tr_adjustReason" tdindex="zgGridTtable_adjustReason">'+m.adjustReason.attr("k")+'</td>' +
                             '<td align="left" width="130" tag="adjustReasonText" title="'+m.adjustReason.attr("v")+'" align="center" id="zgGridTtable_'+rowindex+'_tr_adjustReasonText" tdindex="zgGridTtable_adjustReasonText">'+m.adjustReason.attr("v")+'</td>' +
                             '</tr>';
@@ -1179,7 +1231,7 @@ define('itemTransfersEdit', function () {
                             $("#zgGridTtable>.zgGrid-tbody tr").each(function () {
                                 let articleId = $(this).find('td[tag=articleId]').text();
                                 let articleId1 = $(this).find('td[tag=articleId1]').text();
-                                if(articleId==cols["articleId"] && articleId1==incols["articleId1"]){
+                                if(articleId===cols["articleId"] && articleId1===incols["articleId1"]){
                                     $(this).find('td[tag=barcode]').text(m.item_input_cd.val());
                                     $(this).find('td[tag=articleId]').text(m.item_input.attr('k'));
                                     $(this).find('td[tag=articleName]').text(m.item_input.attr('v'));
@@ -1197,6 +1249,8 @@ define('itemTransfersEdit', function () {
                                     $(this).find('td[tag=taxRate1]').text(m.In_tax_rate.val());
                                     $(this).find('td[tag=bqty1]').text(m.actualQty.val());
                                     $(this).find('td[tag=inventoryQty]').text(m.inventoryQty.val());
+                                    $(this).find('td[tag=transferInQty]').text($("#transferInQty").val());
+                                    $(this).find('td[tag=inventoryInQty]').text($("#inventoryInQty").val());
                                     $(this).find('td[tag=adjustReason]').text(m.adjustReason.attr("k"));
                                     $(this).find('td[tag=adjustReasonText]').text(m.adjustReason.attr("v"));
                                 }
@@ -1380,7 +1434,7 @@ define('itemTransfersEdit', function () {
                                     $("#item_input_price").val(res.o.baseOrderPrice);
                                     $("#tax_rate").val(res.o.taxRate);
                                     // 查询实时库存
-                                    getStock(_storeCd, _itemId);
+                                    getStock(_storeCd, _itemId,'out');
                                 }else{
                                     $.myAutomatic.cleanSelectObj(itemInput);
                                     _common.prompt(res.msg,3,"info");
@@ -1405,7 +1459,7 @@ define('itemTransfersEdit', function () {
             },
             selectEleClick: function (thisObject) {
                 clearInItemialog(false);
-                if(thisObject.attr('k') == $("#item_input").attr('k')){
+                if(thisObject.attr('k') === $("#item_input").attr('k')){
                     $("#In_item_input").focus();
                     $.myAutomatic.cleanSelectObj(InItemInput);
                     _common.prompt("A transfer out of a item cannot be the same as a transfer into a Item!",3,"info"); // 转出商品不能和转入商品相同
@@ -1424,6 +1478,8 @@ define('itemTransfersEdit', function () {
                                     $("#In_item_input_spec").val(res.o.spec);
                                     $("#In_item_input_price").val(res.o.baseOrderPrice);
                                     $("#In_tax_rate").val(res.o.taxRate);
+                                    // 查询实时库存
+                                    getStock(_storeCd, _itemId,'in');
                                 }else{
                                     $.myAutomatic.cleanSelectObj(InItemInput);
                                     _common.prompt(res.msg,3,"info");
@@ -1453,7 +1509,7 @@ define('itemTransfersEdit', function () {
     }
 
     // 查询商品库存数量
-    var getStock = function(storeCd, itemId){
+    var getStock = function(storeCd, itemId,flg){
         $.myAjaxs({
             url:url_root+"/inventoryVoucher/getStock",
             async:true,
@@ -1463,8 +1519,12 @@ define('itemTransfersEdit', function () {
             dataType:"json",
             success: function (result) {
                 if(result.success){
-                    m.on_hand_qty.val(toThousands(parseInt(result.o.realtimeQty)));
-                    m.inventoryQty.val(toThousands(parseInt(result.o.realtimeQty)));
+                    if(flg === 'out'){
+                        m.on_hand_qty.val(toThousands(parseInt(result.o.realtimeQty)));
+                        m.inventoryQty.val(toThousands(parseInt(result.o.realtimeQty)));
+                    }else if(flg === 'in'){
+                        $("#inventoryInQty").val(toThousands(parseInt(result.o.realtimeQty)));
+                    }
                 }else{
                     _common.prompt(result.msg, 3, "error");
                 }
@@ -1483,27 +1543,30 @@ define('itemTransfersEdit', function () {
             localSort: true,
             colNames:["Out Item Barcode","Transfer Out Item","Out Item Name","UOM","Specification","Price","Rate",
                 "In Item Barcode","Transfer In Item","In Item Name","UOM","Specification","Price","Rate",
-                "Transfer Qty","Inventory Qty","adjustReason","Transfer Reason"],
+                "Transfer Out Qty","Out Inventory Qty","Transfer In Qty","In Inventory Qty","adjustReason","Transfer Reason"],
             colModel:[
                 /*转移的A商品*/
-                {name:"barcode",type:"text",text:"right",width:"130",ishide:false,css:""},
-                {name:"articleId",type:"text",text:"right",width:"130",ishide:false,css:""},
-                {name:"articleName",type:"text",text:"left",width:"130",ishide:false,css:""},
+                {name:"barcode",type:"text",text:"right",width:"120",ishide:false,css:""},
+                {name:"articleId",type:"text",text:"right",width:"120",ishide:false,css:""},
+                {name:"articleName",type:"text",text:"left",width:"110",ishide:false,css:""},
                 {name:"uom",type:"text",text:"left",width:"60",ishide:false,css:""},
                 {name:"spec",type:"text",text:"left",width:"100",ishide:false,css:""},
                 {name:"priceNoTax",type:"text",text:"right",ishide:true,css:"",getCustomValue:getString0},
                 {name:"taxRate",type:"text",text:"right",ishide:true,css:"",getCustomValue:getString0},
                 /*转移到的B商品*/
-                {name:"barcode1",type:"text",text:"right",width:"130",ishide:false,css:""},
-                {name:"articleId1",type:"text",text:"right",width:"130",ishide:false,css:""},
-                {name:"articleName1",type:"text",text:"left",width:"130",ishide:false,css:""},
+                {name:"barcode1",type:"text",text:"right",width:"110",ishide:false,css:""},
+                {name:"articleId1",type:"text",text:"right",width:"110",ishide:false,css:""},
+                {name:"articleName1",type:"text",text:"left",width:"110",ishide:false,css:""},
                 {name:"uom1",type:"text",text:"left",width:"60",ishide:false,css:""},
                 {name:"spec1",type:"text",text:"left",width:"100",ishide:false,css:""},
                 {name:"priceNoTax1",type:"text",text:"right",ishide:true,css:"",getCustomValue:getString0},
                 {name:"taxRate1",type:"text",text:"right",ishide:true,css:"",getCustomValue:getString0},
-                /*转移的数量*/
-                {name:"bqty1",type:"text",text:"right",width:"90",ishide:false,css:"",getCustomValue:getThousands},
-                {name:"inventoryQty",type:"text",text:"right",width:"100",ishide:false,css:"",getCustomValue:getThousands},
+                /*转出的数量*/
+                {name:"bqty1",type:"text",text:"right",width:"120",ishide:false,css:"",getCustomValue:getThousands},
+                {name:"inventoryQty",type:"text",text:"right",width:"120",ishide:true,css:"",getCustomValue:getThousands},
+                /*转入的数量*/
+                {name:"transferInQty",type:"text",text:"right",width:"120",ishide:false,css:"",getCustomValue:getThousands},
+                {name:"inventoryInQty",type:"text",text:"right",width:"120",ishide:true,css:"",getCustomValue:getThousands},
                 {name:"adjustReason",type:"text",text:"left",ishide:true},
                 {name:"adjustReasonText",type:"text",text:"left",width:"130",ishide:false,css:""},
             ],//列内容
@@ -1519,6 +1582,10 @@ define('itemTransfersEdit', function () {
             loadEachBeforeEvent:function(trObj){
                 tempTrObjValue={};
                 return trObj;
+            },
+            loadCompleteEvent: function (self) {
+                table = self;
+                return self;
             },
             ajaxSuccess:function(resData){
                 return resData;

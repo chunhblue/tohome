@@ -21,4 +21,6 @@ public interface OP0060Service {
     int deleteByParam(OP0060 op0060);
 
     List<OP0060GridDto> depositList(OP0060ParamDto param, OutputStream outputStream);
+
+    Integer searhSameDayInsert(OP0060ParamDto param);
 }

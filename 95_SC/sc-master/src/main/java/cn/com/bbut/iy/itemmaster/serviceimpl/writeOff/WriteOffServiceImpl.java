@@ -2,7 +2,7 @@ package cn.com.bbut.iy.itemmaster.serviceimpl.writeOff;
 
 import cn.com.bbut.iy.itemmaster.dao.Cm9060Mapper;
 import cn.com.bbut.iy.itemmaster.dao.WriteOffMapper;
-import cn.com.bbut.iy.itemmaster.dto.adjustmentDaily.AdjustmentDailyDTO;
+import cn.com.bbut.iy.itemmaster.dto.cashierDetail.SaleDetail;
 import cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffDTO;
 import cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO;
 import cn.com.bbut.iy.itemmaster.entity.base.Cm9060;
@@ -12,13 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * 门店报废日报
- * 
+ *
  * @author mxy
  */
 @Slf4j
@@ -47,25 +48,59 @@ public class WriteOffServiceImpl implements WriteOffService {
      */
     @Override
     public Map<String,Object> deleteGetList(WriteOffParamDTO dto) {
+        WriteOffDTO offDTO = null;
+        BigDecimal saleqty=BigDecimal.ZERO;
+        // 占时注释掉sale_qty
+        //BigDecimal  newwriteOffQty=BigDecimal.ZERO;
+         BigDecimal  writeOffQty=BigDecimal.ZERO;
+         Integer records=0;
         dto.setBusinessDate(getBusinessDate());
-
         // 获取总条数
         int count = writeOffMapper.selectCountByCondition(dto);
 
-        WriteOffDTO offDTO = this.deleteGetOffQty(dto);
 
         // 获取总页数
         int totalPage = (count % dto.getRows() == 0) ? (count / dto.getRows()) : (count / dto.getRows()) + 1;
+        if (totalPage==dto.getPage()){
+//            offDTO = this.deleteGetOffQty(dto);
+//            saleqty=offDTO.getSaleQty();
+//           writeOffQty = offDTO.getWriteOffQty();
+//            records= Math.toIntExact(offDTO.getRecords());
+        }
+        dto.setFlg(true);
 
         List<WriteOffDTO> result = writeOffMapper.selectListByCondition(dto);
 
+        // 占时注释掉sale_qty
+        List<String> storePosTranNoList = new ArrayList<>();
+        for (WriteOffDTO dto1 : result) {
+            String storePosTranNo = dto1.getStoreCd()+"_"+dto1.getArticleId()+"_"+dto1.getWriteOffDate();
+            storePosTranNoList.add(storePosTranNo);
+        }
+        if (storePosTranNoList.size()>0){
+            List<WriteOffDTO> exSaleDetail = writeOffMapper.getExSaleDetail(storePosTranNoList);
+            for (WriteOffDTO dto2:result) {
+                for (WriteOffDTO dto3: exSaleDetail) {
+                    if ((dto2.getStoreCd()+"_"+dto2.getArticleId()+"_"+dto2.getWriteOffDate())
+                            .equals(dto3.getStoreCd()+"_"+dto3.getArticleId()+"_"+dto3.getAccDate())){
+                        dto2.setSaleQty(dto3.getSaleQty());
+                    }
+                }
+            }
+        }
+
         Map<String,Object> map = new HashMap<String,Object>();
+
         map.put("totalPage",totalPage);
         map.put("count",count);
+
         map.put("data",result);
-        map.put("ItemQty",offDTO.getWriteOffQty());
-        map.put("itemSaleQty",offDTO.getSaleQty());
-        map.put("totalItem",offDTO.getRecords());
+//        map.put("ItemQty",writeOffQty);
+//        map.put("ItemQty","0");
+//        map.put("itemSaleQty", saleqty);
+//        map.put("itemSaleQty","0");
+//        map.put("totalItem",records);
+//        map.put("totalItem","0");
         return map;
     }
 
@@ -78,22 +113,54 @@ public class WriteOffServiceImpl implements WriteOffService {
 
     @Override
     public WriteOffDTO deleteGetOffQty(WriteOffParamDTO dto){
-        dto.setBusinessDate(getBusinessDate());
-        Integer ItemQty=0;
-        Integer saleQty=0;
-        dto.setFlg(false);
-        int countItemSku = writeOffMapper.getCountItemSku(dto);
-        List<WriteOffDTO> ItemAllQty = writeOffMapper.selectListByCondition(dto);
-        for (WriteOffDTO item:ItemAllQty) {
-            BigDecimal bigDecimal =item.getWriteOffQty();
-            BigDecimal bigSaleQty =item.getSaleQty();
-            ItemQty+=bigDecimal.intValue();
-            saleQty+=bigSaleQty.intValue();
-        }
-        WriteOffDTO offDTO = new WriteOffDTO();
-        offDTO.setWriteOffQty(BigDecimal.valueOf(ItemQty));
-        offDTO.setSaleQty(BigDecimal.valueOf(saleQty));
-        offDTO.setRecords(countItemSku);
-        return offDTO;
+//        dto.setFlg(false);
+//        List<WriteOffDTO> result = writeOffMapper.selectListByCondition(dto);
+//        List<String> storePosTranNoList = new ArrayList<>();
+//        for (WriteOffDTO dto1 : result) {
+//            String storePosTranNo = dto1.getStoreCd()+"_"+dto1.getArticleId()+"_"+dto1.getWriteOffDate();
+//            storePosTranNoList.add(storePosTranNo);
+//        }
+            dto.setBusinessDate(getBusinessDate());
+            Integer ItemQty=0;
+            Integer saleQty=0;
+            dto.setFlg(false);
+            List<String> storePosTranNoList = new ArrayList<>();
+            int countItemSku = writeOffMapper.getCountItemSku(dto);
+            List<WriteOffDTO> ItemAllQty = writeOffMapper.selectSaleQty(dto);
+
+            for (WriteOffDTO item:ItemAllQty) {
+                BigDecimal bigDecimal =item.getWriteOffQty();
+                ItemQty+=bigDecimal.intValue();
+                String storePosTranNo = item.getStoreCd()+"_"+item.getArticleId()+"_"+item.getWriteOffDate();
+                storePosTranNoList.add(storePosTranNo);
+            }
+            if (storePosTranNoList.size()>0) {
+                saleQty = writeOffMapper.getTotalSaleQty(storePosTranNoList);
+            }
+
+            WriteOffDTO offDTO = new WriteOffDTO();
+            offDTO.setWriteOffQty(BigDecimal.valueOf(ItemQty));
+            offDTO.setSaleQty(BigDecimal.valueOf(saleQty));
+            offDTO.setRecords(countItemSku);
+            return offDTO;
+    }
+
+    @Override
+    public Map<String, Object> deleteGetListPrint(WriteOffParamDTO param) {
+        param.setBusinessDate(getBusinessDate());
+        WriteOffDTO offDTO;
+        BigDecimal  writeOffQty;
+        Integer records=0;
+        param.setFlg(false);
+        List<WriteOffDTO> result = writeOffMapper.selectListByCondition(param);
+        Map<String,Object> map = new HashMap<String,Object>();
+        offDTO = this.deleteGetOffQty(param);
+        writeOffQty = offDTO.getWriteOffQty();
+        records= Math.toIntExact(offDTO.getRecords());
+        map.put("data",result);
+        map.put("ItemQty",writeOffQty);
+        map.put("totalItem",records);
+        return map;
     }
 }
+

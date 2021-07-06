@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
@@ -26,4 +27,6 @@ public interface ClassifiedSaleReportMapper {
     List<classifiedSaleReportDTO> search(@Param("classParamdto") clssifiedSaleParamReportDTO classParamdto);
 
     int searchCount(@Param("classParamdto")clssifiedSaleParamReportDTO param);
+
+    BigDecimal getTotalSaleAmount(@Param("classParamdto") clssifiedSaleParamReportDTO param);
 }

@@ -16,9 +16,11 @@ import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.stocktake.StocktakePlanService;
 import cn.com.bbut.iy.itemmaster.service.stocktakeProcess.StocktakeProcessService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,7 @@ import javax.servlet.http.HttpSession;
 import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -59,6 +62,8 @@ public class StockProcessController extends BaseAction {
     @Autowired
     private StocktakePlanService stocktakePlanService;
     private SXSSFWorkbook wb;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_STOCKTAKE_VARIANCE";
     private final String EXCEL_EXPORT_NAME = "Stocktake Variance Report.xlsx";
@@ -96,11 +101,12 @@ public class StockProcessController extends BaseAction {
     public void export(String store,HttpServletRequest request,HttpServletResponse response) {
         try {
             //下载
-            String fileName = "Physical Inventory Result - "+store+".xlsx";
+            String fileName = "Stock-take Result of store-"+store+".xlsx";
 
             fileName = URLEncoder.encode(fileName,"utf-8");
             fileName = new String(fileName.getBytes("gbk"),"iso8859-1");
 
+            fileName = fileName.replaceAll("\\+","%20");
             response.setContentType("application/x-msdownload");
             response.addHeader("Content-Disposition", "attachment;filename="+fileName);
 
@@ -271,6 +277,10 @@ public class StockProcessController extends BaseAction {
     public ModelAndView stocktakeProcessPrint(HttpServletRequest request, HttpSession session,
                                          Map<String, ?> model,String searchJson) {
         User u = this.getUser(session);
+
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入盘点处理一览画面", u.getUserId());
         Collection<Integer> roleIds = (Collection<Integer>) request.getSession().getAttribute(
                 Constants.SESSION_ROLES);
@@ -278,7 +288,7 @@ public class StockProcessController extends BaseAction {
         mv.addObject("use", 0);
         mv.addObject("identity", 1);
         mv.addObject("userName", u.getUserName());
-        mv.addObject("printTime", new Date());
+        mv.addObject("printTime",  Utils.getFormateDate(ymd));
         mv.addObject("searchJson", searchJson);
         mv.addObject("typeId", ConstantsAudit.TYPE_ORDER_TAKE_STOCK);
         mv.addObject("useMsg", "盘点处理一览打印画面");

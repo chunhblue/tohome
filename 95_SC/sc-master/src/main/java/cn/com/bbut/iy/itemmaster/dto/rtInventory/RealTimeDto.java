@@ -31,5 +31,6 @@ public class RealTimeDto {
     private BigDecimal return_corr_qty;//退货更正数量
     private BigDecimal transfer_out_corr_qty;//转出更正数量
     private BigDecimal transfer_in_corr_qty;//转入更正数量
-    private int in_es_time;//创建时间
+    private long in_es_time;//创建时间
+    private String acc_date;
 }

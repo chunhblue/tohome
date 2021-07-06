@@ -86,4 +86,46 @@ public class Utils {
         str = date.substring(0,4)+"-"+date.substring(4,6)+"-"+date.substring(6,8);
         return str;
     }
+
+    //   "yyyy-MM-dd" --> "yyyyMMdd"
+    public static String getStringDate(String date){
+        String str = "";
+        if(date == null || "".equals(date) || date.length()<10){
+            return str;
+        }
+        str = date.substring(0,4)+date.substring(5,7)+date.substring(8,10);
+        return str;
+    }
+
+    /**
+     * yyyyMMddHHmmss --> yyyy-MM-dd HH:mm:ss
+     * @param date
+     * @return
+     */
+    public static String getDateTime(String date){
+        String str = "";
+        if(date == null || "".equals(date) || date.length()<14){
+            return str;
+        }
+        str = date.substring(0,4)+"-"+date.substring(4,6)+"-"+date.substring(6,8)
+                +" "+date.substring(8,10)+":"+date.substring(10,12)+":"+date.substring(12,14);
+        return str;
+    }
+
+    public static String getFormateDate(String date){
+        String str = "";
+        if(date == null || "".equals(date) || date.length()<8){
+            return str;
+        }
+        str = date.substring(6,8)+"/"+date.substring(4,6)+"/"+date.substring(0,4);
+        return str;
+    }
+    public static String getFormateDateStr(String date){
+        String str = "";
+        if(date == null || "".equals(date) || date.length()<8){
+            return str;
+        }
+        str =date.substring(0,4)+date.substring(4,6)+date.substring(6,8);
+        return str;
+    }
 }

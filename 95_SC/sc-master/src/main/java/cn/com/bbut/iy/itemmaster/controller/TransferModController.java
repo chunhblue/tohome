@@ -19,6 +19,7 @@ import cn.com.bbut.iy.itemmaster.entity.SK0010;
 import cn.com.bbut.iy.itemmaster.entity.SK0010Key;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.SequenceService;
 import cn.com.bbut.iy.itemmaster.service.transferMod.TransferModService;
 import com.google.gson.Gson;
@@ -55,7 +56,8 @@ public class TransferModController extends BaseAction {
     private TransferModService service;
     @Autowired
     private MRoleStoreService mRoleStoreService;
-
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     /**
      * 店间调拨修正编辑画面
@@ -243,6 +245,9 @@ public class TransferModController extends BaseAction {
             return null;
         }
         CommonDTO dto = new CommonDTO();
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         // 当前用户ID
         dto.setUpdateUserId(u.getUserId());
         dto.setCreateUserId(u.getUserId());
@@ -252,12 +257,12 @@ public class TransferModController extends BaseAction {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HHmmss");
         // 当前时间年月日
         String date = dateFormat.format(now);
-        dto.setCreateYmd(date);
-        dto.setUpdateYmd(date);
+        dto.setCreateYmd(ymd);
+        dto.setUpdateYmd(ymd);
         // 当前时间时分秒
         String time = timeFormat.format(now);
-        dto.setCreateHms(time);
-        dto.setUpdateHms(time);
+        dto.setCreateHms(hms);
+        dto.setUpdateHms(hms);
         return dto;
     }
 

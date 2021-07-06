@@ -23,10 +23,10 @@
 			/*visibility: initial;*/
 		}
 		.username {
-			width: 74px;
+			width: auto;
 		}
 		.username > a {
-			width: 74px;
+			width: auto;
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;

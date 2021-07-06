@@ -298,8 +298,11 @@ public class CashierController extends BaseAction {
         if(sa0050!=null&&StringUtils.isNotBlank(sa0050.getStoreCd())&&
                 StringUtils.isNotBlank(sa0050.getCashierId())&&
                 StringUtils.isNotBlank(sa0050.getCashierName())&&
+                StringUtils.isNotBlank(sa0050.getCashierPassword())&&
                 StringUtils.isNotBlank(sa0050.getCashierLevel())&&
                 StringUtils.isNotBlank(sa0050.getEffectiveSts())) {
+            User u = this.getUser(session);
+            sa0050.setCreateUserId(u.getUserId());
             int flag = sa0050Service.insertCashier(sa0050);
             if(flag>0){
                 resultDto.setSuccess(true);
@@ -358,6 +361,8 @@ public class CashierController extends BaseAction {
             sa0050.setCashierName(cashierName);
             sa0050.setCashierEmail(cashierEmail);
             sa0050.setStoreCd(storeCd);
+            User u = this.getUser(session);
+            sa0050.setUpdateUserId(u.getUserId());
             int flag = sa0050Service.updateCashier(sa0050);
             if(flag>0){
                 resultDto.setSuccess(true);

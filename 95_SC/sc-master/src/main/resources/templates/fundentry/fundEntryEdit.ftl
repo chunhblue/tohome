@@ -151,14 +151,14 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="expenditureStatus" class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label not-null">Expenditure Status</label>
-                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-                                        <select id="expenditureStatus" class="form-control input-sm" name="ExpenditureStatus">
-                                            <option value="">-- All/Please Select --</option>
-                                        </select>
-                                    </div>
+[#--                                    <label for="expenditureStatus" class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label not-null">Expenditure Status</label>--]
+[#--                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">--]
+[#--                                        <select id="expenditureStatus" class="form-control input-sm" name="ExpenditureStatus">--]
+[#--                                            <option value="">-- All/Please Select --</option>--]
+[#--                                        </select>--]
+[#--                                    </div>--]
 
-                                    <label for="operator" class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">Operator</label>[#-- 店铺 --]
+                                    <label for="operator" class="col-xs-12 col-sm-2 col-md-2 col-lg-3 control-label">Operator</label>[#-- 店铺 --]
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                                         <div class="aotu-pos">
                                             <input type="text" class="form-control my-automatic input-sm" id="operator" disabled="disabled">

@@ -34,17 +34,24 @@ public class PriceLabelServiceImpl implements PriceLabelService {
 
         // 业务日期
         param.setBusinessDate(businessDate);
-
-        // 查询总条数
-        Integer count = priceLabelMapper.searchCount(param);
-
-        if (count==null || count == 0) {
-            return new GridDataDTO<PriceLabelDTO>();
-        }
-
-        // 分页查询未来三天的数据
-        List<PriceLabelDTO> list = priceLabelMapper.search(param);
-
+        List<PriceLabelDTO> list;
+        Integer count=0;
+       if (!param.getType().equals("03")){
+           // 查询总条数
+           count = priceLabelMapper.searchCount(param);
+           if (count==null || count == 0) {
+               return new GridDataDTO<PriceLabelDTO>();
+           }
+           // 分页查询未来三天的数据
+           list = priceLabelMapper.search(param);
+       }else {
+           count = priceLabelMapper.searchTypeCount(param);
+           if (count==null || count == 0) {
+             return new GridDataDTO<PriceLabelDTO>();
+           }
+           // 分页查询未来三天的数据
+          list = priceLabelMapper.selectListByCondition(param);
+       }
         return new GridDataDTO<PriceLabelDTO>(list,param.getPage(),count,param.getRows());
     }
 
@@ -68,6 +75,10 @@ public class PriceLabelServiceImpl implements PriceLabelService {
         String businessDate = cm9060Service.getValByKey("0000");
         // 业务日期
         param.setBusinessDate(businessDate);
-        return priceLabelMapper.search(param);
+        if (!param.getType().equals("03")){
+            return priceLabelMapper.search(param);
+        }else {
+            return priceLabelMapper.selectListByCondition(param);
+        }
     }
 }

@@ -47,6 +47,13 @@ define('materialDataEntry', function () {
         piCdParam: null,
         searchItemInp: null, // 商品定位输入框
         searchItemBtn: null, // 商品定位按钮
+        //审核
+        approvalBut:null,
+        approval_dialog:null,
+        audit_cancel:null,
+        audit_affirm:null,
+        typeId:null,
+        reviewId:null,
         i_storeCd: null,
         main_box:null,
         ParamstoreCd:null,
@@ -72,11 +79,14 @@ define('materialDataEntry', function () {
         initAutoMatic();
         $("#create_ymd").prop("disabled", true);
         $("#create_user").prop("disabled", true);
+        m.approvalBut.prop("disabled",true);
         initTable1();
         //表格内按钮事件
         table_event();
         initPage();
 
+        //审核事件
+        approval_event();
     }
   var  initPage=function () {
       if (m.enterFlag.val()) {
@@ -86,6 +96,14 @@ define('materialDataEntry', function () {
           if (m.enterFlag.val() == 'view') {
               $("#updatePlanDetails").hide();
               setDisable(true);
+              //检查是否允许审核
+              _common.checkRole(m.piCdParam.val(),m.typeId.val(),function (success) {
+                  if(success){
+                      m.approvalBut.prop("disabled",false);
+                  }else{
+                      m.approvalBut.prop("disabled",true);
+                  }
+              });
           }
           if (m.enterFlag.val()=="update"){
               $("#updatePlanDetails").show();
@@ -153,7 +171,7 @@ define('materialDataEntry', function () {
                         '<td tag="uom" width="130" title="' + uom + '" align="left" id="zgGridTtable_' + rowindex + '_tr_uom" tdindex="zgGridTtable_uom">' + uom + '</td>' +
                         '<td tag="qty" width="130" title="' + qty + '" align="right" id="zgGridTtable_' + rowindex + '_tr_qty" tdindex="zgGridTtable_qty">' + qty + '</td>' +
                         '<td tag="stockQty" width="130" title="' + stockQty + '" align="right" id="zgGridTtable_' + rowindex + '_tr_stockQty" tdindex="zgGridTtable_stockQty">' + stockQty + '</td>' +
-                        '</tr>'
+                          '</tr>'
                     tableGrid.append(html);
                     _common.prompt("Data added successfully", 3, "success");
                 } else if (subFlag == 'update') {
@@ -173,7 +191,7 @@ define('materialDataEntry', function () {
                             $(this).find('td[tag=articleId]').text(articleId);
                             $(this).find('td[tag=articleName]').text(articleName);
                             $(this).find('td[tag=uom]').text(uom);
-                            $(this).find('td[tag=qty]').text(qty);
+                             $(this).find('td[tag=qty]').text(qty);
 
                             var obj = {
                                 'barcode': barcode,
@@ -230,7 +248,7 @@ define('materialDataEntry', function () {
                 $('#articleId').val(record.articleId);
                 $('#uom').val(record.uom);
                 $('#qty').val(record.qty);
-                console.log($("#qty").val())
+                console.log($("#qty").val());
                 $('#inventoryQty').val(toThousands(parseInt(record.stockQty)));
             }
         });
@@ -279,7 +297,7 @@ define('materialDataEntry', function () {
         // //是否有冻结列的标记
         //
         //重写选择背景变色事件
-      if(!m.enterFlag.val()){
+      if(m.enterFlag.val()!=null){
           //是否有冻结列的标记
           var freeze = tableGrid.getting("freezeIndex");
           //重写选择背景变色事件
@@ -377,6 +395,70 @@ define('materialDataEntry', function () {
         $(selectTrTemp).find('td[tag=qty]').text("").append("<input type='text' class='form-control my-automatic input-sm' id='grid_orderQty' oldValue='"+cols["qty"]+"' value='"+cols["qty"]+"'>");
     }
 
+    var approval_event = function () {
+        //点击审核按钮
+        m.approvalBut.on("click",function(){
+            var recordId = m.piCdParam.val();
+            if(recordId!=null&&recordId!=""){
+                $("#approval_dialog").modal("show");
+                //获取审核记录
+                _common.getStep(recordId,m.typeId.val());
+            }else{
+                _common.prompt("Record fetch failed, Please try again!",5,"error");
+            }
+        });
+        //审核提交
+        $("#audit_affirm").on("click",function () {
+            //审核意见
+            var auditContent = $("#auditContent").val();
+            if(auditContent.length>200){
+                _common.prompt("Approval comments cannot exceed 200 characters!",5,"error");
+                return false;
+            }
+            //审核记录id
+            var auditStepId = $("#auditId").val();
+            //用户id
+            var auditUserId = $("#auditUserId").val();
+            //审核结果
+            var auditStatus = $("#auditStatusGroup").find("input[type='radio']:checked").val();
+            _common.myConfirm("Are you sure to save?", function (result) {
+                if (result != "true") {
+                    return false;
+                }
+                $("#audit_affirm").prop("disabled",true);
+                var detailType = "tmp_rms_adjustment";
+                $.myAjaxs({
+                    url: systemPath + "/audit/submit",
+                    async: true,
+                    cache: false,
+                    type: "post",
+                    data: {
+                        auditStepId: auditStepId,
+                        auditUserId: auditUserId,
+                        auditStatus: auditStatus,
+                        detailType:detailType,
+                        auditContent: auditContent,
+                        toKen: m.toKen.val()
+                    },
+                    dataType: "json",
+                    success: function (result) {
+                        if (result.success) {
+                            $("#approval_dialog").modal("hide");
+                            //更新主档审核状态值
+                            //_common.modifyRecordStatus(auditStepId,auditStatus);
+                            m.approvalBut.prop("disabled", true);
+                            _common.prompt("Saved Successfully!",3,"success");// 保存审核信息成功
+                        } else {
+                            m.approvalBut.prop("disabled", false);
+                            _common.prompt("Saved Failure!",5,"error");// 保存审核信息失败
+                        }
+                        m.toKen.val(result.toKen);
+                    },
+                    complete:_common.myAjaxComplete
+                });
+            })
+        })
+    }
 
     function uuid() {
         var s = [];
@@ -484,45 +566,51 @@ define('materialDataEntry', function () {
             }else {
                 $('#store').css("border-color","#CCC");
             }
+            var newdataForm = [];
             //2021/3/20 开始
-            if (!m.enterFlag.val()){
+            if (m.enterFlag.val()!=null) {
                 $("#zgGridTtable>.zgGrid-tbody tr").each(function () {
-                        var _articleId = $(this).find('td[tag=articleId]').text();
-                        var barcode = $(this).find('td[tag=barcode]').text();
-                        var articleName = $(this).find('td[tag=articleName]').text();
-                        var uom = $(this).find('td[tag=uom]').text();
-                        var qty = $(this).find('td[tag=qty]').text();
-                        var stockQty = $(this).find('td[tag=stockQty]').text();
-                        var obj = {
-                            'barcode': barcode,
-                            'articleId': _articleId,
-                            'articleName': articleName,
-                            'uom': uom,
-                            'qty': qty,
-                            'stockQty': stockQty,
-                            'rowIndex': uuid(), // 设置一个唯一标识
-                        }
-                        if (obj.qty!=0){
-                            dataForm.push(obj);
-                        }
+                    var _articleId = $(this).find('td[tag=articleId]').text();
+                    var barcode = $(this).find('td[tag=barcode]').text();
+                    var articleName = reThousands($(this).find('td[tag=articleName]').text());
+                    var uom = reThousands($(this).find('td[tag=uom]').text());
+                    var qty = $(this).find('td[tag=qty]').text();
+                    var stockQty = reThousands($(this).find('td[tag=stockQty]').text());
+                    var reasonCode = $(this).find('td[tag=reasonCode]').text();
+                    var fnStockQty = $(this).find('td[tag=fnStockQty]').text();
+                    var obj = {
+                        'barcode': barcode,
+                        'articleId': _articleId,
+                        'articleName': articleName,
+                        'uom': uom,
+                        'qty': qty,
+                        'stockQty': stockQty,
+                        'reasonCode': reasonCode,
+                        'fnStockQty':fnStockQty,
+                        'rowIndex': uuid(), // 设置一个唯一标识
+                    }
+                    if (obj.qty != null && obj.qty != "" && obj.qty!=0) {
+                        newdataForm.push(obj);
+                    }
 
                 });
-                if (dataForm.length<1) {
-                     _common.prompt("Please enter the inventory data!",5,"error");/*请录入费用录入商品数据*/
-                     return;
-                }
-                dataForm.forEach(function (item) {
-                    item.qty=reThousands(item.qty);
-                });
-                 }else {
-                if (dataForm.length<1) {
-                    _common.prompt("Please enter the inventory data!",5,"error");/*请录入费用录入商品数据*/
+                if (newdataForm.length < 1) {
+                    _common.prompt("Please enter the inventory data!", 5, "error");/*请录入费用录入商品数据*/
                     return;
                 }
-                dataForm.forEach(function (item) {
-                    item.qty=reThousands(item.qty);
+                newdataForm.forEach(function (item) {
+                    item.qty = reThousands(item.qty);
                 });
-               }
+                //   }else {
+                //  if (newdataForm.length<1) {
+                //      _common.prompt("Please enter the inventory data!",5,"error");/*请录入费用录入商品数据*/
+                //      return;
+                //  }
+                //  newdataForm.forEach(function (item) {
+                //      item.qty=reThousands(item.qty);
+                //  });
+                // }
+            }
 
 
 
@@ -533,7 +621,7 @@ define('materialDataEntry', function () {
                 'storeCd': storeCd,
             }
 
-            var record = encodeURIComponent(JSON.stringify(dataForm));
+            var record = encodeURIComponent(JSON.stringify(newdataForm));
             data = encodeURIComponent(JSON.stringify(data));
             _common.myConfirm("Are you sure you want to save?",function(result){
                 var detailType = "tmp_rms_adjustment";
@@ -552,9 +640,19 @@ define('materialDataEntry', function () {
                                 m.create_ymd.val(_common.formatCreateDate(result.o.createYmd+result.o.createHms));
                             }
                             m.piCd.val(result.o.piCd);
-                            setDisable(true);
-                            m.enterFlag='view';
-                            _common.prompt("Data saved successfully！",2,"success");
+                            _common.prompt("Data saved successfully！",2,"success",function(){/*保存成功*/
+                                //发起审核
+                                var typeId =m.typeId.val();
+                                var	nReviewid =m.reviewId.val();
+                                var	recordCd = m.piCd.val();
+                                _common.initiateAudit(storeCd,recordCd,typeId,nReviewid,m.toKen.val(),function (token) {
+                                    setDisable(true);
+                                    m.enterFlag='view';
+                                    //审核按钮禁用
+                                    m.approvalBut.prop("disabled",true);
+                                    m.toKen.val(token);
+                                })
+                            }, true);
                         }else{
                             _common.prompt(result.msg,5,"error");
                         }
@@ -580,18 +678,25 @@ define('materialDataEntry', function () {
                     }else {
                         $('#store').css("border-color","#CCC");
                 }
-                var searchJsonStr={
-                    storeCd:$("#store").attr("k"),
-                    articleId:articleId,
+
+
+                if (m.enterFlag.val()=="view" || m.enterFlag.val()=="update"){
+                    getDataIn(m.piCd.val());
+                }else {
+                    var searchJsonStr={
+                        storeCd:$("#store").attr("k"),
+                        articleId:articleId,
+                    }
+                    m.searchJson1.val(JSON.stringify(searchJsonStr))
+                    paramGrid = "searchJson="+ m.searchJson1.val();
+                    tableGrid.setting("url",url_left+"/getStoreAllItem");
+                    tableGrid.setting("param", paramGrid);
+                    tableGrid.setting("page", 1);
+                    tableGrid.loadData(null);
                 }
-                m.searchJson1.val(JSON.stringify(searchJsonStr))
-                paramGrid = "searchJson="+ m.searchJson1.val();
-                tableGrid.setting("url",url_left+"/getStoreAllItem");
-                tableGrid.setting("param", paramGrid);
-                tableGrid.setting("page", 1);
-                tableGrid.loadData(null);
+
             // }
-            searchItem();
+            // searchItem();
         });
         //费用录入创建日期
         m.create_ymd.datetimepicker({
@@ -694,6 +799,7 @@ define('materialDataEntry', function () {
             'uom': $($(selectTrTemp[0]).find('td')[3]).text(),
             'qty': $($(selectTrTemp[0]).find('td')[4]).text(),
             'stockQty': $($(selectTrTemp[0]).find('td')[5]).text(),
+            'reasonCode': $($(selectTrTemp[0]).find('td')[6]).text(),
         }
         return obj;
     }
@@ -741,8 +847,67 @@ define('materialDataEntry', function () {
                             '<td tag="articleId" width="130" title="'+item.articleId+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId" tdindex="zgGridTtable_articleId">'+item.articleId+'</td>' +
                             '<td tag="articleName" width="130" title="'+item.articleName+'" align="left" id="zgGridTtable_'+rowindex+'_tr_articleName" tdindex="zgGridTtable_articleName">'+item.articleName+'</td>' +
                             '<td tag="uom" width="130" title="'+item.uom+'" align="left" id="zgGridTtable_'+rowindex+'_tr_uom" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
+                            '<td tag="qty" width="130" title="'+item.qty+'" align="right" id="zgGridTtable_'+rowindex+'_tr_qty" tdindex="zgGridTtable_qty">'+item.qty+'</td>' +
+                            '<td tag="stockQty" width="130" title="'+toThousands(item.stockQty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_stockQty" tdindex="zgGridTtable_stockQty">'+toThousands(item.stockQty)+'</td>' +
+                            '<td  class="hide" tag="reasonCode" width="130" title="'+item.reasonCode+'" align="right" id="zgGridTtable_'+rowindex+'_tr_reasonCode" tdindex="zgGridTtable_reasonCode">'+item.reasonCode+'</td>' +
+                            '<td tag="reason" width="130" title="'+item.reason+'" align="right" id="zgGridTtable_'+rowindex+'_tr_reason" tdindex="zgGridTtable_reason">'+item.reason+'</td>' +
+                            '<td class="hide" tag="fnStockQty" width="130" title="'+toThousands(item.fnStockQty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_fnStockQty" tdindex="zgGridTtable_fnStockQty">'+toThousands(item.fnStockQty)+'</td>' +
+                             '</tr>'
+                        tableGrid.append(html);
+                    });
+                }
+            }
+        });
+    };
+    var getDataIn = function (piCd) {
+        if (piCd==null || piCd==" ") {
+            clearAll();
+            return;
+        }
+        m.piCd.val(piCd);
+        let articleId=m.searchItemInp.val();
+        // let barcode=m.searchItemBcd.val();
+        $("#create_user").val(m.create_By.val());
+        $("#create_ymd").val(m.piDateParam.val());
+        $.myAutomatic.setValueTemp(a_store,m.ParamstoreCd.val(),m.ParamstoreCd.val()+' '+m.ParamstoreName.val());//赋值
+        $.myAjaxs({
+            url: url_left + "/getInData",
+            async: true,
+            cache: false,
+            type: "get",
+            data: "piCd=" + piCd+"&storeCd="+$("#store").attr("k")+"&createUser="+$("#create_user").val()+"&createYmd="+$("#create_ymd").val()+"&articleId="+articleId,
+            dataType: "json",
+            success: function (result) {
+                if (result.success) {
+                    var record = result.o;
+                    dataForm = [];
+                    //  2021/3/25
+                    // $("#piCd").val(record.piCd);
+                    // $("#create_ymd").val(_common.formatCreateDate(record.createYmd));
+                    // $("#create_user").val(record.createUserName);
+                    $("#remarks").val(record.remarks);
+                    // m.i_storeCd.val(record.storeCd);
+                    // $.myAutomatic.setValueTemp(a_store, record.storeCd, record.storeName);//赋值
+                    dataForm=record.itemList;
+                    // 封装明细数据
+                    var trList = $("#zgGridTtable  tr:not(:first)");
+                    trList.remove();
+                    dataForm.forEach(function (item) {
+                        var rowindex = 0;
+                        var trId = $("#zgGridTtable>.zgGrid-tbody tr:last").attr("id");
+                        if(trId!=null&&trId!=''){
+                            rowindex = parseInt(trId.substring(trId.indexOf("_")+1,trId.indexOf("_")+2))+1;
+                        }
+                        item.rowIndex=uuid();
+                        var html = '<tr data-index="'+item.rowIndex+'">' +
+                            '<td tag="barcode" width="130" title="'+item.barcode+'" align="center" id="zgGridTtable_'+rowindex+'_tr_barcode" tdindex="zgGridTtable_barcode">'+item.barcode+'</td>' +
+                            '<td tag="articleId" width="130" title="'+item.articleId+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId" tdindex="zgGridTtable_articleId">'+item.articleId+'</td>' +
+                            '<td tag="articleName" width="130" title="'+item.articleName+'" align="left" id="zgGridTtable_'+rowindex+'_tr_articleName" tdindex="zgGridTtable_articleName">'+item.articleName+'</td>' +
+                            '<td tag="uom" width="130" title="'+item.uom+'" align="left" id="zgGridTtable_'+rowindex+'_tr_uom" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
                             '<td tag="qty" width="130" title="'+toThousands(item.qty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_qty" tdindex="zgGridTtable_qty">'+toThousands(item.qty)+'</td>' +
                             '<td tag="stockQty" width="130" title="'+toThousands(item.stockQty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_stockQty" tdindex="zgGridTtable_stockQty">'+toThousands(item.stockQty)+'</td>' +
+                            '<td hidden tag="reasonCode" width="130" title="'+item.reasonCode+'" align="right" id="zgGridTtable_'+rowindex+'_tr_reasonCode" tdindex="zgGridTtable_reasonCode">'+item.reasonCode+'</td>' +
+                            '<td tag="reason" width="130" title="'+item.reason+'" align="right" id="zgGridTtable_'+rowindex+'_tr_reason" tdindex="zgGridTtable_reason">'+item.reason+'</td>' +
                             '</tr>'
                         tableGrid.append(html);
                     });
@@ -887,11 +1052,11 @@ define('materialDataEntry', function () {
             $("#qty").css("border-color","red");
             _common.prompt("Qty cannot be empty!",5,"error");
             return false;
-        }else if(qty == '0'){
-            $("#qty").css("border-color","red");
-            _common.prompt("Qty cannot be 0!",5,"error");
-            $("#qty").focus();
-            return false;
+        // }else if(qty == '0'){
+        //     $("#qty").css("border-color","red");
+        //     _common.prompt("Qty cannot be 0!",5,"error");
+        //     $("#qty").focus();
+        //     return false;Parameter exception!
         }else if(reThousands(qty) > 9999999999999){
             $("#qty").css("border-color","red");
             _common.prompt("Qty cannot be greater more than 9999999999999!",5,"error");
@@ -916,7 +1081,7 @@ define('materialDataEntry', function () {
         tableGrid = $("#zgGridTtable").zgGrid({
             title: "Details",
             param: paramGrid,
-            colNames: ["Item Barcode", "Item Code", "Item Name", "UOM", "Qty","Inventory Qty"],
+            colNames: ["Item Barcode", "Item Code", "Item Name", "UOM", "Qty","Inventory Qty","Reason Code","Reason","fnStockQty"],
             colModel: [
                 {
                     name: "barcode",
@@ -955,7 +1120,7 @@ define('materialDataEntry', function () {
                     text: "right",
                     width: "130",
                     ishide: false,
-                    getCustomValue:getThousands
+                    // getCustomValue:getThousands
                 },
                 {
                     name: "stockQty",
@@ -963,6 +1128,28 @@ define('materialDataEntry', function () {
                     text: "right",
                     width: "130",
                     ishide: false,
+                    getCustomValue:getThousands
+                },
+                {
+                    name: "reasonCode",
+                    type: "text",
+                    text: "right",
+                    width: "130",
+                    ishide: true,
+                },
+                {
+                    name: "reason",
+                    type: "text",
+                    text: "right",
+                    width: "130",
+                    ishide: false,
+                },
+                {
+                    name: "fnStockQty",
+                    type: "text",
+                    text: "right",
+                    width: "130",
+                    ishide: true,
                     getCustomValue:getThousands
                 }
             ],//列内容
@@ -983,12 +1170,17 @@ define('materialDataEntry', function () {
             },
             loadCompleteEvent: function (self) {
                 selectTrTemp = null;//清空选择的行
-                if (!m.enterFlag.val()){
-                    tableGrid.find("tr").on('dblclick', function (e) {
-                        addInputValue();
-                    });
-                    return self;
-                }
+                   if (!m.enterFlag.val()){
+                       tableGrid.find("tr").on('dblclick', function (e) {
+                           var black = $("#saveBut").attr("disabled");
+                           if (black!="disabled"){
+                               addInputValue();
+                           }
+
+                       });
+                       return self;
+                   }
+
                 return self;
             },
             eachTrClick: function (trObj, tdObj) {//正常左侧点击

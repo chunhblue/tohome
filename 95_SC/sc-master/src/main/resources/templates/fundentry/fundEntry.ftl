@@ -64,6 +64,8 @@
             display: none;
         }
 	</STYLE>
+    <!--页头-->
+    [@common.header][/@common.header]
 </head>
 
 <body>
@@ -72,8 +74,6 @@
 [#--		<div class="error-pcode-text"> ${useMsg!} </div>--]
 [#--		<div class="shade"></div>--]
 [#--	</div>--]
-	<!--页头-->
-[@common.header][/@common.header]
 	<!--导航-->
 [@common.nav "HOME&Operation&Expenditure Management"][/@common.nav]
 <div class="container-fluid" id="main_box">
@@ -159,12 +159,12 @@
                                             <option value="">-- All/Please Select --</option>
                                         </select>
                                     </div>
-                                    <label for="expenditureStatus"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">Expenditure Status</label>
-                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-                                        <select id="expenditureStatus" class="form-control input-sm">
-                                            <option value="">-- All/Please Select --</option>
-                                        </select>
-                                    </div>
+[#--                                    <label for="expenditureStatus"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">Expenditure Status</label>--]
+[#--                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">--]
+[#--                                        <select id="expenditureStatus" class="form-control input-sm">--]
+[#--                                            <option value="">-- All/Please Select --</option>--]
+[#--                                        </select>--]
+[#--                                    </div>--]
 [#--                                    <label for="operator"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">operator</label>--]
 [#--                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">--]
 [#--                                        <select id="operator" class="form-control input-sm">--]

@@ -178,7 +178,7 @@
                     <div class="form-horizontal" >
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                             <div class="form-group">
-                                <label for="item_input"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label not-null">Transfer Out Item</label>
+                                <label for="item_input"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label not-null">Transfer Out Item/Barcode</label>
                                 <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
                                     <div class="aotu-pos good-select">
                                         <input type="text" class="form-control my-automatic input-sm" placeholder="Please enter 3 digit" id="item_input" style="overflow:scroll;text-overflow:ellipsis;">
@@ -208,7 +208,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="In_item_input"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label not-null">Transfer In Item</label>
+                                <label for="In_item_input"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label not-null">Transfer In Item/Barcode</label>
                                 <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
                                     <div class="aotu-pos good-select">
                                         <input type="text" class="form-control my-automatic input-sm" placeholder="Please enter 3 digit" id="In_item_input" style="overflow:scroll;text-overflow:ellipsis;">
@@ -237,15 +237,29 @@
                                 </div>
                             </div>
 
-                            <div class="form-group"> [#--转入数量--]
-                                <label for="actualQty"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">Tranfer Qty</label>
+                            <div class="form-group"> [#--转出数量--]
+                                <label for="actualQty"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">Transfer Out Qty</label>
                                 <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
                                     <input type="text" id="actualQty" class="form-control input-sm">
                                 </div>
 
-                                <label for="inventoryQty"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">Out Item Inventory Qty</label>
+                                <label for="inventoryQty"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label"
+                                       style="white-space: nowrap">Out Item Inventory Qty</label>
                                 <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
                                     <input type="text" id="inventoryQty" disabled class="form-control input-sm">
+                                </div>
+                            </div>
+
+                            <div class="form-group"> [#--转入数量--]
+                                <label for="transferInQty"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">Transfer In Qty</label>
+                                <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
+                                    <input type="text" id="transferInQty" class="form-control input-sm">
+                                </div>
+
+                                <label for="inventoryInQty"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label"
+                                       style="white-space: nowrap">In Item Inventory Qty</label>
+                                <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
+                                    <input type="text" id="inventoryInQty" disabled class="form-control input-sm">
                                 </div>
                             </div>
 

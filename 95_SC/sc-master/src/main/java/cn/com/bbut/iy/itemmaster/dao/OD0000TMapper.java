@@ -64,7 +64,7 @@ public interface OD0000TMapper {
      */
     int updateOldRecord(OD0000TDTO dto);
 
-    int updateNewRecord(String receiveId, @Param("commonDTO") CommonDTO commonDTO);
+    int updateNewRecord(String receiveId, @Param("commonDTO") CommonDTO commonDTO,@Param("checkMouthFlg")Integer checkMouthFlg);
     /**
      * 查询待选
      * @param storeCd
@@ -76,5 +76,9 @@ public interface OD0000TMapper {
     int updateReviewStatus(String receiveId);
 
     int orgOrderIdCount(@Param("receiveId")String receiveId);
+
+    OD0000TDTO selectByOrder(String receiveId);
+
+    OD0000TDTO getHHTreceiveDateTime(String orderId,String storeCd);
 
 }

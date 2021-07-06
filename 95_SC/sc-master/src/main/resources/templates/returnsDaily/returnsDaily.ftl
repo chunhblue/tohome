@@ -275,11 +275,11 @@
                                             <option value="02">Shift3</option>
                                         </select>
                                     </div>
-                                    [#--商品id--]
-                                    <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Barcode</label>
+                                    [#--barcode--]
+                                    [#--<label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Barcode</label>
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                                         <input type="text" id="barcode" class="form-control input-sm">
-                                    </div>
+                                    </div>--]
                                     [#--商品名称--]
                                     <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Item Code\Item Name</label>
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
@@ -321,8 +321,16 @@
                                             <input type="text" id="totalAmt" class="form-control input-sm">
                                         </div>
                                     </div>
-                                </div>
 
+                                    <label for="totalAmt"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Non Sale Type</label>
+                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+                                        <select id="nonSaleType" class="form-control my-automatic input-sm">
+                                            <option value="">-- All/Please Select --</option>
+                                            <option value="VOID">VOID</option>
+                                            <option value="REMOVE ITEM">REMOVE ITEM</option>
+                                            <option value="REFUND ITEM">REFUND ITEM</option>
+                                        </select>
+                                    </div>
                                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                     <div class="wire"></div>
                                     <button id="search" type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-search icon-right"></span>Inquire</button>
@@ -352,38 +360,41 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                    <span style="float: left">Date Created：${bsDate?string('dd/MM/yyyy')}</span>
+                    <span style="float: left">Date Created：${bsDate!}</span>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="row" style="overflow: scroll">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="width: 140%;">
                     <table id="dailyTable" class="table table-hover table-striped table-condensed table-bordered zgrid-table"
                            style="margin-bottom: 10px">
                         <tr>
-                            <th title="Store No.">Store<br> No.</th>
-                            <th title="Store Name">Store<br> Name</th>
-                            <th title="Item Code">Item<br> Code</th>
-                            <th title="Item Name">Item<br> Name</th>
-                            <th title="Barcode">Barcode</th>
-                            <th title="Date">Date</th>
+                            <th title="Store No.">Store No.</th>
+                            <th title="Store Name">Store Name</th>
+                            <th title="Item Code">Item Code</th>
+                            <th title="Item Name">Item Name</th>
+[#--                            <th title="Barcode">Barcode</th>--]
+                            <th title="Date" style="width: 8%">Date</th>
                             <th title="POS No.">POS No.</th>
-                            <th title="Receipt No.">Receipt<br> No.</th>
-                            <th title="Non Sale Type">Non Sale<br> Type</th>
+                            <th title="Receipt No.">Receipt No.</th>
+                            <th title="Non Sale Type">Non Sale Type</th>
                             <th title="Quantity">Quantity </th>
-                            <th title="Selling Price">Selling<br>  Price </th>
-                            <th title="Total Amount">Total<br> Amount </th>
-                            <th title="Cash">Cash</th>
-                            <th title="Card Payment">Card<br> Payment</th>
-                            <th title="E-Voucher">E-Voucher</th>
-                            <th title="Momo">Momo</th>
-                            <th title="Payoo">Payoo</th>
-                            <th title="Viettel">Viettel</th>
-                            <th title="Cashier ID">Cashier<br> ID</th>
-                            <th title="Cashier Name">Cashier<br> Name</th>
-[#--                            <th title="Area Manager ID">Area<br> Manager ID</th>--]
-                            <th title="Area Manager Name">Area<br> Manager Name</th>
+                            <th title="Amount">Amount</th>
+                            <th title="Cashier ID">Cashier ID</th>
+                            <th title="Cashier Name">Cashier Name</th>
+                            [#--                            <th title="Area Manager ID">Area<br> Manager ID</th>--]
+                            <th title="Area Manager Name" style="width: 8%">Area Manager Name</th>
+                            <th title="Mode">Mode</th>
                         </tr>
                     </table>
+
+                    [#--分页--]
+                    <nav aria-label="Page navigation" style="text-align: right">
+                        <ul class="pagination">
+                            <li class="disabled"><a href="javascript:void(0)" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+                            <li class="active"><a href="javascript:void(0)">1</a></li>
+                            <li class="disabled"><a href="javascript:void(0)" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </div>

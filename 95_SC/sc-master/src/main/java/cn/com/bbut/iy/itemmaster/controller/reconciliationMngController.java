@@ -17,6 +17,7 @@ import cn.com.bbut.iy.itemmaster.entity.Mb0030;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.exception.SystemRuntimeException;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.base.DefaultRoleService;
 import cn.com.bbut.iy.itemmaster.service.reconciliationMng.ReconciliationMngService;
 import com.google.gson.Gson;
@@ -65,6 +66,8 @@ public class reconciliationMngController extends BaseAction  {
     private MRoleStoreService mRoleStoreService;
     @Autowired
     private DefaultRoleService defaultRoleService;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     @RequestMapping(method = RequestMethod.GET)
     @Permission(codes = { PermissionCode.SC_RECONCILE_LIST_VIEW})
@@ -100,14 +103,14 @@ public class reconciliationMngController extends BaseAction  {
             return new GridDataDTO<>();
         }
         User u = this.getUser(session);
-        int i = defaultRoleService.getMaxPosition(u.getUserId());
-        if(i >= 4){
+        /*int i = defaultRoleService.getMaxPosition(u.getUserId());
+        if(i == 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             param.setTransStrartDate(startDate);
-        }
+        }*/
         param.setStores(stores);
 
         GridDataDTO<ReconciliationMngDto> list = service.getByTypeCondition(param);
@@ -434,6 +437,9 @@ public class reconciliationMngController extends BaseAction  {
             return null;
         }
         CommonDTO dto = new CommonDTO();
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         // 当前用户ID
         dto.setUpdateUserId(u.getUserId());
         dto.setCreateUserId(u.getUserId());
@@ -443,12 +449,12 @@ public class reconciliationMngController extends BaseAction  {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HHmmss");
         // 当前时间年月日
         String date = dateFormat.format(now);
-        dto.setCreateYmd(date);
-        dto.setUpdateYmd(date);
+        dto.setCreateYmd(ymd);
+        dto.setUpdateYmd(ymd);
         // 当前时间时分秒
         String time = timeFormat.format(now);
-        dto.setCreateHms(time);
-        dto.setUpdateHms(time);
+        dto.setCreateHms(hms);
+        dto.setUpdateHms(hms);
         return dto;
     }
 

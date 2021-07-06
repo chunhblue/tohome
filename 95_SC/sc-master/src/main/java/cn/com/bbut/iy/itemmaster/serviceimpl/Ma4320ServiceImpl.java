@@ -32,4 +32,9 @@ public class Ma4320ServiceImpl implements Ma4320Service {
         return list;
     }
 
+    @Override
+    public String getNowDate() {
+        return ma4320Mapper.getNowDate();
+    }
+
 }

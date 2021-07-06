@@ -55,14 +55,14 @@ public class GroupSaleExServiceImpl implements ExService {
         // 资源权限参数设置
         jsonParam.setStores(paramDTO.getStores());
         jsonParam.setResources(paramDTO.getResources());
-        int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
+        /*int i = defaultRoleService.getMaxPosition(paramDTO.getUserId());
         if(i >= 4){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DATE, -1);
             String startDate = sdf.format(calendar.getTime());
             jsonParam.setSaleStartDate(startDate);
-        }
+        }*/
         // 获取业务日期
         jsonParam.setBusinessDate(cm9060Service.getValByKey("0000"));
         // 生成文件标题信息对象

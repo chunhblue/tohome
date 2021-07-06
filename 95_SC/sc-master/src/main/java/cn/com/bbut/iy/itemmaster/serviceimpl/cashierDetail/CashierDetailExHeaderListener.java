@@ -37,8 +37,8 @@ public class CashierDetailExHeaderListener implements ExEventListener {
         String row1 = "";
 
         // 列标题
-        String row2 = "Sales Date,POS No.,Cashier,Shift,Receipt No.,Selling Time,Membership ID,Subtotal,Discount," +
-                "Total,Payment Type,Item Barcode,Item Name,Specification,UOM,Original Selling Price,Selling Price,Quantity," +
+        String row2 = "Sales Date,POS No.,Cashier,Shift,Receipt No.,SAP Receipt No.,SAP Bill No.,Selling Time,Membership ID,Subtotal,Discount," +
+                "Total,Payment Type,Pay Amount,Item Barcode,Item Name,Specification,UOM,Original Selling Price,Selling Price,Quantity," +
                 "Amount,Discount Amount";
         String[] titles = row2.split(",");
 
@@ -49,7 +49,7 @@ public class CashierDetailExHeaderListener implements ExEventListener {
         Row row = sheet.createRow(index++);
         Cell cell = row.createCell(0, Cell.CELL_TYPE_STRING);
         // 参数：起始行号，终止行号， 起始列号，终止列号 下标（0开始）
-        region = new CellRangeAddress(0, 0, 0, titles.length);
+        region = new CellRangeAddress(0, 0, 0, titles.length-1);
         cell.setCellStyle(titleStyle0(wb));
         cell.setCellValue(row0);
         sheet.addMergedRegion(region);
@@ -58,7 +58,7 @@ public class CashierDetailExHeaderListener implements ExEventListener {
         row = sheet.createRow(index++);
         cell = row.createCell(0, Cell.CELL_TYPE_STRING);
         // 参数：起始行号，终止行号， 起始列号，终止列号 下标（0开始）
-        region = new CellRangeAddress(1, 1, 0, titles.length);
+        region = new CellRangeAddress(1, 1, 0, titles.length-1);
         cell.setCellStyle(titleStyle1(wb));
         cell.setCellValue(row1);
         sheet.addMergedRegion(region);
@@ -70,11 +70,11 @@ public class CashierDetailExHeaderListener implements ExEventListener {
             if (!t.equals("")) {
                 setHeaderCell(wb, sheet, row, curCol, titleStyle2(wb), t);
                 // 合并单元格
-                if (curCol==10) {
+                /*if (curCol==12) {
                     region = new CellRangeAddress((index-1), (index-1), curCol, (curCol+=1));
                     sheet.addMergedRegion(region);
                     setRegionUtil(region, sheet, wb);
-                }
+                }*/
                 curCol++;
             }
         }

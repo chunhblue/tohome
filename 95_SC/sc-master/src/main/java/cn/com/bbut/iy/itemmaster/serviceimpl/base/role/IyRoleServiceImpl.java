@@ -635,7 +635,7 @@ public class IyRoleServiceImpl implements IyRoleService {
     public boolean delRole(Integer roleId) {
         boolean b = defService.isRoleUse(roleId);
         if (b) {
-            throw new SystemRuntimeException("角色被使用，不可删除");
+            throw new SystemRuntimeException("Role is used and cannot be deleted");
         }
         roleService.delRole(roleId);
         roleService.delRoleMenu(roleId);

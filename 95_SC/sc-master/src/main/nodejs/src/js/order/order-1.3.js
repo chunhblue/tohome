@@ -242,6 +242,11 @@ define('order', function () {
 								success:function(result){
 									if(result.success){
 										$("#submitAuditBut").removeAttr("disabled");
+										// 北京时间下午两点之后，不允许订货，不允许审核
+										if(parseInt($("#hms").val()) > 130000){
+											$("#update").attr("disabled","disabled");
+											$("#submitAuditBut").attr("disabled","disabled");
+										}
 									}else{
 										$("#submitAuditBut").attr("disabled","disabled");
 									}
@@ -249,6 +254,10 @@ define('order', function () {
 								complete:_common.myAjaxComplete
 							});
 						}else{
+							$("#submitAuditBut").attr("disabled","disabled");
+						}
+						// 北京时间下午两点之后，不允许订货，不允许审核
+						if(parseInt($("#hms").val()) > 130000){
 							$("#submitAuditBut").attr("disabled","disabled");
 						}
 					});
@@ -259,6 +268,7 @@ define('order', function () {
 				// setShelfResourceValue("shelf", "");
 				$.myAutomatic.cleanSelectObj(excelName);
 				$("#submitAuditBut").removeAttr("disabled");
+				$("#update").removeAttr("disabled");
 				initDisabled();
 			}
 		});
@@ -345,6 +355,17 @@ define('order', function () {
 			}else {
 				$("#aStore").css("border-color","#CCC");
 			}
+			var position = 1;
+			_common.checkPosition($("#aStore").attr("k"),function (result) {
+				if(!result.success){
+					_common.prompt("You do not have permission to order it!",5,"info");
+					position = 0;
+				}
+			});
+			if(position<1){
+				return false;
+			}
+
 			if(!batchFlg){return batchFlg};
 			var cols = tableGrid.getSelectColValue(selectTrTemp,"shelf,depCd,depName,pmaCd,pmaName");
 			var param = "use=1&storeCd="+$("#aStore").attr("k")+"&storeName="+$("#aStore").attr("v")+"&orderDate="+subfmtDate(m.order_date.val())+"&orderType="+

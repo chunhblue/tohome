@@ -4,6 +4,7 @@ import cn.com.bbut.iy.itemmaster.dto.base.role.ResourceViewDTO;
 import cn.com.bbut.iy.itemmaster.dto.businessDaily.BusinessDailyDto;
 import cn.com.bbut.iy.itemmaster.dto.businessDaily.ExpenditureAmtDto;
 import cn.com.bbut.iy.itemmaster.dto.businessDaily.PaymentAmtDto;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
@@ -44,4 +45,6 @@ public interface BusinessDailyService {
     List<BusinessDailyDto> getSaleAmountByPma(String payDate, String storeCd);
 
     Map getData(String storeCd,String businessDate);
+
+    int getCashBalanceCount(String businessDate,String storeCd);
 }

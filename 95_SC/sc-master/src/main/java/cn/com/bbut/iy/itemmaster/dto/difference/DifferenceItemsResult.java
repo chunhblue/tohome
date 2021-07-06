@@ -23,10 +23,13 @@ public class DifferenceItemsResult extends GridDataDTO {
     private String articleName;
     private String unitName;
     private String orderQty;
+    private String dcPickedQty;
     private String orderTax;
     private String orderPrice;
     private String receiveQty;
     private String adjustQty;
     private String adjustAmt;
     private String reason;
+    private String orderedQty;
+    private String orderqtyDcPickedQty;
 }

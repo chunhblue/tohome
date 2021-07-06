@@ -213,10 +213,13 @@ define('pogShelfMaintenance', function () {
             return false;
         }else{
             _StartDate = new Date(fmtDate($("#ud_start_date").val())).getTime();
-            if(judgeNaN(_StartDate)){
+            if(_common.judgeValidDate($("#ud_start_date").val())){
                 _common.prompt("Please enter a valid date!",3,"info");
+                $("#ud_start_date").css("border-color","red");
                 $("#ud_start_date").focus();
                 return false;
+            }else {
+                $("#ud_start_date").css("border-color","#CCCCCC");
             }
         }
         let _EndDate = null;
@@ -226,10 +229,13 @@ define('pogShelfMaintenance', function () {
             return false;
         }else{
             _EndDate = new Date(fmtDate($("#ud_end_date").val())).getTime();
-            if(judgeNaN(_EndDate)){
+            if(_common.judgeValidDate($("#ud_end_date").val())){
                 _common.prompt("Please enter a valid date!",3,"info");
+                $("#ud_end_date").css("border-color","red");
                 $("#ud_end_date").focus();
                 return false;
+            }else {
+                $("#ud_end_date").css("border-color","#CCCCCC");
             }
         }
         if(_StartDate>_EndDate){

@@ -12,3 +12,6 @@ SELECT to_char(now(),'yyyyMMddhh24miss') as dbDate;
 ​			第二次就会是 20210508152712
 
 ）
+
+注：hhmiss 若不加24,则不是24制度，为12时制。
+

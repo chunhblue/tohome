@@ -66,4 +66,6 @@ public class MaterialDTO extends GridDataDTO {
     // 描述
     private String note;
     private String materialType;
+    private String reason;
+    private String reasonCode;
 }

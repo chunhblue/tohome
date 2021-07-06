@@ -347,7 +347,7 @@ define('priceByDay', function () {
 				{name:"storeName",type:"text",text:"left",width:"150",ishide:false,css:""},
 				{name:"vendorId",type:"text",text:"right",width:"120",ishide:false,css:""},
 				{name:"vendorName",type:"text",text:"left",width:"150",ishide:false,css:""},
-				{name:"orderPrice",type:"text",text:"right",width:"170",ishide:false,css:"",getCustomValue:getThousands},
+				{name:"orderPrice",type:"text",text:"right",width:"170",ishide:true,css:"",getCustomValue:getThousands},
 				{name:"sellingPrice",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getThousands},
 				{name:"baseSalePrice",type:"text",text:"right",width:"170",ishide:false,css:"",getCustomValue:getThousands},
 			],//列内容

@@ -19,10 +19,12 @@ import cn.com.bbut.iy.itemmaster.dto.pi0100.StocktakeItemDTO;
 import cn.com.bbut.iy.itemmaster.entity.MA4320;
 import cn.com.bbut.iy.itemmaster.entity.MA4320Example;
 import cn.com.bbut.iy.itemmaster.entity.Mb1200;
+import cn.com.bbut.iy.itemmaster.entity.base.Ma1000;
 import cn.com.bbut.iy.itemmaster.entity.ma1100.MA1100;
 import cn.com.bbut.iy.itemmaster.service.CM9060Service;
 import cn.com.bbut.iy.itemmaster.service.SA0070Service;
 import cn.com.bbut.iy.itemmaster.service.audit.IAuditService;
+import cn.com.bbut.iy.itemmaster.service.ma1000.Ma1000Service;
 import cn.com.bbut.iy.itemmaster.service.stocktake.StocktakeEntryService;
 import cn.com.bbut.iy.itemmaster.serviceimpl.base.ImportExcelBaseService;
 import cn.com.bbut.iy.itemmaster.util.ExcelBaseUtil;
@@ -85,6 +87,10 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
     private MA4320Mapper ma4320Mapper;
     @Autowired
     private StocktakeEntryService service;
+    @Autowired
+    private Ma1000Service ma1000Service;
+    @Autowired
+    private StocktakeEntryService stocktakeEntryService;
 
     /**
      * 查询商品
@@ -270,15 +276,40 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
         if (list==null||list.size()<1) {
             return;
         }
+
+        this.insertVarianceTempTable(list);
+        String tempvarTableName = "temp_variance_item";
+
+        stocktakeEntryMapper.updateStocktakingVarianceReport(tempvarTableName);
+
+        // 创建前先删除临时表
+        stocktakeEntryMapper.deleteTempTable(tempvarTableName);
+
+        // 处理 没有 盘到的商品
+        stocktakeEntryMapper.updatePi0125(piCd,piDate,storeCd);
+    }
+
+    private void insertVarianceTempTable(List<StocktakeItemDTO> oldList) {
+        if (oldList==null||oldList.size()<1) {
+            return ;
+        }
         String endTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        int totalSize = list.size(); //总记录数
+        String tempTableName = "temp_variance_item";
+        // 创建前先删除临时表
+        stocktakeEntryMapper.deleteTempTable(tempTableName);
+
+        // 创建临时表
+        stocktakeEntryMapper.createVarianceTempTable(tempTableName);
+
+        // 批量保存数据到临时表
+        int totalSize = oldList.size(); //总记录数
         int pageSize = 1000; //每页N条
         int totalPage = totalSize/pageSize; //共N页
 
         if (totalSize % pageSize != 0) {
             totalPage += 1;
             if (totalSize < pageSize) {
-                pageSize = list.size();
+                pageSize = oldList.size();
             }
         }
 
@@ -289,21 +320,50 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
             // 用来存入新的集合
             List<StocktakeItemDTO> newList = new ArrayList<StocktakeItemDTO>();
             for (int i = starNum; i < endNum; i++) {
-                list.get(i).setExportTime(endTime);
-                newList.add(list.get(i));
+                oldList.get(i).setExportTime(endTime);
+                newList.add(oldList.get(i));
             }
-
-            stocktakeEntryMapper.updateStocktakingVarianceReport(newList);
+            // 保存数据到临时表里
+            stocktakeEntryMapper.saveToVarianceTempTable(tempTableName,newList);
         }
-
-        // 处理 没有 盘到的商品
-        stocktakeEntryMapper.updatePi0125(piCd,piDate,storeCd);
     }
+
 
     // 获得 盘点商品的最新状态, 并且记录 差异
     private List<StocktakeItemDTO> getItemVarianceReport(String piCd, String piDate, String businessDate, String storeCd, String reviewStatus) {
+        String tempSa0020TableName = "temp_sale_item";
 
-        List<StocktakeItemDTO> list = stocktakeEntryMapper.getItemVarianceReport(piCd,piDate,businessDate,storeCd);
+        // 创建临时表
+        stocktakeEntryMapper.createSaleTempTable(tempSa0020TableName);
+
+        List<StocktakeItemDTO> saleList = stocktakeEntryService.getSalesItemReport(piCd,piDate,storeCd);
+
+        // 批量保存数据到临时表
+        int totalSize = saleList.size(); //总记录数
+        int pageSize = 1000; //每页N条
+        int totalPage = totalSize/pageSize; //共N页
+
+        if (totalSize % pageSize != 0) {
+            totalPage += 1;
+            if (totalSize < pageSize) {
+                pageSize = saleList.size();
+            }
+        }
+
+        for (int pageNum = 1; pageNum < totalPage+1; pageNum++) {
+            int starNum = (pageNum - 1) * pageSize;
+            int endNum = Math.min(pageNum * pageSize, totalSize);
+
+            // 用来存入新的集合
+            List<StocktakeItemDTO> newList = new ArrayList<StocktakeItemDTO>();
+            for (int i = starNum; i < endNum; i++) {
+                newList.add(saleList.get(i));
+            }
+            // 保存数据到临时表里
+            stocktakeEntryMapper.saveSaleTempTable(tempSa0020TableName, newList);
+        }
+
+        List<StocktakeItemDTO> list = stocktakeEntryService.getItemVarianceReport(tempSa0020TableName,piCd,piDate,storeCd);
 
         // 计算异动量
         for (StocktakeItemDTO item : list) {
@@ -381,11 +441,11 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
         // 判断临时表是否存在
         int num = stocktakeEntryMapper.getCountTable(exceptionTableName);
         if(num > 0){
+            // 先删除
+            stocktakeEntryMapper.deleteExByPicd(piCd,piDate);
             if(itemBarcodes.size()>0){
                 List<StocktakeItemDTO> exceptionItemList = stocktakeEntryMapper.getTempExceptionItemList(exceptionTableName,itemBarcodes);
                 if(exceptionItemList.size()>0){
-                    // 先删除
-                    stocktakeEntryMapper.deleteExByPicd(piCd,piDate);
                     stocktakeEntryMapper.tempToExcepition(exceptionItemList,piCd,piDate,storeCd);
                 }
 
@@ -426,7 +486,8 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
 
     @Override
     public void updateEndTime(String piCd, String piDate, String storeCd) {
-        String endTime = new SimpleDateFormat("HHmmss").format(new Date());
+        String endTime = ma4320Mapper.getNowDate().substring(8,14);
+//        String endTime = new SimpleDateFormat("HHmmss").format(new Date());
         stocktakePlanMapper.modifyPI0100EndTime(piCd,piDate,storeCd,endTime);
     }
 
@@ -524,7 +585,6 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
         if (count < 1) {
             return new GridDataDTO<PI0100DTO>();
         }
-
         List<PI0100DTO> _list = stocktakeEntryMapper.search(pi0100Param);
 
         // 格式化日期
@@ -659,8 +719,15 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
                 // 区域
                 String region = replaceBlank(fields[length-2]).trim();
                 // 盘点时间
-                String stocktakeTime = replaceBlank(new BigDecimal(fields[length-1]).toPlainString()).trim();
+                String stocktakeTime = replaceBlank(fields[length-1]).trim();
 
+                // 判断是否为科学计数法
+                if(Pattern.matches("(.*)[+-](.*)",barcode) && Pattern.matches("(.*)[+-](.*)",stocktakeTime)){
+                    String checkMsg = "Failed to Uplaod!<br>Please uplaod the original stocktake result file exported from stocktake tool.";
+                    map.put("list",null);
+                    map.put("msg",checkMsg);
+                    return map;
+                }
 
                 item.setArticleId(articleId);
                 item.setBarcode(barcode);
@@ -872,7 +939,7 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
      * 将数据存入临时表, 补充商品信息 uom
      */
     private Map<String,Object> insertCsvTempTable(List<StocktakeItemDTO> oldList, String businessDate,
-                                                  String storeCd,List<StocktakeItemDTO> allList) {
+                                                  String storeCd,List<StocktakeItemDTO> allList) throws ParseException {
         Map<String,Object> map = new HashMap<>();
         if ((oldList==null||oldList.size()<1) && (allList==null||allList.size()<1)) {
             map.put("list",oldList);
@@ -937,9 +1004,16 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
         }
 
         StringBuilder sb = new StringBuilder();
-        Boolean checkFlg = true;
+        boolean checkFlg = true;
+        List<Ma1000> storeList = ma1000Service.selectByStoreCd(storeCd);
+        if (StringUtils.isEmpty(storeList)) {
+            map.put("list",oldList);
+            map.put("msg","No data found!");
+            return map;
+        }
+        String structureCd = storeList.get(0).getZoCd();
         // 补充信息, 获取数据
-        List<StocktakeItemDTO> tempItemList = stocktakeEntryMapper.getTempTxtItemList(tempTableName,businessDate);
+        List<StocktakeItemDTO> tempItemList = stocktakeEntryMapper.getTempTxtItemList(tempTableName,businessDate,storeCd,structureCd);
         if(tempItemList.size() > 0){
             /*if(tempItemList.size()<oldList.size()){
                 List<StocktakeItemDTO> tempList = new ArrayList<>();
@@ -958,12 +1032,9 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
                    }
                 }
             }*/
-            // HHmmss 表示时间为24h制
+            // HH 表示时间为24h制
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.MINUTE, -5);
-            Date num = calendar.getTime();
-            String nowTime = sdf.format(calendar.getTime());
+            String nowTime = sdf.format(sdf.parse(ma4320Mapper.getNowDate()).getTime()-5*60*1000);
             for(StocktakeItemDTO dto:tempItemList){
                 if(dto.getStocktakeTime().matches("[0-9]+")){
                     if(Long.parseLong(dto.getStocktakeTime())>Long.parseLong(nowTime)){
@@ -1019,7 +1090,7 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
 
         for (int pageNum = 1; pageNum < totalPage+1; pageNum++) {
             int starNum = (pageNum-1)*pageSize;
-            int endNum = pageNum*pageSize>totalSize?(totalSize):pageNum*pageSize;
+            int endNum = Math.min(pageNum * pageSize, totalSize);
 
             // 用来存入新的集合
             List<StocktakeItemDTO> newList = new ArrayList<StocktakeItemDTO>();
@@ -1038,6 +1109,7 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
 
         return tempItemList;
     }
+
 
     /**
      * 格式化盘点时间
@@ -1083,6 +1155,18 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
         // 生产excel内容
         createExcelBody(sheet, wb, pi0100DTO,stockList);
         return wb;
+    }
+
+    @Override
+    public List<StocktakeItemDTO> getSalesItemReport(String piCd, String piDate, String storeCd) {
+        List<StocktakeItemDTO> saleList = stocktakeEntryMapper.getSalesItemReport(piCd,piDate,storeCd);
+        return saleList;
+    }
+
+    @Override
+    public List<StocktakeItemDTO> getItemVarianceReport(String tempTableName, String piCd, String piDate, String storeCd) {
+        List<StocktakeItemDTO> list = stocktakeEntryMapper.getItemVarianceReport(tempTableName,piCd,piDate,storeCd);
+        return list;
     }
 
     /**

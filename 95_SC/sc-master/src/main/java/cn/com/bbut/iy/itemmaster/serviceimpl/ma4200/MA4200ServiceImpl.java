@@ -11,6 +11,7 @@ import cn.com.bbut.iy.itemmaster.serviceimpl.CM9060ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -109,10 +110,18 @@ public class MA4200ServiceImpl implements Ma4200Service {
             param.setEffectiveStatus("10");
             param.setEmpPassword(md5Password);
             flg = ma4200Mapper.insertSelective(param);
+            try {
+                flg = ma4200Mapper.insertUserToMa4210(param);
+            }catch (DuplicateKeyException e){
+                rest.setSuccess(false);
+                rest.setMessage("Data Saved Failure!");
+                return  rest;
+            }
         }else if ("edit".equalsIgnoreCase(operateFlg)){
             param.setUpdateYmd(ymd);
             param.setUpdateHms(hms);
             flg = ma4200Mapper.updateUserInfo(param);
+            flg = ma4200Mapper.updateMa4200ByUser(param);
         }
         if(flg>0){
             rest.setSuccess(true);
@@ -137,5 +146,15 @@ public class MA4200ServiceImpl implements Ma4200Service {
             rest.setMessage("Delete Failure!");
         }
         return rest;
+    }
+
+    @Override
+    public GridDataDTO<MA4200GridDTO> getStore(String userCode,int page,int rows) {
+        String businessDate = cm9060Service.getValByKey("0000");
+
+        int limitStartRow = (page-1)* rows;
+        List<MA4200GridDTO> list = ma4200Mapper.getStoreInfoByuser(userCode,businessDate,limitStartRow,rows);
+        int count = ma4200Mapper.countStoreByUser(userCode);
+        return new GridDataDTO<>(list, page, count,rows);
     }
 }

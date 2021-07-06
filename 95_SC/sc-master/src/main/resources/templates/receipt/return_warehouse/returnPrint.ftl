@@ -62,7 +62,7 @@
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <span style="float: left" id="userName">User Name:${userName}</span>
-                <span style="float: right">Print Date：${printTime?string('dd/MM/yyyy hh:mm:ss')}</span>
+                <span style="float: right">Print Date：${printTime!}</span>
             </div>
         </div>
         <div class="row">

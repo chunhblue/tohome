@@ -3,6 +3,7 @@ package cn.com.bbut.iy.itemmaster.controller;
 import cn.com.bbut.iy.itemmaster.annotation.Permission;
 import cn.com.bbut.iy.itemmaster.annotation.Secure;
 import cn.com.bbut.iy.itemmaster.constant.Constants;
+import cn.com.bbut.iy.itemmaster.constant.ConstantsAudit;
 import cn.com.bbut.iy.itemmaster.constant.PermissionCode;
 import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
@@ -72,6 +73,9 @@ public class PriceChangeDetailController extends BaseAction {
                 Constants.SESSION_ROLES);
         ModelAndView mv = new ModelAndView("priceChange/priceChangeDetail");
         mv.addObject("useMsg", "紧急变价一览画面");
+        mv.addObject("typeId", ConstantsAudit.TYPE_CHANGE_PRICE);
+        mv.addObject("reviewId", ConstantsAudit.REVIEW_CHANGE_PRICE);
+        this.saveToken(request);
         return mv;
     }
 

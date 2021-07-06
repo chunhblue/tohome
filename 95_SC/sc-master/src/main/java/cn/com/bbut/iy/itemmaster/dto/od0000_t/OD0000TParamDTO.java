@@ -21,7 +21,7 @@ public class OD0000TParamDTO extends GridParamDTO {
     // 业务日期
     private String businessDate;
 
-    // 业区分供应商订货||仓库订货
+    // 业区分供应商订货:1||仓库订货:0
     private String orderType;
 
     // 收货单编号

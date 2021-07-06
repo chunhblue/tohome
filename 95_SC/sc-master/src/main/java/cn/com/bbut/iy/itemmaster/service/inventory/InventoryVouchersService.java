@@ -149,5 +149,6 @@ public interface InventoryVouchersService {
     Ma1000DTO getSouthOrNouth(String storeCd);
 
     List<AutoCompleteDTO> getOutStoreList(String v, String zoCd);
+    List<AutoCompleteDTO> getStoreListByInStore(String v, String vstore);
 
 }

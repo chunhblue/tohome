@@ -42,8 +42,9 @@
         <result column="create_user_id" property="createUserId"></result>
         <result column="create_ymd" property="createYmd"></result>
         <result column="create_hms" property="createHms"></result>
-        <result column="posId" property="posId"></result>
+        <result column="pos_id" property="posId"></result>
         <result column="sale_serial_no" property="saleSerialNo"></result>
+        <result column="tran_serial_no" property="tranSerialNo"></result>
     </resultMap>
 
     <update id="updateStatus" parameterType="cn.com.bbut.iy.itemmaster.dto.invoiceEntry.InvoiceDataDTO">
@@ -78,6 +79,7 @@
         SA0010 S
         WHERE
         S.store_cd = #{storeNo}
+        AND S.pos_id = #{posId}
         AND S.tran_serial_no in
         <foreach collection="list" item="receiptNo" open="(" separator="," close=")">
             CAST(#{receiptNo} AS integer)
@@ -91,7 +93,7 @@
             CAST(#{receiptNo} AS integer)
         </foreach>
         AND A.tran_type = 'sale'
-
+        AND A.pos_id = #{posId}
         ORDER BY
         acc_date
         LIMIT ${rows} OFFSET ${limitStart}
@@ -179,8 +181,11 @@
                  open="(" separator="," close=")">
             #{store,jdbcType=VARCHAR}
         </foreach>
+<!--        <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">-->
+<!--        AND A.acc_date BETWEEN #{param.startDate} AND #{param.endDate}-->
+<!--    </if>-->
         <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">
-            AND A.acc_date BETWEEN #{param.startDate} AND #{param.endDate}
+            AND A.create_ymd BETWEEN #{param.startDate} AND #{param.endDate}
         </if>
         <if test="param.status!=null and param.status!=''">
             AND A.status = #{param.status}
@@ -202,8 +207,11 @@
                  open="(" separator="," close=")">
             #{store,jdbcType=VARCHAR}
         </foreach>
+<!--        <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">-->
+<!--            AND A.acc_date BETWEEN #{param.startDate} AND #{param.endDate}-->
+<!--        </if>-->
         <if test="param.startDate!=null and param.startDate!='' and param.endDate!=null and param.endDate!=''">
-            AND A.acc_date BETWEEN #{param.startDate} AND #{param.endDate}
+            AND A.create_ymd BETWEEN #{param.startDate} AND #{param.endDate}
         </if>
         <if test="param.status!=null and param.status!=''">
             AND A.status = #{param.status}
@@ -369,4 +377,9 @@
             #{param.saleSerialNo}
         )
     </insert>
+
+    <select id="getReceiptNoByStore" resultMap="listResultMap">
+        SELECT receipt_no,sale_serial_no from sa0230 where store_cd = #{storeNo} and pos_id = #{posId}
+    </select>
+
 </mapper>

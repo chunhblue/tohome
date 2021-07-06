@@ -70,7 +70,6 @@ define('stockAdjustmentPrint', function () {
                             '<td title="' + isEmpty(item.barcode) + '" style="text-align: right">' + isEmpty(item.barcode) + '</td>' +
                             '<td title="' + isEmpty(item.uom) + '" style="text-align:left;">' + isEmpty(item.uom) + '</td>' +
                             '<td title="' + toThousands(item.adjustmentQty) + '" style="text-align:right;">' + toThousands(item.adjustmentQty) + '</td>' +
-                            '<td title="' + isEmpty(item.generalReasonText) + '" style="text-align: left">' + isEmpty(item.generalReasonText) + '</td>' +
                             '<td title="' + isEmpty(item.adjustReasonText) + '" style="text-align: left">' + isEmpty(item.adjustReasonText) + '</td>' +
                             '<td title="' + isEmpty(item.ofc) + '" style="text-align: left">' + isEmpty(item.ofc) + '</td>' +
                             '<td title="' + isEmpty(item.ofcName) + '" style="text-align: left">' + isEmpty(item.ofcName) + '</td>' +

@@ -84,9 +84,28 @@ define('auditPending', function () {
     }
     //验证检索项是否合法
     var verifySearch = function(){
+        if(m.startDate.val()!==""&&m.startDate.val()!=null){
+            if(_common.judgeValidDate(m.startDate.val())){
+                _common.prompt("Please enter a valid date!",3,"info");
+                $("#startDate").focus();
+                return false;
+            }
+        }
+        if(m.endDate.val()!==""&&m.endDate.val()!=null){
+            if(_common.judgeValidDate(m.endDate.val())){
+                _common.prompt("Please enter a valid date!",3,"info");
+                $("#endDate").focus();
+                return false;
+            }
+        }
         if(m.startDate.val()!=""&&m.endDate.val()!="") {
             var _StartDate = new Date(fmtDate($("#startDate").val())).getTime();
             var _EndDate = new Date(fmtDate($("#endDate").val())).getTime();
+            if(_StartDate>_EndDate){
+                _common.prompt("The start date cannot be greater than the end date!!", 5, "error"); //开始时间不能大于结束时间
+                $("#endDate").focus();
+                return false;
+            }
             var difValue = parseInt(Math.abs((_EndDate - _StartDate) / (1000 * 3600 * 24)));
             if (difValue > 62) {
                 _common.prompt("Query Period cannot exceed 62 days!", 5, "error"); // 日期期间取值范围不能大于62天
@@ -95,7 +114,7 @@ define('auditPending', function () {
             }
         }
         return true;
-    }
+    };
 
     //画面按钮点击事件
     var but_event = function(){
@@ -184,6 +203,7 @@ define('auditPending', function () {
             }
             $("#auditContent").val("");
             $("#approval_dialog").modal("show");
+            $("#audit_affirm").prop("disabled",false);
         });
         //批量审核提交
         $("#audit_affirm").on("click",function () {
@@ -205,6 +225,7 @@ define('auditPending', function () {
                 if (result != "true") {
                     return false;
                 }
+                $("#audit_affirm").prop("disabled",true);
                 $.myAjaxs({
                     url: url_left + "/batchAudit",
                     async: true,

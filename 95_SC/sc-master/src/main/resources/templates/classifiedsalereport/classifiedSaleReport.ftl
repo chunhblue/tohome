@@ -279,6 +279,10 @@
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                                         <input  id="endDate" placeholder="End Date" class="form-control input-sm select-date" type="text" value="">
                                     </div>
+                                    <label for="Total Amount"  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Total Sale Amount</label>
+                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+                                        <input type="text" id="totalSaleAmount" class="form-control input-sm" disabled="disabled">
+                                    </div>
                                 </div><!-- form-group -->
                                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                     <div class="wire"></div>
@@ -306,7 +310,7 @@
         </div>
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <span style="float: left">Date Created：${bsDate?string('dd/MM/yyyy')}</span>
+                <span style="float: left">Date Created：${bsDate!}</span>
             </div>
         </div>
         <div class="row">
@@ -320,12 +324,12 @@
                         <th title="Top Department">Top Department</th>
                         <th title="Department">Department</th>
                         <th title="Category">Category</th>
-                        <th title="Sub-Category">Sub-Category</th>
+                        <th title="Sub-Category" style="width: 12%">Sub-Category</th>
                         <th title="Sales Quantity">Sales Quantity</th>
                         <th title="Sales Amount">Sales Amount</th>
                         <th title="Sales Date">Sales Date</th>
                         [#--<th title="Area Manager ID">Area Manager ID</th>--]
-                        <th title="Area Manager Name">Area Manager Name</th>
+                        <th title="Area Manager Name" style="width: 12%">Area Manager Name</th>
                     </tr>
                 </table>
 

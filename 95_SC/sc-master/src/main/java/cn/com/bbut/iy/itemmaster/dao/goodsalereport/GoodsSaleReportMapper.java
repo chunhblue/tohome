@@ -8,6 +8,7 @@ import cn.com.bbut.iy.itemmaster.entity.ma0080.MA0080;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
@@ -23,4 +24,5 @@ public interface GoodsSaleReportMapper {
     int searchCount(@Param("goodSaleReport")goodSaleReportParamDTO param);
     int getArticleCount(@Param("goodSaleReport")goodSaleReportParamDTO param);
 
+    BigDecimal getTotalSaleAmount(@Param("goodSaleReport") goodSaleReportParamDTO param);
 }

@@ -380,6 +380,7 @@ define('stockAdjustmentEdit', function () {
 				if (result != "true") {
 					return false;
 				}
+				$("#audit_affirm").prop("disabled",true);
 				var detailType = "tmp_adjustment";
 				$.myAjaxs({
 					url: _common.config.surl + "/audit/submit",
@@ -539,15 +540,15 @@ define('stockAdjustmentEdit', function () {
 	var but_event = function(){
 		$("#item_input_tamount").blur(function () {
 			let reg = /^-?[1-9]\d*$/;
-			if (!reg.test( this.value)|| this.value.indexOf(",")<0){
-				$("#item_input_tamount").val(toThousands(this.value));
+			if (reg.test( this.value)|| this.value.indexOf(",")<0){
+				$("#item_input_tamount").val(this.value);
 			}
 		});
 		//光标进入，去除金额千分位，并去除小数后面多余的0
 		$("#item_input_tamount").focus(function(){
 			let reg = /^-?[1-9]\d*$/;
-			if (!reg.test( this.value)|| this.value.indexOf(",")<0){
-				$("#item_input_tamount").val(toThousands(this.value));
+			if (reg.test( this.value)|| this.value.indexOf(",")<0){
+				$("#item_input_tamount").val(this.value);
 			}
 		});
 
@@ -741,7 +742,7 @@ define('stockAdjustmentEdit', function () {
 				if(result == "true"){
 					if(flg=='add'){
 						let rowindex = 0;
-						let trId = $("#zgGridTtable>.zgGrid-tbody tr :not(:last-child)").attr("id");
+						let trId = $("#zgGridTtable>.zgGrid-tbody tr:nth-last-child(2)").attr("id");
 						if(trId!=null&&trId!=''){
 							rowindex = parseInt(trId.substring(trId.indexOf("_")+1,trId.indexOf("_")+2))+1;
 						}
@@ -758,7 +759,7 @@ define('stockAdjustmentEdit', function () {
 							'<td align="right" width="110" tag="inventoryQty" title="'+m.inventoryQty.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_inventoryQty" tdindex="zgGridTtable_inventoryQty">'+m.inventoryQty.val()+'</td>' +
 							'<td align="left" tag="generalReason" style="display: none;" title="'+m.generalReason.attr("k")+'" align="center" id="zgGridTtable_'+rowindex+'_tr_generalReason" tdindex="zgGridTtable_generalReason">'+m.generalReason.attr("k")+'</td>' +
 							'<td align="left" tag="generalReasonText" style="display: none;" title="'+m.generalReason.attr("v")+'" align="center" id="zgGridTtable_'+rowindex+'_tr_generalReasonText" tdindex="zgGridTtable_generalReasonText">'+m.generalReason.attr("v")+'</td>' +
-							'<td align="left" tag="adjustReason" style="display: none;" title="'+adjustReasonNum(m.adjustReason.attr("v"))+'" align="center" id="zgGridTtable_'+rowindex+'_tr_adjustReason" tdindex="zgGridTtable_adjustReason">'+adjustReasonNum(m.adjustReason.attr("v"))+'</td>' +
+							'<td align="left" tag="adjustReason" style="display: none;" title="'+m.adjustReason.attr("k")+'" align="center" id="zgGridTtable_'+rowindex+'_tr_adjustReason" tdindex="zgGridTtable_adjustReason">'+m.adjustReason.attr("k")+'</td>' +
 							'<td align="left" width="150" tag="adjustReasonText" title="'+m.adjustReason.attr("v")+'" align="center" id="zgGridTtable_'+rowindex+'_tr_adjustReasonText" tdindex="zgGridTtable_adjustReasonText">'+m.adjustReason.attr("v")+'</td>' +
 							'<td align="left" width="130" tag="expenditureNo" style="display: none;" title="'+m.expenditureNo.attr("k")+'" align="center" id="zgGridTtable_'+rowindex+'_tr_expenditureNo" tdindex="zgGridTtable_expenditureNo">'+m.expenditureNo.attr("k")+'</td>' +
 							'<td align="left" width="130" tag="expenditureNoText" style="display: none;" title="'+m.expenditureNo.attr("v")+'" align="center" id="zgGridTtable_'+rowindex+'_tr_expenditureNoText" tdindex="zgGridTtable_expenditureNoText">'+m.expenditureNo.attr("v")+'</td>' +
@@ -785,7 +786,8 @@ define('stockAdjustmentEdit', function () {
 									$(this).find('td[tag=inventoryQty]').text(m.inventoryQty.val());
 									$(this).find('td[tag=generalReason]').text(m.generalReason.attr("k"));
 									$(this).find('td[tag=generalReasonText]').text(m.generalReason.attr("v"));
-									$(this).find('td[tag=adjustReason]').text(adjustReasonNum(m.adjustReason.attr("v")));
+									// $(this).find('td[tag=adjustReason]').text(adjustReasonNum(m.adjustReason.attr("v")));
+									$(this).find('td[tag=adjustReason]').text(m.adjustReason.attr("k"));
 									$(this).find('td[tag=adjustReasonText]').text(m.adjustReason.attr("v"));
 									$(this).find('td[tag=expenditureNo]').text(m.expenditureNo.attr("k"));
 									$(this).find('td[tag=expenditureNoText]').text(m.expenditureNo.attr("v"));

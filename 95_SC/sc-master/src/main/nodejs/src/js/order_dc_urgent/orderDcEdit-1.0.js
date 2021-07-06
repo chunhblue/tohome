@@ -436,9 +436,10 @@ define('orderDcEdit', function () {
 			}*/
 			var reg = /((^[1-9]\d*)|^0)(\.\d+)?$/;
 			var orderQty = reThousands(m.orderQty.val().trim());
+			var orderQty1 = m.orderQty.val().trim();
 			var minOrderQty = reThousands(m.item_input_minOrderQty.val());
 			var orderBatchQty = reThousands(m.item_input_orderBatchQty.val());
-			if(!reg.test(orderQty)){
+			if(!reg.test(orderQty)  || orderQty1.indexOf(",")>0){
 				$("#orderQty").css("border-color","red");
 				_common.prompt("Please enter with correct data type!",3,"info");
 				$('#i_orderQty').focus();
@@ -770,6 +771,16 @@ define('orderDcEdit', function () {
 		});
 
 		m.returnsSubmitBut.on("click",function(){
+			var position = 1;
+			_common.checkPosition($("#aStore").attr("k"),function (result) {
+				if(!result.success){
+					_common.prompt(result.message,5,"info");
+					position = 0;
+				}
+			});
+			if(position<1){
+				return false;
+			}
 			if(!verifySearch()){
 				return false;
 			}
@@ -886,7 +897,7 @@ define('orderDcEdit', function () {
 				});
 			})
 		})
-    }
+    };
 
 	//获取实时库存数量
     var setInventoryQty = function(articleId){
@@ -1199,6 +1210,7 @@ define('orderDcEdit', function () {
 				if (result != "true") {
 					return false;
 				}
+				$("#audit_affirm").prop("disabled",true);
 				var detailType = "tmp_on_order";
 				$.myAjaxs({
 					url:systemPath+"/audit/submit",

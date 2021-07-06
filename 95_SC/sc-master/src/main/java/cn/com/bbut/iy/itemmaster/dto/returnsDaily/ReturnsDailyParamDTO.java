@@ -1,14 +1,17 @@
 package cn.com.bbut.iy.itemmaster.dto.returnsDaily;
 
+import cn.com.bbut.iy.itemmaster.dto.base.GridParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.role.ResourceViewDTO;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class ReturnsDailyParamDTO {
+public class ReturnsDailyParamDTO  extends GridParamDTO {
 
     // 商品id
     private String articleId;
@@ -50,5 +53,11 @@ public class ReturnsDailyParamDTO {
     private String totalAmt;
 
     private String calType;
+    private String nonSaleType;
+
+    private int limitStart;
+
+    // 是否分页
+    private boolean flg = true;
 
 }

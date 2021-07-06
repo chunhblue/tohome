@@ -9,12 +9,15 @@ import cn.com.bbut.iy.itemmaster.entity.User;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 public interface InvoiceEntryService {
 
     GridDataDTO<InvoiceEntryDTO> searchInvoice(String searchJson, int page, int rows);
 
     GridDataDTO<InvoiceItemsDTO> searchInvoiceItem(String searchJson, int page, int rows);
+
+    List<String> getExistsReceiptNoList(String record);
 
     ReturnDTO insertInvoice(String record, User user, HttpServletRequest request, HttpSession session);
 

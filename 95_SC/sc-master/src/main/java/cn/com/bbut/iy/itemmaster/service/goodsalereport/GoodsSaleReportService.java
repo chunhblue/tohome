@@ -20,4 +20,6 @@ public interface GoodsSaleReportService {
 
     List<MA0020C> getClityList();
     Map<String,Object> getGoodSaleReportContent(goodSaleReportParamDTO param);
+
+    Map<String, Object> getTotalSaleAmount(goodSaleReportParamDTO param);
 }

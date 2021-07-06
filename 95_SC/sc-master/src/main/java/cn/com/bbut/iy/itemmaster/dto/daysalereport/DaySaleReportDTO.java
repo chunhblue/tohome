@@ -50,4 +50,17 @@ public class DaySaleReportDTO  extends GridDataDTO {
     private BigDecimal time46;
     private BigDecimal shift3;
     private BigDecimal totalAmt;
+    // 统计顾客数量
+    private BigDecimal hour6_8;
+    private BigDecimal hour8_10;
+    private BigDecimal hour10_12;
+    private BigDecimal hour12_14;
+    private BigDecimal hour14_16;
+    private BigDecimal hour16_18;
+    private BigDecimal hour18_20;
+    private BigDecimal hour20_22;
+    private BigDecimal hour22_24;
+    private BigDecimal hour0_2;
+    private BigDecimal hour2_4;
+    private BigDecimal hour4_6;
 }

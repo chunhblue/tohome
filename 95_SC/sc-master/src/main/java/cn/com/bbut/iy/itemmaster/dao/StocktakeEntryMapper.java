@@ -34,10 +34,9 @@ public interface StocktakeEntryMapper {
 
     List<AutoCompleteDTO> getItemList(@Param("piCd") String piCd, @Param("piDate")String piDate,@Param("piStoreCd")String piStoreCd, @Param("v")String v);
 
-    List<StocktakeItemDTO> getItemVarianceReport(@Param("piCd") String piCd, @Param("piDate")String piDate,
-                                                 @Param("businessDate")String businessDate, @Param("storeCd")String storeCd);
+    List<StocktakeItemDTO> getItemVarianceReport(@Param("tableName")String tempTableName,@Param("piCd") String piCd, @Param("piDate")String piDate, @Param("storeCd")String storeCd);
 
-    void updateStocktakingVarianceReport(@Param("list") List<StocktakeItemDTO> newList);
+    void updateStocktakingVarianceReport(@Param("tableName")String tempvarTableName);
 
     void updatePi0125(@Param("piCd") String piCd, @Param("piDate")String piDate, @Param("storeCd")String storeCd);
 
@@ -58,7 +57,8 @@ public interface StocktakeEntryMapper {
     // 从临时表中补全信息
     List<StocktakeItemDTO> getTempItemList(@Param("tableName")String tempTableName, @Param("businessDate") String businessDate,@Param("storeCd")String storeCd);
     // 从Txt临时表中补全信息
-    List<StocktakeItemDTO> getTempTxtItemList(@Param("tableName")String tempTableName, @Param("businessDate") String businessDate);
+    List<StocktakeItemDTO> getTempTxtItemList(@Param("tableName")String tempTableName, @Param("businessDate") String businessDate,
+                                              @Param("storeCd")String storeCd, @Param("structureCd") String structureCd);
 
     int countOldItem(@Param("articleId")String articleId,@Param("businessDate")String businessDate);
     // 删除临时表
@@ -89,4 +89,16 @@ public interface StocktakeEntryMapper {
     void deleteExMore(@Param("piCd") String piCd, @Param("piDate") String piDate,@Param("list")Collection<String> items);
 
     PI0100DTO getPi0100Info(String storeCd,String piCd);
+
+    // 创建临时表
+    void createVarianceTempTable(@Param("tableName") String tempTableName);
+    // 保存数据到临时表
+    void saveToVarianceTempTable(@Param("tableName")String tempTableName, @Param("list") List<StocktakeItemDTO> list);
+
+    void createSaleTempTable(@Param("tableName") String tempTableName);
+
+    List<StocktakeItemDTO> getSalesItemReport(@Param("piCd") String piCd, @Param("piDate")String piDate, @Param("storeCd")String storeCd);
+
+    void saveSaleTempTable(@Param("tableName")String tempTableName, @Param("list") List<StocktakeItemDTO> list);
+
 }

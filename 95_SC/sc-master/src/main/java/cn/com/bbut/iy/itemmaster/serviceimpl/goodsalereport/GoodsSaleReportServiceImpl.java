@@ -68,13 +68,14 @@ public class GoodsSaleReportServiceImpl implements GoodsSaleReportService {
         List<goodSaleReportDTO> goodsList = goodsSaleReportMapper.search(param);
         if (totalPage==param.getPage()){
             itemSKU=goodsSaleReportMapper.getArticleCount(param);
+            sumSaleAmount=goodsSaleReportMapper.getTotalSaleAmount(param);
             param.setFlg(false);
             List<goodSaleReportDTO> goodsList1 = goodsSaleReportMapper.search(param);
             for (goodSaleReportDTO reportdto :goodsList1) {
                 reportdto.setSaleDate(formatDate2(reportdto.getSaleDate()));
                 reportdto.setAccDate(formatDate1(reportdto.getAccDate()));
-                sumSaleAmount=sumSaleAmount.add(new BigDecimal(reportdto.getSaleAmount()));
-                sumSaleAmountQty=sumSaleAmountQty.add(new BigDecimal(reportdto.getSaleQty()));
+//                sumSaleAmount=sumSaleAmount.add(new BigDecimal(reportdto.getSaleAmount()));
+                sumSaleAmountQty=sumSaleAmountQty.add(reportdto.getSaleQty());
             }
         }
         Map<String,Object> map = new HashMap<String,Object>();
@@ -86,6 +87,17 @@ public class GoodsSaleReportServiceImpl implements GoodsSaleReportService {
         map.put("totalSaleQty",formatNum(sumSaleAmountQty.toString()));
         return map;
     }
+
+    @Override
+    public Map<String, Object> getTotalSaleAmount(goodSaleReportParamDTO param) {
+        Map<String,Object> map = new HashMap<String,Object>();
+        param.setStartDate(Utils.getTimeStamp(param.getStartDate()));
+        param.setEndDate(Utils.getTimeStamp(param.getEndDate()));
+        BigDecimal totalSaleAmount = goodsSaleReportMapper.getTotalSaleAmount(param);
+        map.put("totalSaleAmount",totalSaleAmount);
+        return map;
+    }
+
     private String formatDate1(String piDate) {
         if (StringUtils.isEmpty(piDate)) {
             return "";

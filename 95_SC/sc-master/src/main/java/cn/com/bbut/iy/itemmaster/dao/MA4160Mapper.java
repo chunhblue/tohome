@@ -26,4 +26,11 @@ public interface MA4160Mapper extends MA4160GenMapper {
      * @return
      */
     int countFinancePosition(@Param("userId")String userId);
+
+    /**
+     * 查看是否只拥有店长权限
+     * @param userId
+     * @return
+     */
+    int judgeSMPositionByCondition(@Param("userId")String userId,@Param("storeCd")String storeCd);
 }

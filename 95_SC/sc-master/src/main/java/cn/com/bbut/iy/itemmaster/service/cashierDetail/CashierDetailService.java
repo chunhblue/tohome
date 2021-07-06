@@ -4,6 +4,7 @@ import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.cashierDetail.*;
 import cn.com.bbut.iy.itemmaster.entity.sa0050.SA0050;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
@@ -43,5 +44,5 @@ public interface CashierDetailService {
      */
     List<SA0050> getCashier(String storeCd, String posId);
 
-    Map getTotalAmount(CashierDetailParam param);
+    Map getTotalAmount(String  userId, CashierDetailParam param);
 }

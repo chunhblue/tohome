@@ -233,6 +233,24 @@ public class ConstantsAudit implements Serializable {
 
     public static final String KEY_PLAN_STOCK = "pi_cd";
 
+    // --------------------- 紧急变价   ---------------------
+    public static final int TYPE_CHANGE_PRICE = 25;
+
+    public static final int REVIEW_CHANGE_PRICE = 29;
+
+    public static final String TABLE_CHANGE_PRICE = "sa0070";
+
+    public static final String KEY_CHANGE_PRICE = "change_id";
+
+    // --------------------- 紧急变价   ---------------------
+    public static final int TYPE_SALE_PAUSE = 26;
+
+    public static final int REVIEW_SALE_PAUSE = 30;
+
+    public static final String TABLE_SALE_PAUSE = "sa0070";
+
+    public static final String KEY_SALE_PAUSE = "change_id";
+
     /**
      * 获取审核类型对应的主档表名、主键
      * @param typeId 审核类型
@@ -337,6 +355,14 @@ public class ConstantsAudit implements Serializable {
                 auditInfo.put("table",TABLE_PLAN_STOCK);
                 auditInfo.put("key",KEY_PLAN_STOCK);
                 break;
+            case TYPE_CHANGE_PRICE: // 紧急变价
+                auditInfo.put("table",TABLE_CHANGE_PRICE);
+                auditInfo.put("key",KEY_CHANGE_PRICE);
+                break;
+            case TYPE_SALE_PAUSE:// 紧急销售暂停
+                auditInfo.put("table",TABLE_SALE_PAUSE);
+                auditInfo.put("key",KEY_SALE_PAUSE);
+                break;
             default:
                 auditInfo.put("table",null);
                 auditInfo.put("key",null);
@@ -424,6 +450,12 @@ public class ConstantsAudit implements Serializable {
                 break;
             case REVIEW_PLAN_STOCK://盘点计划
                 typeId = TYPE_PLAN_STOCK;
+                break;
+            case REVIEW_CHANGE_PRICE://紧急变价
+                typeId = TYPE_CHANGE_PRICE;
+                break;
+            case REVIEW_SALE_PAUSE:// 紧急销售暂停
+                typeId = TYPE_SALE_PAUSE;
                 break;
             default:
                 typeId = 0;

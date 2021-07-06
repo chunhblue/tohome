@@ -12,6 +12,7 @@ package cn.com.bbut.iy.itemmaster.dto.base;
 import java.io.Serializable;
 import java.util.List;
 
+import cn.com.bbut.iy.itemmaster.dto.cash.CashDetail;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

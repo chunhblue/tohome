@@ -226,6 +226,10 @@ define('importantgoodsSaleDayReport' , function (){
             $("#startDate").focus();
             $("#startDate").css("border-color","red");
             return false;
+        }else if(_common.judgeValidDate(m.startDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#startDate").focus();
+            return false;
         }else {
             $("#startDate").css("border-color","#CCC");
         }
@@ -233,6 +237,10 @@ define('importantgoodsSaleDayReport' , function (){
             _common.prompt("Please enter a Date!",5,"error"); // 结束日期不可以为空
             $("#endDate").focus();
             $("#endDate").css("border-color","red");
+            return false;
+        }else if(_common.judgeValidDate(m.endDate.val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#endDate").focus();
             return false;
         }else {
             $("#endDate").css("border-color","#CCC");

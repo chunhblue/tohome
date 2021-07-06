@@ -55,6 +55,7 @@
          SELECT  DISTINCT
         ma10.store_cd,
         ma10.store_name,
+        sale_date,
         ma07.dep_cd,
         concat(ma07.dep_cd,' ',ma07.dep_name) dep_name,
         ma08.pma_cd,
@@ -63,15 +64,16 @@
         concat(ma09.category_cd,' ',ma09.category_name) category_name,
         ma01.sub_category_cd,
         concat(ma01.sub_category_cd,' ',ma01.sub_category_name) sub_category_name,
-        sa02.sale_date,
-        sa01.tran_date,
+        case when to_char(sa01.tran_date,'HH24mmss')  &lt;'060000'
+        then to_char(sa01.tran_date+ '-1 day','yyyyMMdd')
+        else to_char(sa01.tran_date,'yyyyMMdd')
+        end as tranDate,
         sa02.price_actual,
-        sa02.sale_qty,
-        sa02.sale_amount,
+        sum( sa02.sale_qty ) AS sale_qty,
+        SUM( sa02.sale_amount ) AS sale_amount,
 		ma11.article_id,
 		ma11.article_name,
 		sa02.barcode,
-		sa02.acc_date,
         oper.c_operatorcode,
         oper.c_operatorname
     FROM
@@ -140,6 +142,28 @@
         <if test="goodSaleReport.articleName!=null and goodSaleReport.articleName!=''">
             AND concat(lower(ma11.article_name),'',lower(ma11.article_id),'',lower(ma11.article_name_en),'',lower(ma11.article_short_name_en)) like lower(CONCAT('%',#{goodSaleReport.articleName},'%'))
         </if>
+        GROUP BY
+        ma10.store_cd,
+        ma10.store_name,
+        ma07.dep_cd,
+        ma08.pma_cd,
+        ma08.pma_name,
+        ma09.category_cd,
+        ma09.category_name,
+        ma01.sub_category_cd,
+        ma01.sub_category_name,
+        sa01.tran_date,
+        sa02.price_actual,
+        ma11.article_id,
+        ma11.article_name,
+        sa02.barcode,
+        sa02.sale_date,
+        case when to_char(sa01.tran_date,'HH24mmss') &lt;'060000'
+        then to_char(sa01.tran_date+ '-1 day','yyyyMMdd')
+        else to_char(sa01.tran_date,'yyyyMMdd')
+        end ,
+        oper.c_operatorcode,
+        oper.c_operatorname
         <if test="goodSaleReport.flg">
             LIMIT ${goodSaleReport.rows} OFFSET ${goodSaleReport.limitStart}
         </if>
@@ -178,8 +202,8 @@
    where
         ma10.store_cd=sa02.store_cd
         AND ma10.ofc = oper.c_operatorcode
-        and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma11.effective_start_date AND ma11.effective_end_date
-        and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma10.effective_start_date AND ma10.effective_end_date
+--         and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma11.effective_start_date AND ma11.effective_end_date
+--         and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma10.effective_start_date AND ma10.effective_end_date
 		AND sa02.article_id=ma11.article_id
 		AND ma11.pma_cd=ma08.pma_cd
 		AND ma11.dep_cd = ma07.dep_cd
@@ -232,143 +256,56 @@
         SELECT
             COUNT (*)
         FROM (
-            SELECT  DISTINCT
-                ma10.store_cd,
-                ma10.store_name,
-                ma07.dep_cd,
-                concat(ma07.dep_cd,' ',ma07.dep_name) dep_name,
-                ma08.pma_cd,
-                concat(ma08.pma_cd,' ',ma08.pma_name) pma_name,
-                ma09.category_cd,
-                concat(ma09.category_cd,' ',ma09.category_name) category_name,
-                ma01.sub_category_cd,
-                concat(ma01.sub_category_cd,' ',ma01.sub_category_name) sub_category_name,
-                sa02.sale_date,
-                sa02.sale_qty,
-                sa02.sale_amount,
-                ma11.article_id,
-                ma11.article_name,
-                sa02.barcode,
-                sa02.acc_date,
-                oper.c_operatorcode,
-                oper.c_operatorname
-            FROM
-                ma1000 ma10,
-                sa0010 sa01,
-                sa0020 sa02,
-                ma1100 ma11,
-                ma0070 ma07,
-                ma0080 ma08,
-                ma0090 ma09,
-                ma0100 ma01,
-                t_operator oper
-            where
-                ma10.store_cd=sa02.store_cd
-                AND ma10.ofc = oper.c_operatorcode
-                and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma11.effective_start_date AND ma11.effective_end_date
-                and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma10.effective_start_date AND ma10.effective_end_date
-                AND sa02.article_id=ma11.article_id
-                AND ma11.pma_cd=ma08.pma_cd
-                AND ma11.dep_cd = ma07.dep_cd
-                AND ma11.category_cd = ma09.category_cd
-                AND ma11.sub_category_cd = ma01.sub_category_cd
-                AND ma08.effective_sts = '10'
-                AND  ma10.store_cd IN
-                <foreach item="store" index="index" collection="goodSaleReport.stores"
-                         open="(" separator="," close=")">
-                    #{store,jdbcType=VARCHAR}
-                </foreach>
-                AND sa01.acc_date = sa02.acc_date
-                AND sa01.store_cd = sa02.store_cd
-                AND sa01.pos_id = sa02.pos_id
-                AND sa01.tran_serial_no = sa02.tran_serial_no
-        <if test="goodSaleReport.startDate!=null and goodSaleReport.startDate!=''">
-            <![CDATA[
-        AND sa01.tran_date >= TO_TIMESTAMP(#{goodSaleReport.startDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
-        ]]>
-        </if>
-        <if test="goodSaleReport.endDate!=null and goodSaleReport.endDate!=''">
-            <![CDATA[
-             and (sa01.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{goodSaleReport.endDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
-           ]]>
-        </if>
-                 <if test="goodSaleReport.barcode!=null and goodSaleReport.barcode!=''">
-                     AND lower( sa02.barcode )  LIKE CONCAT('%',#{goodSaleReport.barcode},'%')
-                 </if>
-                <if test="goodSaleReport.depCd!=null and goodSaleReport.depCd!=''">
-                    AND ma11.dep_cd = #{goodSaleReport.depCd}
-                </if>
-                <if test="goodSaleReport.pmaCd!=null and goodSaleReport.pmaCd!=''">
-                    AND ma11.pma_cd = #{goodSaleReport.pmaCd}
-                </if>
-                <if test="goodSaleReport.categoryCd != null and goodSaleReport.categoryCd != ''">
-                    and ma11.category_cd = #{goodSaleReport.categoryCd,jdbcType=VARCHAR}
-                </if>
-                <if test="goodSaleReport.subCategoryCd != null and goodSaleReport.subCategoryCd != ''">
-                    and ma11.sub_category_cd = #{goodSaleReport.subCategoryCd,jdbcType=VARCHAR}
-                </if>
-
-                <if test="goodSaleReport.city!=null and goodSaleReport.city!=''">
-                    AND ma10.zo_cd = #{goodSaleReport.city}
-                </if>
-                <if test="goodSaleReport.am!=null and goodSaleReport.am!=''">
-                    AND ma10.ofc = #{goodSaleReport.am}
-                </if>
-            <if test="goodSaleReport.articleName!=null and goodSaleReport.articleName!=''">
-            AND concat(lower(ma11.article_name),'',lower(ma11.article_id),'',lower(ma11.article_name_en),'',lower(ma11.article_short_name_en)) like lower(CONCAT('%',#{goodSaleReport.articleName},'%'))
-           </if>
-        ) A
-    </select>
-    <select id="getArticleCount" parameterType="cn.com.bbut.iy.itemmaster.dto.goodsalereport.goodSaleReportParamDTO" resultType="int">
-        SELECT
-            COUNT ( A.article_id)
-        FROM (
-            SELECT  DISTINCT
-                ma10.store_cd,
-                ma10.store_name,
-                ma07.dep_cd,
-                concat(ma07.dep_cd,' ',ma07.dep_name) dep_name,
-                ma08.pma_cd,
-                concat(ma08.pma_cd,' ',ma08.pma_name) pma_name,
-                ma09.category_cd,
-                concat(ma09.category_cd,' ',ma09.category_name) category_name,
-                ma01.sub_category_cd,
-                concat(ma01.sub_category_cd,' ',ma01.sub_category_name) sub_category_name,
-                sa02.sale_date,
-                sa02.sale_qty,
-                sa02.sale_amount,
-                ma11.article_id,
-                ma11.article_name,
-                sa02.barcode,
-                sa02.acc_date,
-                oper.c_operatorcode,
-                oper.c_operatorname
-            FROM
-                ma1000 ma10,
-                sa0010 sa01,
-                sa0020 sa02,
-                ma1100 ma11,
-                ma0070 ma07,
-                ma0080 ma08,
-                ma0090 ma09,
-                ma0100 ma01,
-                t_operator oper
-            where
-                ma10.store_cd=sa02.store_cd
-                AND ma10.ofc = oper.c_operatorcode
-                and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma11.effective_start_date AND ma11.effective_end_date
-                and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma10.effective_start_date AND ma10.effective_end_date
-                AND sa02.article_id=ma11.article_id
-                AND ma11.pma_cd=ma08.pma_cd
-                AND ma11.dep_cd = ma07.dep_cd
-                AND ma11.category_cd = ma09.category_cd
-                AND ma11.sub_category_cd = ma01.sub_category_cd
-                AND ma08.effective_sts = '10'
-                AND  ma10.store_cd IN
-                <foreach item="store" index="index" collection="goodSaleReport.stores"
-                         open="(" separator="," close=")">
-                    #{store,jdbcType=VARCHAR}
-                </foreach>
+        SELECT  DISTINCT
+        ma10.store_cd,
+        ma10.store_name,
+        ma07.dep_cd,
+        sa02.sale_date,
+        concat(ma07.dep_cd,' ',ma07.dep_name) dep_name,
+        ma08.pma_cd,
+        concat(ma08.pma_cd,' ',ma08.pma_name) pma_name,
+        ma09.category_cd,
+        concat(ma09.category_cd,' ',ma09.category_name) category_name,
+        ma01.sub_category_cd,
+        concat(ma01.sub_category_cd,' ',ma01.sub_category_name) sub_category_name,
+        case when to_char(sa01.tran_date,'HH24mmss')  &lt;'060000'
+        then to_char(sa01.tran_date+ '-1 day','yyyyMMdd')
+        else to_char(sa01.tran_date,'yyyyMMdd')
+        end as acc_date,
+        sa02.price_actual,
+        sum( sa02.sale_qty ) AS sale_qty,
+        SUM( sa02.sale_amount ) AS sale_amount,
+        ma11.article_id,
+        ma11.article_name,
+        sa02.barcode,
+        oper.c_operatorcode,
+        oper.c_operatorname
+        FROM
+        ma1000 ma10,
+        sa0010 sa01,
+        sa0020 sa02,
+        ma1100 ma11,
+        ma0070 ma07,
+        ma0080 ma08,
+        ma0090 ma09,
+        ma0100 ma01,
+        t_operator oper
+        where
+        ma10.store_cd=sa02.store_cd
+        AND ma10.ofc = oper.c_operatorcode
+        and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma11.effective_start_date AND ma11.effective_end_date
+        and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma10.effective_start_date AND ma10.effective_end_date
+        AND sa02.article_id=ma11.article_id
+        AND ma11.pma_cd=ma08.pma_cd
+        AND ma11.dep_cd = ma07.dep_cd
+        AND ma11.category_cd = ma09.category_cd
+        AND ma11.sub_category_cd = ma01.sub_category_cd
+        AND ma08.effective_sts = '10'
+        AND  ma10.store_cd IN
+        <foreach item="store" index="index" collection="goodSaleReport.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
         AND sa01.acc_date = sa02.acc_date
         AND sa01.store_cd = sa02.store_cd
         AND sa01.pos_id = sa02.pos_id
@@ -383,34 +320,356 @@
              and (sa01.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{goodSaleReport.endDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
            ]]>
         </if>
-               <if test="goodSaleReport.barcode!=null and goodSaleReport.barcode!=''">
-                    AND lower( sa02.barcode )  LIKE CONCAT('%',#{goodSaleReport.barcode},'%')
+        <if test="goodSaleReport.barcode!=null and goodSaleReport.barcode!=''">
+            AND lower( sa02.barcode )  LIKE CONCAT('%',#{goodSaleReport.barcode},'%')
 
-                   </if>
-                <if test="goodSaleReport.depCd!=null and goodSaleReport.depCd!=''">
-                    AND ma11.dep_cd = #{goodSaleReport.depCd}
-                </if>
-                <if test="goodSaleReport.pmaCd!=null and goodSaleReport.pmaCd!=''">
-                    AND ma11.pma_cd = #{goodSaleReport.pmaCd}
-                </if>
-                <if test="goodSaleReport.categoryCd != null and goodSaleReport.categoryCd != ''">
-                    and ma11.category_cd = #{goodSaleReport.categoryCd,jdbcType=VARCHAR}
-                </if>
-                <if test="goodSaleReport.subCategoryCd != null and goodSaleReport.subCategoryCd != ''">
-                    and ma11.sub_category_cd = #{goodSaleReport.subCategoryCd,jdbcType=VARCHAR}
-                </if>
+        </if>
+        <if test="goodSaleReport.depCd!=null and goodSaleReport.depCd!=''">
+            AND ma11.dep_cd = #{goodSaleReport.depCd}
+        </if>
+        <if test="goodSaleReport.pmaCd!=null and goodSaleReport.pmaCd!=''">
+            AND ma11.pma_cd = #{goodSaleReport.pmaCd}
+        </if>
+        <if test="goodSaleReport.categoryCd != null and goodSaleReport.categoryCd != ''">
+            and ma11.category_cd = #{goodSaleReport.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="goodSaleReport.subCategoryCd != null and goodSaleReport.subCategoryCd != ''">
+            and ma11.sub_category_cd = #{goodSaleReport.subCategoryCd,jdbcType=VARCHAR}
+        </if>
 
-                <if test="goodSaleReport.city!=null and goodSaleReport.city!=''">
-                    AND ma10.zo_cd = #{goodSaleReport.city}
-                </if>
-                <if test="goodSaleReport.am!=null and goodSaleReport.am!=''">
-                    AND ma10.ofc = #{goodSaleReport.am}
-                </if>
-
-                <if test="goodSaleReport.articleName!=null and goodSaleReport.articleName!=''">
-                    and concat(lower( ma11.article_name ),'',lower(ma11.article_id),'',lower( ma11.article_name_en ),'',lower( ma11.article_short_name ),'', lower( ma11.article_short_name_en )) LIKE lower( CONCAT('%',#{goodSaleReport.articleName},'%') )
-                </if>
+        <if test="goodSaleReport.city!=null and goodSaleReport.city!=''">
+            AND ma10.zo_cd = #{goodSaleReport.city}
+        </if>
+        <if test="goodSaleReport.am!=null and goodSaleReport.am!=''">
+            AND ma10.ofc = #{goodSaleReport.am}
+        </if>
+        <if test="goodSaleReport.articleName!=null and goodSaleReport.articleName!=''">
+            AND concat(lower(ma11.article_name),'',lower(ma11.article_id),'',lower(ma11.article_name_en),'',lower(ma11.article_short_name_en)) like lower(CONCAT('%',#{goodSaleReport.articleName},'%'))
+        </if>
+        GROUP BY
+        ma10.store_cd,
+        ma10.store_name,
+        ma07.dep_cd,
+        ma08.pma_cd,
+        ma08.pma_name,
+        ma09.category_cd,
+        ma09.category_name,
+        ma01.sub_category_cd,
+        ma01.sub_category_name,
+        sa01.tran_date,
+        sa02.price_actual,
+        ma11.article_id,
+        ma11.article_name,
+        sa02.barcode,
+        sa02.sale_date,
+        case when to_char(sa01.tran_date,'HH24mmss') &lt;'060000'
+        then to_char(sa01.tran_date+ '-1 day','yyyyMMdd')
+        else to_char(sa01.tran_date,'yyyyMMdd')
+        end,
+        oper.c_operatorcode,
+        oper.c_operatorname
         ) A
+    </select>
+    <select id="getArticleCount" parameterType="cn.com.bbut.iy.itemmaster.dto.goodsalereport.goodSaleReportParamDTO" resultType="int">
+        SELECT
+        COUNT( DISTINCT A.article_id )
+        FROM (
+        SELECT  DISTINCT
+        ma10.store_cd,
+        ma10.store_name,
+        sa02.sale_date,
+        ma07.dep_cd,
+        concat(ma07.dep_cd,' ',ma07.dep_name) dep_name,
+        ma08.pma_cd,
+        concat(ma08.pma_cd,' ',ma08.pma_name) pma_name,
+        ma09.category_cd,
+        concat(ma09.category_cd,' ',ma09.category_name) category_name,
+        ma01.sub_category_cd,
+        concat(ma01.sub_category_cd,' ',ma01.sub_category_name) sub_category_name,
+        case when to_char(sa01.tran_date,'HH24mmss')  &lt;'060000'
+        then to_char(sa01.tran_date+ '-1 day','yyyyMMdd')
+        else to_char(sa01.tran_date,'yyyyMMdd')
+        end as acc_date,
+        sa02.price_actual,
+        sum( sa02.sale_qty ) AS sale_qty,
+        SUM( sa02.sale_amount ) AS sale_amount,
+        ma11.article_id,
+        ma11.article_name,
+        sa02.barcode,
+        oper.c_operatorcode,
+        oper.c_operatorname
+        FROM
+        ma1000 ma10,
+        sa0010 sa01,
+        sa0020 sa02,
+        ma1100 ma11,
+        ma0070 ma07,
+        ma0080 ma08,
+        ma0090 ma09,
+        ma0100 ma01,
+        t_operator oper
+        where
+        ma10.store_cd=sa02.store_cd
+        AND ma10.ofc = oper.c_operatorcode
+        and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma11.effective_start_date AND ma11.effective_end_date
+        and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma10.effective_start_date AND ma10.effective_end_date
+        AND sa02.article_id=ma11.article_id
+        AND ma11.pma_cd=ma08.pma_cd
+        AND ma11.dep_cd = ma07.dep_cd
+        AND ma11.category_cd = ma09.category_cd
+        AND ma11.sub_category_cd = ma01.sub_category_cd
+        AND ma08.effective_sts = '10'
+        AND  ma10.store_cd IN
+        <foreach item="store" index="index" collection="goodSaleReport.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        AND sa01.acc_date = sa02.acc_date
+        AND sa01.store_cd = sa02.store_cd
+        AND sa01.pos_id = sa02.pos_id
+        AND sa01.tran_serial_no = sa02.tran_serial_no
+        <if test="goodSaleReport.startDate!=null and goodSaleReport.startDate!=''">
+            <![CDATA[
+        AND sa01.tran_date >= TO_TIMESTAMP(#{goodSaleReport.startDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        ]]>
+        </if>
+        <if test="goodSaleReport.endDate!=null and goodSaleReport.endDate!=''">
+            <![CDATA[
+             and (sa01.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{goodSaleReport.endDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+           ]]>
+        </if>
+        <if test="goodSaleReport.barcode!=null and goodSaleReport.barcode!=''">
+            AND lower( sa02.barcode )  LIKE CONCAT('%',#{goodSaleReport.barcode},'%')
+
+        </if>
+        <if test="goodSaleReport.depCd!=null and goodSaleReport.depCd!=''">
+            AND ma11.dep_cd = #{goodSaleReport.depCd}
+        </if>
+        <if test="goodSaleReport.pmaCd!=null and goodSaleReport.pmaCd!=''">
+            AND ma11.pma_cd = #{goodSaleReport.pmaCd}
+        </if>
+        <if test="goodSaleReport.categoryCd != null and goodSaleReport.categoryCd != ''">
+            and ma11.category_cd = #{goodSaleReport.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="goodSaleReport.subCategoryCd != null and goodSaleReport.subCategoryCd != ''">
+            and ma11.sub_category_cd = #{goodSaleReport.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+
+        <if test="goodSaleReport.city!=null and goodSaleReport.city!=''">
+            AND ma10.zo_cd = #{goodSaleReport.city}
+        </if>
+        <if test="goodSaleReport.am!=null and goodSaleReport.am!=''">
+            AND ma10.ofc = #{goodSaleReport.am}
+        </if>
+        <if test="goodSaleReport.articleName!=null and goodSaleReport.articleName!=''">
+            AND concat(lower(ma11.article_name),'',lower(ma11.article_id),'',lower(ma11.article_name_en),'',lower(ma11.article_short_name_en)) like lower(CONCAT('%',#{goodSaleReport.articleName},'%'))
+        </if>
+        GROUP BY
+        ma10.store_cd,
+        ma10.store_name,
+        ma07.dep_cd,
+        ma08.pma_cd,
+        ma08.pma_name,
+        ma09.category_cd,
+        ma09.category_name,
+        ma01.sub_category_cd,
+        ma01.sub_category_name,
+        sa01.tran_date,
+        sa02.price_actual,
+        ma11.article_id,
+        ma11.article_name,
+        sa02.barcode,
+        sa01.tran_date,
+        oper.c_operatorcode,
+        sa02.sale_date,
+        oper.c_operatorname
+        ) A
+    </select>
+    <select id="getTotalSaleAmount1" parameterType="cn.com.bbut.iy.itemmaster.dto.goodsalereport.goodSaleReportParamDTO"  resultType="BigDecimal">
+        SELECT
+        sum(sa02.sale_amount) sale_amount
+        FROM
+        ma1000 ma10,
+        sa0010 sa01,
+        sa0020 sa02,
+        ma1100 ma11,
+        ma0070 ma07,
+        ma0080 ma08,
+        ma0090 ma09,
+        ma0100 ma01,
+        t_operator oper
+        where
+        ma10.store_cd=sa02.store_cd
+        AND ma10.ofc = oper.c_operatorcode
+        and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma11.effective_start_date AND ma11.effective_end_date
+        and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma10.effective_start_date AND ma10.effective_end_date
+        AND sa02.article_id=ma11.article_id
+        AND ma11.pma_cd=ma08.pma_cd
+        AND ma11.dep_cd = ma07.dep_cd
+        AND ma11.category_cd = ma09.category_cd
+        AND ma11.sub_category_cd = ma01.sub_category_cd
+        AND ma08.effective_sts = '10'
+        AND  ma10.store_cd IN
+        <foreach item="store" index="index" collection="goodSaleReport.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        AND sa01.acc_date = sa02.acc_date
+        AND sa01.store_cd = sa02.store_cd
+        AND sa01.pos_id = sa02.pos_id
+        AND sa01.tran_serial_no = sa02.tran_serial_no
+        <if test="goodSaleReport.startDate!=null and goodSaleReport.startDate!=''">
+            <![CDATA[
+        AND sa01.tran_date >= TO_TIMESTAMP(#{goodSaleReport.startDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        ]]>
+        </if>
+        <if test="goodSaleReport.endDate!=null and goodSaleReport.endDate!=''">
+            <![CDATA[
+             and (sa01.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{goodSaleReport.endDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+           ]]>
+        </if>
+        <if test="goodSaleReport.barcode!=null and goodSaleReport.barcode!=''">
+            AND lower( sa02.barcode )  LIKE CONCAT('%',#{goodSaleReport.barcode},'%')
+
+        </if>
+        <if test="goodSaleReport.depCd!=null and goodSaleReport.depCd!=''">
+            AND ma11.dep_cd = #{goodSaleReport.depCd}
+        </if>
+        <if test="goodSaleReport.pmaCd!=null and goodSaleReport.pmaCd!=''">
+            AND ma11.pma_cd = #{goodSaleReport.pmaCd}
+        </if>
+        <if test="goodSaleReport.categoryCd != null and goodSaleReport.categoryCd != ''">
+            and ma11.category_cd = #{goodSaleReport.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="goodSaleReport.subCategoryCd != null and goodSaleReport.subCategoryCd != ''">
+            and ma11.sub_category_cd = #{goodSaleReport.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+
+        <if test="goodSaleReport.city!=null and goodSaleReport.city!=''">
+            AND ma10.zo_cd = #{goodSaleReport.city}
+        </if>
+        <if test="goodSaleReport.am!=null and goodSaleReport.am!=''">
+            AND ma10.ofc = #{goodSaleReport.am}
+        </if>
+        <if test="goodSaleReport.articleName!=null and goodSaleReport.articleName!=''">
+            AND concat(lower(ma11.article_name),'',lower(ma11.article_id),'',lower(ma11.article_name_en),'',lower(ma11.article_short_name_en)) like lower(CONCAT('%',#{goodSaleReport.articleName},'%'))
+        </if>
+    </select>
+    <select id="getTotalSaleAmount" parameterType="cn.com.bbut.iy.itemmaster.dto.goodsalereport.goodSaleReportParamDTO"  resultType="BigDecimal">
+       select
+       SUM(A.sale_amount) as sale_amount
+       from
+       (SELECT  DISTINCT
+        ma10.store_cd,
+        ma10.store_name,
+        ma07.dep_cd,
+        concat(ma07.dep_cd,' ',ma07.dep_name) dep_name,
+        ma08.pma_cd,
+        concat(ma08.pma_cd,' ',ma08.pma_name) pma_name,
+        ma09.category_cd,
+        concat(ma09.category_cd,' ',ma09.category_name) category_name,
+        ma01.sub_category_cd,
+        concat(ma01.sub_category_cd,' ',ma01.sub_category_name) sub_category_name,
+        case when to_char(sa01.tran_date,'HH24mmss')  &lt;'060000'
+        then to_char(sa01.tran_date+ '-1 day','yyyyMMdd')
+        else to_char(sa01.tran_date,'yyyyMMdd')
+        end as acc_date,
+        sa02.price_actual,
+        sum( sa02.sale_qty ) AS sale_qty,
+        SUM( sa02.sale_amount ) AS sale_amount,
+        ma11.article_id,
+        ma11.article_name,
+        sa02.barcode,
+        sa02.sale_date,
+        oper.c_operatorcode,
+        oper.c_operatorname
+        FROM
+        ma1000 ma10,
+        sa0010 sa01,
+        sa0020 sa02,
+        ma1100 ma11,
+        ma0070 ma07,
+        ma0080 ma08,
+        ma0090 ma09,
+        ma0100 ma01,
+        t_operator oper
+        where
+        ma10.store_cd=sa02.store_cd
+        AND ma10.ofc = oper.c_operatorcode
+        and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma11.effective_start_date AND ma11.effective_end_date
+        and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma10.effective_start_date AND ma10.effective_end_date
+        AND sa02.article_id=ma11.article_id
+        AND ma11.pma_cd=ma08.pma_cd
+        AND ma11.dep_cd = ma07.dep_cd
+        AND ma11.category_cd = ma09.category_cd
+        AND ma11.sub_category_cd = ma01.sub_category_cd
+        AND ma08.effective_sts = '10'
+        AND  ma10.store_cd IN
+        <foreach item="store" index="index" collection="goodSaleReport.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        AND sa01.acc_date = sa02.acc_date
+        AND sa01.store_cd = sa02.store_cd
+        AND sa01.pos_id = sa02.pos_id
+        AND sa01.tran_serial_no = sa02.tran_serial_no
+        <if test="goodSaleReport.startDate!=null and goodSaleReport.startDate!=''">
+            <![CDATA[
+        AND sa01.tran_date >= TO_TIMESTAMP(#{goodSaleReport.startDate,jdbcType=VARCHAR}|| ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+        ]]>
+        </if>
+        <if test="goodSaleReport.endDate!=null and goodSaleReport.endDate!=''">
+            <![CDATA[
+             and (sa01.tran_date - INTERVAL'1 day') < TO_TIMESTAMP(#{goodSaleReport.endDate,jdbcType=VARCHAR} || ' ' ||'06:00:00', 'YYYY-MM-DD HH24:MI:SS')
+           ]]>
+        </if>
+        <if test="goodSaleReport.barcode!=null and goodSaleReport.barcode!=''">
+            AND lower( sa02.barcode )  LIKE CONCAT('%',#{goodSaleReport.barcode},'%')
+
+        </if>
+        <if test="goodSaleReport.depCd!=null and goodSaleReport.depCd!=''">
+            AND ma11.dep_cd = #{goodSaleReport.depCd}
+        </if>
+        <if test="goodSaleReport.pmaCd!=null and goodSaleReport.pmaCd!=''">
+            AND ma11.pma_cd = #{goodSaleReport.pmaCd}
+        </if>
+        <if test="goodSaleReport.categoryCd != null and goodSaleReport.categoryCd != ''">
+            and ma11.category_cd = #{goodSaleReport.categoryCd,jdbcType=VARCHAR}
+        </if>
+        <if test="goodSaleReport.subCategoryCd != null and goodSaleReport.subCategoryCd != ''">
+            and ma11.sub_category_cd = #{goodSaleReport.subCategoryCd,jdbcType=VARCHAR}
+        </if>
+
+        <if test="goodSaleReport.city!=null and goodSaleReport.city!=''">
+            AND ma10.zo_cd = #{goodSaleReport.city}
+        </if>
+        <if test="goodSaleReport.am!=null and goodSaleReport.am!=''">
+            AND ma10.ofc = #{goodSaleReport.am}
+        </if>
+        <if test="goodSaleReport.articleName!=null and goodSaleReport.articleName!=''">
+            AND concat(lower(ma11.article_name),'',lower(ma11.article_id),'',lower(ma11.article_name_en),'',lower(ma11.article_short_name_en)) like lower(CONCAT('%',#{goodSaleReport.articleName},'%'))
+        </if>
+        GROUP BY
+        ma10.store_cd,
+        ma10.store_name,
+        ma07.dep_cd,
+        ma08.pma_cd,
+        ma08.pma_name,
+        ma09.category_cd,
+        ma09.category_name,
+        ma01.sub_category_cd,
+        ma01.sub_category_name,
+        sa02.price_actual,
+        ma11.article_id,
+        ma11.article_name,
+        sa02.barcode,
+        sa02.sale_date,
+        case when to_char(sa01.tran_date,'HH24mmss') &lt;'060000'
+        then to_char(sa01.tran_date+ '-1 day','yyyyMMdd')
+        else to_char(sa01.tran_date,'yyyyMMdd')
+        end,
+        oper.c_operatorcode,
+        oper.c_operatorname) as A;
     </select>
 
 </mapper>

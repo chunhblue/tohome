@@ -934,7 +934,16 @@ public class PermissionCode implements Serializable {
     public static final String CODE_SC_STAFF_ATTENDANCE_LIST_VIEW = "SC-STAFF-DAILY-001";
     /** Store Staff Attendance Detail Report HCM 导出权限 */
     public static final String CODE_SC_STAFF_ATTENDANCE__EXPORT = "SC-STAFF-DAILY-002";
-
+	
+    /** 上传文件到pos 页面权限 **/
+    public static final String CODE_SC_RU_VIEW_LIST = "SC-RU";
+    /** 上传文件到pos 列表查看权限 **/
+    public static final String CODE_SC_RU_VIEW = "SC-RU-VIEW";
+    /** 上传文件到pos 添加权限 **/
+    public static final String CODE_SC_RU_ADD = "SC-RU-ADD";
+    /** 上传文件到pos 编辑权限 **/
+    public static final String CODE_SC_RU_EDIT = "SC-RU-EDIT";
+    
     /** Clearance Of Inventory Entry 列表查看权限 */
     public static final String CODE_SC_ST_CLEAR_LIST_VIEW = "SC-ST-CLEAR-001";
     /** Clearance Of Inventory Entry 新增权限 */

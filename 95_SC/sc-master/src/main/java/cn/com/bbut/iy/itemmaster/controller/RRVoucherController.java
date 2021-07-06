@@ -16,9 +16,11 @@ import cn.com.bbut.iy.itemmaster.dto.receipt.rrVoucher.RRVoucherParamDTO;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.audit.IAuditService;
 import cn.com.bbut.iy.itemmaster.service.receipt.rrVoucher.IRRVoucherService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -54,6 +56,8 @@ public class RRVoucherController extends BaseAction {
     private MRoleStoreService mRoleStoreService;
     @Autowired
     private IAuditService auditServiceImpl;
+    @Autowired
+    private Ma4320Service ma4320Service;
 
     private final String EXCEL_EXPORT_KEY = "EXCEL_RECEIVING_RETURN_QUERY";
     private final String EXCEL_EXPORT_NAME = "Receiving And Return Query.xlsx";
@@ -264,6 +268,9 @@ public class RRVoucherController extends BaseAction {
     public ModelAndView rrVoucherQueryPrint(HttpServletRequest request, HttpSession session,
                                               Map<String, ?> model,String searchJson) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入收货查询打印一览画面", u.getUserId());
         Collection<Integer> roleIds = (Collection<Integer>) request.getSession().getAttribute(
                 Constants.SESSION_ROLES);
@@ -271,7 +278,7 @@ public class RRVoucherController extends BaseAction {
         mv.addObject("use", 0);
         mv.addObject("identity", 1);
         mv.addObject("userName", u.getUserName());
-        mv.addObject("printTime", new Date());
+        mv.addObject("printTime", Utils.getFormateDate(ymd));
         mv.addObject("searchJson", searchJson);
         mv.addObject("typeId", ConstantsAudit.TYPE_ORDER_TAKE_STOCK);
         mv.addObject("useMsg", "收货查询打印一览打印画面");
@@ -337,6 +344,9 @@ public class RRVoucherController extends BaseAction {
         if(u == null){
             return null;
         }
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         CommonDTO dto = new CommonDTO();
         // 当前用户ID
         dto.setUpdateUserId(u.getUserId());
@@ -347,12 +357,12 @@ public class RRVoucherController extends BaseAction {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HHmmss");
         // 当前时间年月日
         String date = dateFormat.format(now);
-        dto.setCreateYmd(date);
-        dto.setUpdateYmd(date);
+        dto.setCreateYmd(ymd);
+        dto.setUpdateYmd(ymd);
         // 当前时间时分秒
         String time = timeFormat.format(now);
-        dto.setCreateHms(time);
-        dto.setUpdateHms(time);
+        dto.setCreateHms(hms);
+        dto.setUpdateHms(hms);
         return dto;
     }
 
@@ -437,7 +447,7 @@ public class RRVoucherController extends BaseAction {
                         _return.setMessage("The approval status is expired and cannot modify!");//审核状态已失效
                     default:
                         _return.setSuccess(false);
-                        _return.setMessage("Selected PO is already approved and cannot modify!");//审核状态已完成
+                        _return.setMessage("Selected document!");//审核状态已完成
                 }
             }
         }else if(status == 15){////收货录入完成，未审核

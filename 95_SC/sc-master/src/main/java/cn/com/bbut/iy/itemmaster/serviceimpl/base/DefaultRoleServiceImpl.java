@@ -251,4 +251,9 @@ public class DefaultRoleServiceImpl implements DefaultRoleService {
 
         return ma4160Mapper.countFinancePosition(userId);
     }
+
+    @Override
+    public int judgeSMPosition(String userId,String StoreCd) {
+        return ma4160Mapper.judgeSMPositionByCondition(userId,StoreCd);
+    }
 }

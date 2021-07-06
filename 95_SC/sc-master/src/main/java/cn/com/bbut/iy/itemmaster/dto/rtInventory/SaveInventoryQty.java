@@ -21,7 +21,7 @@ public class SaveInventoryQty {
     private String storeCd;// 店铺cd
     private String articleId;//商品Id
     private String detailType;//库存类型
-    private Timestamp inEsTime;
+    private String inEsTime;
 
     private Float saleQty;//销售数量
     private Float onHandQty;//昨日在库量
@@ -49,4 +49,6 @@ public class SaveInventoryQty {
 
     private Float realtimeQty; // 实时库存数量
     private Float inventoryQty; // 通用qty
+
+    private String accDate;
 }

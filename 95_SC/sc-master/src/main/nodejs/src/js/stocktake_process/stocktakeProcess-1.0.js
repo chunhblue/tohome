@@ -186,6 +186,7 @@ define('receipt', function () {
             // 确定要提交吗？审核过程中不能修改！
             _common.myConfirm("Are you sure you want to submit? Cannot be modified during approval!",function(result) {
                 if (result == "true") {
+                    _common.loading();
                     //发起审核
                     var typeId =m.typeId.val();
                     var	nReviewid =m.reviewId.val();
@@ -193,8 +194,7 @@ define('receipt', function () {
                     var storeCd = cols['storeCd'];
                     _common.initiateAudit(storeCd,recordCd,typeId,nReviewid,m.toKen.val(),function (token) {
                         m.toKen.val(token);
-                        m.search.click();
-                        synchronizedEndTime(recordCd,piDate,storeCd);
+                        approval(recordCd,cols['piCd'],formatDate(cols['piDate']),storeCd);
                     })
                 }
             })
@@ -254,8 +254,107 @@ define('receipt', function () {
 
             }
         });
-    }
+    };
 
+    var approval = function (recordId,piCd,piDate,storeCd) {
+        $.myAjaxs({
+            url:systemPath+"/audit/getStep",
+            async:true,
+            cache:false,
+            type :"post",
+            data :{
+                recordId : recordId,
+                typeId : m.typeId.val()
+            },
+            dataType:"json",
+            success:function(result){
+                if(result.success){
+                    if(result.data) {
+                        // 设置审核记录ID
+                        $("#auditId").val(result.data);
+                        $("#audit_affirm").prop('disabled', false);
+
+                        var auditStepId = $("#auditId").val();
+                        //审核结果
+                        var auditStatus = "1";//通过
+                        var detailType = "tmp_stock_take";
+                        $.myAjaxs({
+                            url: _common.config.surl + "/audit/submit",
+                            async: true,
+                            cache: false,
+                            type: "post",
+                            data: {
+                                auditStepId: auditStepId,
+                                auditStatus: auditStatus,
+                                detailType:detailType,
+                                auditContent: "",
+                                toKen: m.toKen.val()
+                            },
+                            dataType: "json",
+                            success: function (result) {
+                                if (result.success) {
+                                    $("#approval_dialog").modal("hide");
+                                    //更新主档审核状态值
+                                    //_common.modifyRecordStatus(auditStepId,auditStatus);
+                                    // m.approvalBut.prop("disabled", true);
+
+                                    // 判断是否审核完成
+                                    let typeId = m.typeId.val();
+                                    updateStatus(piCd, typeId, piDate);
+                                    synchronizedEndTime(piCd,piDate,storeCd);
+                                    _common.prompt("Saved Successfully!",3,"success");// 保存审核信息成功
+                                    m.search.click();
+                                } else {
+                                    // m.approvalBut.prop("disabled", false);
+                                    _common.prompt("Saved Failure!",5,"error");// 保存审核信息失败
+                                }
+                                m.toKen.val(result.toKen);
+                            },
+                            complete:_common.myAjaxComplete
+                        });
+                    }
+                }else{
+                    if(result.data == 'Param'){
+                        _common.prompt('Record fetch failed, Please try again!',5,"error"); // 没有查询到记录（参数为空）
+                        return ;
+                    }
+                    if(result.data == 'Null'){
+                        _common.prompt('No Matching!',5,"error"); // 没有查询到记录（返回结果为空）
+                        return ;
+                    }
+                    if(result.data == 'Inconformity'){
+                        _common.prompt('You do not have permission to process!',5,"error"); // 角色不符合
+                        return ;
+                    }
+                    _common.prompt('Query failed, Please try again!',5,"error"); // 查询失败
+                    $("#audit_affirm").prop('disabled', true);
+                }
+                _common.loading_close();
+            },
+            error : function(e){
+                _common.prompt("The request failed, Please try again!",5,"error");// 请求失败
+                _common.loading_close();
+            }
+        });
+    };
+
+    /**
+     * 审核完成修改状态
+     */
+    var updateStatus = function (recordId,typeId,startDate) {
+        $.myAjaxs({
+            url:systemPath+"/stocktakeEntry/updateStatus",
+            async:true,
+            cache:false,
+            type :"post",
+            data :{
+                piCd:recordId,
+                typeId:typeId,
+                piDate:startDate,
+            },
+            dataType:"json",
+        });
+    };
     // 17:05:16 -> 170516
     var formatTime = function (str) {
         return str.replace(/:/g,'');
@@ -480,13 +579,21 @@ define('receipt', function () {
             },
             eachTrClick:function(trObj,tdObj){//正常左侧点击
                 selectTrTemp = trObj;
-                let cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,piDate,piStatusCd");
+                let cols = tableGrid.getSelectColValue(selectTrTemp,"piCd,piDate,piStatusCd,storeCd");
                 let status = cols["piStatusCd"];
                 _common.getRecordStatus(cols['piCd'],m.typeId.val(),function (result) {
                     _result = result;
                     if (_result.data == null&&status!="01") {
                         $("#submitPlan").prop("disabled",false);
                     } else {
+                        $("#submitPlan").prop("disabled",true);
+                    }
+                });
+                //检查是否允许审核
+                checkUserRole(cols['storeCd'],function (success) {
+                    if(success){
+                        $("#submitPlan").prop("disabled",false);
+                    }else{
                         $("#submitPlan").prop("disabled",true);
                     }
                 });
@@ -542,6 +649,27 @@ define('receipt', function () {
             },
             ajaxSuccess:function(resData){
                 return resData;
+            }
+        });
+    }
+
+    var checkUserRole = function (storeCd,callback) {
+        $.myAjaxs({
+            url:systemPath+"/officeManagement/checkUserRole",
+            async:true,
+            cache:false,
+            type :"post",
+            data :{
+                recordId : storeCd,
+            },
+            dataType:"json",
+            success:function(result){
+                //回调
+                callback(result.success);
+            },
+            error : function(e){
+                prompt("The request failed, Please try again!",5,"error");// 请求失败
+                callback(false);
             }
         });
     }

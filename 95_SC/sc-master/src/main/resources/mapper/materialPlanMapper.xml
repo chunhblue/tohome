@@ -14,6 +14,8 @@
         <result column="pi_method" property="piMethod"></result>
         <result column="remarks" property="remarks"></result>
         <result column="create_user_id" property="createUserId"></result>
+        <result column="upload_flg" property="uploadFlg"></result>
+        <result column="review_status" property="reviewSts"></result>
     </resultMap>
 
     <resultMap id="Pi0110ResultMap" type="cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0110DTOC">
@@ -77,7 +79,7 @@
 
     <select id="selectCountByParam" resultType="int" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100c.PI0100ParamDTOC">
         SELECT
-        COUNT (P.pi_cd)
+        COUNT (P.*)
         FROM
         pi0155 P,
         ma1000 p1,
@@ -106,6 +108,9 @@
                 <![CDATA[
                 and P.create_ymd <= #{pi0100Param.piEndDate}
                 ]]>
+            </if>
+            <if test="pi0100Param.reviewSts != null and pi0100Param.reviewSts != ''">
+                and cast(p.review_status as varchar)  = #{pi0100Param.reviewSts}
             </if>
         </where>
     </select>
@@ -114,10 +119,12 @@
         SELECT
         CONCAT(P.create_ymd,P.create_hms) AS create_ymd,
         P.pi_cd,
+        p.upload_flg,
         p1.store_cd,
         p1.store_name,
         P3.emp_name AS create_user_name,
-        P.remarks
+        P.remarks,
+        P.review_status
         FROM
         pi0155 P,
         ma1000 p1,
@@ -146,6 +153,9 @@
                 <![CDATA[
                 and P.create_ymd <= #{pi0100Param.piEndDate}
                 ]]>
+            </if>
+            <if test="pi0100Param.reviewSts != null and pi0100Param.reviewSts != ''">
+                and cast(p.review_status as varchar)  = #{pi0100Param.reviewSts}
             </if>
         </where>
         ORDER BY P.create_ymd DESC
@@ -189,7 +199,7 @@ WHERE
 	A.sales_unit_id = D.unit_id
 	And A.cost_item='1'
   <if test="param.articleId !=null and param.articleId !=''">
-  AND  A.article_id=#{param.articleId}
+  AND  A.article_id like concat('%',#{param.articleId},'%')
  </if>
     </select>
     <select id="selectCountItem" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100c.MaterialDTO" resultType="INT">
@@ -233,11 +243,13 @@ WHERE
          pi0160.barcode,
          pi0160.uom,
          pi0160.qty,
+         PI0160.reason_code,
+        CONCAT(PI0160.reason_code,' ',PI0160.reason) AS reason,
          pi0160.material_type
          FROM PI0160
          WHERE 1=1
         <if test="param.articleId !=null and param.articleId !=''">
-            AND  pi0160.article_id=#{param.articleId}
+            AND  pi0160.article_id like concat('%',#{param.articleId},'%')
         </if>
     </select>
 

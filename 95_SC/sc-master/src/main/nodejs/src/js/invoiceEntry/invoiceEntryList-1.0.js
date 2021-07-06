@@ -206,28 +206,30 @@ define('invoiceEntryList', function () {
         let _StartDate = null;
         if(!$("#searchStartDate").val()){
             _common.prompt("Please select a start date!",3,"info");/*请选择开始日期*/
+            $("#searchStartDate").css("border-color","red");
             $("#searchStartDate").focus();
             return false;
-        }else{
-            _StartDate = new Date(fmtDate($("#searchStartDate").val())).getTime();
-            if(judgeNaN(_StartDate)){
-                _common.prompt("Please enter a valid date!",3,"info");
-                $("#searchStartDate").focus();
-                return false;
-            }
+        }else if(_common.judgeValidDate($("#searchStartDate").val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#searchStartDate").css("border-color","red");
+            $("#searchStartDate").focus();
+            return false;
+        }else {
+            $("#searchStartDate").css("border-color","#CCC");
         }
         let _EndDate = null;
         if(!$("#searchEndDate").val()){
             _common.prompt("Please select a end date!",3,"info");/*请选择结束日期*/
+            $("#searchEndDate").css("border-color","red");
             $("#searchEndDate").focus();
             return false;
-        }else{
-            _EndDate = new Date(fmtDate($("#searchEndDate").val())).getTime();
-            if(judgeNaN(_EndDate)){
-                _common.prompt("Please enter a valid date!",3,"info");
-                $("#searchEndDate").focus();
-                return false;
-            }
+        }else if(_common.judgeValidDate($("#searchEndDate").val())){
+            _common.prompt("Please enter a valid date!",3,"info");
+            $("#searchEndDate").css("border-color","red");
+            $("#searchEndDate").focus();
+            return false;
+        }else {
+            $("#searchEndDate").css("border-color","#CCC");
         }
         if(_StartDate>_EndDate){
             $("#searchEndDate").focus();
@@ -317,7 +319,7 @@ define('invoiceEntryList', function () {
                 {name:"storeNo",type:"text",text:"right",width:"130",ishide:false,css:""},
                 {name:"storeName",type:"text",text:"left",width:"160",ishide:false,css:""},
                 {name:"accDate",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue: dateFmt},
-                {name:"saleSerialNo",type:"text",text:"right",width:"130",ishide:false,css:""},
+                {name:"saleSerialNo",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue:getLetter},
                 {name:"amt",type:"text",text:"right",width:"130",ishide:false,css:"",getCustomValue: getThousands},
                 {name:"customerName",type:"text",text:"left",width:"130",ishide:false,css:""},
                 {name:"companyName",type:"text",text:"left",width:"130",ishide:false,css:""},
@@ -427,6 +429,57 @@ define('invoiceEntryList', function () {
         var res = '';
         res = date.replace(/\//g, '').replace(/^(\d{2})(\d{2})(\d{4})$/,"$3-$2-$1");
         return res;
+    }
+
+    var getLetter = function (tdObj, value) {
+        return $(tdObj).text(numberToLetter(value));
+    };
+
+    function numberToLetter(value) {
+        if(value == null || value === ""){
+            return "";
+        }
+        value = value.toUpperCase().split("");
+        var al = value.length;
+        var numout = '';
+        for (var i = 0; i < al; i++) {
+            switch (value[i]) {
+                case '1':
+                    numout+='Q';
+                    break;
+                case '2':
+                    numout+='W';
+                    break;
+                case '3':
+                    numout+='E';
+                    break;
+                case '4':
+                    numout+='R';
+                    break;
+                case '5':
+                    numout+='T';
+                    break;
+                case '6':
+                    numout+='Y';
+                    break;
+                case '7':
+                    numout+='U';
+                    break;
+                case '8':
+                    numout+='I';
+                    break;
+                case '9':
+                    numout+='O';
+                    break;
+                case '0':
+                    numout+='P';
+                    break;
+                default:
+                    numout+=value[i];
+                    break;
+            }
+        }
+        return numout;
     }
 
     //格式化数字类型的日期

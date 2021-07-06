@@ -12,8 +12,10 @@ import cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.MRoleStoreService;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.VendorReturnedDaily.VendorReturnedDailyService;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
+import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +45,8 @@ public class VendorReturnedDailyController extends BaseAction {
     private VendorReturnedDailyService vendorReturnedDailyService;
     @Autowired
     private MRoleStoreService mRoleStoreService;
-
+    @Autowired
+    private Ma4320Service ma4320Service;
     private final String EXCEL_EXPORT_KEY = "EXCEL_RETURNED_DAILY_SUPPLIER";
     private final String EXCEL_EXPORT_NAME = "Store Returned Daily Report(To Supplier).xlsx";
 
@@ -59,14 +62,17 @@ public class VendorReturnedDailyController extends BaseAction {
     public ModelAndView tolistView(HttpServletRequest request, HttpSession session,
                                    Map<String, ?> model) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         log.debug("User:{} 进入 门店商品退货日报（Ｆrom 供应商）", u.getUserId());
         Collection<Integer> roleIds = (Collection<Integer>) request.getSession().getAttribute(
                 Constants.SESSION_ROLES);
 
         ModelAndView mv = new ModelAndView("vendorReturnedDaily/vendorReturnedDaily");
         mv.addObject("useMsg", "门店商品退货日报（Ｆrom 供应商）");
-        mv.addObject("bsDate", new Date());
-        mv.addObject("printTime", new Date());
+        mv.addObject("bsDate", Utils.getFormateDate(ymd));
+        mv.addObject("printTime", Utils.getFormateDate(ymd));
         mv.addObject("userName",u.getUserName());
         return mv;
     }
@@ -181,14 +187,16 @@ public class VendorReturnedDailyController extends BaseAction {
     @RequestMapping(method = RequestMethod.GET,value = "/print")
     public ModelAndView toPrintView(HttpServletRequest request, HttpSession session,String searchJson) {
         User u = this.getUser(session);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
         log.debug("User:{} 进入 门店商品退货日报（From 供应商）打印画面", u.getUserId());
         Collection<Integer> roleIds = (Collection<Integer>) request.getSession().getAttribute(
                 Constants.SESSION_ROLES);
 
         ModelAndView mv = new ModelAndView("vendorReturnedDaily/vendorReturnedDailyPrint");
         mv.addObject("useMsg", "门店商品退货日报（Ｆrom 供应商）打印画面");
-        mv.addObject("bsDate", new Date());
-        mv.addObject("printTime", new Date());
+        mv.addObject("bsDate", Utils.getFormateDate(ymd));
+        mv.addObject("printTime",Utils.getFormateDate(ymd));
         mv.addObject("userName",u.getUserName());
         mv.addObject("searchJson",searchJson);
         return mv;

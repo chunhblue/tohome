@@ -41,7 +41,8 @@ public class Ma4315DetailGridDto extends GridDataDTO {
     /**
      * 回复时间
      */
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", timezone = "GMT+8")
+//    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private Date informReplyDate;
 
     /**

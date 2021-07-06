@@ -3,6 +3,7 @@ package cn.com.bbut.iy.itemmaster.controller;
 import cn.com.bbut.iy.itemmaster.annotation.Permission;
 import cn.com.bbut.iy.itemmaster.annotation.Secure;
 import cn.com.bbut.iy.itemmaster.constant.Constants;
+import cn.com.bbut.iy.itemmaster.constant.ConstantsAudit;
 import cn.com.bbut.iy.itemmaster.constant.PermissionCode;
 import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
@@ -74,6 +75,9 @@ public class SuspendSaleDetailController extends BaseAction {
         log.debug("User:{} 进入 暂停销售一览一览", u.getUserId());
         ModelAndView mv = new ModelAndView("suspendSale/suspendSaleDetail");
         mv.addObject("useMsg", "暂停销售一览画面");
+        mv.addObject("typeId", ConstantsAudit.TYPE_SALE_PAUSE);
+        mv.addObject("reviewId", ConstantsAudit.REVIEW_SALE_PAUSE);
+        this.saveToken(request);
         return mv;
     }
 

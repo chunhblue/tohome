@@ -13,6 +13,7 @@ define('saleReconciliation', function () {
 		systemPath = "",
 	    paramGrid = null,
 	    selectTrTemp = null,
+		position = 0,
 	    tempTrObjValue = {},//临时行数据存储
 		staff="",
 		am="",
@@ -66,14 +67,13 @@ define('saleReconciliation', function () {
 		initTable1();
 		$("#update").hide();
     	table_event();
-		// 初始化店铺运营组织检索
-		initOrganization();
 		//权限验证
 		_myValidator.init();
 		isButPermission();
+		_common.initOrganization();
 		// m.search.click();
 		// 初始化检索日期
-		_common.initDate(m.bs_start_date,m.bs_end_date);
+		initDate(m.bs_start_date,m.bs_end_date);
 		initParam();
     }
 	var initAutoMatic=function () {
@@ -93,7 +93,52 @@ define('saleReconciliation', function () {
 			ePageSize: 10,
 			startCount: 0,
 		});
+	};
 
+	var initDate = function(startDate,endDate) {
+		if (startDate) {
+				startDate.datetimepicker({
+					language:'en',
+					format: 'dd/mm/yyyy',
+					maxView: 4,
+					startView: 2,
+					minView: 2,
+					autoclose: true,
+					todayHighlight: true,
+					todayBtn: true,
+				}).on('click', function (ev) {
+					if(position===0 && $("#aStore").attr("k")!=null&&$("#aStore").attr("k")!==""){
+						$("#bs_start_date").datetimepicker("setStartDate", new Date(new Date().setMonth(new Date().getMonth()-2)));
+					}else {
+						// 只显示一年的时间
+						$("#bs_start_date").datetimepicker("setStartDate",new Date(new Date()-1000 * 60 * 60 * 24 * 365));
+					}
+				});
+			}
+
+			// 倒推两个月
+			let _start = new Date(new Date().setMonth(new Date().getMonth()-2));
+			if (!endDate) {
+				_start = new Date();
+			}
+			startDate.val(_start.Format('dd/MM/yyyy'));
+
+		if (endDate) {
+			endDate.datetimepicker({
+				language:'en',
+				format: 'dd/mm/yyyy',
+				maxView: 4,
+				startView: 2,
+				minView: 2,
+				autoclose: true,
+				todayHighlight: true,
+				todayBtn: true,
+			}).on('click', function (ev) {
+				$("#bs_end_date").datetimepicker("setStartDate",new Date(fmtDate($("#bs_start_date").val())));
+			});
+			// 默认日期当天
+			endDate.val(new Date().Format('dd/MM/yyyy'));
+		}
 	};
 
 	// 初始化参数, back 的时候 回显 已选择的检索项
@@ -113,7 +158,9 @@ define('saleReconciliation', function () {
 			obj.reviewSts='';
 		}
 		// 设置组织架构回显
-		_common.setAutomaticVal(obj);
+		if (obj.storeCd) {
+			$.myAutomatic.setValueTemp(aStore,obj.storeCd,obj.storeName);
+		}
 		$.myAutomatic.setValueTemp(am,obj.am,obj.amName);
 		$.myAutomatic.setValueTemp(staff,obj.staffId,obj.userId);
 		m.bs_start_date.val(obj.vStartDate);
@@ -280,6 +327,19 @@ define('saleReconciliation', function () {
 			m.bs_start_date.val("");
 			m.bs_end_date.val("");
 		});
+		$("#aStore").on("blur",function(){
+			let thisObj = $("#aStore");
+			if(thisObj.attr("k")!=null&&thisObj.attr("k")!==""){
+				_common.getPositionList(thisObj.attr("k"),function (result) {
+					let arr = result;
+					for(let i=0;i<arr.length;i++){
+						if(arr[i] !== 4 && arr[i] !== 1){
+							position = arr[i];
+						}
+					}
+				});
+			}
+		});
     	m.reset.on("click",function(){
     		m.bs_start_date.val("");
     		m.bs_end_date.val("");
@@ -340,9 +400,9 @@ define('saleReconciliation', function () {
 		tableGrid = $("#zgGridTtable").zgGrid({
     		title:"Query Result",
     		param:paramGrid,
-			colNames:["Pay ID","Store No.","Store Name","Area Manager ID","Area Manager Name","Business Date",
+			colNames:["Pay ID","Store No.","Store Name","Area Manager ID","Area Manager Name","Business Date","Submission Date",
 				"Customer Count","PSD","Shift1","Shift2","Shift3","Additional","Offset Claim","Total Amount Received",
-				"Shift1 Received","Shift2 Received","Shift3 Received","Variance Amount","Total Amount"],
+				"Shift1 Received","Shift2 Received","Shift3 Received","Variance Amount","Actual Counted Amount(User Entered)"],
 			colModel:[
 				{name:"payId",type:"text",text:"left",width:"150",ishide:true,css:""},
 				{name:"storeCd",type:"text",text:"left",width:"150",ishide:false,css:""},
@@ -350,6 +410,7 @@ define('saleReconciliation', function () {
 				{name:"ofc",type:"text",text:"left",width:"150",ishide:false,css:""},
 				{name:"amName",type:"text",text:"left",width:"150",ishide:false,css:""},
 				{name:"payDate",type:"text",text:"center",width:"130",ishide:false,css:"",getCustomValue:dateFmt},
+				{name:"createYmdFull",type:"text",text:"center",width:"130",ishide:false,css:""},
 				{name:"customerQty",type:"number",text:"right",width:"130",ishide:false,css:"",getCustomValue:formatNum},
 				{name:"customerAvgPrice",type:"number",text:"right",width:"130",ishide:true,css:"",getCustomValue:formatNum},
 				{name:"payInAmt0",type:"number",text:"right",width:"130",ishide:false,css:"",getCustomValue:formatNum},
@@ -357,17 +418,17 @@ define('saleReconciliation', function () {
 				{name:"payInAmt2",type:"number",text:"right",width:"150",ishide:false,css:"",getCustomValue:formatNum},
 				{name:"additional",type:"number",text:"right",width:"150",ishide:false,css:"",getCustomValue:formatNum},
 				{name:"offsetClaim",type:"number",text:"right",width:"150",ishide:false,css:"",getCustomValue:formatNum},
-				{name:"payAmt",type:"number",text:"right",width:"170",ishide:false,css:"",getCustomValue:formatNum},
+				{name:"payAmt",type:"number",text:"right",width:"150",ishide:false,css:"",getCustomValue:formatNum},
 				{name:"payAmt0",type:"number",text:"right",width:"130",ishide:false,css:"",getCustomValue:formatNum},
-				{name:"payAmt1",type:"number",text:"right",width:"170",ishide:false,css:"",getCustomValue:formatNum},
-				{name:"payAmt2",type:"number",text:"right",width:"150",ishide:false,css:"",getCustomValue:formatNum},
+				{name:"payAmt1",type:"number",text:"right",width:"130",ishide:false,css:"",getCustomValue:formatNum},
+				{name:"payAmt2",type:"number",text:"right",width:"130",ishide:false,css:"",getCustomValue:formatNum},
 				{name:"payAmtDiff",type:"number",text:"right",width:"150",ishide:false,css:"",getCustomValue:formatNum},
-				{name:"payInAmt",type:"number",text:"right",width:"150",ishide:false,css:"",getCustomValue:formatNum},
+				{name:"payInAmt",type:"number",text:"right",width:"250",ishide:false,css:"",getCustomValue:formatNum},
 	          ],//列内容
 	          width:"max",//宽度自动
 	          page:1,//当前页
 	          rowPerPage:10,//每页数据量
-	          isPage:false,//是否需要分页
+	          isPage:true,//是否需要分页
 	          isCheckbox:false,
 			  eachTrClick: function (trObj) {//正常左侧点击
 				  $("#update").removeAttr("disabled");
@@ -382,66 +443,83 @@ define('saleReconciliation', function () {
 	          loadCompleteEvent:function(self){
 	        	  selectTrTemp = null;//清空选择的行
 				  //更新总条数(注减一是去除标题行)
-				  var total = tableGrid.find("tr").length-1;
-				  $("#records").text(total);
+				  /*var total = tableGrid.find("tr").length-1;
+				  $("#records").text(total);*/
+
 
 				  if($("#zgGridTtable>.zgGrid-tbody tr").length>0){
-					  var payInAmt0 = 0,payInAmt1 = 0,payInAmt2 = 0,payInAmt3 = 0,payInAmt4 = 0,payInAmt5 = 0,additional=0,offsetClaim=0;
-					  var payAmt0 = 0,payAmt1 = 0,payAmt2 = 0,payAmt3 = 0,payAmt4 = 0,payAmt5 = 0;
-					  var payInAmt = 0,payAmt = 0,payAmtDiff = 0;
-					  var customerQty = 0,customerAvgPrice = 0;
-					  $("#zgGridTtable>.zgGrid-tbody tr").each(function () {
-						  var td_payInAmt0 = parseFloat($(this).find('td[tag=payInAmt0]').text().replace(/,/g, ""));
-						  var td_payInAmt1 = parseFloat($(this).find('td[tag=payInAmt1]').text().replace(/,/g, ""));
-						  var td_payInAmt2 = parseFloat($(this).find('td[tag=payInAmt2]').text().replace(/,/g, ""));
-						  var td_additional = parseFloat($(this).find('td[tag=additional]').text().replace(/,/g, ""));
-						  var td_offsetClaim = parseFloat($(this).find('td[tag=offsetClaim]').text().replace(/,/g, ""));
-						  if(!isNaN(td_payInAmt0))
-							  payInAmt0 +=  parseFloat(td_payInAmt0);
-						  if(!isNaN(td_payInAmt1))
-							  payInAmt1 +=  parseFloat(td_payInAmt1);
-						  if(!isNaN(td_payInAmt2))
-							  payInAmt2 +=  parseFloat(td_payInAmt2);
-						  if(!isNaN(td_additional))
-							  additional +=  parseFloat(td_additional);
-						  if(!isNaN(td_offsetClaim))
-							  offsetClaim +=  parseFloat(td_offsetClaim);
+					  /* var payInAmt0 = 0,payInAmt1 = 0,payInAmt2 = 0,payInAmt3 = 0,payInAmt4 = 0,payInAmt5 = 0,additional=0,offsetClaim=0;
+                       var payAmt0 = 0,payAmt1 = 0,payAmt2 = 0,payAmt3 = 0,payAmt4 = 0,payAmt5 = 0;
+                       var payInAmt = 0,payAmt = 0,payAmtDiff = 0;
+                       var customerQty = 0,customerAvgPrice = 0;
+                       $("#zgGridTtable>.zgGrid-tbody tr").each(function () {
+                           var td_payInAmt0 = parseFloat($(this).find('td[tag=payInAmt0]').text().replace(/,/g, ""));
+                           var td_payInAmt1 = parseFloat($(this).find('td[tag=payInAmt1]').text().replace(/,/g, ""));
+                           var td_payInAmt2 = parseFloat($(this).find('td[tag=payInAmt2]').text().replace(/,/g, ""));
+                           var td_additional = parseFloat($(this).find('td[tag=additional]').text().replace(/,/g, ""));
+                           var td_offsetClaim = parseFloat($(this).find('td[tag=offsetClaim]').text().replace(/,/g, ""));
+                           var td_customerQty = parseFloat($(this).find('td[tag=customerQty]').text().replace(/,/g, ""));
+                           if (!isNaN(td_customerQty)){
+                               customerQty += parseFloat(td_customerQty);
+                           }
+                           if(!isNaN(td_payInAmt0))
+                               payInAmt0 +=  parseFloat(td_payInAmt0);
+                           if(!isNaN(td_payInAmt1))
+                               payInAmt1 +=  parseFloat(td_payInAmt1);
+                           if(!isNaN(td_payInAmt2))
+                               payInAmt2 +=  parseFloat(td_payInAmt2);
+                           if(!isNaN(td_additional))
+                               additional +=  parseFloat(td_additional);
+                           if(!isNaN(td_offsetClaim))
+                               offsetClaim +=  parseFloat(td_offsetClaim);
 
-						  var td_payAmt0 = parseFloat($(this).find('td[tag=payAmt0]').text().replace(/,/g, ""));
-						  var td_payAmt1 = parseFloat($(this).find('td[tag=payAmt1]').text().replace(/,/g, ""));
-						  var td_payAmt2 = parseFloat($(this).find('td[tag=payAmt2]').text().replace(/,/g, ""));
-						  if(!isNaN(td_payAmt0))
-							  payAmt0 +=  parseFloat(td_payAmt0);
-						  if(!isNaN(td_payAmt1))
-							  payAmt1 +=  parseFloat(td_payAmt1);
-						  if(!isNaN(td_payAmt2))
-							  payAmt2 +=  parseFloat(td_payAmt2);
-						  var td_payInAmt = parseFloat($(this).find('td[tag=payInAmt]').text().replace(/,/g, ""));
-						  var td_payAmt = parseFloat($(this).find('td[tag=payAmt]').text().replace(/,/g, ""));
-						  var td_payAmtDiff = parseFloat($(this).find('td[tag=payAmtDiff]').text().replace(/,/g, ""));
-						  if(!isNaN(td_payInAmt))
-							  payInAmt +=  parseFloat(td_payInAmt);
-						  if(!isNaN(td_payAmt))
-							  payAmt +=  parseFloat(td_payAmt);
-						  if(!isNaN(td_payAmtDiff))
-							  payAmtDiff +=  parseFloat(td_payAmtDiff);
-					  });
+                           var td_payAmt0 = parseFloat($(this).find('td[tag=payAmt0]').text().replace(/,/g, ""));
+                           var td_payAmt1 = parseFloat($(this).find('td[tag=payAmt1]').text().replace(/,/g, ""));
+                           var td_payAmt2 = parseFloat($(this).find('td[tag=payAmt2]').text().replace(/,/g, ""));
+                           // var td_customerQty = parseFloat($(this).find('td[tag=customerQty]').text().replace(/,/g, ""));
+                           // if (!isNaN(td_customerQty)){
+                             //   customerQty += parseFloat(td_customerQty);
+                           // }
+                           if(!isNaN(td_payAmt0))
+                               payAmt0 +=  parseFloat(td_payAmt0);
+                           if(!isNaN(td_payAmt1))
+                               payAmt1 +=  parseFloat(td_payAmt1);
+                           if(!isNaN(td_payAmt2))
+                               payAmt2 +=  parseFloat(td_payAmt2);
+                           var td_payInAmt = parseFloat($(this).find('td[tag=payInAmt]').text().replace(/,/g, ""));
+                           var td_payAmt = parseFloat($(this).find('td[tag=payAmt]').text().replace(/,/g, ""));
+                           var td_payAmtDiff = parseFloat($(this).find('td[tag=payAmtDiff]').text().replace(/,/g, ""));
+                           // var td_customerQty = parseFloat($(this).find('td[tag=customerQty]').text().replace(/,/g, ""));
+                           // if (!isNaN(td_customerQty)){
+                             //   customerQty += parseFloat(td_customerQty);
+                           // }
+                           if(!isNaN(td_payInAmt))
+                               payInAmt +=  parseFloat(td_payInAmt);
+                           if(!isNaN(td_payAmt))
+                               payAmt +=  parseFloat(td_payAmt);
+                           if(!isNaN(td_payAmtDiff))
+                               payAmtDiff +=  parseFloat(td_payAmtDiff);
+                       }); */
+					  let totalData = self.defaults.traverseData[0];
 					  var total = "<tr style='text-align:right' id='total'><td></td><td></td><td></td><td></td><td></td>" +
 						  "<td>Total:</td>" +
-						  "<td>"+fmtIntNum(payInAmt0)+"</td>" +
-						  "<td>"+fmtIntNum(payInAmt1)+"</td>"+
-						  "<td>"+fmtIntNum(payInAmt2)+"</td>" +
-						  "<td>"+fmtIntNum(additional)+"</td>" +
-						  "<td>"+fmtIntNum(offsetClaim)+"</td>" +
-						  // "<td>"+fmtIntNum(payInAmt)+"</td>" +
-						  "<td>"+fmtIntNum(payAmt)+"</td>" +
-						  "<td>"+fmtIntNum(payAmt0)+"</td>" +
-						  "<td>"+fmtIntNum(payAmt1)+"</td>" +
-						  "<td>"+fmtIntNum(payAmt2)+"</td>" +
-						  "<td>"+fmtIntNum(payAmtDiff)+"</td>" +
-						  "<td>"+fmtIntNum(payInAmt)+"</td>" +
-						  "</tr>"
-					  $("#zgGridTtable_tbody").append(total);
+						  "<td>"+fmtIntNum(totalData.tcustomerQty)+"</td>" +
+						  "<td>"+fmtIntNum(totalData.tpayInAmt0)+"</td>" +
+						  "<td>"+fmtIntNum(totalData.tpayInAmt1)+"</td>" +
+						  "<td>"+fmtIntNum(totalData.tpayInAmt2)+"</td>" +
+						  "<td>"+fmtIntNum(totalData.tadditional)+"</td>" +
+						  "<td>"+fmtIntNum(totalData.toffsetClaim)+"</td>" +
+						  "<td>"+fmtIntNum(totalData.tpayAmt)+"</td>" +
+						  "<td>"+fmtIntNum(totalData.tpayAmt0)+"</td>" +
+						  "<td>"+fmtIntNum(totalData.tpayAmt1)+"</td>" +
+						  "<td>"+fmtIntNum(totalData.tpayAmt2)+"</td>" +
+						  "<td>"+fmtIntNum(totalData.tpayAmtDiff)+"</td>" +
+						  "<td>"+fmtIntNum(totalData.tpayInAmt)+"</td>" +
+						  "</tr>";
+					  if(self.defaults.page === self.defaults.total){
+					  	 $("#zgGridTtable_tbody").append(total);
+					  }
+
 				  }
 	        	  return self;
 	          },
@@ -472,10 +550,9 @@ define('saleReconciliation', function () {
 				}
 			]
     	});
-		$("#zgGridTtable_main_foot").append("<div class='zgGrid-tfoot-td' id='zgGridTtable_tfoot_box'><span class='zg-page-records'>Total: <span id='records'>0</span> items</span></div>");
-
-
-	}
+		/*$("#zgGridTtable_main_foot").append("<div class='zgGrid-tfoot-td' id='zgGridTtable_tfoot_box'><span class='zg-page-records'>Total: <span id='records'>0</span> items</span></div>");
+*/
+	};
 
 	// 按钮权限验证
 	var isButPermission = function () {
@@ -491,18 +568,32 @@ define('saleReconciliation', function () {
 
 	//验证检索项是否合法
 	var verifySearch = function() {
+		//let _storeCd = $("#aStore").attr('k');
+		// if(!_storeCd){
+		// 	_common.prompt("Please select the store first!",3,"info");
+		// 	$("#aStore").css("border-color","red");
+		// 	$("#aStore").focus();
+		// 	return false;
+		// }else {$("#aStore").css("border-color","#CCC");}
 		let _StartDate = null;
 		if(!$("#bs_start_date").val()){
 			_common.prompt("Please select a start date!",3,"info");/*请选择开始日期*/
 			$("#bs_start_date").focus();
 			return false;
 		}else{
-			_StartDate = new Date(fmtDate($("#bs_start_date").val())).getTime();
-			if(judgeNaN(_StartDate)){
-				_common.prompt("Please enter a valid date!",3,"info");
+			if ($("#bs_start_date").val()) {
+				_StartDate = new Date(fmtDate($("#bs_start_date").val())).getTime();
+				if(judgeNaN(_StartDate)){
+					_common.prompt("Please enter a valid date!",3,"info");
+					$("#bs_start_date").focus();
+					return false;
+				}
+			}else {
+				_common.prompt("Please select a correct  date!",3,"info");/*请选择开始日期*/
 				$("#bs_start_date").focus();
 				return false;
 			}
+
 		}
 		let _EndDate = null;
 		if(!$("#bs_end_date").val()){
@@ -510,12 +601,19 @@ define('saleReconciliation', function () {
 			$("#bs_end_date").focus();
 			return false;
 		}else{
-			_EndDate = new Date(fmtDate($("#bs_end_date").val())).getTime();
-			if(judgeNaN(_EndDate)){
-				_common.prompt("Please enter a valid date!",3,"info");
-				$("#bs_end_date").focus();
+			if ($("#bs_end_date").val()){
+				_EndDate = new Date(fmtDate($("#bs_end_date").val())).getTime();
+				if(judgeNaN(_EndDate)){
+					_common.prompt("Please enter a valid date!",3,"info");
+					$("#bs_end_date").focus();
+					return false;
+				}
+			}else {
+				_common.prompt("Please select a correct  date!",3,"info");/*请选择开始日期*/
+				$("#bs_start_date").focus();
 				return false;
 			}
+
 		}
 		if(_StartDate>_EndDate){
 			$("#bs_end_date").focus();
@@ -544,191 +642,8 @@ define('saleReconciliation', function () {
 			return true;
 		}
 		return true;
-	}
-	var initOrganization = function () {
-		// 初始化，子级禁用
-		// $("#aCity").attr("disabled", true);
-		// $("#aDistrict").attr("disabled", true);
-		// $("#aStore").attr("disabled", true);
-		// $("#cityRefresh").hide();
-		// $("#cityRemove").hide();
-		// $("#districtRefresh").hide();
-		// $("#districtRemove").hide();
-		// $("#storeRefresh").hide();
-		// $("#storeRemove").hide();
-		// 输入框事件绑定
-		a_region = $("#aRegion").myAutomatic({
-			url: systemPath + "/roleStore/getRegion",
-			ePageSize: 10,
-			startCount: 0,
-			selectEleClick: function (thisObj) {
-				$.myAutomatic.cleanSelectObj(a_city);
-				$.myAutomatic.cleanSelectObj(a_district);
-				$.myAutomatic.cleanSelectObj(a_store);
-				// $("#aCity").attr("disabled", true);
-				// $("#aDistrict").attr("disabled", true);
-				// $("#aStore").attr("disabled", true);
-				// $("#cityRefresh").hide();
-				// $("#cityRemove").hide();
-				// $("#districtRefresh").hide();
-				// $("#districtRemove").hide();
-				// $("#storeRefresh").hide();
-				// $("#storeRemove").hide();
-				// if (thisObj.attr("k") != null && thisObj.attr("k") != "") {
-				// 	$("#aCity").attr("disabled", false);
-				// 	$("#cityRefresh").show();
-				// 	$("#cityRemove").show();
-				// }
-				var rinput = thisObj.attr("k");
-				// 替换子级查询参数
-				var str = "&regionCd=" + rinput;
-				$.myAutomatic.replaceParam(a_city, str);
-			}
-		});
-		a_city = $("#aCity").myAutomatic({
-			url: systemPath + "/roleStore/getCity",
-			ePageSize: 10,
-			startCount: 0,
-			selectEleClick: function (thisObj) {
-				$.myAutomatic.cleanSelectObj(a_district);
-				$.myAutomatic.cleanSelectObj(a_store);
-				// $("#aDistrict").attr("disabled", true);
-				// $("#aStore").attr("disabled", true);
-				// $("#districtRefresh").hide();
-				// $("#districtRemove").hide();
-				// $("#storeRefresh").hide();
-				// $("#storeRemove").hide();
-				// if (thisObj.attr("k") != null && thisObj.attr("k") != "") {
-				// 	$("#aDistrict").attr("disabled", false);
-				// 	$("#districtRefresh").show();
-				// 	$("#districtRemove").show();
-				// }
-				var rinput = $("#aRegion").attr("k");
-				var cinput = thisObj.attr("k");
-				// 替换子级查询参数
-				var str = "&regionCd=" + rinput + "&cityCd=" + cinput;
-				$.myAutomatic.replaceParam(a_district, str);
-			}
-		});
-		a_district = $("#aDistrict").myAutomatic({
-			url: systemPath + "/roleStore/getDistrict",
-			ePageSize: 10,
-			startCount: 0,
-			selectEleClick: function (thisObj) {
-				$.myAutomatic.cleanSelectObj(a_store);
-				// $("#aStore").attr("disabled", true);
-				// $("#storeRefresh").hide();
-				// $("#storeRemove").hide();
-				// if (thisObj.attr("k") != null && thisObj.attr("k") != "") {
-				// 	$("#aStore").attr("disabled", false);
-				// 	$("#storeRefresh").show();
-				// 	$("#storeRemove").show();
-				// }
-				var rinput = $("#aRegion").attr("k");
-				var cinput = $("#aCity").attr("k");
-				var dinput = thisObj.attr("k");
-				// 替换子级查询参数
-				var str = "&regionCd=" + rinput + "&cityCd=" + cinput + "&districtCd=" + dinput;
-				$.myAutomatic.replaceParam(a_store, str);
-			}
-		});
-		a_store = $("#aStore").myAutomatic({
-			url: systemPath + "/roleStore/getStore",
-			ePageSize: 8,
-			startCount: 0,
-			cleanInput: function (thisObj) {
-				m.posId.find("option:not(:first)").remove();
-			},
-			selectEleClick: function (thisObj) {
-				if (thisObj.attr("k") != null && thisObj.attr("k") != "") {
-					getSelectPosId(thisObj.attr("k"))
-				}
-			}
-		});
-
-		// 选值栏位清空按钮事件绑定
-		$("#regionRemove").on("click", function (e) {
-			$.myAutomatic.cleanSelectObj(a_city);
-			$.myAutomatic.cleanSelectObj(a_district);
-			$.myAutomatic.cleanSelectObj(a_store);
-			$.myAutomatic.replaceParam(a_city, null);
-			$.myAutomatic.replaceParam(a_district, null);
-			$.myAutomatic.replaceParam(a_store, null);
-			// $("#aCity").attr("disabled", true);
-			// $("#aDistrict").attr("disabled", true);
-			// $("#aStore").attr("disabled", true);
-			// $("#cityRefresh").hide();
-			// $("#cityRemove").hide();
-			// $("#districtRefresh").hide();
-			// $("#districtRemove").hide();
-			// $("#storeRefresh").hide();
-			// $("#storeRemove").hide();
-		});
-		$("#cityRemove").on("click", function (e) {
-			$.myAutomatic.cleanSelectObj(a_district);
-			$.myAutomatic.cleanSelectObj(a_store);
-			$.myAutomatic.replaceParam(a_district, null);
-			$.myAutomatic.replaceParam(a_store, null);
-			// $("#aDistrict").attr("disabled", true);
-			// $("#aStore").attr("disabled", true);
-			// $("#districtRefresh").hide();
-			// $("#districtRemove").hide();
-			// $("#storeRefresh").hide();
-			// $("#storeRemove").hide();
-		});
-		$("#districtRemove").on("click", function (e) {
-			$.myAutomatic.cleanSelectObj(a_store);
-			// $("#aStore").attr("disabled", true);
-			// $("#storeRefresh").hide();
-			// $("#storeRemove").hide();
-		});
-
-		// 如果只有一条店铺权限，则默认选择
-		$.myAjaxs({
-			url:systemPath+"/roleStore/getStoreByRole",
-			async:true,
-			cache:false,
-			type :"post",
-			data :null,
-			dataType:"json",
-			success:function(re){
-				if(re.success){
-					var obj = re.o;
-					$("#aCity").attr("disabled", false);
-					$("#aDistrict").attr("disabled", false);
-					$("#aStore").attr("disabled", false);
-					$("#cityRefresh").show();
-					$("#cityRemove").show();
-					$("#districtRefresh").show();
-					$("#districtRemove").show();
-					$("#storeRefresh").show();
-					$("#storeRemove").show();
-					$.myAutomatic.setValueTemp(a_region,obj.regionCd,obj.regionName);
-					$.myAutomatic.setValueTemp(a_city,obj.cityCd,obj.cityName);
-					$.myAutomatic.setValueTemp(a_district,obj.districtCd,obj.districtName);
-					$.myAutomatic.setValueTemp(a_store,obj.storeCd,obj.storeName);
-					// 替换子级查询参数
-					var str = "&regionCd=" + obj.regionCd;
-					$.myAutomatic.replaceParam(a_city, str);
-					str = str + "&cityCd=" + obj.cityCd;
-					$.myAutomatic.replaceParam(a_district, str);
-					str = str + "&districtCd=" + obj.districtCd;
-					$.myAutomatic.replaceParam(a_store, str);
-				}
-			}
-		});
 	};
-	var shiftFmt = function(tdObj, value){
-    	var shiftName = "";
-    	if(value=="00"){
-			shiftName = "Shift1"
-		}else if(value=="01"){
-			shiftName = "Shift2"
-		}else if(value=="02"){
-			shiftName = "Shift3"
-		}
-		return $(tdObj).text(shiftName);
-	}
+
 
 	//number格式化
 	var formatNum = function(tdObj,value){

@@ -95,11 +95,14 @@ public class IndexController extends BaseAction{
             return resultDto;
         }
         //获取通知数量
-        int notificationCount = taskService.getNotificationsCount(roleIds,storeCds,u.getUserId());
+        int notificationCount = 0;
+//                taskService.getNotificationsCount(roleIds,storeCds,u.getUserId());
         //获取通知数量
-        int mmPromotionCount = taskService.getMMPromotionCount(u.getUserId());
+        int mmPromotionCount = 0;
+//                taskService.getMMPromotionCount(u.getUserId());
         //获取通知数量
-        int newItemCount = taskService.getNewItemCount(u.getUserId(),storeCds);
+        int newItemCount = 0;
+//                taskService.getNewItemCount(u.getUserId(),storeCds);
         resultDto.setSuccess(true);
         Map<String,Integer> countMap = new HashMap<>();
         countMap.put("count",notificationCount+mmPromotionCount+newItemCount);

@@ -4,8 +4,6 @@ import cn.com.bbut.iy.itemmaster.dao.PriceLabelMapper;
 import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
 import cn.com.bbut.iy.itemmaster.dto.priceLabel.PriceLabelDTO;
 import cn.com.bbut.iy.itemmaster.dto.priceLabel.PriceLabelParamDTO;
-import cn.com.bbut.iy.itemmaster.dto.receipt.vendor.VendorReceiptGridDTO;
-import cn.com.bbut.iy.itemmaster.dto.receipt.vendor.VendorReceiptParamDTO;
 import cn.com.bbut.iy.itemmaster.excel.BaseExcelParam;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.excel.TransSession;
@@ -14,7 +12,6 @@ import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -86,10 +83,15 @@ public class PriceLableExServiceImpl implements ExService {
      */
     private void createExcelBody(Sheet sheet, int curRow, PriceLabelParamDTO jsonParam) {
 
-
+        List<PriceLabelDTO> _list;
         // 查询数据
         jsonParam.setBusinessDate(cm9060Service.getValByKey("0000"));
-        List<PriceLabelDTO> _list = priceLabelMapper.search(jsonParam);
+        if (!jsonParam.getType().equals("03")){
+
+            _list = priceLabelMapper.search(jsonParam);
+        }else {
+            _list = priceLabelMapper.selectListByCondition(jsonParam);
+        }
         // 遍历数据
         int no = 1;
         for (PriceLabelDTO ls : _list) {
@@ -106,8 +108,6 @@ public class PriceLableExServiceImpl implements ExService {
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));
             setCellValue(cell, ls.getStoreName());
-
-
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
@@ -146,15 +146,31 @@ public class PriceLableExServiceImpl implements ExService {
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
             setCellValue(cell,ls.getArticleId());
+            if (!jsonParam.getType().equals("03")){
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
+                setCellValue(cell,formatNum(String.valueOf(ls.getOldPrice())));
+            }else {
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
+                String str1= String.valueOf(ls.getOldPrice());
+                Double aDouble1 = Double.valueOf(str1);
+                String format1 = String.format("%,d", aDouble1.intValue());
+                setCellValue(cell,format1);
+            }
 
-            cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
-            setCellValue(cell,formatNum(String.valueOf(ls.getOldPrice())));
-
-            cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
-            setCellValue(cell,formatNum(String.valueOf(ls.getNewPrice())));
-
+            if (!jsonParam.getType().equals("03")){
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
+                setCellValue(cell,formatNum(String.valueOf(ls.getNewPrice())));
+            }else {
+                cell = row.createCell(curCol++);
+                cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
+                String str1= String.valueOf(ls.getNewPrice());
+                Double aDouble1 = Double.valueOf(str1);
+                String format1 = String.format("%,d", aDouble1.intValue());
+                setCellValue(cell,format1);
+            }
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
             setCellValue(cell,fmtDateToStr(ls.getEffectiveStartDate()));

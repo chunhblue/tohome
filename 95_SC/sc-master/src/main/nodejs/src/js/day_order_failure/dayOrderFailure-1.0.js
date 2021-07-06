@@ -223,6 +223,15 @@ define('orderFailed', function () {
             _common.prompt("Please select order date!",3,"info");/*请选择日期*/
             $("#orderDate").focus();
             return false;
+        }else{
+            if(_common.judgeValidDate($("#orderDate").val())){
+                _common.prompt("Please enter a valid date!",3,"info");
+                $("#orderDate").css("border-color","red");
+                $("#orderDate").focus();
+                return false;
+            }else {
+                $("#orderDate").css("border-color","#CCCCCC");
+            }
         }
         return true;
     }

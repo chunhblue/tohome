@@ -19,6 +19,8 @@ define('cashierAmount', function () {
         getThousands = null,
         a_store = null,
         a_cashier = null,
+        dateStr = null,
+        dateTime = null,
         _sts = null,
         submitFlag = false,
         tempTrObjValue = {},//临时行数据存储
@@ -56,6 +58,7 @@ define('cashierAmount', function () {
         searchJson: null,
         checkCount: null,
         del_alert: null,
+        submissionDate:null,
         // 头档传入信息
         storeCd1: null,
         storeName1: null,
@@ -63,7 +66,12 @@ define('cashierAmount', function () {
         userName: null,
         userId: null,
         expense: null,
+        submitter:null,
         remark: null,
+        userName1:null,
+        submitter1:null,
+        submissionDate1:null,
+        storeCd2:null,
         shift1: null,//班次
         posId1: null,//posId
     };
@@ -83,8 +91,7 @@ define('cashierAmount', function () {
         getThousands = _common.getThousands;
         // 画面按钮点击事件
         but_event();
-        // 初始化下拉
-        initAutoMatic();
+
         // 初始化表格
         initTable1();
         initTable2();
@@ -92,6 +99,8 @@ define('cashierAmount', function () {
         table_but();
         // 根据跳转加载数据，设置操作模式
         setValueByType();
+        // 初始化下拉
+        initAutoMatic();
         $("#updateByPay").hide();
     }
 
@@ -124,6 +133,13 @@ define('cashierAmount', function () {
             btnDisable(true);
             inputDisable(true);
         } else {
+            m.submissionDate.hide();
+            m.submissionDate1.hide();
+            m.submitter.hide();
+            m.submitter1.hide();
+            // var format = new Date().Format("dd/MM/yyyy hh:mm:ss.S");
+            // m.submissionDate.val(format);
+            // m.submitter.val(m.userName1.val());
             // 设置业务日期
             setBusinessDate();
             // 初始化表格数据
@@ -139,12 +155,12 @@ define('cashierAmount', function () {
                   payListEx=payListEx+","+$(this).val();
                   var  expendString={
                       storeCd: $("#a_store").attr("k"),
-                      payDate: $("#businessDate").val(),
+                      payDate: subfmtDate(m.bs_date.val()),
                       cashSplitFlag: $("input[name='cash_split_flag']:checked").val(),
                       voucherNo:$(this).val()
                   }
                   payString.push(expendString);
-              })
+              });
         payListA=JSON.stringify(payString);
         $("#from_hide_expend").val(payListEx);
         //拼接检索参数
@@ -179,12 +195,15 @@ define('cashierAmount', function () {
             success: function (result) {
                 if (result.success) {
                     $.myAutomatic.setValueTemp(a_store, result.data.storeCd, result.data.storeName);
+                    // m.submissionDate();
+                    checkUserName(result.data.createUserId);
+                    makeUpTime(result.data.createYmd,result.data.createHms);
                     // $.myAutomatic.setValueTemp(expenditureNo, result.data.voucherNo, result.data.voucherNo);
                    $('#expenditureNoA').hide();
                     for (let i = 0; i <result.data.voucherNo.length; i++) {
                         if (result.data.voucherNoList[i]!=null &&  result.data.voucherNoList[i]!=""){
                             var voNo=result.data.voucherNoList[i];
-                            let accDate = m.businessDate.val();
+                            let accDate = result.data.payDate;
                             var resourceGroup = "<div class='row' name='resExpendRow' >" +
                                 "                <label for='expenditureNo' class='col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label' style='white-space: nowrap'>Expenditure No.</label>" +
                                 "                <div class='col-xs-12 col-sm-4 col-md-3 col-lg-2'>" +
@@ -195,7 +214,7 @@ define('cashierAmount', function () {
                                 "                <label for='description'  class='col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label' style='white-space: nowrap;'>Expenditure Description</label>" +
                                 "                <div class='col-xs-12 col-sm-4 col-md-3 col-lg-2'>" +
                                 "                    <div class='res-info'  id="+voNo+" name='descriptionFor'></div>" +
-                                "                    <input type='hidden'  name='descriptionForInput' class='form-control input-sm'" +
+                                "                    <input  name='descriptionForInput' class='form-control input-sm'" +
                                 "                          value='" +  + "'>" +
                                 "                </div>" ;
                             $("#expendlitLine").before(resourceGroup);
@@ -229,7 +248,7 @@ define('cashierAmount', function () {
         // 创建请求字符串
         let searchJsonStr = {
             storeCd: $("#a_store").attr("k"),
-            payDate: $("#businessDate").val(),
+            payDate: subfmtDate(m.bs_date.val()),
             cashSplitFlag: $("input[name='cash_split_flag']:checked").val(),
              voucherNo:$("#expenditureNo").val()
             // voucherNo:$("#expenditureNo").attr("k")
@@ -241,9 +260,36 @@ define('cashierAmount', function () {
         }
         m.searchJson.val(JSON.stringify(searchJsonStr));
     }
+    var checkUserName=function (data) {
+        $.myAjaxs({
+            url: systemPath+"/inventoryVoucher/getuser",
+            async: true,
+            cache: false,
+            type: "post",
+            data :"userId="+data,
+            dataType: "json",
+            success: function (result) {
+                if (result.success) {
+                    let user = result.o;
+                    m.submitter.val(user);
+                }
+            }
+        });
+    }
+    var makeUpTime=function (date,time) {
 
+         var year=date.substring(0,4);
+        var month=date.substring(4,6);
+        var day=date.substring(6,8);
+        var hour=time.substring(0,2);
+        var min=time.substring(2,4);
+        var sec=time.substring(4,6);
+        var timeStr=day+"/"+month+"/"+year+" "+hour+":"+min+":"+sec;
+        m.submissionDate.val(timeStr);
+    }
     //初始化下拉
     var initAutoMatic = function () {
+
         m.bs_date.datetimepicker({
             language:'en',
             format: 'dd/mm/yyyy',
@@ -252,8 +298,15 @@ define('cashierAmount', function () {
             minView:2,
             autoclose:true,
             todayHighlight:true,
-            todayBtn:true
+            todayBtn:true,
+            endDate:new Date(dateTime)
         });
+
+        $("#expenditureNo").on("focus",function () {
+            let accDate = subfmtDate(m.bs_date.val());
+            let storeCd =  $("#a_store").attr("k");
+            $.myAutomatic.replaceParam(expenditureNo,"&accDate="+accDate+"&storeCd="+storeCd);
+        })
 
         $("#expenditureNo").prop("disabled",true);
         $("#expenditureNo_refresh").hide();
@@ -266,6 +319,7 @@ define('cashierAmount', function () {
         //店铺
         a_store = $("#a_store").myAutomatic({
             url: systemPath + "/ma1000/getStoreByPM",
+            async: false,
             ePageSize: 10,
             startCount: 0,
             cleanInput: function (thisObj) {
@@ -291,6 +345,14 @@ define('cashierAmount', function () {
         // 经费管理序号下拉
         expenditureNo = $("#expenditureNo").myAutomatic({
             url: systemPath + "/fundEntry/getExpenditureList",
+            // param:[{
+            //     'k':'bs_date',
+            //     'v':'accDate'
+            // },{
+            //     'k':'storeCd2',
+            //     'v':'storeCd'
+            // }],
+            async:false,
             ePageSize: 10,
             startCount: 0,
             cleanInput: function (thisObj) {
@@ -338,8 +400,7 @@ define('cashierAmount', function () {
             success: function (result) {
                 if (result.success) {
                     $("#description").val(result.o.description);
-                        var expend=expenditureNo;
-                        $('#'+expend).append('<span>'+result.o.description+'</span>');
+                        $('#'+expenditureNo).append('<span>'+result.o.description+'</span>');
                 }
             },
             error: function (e) {
@@ -596,7 +657,6 @@ define('cashierAmount', function () {
             }
         });
     }
-
     var btnDisable = function (flag) {
         $('#updateByCash').prop('disabled', flag);
         $('#updateByPay').prop('disabled', flag);
@@ -758,6 +818,47 @@ define('cashierAmount', function () {
         m.submitBut.on("click", function () {
             $("#expenditureNo_clear").click();
             if (verifySearch("1")) {
+               var thisParent = $(tableGrid1.find("tbody")).parent();
+                //还原input输入框
+                var cols = tableGrid1.getSelectColValue(thisParent, "cashCd");
+                //还原表格中的input框
+                var inputRowCashCd = tableGrid1.find(".info [tag=cashCd]");
+                var cashQtyRow1 = $("#i_shift1Qty");
+                var cashQtyRow2 = $("#i_shift2Qty");
+                var cashQtyRow3 = $("#i_shift3Qty");
+                if ((cols["cashCd"] !== inputRowCashCd.text() && cashQtyRow1.length === 1)
+                    || (cols["cashCd"] !== inputRowCashCd.text() && cashQtyRow2.length === 1)
+                    || (cols["cashCd"] !== inputRowCashCd.text() && cashQtyRow3.length === 1)) {
+                    var cashQty1 = reThousands(cashQtyRow1.val());
+                    var cashQty2 = reThousands(cashQtyRow2.val());
+                    var cashQty3 = reThousands(cashQtyRow3.val());
+                    //添加判断
+                    var reg = /((^[1-9]\d*)|^0)(\.\d+)?$/;
+                    if (cashQty1 !== "" && !reg.test(cashQty1)) {
+                        _common.prompt("Please enter the correct quantity!", 5, "error");/*请输入正确数量*/
+                        $('#i_shift1Qty').focus();
+                        return false;
+                    }
+                    if (cashQty2 !== "" && !reg.test(cashQty2)) {
+                        _common.prompt("Please enter the correct quantity!", 5, "error");/*请输入正确数量*/
+                        $('#i_shift2Qty').focus();
+                        return false;
+                    }
+                    if (cashQty3 !== "" && !reg.test(cashQty3)) {
+                        _common.prompt("Please enter the correct quantity!", 5, "error");/*请输入正确数量*/
+                        $('#i_shift3Qty').focus();
+                        return false;
+                    }
+                    tableGrid1.find(".info [tag=shift1]").text(toThousands(cashQty1));
+                    tableGrid1.find(".info [tag=shift2]").text(toThousands(cashQty2));
+                    tableGrid1.find(".info [tag=shift3]").text(toThousands(cashQty3));
+                    //赋值
+                    $('#i_shift1Qty').val(cols["shift1"]);
+                    $('#i_shift2Qty').val(cols["shift2"]);
+                    $('#i_shift3Qty').val(cols["shift3"]);
+                    //现金合计
+                    cash_total();
+                }
                 // if ($("#cash_split_flag_1").is(":checked")) {
                     if ($("#zgGridTtable>.zgGrid-tbody tr").length > 0) {
                         var payAmt0=0,payAmt1=0,payAmt2=0
@@ -777,13 +878,13 @@ define('cashierAmount', function () {
                         });
                         $("#zgGridTtable>.zgGrid-tbody tr").each(function () {
                             if ($(this).find('td[tag=payCd]').text() === "01") {
-                                $(this).find('td[tag=payAmtDiff]').text(reThousands($("#totalShift1").val())-payAmt0);
+                                $(this).find('td[tag=payAmtDiff]').text(toThousands(reThousands($("#totalShift1").val())-payAmt0));
                             }
                             if ($(this).find('td[tag=payCd]').text() === "02") {
-                                $(this).find('td[tag=payAmtDiff]').text(reThousands($("#totalShift2").val())-payAmt1);
+                                $(this).find('td[tag=payAmtDiff]').text(toThousands(reThousands($("#totalShift2").val())-payAmt1));
                             }
                             if ($(this).find('td[tag=payCd]').text() === "03") {
-                                $(this).find('td[tag=payAmtDiff]').text(reThousands($("#totalShift3").val())-payAmt2);
+                                $(this).find('td[tag=payAmtDiff]').text(toThousands(reThousands($("#totalShift3").val())-payAmt2));
                             }
                         });
                     }
@@ -798,8 +899,8 @@ define('cashierAmount', function () {
                             payAmt: reThousands($(this).find('td[tag=payAmt]').text()),//应收金额
                             payInAmt: reThousands($(this).find('td[tag=payInAmt]').text()),//实收金额
                             payAmtDiff: reThousands($(this).find('td[tag=payAmtDiff]').text()),//差异金额
-                            differenceReasonCd: $(this).find('td[tag=differenceReasonCd]').text(),//差异原因cd
-                        }
+                            differenceReasonCd: reThousands($(this).find('td[tag=differenceReasonCd]').text()),//差异原因cd
+                        };
                         payArr.push(pay);
                     }
                 });
@@ -845,6 +946,7 @@ define('cashierAmount', function () {
                     if (result === "true") {
                         tableGrid.showColumn('payAmt');
                         tableGrid.showColumn('payAmtDiff');
+                        tableGrid.showColumn('salesByHht');
                         $("#payAmtDiff").show();
                         $('#payAmt').show();
                         btnDisable(true);
@@ -858,17 +960,23 @@ define('cashierAmount', function () {
                             dataType: "json",
                             success: function (result) {
                                 if (result.success) {
+
                                     m.remark.prop("disabled", true);
                                     m.expense.prop("disabled", true);
                                     m.payId.val(result.data);
                                     m.toKen.val(result.toKen);
+
                                     m.viewSts.val("view");
+                                    _sts="view";
+                                    pay_total();
                                     $('#a_store_refresh').prop('disabled', true);
                                     $('#a_store_clear').prop('disabled', true);
                                     $('#search').prop('disabled', true);
                                     $('#reset').prop('disabled', true);
+
                                     btnDisable(true);
                                     inputDisable(true);
+
                                     _common.prompt("Submitted successfully！", 2, "success");
                                 } else {
                                     _common.prompt(result.message, 5, "error");
@@ -967,18 +1075,20 @@ define('cashierAmount', function () {
                     m.storeCd1.val(result.data.storeCd);
                     m.payDate.val(payDate);
                     m.payId.val(payId);
-                    $('#search').prop('disabled', true);
-                    $('#reset').prop('disabled', true);
-                    inputDisable(true);
+                    $('#search').prop('disabled', false);
+                    $('#reset').prop('disabled', false);
+                    inputDisable(false);
+                    _common.prompt("Cash Balancing entry already finished for target store & date!", 5, "info");
+                    return false;
                     //验证订货日是否为当前业务日
-                    _common.checkBusinessDate(payDate, payId, function (result) {
+                    /*_common.checkBusinessDate(payDate, payId, function (result) {
                         if (result.success) {
                             btnDisable(false);
                         } else {
                             btnDisable(true);
                             _common.prompt("The document is not created within today and cannot be modified!", 3, "info");
                         }
-                    })
+                    })*/
                 } else {
                     m.payId.val("");
                     btnDisable(false);
@@ -1010,10 +1120,10 @@ define('cashierAmount', function () {
         tableGrid = $("#zgGridTtable").zgGrid({
             title: "Variance Details",
             param: paramGrid,
-            colNames: ["Pay Cd", "Payment Type", "Total Amount", "Actual Amount", "Variance Amount", "Difference Reason Code", "Variance Reason"],
+            colNames: ["Pay Cd", "Payment Type", "Total Amount","Sales By HHT","Actual Counted Amount(User Entered)", "Variance Amount", "Difference Reason Code", "Variance Reason"],
             colModel: [
                 {name: "payCd", type: "text", text: "right", width: "100", ishide: true, css: ""},
-                {name: "payName", type: "text", text: "left", width: "150", ishide: false, css: ""},
+                {name: "payName", type: "text", text: "left", width: "110", ishide: false, css: ""},
                 {
                     name: "payAmt",
                     type: "text",
@@ -1023,6 +1133,7 @@ define('cashierAmount', function () {
                     css: "",
                     getCustomValue: getThousands
                 },
+                {name: "salesByHht", type: "text", text: "right", width: "90", ishide: true, css: "",getCustomValue: getThousands},
                 {
                     name: "payInAmt",
                     type: "text",
@@ -1069,8 +1180,9 @@ define('cashierAmount', function () {
             loadCompleteEvent: function (self) {
                 selectTrTemp = null;//清空选择的行
                 if (_sts == 'view') {
-                    tableGrid.showColumn('payAmt')
-                    tableGrid.showColumn('payAmtDiff')
+                    tableGrid.showColumn('payAmt');
+                    tableGrid.showColumn('payAmtDiff');
+                    tableGrid.showColumn('salesByHht');
                 }
                 pay_total();
                 return self;
@@ -1100,46 +1212,56 @@ define('cashierAmount', function () {
             var payAmt = 0;
             var payInAmt = 0;
             var payAmtDiff = 0;
+            var paySalesByHht = 0;
             $("#zgGridTtable>.zgGrid-tbody tr").each(function () {
                 var td_payAmt = parseFloat($(this).find('td[tag=payAmt]').text().replace(/,/g, ""));
                 var td_payInAmt = parseFloat($(this).find('td[tag=payInAmt]').text().replace(/,/g, ""));
                 var td_payAmtDiff = parseFloat($(this).find('td[tag=payAmtDiff]').text().replace(/,/g, ""));
+                var td_salesByHht = parseFloat($(this).find('td[tag=salesByHht]').text().replace(/,/g, ""));
                 if (!isNaN(td_payAmt))
                     payAmt += parseFloat(td_payAmt);
                 if (!isNaN(td_payInAmt))
                     payInAmt += parseFloat(td_payInAmt);
                 if (!isNaN(td_payAmtDiff))
                     payAmtDiff += parseFloat(td_payAmtDiff);
+                if (!isNaN(td_salesByHht))
+                    paySalesByHht += parseFloat(td_salesByHht);
             });
             var total = "<tr style='text-align: left' id='pay_total' tag='total'>" +
                 "<td title='Total'>Total:</td>" +
                 "<td align='right' id='payAmt' title='" + toThousands(payAmt) + "'>" + toThousands(payAmt) + "</td>" +
+                "<td align='right' id='salesByHht' title='" + toThousands(paySalesByHht) + "'>" + toThousands(paySalesByHht) + "</td>" +
                 "<td align='right'  id='payInAmt' title='" + toThousands(payInAmt) + "'>" + toThousands(payInAmt) + "</td>" +
                 "<td align='right'   id='payAmtDiff' title='" + toThousands(payAmtDiff) + "'>" + toThousands(payAmtDiff) + "</td>" +
                 //"<td></td>" +
-                "</tr>"
+                "</tr>";
             $("#pay_total").remove();
 
             $("#zgGridTtable_tbody").append(total);
             if (_sts == 'view') {
                 $("#payAmtDiff").show();
                 $('#payAmt').show();
+                $('#salesByHht').show();
             } else {
                 $('#payAmt').hide();
                 $("#payAmtDiff").hide();
+                $("#salesByHht").hide();
             }
         }
 
     }
     //币种合计
     var cash_total = function () {
+        var totalShift=0;
         if ($("#zgGridTtable1>.zgGrid-tbody tr").length > 0) {
             var amount1 = 0,amount2 = 0,amount3 = 0;
+
             $("#zgGridTtable1>.zgGrid-tbody tr").each(function () {
                 var cashCd = $(this).find('td[tag=cashCd]').text();
                 var shift1 = reThousands($(this).find('td[tag=shift1]').text());
                 var shift2 = reThousands($(this).find('td[tag=shift2]').text());
                 var shift3 = reThousands($(this).find('td[tag=shift3]').text());
+
                 if (!isNaN(shift1)) {
                     switch (cashCd) {
                         case "00":
@@ -1204,6 +1326,7 @@ define('cashierAmount', function () {
                             break;
                     }
                 }
+                totalShift=amount1+amount2+amount3;
             });
 
             var reg = /\d{1,3}(?=(\d{3})+$)/g;
@@ -1222,11 +1345,19 @@ define('cashierAmount', function () {
                 "<td align='right'  title='" + amountshift1 + "'>" + amountshift1 + "</td>" +
                 "<td align='right'  title='" + amountshift2 + "'>" + amountshift2 + "</td>" +
                 "<td align='right'  title='" + amountshift3 + "'>" + amountshift3 + "</td>" +
-                "</tr>";
+                "</tr>"+
+            "<tr style='text-align: left;text-align: left;font-size:20px' id='cash_total2'  tag='total'>" +
+             "<td colspan='4'>3 Shifts Total:" +toThousands(totalShift) + "</td>"+
+            // "<td title='Total'></td>" +
+            // "<td></td>"+
+            // "<td></td>"+
+            // "3 Shifts Total:" +totalShift +
+            "</tr>";
             $("#totalShift1").val(amountText1);
             $("#totalShift2").val(amountText2);
             $("#totalShift3").val(amountText3);
             $("#cash_total").remove();
+            $("#cash_total2").remove();
             $("#zgGridTtable1_tbody").append(total);
         }
     }
@@ -1325,7 +1456,7 @@ define('cashierAmount', function () {
         } else {
             $("#a_store").css("border-color", "#CCC");
         }
-        if (m.bs_date.val() == "") {
+        if (!m.bs_date.val()) {
             if (flg == "1") {
                 _common.prompt("The business date cannot be empty!", 5, "error");/*业务日期不能为空*/
                 m.bs_date.focus();
@@ -1333,7 +1464,18 @@ define('cashierAmount', function () {
             }
             return false;
         } else {
-            m.bs_date.css("border-color", "#CCC");
+            if(_common.judgeValidDate(m.bs_date.val())){
+                _common.prompt("Please enter a valid date!",3,"info");
+                m.bs_date.focus();
+                return false;
+            }else if(parseInt(formatDate(m.bs_date.val()))>parseInt(formatDate(dateStr))){
+                _common.prompt("Only dates prior to today can be selected!",3,"info");
+                m.bs_date.focus();
+                return false;
+            }
+            else {
+                m.bs_date.css("border-color", "#CCC");
+            }
         }
 
         if (m.remark.val().length > 200) {
@@ -1347,7 +1489,10 @@ define('cashierAmount', function () {
             $("#expenditureNo").focus();
             return  false;
         }
-
+       if (subfmtDate(m.bs_date.val())>m.businessDate.val()){
+           _common.prompt("The business date cannot be greater today!", 5, "error");
+           return  false;
+       }
         return  true;
     }
     var checkReceipt=function () {
@@ -1404,6 +1549,13 @@ define('cashierAmount', function () {
         return res;
     }
 
+    //格式化数字类型的日期
+    function dateInfmt(date) {
+        var res = "";
+        res = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
+        return res;
+    }
+
     // 格式化数字类型的日期：yyyymmdd → dd/mm/yyyy
     function fmtIntDate(date) {
         if (date == null || date.length != 8) {
@@ -1420,13 +1572,26 @@ define('cashierAmount', function () {
         res = strDate.replace(/-/g, "");
         return res;
     }
+    // 06/03/2020 -> 20200306
+    var formatDate = function (dateStr) {
+        dateStr = dateStr.replace(/\//g,'');
+        var day = dateStr.substring(0,2);
+        var month = dateStr.substring(2,4);
+        var year = dateStr.substring(4,8);
+        return year+month+day;
+    }
+
 
     // 设置业务日期
     function setBusinessDate() {
         let businessDate = m.businessDate.val();
         if (businessDate != null && businessDate != '') {
-            businessDate = fmtIntDate(businessDate);
-            m.bs_date.val(businessDate);
+            let date = new Date(new Date(dateInfmt(businessDate))-1000*60*60*24);
+            var mouth = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+            var day = date.getDate() < 10 ? "0" + (date.getDate()) : date.getDate();
+            dateStr = day+"/"+mouth+"/"+date.getFullYear();
+            dateTime = date.getFullYear()+"-"+mouth+"-"+day;
+            m.bs_date.val(dateStr);
         } else {
             _common.prompt("Failed to get business date, please refresh!", 3, "error");
         }

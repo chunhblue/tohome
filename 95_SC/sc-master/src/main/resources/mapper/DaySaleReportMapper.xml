@@ -26,6 +26,18 @@
         <result column="4h_6h"  property="time46"/>
         <result column="shift3"  property="shift3"/>
         <result column="sales_amt"  property="totalAmt"/>
+        <result column="hour6_8"  property="hour6_8"/>
+        <result column="hour8_10"  property="hour8_10"/>
+        <result column="hour10_12"  property="hour10_12"/>
+        <result column="hour12_14"  property="hour12_14"/>
+        <result column="hour14_16"  property="hour14_16"/>
+        <result column="hour16_18"  property="hour16_18"/>
+        <result column="hour18_20"  property="hour18_20"/>
+        <result column="hour20_22"  property="hour20_22"/>
+        <result column="hour22_24"  property="hour22_24"/>
+        <result column="hour0_2"  property="hour0_2"/>
+        <result column="hour2_4"  property="hour2_4"/>
+        <result column="hour4_6"  property="hour4_6"/>
     </resultMap>
     <resultMap id="BaseItemResult02" type="cn.com.bbut.iy.itemmaster.dto.daysalereport.DaySaleReportDTO">
         <result column="psd" property="psd" />
@@ -52,6 +64,18 @@
         <result column="4h_6h"  property="time46"/>
         <result column="shift3"  property="shift3"/>
         <result column="sales_amt"  property="totalAmt"/>
+        <result column="hour6_8"  property="hour6_8"/>
+        <result column="hour8_10"  property="hour8_10"/>
+        <result column="hour10_12"  property="hour10_12"/>
+        <result column="hour12_14"  property="hour12_14"/>
+        <result column="hour14_16"  property="hour14_16"/>
+        <result column="hour16_18"  property="hour16_18"/>
+        <result column="hour18_20"  property="hour18_20"/>
+        <result column="hour20_22"  property="hour20_22"/>
+        <result column="hour22_24"  property="hour22_24"/>
+        <result column="hour0_2"  property="hour0_2"/>
+        <result column="hour2_4"  property="hour2_4"/>
+        <result column="hour4_6"  property="hour4_6"/>
     </resultMap>
     <select id="selectDaySaleReport01" parameterType="cn.com.bbut.iy.itemmaster.dto.daysalereport.DaySaleReportParamDTO" resultMap="BaseItemResult">
         SELECT
@@ -223,41 +247,6 @@
         <if test="daySaleReportParamdto.includeService!=null and daySaleReportParamdto.includeService!=''">
             AND a.in_service = #{daySaleReportParamdto.includeService}
         </if>)AS A;
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!--        SELECT-->
-<!--        count(1)-->
-<!--        FROM-->
-<!--        ia0050 a-->
-<!--        LEFT JOIN ( SELECT t_operator.c_operatorname, ma1000.store_name,ma1000.store_cd FROM MA1000 LEFT JOIN t_operator ON MA1000.ofc = t_operator.c_operatorcode )-->
-<!--        AS T ON t.store_cd = a.store_cd-->
-<!--        where 1=1-->
-<!--        and a.store_cd in-->
-<!--        <foreach item="store" index="index" collection="daySaleReportParamdto.stores"-->
-<!--                 open="(" separator="," close=")">-->
-<!--            #{store,jdbcType=VARCHAR}-->
-<!--        </foreach>-->
-<!--        <if test="daySaleReportParamdto.effectiveStartDate !=null and daySaleReportParamdto.effectiveEndDate !=null and  daySaleReportParamdto.effectiveEndDate!='' ">-->
-<!--            AND a.pos_business_date between #{daySaleReportParamdto.effectiveStartDate} and-->
-<!--            #{daySaleReportParamdto.effectiveEndDate}-->
-<!--        </if>  <if test="daySaleReportParamdto.includeService!=null and daySaleReportParamdto.includeService!=''">-->
-<!--         AND a.in_service = #{daySaleReportParamdto.includeService}-->
-<!--         </if>-->
-<!--        <if test="daySaleReportParamdto.flg">-->
-<!--            LIMIT ${daySaleReportParamdto.rows} OFFSET ${daySaleReportParamdto.limitStart}-->
-<!--        </if>-->
-
     </select>
 
     <select id="selectDaySaleReport1" parameterType="cn.com.bbut.iy.itemmaster.dto.daysalereport.DaySaleReportParamDTO" resultMap="BaseItemResult">
@@ -331,11 +320,16 @@
      SELECT
 	 a.*,
 	 t.c_operatorname,
-	 t.store_name
+	 t.store_name,
+     B.hour6_8,B.hour8_10,B.hour10_12,B.hour12_14,B.hour14_16,B.hour16_18,
+        B.hour18_20,B.hour20_22,B.hour22_24,B.hour0_2,B.hour2_4,B.hour4_6
      FROM
 	ia0040 a
 	LEFT JOIN ( SELECT t_operator.c_operatorname, ma1000.store_name,ma1000.store_cd FROM MA1000 LEFT JOIN t_operator ON MA1000.ofc = t_operator.c_operatorcode )
 	AS T ON t.store_cd = a.store_cd
+	left join
+       ia0041 B
+    ON a.store_cd = B.store_cd AND a.acc_date = B.acc_date and B.in_service = a.in_service
 	where 1=1
 	and a.store_cd in
 	<foreach item="store" index="index" collection="daySaleReportParamdto.stores"
@@ -358,11 +352,16 @@
         SELECT
         a.*,
         t.c_operatorname,
-        t.store_name
+        t.store_name,
+        B.hour6_8,B.hour8_10,B.hour10_12,B.hour12_14,B.hour14_16,B.hour16_18,
+        B.hour18_20,B.hour20_22,B.hour22_24,B.hour0_2,B.hour2_4,B.hour4_6
         FROM
         ia0050 a
         LEFT JOIN ( SELECT t_operator.c_operatorname, ma1000.store_name,ma1000.store_cd FROM MA1000 LEFT JOIN t_operator ON MA1000.ofc = t_operator.c_operatorcode )
         AS T ON t.store_cd = a.store_cd
+        left join
+        ia0051 B
+        ON a.store_cd = B.store_cd AND a.pos_business_date = B.pos_business_date and B.in_service = a.in_service
         where 1=1
         and a.store_cd in
         <foreach item="store" index="index" collection="daySaleReportParamdto.stores"
