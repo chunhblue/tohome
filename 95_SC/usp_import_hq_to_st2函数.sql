@@ -1,5 +1,15 @@
-CREATE OR REPLACE FUNCTION "public"."usp_import_hq_to_st2"()
-  RETURNS "pg_catalog"."void" AS $BODY$
+-- FUNCTION: public.usp_import_hq_to_st2()
+
+-- DROP FUNCTION public.usp_import_hq_to_st2();
+
+CREATE OR REPLACE FUNCTION public.usp_import_hq_to_st2(
+	)
+    RETURNS void
+    LANGUAGE 'plpgsql'
+
+    COST 100
+    VOLATILE 
+AS $BODY$
 declare
     -----------------------------------------------------------------------------------------
     -- 变量定义
@@ -17,8 +27,7 @@ begin
     ----------------------------------------------------------------------------------------
     step_no := 0;
     rtn_code := 0;
-	--  path := '/data/hadoop/data/store/from_hq2/';
-    path := '/tmp/20201230/';
+	path := '/data/hadoop/data/store/from_hq2/';
 
     --------------------------------------
     -- JOB开始
@@ -30,8 +39,7 @@ begin
     select usp_step_begin_log(step_no) into step_no;
 
 	select sp_value into ls_nr_date from cm9060 where sp_id = '0006';
-    --  path:=path||ls_nr_date||'/';
-    
+    path:=path||ls_nr_date||'/';
     get diagnostics rtn_rows =ROW_COUNT;
     select usp_step_end_log(step_no,rtn_rows) into step_no;
 	
@@ -256,6 +264,70 @@ begin
 
     get diagnostics rtn_rows =ROW_COUNT;
     select usp_step_end_log(step_no,rtn_rows) into step_no;
+	
+	/* add by lch start 20210511 */
+	--------------------------------------
+    -- STEP24:清除表 hht_from_hcmc.selling_upload_header 数据
+    --------------------------------------
+    select usp_step_begin_log(step_no) into step_no;
+	
+    truncate table hht_from_hcmc.selling_upload_header;
+
+    get diagnostics rtn_rows =ROW_COUNT;
+    select usp_step_end_log(step_no,rtn_rows) into step_no;
+    
+	--------------------------------------
+    -- STEP25:导入表 hht_from_hcmc.selling_upload_header
+    --------------------------------------
+    select usp_step_begin_log(step_no) into step_no;
+	
+    execute 'copy hht_from_hcmc.selling_upload_header from '''||''||path||'selling_upload_header.csv''';
+
+    get diagnostics rtn_rows =ROW_COUNT;
+    select usp_step_end_log(step_no,rtn_rows) into step_no;
+	
+	--------------------------------------
+    -- STEP26:清除表 hht_from_hcmc.selling_upload_detail 数据
+    --------------------------------------
+    select usp_step_begin_log(step_no) into step_no;
+	
+    truncate table hht_from_hcmc.selling_upload_detail;
+
+    get diagnostics rtn_rows =ROW_COUNT;
+    select usp_step_end_log(step_no,rtn_rows) into step_no;
+    
+	--------------------------------------
+    -- STEP27:导入表 hht_from_hcmc.selling_upload_detail
+    --------------------------------------
+    select usp_step_begin_log(step_no) into step_no;
+	
+    execute 'copy hht_from_hcmc.selling_upload_detail from '''||''||path||'selling_upload_detail.csv''';
+
+    get diagnostics rtn_rows =ROW_COUNT;
+    select usp_step_end_log(step_no,rtn_rows) into step_no;
+	
+	
+	--------------------------------------
+    -- STEP28:清除表 hht_from_hcmc.selling_upload_nosale 数据
+    --------------------------------------
+    select usp_step_begin_log(step_no) into step_no;
+	
+    truncate table hht_from_hcmc.selling_upload_nosale;
+
+    get diagnostics rtn_rows =ROW_COUNT;
+    select usp_step_end_log(step_no,rtn_rows) into step_no;
+    
+	--------------------------------------
+    -- STEP29:导入表 hht_from_hcmc.selling_upload_nosale
+    --------------------------------------
+    select usp_step_begin_log(step_no) into step_no;
+	
+    execute 'copy hht_from_hcmc.selling_upload_nosale from '''||''||path||'selling_upload_nosale.csv''';
+
+    get diagnostics rtn_rows =ROW_COUNT;
+    select usp_step_end_log(step_no,rtn_rows) into step_no;
+	
+	/* add by lch end 20210511 */
     
 	--------------------------------------
 	-- 出口处理
@@ -268,6 +340,7 @@ begin
 		raise notice 'error_code=% , %',rtn_code,msg;
 		perform usp_proc_end_log('usp_import_hq_to_st2',1);
 end;
-$BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100
+$BODY$;
+
+ALTER FUNCTION public.usp_import_hq_to_st2()
+    OWNER TO postgres;
