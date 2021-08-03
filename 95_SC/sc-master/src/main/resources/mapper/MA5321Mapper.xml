@@ -13,5 +13,19 @@
             </if>
         </where>
     </select>
+    <select id="selectWarehouseList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT distinct MA5321.warehouse_no AS k, CONCAT( MA5321.warehouse_no,' ',MA5321.warehouse_name) AS v
+        FROM MA5321 left join ma5323 ON MA5321.warehouse_no=ma5323.warehouse_no
+        <where>
+            1=1
+            <if test="v != null and v != ''">
+                and LOWER(MA5321.warehouse_no) LIKE LOWER(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+                OR LOWER(MA5321.warehouse_name) LIKE LOWER(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="storeCd != null and storeCd != ''">
+               and ma5323.store_cd=#{storeCd}
+            </if>
+        </where>
+    </select>
 
 </mapper>

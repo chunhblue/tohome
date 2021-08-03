@@ -102,7 +102,6 @@
         JOIN (
             SELECT store_cd, store_name
             FROM ma1000
-            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         ) T0
         ON T.store_cd = T0.store_cd
         JOIN (
@@ -110,8 +109,7 @@
                 article_id, effective_start_date, article_name,  dep_cd, pma_cd, category_cd,sub_category_cd
             FROM
                 ma1100
-            WHERE
-                #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            WHERE 1=1
             <if test="depCd != null and depCd != ''">
                 AND dep_cd = #{depCd,jdbcType=VARCHAR}
             </if>
@@ -197,7 +195,7 @@
             SELECT store_cd, store_name,ofc,
             (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
             FROM ma1000
-            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            WHERE 1=1
             <if test="am !=null and am !=''">
                 AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
             </if>
@@ -208,8 +206,7 @@
                 article_id, effective_start_date, article_name, article_name_en,article_short_name_en,article_short_name,dep_cd, pma_cd, category_cd,sub_category_cd
             FROM
                 ma1100
-            WHERE
-            #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            WHERE 1=1
         <if test="depCd != null and depCd != ''">
             AND dep_cd = #{depCd,jdbcType=VARCHAR}
         </if>
@@ -279,7 +276,7 @@
         SELECT store_cd, store_name,ofc,
         (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
         FROM ma1000
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="am !=null and am !=''">
             AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
         </if>
@@ -290,8 +287,7 @@
         article_id, effective_start_date, article_name,  dep_cd, pma_cd, category_cd,sub_category_cd
         FROM
         ma1100
-        WHERE
-        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="depCd != null and depCd != ''">
             AND dep_cd = #{depCd,jdbcType=VARCHAR}
             <if test="pmaCd != null and pmaCd != ''">
@@ -374,7 +370,7 @@
         SELECT store_cd, store_name,ofc,
         (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
         FROM ma1000
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="am !=null and am !=''">
             AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
         </if>
@@ -385,8 +381,7 @@
         article_id, effective_start_date, article_name, article_name_en,article_short_name_en,article_short_name,dep_cd, pma_cd, category_cd,sub_category_cd
         FROM
         ma1100
-        WHERE
-        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="depCd != null and depCd != ''">
             AND dep_cd = #{depCd,jdbcType=VARCHAR}
         </if>
@@ -454,7 +449,7 @@
         SELECT store_cd, store_name,ofc,
         (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
         FROM ma1000
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="am !=null and am !=''">
             AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
         </if>
@@ -465,8 +460,7 @@
         article_id, effective_start_date, article_name,  dep_cd, pma_cd, category_cd,sub_category_cd
         FROM
         ma1100
-        WHERE
-        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="depCd != null and depCd != ''">
             AND dep_cd = #{depCd,jdbcType=VARCHAR}
             <if test="pmaCd != null and pmaCd != ''">
@@ -548,7 +542,7 @@
         SELECT store_cd, store_name,ofc,
         (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
         FROM ma1000
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="am !=null and am !=''">
             AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
         </if>
@@ -559,8 +553,7 @@
         article_id, effective_start_date, article_name, article_name_en,article_short_name_en,article_short_name,dep_cd, pma_cd, category_cd,sub_category_cd
         FROM
         ma1100
-        WHERE
-        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="depCd != null and depCd != ''">
             AND dep_cd = #{depCd,jdbcType=VARCHAR}
         </if>

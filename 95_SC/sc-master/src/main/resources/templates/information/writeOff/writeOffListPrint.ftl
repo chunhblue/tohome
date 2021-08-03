@@ -89,7 +89,7 @@
                         <th title="Barcode">Barcode</th>
                         <th title="UOM">UOM</th>
                         <th title="Write Off Quantity">Write Off Quantity</th>
-[#--                        <th title="Sale Quantity">Sale Quantity</th>--]
+                        <th title="Sale Quantity">Sale Quantity</th>
                         [#--                                <th title="Write Off Amount">Write Off Amount</th>--]
                         <th title="Write Off Reason">Write Off Reason</th>
                         <th title="Are Manager Code">Are Manager Code</th>

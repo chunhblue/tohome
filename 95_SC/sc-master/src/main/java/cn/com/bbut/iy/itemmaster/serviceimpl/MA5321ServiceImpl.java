@@ -27,4 +27,10 @@ public class MA5321ServiceImpl implements MA5321Service {
     public List<AutoCompleteDTO> getWarehouse(String v) {
         return mapper.selectWarehouse(v);
     }
+
+    @Override
+    public List<AutoCompleteDTO> getWarehouseList(String storeCd, String v) {
+
+        return mapper.selectWarehouseList(storeCd,v);
+    }
 }

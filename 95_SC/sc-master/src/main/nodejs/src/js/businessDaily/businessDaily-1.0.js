@@ -173,6 +173,7 @@ define('businessDaily', function () {
 				$("#payCd4").text(payAmt.payCd4);
 				$("#payCd5").text(payAmt.payCd5);
 				$("#payCd6").text(payAmt.payCd6);
+				$("#payCd7").text(payAmt.payCd7);
 			}
 		})
 
@@ -313,6 +314,7 @@ define('businessDaily', function () {
 						$("#payCd4").text(payAmt.payCd4);
 						$("#payCd5").text(payAmt.payCd5);
 						$("#payCd6").text(payAmt.payCd6);
+						$("#payCd7").text(payAmt.payCd7);
 						$("#payAmt0").text(toThousands(payAmt.payAmt0));
 						$("#payAmt1").text(toThousands(payAmt.payAmt1));
 						$("#payAmt2").text(toThousands(payAmt.payAmt2));
@@ -320,26 +322,29 @@ define('businessDaily', function () {
 						$("#payAmt4").text(toThousands(payAmt.payAmt4));
 						$("#payAmt5").text(toThousands(payAmt.payAmt5));
 						$("#payAmt6").text(toThousands(payAmt.payAmt6));
+						$("#payAmt7").text(toThousands(payAmt.payAmt7));
 						$("#payAmt").text(toThousands(payAmt.payAmt));
 						$("#Contribution0").text((100-(payAmt.payAmt1*100/payAmt.payAmt).toFixed(1)
 							-(payAmt.payAmt2*100/payAmt.payAmt).toFixed(1)
 							-(payAmt.payAmt3*100/payAmt.payAmt).toFixed(1)
 							-(payAmt.payAmt4*100/payAmt.payAmt).toFixed(1)
 							-(payAmt.payAmt5*100/payAmt.payAmt).toFixed(1)
-							-(payAmt.payAmt6*100/payAmt.payAmt).toFixed(1)).toFixed(1));
+							-(payAmt.payAmt6*100/payAmt.payAmt).toFixed(1)
+							-(payAmt.payAmt7*100/payAmt.payAmt).toFixed(1)).toFixed(1));
 						$("#Contribution1").text((payAmt.payAmt1*100/payAmt.payAmt).toFixed(1));
 						$("#Contribution2").text((payAmt.payAmt2*100/payAmt.payAmt).toFixed(1));
 						$("#Contribution3").text((payAmt.payAmt3*100/payAmt.payAmt).toFixed(1));
 						$("#Contribution4").text((payAmt.payAmt4*100/payAmt.payAmt).toFixed(1));
 						$("#Contribution5").text((payAmt.payAmt5*100/payAmt.payAmt).toFixed(1));
 						$("#Contribution6").text((payAmt.payAmt6*100/payAmt.payAmt).toFixed(1));
+						$("#Contribution7").text((payAmt.payAmt7*100/payAmt.payAmt).toFixed(1));
 						$("#Contribution").text("100 %");
 						if($("#payAmt").text() === '0'){
 							$("#Contribution0").text('0.0');
 							$("#Contribution1").text('0.0');$("#Contribution2").text('0.0');
 							$("#Contribution3").text('0.0');$("#Contribution4").text('0.0');
 							$("#Contribution5").text('0.0');$("#Contribution6").text('0.0');
-							$("#Contribution").text("0 %");
+							$("#Contribution7").text('0.0');$("#Contribution").text("0 %");
 						}
 
 						$("#customerCount0").text(toThousands(payAmt.customerCount0));
@@ -349,6 +354,7 @@ define('businessDaily', function () {
 						$("#customerCount4").text(toThousands(payAmt.customerCount4));
 						$("#customerCount5").text(toThousands(payAmt.customerCount5));
 						$("#customerCount6").text(toThousands(payAmt.customerCount6));
+						$("#customerCount7").text(toThousands(payAmt.customerCount7));
 						$("#customerCount").text(toThousands(payAmt.customerCount));
 						// 充值金额（只含现金）
 						var serviceAmt = result.data.serviceAmt;

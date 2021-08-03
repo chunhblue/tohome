@@ -63,7 +63,6 @@
         OP0040,ma1000
         WHERE
         ma1000.store_cd = OP0040.store_cd
-        AND OP0040.acc_date BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
         and OP0040.store_cd IN
         <foreach item="store" index="index" collection="stores"
                  open="(" separator="," close=")">
@@ -88,7 +87,6 @@
         OP0040,ma1000
         WHERE
         ma1000.store_cd = OP0040.store_cd
-        AND OP0040.acc_date BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
         and OP0040.store_cd IN
         <foreach item="store" index="index" collection="stores"
                  open="(" separator="," close=")">

@@ -77,8 +77,6 @@
         AND structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = f.store_cd AND effective_sts = '10' )
         AND effective_sts = '10'
         )
-
-        AND f.ord_date  between e.effective_start_date and e.effective_end_date
         AND f.ord_date  between g.effective_start_date and g.effective_end_date
         <if test="param.flg">
             LIMIT ${param.rows} OFFSET ${param.limitStart}
@@ -147,7 +145,6 @@
         AND structure_cd = ( SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = f.store_cd AND effective_sts = '10' )
         AND effective_sts = '10'
         )
-        AND f.ord_date  between e.effective_start_date and e.effective_end_date
         AND f.ord_date  between g.effective_start_date and g.effective_end_date
     </select>
 </mapper>

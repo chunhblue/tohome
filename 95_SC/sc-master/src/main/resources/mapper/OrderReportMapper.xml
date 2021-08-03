@@ -18,6 +18,7 @@
         <result column="store_cd" property="storeCd"></result>
         <result column="auto_order_qty" property="autoOrderQty"></result>
         <result column="real_qty" property="realQty"></result>
+        <result column="real_qty" property="realQty"></result>
         <result column="variance_qty" property="varianceQty"></result>
         <result column="qty1" property="qty1"></result>
         <result column="variance" property="variance"></result>
@@ -145,9 +146,7 @@
         t_operator oper
         <where>
             AND T.article_id = T1.article_id
-            AND #{param} BETWEEN T1.effective_start_date AND T1.effective_end_date
             AND T.store_cd = T0.store_cd
-            AND #{param} BETWEEN T0.effective_start_date AND T0.effective_end_date
             AND oper.c_operatorcode = T0.ofc
             AND T1.article_id = T6.article_id
             AND T1.effective_start_date = T6.effective_start_date
@@ -175,9 +174,7 @@
         t_operator oper
         <where>
             AND T.article_id = T1.article_id
-            AND #{param} BETWEEN T1.effective_start_date AND T1.effective_end_date
             AND T.store_cd = T0.store_cd
-            AND #{param} BETWEEN T0.effective_start_date AND T0.effective_end_date
             AND oper.c_operatorcode = T0.ofc
             AND T1.article_id = T6.article_id
             AND T1.effective_start_date = T6.effective_start_date
@@ -245,10 +242,6 @@
     AND pi1.store_cd =#{param.storeCd}
     AND pi1.article_id = ma1100.article_id
     AND ma1000.store_cd = od0010.store_cd
-    AND #{param.orderDate} BETWEEN ma1000.effective_start_date
-    AND ma1000.effective_end_date
-    AND #{param.orderDate} BETWEEN ma1100.effective_start_date
-    AND ma1100.effective_end_date
     AND ma1100.article_id = ma1110.article_id
         <if test="param.articleId != null and param.articleId != ''">
             AND lower(ma1110.default_barcode) like lower(CONCAT('%',#{param.articleId,jdbcType=VARCHAR},'%'))
@@ -363,10 +356,6 @@
       WHERE
       ma1100.article_id = od0010.article_id
       AND ma1000.store_cd = od0010.store_cd
-      AND #{param.orderDate} BETWEEN ma1000.effective_start_date
-      AND ma1000.effective_end_date
-      AND #{param.orderDate} BETWEEN ma1100.effective_start_date
-      AND ma1100.effective_end_date
       AND ma1100.article_id = ma1110.article_id
 <!--      <if test="param.articleId != null and param.articleId != ''">-->
 <!--          AND ma1100.article_id=#{param.articleId}-->
@@ -458,10 +447,6 @@
         WHERE
         ma1100.article_id = od0010.article_id
         AND ma1000.store_cd = od0010.store_cd
-        AND #{param.orderDate} BETWEEN ma1000.effective_start_date
-        AND ma1000.effective_end_date
-        AND #{param.orderDate} BETWEEN ma1100.effective_start_date
-        AND ma1100.effective_end_date
         AND ma1100.article_id = ma1110.article_id
         <if test="param.articleId != null and param.articleId != ''">
             AND lower(ma1110.default_barcode) like lower(CONCAT('%',#{param.articleId,jdbcType=VARCHAR},'%'))

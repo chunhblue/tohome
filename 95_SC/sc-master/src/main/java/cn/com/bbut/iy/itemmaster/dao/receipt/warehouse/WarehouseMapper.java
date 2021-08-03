@@ -65,4 +65,6 @@ public interface WarehouseMapper {
      * @return
      */
     List<WarehouseReceiptGridDTO> getPrintData(WarehouseReceiptParamDTO param);
+
+    List<WarehouseReceiptGridDTO>  getSoTransfer(List<WarehouseReceiptGridDTO> _list);
 }

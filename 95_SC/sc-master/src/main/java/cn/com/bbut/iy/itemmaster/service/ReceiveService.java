@@ -64,5 +64,6 @@ public interface ReceiveService {
     Integer insertDocumentUrl(OD0000TDTO dto);
 
     int updateStatus(String receiveId,CommonDTO dto);
- 
+
+    boolean receiveIdIsExist(String orderId);
 }

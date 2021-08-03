@@ -115,7 +115,7 @@ public class AuditController extends BaseAction {
         try {
             reviewId = Long.parseLong(nReviewid);
         } catch (Exception e) {
-            log.error("-------------------------参数错误 nReviewid {}",nReviewid+"-------------------------");
+            log.error("-------------------------参数错误 nReviewid {}",nReviewid+"---recordCd"+recordCd+"----------------------");
             ard.setMessage("参数错误!");
             ard.setSuccess(false);
             return ard;
@@ -194,7 +194,7 @@ public class AuditController extends BaseAction {
                 List<ReviewInfoBean> reviewInfo = reviewServiceImpl.getStepByReviewid(reviewId);
                 ReviewInfoBean reviewInfoBean;
                 if(reviewInfo == null || reviewInfo.size() == 0){
-                    log.error("-------------------------获取流程步骤失败 reviewId {}",reviewId+"-------------------------");
+                    log.error("-------------------------获取流程步骤失败 reviewId {}",reviewId+"---recordCd"+recordCd+"-----------------");
                     throw new RuntimeException("获取流程步骤失败");
                 }
                 reviewInfoBean = reviewInfo.get(0);
@@ -436,7 +436,7 @@ public class AuditController extends BaseAction {
         if(StringUtils.isBlank(recordId)){
             _return.setSuccess(false);
             _return.setMessage("Param");
-            log.info("-------------------------参数recordId为空-------------------------");
+            log.error("-------------------------参数recordId为空-------------------------");
             return _return;
         }
         // 查询记录
@@ -444,7 +444,7 @@ public class AuditController extends BaseAction {
         if(bean == null){
             _return.setSuccess(false);
             _return.setMessage("Null");
-            log.info("-------------------------根据主档ID和操作序列查询记录,查询记录失败(在t_audit_tab查询失败)-------------------------");
+            log.error("-------------------------根据主档ID和操作序列查询记录,查询记录失败(在t_audit_tab查询失败)-------------------------");
             return _return;
         }
         // 判断角色是否符合
@@ -461,7 +461,7 @@ public class AuditController extends BaseAction {
             if(count==0){
                 _return.setSuccess(false);
                 _return.setMessage("Inconformity");
-                log.info("-------------------------该用户职务不具有审核权限与ma4210相关-------------------------");
+                log.error("-------------------------该用户职务不具有审核权限与ma4210相关-------------------------");
                 return _return;
             }
         }
@@ -1565,7 +1565,15 @@ public class AuditController extends BaseAction {
                     String message = "Failed to connect to live inventory data！";
                     checkData = false;
                 }
-
+                String[] str = urlData.split("}");
+                if(str.length<=1){
+                    Gson gson = new Gson();
+                    RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+                    if("500".equals(param.getStatus()) || param.getContent() == null){
+                        String message = "Failed to connect to live inventory data！";
+                        checkData = false;
+                    }
+                }
                 if(checkData){
                     Gson gson = new Gson();
                     // 获取第一层的信息
@@ -1849,10 +1857,10 @@ public class AuditController extends BaseAction {
                     // 添加时间
                     notificationBean.setCNotificationTime(now);
                     //与邮件有关 占时 关闭
-//                    int addNotification = notificationServiceImpl.addNotification(notificationBean);
-//                    if(addNotification > 0){
-//                        ard.setMessage("All success!");
-//                    }
+                    int addNotification = notificationServiceImpl.addTBacklog(notificationBean);
+                    if(addNotification > 0){
+                        ard.setMessage("All success!");
+                    }
                 }else {
                     auditServiceImpl.updateVoidAudit(auditBean);
                     ard.setSuccess(false);
@@ -2055,10 +2063,10 @@ public class AuditController extends BaseAction {
                         notificationBean.setCNotificationTime(now);
 
                         // 收货邮件发送，注释
-//                        int addNotification = notificationServiceImpl.addNotification(notificationBean);
-//                        if(addNotification > 0){
-//                            log.debug("-------------------------审核更新 + 生成新流程、通知 OK-------------------------");
-//                        }
+                        int addNotification = notificationServiceImpl.addTBacklog(notificationBean);
+                        if(addNotification > 0){
+                            log.debug("-------------------------审核更新 + 生成新流程、通知 OK-------------------------");
+                        }
                     }
                 }else{
                     ard.setMessage("upt");

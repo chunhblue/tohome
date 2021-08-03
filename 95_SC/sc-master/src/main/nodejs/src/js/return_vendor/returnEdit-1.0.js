@@ -36,6 +36,7 @@ define('returnVendorEdit', function () {
         tempTrOrderQty = null,//选中的退货量
         tempTrOrderNochargeQty = null,//选中的退货量
         tempTrReceiveNochargeQty = null,//选中的退货量
+        tempTrExpiredDate = null,//选中的退货失效日期
         auditNum = 0,//该订单正在审核的数量
         //附件
         attachmentsParamGrid = null,
@@ -95,6 +96,7 @@ define('returnVendorEdit', function () {
         orderPrice: null,
         reasonId: null,
         onHandQty: null,
+        expired_date: null,
         isFreeItem: null,
         isFreeItemText: null,
         //弹窗按钮
@@ -300,7 +302,7 @@ define('returnVendorEdit', function () {
             }
         });
         a_item_direct = $("#a_item_direct").myAutomatic({
-            url: url_left + "/getItems",
+            url: url_left + "/getDirectItems",
             ePageSize: 10,
             startCount: 3,
             param: [{
@@ -326,7 +328,18 @@ define('returnVendorEdit', function () {
                 }
             }
         })
-    }
+
+        $("#expired_date").datetimepicker({
+            language:'en',
+            format: 'dd/mm/yyyy',
+            maxView:4,
+            startView:2,
+            minView:2,
+            autoclose:true,
+            todayHighlight:true,
+            todayBtn:true
+        });
+    };
 
     var getItemInfo = function (articleId, orgOrderId) {
         $.myAjaxs({
@@ -515,7 +528,6 @@ define('returnVendorEdit', function () {
             m.approvalBut.prop("disabled", true);
         }
         if (m.flag.val() == '0') {//View
-
             initOrderData();
             disableAll();
             //检查是否允许审核
@@ -523,6 +535,7 @@ define('returnVendorEdit', function () {
                 if (success) {
                     m.approvalBut.prop("disabled", false);
                 } else {
+                    $("#print").removeClass("disabled");
                     m.approvalBut.prop("disabled", true);
                 }
             });
@@ -669,6 +682,7 @@ define('returnVendorEdit', function () {
                     var str = "&orderDifferentiate=1&orderDate=" + subfmtDate(m.order_date.val());
                     // $.myAutomatic.replaceParam(a_item, str);
                     $.myAutomatic.replaceParam(a_item_direct, str);
+                    m.expired_date.val('');
                     // 原订单号退货
                 } else if (!orgFlag && $("#reType").val() === '20') {
                     var str = "&orderId=" + $("#org_order_id").attr("k") + "&orderDifferentiate=0&orderDate=" + subfmtDate(m.order_date.val());
@@ -767,6 +781,23 @@ define('returnVendorEdit', function () {
                 })
             }
         });
+        // 2021/7/23 开始
+       $("#print").on("click",function () {
+           let _storeCd = m.aStore.attr('k');
+           let bean = {
+               orderId:m.order_id.val(),
+               orderDate:m.order_date.val(),
+               storeCd:m.aStore.attr('k'),
+               orderRemark:m.order_remark.val(),
+               storeName:m.aStore.attr("v")
+           };
+           m.searchJson.val(JSON.stringify(bean));
+           paramGrid = "searchJson="+m.searchJson.val();
+           var url = url_left +"/printDocument?"+ paramGrid+"&returnType="+m.reType.val();
+           window.open(encodeURI(url), "excelprint", "width=1400,height=600,scrollbars=yes");
+       })
+
+
         //返回一览
         m.returnsViewBut.on("click", function () {
             var bank = $("#returnsSubmitBut").attr("disabled");
@@ -825,6 +856,7 @@ define('returnVendorEdit', function () {
                         orderNochargeQty: 0,//搭赠数量为 0
                         orderPrice: 0,//订货单价
                         orderAmtNotax: reThousands($(this).find('td[tag=orderAmount]').text()),//退货价格（不含税）
+                        expiredDate: subfmtDate($(this).find('td[tag=expiredDate]').text()),//退货商品失效日期
                         reasonId: $(this).find('td[tag=reasonId]').text(),//退货原因
                         returnType: m.reType.val(),
                     }
@@ -847,6 +879,7 @@ define('returnVendorEdit', function () {
                         orderPrice: reThousands($(this).find('td[tag=orderPrice]').text()),//订货单价
                         orderAmtNotax: reThousands($(this).find('td[tag=orderAmount]').text()),//退货价格（不含税）
                         // orderAmt: reThousands($(this).find('td[tag=orderAmount]').text()),//退货价格（含税）
+                        expiredDate: subfmtDate($(this).find('td[tag=expiredDate]').text()),//退货商品失效日期
                         reasonId: $(this).find('td[tag=reasonId]').text(),//退货原因
                         returnType: m.reType.val(),
                         isFreeItem: $(this).find('td[tag=isFreeItem]').text(),
@@ -1058,6 +1091,16 @@ define('returnVendorEdit', function () {
                     $("#orderNochargeQty").css("border-color", "#CCCCCC");
                 }
             }
+            if(!!$("#expired_date").val()){
+                if(_common.judgeValidDate($("#expired_date").val())){
+                    _common.prompt("Please enter a valid date!",3,"info");
+                    $("#expired_date").css("border-color","red");
+                    $("#expired_date").focus();
+                    return false;
+                }else {
+                    $("#expired_date").css("border-color","#CCC");
+                }
+            }
 
             var reasonId = m.reasonId.val();
             if (reasonId == null || reasonId == '') {
@@ -1098,13 +1141,13 @@ define('returnVendorEdit', function () {
                         $("#a_item").css("border-color", "#CCCCCC");
                     }
                 }
-                if (!appendFlg) {
+                /*if (!appendFlg) {
                     $("#a_item").css("border-color", "red");
                     _common.prompt("Selected item already exists in order list,please select a new item!", 5, "info"); // 该商品已经存在
                     return false;
                 } else {
                     $("#a_item").css("border-color", "#CCCCCC");
-                }
+                }*/
             }
             if (m.reType.val() == "10") {
                 if (flg == 'add') {
@@ -1133,13 +1176,13 @@ define('returnVendorEdit', function () {
                         $("#a_item_direct").css("border-color", "#CCCCCC");
                     }
                 }
-                if (!appendFlg) {
+                /*if (!appendFlg) {
                     $("#a_item_direct").css("border-color", "red");
                     _common.prompt("Selected item already exists in order list,please select a new item!", 5, "info"); // 该商品已经存在
                     return false;
                 } else {
                     $("#a_item_direct").css("border-color", "#CCCCCC");
-                }
+                }*/
             }
 
             _common.myConfirm("Are you sure to Submit?", function (result) {
@@ -1150,8 +1193,10 @@ define('returnVendorEdit', function () {
                         if (trId != null && trId != '') {
                             rowindex = parseInt(trId.substring(trId.indexOf("_") + 1, trId.indexOf("_") + 2)) + 1;
                         }
+                        var num = $("#zgGridTtable>.zgGrid-tbody tr").length + 1;
                         var tr = '<tr id="zgGridTtable_' + rowindex + '_tr" class="">' +
                             '<td tag="ckline" align="center" style="color:#428bca;" id="zgGridTtable_' + rowindex + '_tr_ckline" tdindex="zgGridTtable_ckline"><input type="checkbox" value="zgGridTtable_' + rowindex + '_tr" name="zgGridTtable"> </td>' +
+                            '<td tag="num"  align="center"  title="' + num + '" id="zgGridTtable_' + rowindex + '_tr_line" tdindex="zgGridTtable_ckline">' + num + '</td>' +
                             '<td tag="barcode" width="100" title="' + m.barcode.val() + '" align="right" id="zgGridTtable_' + rowindex + '_tr_barcode" tdindex="zgGridTtable_barcode">' + m.barcode.val() + '</td>' +
                             '<td tag="articleId" width="100" title="' + articleId + '" align="right" id="zgGridTtable_' + rowindex + '_tr_articleId" tdindex="zgGridTtable_articleId">' + articleId + '</td>' +
                             '<td tag="articleName" width="150" title="' + m.itemName.val() + '" align="left" id="zgGridTtable_' + rowindex + '_tr_articleName" tdindex="zgGridTtable_articleName">' + m.itemName.val() + '</td>' +
@@ -1165,10 +1210,11 @@ define('returnVendorEdit', function () {
                             '<td tag="orderAmount" hidden width="130" title="' + m.orderAmount.val() + '" align="right" id="zgGridTtable_' + rowindex + '_tr_orderAmount" tdindex="zgGridTtable_orderAmount">' + m.orderAmount.val() + '</td>' +
                             '<td tag="isFreeItem" hidden width="100" title="' + m.isFreeItem.val() + '" align="left" id="zgGridTtable_' + rowindex + '_tr_isFreeItem" tdindex="zgGridTtable_isFreeItem">' + m.isFreeItem.val() + '</td>' +
                             '<td tag="isFreeItemText" hidden width="100" title="' + m.isFreeItem.val() + '" align="left" id="zgGridTtable_' + rowindex + '_tr_isFreeItem" tdindex="zgGridTtable_isFreeItem">' + m.isFreeItem.val() + '</td>' +
+                            '<td tag="expiredDate" width="80" title="' + m.expired_date.val() + '" align="left" id="zgGridTtable_' + rowindex + '_tr_expiredDate" tdindex="zgGridTtable_expiredDate">' + m.expired_date.val() + '</td>' +
                             '<td tag="reasonId" hidden width="80" title="' + m.reasonId.val() + '" align="right" id="zgGridTtable_' + rowindex + '_tr_reasonId" tdindex="zgGridTtable_reasonId">' + m.reasonId.val() + '</td>' +
                             '<td tag="reasonName" width="190" title="' + m.reasonId.find("option:selected").text() + '" align="left" id="zgGridTtable_' + rowindex + '_tr_reasonName" tdindex="zgGridTtable_reasonName">' + m.reasonId.find("option:selected").text() + '</td>' +
                             '</tr>';
-                        tableGrid.append(tr)
+                        tableGrid.append(tr);
                         _common.prompt("Data added successfully！", 2, "success"); // 商品添加成功
                     } else if (flg == 'update') {
                         if (m.reType.val() == "10") {
@@ -1187,6 +1233,7 @@ define('returnVendorEdit', function () {
                         $(selectTrTemp).find('td[tag=orderQty]').text(m.orderQty.val());
                         $(selectTrTemp).find('td[tag=isFreeItem]').text(m.isFreeItem.val());
                         $(selectTrTemp).find('td[tag=isFreeItemText]').text(m.isFreeItem.val());
+                        $(selectTrTemp).find('td[tag=expiredDate]').text(m.expired_date.val());
                         var orderAmount = reThousands(m.orderAmount.val());
                         $(selectTrTemp).find('td[tag=orderAmount]').text(toThousands(orderAmount));
                         _common.prompt("Data updated successfully！", 2, "success"); // 商品修改成功
@@ -1224,6 +1271,7 @@ define('returnVendorEdit', function () {
         m.returnedQty.val('');
         m.orderQty.val('');
         m.reasonId.val('');
+        m.expired_date.val('');
         m.isFreeItem.val('');
         m.isFreeItemText.val('');
     };
@@ -1248,6 +1296,7 @@ define('returnVendorEdit', function () {
         m.reasonId.val(tempTrReasonId);
         m.orderNochargeQty.val(tempTrOrderNochargeQty);
         m.receiveNochargeQty.val(tempTrReceiveNochargeQty);
+        m.expired_date.val(tempTrExpiredDate);
     }
 
     //临时存值置空
@@ -1263,6 +1312,7 @@ define('returnVendorEdit', function () {
         tempTrItemAmt = null;//选中的商品退货总金额
         tempTrReasonId = null;//选中的退货原因
         tempTrReasonName = null;//选中的退货原因
+        tempTrExpiredDate = null;//选中的退货失效日期
     }
 
     //画面按钮点击事件
@@ -1383,7 +1433,7 @@ define('returnVendorEdit', function () {
     var trClick_table1 = function () {
         //选中时先清空临时值
         clearTempTr();
-        var cols = tableGrid.getSelectColValue(selectTrTemp, "barcode,articleId,articleName,unitId,unitName,spec,orderQty,orderPrice,orderAmount,orderNochargeQty,reasonId,reasonName");
+        var cols = tableGrid.getSelectColValue(selectTrTemp, "barcode,articleId,articleName,unitId,unitName,spec,orderQty,orderPrice,orderAmount,orderNochargeQty,expiredDate,reasonId,reasonName");
         tempTrBarcode = cols["barcode"];
         tempTrItemCode = cols["articleId"];
         tempTrItemName = cols["articleName"];
@@ -1396,6 +1446,7 @@ define('returnVendorEdit', function () {
         tempTrReasonId = cols["reasonId"];
         tempTrOrderNochargeQty = cols["orderNochargeQty"];
         tempTrReasonName = cols["reasonName"];
+        tempTrExpiredDate = cols["expiredDate"];
 
     }
 
@@ -1404,7 +1455,7 @@ define('returnVendorEdit', function () {
         tableGrid = $("#zgGridTtable").zgGrid({
             title: "Return Detail",
             param: paramGrid,
-            colNames: ["Item Barcode", "Item Code", "Item Name", "UOM ID", "Vendor Id", "Price", "UOM", "Spec", "Return Qty", "Return Free Qty", "Amount","Item Type","Item Type","Reason Id", "Reason Name", "Return Type"],
+            colNames: ["Item Barcode", "Item Code", "Item Name", "UOM ID", "Vendor Id", "Price", "UOM", "Spec", "Return Qty", "Return Free Qty", "Amount","Item Type","Item Type","Expired Date","Reason Id", "Reason Name", "Return Type"],
             colModel: [
                 {name: "barcode", type: "text", text: "right", width: "100", ishide: false, css: ""},
                 {name: "articleId", type: "text", text: "right", width: "100", ishide: false, css: ""},
@@ -1451,6 +1502,7 @@ define('returnVendorEdit', function () {
                 },
                 {name: "isFreeItem", type: "text", text: "right", width: "80", ishide: true, css: ""},
                 {name: "isFreeItemText", type: "text", text: "right", width: "80", ishide: true, css: "",getCustomValue:getItemType},
+                {name: "expiredDate", type: "text", text: "right", width: "80", ishide: false, css: "",getCustomValue:dateFmt},
                 {name: "reasonId", type: "text", text: "left", width: "80", ishide: true, css: ""},
                 {name: "reasonName", type: "text", text: "left", width: "190", ishide: false, css: ""},
                 {name: "returnType", type: "text", text: "left", width: "200", ishide: true, css: ""},
@@ -1461,6 +1513,7 @@ define('returnVendorEdit', function () {
             page: 1,//当前页
             rowPerPage: 10,//每页数据量
             isPage: false,//是否需要分页
+            lineNumber:true,
             isCheckbox: true,
             freezeHeader:true,
             loadEachBeforeEvent: function (trObj) {
@@ -1496,6 +1549,10 @@ define('returnVendorEdit', function () {
                     butId: "delete",
                     butText: "Delete",
                     butSize: ""
+                },
+                {
+                    butType: "custom",
+                    butHtml:"<button id='print' type='button' class='btn btn-info btn-sm disabled'><span class='glyphicon glyphicon-print'></span>Print</button>"
                 },
                 {
                     butType: "custom",

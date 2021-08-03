@@ -181,7 +181,7 @@
                                 <label for="item_input"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label not-null">Transfer Out Item/Barcode</label>
                                 <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
                                     <div class="aotu-pos good-select">
-                                        <input type="text" class="form-control my-automatic input-sm" placeholder="Please enter 3 digit" id="item_input" style="overflow:scroll;text-overflow:ellipsis;">
+                                        <input type="text" class="form-control my-automatic input-sm"  id="item_input" style="overflow:scroll;text-overflow:ellipsis;">
                                         <a id="itemRefresh" href="javascript:void(0);" title="Refresh" class="auto-but glyphicon glyphicon-refresh refresh"></a>
                                         <a id="itemRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
                                     </div>
@@ -211,7 +211,7 @@
                                 <label for="In_item_input"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label not-null">Transfer In Item/Barcode</label>
                                 <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
                                     <div class="aotu-pos good-select">
-                                        <input type="text" class="form-control my-automatic input-sm" placeholder="Please enter 3 digit" id="In_item_input" style="overflow:scroll;text-overflow:ellipsis;">
+                                        <input type="text" class="form-control my-automatic input-sm"  id="In_item_input" style="overflow:scroll;text-overflow:ellipsis;">
                                         <a id="In_itemRefresh" href="javascript:void(0);" title="Refresh" class="auto-but glyphicon glyphicon-refresh refresh"></a>
                                         <a id="In_itemRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
                                     </div>
@@ -253,7 +253,7 @@
                             <div class="form-group"> [#--转入数量--]
                                 <label for="transferInQty"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">Transfer In Qty</label>
                                 <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
-                                    <input type="text" id="transferInQty" class="form-control input-sm">
+                                    <input type="text" id="transferInQty"  disabled class="form-control input-sm">
                                 </div>
 
                                 <label for="inventoryInQty"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label"
@@ -305,5 +305,6 @@
 <input type="hidden" id="toKen" value="${toKen!}"/>
 <input type="hidden" id="typeId" value="${typeId!}">
 <input type="hidden" id="reviewId" value="${reviewId!}">
+<input type="hidden" id="Inqty" value="">
 </body>
 </html>

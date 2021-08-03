@@ -140,9 +140,17 @@ define('stockAdjustmentEdit', function () {
 		$("#updateItemDetails").on("click",function(){
 			let flg = m.viewSts.val();
 			if(flg!="add"&&flg!="edit"){return false;}
-			if(selectTrTemp==null){
+			let _list = tableGrid.getCheckboxTrs();
+			if((_list == null || _list.length == 0) && selectTrTemp==null){
 				_common.prompt("Please select at least one row of data!",3,"info");
 				return false;
+			}
+			if(_list.length >= 2){
+				_common.prompt("Please select only one row of data!",3,"info");
+				return false;
+			}
+			if(_list.length == 1){
+				selectTrTemp = _list[0];
 			}
 			let _storeCd = $("#vstore").attr('k');
 			if(!_storeCd){
@@ -173,7 +181,10 @@ define('stockAdjustmentEdit', function () {
 				$.myAutomatic.setValueTemp(expenditureNo,'',strs['expenditureNoText']);
 				let accDate = subfmtDate(m.tf_date.val());
 				let storeCd = $("#vstore").attr("k");
-				getDescription($("#expenditureNo").attr("k"),storeCd,accDate);
+				if(strs['expenditureNoText'] == null || strs['expenditureNoText'] == ''){
+					$.myAutomatic.replaceParam(expenditureNo,"&accDate="+accDate+"&storeCd="+storeCd);
+				}
+			getDescription($("#expenditureNo").attr("k"),storeCd,accDate);
 				setMinDialogDisable(false);
 				$("#description").val(strs['description']);
 			$('#update_dialog').attr("flg","upt");
@@ -187,10 +198,18 @@ define('stockAdjustmentEdit', function () {
 		$("#viewItemDetails").on("click",function(){
 			$("#adjustReason").attr("disabled",true);
 			let _storeCd = $("#vstore").attr('k');
-			if(selectTrTemp==null){
+			let _list = tableGrid.getCheckboxTrs();
+			if((_list == null || _list.length == 0) && selectTrTemp==null){
 				_common.prompt("Please select at least one row of data!",3,"info");
 				return false;
-			}else{
+			}
+			if(_list.length >= 2){
+				_common.prompt("Please select only one row of data!",3,"info");
+				return false;
+			}
+			if(_list.length == 1){
+				selectTrTemp = _list[0];
+			}
 				let cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,spec,priceNoTax,qty1,generalReason,generalReasonText,adjustReasonText");
 				var attribute1 = $(selectTrTemp[0]).find('td').eq(4).text();
 				if (attribute1==="Total:"){
@@ -220,7 +239,7 @@ define('stockAdjustmentEdit', function () {
 				$('#update_dialog').modal("show");
 				// 查询实时库存
 				getStock(_storeCd, cols['articleId']);
-			}
+
 		});
 
 		// 删除按钮
@@ -644,6 +663,8 @@ define('stockAdjustmentEdit', function () {
 				}
 				_common.myConfirm("Are you sure you want to save?",function(result){
 					if(result!="true"){return false;}
+					setDisable(true);
+					m.returnsViewBut.prop("disabled",true);
 					$.myAjaxs({
 						url:url_root+_url,
 						async:true,
@@ -667,6 +688,7 @@ define('stockAdjustmentEdit', function () {
 									$("#tf_cd").val(result.o);
 								}
 								_common.prompt("Data saved successfully！",3,"success",function(){
+									m.returnsViewBut.prop("disabled",false);
 									//发起审核
 									let typeId =m.typeId.val();
 									let	nReviewid =m.reviewId.val();
@@ -1031,8 +1053,11 @@ define('stockAdjustmentEdit', function () {
 				// var trList = $("#zgGridTtable  tr:not(:first)");
 				// trList.remove();
 				// 替换商品下拉查询参数
+				let accDate = subfmtDate(m.tf_date.val());
 				let str = "&storeCd=" + thisObject.attr("k");
 				$.myAutomatic.replaceParam(itemInput, str);
+				$.myAutomatic.replaceParam(expenditureNo,"&accDate="+accDate+str);
+
 			}
 		});
 
@@ -1083,6 +1108,9 @@ define('stockAdjustmentEdit', function () {
 			startCount: 0,
 			cleanInput: function () {
 				$("#expenditureDescription").hide();
+				let accDate = subfmtDate(m.tf_date.val());
+				let storeCd = $("#vstore").attr("k");
+				$.myAutomatic.replaceParam(expenditureNo,"&accDate="+accDate+"&storeCd="+storeCd);
 			},
 			selectEleClick: function (thisObj) {
 				if (thisObj.attr("k") != null && thisObj.attr("k") != "") {
@@ -1230,10 +1258,16 @@ define('stockAdjustmentEdit', function () {
 			},
 			loadCompleteEvent: function (self) {
 				total();
+				isDisabledBtn();
 				return self;
 			},
 			eachTrClick:function(trObj,tdObj){//正常左侧点击
 				selectTrTemp = trObj;
+				isDisabledBtn();
+				let _list = tableGrid.getCheckboxTrs();
+				if(_list.length<1){
+					selectTrTemp = null;//清空选择的行
+				}
 			},
 			buttonGroup:[
 				{
@@ -1259,6 +1293,21 @@ define('stockAdjustmentEdit', function () {
 				}
 			],
 		});
+	};
+
+	// 多选时查看、编辑禁用
+	function isDisabledBtn(){
+		let flg = m.viewSts.val();
+		let _list = tableGrid.getCheckboxTrs();
+		if(_list == null || _list.length > 1){
+			$("#updateItemDetails").prop("disabled",true);
+			$("#viewItemDetails").prop("disabled",true);
+		}else{
+			if(flg=="add" || flg=="edit"){
+				$("#updateItemDetails").prop("disabled",false);
+			}
+			$("#viewItemDetails").prop("disabled",false);
+		}
 	}
 
 	// 日期字段格式化格式

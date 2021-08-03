@@ -172,10 +172,10 @@
       left join  t_operator b  on  b.c_operatorcode=ma1000.oc
       where record_sts = '10'
       and op0060.store_cd = ma1000.store_cd
-      <![CDATA[
+      /*<![CDATA[
             and effective_start_date <= acc_date
             and effective_end_date >= acc_date
-          ]]>
+          ]]>*/
       and op0060.store_cd  IN
       <foreach item="store" index="index" collection="stores"
                open="(" separator="," close=")">
@@ -191,9 +191,9 @@
           and op0060.acc_date <= #{endDate,jdbcType=VARCHAR}
           ]]>
       </if>
-      <if test="payPerson!=null and payPerson!=''">
+      <!--<if test="payPerson!=null and payPerson!=''">
         AND lower(op0060.pay_person) like lower(CONCAT('%',#{payPerson},'%'))
-      </if>
+      </if>-->
       <if test="ofc!=null and ofc!=''">
         AND lower(t_operator.c_operatorcode) like lower(CONCAT('%',#{ofc},'%'))
       </if>
@@ -219,10 +219,10 @@
       left join  t_operator b  on  b.c_operatorcode=ma1000.oc
       where record_sts = '10'
       and op0060.store_cd = ma1000.store_cd
-      <![CDATA[
+      /*<![CDATA[
           and effective_start_date <= acc_date
           and effective_end_date >= acc_date
-      ]]>
+      ]]>*/
       and op0060.store_cd  IN
       <foreach item="store" index="index" collection="stores"
                open="(" separator="," close=")">
@@ -238,9 +238,9 @@
           and op0060.acc_date <= #{endDate,jdbcType=VARCHAR}
           ]]>
       </if>
-      <if test="payPerson!=null and payPerson!=''">
+      <!--<if test="payPerson!=null and payPerson!=''">
         AND lower(op0060.pay_person) like lower(CONCAT('%',#{payPerson},'%'))
-      </if>
+      </if>-->
       <if test="ofc!=null and ofc!=''">
         AND lower(t_operator.c_operatorcode) like lower(CONCAT('%',#{ofc},'%'))
       </if>

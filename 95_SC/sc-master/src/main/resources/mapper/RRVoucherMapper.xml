@@ -217,8 +217,7 @@
         (SELECT distinct t_operator.c_operatorcode,t_operator.c_operatorname  from   t_operator  LEFT JOIN  MA1000 ON  MA1000.ofc= t_operator.c_operatorcode)  ofcName  on ma1000.ofc=ofcName.c_operatorcode
         left join (SELECT  distinct t_operator.c_operatorcode,t_operator.c_operatorname  from   t_operator  LEFT JOIN  MA1000 ON  MA1000.oc= t_operator.c_operatorcode) AS ocName  on ma1000.oc=ocName.c_operatorcode
         left join (SELECT distinct t_operator.c_operatorcode,t_operator.c_operatorname  from   t_operator  LEFT JOIN  MA1000 ON  MA1000.om= t_operator.c_operatorcode) AS omName  on ma1000.om=omName.c_operatorcode
-        WHERE #{businessDate,jdbcType=VARCHAR}
-        BETWEEN effective_start_date AND effective_end_date
+
         ) T1
         ON T.store_cd = T1.store_cd
         LEFT JOIN (
@@ -370,8 +369,7 @@
         (SELECT distinct t_operator.c_operatorcode,t_operator.c_operatorname  from   t_operator  LEFT JOIN  MA1000 ON  MA1000.ofc= t_operator.c_operatorcode)  ofcName  on ma1000.ofc=ofcName.c_operatorcode
         left join (SELECT  distinct t_operator.c_operatorcode,t_operator.c_operatorname  from   t_operator  LEFT JOIN  MA1000 ON  MA1000.oc= t_operator.c_operatorcode) AS ocName  on ma1000.oc=ocName.c_operatorcode
         left join (SELECT distinct t_operator.c_operatorcode,t_operator.c_operatorname  from   t_operator  LEFT JOIN  MA1000 ON  MA1000.om= t_operator.c_operatorcode) AS omName  on ma1000.om=omName.c_operatorcode
-        WHERE #{businessDate,jdbcType=VARCHAR}
-        BETWEEN effective_start_date AND effective_end_date
+
         ) T1
         ON T.store_cd = T1.store_cd
         LEFT JOIN (
@@ -503,8 +501,6 @@
             SELECT
                 article_id, article_name, spec, purchase_vat_cd
             FROM MA1100
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN effective_start_date AND effective_end_date
         ) T1
         ON T.article_id = T1.article_id
         LEFT JOIN (
@@ -596,7 +592,6 @@
         LEFT JOIN (
         SELECT store_cd, store_name
         FROM MA1000
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         ) T1
         ON T.store_cd = T1.store_cd
         LEFT JOIN (

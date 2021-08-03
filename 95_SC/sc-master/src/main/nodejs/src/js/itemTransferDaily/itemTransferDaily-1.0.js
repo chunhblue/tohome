@@ -200,6 +200,7 @@ define('storeTransferDaily', function () {
                 _common.loadPaging(1,1,1,10);
                 page=1;
                 setParamJson();
+                _common.loading();
                 getData(page,rows);
             }
         })
@@ -273,7 +274,9 @@ define('storeTransferDaily', function () {
                     $('#dailyTable').append(tempTrHtml);
                     // 加载分页条数据
                     _common.loadPaging(totalPage,count,page,rows);
+
                 }
+                _common.loading_close();
                 // 激活 分页按钮点击
                 but_paging();
             },
@@ -289,9 +292,11 @@ define('storeTransferDaily', function () {
             page = $($(this).context).val();
             if(verifySearch()){
                 // 拼接检索参数
+                _common.loading();
                 setParamJson();
                 // 分页获取数据
                 getData(page,rows);
+                _common.loading_close();
             }
         });
     }

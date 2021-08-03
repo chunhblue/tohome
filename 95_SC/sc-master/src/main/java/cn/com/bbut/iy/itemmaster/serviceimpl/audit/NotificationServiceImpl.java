@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -24,6 +25,10 @@ import java.util.List;
 @Service
 @Transactional
 public class NotificationServiceImpl implements INotificationService {
+
+    @Value("${scUrl.scHeadUrl}")
+    private String scHeadUrl;
+
     @Autowired
     private NotificationBeanMapper notificationBeanMapper;
 
@@ -46,10 +51,24 @@ public class NotificationServiceImpl implements INotificationService {
      */
     @Override
     public int addNotification(NotificationBean notificationBean) {
+
+        try {
+            sendEmail(notificationBean);
+        }catch (Exception e){
+            log.error("邮件发送失败 Exception Record Cd: {}",notificationBean.getCRecordCd());
+            e.printStackTrace();
+        }
+        return notificationBeanMapper.insertNotification(notificationBean);
+    }
+
+    @Transactional(rollbackFor=Exception.class)
+    @Override
+    public void sendEmail(NotificationBean notificationBean){
         long roleId = notificationBean.getNRoleid();
         String storeCd = notificationBean.getStoreCd();
         List<String> emails = new ArrayList<>();
-        if(roleId < 4){ // AM OM OP
+        emails = notificationBeanMapper.selectMailByMd(roleId,storeCd);
+        /*if(roleId < 4){ // AM OM OP
             emails = notificationBeanMapper.selectMailByMd(roleId,storeCd);
         }else if(roleId == 4){ //SM
             emails = notificationBeanMapper.selectMailBySm(storeCd);
@@ -59,8 +78,11 @@ public class NotificationServiceImpl implements INotificationService {
             }else{
                 emails = notificationBeanMapper.selectMailByPostion(roleId,storeCd);
             }
-        }
+        }*/
         String[] sendEmails = emails.stream().filter(email -> StringUtils.isNotBlank(email)).toArray(String[]::new);
+
+        log.error("邮件发送中 Record Cd: {}",notificationBean.getCRecordCd());
+        log.error("邮件发送中 sendEmails: {}",sendEmails);
         if(sendEmails!=null&&sendEmails.length>0){
             String typeName = notificationBeanMapper.getTypeName(notificationBean.getNTypeid());
             StringBuilder htmlContent = new StringBuilder()
@@ -68,9 +90,18 @@ public class NotificationServiceImpl implements INotificationService {
                     .append("<head>")
                     .append("</head>")
                     .append("<body>")
-                    .append("<p>Approval ID: "+notificationBean.getCRecordCd()+"<p/>")
+                    .append("<p>----------------------------------------------------------------------<p/>")
+                    .append("<p>* This email is automatically sent from Store System.<p/>")
+                    .append("<p>* Please do not reply to this email.<p/>")
+                    .append("<p>----------------------------------------------------------------------<p/>")
+                    .append("<p>Hi team,<p/>")
+                    .append("<p>Below document pending for your review, please process ASAP. <p/>")
+                    .append("<p>Pending Approval ID: "+notificationBean.getCRecordCd()+"<p/>")
 //                .append("<p>Reason: "+auditContent+"<p/>")
                     .append("<p>Approval Type: "+typeName+"<p/>")
+                    .append("<p>Store System production link: <p/>")
+                    .append("<p>"+scHeadUrl+"scmaster/a/auditMessage/auditSkip?url="+notificationBean.getCUrl()+"&typeId="+notificationBean.getNTypeid()+"&recordCd="+notificationBean.getCRecordCd()+"<p/>")
+                    .append("<p>Best regards<p/>")
                     .append("</body>")
                     .append("</html>");
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -79,14 +110,22 @@ public class NotificationServiceImpl implements INotificationService {
                 helper = new MimeMessageHelper(message, true);
                 helper.setFrom(from);
                 helper.setTo(sendEmails);
-                helper.setSubject("The approval for ID: "+notificationBean.getCRecordCd()+" !");
+                helper.setSubject("Pending Approval for ID: "+notificationBean.getCRecordCd()+" ");
                 helper.setText(htmlContent.toString(), true);
                 javaMailSender.send(message);
-            } catch (MessagingException e) {
-                log.error("邮件发送失败 Record Cd: {}",notificationBean.getCRecordCd());
+                log.error("邮件成功 Record Cd: {}",notificationBean.getCRecordCd());
+            }catch(MailException e){
+                log.error("邮件发送失败 MailException Record Cd: {}",notificationBean.getCRecordCd());
+                e.printStackTrace();
+            }catch (MessagingException e) {
+                log.error("邮件发送失败 MessagingException Record Cd: {}",notificationBean.getCRecordCd());
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public int addTBacklog(NotificationBean notificationBean) {
         return notificationBeanMapper.insertNotification(notificationBean);
     }
 

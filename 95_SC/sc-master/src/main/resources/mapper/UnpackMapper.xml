@@ -238,7 +238,6 @@
         ) T
         LEFT JOIN (
             SELECT article_id, effective_start_date, article_name FROM MA1100
-            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         ) T1
         ON T.child_article_id = T1.article_id
         ORDER BY T.serial_no

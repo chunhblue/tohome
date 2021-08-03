@@ -54,6 +54,12 @@
         and store_cd=#{storeCd,jdbcType=VARCHAR}
     </sql>
 
+    <sql id="Group_Store_Date_Sa0010_Where">
+        GROUP BY case when to_char(tran_date,'HH24miss') <![CDATA[ <'060000' ]]>
+        then to_char(tran_date+ '-1 day','yyyyMMdd')
+        else to_char(tran_date,'yyyyMMdd') end,store_cd
+    </sql>
+
     <sql id="Shift_Sa0030_Where">
         where
         tran_type in ('sale','return')
@@ -283,6 +289,182 @@
             or to_number(to_char(tran_date,'hh24'),'99') >= 22)
             ]]>
         ) pay1_2
+    </select>
+
+    <select id="getPayAmtList" resultMap="ResultMap">
+        select t1.pay_date,t1.store_cd,
+        t1.amount pay_amt,
+        pay_0.pay_amt_0 pay_amt_0,
+        pay_1.pay_amt_1 pay_amt_1,
+        pay_2.pay_amt_2 pay_amt_2,
+        pay_hht_0.pay_amt_0 pay_hht_amt0,
+        pay_hht_1.pay_amt_1 pay_hht_amt1,
+        pay_hht_2.pay_amt_2 pay_hht_amt2
+        from
+        (select COALESCE ( SUM (
+        CASE
+        WHEN pay_cd1 = '01' THEN pay_amount1 - change_amount
+        WHEN pay_cd2 = '01' THEN pay_amount2 - change_amount
+        WHEN pay_cd3 = '01' THEN pay_amount3 - change_amount
+        WHEN pay_cd4 = '01' THEN pay_amount4 - change_amount
+        END
+        ), 0 )  amount,
+        <![CDATA[
+        case when to_char(tran_date,'HH24miss')<'060000' ]]>
+        then to_char(tran_date+ '-1 day','yyyyMMdd')
+        else to_char(tran_date,'yyyyMMdd') end as pay_date,
+        store_cd
+          from sa0010
+        where
+        tran_type in ('sale','return')
+        <include refid="Group_Store_Date_Sa0010_Where" />
+        ) t1
+        left join
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
+        end),0) as pay_amt_0,
+        <![CDATA[
+        case when to_char(tran_date,'HH24miss')<'060000' ]]>
+        then to_char(tran_date+ '-1 day','yyyyMMdd')
+        else to_char(tran_date,'yyyyMMdd') end as pay_date,
+        store_cd from sa0010
+        where
+        tran_type in ('sale','return')
+        /*--早班*/
+        <![CDATA[
+            and to_number(to_char(tran_date,'hh24'),'99') >= 6
+            and to_number(to_char(tran_date,'hh24'),'99') < 14
+            ]]>
+        <include refid="Group_Store_Date_Sa0010_Where" />
+        ) pay_0 on
+        t1.pay_date = pay_0.pay_date AND t1.store_cd = pay_0.store_cd
+        left join
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
+        end),0) as pay_amt_1,
+        <![CDATA[
+        case when to_char(tran_date,'HH24miss')<'060000']]>
+        then to_char(tran_date+ '-1 day','yyyyMMdd')
+        else to_char(tran_date,'yyyyMMdd') end as pay_date,
+        store_cd from sa0010
+        where
+        tran_type in ('sale','return')
+        /*--中班*/
+        <![CDATA[
+            and to_number(to_char(tran_date,'hh24'),'99') >= 14
+            and to_number(to_char(tran_date,'hh24'),'99') < 22
+            ]]>
+        <include refid="Group_Store_Date_Sa0010_Where" />
+        ) pay_1 on
+        t1.pay_date = pay_1.pay_date AND t1.store_cd = pay_1.store_cd
+        left join
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
+        end),0) as pay_amt_2,
+        <![CDATA[
+        case when to_char(tran_date,'HH24miss')<'060000']]>
+        then to_char(tran_date+ '-1 day','yyyyMMdd')
+        else to_char(tran_date,'yyyyMMdd') end as pay_date,
+        store_cd from sa0010
+        where
+        tran_type in ('sale','return')
+        /*--晚班*/
+        <![CDATA[
+            and (to_number(to_char(tran_date,'hh24'),'99') < 6
+            or to_number(to_char(tran_date,'hh24'),'99') >= 22)
+            ]]>
+        <include refid="Group_Store_Date_Sa0010_Where" />
+        ) pay_2 on
+        t1.pay_date = pay_2.pay_date AND t1.store_cd = pay_2.store_cd
+        LEFT JOIN
+        <!-- HHT的销售数据 -->
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
+        end),0) as pay_amt_0,
+        <![CDATA[
+        case when to_char(tran_date,'HH24miss')<'060000' ]]>
+        then to_char(tran_date+ '-1 day','yyyyMMdd')
+        else to_char(tran_date,'yyyyMMdd') end as pay_date,
+        store_cd from sa0010
+        where
+        tran_type in ('sale','return')
+        and pos_id = '99'
+        <!--早班 -->
+        <![CDATA[
+            and to_number(to_char(tran_date,'hh24'),'99') >= 6
+            and to_number(to_char(tran_date,'hh24'),'99') < 14
+            ]]>
+        <include refid="Group_Store_Date_Sa0010_Where" />
+        ) pay_hht_0 on
+        t1.pay_date=pay_hht_0.pay_date and t1.store_cd=pay_hht_0.store_cd
+        left join
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
+        end),0) as pay_amt_1,
+        <![CDATA[
+        case when to_char(tran_date,'HH24miss')<'060000']]>
+        then to_char(tran_date+ '-1 day','yyyyMMdd')
+        else to_char(tran_date,'yyyyMMdd') end as pay_date,
+        store_cd from sa0010
+        where
+        tran_type in ('sale','return')
+        and pos_id = '99'
+        /*--中班*/
+        <![CDATA[
+            and to_number(to_char(tran_date,'hh24'),'99') >= 14
+            and to_number(to_char(tran_date,'hh24'),'99') < 22
+            ]]>
+        <include refid="Group_Store_Date_Sa0010_Where" />
+        ) pay_hht_1 on
+        t1.pay_date=pay_hht_1.pay_date and t1.store_cd=pay_hht_1.store_cd
+        left join
+        (select COALESCE(sum(case when pay_cd1='01' then pay_amount1-COALESCE(change_amount,0)
+        when pay_cd2='01' then pay_amount2-COALESCE(change_amount,0)
+        when pay_cd3='01' then pay_amount3-COALESCE(change_amount,0)
+        when pay_cd4='01' then pay_amount4-COALESCE(change_amount,0)
+        end),0) as pay_amt_2,
+        <![CDATA[
+        case when to_char(tran_date,'HH24miss')<'060000']]>
+        then to_char(tran_date+ '-1 day','yyyyMMdd')
+        else to_char(tran_date,'yyyyMMdd') end as pay_date,
+        store_cd from sa0010
+        where
+        tran_type in ('sale','return')
+        and pos_id = '99'
+        /*--晚班*/
+        <![CDATA[
+            and (to_number(to_char(tran_date,'hh24'),'99') < 6
+            or to_number(to_char(tran_date,'hh24'),'99') >= 22)
+            ]]>
+        <include refid="Group_Store_Date_Sa0010_Where" />
+        ) pay_hht_2 on
+        t1.pay_date=pay_hht_2.pay_date and t1.store_cd=pay_hht_2.store_cd
+        where
+        t1.store_cd IN
+        <foreach item="store" index="index" collection="stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="vStartDate!=null and vStartDate!=''">
+            <![CDATA[
+                    and t1.pay_date >= #{vStartDate,jdbcType=VARCHAR}
+                    ]]>
+        </if>
+        <if test="vEndDate!=null and vEndDate!=''">
+            <![CDATA[
+                    and t1.pay_date <= #{vEndDate,jdbcType=VARCHAR}
+                    ]]>
+        </if>
     </select>
 
     <select id="getUserName" parameterType="string" resultType="string">

@@ -416,6 +416,18 @@ public class InventoryVouchersServiceImpl implements InventoryVouchersService {
         return inventoryVouchersMapper.getStoreListByInStore(v,vstore, businessDate);
     }
 
+    @Override
+    public List<AutoCompleteDTO> getMa1172OutItemList(String storeCd, String v) {
+        String businessDate = getBusinessDate();
+        return inventoryVouchersMapper.getMa1172OutItemList(storeCd, v, businessDate);
+    }
+
+    @Override
+    public List<AutoCompleteDTO> getMa1172InItemList(String outArticleId, String storeCd, String v) {
+        String businessDate = getBusinessDate();
+        return inventoryVouchersMapper.getMa1172InItemList(outArticleId,storeCd, v, businessDate);
+    }
+
     /**
      * 商品自动下拉
      */
@@ -562,6 +574,16 @@ public class InventoryVouchersServiceImpl implements InventoryVouchersService {
         map.put("totalQty",sumQty1);
         map.put("totalItemSKU",totalArticle);
         return map;
+    }
+
+    @Override
+    public SK0010 getStoreSeries(String storeCd){
+        return sK0010Mapper.getStoreSeries(storeCd);
+    }
+
+    @Override
+    public List<SK0010> getApprovedInfo(String voucherNo){
+        return sK0010Mapper.getApprovedInfo(voucherNo);
     }
 
 

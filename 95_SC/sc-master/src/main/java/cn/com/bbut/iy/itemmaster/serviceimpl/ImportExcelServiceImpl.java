@@ -97,7 +97,7 @@ public class ImportExcelServiceImpl extends ImportExcelBaseService implements Im
                 ma1105.setLoc(super.getCellValue(sheet, row, 1));
                 super.validCellValue(sheet, row, 4, "商品Code");
                 ma1105.setItemCode(super.getCellValue(sheet, row, 4));
-                ma1105.setProductName(super.getCellValue(sheet, row, 6));//商品名称
+                ma1105.setProductName(super.getCellValue(sheet, row, 6).replace("'","\'"));//商品名称
                 ma1105.setVFacing(super.getCellValue(sheet, row, 10));
                 ma1105.setHFacing(super.getCellValue(sheet, row, 11));
                 ma1105.setDFacing(super.getCellValue(sheet, row, 12));

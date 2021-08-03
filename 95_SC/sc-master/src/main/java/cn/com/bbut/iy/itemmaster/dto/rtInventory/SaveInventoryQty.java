@@ -51,4 +51,5 @@ public class SaveInventoryQty {
     private Float inventoryQty; // 通用qty
 
     private String accDate;
+    private String storeCd1;// 对方店铺cd
 }

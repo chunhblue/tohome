@@ -158,4 +158,5 @@ public class WarehouseReceiptGridDTO extends GridDataDTO {
 
     private String physicalReceivingDate;
     private String receiveDateT;
+    private Integer num;
 }

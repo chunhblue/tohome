@@ -1,7 +1,7 @@
 spring.profiles.active: ${profileActive}
 
-logging.file: ${logDir}/${logFile}.log
-
+logging.file:
+  ${logDir}/${logFile}.log
 server:
   servlet:
     context-path: ${m.syspath}
@@ -161,4 +161,7 @@ file:
 
 esUrl:
   inventoryUrl: ${m.inventoryUrlDir}
+
+scUrl:
+  scHeadUrl: ${m.scHeadUrl}
 

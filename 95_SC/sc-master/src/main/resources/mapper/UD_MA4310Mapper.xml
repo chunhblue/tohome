@@ -7,10 +7,7 @@
     ma4310.inform_cd, ma4310.store_cd,ma1000.store_name
     from ma4310,ma1000
     where
-    <![CDATA[
-        ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-    ]]>
+    1=1
     and ma1000.store_cd = ma4310.store_cd
     <if test="informCd != null and informCd !=''">
       ma4310.inform_cd = #{informCd,jdbcType=VARCHAR}
@@ -62,10 +59,6 @@
       <if test="storeList == null">
         and ma4310.store_cd  = ''
       </if>
-      <![CDATA[
-        and ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-        ]]>
       and ma1000.store_cd = ma4310.store_cd
       <if test="informCd != null and informCd !=''">
         AND lower(ma4310.inform_cd) like lower(CONCAT('%',#{informCd,jdbcType=VARCHAR},'%'))
@@ -132,10 +125,6 @@
     <if test="storeList == null">
       and ma4310.store_cd  = ''
     </if>
-    <![CDATA[
-        and ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-        ]]>
     and ma1000.store_cd = ma4310.store_cd
     <if test="informCd != null and informCd !=''">
       AND lower(ma4310.inform_cd) like lower(CONCAT('%',#{informCd,jdbcType=VARCHAR},'%'))
@@ -166,10 +155,7 @@
     ma4310.inform_cd, store_cd,
     (select store_name from ma1000
     where
-    <![CDATA[
-        ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-    ]]>
+    1=1
     and ma1000.store_cd = ma4310.store_cd) as store_name,
     ma4300.inform_title,
     ma4300.inform_content

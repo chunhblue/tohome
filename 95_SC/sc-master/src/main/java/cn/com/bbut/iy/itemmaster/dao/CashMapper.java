@@ -24,6 +24,13 @@ public interface CashMapper {
     CashDetail getPayAmt(@Param("payDate")String payDate,@Param("storeCd")String storeCd,@Param("voucherDate")String voucherDate);
 
     /**
+     * 获取实际销售金额List
+     * @param dto
+     * @return
+     */
+    List<CashDetail> getPayAmtList(CashDetailParam dto);
+
+    /**
      * 获取营业员一览
      * @param v
      * @param stores 店铺权限

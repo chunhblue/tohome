@@ -166,14 +166,17 @@ define('vouchersList', function () {
 					_url = '/stockScrap';
 				}else if(_type == '604'){
 					_url = '/stockAdjustment';
-				}else if(_type == '500'||_type == '501'||_type == '502'||_type == '506'){
+				}
+				/*else if(_type == '500'||_type == '501'||_type == '502'||_type == '506'){
 					_url = '/storeTransfers';
-				}else if(_type == '504'||_type == '505'){
+				}*/
+				/*else if(_type == '504'||_type == '505'){
 					saveParamToSession();
 					_url = '/transferCorrection';
 					// _common.prompt("The Store Transfer Correction cannot be modified",5,"info");
 					// return false;
-				} else if (_type == '601'||_type == '602') {
+				} */
+				else if (_type == '601'||_type == '602') {
 					_url = '/itemTransfer';
 				} else {
 					_common.prompt("Unknown Type",5,"error");
@@ -213,14 +216,16 @@ define('vouchersList', function () {
 					_url = '/stockScrap';
 				} else if (_type == '604'){
 					_url = '/stockAdjustment';
-				} else if (_type == '500'||_type == '501'||_type == '506'){
-					_url = '/storeTransferIn';
-				} else if (_type == '502') {
+				}
+				// else if (_type == '500'||_type == '501'||_type == '506'){
+				// 	_url = '/storeTransferIn';
+				// }
+				else if (_type == '502') {
 					_url = '/storeTransfers';
-				} else if(_type == '504'||_type == '505'){
+				} /*else if(_type == '504'||_type == '505'){
 					saveParamToSession();
 					_url = '/transferCorrection';
-				} else if (_type == '601'||_type == '602') {
+				} */else if (_type == '601'||_type == '602') {
 					_url = '/itemTransfer';
 				} else {
 					_common.prompt("Unknown Type",5,"error");
@@ -566,18 +571,18 @@ define('vouchersList', function () {
 			case "500":
 				_value = "Transfer Instructions";
 				break;
-			case "501":
+			/*case "501":
 				_value = "Store Transfer In";
-				break;
+				break;*/
 			case "502":
-				_value = "Store Transfer Out";
+				_value = "Store Transfer";
 				break;
-			case "504":
+			/*case "504":
 				_value = "Transfer In Correction";
 				break;
 			case "505":
 				_value = "Transfer Out Correction";
-				break;
+				break;*/
 			case "506":
 				_value = "Transfer";
 				break;

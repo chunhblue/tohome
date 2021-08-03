@@ -60,6 +60,13 @@ public class Cm9010ServiceImpl implements Cm9010Service {
     }
 
     @Override
+    public List<AutoCompleteDTO> getItemOutInReasonCode(String v) {
+
+        List<AutoCompleteDTO> reasonValue = cm9010Mapper.getItemOutInReasonCode(v);
+        return reasonValue;
+    }
+
+    @Override
     public List<AutoCompleteDTO> getWriteOffReasonValue(String v) {
         List<AutoCompleteDTO> reasonValue = cm9010Mapper.getWriteOffReasonValue(v);
         return reasonValue;

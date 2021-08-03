@@ -216,6 +216,13 @@ public class AuditServiceImpl implements IAuditService {
                     OD0000Example example = new OD0000Example();
                     example.or().andOrderIdEqualTo(recordCd);
                     od0000Mapper.updateByExampleSelective(dto,example);
+                }else if((int)reviewId==ConstantsAudit.REVIEW_REC_RET_CORRECTION){
+                    OD0000 dto = new OD0000();
+                    //添加实际收退货调整日期
+                    dto.setReceiveDate(date);
+                    OD0000Example example = new OD0000Example();
+                    example.or().andOrderIdEqualTo(recordCd);
+                    od0000Mapper.updateByExampleSelective(dto,example);
                 }
             }
             else {

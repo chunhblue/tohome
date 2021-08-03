@@ -4,7 +4,10 @@ import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.OrderInfoDTO;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.ReturnHeadResult;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.returnVendor.*;
+import cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.RWHItemsGridResult;
+import cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.ReturnWarehouseParamDTO;
 import cn.com.bbut.iy.itemmaster.entity.od8030.OD8030;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.util.List;
 
@@ -24,4 +27,7 @@ public interface ReturnVendorService {
 
     // 一览打印画面
     List<RVListResult> getReturnVPrintList(RVListParamDTO param);
+
+   // SXSSFWorkbook getExcel(ReturnWarehouseParamDTO returnParamDTO, List<RWHItemsGridResult> itemList);
+
 }

@@ -4,14 +4,7 @@
 
   <sql id="ma4350_where_sql">
     <where>
-      <![CDATA[
-        and ma1100.effective_start_date <= sale_date
-        and ma1100.effective_end_date >= sale_date
-      ]]>
-      <![CDATA[
-        and ma1000.effective_start_date <= sale_date
-        and ma1000.effective_end_date >= sale_date
-      ]]>
+      1=1
       and ma1100.article_id = ma4350.formula_article_id
       and ma1000.store_cd = ma4350.store_cd
       and ma4350.store_cd IN
@@ -72,14 +65,6 @@
     CONCAT(ma1000.store_name,' ',MA1000.store_name_en) store_name
     from ma4350,ma1000,ma1100
     where voucher_cd = #{voucherCd,jdbcType=VARCHAR}
-      <![CDATA[
-        and ma1100.effective_start_date <= sale_date
-        and ma1100.effective_end_date >= sale_date
-      ]]>
-      <![CDATA[
-        and ma1000.effective_start_date <= sale_date
-        and ma1000.effective_end_date >= sale_date
-      ]]>
       and ma1100.article_id = ma4350.formula_article_id
       and ma1000.store_cd = ma4350.store_cd
     limit 1

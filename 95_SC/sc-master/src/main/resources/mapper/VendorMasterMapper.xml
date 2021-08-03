@@ -508,7 +508,7 @@
     <select id="selectList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
         SELECT vendor_id k, CONCAT(vendor_id,' ',vendor_name) AS v
         FROM ma2000
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN EFFECTIVE_START_DATE AND EFFECTIVE_END_DATE
+        WHERE 1=1
         <if test="v!=null and v!=''">
             AND (
                 lower(vendor_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))

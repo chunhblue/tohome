@@ -90,11 +90,24 @@ public class ReceiveController extends BaseAction {
         _dto.setCommonDTO(dto);
         _dto.setFileDetailJson(fileDetailJson);
         String receiveId = _dto.getReceiveId();
+        String orderId = _dto.getOrderId();
+
+        // 改为判断orderId此时是否存在于db中，防止多线程操作--存在返回true
+        boolean flag = service.receiveIdIsExist(orderId);
+
+        if(!flag){
+            receiveId = service.insertByReceive(_dto, _list);
+        }
+        if(!StringUtils.isBlank(receiveId)){
+            service.updateReceive(_dto, _list);
+        }
+        /*
         if(StringUtils.isBlank(receiveId)){
             receiveId = service.insertByReceive(_dto, _list);
         }else{
             service.updateReceive(_dto, _list);
         }
+        */
         if(StringUtils.isBlank(receiveId)){
             res.setMsg("Data saved Failure！");
         }else {

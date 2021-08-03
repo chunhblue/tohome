@@ -195,7 +195,7 @@ define('storeTransfer', function () {
                 return false;
             }else{
 
-                var cols = tableGrid.getSelectColValue(selectTrTemp,"storeCd,voucherNo,voucherDate,voucherType,storeCd1");
+                var cols = tableGrid.getSelectColValue(selectTrTemp,"storeCd,voucherNo,voucherDate,voucherType,storeCd1,stsName");
                 //获取数据审核状态
                 _common.getRecordStatus(cols["voucherNo"],m.typeId.val(),function (result) {
                     if(result.success){
@@ -205,7 +205,7 @@ define('storeTransfer', function () {
                         }
                         var param = "storeCd=" + cols["storeCd"] + "&voucherNo=" + cols["voucherNo"]+
                             "&voucherDate=" + voucherDate + "&voucherType=" + cols["voucherType"]+
-                            "&storeCd1=" + cols["storeCd1"] + "&flag=edit";
+                            "&storeCd1=" + cols["storeCd1"] +"&stsName=" + cols["stsName"] + "&flag=edit";
                         saveParamToSession();
                         top.location = url_left+"/edit?"+param;
                     }else{
@@ -237,14 +237,14 @@ define('storeTransfer', function () {
                 _common.prompt("Please select at least one row of data!",5,"error");
                 return false;
             }else{
-                var cols = tableGrid.getSelectColValue(selectTrTemp,"storeCd,voucherNo,voucherDate,voucherType,storeCd1");
+                var cols = tableGrid.getSelectColValue(selectTrTemp,"storeCd,voucherNo,voucherDate,voucherType,storeCd1,stsName");
                 var voucherDate = '';
                 if(cols["voucherDate"]!=null&&cols["voucherDate"]!=''){
                     voucherDate = subfmtDate(cols["voucherDate"]);
                 }
                 var param = "storeCd=" + cols["storeCd"] + "&voucherNo=" + cols["voucherNo"]+
                     "&voucherDate=" + voucherDate + "&voucherType=" + cols["voucherType"]+
-                    "&storeCd1=" + cols["storeCd1"] + "&flag=view";
+                    "&storeCd1=" + cols["storeCd1"] +"&stsName=" + cols["stsName"] + "&flag=view";
                 saveParamToSession();
                 top.location = url_left+"/view?"+param;
             }
@@ -388,7 +388,7 @@ define('storeTransfer', function () {
             title:"Store Transfer Details",
             param:paramGrid,
             localSort: true,
-            colNames:["Transfer Out Date","Document No.","From Store","Transfer From Store","To Store","Transfer To Store",
+            colNames:["Transfer Date","Document No.","From Store","Transfer From Store","To Store","Transfer To Store",
                 "Document Type","Document Type","Document Status","Document Description","Sales Amount","Date Created","Created By"],
             colModel:[
                 {name:"voucherDate",type:"text",text:"center",width:"160",ishide:false,css:"",getCustomValue:dateFmt},

@@ -83,21 +83,27 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
 
             String connUrl = inventoryUrl + "GetRelTimeInventory/"+"/"+rTParamDTO.getStoreCd()
                     +"/*/*/*/*/*/" + inEsTime+"/*/*";
-            String urlData = RequestPost(articleIdListJson,connUrl);
+           /** String urlData = RequestPost(articleIdListJson,connUrl);
             if(urlData == null || "".equals(urlData)){
                 String message = "Failed to connect to live inventory data！";
                 data.setMessage(message);
                 return data;
             }
             Gson gson = new Gson();
-            /*RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
-            if("500".equals(param.getStatus()) || param.getContent() == null){
-                String message = "Failed to connect to live inventory data！";
-                data.setMessage(message);
-                return data;
-            }*/
             // 获取第一层的信息
-            ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
+            ArrayList<RtInvContent> rtInvContent2 = new ArrayList<>();
+            String[] str = urlData.split("}");
+            if(str.length<=1){
+                RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+                if("500".equals(param.getStatus()) || param.getContent() == null){
+                    String message = "Failed to connect to live inventory data！";
+                    data.setMessage(message);
+                    return data;
+                }
+            }else {
+                rtInvContent2 = gson.fromJson(urlData, new TypeToken<List<RtInvContent>>() {
+                }.getType());
+            }
 
             RtInvContent rtInvContent = rtInvContent2.get(0);
             if(rtInvContent == null){
@@ -128,7 +134,7 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
                         }
                     }
                 }
-            }
+            } */
 
          data = new GridDataDTO<>(_list,
                 rTParamDTO.getPage(), count, rTParamDTO.getRows());
@@ -204,14 +210,20 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
                     return data;
                 }
 
-                /*RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
-                if("500".equals(param.getStatus()) || param.getContent() == null){
-                    String message = "Failed to connect to live inventory data！";
-                    data.setMessage(message);
-                    return data;
-                }*/
                 // 获取第一层的信息
-                ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
+                ArrayList<RtInvContent> rtInvContent2 = new ArrayList<>();
+                String[] str = urlData.split("}");
+                if(str.length<=1){
+                    RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+                    if("500".equals(param.getStatus()) || param.getContent() == null){
+                        String message = "Failed to connect to live inventory data！";
+                        data.setMessage(message);
+                        return data;
+                    }
+                }else {
+                    rtInvContent2 = gson.fromJson(urlData, new TypeToken<List<RtInvContent>>() {
+                    }.getType());
+                }
 
                 RtInvContent rtInvContent = rtInvContent2.get(0);
                 if(rtInvContent == null){
@@ -248,21 +260,27 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
             //拼接url，转义参数
             String connUrl = inventoryUrl + "GetRelTimeInventory/"+rTParamDTO.getStoreCd()+"/"+ itemCode
                     +"/"+depId+"/"+ pmaId+"/"+categoryId+"/"+subCategoryId+"/"+ inEsTime+"/"+page+"/"+rows;
-            String urlData = getConnUrlData(connUrl);
+           String urlData = getConnUrlData(connUrl);
             if(urlData == null || "".equals(urlData)){
                 String message = "Failed to connect to live inventory data！";
                 data.setMessage(message);
                 return data;
             }
             Gson gson = new Gson();
-            /*RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
-            if("500".equals(param.getStatus()) || param.getContent() == null){
-                String message = "Failed to connect to live inventory data！";
-                data.setMessage(message);
-                return data;
-            }*/
             // 获取第一层的信息
-            ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
+            ArrayList<RtInvContent> rtInvContent2 = new ArrayList<>();
+            String[] str = urlData.split("}");
+            if(str.length<=1){
+                RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+                if("500".equals(param.getStatus()) || param.getContent() == null){
+                    String message = "Failed to connect to live inventory data！";
+                    data.setMessage(message);
+                    return data;
+                }
+            }else {
+                rtInvContent2 = gson.fromJson(urlData, new TypeToken<List<RtInvContent>>() {
+                }.getType());
+            }
 
             RtInvContent rtInvContent = rtInvContent2.get(0);
             if(rtInvContent == null){
@@ -378,7 +396,10 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
     public RTInventoryQueryDTO getRtInventory(String connUrl){
 
         RTInventoryQueryDTO data = new RTInventoryQueryDTO();
-        String urlData = getConnUrlData(connUrl);
+        BigDecimal rTimeQty = BigDecimal.ZERO;
+
+
+        /**String urlData = getConnUrlData(connUrl);
         if(urlData == null || "".equals(urlData)){
             String message = "Failed to connect to live inventory data！";
             data.setMessage(message);
@@ -386,13 +407,19 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
         }
         Gson gson = new Gson();
         // 获取第一层的信息
-        /*RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
-        if("500".equals(param.getStatus()) || param.getContent() == null){
-            String message = "Failed to connect to live inventory data！";
-            data.setMessage(message);
-            return data;
-        }*/
-        ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
+        ArrayList<RtInvContent> rtInvContent2 = new ArrayList<>();
+        String[] str = urlData.split("}");
+        if(str.length<=1){
+            RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+            if("500".equals(param.getStatus()) || param.getContent() == null){
+                String message = "Failed to connect to live inventory data！";
+                data.setMessage(message);
+                return data;
+            }
+        }else {
+            rtInvContent2 = gson.fromJson(urlData, new TypeToken<List<RtInvContent>>() {
+            }.getType());
+        }
 
         RtInvContent rtInvContent = rtInvContent2.get(0);
         if(rtInvContent == null){
@@ -406,7 +433,6 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
             data.setMessage("Inventory quantity not found!");
             return data;
         }
-        BigDecimal rTimeQty = BigDecimal.ZERO;
         for(RealTimeDto realTimeDto : realTimeDto2){
             // 计算实时库存数量
             BigDecimal rtQty = realTimeDto.getOn_hand_qty().add(realTimeDto.getReceive_qty().add(realTimeDto.getReceive_corr_qty()))
@@ -414,7 +440,7 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
                     .subtract(realTimeDto.getSale_qty()).subtract(realTimeDto.getWrite_off_qty()).add(realTimeDto.getTransfer_in_qty().add(realTimeDto.getTransfer_in_corr_qty()))
                     .subtract(realTimeDto.getReturn_qty().add(realTimeDto.getReturn_corr_qty()));
             rTimeQty = rTimeQty.add(rtQty);
-        }
+        }*/
         data.setRealtimeQty(rTimeQty);
         return data;
     }
@@ -435,14 +461,20 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
             return rtList;
         }
         Gson gson = new Gson();
-        /*RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
-        if("500".equals(param.getStatus()) || param.getContent() == null){
-            String message = "Failed to connect to live inventory data！";
-            return rtList;
-        }*/
-        // 获取第一层的信息
-        ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
 
+        // 获取第一层的信息
+        ArrayList<RtInvContent> rtInvContent2 = new ArrayList<>();
+        String[] str = urlData.split("}");
+        if(str.length<=1){
+            RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+            if("500".equals(param.getStatus()) || param.getContent() == null){
+                String message = "Failed to connect to live inventory data！";
+                return rtList;
+            }
+        }else {
+            rtInvContent2 = gson.fromJson(urlData, new TypeToken<List<RtInvContent>>() {
+            }.getType());
+        }
         RtInvContent rtInvContent = rtInvContent2.get(0);
         if(rtInvContent == null){
             rtInvContent = new RtInvContent();
@@ -494,14 +526,18 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
                 return rtList;
             }
             Gson gson = new Gson();
-            // 获取第一层的信息
-            /*RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
-            if("500".equals(param.getStatus()) || param.getContent() == null){
-                String message = "Failed to connect to live inventory data！";
-                return rtList;
-            }*/
-            ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
-
+            ArrayList<RtInvContent> rtInvContent2 = new ArrayList<>();
+            String[] str = urlData.split("}");
+            if(str.length<=1){
+                RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+                if("500".equals(param.getStatus()) || param.getContent() == null){
+                    String message = "Failed to connect to live inventory data！";
+                    return rtList;
+                }
+            }else {
+                rtInvContent2 = gson.fromJson(urlData, new TypeToken<List<RtInvContent>>() {
+                }.getType());
+            }
             RtInvContent rtInvContent = rtInvContent2.get(0);
             if(rtInvContent == null){
                 rtInvContent = new RtInvContent();
@@ -620,8 +656,8 @@ public class RealTimeInventoryQueryServiceImpl implements RealTimeInventoryQuery
             String jsonStr = new ObjectMapper().writeValueAsString(saveRtQtyList);
 
             String url = inventoryUrl+"/SaveRelTimeInventory";
-            String urlData = RequestPost(jsonStr,url);
-//            String urlData = null;
+//            String urlData = RequestPost(jsonStr,url);
+            String urlData = null;
             if(urlData != null){
                 rtInvContent = new Gson().fromJson(urlData,RtInvContent.class);
             }

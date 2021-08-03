@@ -16,4 +16,5 @@ public interface MA5321Service {
      */
     List<AutoCompleteDTO> getWarehouse(String v);
 
+    List<AutoCompleteDTO> getWarehouseList(String storeCd, String v);
 }

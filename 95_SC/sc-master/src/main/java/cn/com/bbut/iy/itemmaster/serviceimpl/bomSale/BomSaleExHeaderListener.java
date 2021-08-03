@@ -33,8 +33,7 @@ public class BomSaleExHeaderListener implements ExEventListener {
 
         // 列标题
         String row2 = "NO.,Date,Store No.,Store Name,Barcode,Item Code,Item Name,UOM,Sales Quantity," +
-                "Sales Amount(+VAT),Sales VAT Amount,Returning Quantity,Returning Amount(+VAT)," +
-                "Returning VAT Amount,GP,GP%,Daily Cost";
+                "Sales Amount(+VAT)";
         String[] titles = row2.split(",");
 
         // 开始拼接excel头信息

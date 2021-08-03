@@ -91,4 +91,17 @@ public interface INotificationService {
      * @return
      */
     List<ShortcutDTO> getShortcutList(long id, List<String> params);
+
+    /**
+     * 发送邮件
+     * @param notificationBean
+     */
+    void sendEmail(NotificationBean notificationBean);
+
+    /**
+     * 添加待办事务
+     * @param notificationBean
+     * @return
+     */
+    int addTBacklog(NotificationBean notificationBean);
 }

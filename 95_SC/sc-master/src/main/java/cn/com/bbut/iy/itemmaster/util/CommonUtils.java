@@ -228,6 +228,15 @@ public class CommonUtils {
         }
     }
 
+    public static String setStrValue(String value) {
+        if (value != null) {
+            return value;
+        } else {
+            value = "";
+        }
+        return value;
+    }
+
     /**
      * 数字赋值
      *

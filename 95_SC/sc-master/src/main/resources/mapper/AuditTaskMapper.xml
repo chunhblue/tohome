@@ -461,7 +461,6 @@
         and b.c_enable <![CDATA[<>]]> '0'
         and d.c_enable = '1'
         and e.vendor_id = f.vendor_id
-        and e.effective_date between f.effective_start_date and f.effective_end_date
         and d.n_operatorid = #{id}
 
         UNION ALL
@@ -605,7 +604,6 @@
         and d.n_operatorid = cast(g.n_operatorid as integer)
         and e.promotion_id = h.promotion_id
         and h.item_code = i.article_id
-        and h.scheme_ck_start_date between i.effective_start_date and i.effective_end_date
         and cast(e.review_status as varchar) in
         <foreach collection="status" item="i" open="(" separator="," close=")">
             #{i}
@@ -646,7 +644,6 @@
         and d.n_operatorid = cast(g.n_operatorid as integer)
         and e.promotion_cd = h.promotion_cd
         and h.article_id = i.article_id
-        and e.pro_purchase_start_date between i.effective_start_date and i.effective_end_date
         and e.dep_cd = g.dep_cd
         and cast(e.review_status as varchar) in
         <foreach collection="status" item="i" open="(" separator="," close=")">
@@ -962,7 +959,6 @@
         and b.record_cd = a.parent_article_id
         and b.effective_start_date = a.effective_start_date
         and a.parent_article_id = e.article_id
-        and a.effective_start_date between e.effective_start_date and e.effective_end_date
         and b.c_enable <![CDATA[<>]]> '0'
         and b.n_typeid = c.n_typeid
         and b.n_typeid = 18

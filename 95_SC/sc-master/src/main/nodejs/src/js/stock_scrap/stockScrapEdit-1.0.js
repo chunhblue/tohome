@@ -335,7 +335,6 @@ define('stockScrapEdit', function () {
 
 		// 修改
 		$("#updateItemDetails").on("click",function(){
-			let cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,spec,priceNoTax,taxRate,qty1,adjustReason,adjustReasonText");
 			let _storeCd = $("#vstore").attr('k');
 			if(!_storeCd){
 				_common.prompt("Please select the store first!",3,"info");
@@ -346,10 +345,20 @@ define('stockScrapEdit', function () {
 
 			let flg = m.viewSts.val();
 			if(flg!="add"&&flg!="edit"){return false;}
-			if(selectTrTemp==null){
+			let _list = tableGrid.getCheckboxTrs();
+			if((_list == null || _list.length == 0) && selectTrTemp==null){
 				_common.prompt("Please select at least one row of data!",3,"info");
 				return false;
-			}else if((cols['barcode']=="" && cols['articleId']=="" && cols['uom']=="" && cols['spec']==""&&cols['qty1']==""&&cols['adjustReasonText']=="")||cols['barcode']=="" && cols['articleId']==null && cols['uom']==null && cols['spec']==null &&cols['qty1']==null &&cols['adjustReasonText']==null) {
+			}
+			if(_list.length >= 2){
+				_common.prompt("Please select only one row of data!",3,"info");
+				return false;
+			}
+			if(_list.length == 1){
+				selectTrTemp = _list[0];
+			}
+			let cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,spec,priceNoTax,taxRate,qty1,adjustReason,adjustReasonText");
+			if((cols['barcode']=="" && cols['articleId']=="" && cols['uom']=="" && cols['spec']==""&&cols['qty1']==""&&cols['adjustReasonText']=="")||cols['barcode']=="" && cols['articleId']==null && cols['uom']==null && cols['spec']==null &&cols['qty1']==null &&cols['adjustReasonText']==null) {
 				_common.prompt("Please select at valid one row of data!",3,"info");
 				return false;
 			}else {
@@ -371,12 +380,21 @@ define('stockScrapEdit', function () {
 
 		// 查看
 		$("#viewItemDetails").on("click",function(){
-			let cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,spec,priceNoTax,qty1,adjustReasonText");
 			let _storeCd = $("#vstore").attr('k');
-			if(selectTrTemp==null){
+			let _list = tableGrid.getCheckboxTrs();
+			if((_list == null || _list.length == 0) && selectTrTemp==null){
 				_common.prompt("Please select at least one row of data!",3,"info");
 				return false;
-			} else if((cols['barcode']=="" && cols['articleId']=="" && cols['uom']=="" && cols['spec']==""&&cols['qty1']==""&&cols['adjustReasonText']=="")||cols['barcode']=="" && cols['articleId']==null && cols['uom']==null && cols['spec']==null &&cols['qty1']==null &&cols['adjustReasonText']==null) {
+			}
+			if(_list.length >= 2){
+				_common.prompt("Please select only one row of data!",3,"info");
+				return false;
+			}
+			if(_list.length == 1){
+				selectTrTemp = _list[0];
+			}
+			let cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,spec,priceNoTax,qty1,adjustReasonText");
+			if((cols['barcode']=="" && cols['articleId']=="" && cols['uom']=="" && cols['spec']==""&&cols['qty1']==""&&cols['adjustReasonText']=="")||cols['barcode']=="" && cols['articleId']==null && cols['uom']==null && cols['spec']==null &&cols['qty1']==null &&cols['adjustReasonText']==null) {
 				_common.prompt("Please select at valid one row of data!",3,"info");
 				return false;
 			}else {
@@ -819,6 +837,8 @@ define('stockScrapEdit', function () {
 				}
 				_common.myConfirm("Are you sure you want to save?",function(result){
 					if(result!="true"){return false;}
+					setDisable(true);
+					m.returnsViewBut.prop("disabled",true);
 					$.myAjaxs({
 						url:url_root+_url,
 						async:true,
@@ -843,6 +863,7 @@ define('stockScrapEdit', function () {
 									$("#tf_cd").val(result.o);
 								}
 								_common.prompt("Data saved successfully！",3,"success",function(){
+									m.returnsViewBut.prop("disabled",false);
 									//发起审核
 									let typeId =m.typeId.val();
 									let	nReviewid =m.reviewId.val();
@@ -1263,10 +1284,16 @@ define('stockScrapEdit', function () {
 			},
 			loadCompleteEvent: function (self) {
 				total();
+				isDisabledBtn();
 				return self;
 			},
 			eachTrClick:function(trObj,tdObj){//正常左侧点击
 				selectTrTemp = trObj;
+				isDisabledBtn();
+				let _list = tableGrid.getCheckboxTrs();
+				if(_list.length<1){
+					selectTrTemp = null;//清空选择的行
+				}
 			},
 			buttonGroup:[
 				{
@@ -1293,6 +1320,21 @@ define('stockScrapEdit', function () {
 				{butType:"custom",butHtml:"<button id='attachments' type='button' class='btn btn-primary btn-sm'><span class='glyphicon glyphicon glyphicon-file'></span> Attachments</button>"},//附件
 			],
 		});
+	}
+
+	// 多选时查看、编辑禁用
+	function isDisabledBtn(){
+		let flg = m.viewSts.val();
+		let _list = tableGrid.getCheckboxTrs();
+		if(_list == null || _list.length > 1){
+			$("#updateItemDetails").prop("disabled",true);
+			$("#viewItemDetails").prop("disabled",true);
+		}else{
+			if(flg=="add" || flg=="edit"){
+				$("#updateItemDetails").prop("disabled",false);
+			}
+			$("#viewItemDetails").prop("disabled",false);
+		}
 	}
 
     // 日期字段格式化格式

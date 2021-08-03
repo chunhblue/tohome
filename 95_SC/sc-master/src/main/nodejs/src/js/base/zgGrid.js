@@ -224,6 +224,7 @@
 					trId = "";
 				if(typeof datas == "string") {  datas = JSON.parse(datas);}
 				tbody.empty();
+				var line = self.defaults.line;
 				for(var i=0;i<datas.length;i++){
 					trId = tableId+"_"+i+"_tr";
 					if(self.defaults.isCheckbox==true||self.defaults.isCheckbox=="true"){
@@ -231,8 +232,8 @@
 						insterTdStr+="<td tag='ckline' trnumber='"+i+"' align='center' style='color:#428bca;' id='"+trId+"_ckline' tdIndex='"+tableId+"_ckline'><input type='checkbox' value='"+trId+"' name='"+tableId+"' /> </td>";
 					}
 					if(self.defaults.lineNumber==true||self.defaults.lineNumber=="true"){
-						self.defaults.line+=1;
-						insterTdStr+="<td tag='line' trnumber='"+i+"' align='center' style='color:#428bca;' id='"+trId+"_line' tdIndex='"+tableId+"_line'>"+self.defaults.line+"</td>";
+						line+=1;
+						insterTdStr+="<td tag='line' trnumber='"+i+"' align='center' style='color:#428bca;' id='"+trId+"_line' tdIndex='"+tableId+"_line'>"+line+"</td>";
 					}
 					for(var j=0;j<colModel.length;j++){
 						var colObj = colModel[j],//列对象

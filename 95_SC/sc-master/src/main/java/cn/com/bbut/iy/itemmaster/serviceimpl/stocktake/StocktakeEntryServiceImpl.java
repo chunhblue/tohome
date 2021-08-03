@@ -44,6 +44,7 @@ import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -150,7 +151,7 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
             // 分批次保存数据
             batchSave(stocktakeItemList);
             // 生成差异数据
-            updateStocktakingVarianceReport(piCd,piDate,storeCd,reviewStatus);
+//            updateStocktakingVarianceReport(piCd,piDate,storeCd,reviewStatus);
         } catch (Exception e) {
             e.printStackTrace();
             return -1;
@@ -266,8 +267,7 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
      *  生成盘点差异报表数据
      */
     @Override
-//    @Transactional
-//    @Async
+    @Transactional
     public void updateStocktakingVarianceReport(String piCd, String piDate, String storeCd, String reviewStatus) {
         String businessDate = cm9060Service.getValByKey("0000");
         // 获取 商品最新状态, 并计算差异
@@ -437,7 +437,7 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
         String piDate = list.get(0).getPiDate();
         String storeCd = list.get(0).getStoreCd();
 
-        String exceptionTableName = "temp_exception_item";
+        String exceptionTableName = "public.temp_stock_exception_item";
         // 判断临时表是否存在
         int num = stocktakeEntryMapper.getCountTable(exceptionTableName);
         if(num > 0){
@@ -750,6 +750,17 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
                 list.add(item);
             }
             csvfile.close();
+
+            File outfile = new File(path);
+            //如果文件存在并且是文件，删除改文件
+            if(outfile.exists()&&outfile.isFile()) {
+               boolean flg = outfile.delete();
+               if(flg){
+                  log.error("删除文件成功:"+path);
+               }else {
+                   log.error("删除文件失败:"+path);
+               }
+            }
             boolean stTimeFlg = true;
             List<StocktakeItemDTO> allList = new ArrayList<>();
             for(StocktakeItemDTO dto:list){
@@ -947,7 +958,7 @@ public class StocktakeEntryServiceImpl extends ImportExcelBaseService implements
             return map;
         }
 
-        String exceptionTableName = "temp_exception_item";
+        String exceptionTableName = "public.temp_stock_exception_item";
         String tempTableName = "temp_item_csv";
         // 创建前先删除临时表
         stocktakeEntryMapper.deleteTempTable(tempTableName);

@@ -252,7 +252,7 @@
         SELECT a.*,e.store_name
         from
         ma1000 e right join
-        (select store_cd,
+        (select store_cd,order_date,
         COALESCE(count(store_cd),0) AS total_open_po from od0000  where
         1=1
         <if test="param.storeCd !='' and param.storeCd !=null">
@@ -267,7 +267,8 @@
         order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
         AND order_type='01'
         AND order_differentiate IN ('0','1')
-        GROUP BY store_cd
+        GROUP BY store_cd,
+        order_date
         ) a
         on a.store_cd=e.store_cd
         <if test="param.flg">
@@ -278,7 +279,7 @@
         SELECT count(1)
         from
         ma1000 e right join
-        (select store_cd,
+        (select store_cd,order_date,
         COALESCE(count(store_cd),0) AS total_open_po from od0000  where
         1=1
         <if test="param.storeCd !='' and param.storeCd !=null">
@@ -293,7 +294,8 @@
         order_date  between  #{param.hhstartDate} AND #{param.hhendDate}
         AND order_type='01'
         AND order_differentiate IN ('0','1')
-        GROUP BY store_cd) a
+        GROUP BY store_cd,
+        order_date) a
         on a.store_cd=e.store_cd
     </select>
 
@@ -325,7 +327,7 @@
         SELECT a.*,e.store_name
         from
         ma1000 e right join
-        (select store_cd,
+        (select store_cd,order_date,
         COALESCE(count(store_cd),0) AS no_of_pending_grpo from od0000  where
         1=1
         <if test="param.storeCd !='' and param.storeCd !=null">
@@ -341,7 +343,8 @@
         AND order_type='01'
         AND review_status='15'
         AND order_differentiate IN ('0','1')
-        GROUP BY store_cd
+        GROUP BY store_cd,
+        order_date
     ) a
         on a.store_cd=e.store_cd
     </select>
@@ -373,7 +376,7 @@
         SELECT a.*,e.store_name
         from
         ma1000 e right join
-        (select store_cd,
+        (select store_cd,order_date,
         COALESCE(count(store_cd),0) AS grpo_of_qty from od0000  where
         1=1
         <if test="param.storeCd !='' and param.storeCd !=null">
@@ -389,7 +392,8 @@
         AND order_type='01'
         AND review_status='10'
         AND order_differentiate IN ('0','1')
-        GROUP BY store_cd
+        GROUP BY store_cd,
+        order_date
       ) a
         on a.store_cd=e.store_cd
     </select>
@@ -421,7 +425,7 @@
         SELECT a.*,e.store_name
         from
         ma1000 e right join
-        (select store_cd,
+        (select store_cd,order_date,
         COALESCE(count(store_cd),0) AS no_of_confi_po from od0000  where
         1=1
         <if test="param.storeCd !='' and param.storeCd !=null">
@@ -437,7 +441,8 @@
         AND order_type='01'
         AND review_status='20'
         AND order_differentiate IN ('0','1')
-        GROUP BY store_cd
+        GROUP BY store_cd,
+        order_date
       ) a
         on a.store_cd=e.store_cd
     </select>

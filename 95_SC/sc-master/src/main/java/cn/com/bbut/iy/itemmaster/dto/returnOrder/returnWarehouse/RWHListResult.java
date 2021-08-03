@@ -33,4 +33,9 @@ public class RWHListResult extends GridDataDTO {
     private String status;//审核状态
     private String orderType;
     private String returnType;
+    private String barcode;
+    private String depName;//退货类型
+    private String articleName;//退货类型
+    private String articleId;//退货类型
+
 }

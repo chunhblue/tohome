@@ -88,6 +88,10 @@ public class BusinessDailyDto {
      */
     private BigDecimal payAmt6;
     /**
+     * 支付方式金额_7/ShopeePay
+     */
+    private BigDecimal payAmt7;
+    /**
      * 大分类cd
      */
     private String pmaCd;
@@ -137,6 +141,7 @@ public class BusinessDailyDto {
     private String payCd4;
     private String payCd5;
     private String payCd6;
+    private String payCd7;
 
     /**
      * 根据支付方式统计客数
@@ -149,6 +154,7 @@ public class BusinessDailyDto {
     private Integer customerCount4;
     private Integer customerCount5;
     private Integer customerCount6;
+    private Integer customerCount7;
 
     /**
      * service 金额

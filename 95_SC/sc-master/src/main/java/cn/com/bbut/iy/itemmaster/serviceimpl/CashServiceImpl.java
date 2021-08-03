@@ -63,55 +63,42 @@ public class CashServiceImpl implements CashService {
                     i--;
                 }
             }
-            for (int i = 0; i < list.size(); i++) {
-                list.get(i).setVoucherDate(list.get(i).getPayDate());
-                // 日期格式转换
-                list.get(i).setPayDate(Utils.getTimeStamp(list.get(i).getPayDate()));
-                //支付方式金额 20
-//                list.get(i).setPayInAmt(list.get(i).getPayInAmt0().add(list.get(i).getPayInAmt1()).add(list.get(i).getPayInAmt2()).add(list.get(i).getPayInAmt3()).add(list.get(i).getPayInAmt4()).add(list.get(i).getPayInAmt5()).add(list.get(i).getAdditional()).add(list.get(i).getOffsetClaim()));
-                //应收合计金额
-                CashDetail cashDetail = cashMapper.getPayAmt(list.get(i).getPayDate(), list.get(i).getStoreCd(),list.get(i).getVoucherDate());
-                list.get(i).setPayAmt(cashDetail.getPayAmt());
-                if (cashDetail.getPayAmt() == null) {
-                    cashDetail.setPayAmt(BigDecimal.ZERO);
-                    list.get(i).setPayAmt(BigDecimal.ZERO);
+        }
+        List<CashDetail> cashDetailList = cashMapper.getPayAmtList(dto);
+        for(CashDetail cash:list){
+            cash.setPayAmt(BigDecimal.ZERO);
+            cash.setPayAmt0(BigDecimal.ZERO);
+            cash.setPayAmt1(BigDecimal.ZERO);
+            cash.setPayAmt2(BigDecimal.ZERO);
+            cash.setPayAmtDiff(BigDecimal.ZERO);
+            for(CashDetail cashDetail:cashDetailList){
+                if(cash.getPayDate().equals(cashDetail.getPayDate())&&cash.getStoreCd().equals(cashDetail.getStoreCd())){
+                    //应收各项金额
+                    cash.setPayAmt(cashDetail.getPayAmt());
+                    cash.setPayAmt0(cashDetail.getPayAmt0());
+                    cash.setPayAmt1(cashDetail.getPayAmt1());
+                    cash.setPayAmt2(cashDetail.getPayAmt2());
+                    //差异金额
+                    cash.setPayAmtDiff(cash.getPayInAmt().subtract(cashDetail.getPayAmt()));
                 }
-
-                // 2021 6 4注释
-                //获取客数 客单价  ==0
-//                int customerQty = cashMapper.getCustomerQty(list.get(i).getPayDate(), list.get(i).getStoreCd());
-//                if (customerQty > 0) {
-//                    BigDecimal customerQtyBig = new BigDecimal(customerQty);
-//                    list.get(i).setCustomerQty(customerQtyBig);
-//                    if (cashDetail.getPayAmt().compareTo(BigDecimal.ZERO) > 0) {
-//                        list.get(i).setCustomerAvgPrice(cashDetail.getPayAmt().divide(customerQtyBig,2));
-//                    }
-//                } else {
-//                    list.get(i).setCustomerQty(BigDecimal.ZERO);
-//                    list.get(i).setCustomerAvgPrice(BigDecimal.ZERO);
-//                }
-                //应收各项金额
-                list.get(i).setPayAmt0(cashDetail.getPayAmt0());
-                list.get(i).setPayAmt1(cashDetail.getPayAmt1());
-                list.get(i).setPayAmt2(cashDetail.getPayAmt2());
-                //差异金额
-                list.get(i).setPayAmtDiff(list.get(i).getPayInAmt().subtract(list.get(i).getPayAmt()));
-                if (StringUtils.isNotBlank(payAmtFlg) && StringUtils.isNotBlank(payAmtDiff)) {
-                    BigDecimal payAmtDiff1 = new BigDecimal(payAmtDiff);
-                    //payAmtFlg 1 <   2  ≤   3 >   4 ≥
-                    if ("1".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) >= 0) {
-                        list.remove(i);
-                        i--;
-                    } else if ("2".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) > 0) {
-                        list.remove(i);
-                        i--;
-                    } else if ("3".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) <= 0) {
-                        list.remove(i);
-                        i--;
-                    } else if ("4".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) < 0) {
-                        list.remove(i);
-                        i--;
-                    }
+            }
+        }
+        if (StringUtils.isNotBlank(payAmtFlg) && StringUtils.isNotBlank(payAmtDiff)) {
+            BigDecimal payAmtDiff1 = new BigDecimal(payAmtDiff);
+            //payAmtFlg 1 <   2  ≤   3 >   4 ≥
+            for(int i =0;i<list.size();i++){
+                if ("1".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) >= 0) {
+                    list.remove(i);
+                    i--;
+                } else if ("2".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) > 0) {
+                    list.remove(i);
+                    i--;
+                } else if ("3".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) <= 0) {
+                    list.remove(i);
+                    i--;
+                } else if ("4".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) < 0) {
+                    list.remove(i);
+                    i--;
                 }
             }
         }
@@ -121,7 +108,6 @@ public class CashServiceImpl implements CashService {
             String createHms = detail.getCreateHms();
             String dateTime = dateFomte(createYmd, createHms);
             detail.setCreateYmdFull(dateTime);
-            detail.setPayDate(Utils.getStringDate(detail.getPayDate()));
         }
         GridDataDTO<CashDetail> data = new GridDataDTO<>(list, dto.getPage(), count, dto.getRows());
         return data;
@@ -390,42 +376,42 @@ public class CashServiceImpl implements CashService {
                     i--;
                 }
             }
-            for (int i = 0; i < list.size(); i++) {
-                list.get(i).setVoucherDate(list.get(i).getPayDate());
-                // 日期格式转换
-                list.get(i).setPayDate(Utils.getTimeStamp(list.get(i).getPayDate()));
-                //支付方式金额 20
-//                list.get(i).setPayInAmt(list.get(i).getPayInAmt0().add(list.get(i).getPayInAmt1()).add(list.get(i).getPayInAmt2()).add(list.get(i).getPayInAmt3()).add(list.get(i).getPayInAmt4()).add(list.get(i).getPayInAmt5()).add(list.get(i).getAdditional()).add(list.get(i).getOffsetClaim()));
-                //应收合计金额
-                CashDetail cashDetail = cashMapper.getPayAmt(list.get(i).getPayDate(), list.get(i).getStoreCd(), list.get(i).getVoucherDate());
-                list.get(i).setPayAmt(cashDetail.getPayAmt());
-                if (cashDetail.getPayAmt() == null) {
-                    cashDetail.setPayAmt(BigDecimal.ZERO);
-                    list.get(i).setPayAmt(BigDecimal.ZERO);
+        }
+        List<CashDetail> cashDetailList = cashMapper.getPayAmtList(dto);
+        for(CashDetail cash:list){
+            cash.setPayAmt(BigDecimal.ZERO);
+            cash.setPayAmt0(BigDecimal.ZERO);
+            cash.setPayAmt1(BigDecimal.ZERO);
+            cash.setPayAmt2(BigDecimal.ZERO);
+            cash.setPayAmtDiff(BigDecimal.ZERO);
+            for(CashDetail cashDetail:cashDetailList){
+                if(cash.getPayDate().equals(cashDetail.getPayDate())&&cash.getStoreCd().equals(cashDetail.getStoreCd())){
+                    //应收各项金额
+                    cash.setPayAmt(cashDetail.getPayAmt());
+                    cash.setPayAmt0(cashDetail.getPayAmt0());
+                    cash.setPayAmt1(cashDetail.getPayAmt1());
+                    cash.setPayAmt2(cashDetail.getPayAmt2());
+                    //差异金额
+                    cash.setPayAmtDiff(cash.getPayInAmt().subtract(cashDetail.getPayAmt()));
                 }
-
-                //应收各项金额
-                list.get(i).setPayAmt0(cashDetail.getPayAmt0());
-                list.get(i).setPayAmt1(cashDetail.getPayAmt1());
-                list.get(i).setPayAmt2(cashDetail.getPayAmt2());
-                //差异金额
-                list.get(i).setPayAmtDiff(list.get(i).getPayInAmt().subtract(list.get(i).getPayAmt()));
-                if (StringUtils.isNotBlank(payAmtFlg) && StringUtils.isNotBlank(payAmtDiff)) {
-                    BigDecimal payAmtDiff1 = new BigDecimal(payAmtDiff);
-                    //payAmtFlg 1 <   2  ≤   3 >   4 ≥
-                    if ("1".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) >= 0) {
-                        list.remove(i);
-                        i--;
-                    } else if ("2".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) > 0) {
-                        list.remove(i);
-                        i--;
-                    } else if ("3".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) <= 0) {
-                        list.remove(i);
-                        i--;
-                    } else if ("4".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) < 0) {
-                        list.remove(i);
-                        i--;
-                    }
+            }
+        }
+        if (StringUtils.isNotBlank(payAmtFlg) && StringUtils.isNotBlank(payAmtDiff)) {
+            BigDecimal payAmtDiff1 = new BigDecimal(payAmtDiff);
+            //payAmtFlg 1 <   2  ≤   3 >   4 ≥
+            for(int i =0;i<list.size();i++){
+                if ("1".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) >= 0) {
+                    list.remove(i);
+                    i--;
+                } else if ("2".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) > 0) {
+                    list.remove(i);
+                    i--;
+                } else if ("3".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) <= 0) {
+                    list.remove(i);
+                    i--;
+                } else if ("4".equals(payAmtFlg) && list.get(i).getPayAmtDiff().compareTo(payAmtDiff1) < 0) {
+                    list.remove(i);
+                    i--;
                 }
             }
         }

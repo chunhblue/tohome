@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.com.bbut.iy.itemmaster.dao.ReturnWarehouseMapper">
     <select id="getOrgOrderIdList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
-       SELECT  distinct  h.order_id v, h.order_id k FROM (Select g.order_id,od0010.article_id  from (select distinct
+        SELECT  distinct  h.order_id v, h.order_id k FROM (Select g.order_id,od0010.article_id  from (select distinct
         od0000.order_id,od0000.create_ymd,od0000.create_hms,od0000.store_cd
         from od0000,od0000_t
         <where>
@@ -28,8 +28,8 @@
         left join od0010 on od0010.order_id=g.order_id  and  <![CDATA[
            od0010.receive_total_qty <> 0
             ]]>
-            AND OD0010.receive_total_qty is not null
-       )AS   h WHERE h.article_id is not null
+        AND OD0010.receive_total_qty is not null
+        )AS   h WHERE h.article_id is not null
         and h.order_id not in (
         SELECT org_order_id from od0000
         where order_differentiate = #{orderDifferentiate,jdbcType=VARCHAR}
@@ -49,7 +49,6 @@
         from od0000
         left join ma1000
             on od0000.store_cd = ma1000.store_cd
-            and #{businessDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
         left join ma2000
             on od0000.vendor_id = ma2000.vendor_id
             and #{businessDate,jdbcType=VARCHAR} BETWEEN ma2000.effective_start_date AND ma2000.effective_end_date
@@ -72,9 +71,8 @@
             ]]>
             /*搭赠商品不能退货*/
             and od0010.is_free_item = '0'
-            AND ma1100.aging_stock_returnable='1'
+            <!-- AND ma1100.aging_stock_returnable='1'-->
             AND MA1100.INVENTORY_item='1'
-            and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
             <if test="orderId !=null and orderId!='' ">
                 and od0010.order_id = #{orderId,jdbcType=VARCHAR}
             </if>
@@ -100,9 +98,32 @@
         <if test="dto.storeCd    !=null and dto.storeCd !=''">
             AND   sk0000_today.store_cd=#{dto.storeCd,jdbcType=VARCHAR }
         </if>
-        AND #{dto.orderDate,jdbcType=VARCHAR} BETWEEN 	ma1100.effective_start_date AND MA1100.effective_end_date
-        AND ma1100.aging_stock_returnable='1'
+        <!--AND ma1100.aging_stock_returnable='1'-->
         AND MA1100.INVENTORY_item='1'
+        AND MA1100.dc_item='1'
+        <if test="dto.v!=null and dto.v!=''">
+            AND (
+            lower(ma1100.article_id) like lower(CONCAT('%',#{dto.v,jdbcType=VARCHAR},'%'))
+            OR lower(ma1100.article_name) like lower(CONCAT('%',#{dto.v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+
+    </select>
+    <select id="getdirectItemsList" parameterType="cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.ReturnWarehouseParamDTO"  resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select
+        distinct
+        ma1100.article_id k, CONCAT(ma1100.article_id,' ',ma1100.article_name) AS v
+        from
+        ma1100 ,sk0000_today
+        WHERE
+        1=1
+        AND sk0000_today.article_id = MA1100.article_id
+        <if test="dto.storeCd    !=null and dto.storeCd !=''">
+            AND   sk0000_today.store_cd=#{dto.storeCd,jdbcType=VARCHAR }
+        </if>
+        <!--AND ma1100.aging_stock_returnable='1'-->
+        AND MA1100.INVENTORY_item='1'
+       <!-- AND MA1100.dc_item='0' -->
         <if test="dto.v!=null and dto.v!=''">
             AND (
             lower(ma1100.article_id) like lower(CONCAT('%',#{dto.v,jdbcType=VARCHAR},'%'))
@@ -138,10 +159,10 @@
 
         <where>
             t.order_id = t1.order_id
-        <if test="orderId!='' and orderId!=null">
-            and t.org_order_id = #{orderId,jdbcType=VARCHAR}
-        </if>
-           and t1.article_id = #{articleId,jdbcType=VARCHAR}
+            <if test="orderId!='' and orderId!=null">
+                and t.org_order_id = #{orderId,jdbcType=VARCHAR}
+            </if>
+            and t1.article_id = #{articleId,jdbcType=VARCHAR}
             and t.order_type = '02'
             and t.order_sts = '04'
         </where>
@@ -157,7 +178,6 @@
         and sk0000_today.effective_date = #{orderDate,jdbcType=VARCHAR}
         and sk0000_today.article_id = od0010.article_id
         and sk0000_today.store_cd = od0010.store_cd
-        and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
         <if test="orderId !=null and orderId != ''">
             and od0010.order_id = #{orderId,jdbcType=VARCHAR}
         </if>
@@ -174,7 +194,7 @@ SELECT A.article_id,B.spec,B.article_name,B.unit_id,B.spec,B.unit_name,
 
 (SELECT distinct MA1110.default_barcode FROM MA1110 WHERE MA1110.article_id=#{dto.articleId,jdbcType=VARCHAR} AND
 
- MA1110.vendor_id = A.major_vendor_id AND (#{businessDate,jdbcType=VARCHAR} between MA1110.effective_start_date and MA1110.effective_end_date)
+ MA1110.vendor_id = A.major_vendor_id
  ) AS barcode
 from
 (SELECT
@@ -208,7 +228,6 @@ WHERE
 
 
 
-
     <!--退仓库一览条件查询-->
     <select id="selectWHQueryListBy"
             resultType="cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.RWHListResult"
@@ -230,9 +249,8 @@ WHERE
         (select sum(od0010.receive_qty) from od0010 where a.order_id=od0010.order_id) receive_qty
         from
         od0000 a
-        left join od0010 b on b.order_id = a.order_id
         left join ma5321 d on d.warehouse_no = a.delivery_center_id
-        left join ma1000 e on e.store_cd = a.store_cd and a.order_date BETWEEN e.effective_start_date AND e.effective_end_date
+        left join ma1000 e on e.store_cd = a.store_cd
         left join od0005 f on a.order_id = f.order_id
         where
         a.order_type = '02'
@@ -259,7 +277,7 @@ WHERE
             AND lower(A.org_order_id) like lower(CONCAT('%',#{orgOrderId},'%'))
         </if>
         <if test="deliveryCenterId != null and deliveryCenterId != ''" >
-            AND A.vendor_id = #{deliveryCenterId}
+            AND A.delivery_center_id = #{deliveryCenterId}
         </if>
         <if test="reviewStatus !=null">
             and A.review_status = #{reviewStatus,jdbcType=INTEGER}
@@ -299,9 +317,8 @@ WHERE
         (select sum(od0010.receive_qty) from od0010 where a.order_id=od0010.order_id) receive_qty
         from
         od0000 a
-        left join od0010 b on b.order_id = a.order_id
         left join ma5321 d on d.warehouse_no = a.delivery_center_id
-        left join ma1000 e on e.store_cd = a.store_cd and a.order_date BETWEEN e.effective_start_date AND e.effective_end_date
+        left join ma1000 e on e.store_cd = a.store_cd
         left join od0005 f on a.order_id = f.order_id
         where
         a.order_type = '02'
@@ -366,10 +383,8 @@ WHERE
         (select sum(od0010.receive_qty) from od0010 where a.order_id=od0010.order_id) receive_qty
         from
         od0000 a
-        left join od0010 b on b.order_id = a.order_id
         left join ma5321 d on d.warehouse_no = a.delivery_center_id
-        left join ma1000 e on e.store_cd = a.store_cd and a.order_date BETWEEN e.effective_start_date AND
-        e.effective_end_date
+        left join ma1000 e on e.store_cd = a.store_cd
         left join od0005 f on a.order_id = f.order_id
         where
         a.order_type = '02'
@@ -396,7 +411,7 @@ WHERE
             AND lower(A.org_order_id) like lower(CONCAT('%',#{orgOrderId},'%'))
         </if>
         <if test="deliveryCenterId != null and deliveryCenterId != ''">
-            AND A.vendor_id = #{deliveryCenterId}
+            AND A.delivery_center_id = #{deliveryCenterId}
         </if>
         <if test="reviewStatus !=null">
             and A.review_status = #{reviewStatus,jdbcType=INTEGER}
@@ -410,10 +425,7 @@ WHERE
         <if test="reviewStatus ==null and returnSts != null">
             and A.review_status in (10,20)
         </if>
-        order by a.create_ymd desc,a.create_hms desc
-        <if test="flg and limitStart >= 0">
-            limit ${limitEnd} offset ${limitStart}
-        </if>)AS temp_table
+       )AS temp_table
     </select>
 
     <!--退仓库详情根据单据编号查询头档-->
@@ -436,7 +448,7 @@ WHERE
         A.order_remark
         from od0000 A
         left join ma5321 C on C.warehouse_no = A.delivery_center_id
-        left join ma1000 D on D.store_cd = A.store_cd and A.order_date BETWEEN D.effective_start_date AND D.effective_end_date
+        left join ma1000 D on D.store_cd = A.store_cd
         left join ma4200 e on A.create_user_id=e.emp_num_id
         left join ma4200 f on f.emp_num_id=A.update_user_id
         <where>
@@ -450,44 +462,109 @@ WHERE
     <select id="getReturnItems"
             resultType="cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.RWHItemsGridResult">
         select distinct
-            a.barcode,
-            a.article_id,
-            b.article_name,
-            b.spec,
-            d.unit_id,
-            d.unit_name,
-            a.vendor_id,
-            coalesce(a.order_qty,0) order_qty,
-            coalesce(a.order_nocharge_qty,0) order_nocharge_qty,
-            a.order_price,
-            a.order_amt order_amount,
-            a.reason_id,
-            a.is_free_item,
-            a.is_free_item as is_free_item_text,
-            (select code_name from cm9010 where code_type='00400' and code_value = a.reason_id)as reason_name,
-            <choose>
-                <when test="flag != null and flag == '1'.toString()">
-                    coalesce(a.order_qty,0) AS receive_qty,
-                    coalesce(a.order_nocharge_qty,0) AS receive_nocharge_qty
-                </when>
-                <otherwise>
-                    coalesce(a.receive_qty,0) AS receive_qty,
-                    coalesce(a.receive_nocharge_qty,0) AS receive_nocharge_qty
-                </otherwise>
-            </choose>
+        a.barcode,
+        a.article_id,
+        b.article_name,
+        a.serial_no,
+        b.spec,
+        d.unit_id,
+        d.unit_name,
+        a.vendor_id,
+        coalesce(a.order_qty,0) order_qty,
+        coalesce(a.order_nocharge_qty,0) order_nocharge_qty,
+        a.order_price,
+        a.order_amt order_amount,
+        a.reason_id,
+         a.expired_date,
+        a.is_free_item,
+        a.is_free_item as is_free_item_text,
+        (select code_name from cm9010 where code_type='00400' and code_value = a.reason_id)as reason_name,
+        <choose>
+            <when test="flag != null and flag == '1'.toString()">
+                coalesce(a.order_qty,0) AS receive_qty,
+                coalesce(a.order_nocharge_qty,0) AS receive_nocharge_qty
+            </when>
+            <otherwise>
+                coalesce(a.receive_qty,0) AS receive_qty,
+                coalesce(a.receive_nocharge_qty,0) AS receive_nocharge_qty
+            </otherwise>
+        </choose>
         from
-            od0000,od0010 a,ma1100 b
+        od0000,od0010 a,ma1100 b
         left join ma0220 d on d.unit_id = b.sales_unit_id and d.effective_sts = '10'
         <where>
             od0000.order_id = a.order_id
             and b.article_id = a.article_id
-            and od0000.order_date BETWEEN b.effective_start_date AND b.effective_end_date
             <if test="orderId != null and orderId != ''" >
                 and od0000.order_id = #{orderId}
             </if>
         </where>
     </select>
-
+    <!--    //20210722-->
+    <select id="getReturnVendorItemsList"
+            resultType="cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.RWHItemsGridResult">
+        select distinct
+        a.barcode,
+        a.article_id,
+        b.article_name,
+        b.spec,
+        d.unit_id,
+        d.unit_name,
+        a.vendor_id,
+        od0000.order_remark,
+        coalesce(a.order_qty,0) order_qty,
+        coalesce(a.order_nocharge_qty,0) order_nocharge_qty,
+        a.order_price,
+        a.order_amt order_amount,
+        a.reason_id,
+        a.is_free_item,
+        a.is_free_item as is_free_item_text,
+        (select code_name from cm9010 where code_type='00400' and code_value = a.reason_id)as reason_name,
+        coalesce(a.receive_qty,0) AS receive_qty,
+        coalesce(a.receive_nocharge_qty,0) AS receive_nocharge_qty
+        from
+        od0000,od0010 a,ma1100 b
+        left join ma0220 d on d.unit_id = b.sales_unit_id and d.effective_sts = '10'
+        <where>
+            od0000.order_id = a.order_id
+            and b.article_id = a.article_id
+            <if test="dto.orderId != null and dto.orderId != ''" >
+                and od0000.order_id = #{dto.orderId}
+            </if>
+        </where>
+    </select>
+    <!--    //20210726-->
+    <select id="getDcReturnWarehouseItemsList"
+            resultType="cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.RWHItemsGridResult">
+        select distinct
+        a.barcode,
+        a.article_id,
+        b.article_name,
+        b.spec,
+        d.unit_id,
+        d.unit_name,
+        a.vendor_id,
+        coalesce(a.order_qty,0) order_qty,
+        coalesce(a.order_nocharge_qty,0) order_nocharge_qty,
+        a.order_price,
+        a.order_amt order_amount,
+        a.reason_id,
+        a.is_free_item,
+        a.is_free_item as is_free_item_text,
+        (select code_name from cm9010 where code_type='00400' and code_value = a.reason_id)as reason_name,
+        coalesce(a.receive_qty,0) AS receive_qty,
+        coalesce(a.receive_nocharge_qty,0) AS receive_nocharge_qty
+        from
+        od0000,od0010 a,ma1100 b
+        left join ma0220 d on d.unit_id = b.sales_unit_id and d.effective_sts = '10'
+        <where>
+            od0000.order_id = a.order_id
+            and b.article_id = a.article_id
+            <if test="dto.orderId != null and dto.orderId != ''" >
+                and od0000.order_id = #{dto.orderId}
+            </if>
+        </where>
+    </select>
     <select id="getRealTimeStock"
             resultType="cn.com.bbut.iy.itemmaster.dto.returnOrder.RealtimeStockItem">
         SELECT
@@ -520,13 +597,9 @@ WHERE
         ma1110.vendor_id
         FROM
         ma1110
-        WHERE
-        #{stockDate} BETWEEN ma1110.effective_start_date
-        AND ma1110.effective_end_date
         ) AS d ON iv.article_id = d.article_id AND iv.major_vendor_id = d.vendor_id
         <where>
             iv.store_cd = #{storeCd,jdbcType=VARCHAR}
-            and  #{stockDate} between ma1100.effective_start_date and ma1100.effective_end_date
             and ma1100.article_id = #{articleId,jdbcType=VARCHAR}
         </where>
         order by ma1100.article_id ASC
@@ -535,10 +608,10 @@ WHERE
 
     <select id="getReturnContract" resultType="cn.com.bbut.iy.itemmaster.dto.returnOrder.OrderInfoDTO">
         select
-            ma2000.vendor_id,
-            ma2180.this_return,
-            ma2180.this_remain_return,
-            ma2180.this_exchange_return
+        ma2000.vendor_id,
+        ma2180.this_return,
+        ma2180.this_remain_return,
+        ma2180.this_exchange_return
         from ma2000,ma2180
         <where>
             ma2000.vendor_id = #{vendorId,jdbcType=VARCHAR}
@@ -553,5 +626,36 @@ WHERE
         from ma5321
     </select>
     <!--退仓库一览条件查询-->
+
+<!--    //20210726 Dc-->
+    <select id="selectArticleBySupplier"
+            resultType="cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.RWHListResult"
+            parameterType="cn.com.bbut.iy.itemmaster.dto.returnOrder.returnVendor.RVListParam" >
+    SELECT
+	od0000.delivery_center_id ,
+	od0010.article_id,
+	ma5321.warehouse_name delivery_center_name,
+	    ma1100.dep_cd,
+		od0010.barcode,
+		ma2000.vendor_name,
+		ma1000.store_name,
+		ma0070.dep_name,
+		ma1100.article_id,
+		od0000.order_date,
+		ma1100.article_name,
+	od0010.store_cd
+FROM
+	od0000 LEFT JOIN ma5321 ON ma5321.warehouse_no = od0000.delivery_center_id,
+	 od0010 left join ma1000 on od0010.store_cd=ma1000.store_cd
+	 left join ma2000 on od0010.vendor_id=ma2000.vendor_id
+	 left join ma1100 on od0010.article_id=ma1100.article_id
+	 left join ma0070 on ma1100.dep_cd=ma0070.dep_cd
+WHERE
+	od0000.order_id = od0010.order_id
+	AND od0000.delivery_center_id = #{jsonParam.deliveryCenterId}
+	AND od0000.order_date >= #{jsonParam.orderStartDate}
+	AND #{jsonParam.orderEndDate} >= od0000.order_date
+	AND od0000.return_type = #{jsonParam.returnType}
+    </select>
 
 </mapper>

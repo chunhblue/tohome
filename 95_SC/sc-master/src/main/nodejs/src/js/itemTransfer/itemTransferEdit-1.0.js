@@ -80,6 +80,7 @@ define('itemTransfersEdit', function () {
         audit_cancel:null,
         audit_affirm:null,
         typeId:null,
+        Inqty:null,
         reviewId:null
     }
 
@@ -381,9 +382,17 @@ define('itemTransfersEdit', function () {
 
         // 修改
         $("#updateItemDetails").on("click",function(){
-            if(selectTrTemp==null){
+            let _list = tableGrid.getCheckboxTrs();
+            if((_list == null || _list.length == 0) && selectTrTemp==null){
                 _common.prompt("Please select at least one row of data!",3,"info");
                 return false;
+            }
+            if(_list.length >= 2){
+                _common.prompt("Please select only one row of data!",3,"info");
+                return false;
+            }
+            if(_list.length == 1){
+                selectTrTemp = _list[0];
             }
             let _storeCd = $("#aStore").attr('k');
             if(!_storeCd){
@@ -424,34 +433,42 @@ define('itemTransfersEdit', function () {
 
         // 查看
         $("#viewItemDetails").on("click",function(){
-            if(selectTrTemp==null){
+            let _list = tableGrid.getCheckboxTrs();
+            if((_list == null || _list.length == 0) && selectTrTemp==null){
                 _common.prompt("Please select at least one row of data!",3,"info");
                 return false;
-            }else{
-                let _storeCd = $("#aStore").attr('k');
-                let cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,spec,priceNoTax,bqty1,adjustReasonText" +
-                    ",barcode1,articleId1,articleName1,uom1,spec1,priceNoTax1,taxRate1,transferInQty");
-                $("#item_input_cd").val(cols['barcode']);
-                $.myAutomatic.setValueTemp(itemInput,cols['articleId'],cols['articleName']);
-                $("#item_input_uom").val(cols['uom']);
-                $("#item_input_spec").val(cols['spec']);
-                $("#item_input_price").val(cols['priceNoTax']);
-                $("#actualQty").val(cols['bqty1']);
-                $("#transferInQty").val(cols['transferInQty']);
-                $.myAutomatic.setValueTemp(adjustReason,'',cols['adjustReasonText']);
-                $("#In_item_input_cd").val(cols['barcode1']);
-                $.myAutomatic.setValueTemp(InItemInput,cols['articleId1'],cols['articleName1']);
-                $("#In_item_input_uom").val(cols['uom1']);
-                $("#In_item_input_spec").val(cols['spec1']);
-                $("#In_item_input_price").val(cols['priceNoTax1']);
-                $("#In_tax_rate").val(cols['taxRate1']);
-                setDialogDisable(1);
-                $('#update_dialog').attr("flg","view");
-                $('#update_dialog').modal("show");
-                // 查询实时库存
-                getStock(_storeCd, cols['articleId'],'out');
-                getStock(_storeCd, cols['articleId1'],'in');
             }
+            if(_list.length >= 2){
+                _common.prompt("Please select only one row of data!",3,"info");
+                return false;
+            }
+            if(_list.length == 1){
+                selectTrTemp = _list[0];
+            }
+            let _storeCd = $("#aStore").attr('k');
+            let cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,spec,priceNoTax,bqty1,adjustReasonText" +
+                ",barcode1,articleId1,articleName1,uom1,spec1,priceNoTax1,taxRate1,transferInQty");
+            $("#item_input_cd").val(cols['barcode']);
+            $.myAutomatic.setValueTemp(itemInput,cols['articleId'],cols['articleName']);
+            $("#item_input_uom").val(cols['uom']);
+            $("#item_input_spec").val(cols['spec']);
+            $("#item_input_price").val(cols['priceNoTax']);
+            $("#actualQty").val(cols['bqty1']);
+            $("#transferInQty").val(cols['transferInQty']);
+            $.myAutomatic.setValueTemp(adjustReason,'',cols['adjustReasonText']);
+            $("#In_item_input_cd").val(cols['barcode1']);
+            $.myAutomatic.setValueTemp(InItemInput,cols['articleId1'],cols['articleName1']);
+            $("#In_item_input_uom").val(cols['uom1']);
+            $("#In_item_input_spec").val(cols['spec1']);
+            $("#In_item_input_price").val(cols['priceNoTax1']);
+            $("#In_tax_rate").val(cols['taxRate1']);
+            setDialogDisable(1);
+            $('#update_dialog').attr("flg","view");
+            $('#update_dialog').modal("show");
+            // 查询实时库存
+            getStock(_storeCd, cols['articleId'],'out');
+            getStock(_storeCd, cols['articleId1'],'in');
+
         });
 
         // 删除按钮
@@ -520,7 +537,8 @@ define('itemTransfersEdit', function () {
                 // 转入商品
                 let _price1 = $(this).find('td[tag=priceNoTax1]').text();
                 let _qty1 = parseInt(reThousands($(this).find('td[tag=qty2]').text()))||0;
-                let _actualQty1 = parseInt(reThousands($(this).find('td[tag=transferInQty]').text()))||0;
+                // let _actualQty1 = parseInt(reThousands($(this).find('td[tag=transferInQty]').text()))||0;
+                let _actualQty1 = reThousands($(this).find('td[tag=transferInQty]').text())||0;
                 let _rate1 = reThousands($(this).find('td[tag=taxRate1]').text())||0;
                 let _amtNoTax1 = accMul(_price, Math.abs(_actualQty1));
                 let _amt1 = Number(accMul(_amtNoTax1, accAdd(1,_rate1))).toFixed(2);
@@ -723,7 +741,7 @@ define('itemTransfersEdit', function () {
         if(flag==2){ // modify
             $("#dialog_affirm").prop("disabled", false);
             $("#actualQty").prop("disabled", false);
-            $("#transferInQty").prop("disabled", false);
+            // $("#transferInQty").prop("disabled", false);
             $("#item_input").prop("disabled", false);
             $("#In_item_input").prop("disabled", false);
             $("#itemRefresh").show();
@@ -733,7 +751,7 @@ define('itemTransfersEdit', function () {
         }else{
             $("#dialog_affirm").prop("disabled", flg);
             $("#actualQty").prop("disabled", flg);
-            $("#transferInQty").prop("disabled", flg);
+            // $("#transferInQty").prop("disabled", flg);
             $("#itemRefresh").hide();
             $("#itemRemove").hide();
             $("#In_itemRefresh").hide();
@@ -858,50 +876,50 @@ define('itemTransfersEdit', function () {
         //     _common.prompt("Target item is out of stock, cannot transfer out!",3,"info"); // 转出商品库存为0，不能转移
         //     return false;
         // }else {
-            if (flg != '1') {
-                temp = reThousands($("#actualQty").val());
-                if (temp == null || $.trim(temp) == "") {
-                    _common.prompt("The Tranfer Qty cannot be empty!", 3, "error");
-                    $("#actualQty").css("border-color", "red");
-                    $("#actualQty").focus();
-                    return false;
-                } else if (temp == '0') {
-                    _common.prompt("Transfer Qty cannot be 0, please enter again!", 3, "error");
-                    $("#actualQty").css("border-color", "red");
-                    $("#actualQty").focus();
-                    return false;
-                } else {
-                    let reg = /^[0-9]*$/;
-                    if (!reg.test(Math.abs(temp))) {
-                        _common.prompt("Tranfer Qty can only be integers!", 3, "error");
-                        $("#actualQty").css("border-color", "red");
-                        $("#actualQty").focus();
-                        return false;
-                    }
-                    // else {
-                    //     if (Math.abs(parseInt(temp)) > Math.abs(parseInt(handQty))) {
-                    //         _common.prompt("Tranfer Qty cannot be more than actual stock quantity!", 3, "error");
-                    //         $("#actualQty").css("border-color", "red");
-                    //         $("#actualQty").focus();
-                    //         return false;
-                    //     } else {
-                    //         $("#actualQty").css("border-color", "#CCC");
-                    //     }
-                    // }
-                }
-            }
-
-            temp = m.adjustReason.attr("k");
+        if (flg != '1') {
+            temp = reThousands($("#actualQty").val());
             if (temp == null || $.trim(temp) == "") {
-                _common.prompt("Please select the write-off reason!", 3, "error");
-                $("#adjustReason").css("border-color", "red");
-                $("#adjustReason").focus();
+                _common.prompt("The Tranfer Qty cannot be empty!", 3, "error");
+                $("#actualQty").css("border-color", "red");
+                $("#actualQty").focus();
+                return false;
+            } else if (temp == '0') {
+                _common.prompt("Transfer Qty cannot be 0, please enter again!", 3, "error");
+                $("#actualQty").css("border-color", "red");
+                $("#actualQty").focus();
                 return false;
             } else {
-                $("#adjustReason").css("border-color", "#CCC");
+                let reg = /^[0-9]*$/;
+                if (!reg.test(Math.abs(temp))) {
+                    _common.prompt("Tranfer Qty can only be integers!", 3, "error");
+                    $("#actualQty").css("border-color", "red");
+                    $("#actualQty").focus();
+                    return false;
+                }
+                // else {
+                //     if (Math.abs(parseInt(temp)) > Math.abs(parseInt(handQty))) {
+                //         _common.prompt("Tranfer Qty cannot be more than actual stock quantity!", 3, "error");
+                //         $("#actualQty").css("border-color", "red");
+                //         $("#actualQty").focus();
+                //         return false;
+                //     } else {
+                //         $("#actualQty").css("border-color", "#CCC");
+                //     }
+                // }
             }
-            return true;
-       // }
+        }
+
+        temp = m.adjustReason.attr("k");
+        if (temp == null || $.trim(temp) == "") {
+            _common.prompt("Please select the write-off reason!", 3, "error");
+            $("#adjustReason").css("border-color", "red");
+            $("#adjustReason").focus();
+            return false;
+        } else {
+            $("#adjustReason").css("border-color", "#CCC");
+        }
+        return true;
+        // }
     }
 
 
@@ -913,7 +931,8 @@ define('itemTransfersEdit', function () {
 
         $("#actualQty").blur(function () {
             $("#actualQty").val(toThousands(this.value));
-            $("#transferInQty").val($("#actualQty").val());
+            var Q=  m.Inqty.val()*m.actualQty.val();
+            $("#transferInQty").val( Q.toFixed(4));
         });
         //光标进入，去除金额千分位，并去除小数后面多余的0
         $("#actualQty").focus(function(){
@@ -921,11 +940,13 @@ define('itemTransfersEdit', function () {
         });
 
         $("#transferInQty").blur(function () {
-            $("#transferInQty").val(toThousands(this.value));
+            //  $("#transferInQty").val(toThousands(this.value));
+            $("#transferInQty").val(this.value);
         });
         //光标进入，去除金额千分位，并去除小数后面多余的0
         $("#transferInQty").focus(function(){
-            $("#transferInQty").val(reThousands(this.value));
+            // $("#transferInQty").val(reThousands(this.value));
+            $("#transferInQty").val(this.value);
         });
 
         // 重置按钮
@@ -968,7 +989,8 @@ define('itemTransfersEdit', function () {
                     // 转入商品
                     let _price1 = $(this).find('td[tag=priceNoTax1]').text();
                     let _qty1 = parseInt(reThousands($(this).find('td[tag=qty2]').text()))||0;
-                    let _actualQty1 = parseInt(reThousands($(this).find('td[tag=transferInQty]').text()))||0;
+                    // let _actualQty1 = parseInt(reThousands($(this).find('td[tag=transferInQty]').text()))||0;
+                    let _actualQty1 = reThousands($(this).find('td[tag=transferInQty]').text())||0;
                     let _rate1 = reThousands($(this).find('td[tag=taxRate1]').text())||0;
                     let _amtNoTax1 = accMul(_price, Math.abs(_actualQty1));
                     let _amt1 = Number(accMul(_amtNoTax1, accAdd(1,_rate1))).toFixed(2);
@@ -1082,6 +1104,8 @@ define('itemTransfersEdit', function () {
                 }
                 _common.myConfirm("Are you sure to save?",function(result){
                     if(result!="true"){return false;}
+                    setDisable(true);
+                    m.returnsViewBut.prop("disabled",true);
                     $.myAjaxs({
                         url:url_root+_url,
                         async:true,
@@ -1115,6 +1139,7 @@ define('itemTransfersEdit', function () {
                                     $("#tf_cd").val(result.o);
                                 }
                                 _common.prompt("Data saved successfully！",2,"success",function(){/*保存成功*/
+                                    m.returnsViewBut.prop("disabled",false);
                                     submitFlag=true;
                                     //发起审核
                                     let typeId =m.typeId.val();
@@ -1377,7 +1402,8 @@ define('itemTransfersEdit', function () {
     // 根据Store No.取得该店铺信息
     var initAutomatic = function(){
         adjustReason = $("#adjustReason").myAutomatic({
-            url:url_root+"/cm9010/getReasonCode",
+            // url:url_root+"/cm9010/getReasonCode",
+            url:url_root+"/cm9010/getItemOutInReasonCode",
             ePageSize:10,
             startCount:0,
         });
@@ -1398,22 +1424,25 @@ define('itemTransfersEdit', function () {
                 // 替换商品下拉查询参数
                 let str = "&storeCd=" + thisObject.attr("k");
                 $.myAutomatic.replaceParam(itemInput, str);
-                $.myAutomatic.replaceParam(InItemInput, str);
+                // $.myAutomatic.replaceParam(InItemInput, str);
             }
         });
 
 
         // 商品选择
         itemInput = $("#item_input").myAutomatic({
-            url: url_root+"/inventoryVoucher/getItemList",
+            //url: url_root+"/inventoryVoucher/getItemList",
+            url: url_root+"/inventoryVoucher/getMa1172OutItemList",
             ePageSize: 5,
-            startCount: 3,
+            startCount: 0,
             cleanInput: function() {
                 clearDialog(false);
             },
             selectEleClick: function (thisObject) {
                 clearDialog(false);
                 $.myAutomatic.setValueTemp(itemInput,thisObject.attr("k"),thisObject.text());
+
+
                 if(thisObject.attr('k') == $("#In_item_input").attr('k')){
                     $("#item_input").focus();
                     $.myAutomatic.cleanSelectObj(itemInput);
@@ -1422,6 +1451,8 @@ define('itemTransfersEdit', function () {
                 }
                 let _storeCd = $("#aStore").attr('k');
                 $.myAutomatic.setValueTemp(itemInput,thisObject.attr("k"),thisObject.text());
+                let str = "&storeCd=" + $("#aStore").attr("k")+"&outArticleId="+thisObject.attr("k");
+                $.myAutomatic.replaceParam(InItemInput, str);
                 let _itemId = thisObject.attr('k');
                 if(!!_storeCd && !!_itemId){
                     checkParent(_itemId, function(res){
@@ -1446,18 +1477,21 @@ define('itemTransfersEdit', function () {
                         }
                     });
                 }
+
             }
         });
 
         // 商品选择
         InItemInput = $("#In_item_input").myAutomatic({
-            url: url_root+"/inventoryVoucher/getItemList",
+            // url: url_root+"/inventoryVoucher/getItemList",
+            url: url_root+"/inventoryVoucher/getMa1172InItemList",
             ePageSize: 5,
-            startCount: 3,
+            startCount: 0,
             cleanInput: function() {
                 clearInItemialog(false);
             },
             selectEleClick: function (thisObject) {
+
                 clearInItemialog(false);
                 if(thisObject.attr('k') === $("#item_input").attr('k')){
                     $("#In_item_input").focus();
@@ -1467,6 +1501,7 @@ define('itemTransfersEdit', function () {
                 }
                 let _storeCd = $("#aStore").attr('k');
                 $.myAutomatic.setValueTemp(InItemInput,thisObject.attr("k"),thisObject.text());
+                m.Inqty.val(thisObject.attr("hidek"));
                 let _itemId = thisObject.attr('k');
                 if(!!_storeCd && !!_itemId){
                     checkParent(_itemId, function(res){
@@ -1565,7 +1600,7 @@ define('itemTransfersEdit', function () {
                 {name:"bqty1",type:"text",text:"right",width:"120",ishide:false,css:"",getCustomValue:getThousands},
                 {name:"inventoryQty",type:"text",text:"right",width:"120",ishide:true,css:"",getCustomValue:getThousands},
                 /*转入的数量*/
-                {name:"transferInQty",type:"text",text:"right",width:"120",ishide:false,css:"",getCustomValue:getThousands},
+                {name:"transferInQty",type:"text",text:"right",width:"120",ishide:false,css:""},
                 {name:"inventoryInQty",type:"text",text:"right",width:"120",ishide:true,css:"",getCustomValue:getThousands},
                 {name:"adjustReason",type:"text",text:"left",ishide:true},
                 {name:"adjustReasonText",type:"text",text:"left",width:"130",ishide:false,css:""},
@@ -1583,15 +1618,21 @@ define('itemTransfersEdit', function () {
                 tempTrObjValue={};
                 return trObj;
             },
-            loadCompleteEvent: function (self) {
-                table = self;
-                return self;
-            },
             ajaxSuccess:function(resData){
                 return resData;
             },
+            loadCompleteEvent: function (self) {
+                table = self;
+                isDisabledBtn();
+                return self;
+            },
             eachTrClick:function(trObj,tdObj){//正常左侧点击
                 selectTrTemp = trObj;
+                isDisabledBtn();
+                let _list = tableGrid.getCheckboxTrs();
+                if(_list.length<1){
+                    selectTrTemp = null;//清空选择的行
+                }
             },
             buttonGroup:[
                 {
@@ -1618,8 +1659,21 @@ define('itemTransfersEdit', function () {
                 {butType:"custom",butHtml:"<button id='attachments' type='button' class='btn btn-primary btn-sm'><span class='glyphicon glyphicon glyphicon-file'></span> Attachments</button>"},//附件
             ],
         });
+    };
+    // 多选时查看、编辑禁用
+    function isDisabledBtn(){
+        let flg = m.viewSts.val();
+        let _list = tableGrid.getCheckboxTrs();
+        if(_list == null || _list.length > 1){
+            $("#updateItemDetails").prop("disabled",true);
+            $("#viewItemDetails").prop("disabled",true);
+        }else{
+            if(flg=="add" || flg=="edit"){
+                $("#updateItemDetails").prop("disabled",false);
+            }
+            $("#viewItemDetails").prop("disabled",false);
+        }
     }
-
     // 日期字段格式化格式
     var dateFmt = function(tdObj, value){
         if(value!=null&&value.trim()!=''&&value.length==8) {

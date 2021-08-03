@@ -664,30 +664,44 @@ define('materialDataEntry', function () {
             })
         });
 
+
+
+        $("#confirm").on('click',function () {
+            let storeCd = m.store.attr('k');
+            let articleId=m.searchItemInp.val();
+            if (!storeCd){
+                _common.prompt("Please enter the Store!",5,"error");/*请录入费用录入商品数据*/
+                $('#store').focus();
+                $('#store').css("border-color","red");
+                return;
+            }else {
+                $('#store').css("border-color","#CCC");
+            }
+            _common.myConfirm("Entry conditions cannot be changed after click 'Confirm, are you sure to continue?", function (result) {
+                if (result == "true") {
+                    $("#confirm").attr("disabled",true);
+                    $("#searchItemBtn").attr("disabled",false);
+                    $("#searchItemBtn").removeClass("disabled");
+                    $('#store').attr("disabled",true);
+                    $("#refresh").hide();
+                    $("#clear").hide();
+                }
+            })
+        }),
         // 输入商品id定位功能
         m.searchItemBtn.on('click',function () {
-
-            // if(!m.enterFlag.val()){
-                let storeCd = m.store.attr('k');
-                let articleId=m.searchItemInp.val();
-                if (!storeCd){
-                        _common.prompt("Please enter the Store!",5,"error");/*请录入费用录入商品数据*/
-                        $('#store').focus();
-                        $('#store').css("border-color","red");
-                        return;
-                    }else {
-                        $('#store').css("border-color","#CCC");
-                }
-
-
+                // if(!m.enterFlag.val()){
+                $("store").attr("disabled",true);
+                $("#refresh").attr("disabled",true);
+                $("#clear").attr("disabled",true);
                 if (m.enterFlag.val()=="view" || m.enterFlag.val()=="update"){
                     getDataIn(m.piCd.val());
                 }else {
                     var searchJsonStr={
                         storeCd:$("#store").attr("k"),
-                        articleId:articleId,
+                        articleId:m.searchItemInp.val(),
                     }
-                    m.searchJson1.val(JSON.stringify(searchJsonStr))
+                    m.searchJson1.val(JSON.stringify(searchJsonStr));
                     paramGrid = "searchJson="+ m.searchJson1.val();
                     tableGrid.setting("url",url_left+"/getStoreAllItem");
                     tableGrid.setting("param", paramGrid);
@@ -766,12 +780,12 @@ define('materialDataEntry', function () {
         list.forEach(function (item) {
             item.rowIndex=uuid();
             var html = '<tr data-index="'+item.rowIndex+'">' +
-                '<td tag="barcode" width="130" title="'+item.barcode+'" align="center" tdindex="zgGridTtable_barcode">'+item.barcode+'</td>' +
-                '<td tag="articleId" width="130" title="'+item.articleId+'" align="center" tdindex="zgGridTtable_articleId">'+item.articleId+'</td>' +
-                '<td tag="articleName" width="130" title="'+item.articleName+'" align="left" tdindex="zgGridTtable_articleName">'+item.articleName+'</td>' +
-                '<td tag="uom" width="130" title="'+item.uom+'" align="left" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
-                '<td tag="qty" width="130" title="'+toThousands(item.qty)+'" align="right" tdindex="zgGridTtable_qty">'+toThousands(item.qty)+'</td>' +
-                '<td tag="stockQty" width="130" title="'+toThousands(item.stockQty)+'" align="right" tdindex="zgGridTtable_stockQty">'+toThousands(item.stockQty)+'</td>' +
+                '<td tag="barcode" width="150" title="'+item.barcode+'" align="center" tdindex="zgGridTtable_barcode">'+item.barcode+'</td>' +
+                '<td tag="articleId" width="150" title="'+item.articleId+'" align="center" tdindex="zgGridTtable_articleId">'+item.articleId+'</td>' +
+                '<td tag="articleName" width="150" title="'+item.articleName+'" align="left" tdindex="zgGridTtable_articleName">'+item.articleName+'</td>' +
+                '<td tag="uom" width="150" title="'+item.uom+'" align="left" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
+                '<td tag="qty" width="150" title="'+toThousands(item.qty)+'" align="right" tdindex="zgGridTtable_qty">'+toThousands(item.qty)+'</td>' +
+                '<td tag="stockQty" width="150" title="'+toThousands(item.stockQty)+'" align="right" tdindex="zgGridTtable_stockQty">'+toThousands(item.stockQty)+'</td>' +
                 '</tr>'
             tableGrid.append(html);
             dataForm.push(item);
@@ -843,15 +857,15 @@ define('materialDataEntry', function () {
                         }
                         item.rowIndex=uuid();
                         var html = '<tr data-index="'+item.rowIndex+'">' +
-                            '<td tag="barcode" width="130" title="'+item.barcode+'" align="center" id="zgGridTtable_'+rowindex+'_tr_barcode" tdindex="zgGridTtable_barcode">'+item.barcode+'</td>' +
-                            '<td tag="articleId" width="130" title="'+item.articleId+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId" tdindex="zgGridTtable_articleId">'+item.articleId+'</td>' +
-                            '<td tag="articleName" width="130" title="'+item.articleName+'" align="left" id="zgGridTtable_'+rowindex+'_tr_articleName" tdindex="zgGridTtable_articleName">'+item.articleName+'</td>' +
-                            '<td tag="uom" width="130" title="'+item.uom+'" align="left" id="zgGridTtable_'+rowindex+'_tr_uom" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
-                            '<td tag="qty" width="130" title="'+item.qty+'" align="right" id="zgGridTtable_'+rowindex+'_tr_qty" tdindex="zgGridTtable_qty">'+item.qty+'</td>' +
-                            '<td tag="stockQty" width="130" title="'+toThousands(item.stockQty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_stockQty" tdindex="zgGridTtable_stockQty">'+toThousands(item.stockQty)+'</td>' +
+                            '<td tag="barcode" width="150" title="'+item.barcode+'" align="center" id="zgGridTtable_'+rowindex+'_tr_barcode" tdindex="zgGridTtable_barcode">'+item.barcode+'</td>' +
+                            '<td tag="articleId" width="150" title="'+item.articleId+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId" tdindex="zgGridTtable_articleId">'+item.articleId+'</td>' +
+                            '<td tag="articleName" width="150" title="'+item.articleName+'" align="left" id="zgGridTtable_'+rowindex+'_tr_articleName" tdindex="zgGridTtable_articleName">'+item.articleName+'</td>' +
+                            '<td tag="uom" width="150" title="'+item.uom+'" align="left" id="zgGridTtable_'+rowindex+'_tr_uom" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
+                            '<td tag="qty" width="150" title="'+item.qty+'" align="right" id="zgGridTtable_'+rowindex+'_tr_qty" tdindex="zgGridTtable_qty">'+item.qty+'</td>' +
+                            '<td tag="stockQty" width="150" title="'+toThousands(item.stockQty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_stockQty" tdindex="zgGridTtable_stockQty">'+toThousands(item.stockQty)+'</td>' +
                             '<td  class="hide" tag="reasonCode" width="130" title="'+item.reasonCode+'" align="right" id="zgGridTtable_'+rowindex+'_tr_reasonCode" tdindex="zgGridTtable_reasonCode">'+item.reasonCode+'</td>' +
-                            '<td tag="reason" width="130" title="'+item.reason+'" align="right" id="zgGridTtable_'+rowindex+'_tr_reason" tdindex="zgGridTtable_reason">'+item.reason+'</td>' +
-                            '<td class="hide" tag="fnStockQty" width="130" title="'+toThousands(item.fnStockQty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_fnStockQty" tdindex="zgGridTtable_fnStockQty">'+toThousands(item.fnStockQty)+'</td>' +
+                            '<td tag="reason" width="150" title="'+item.reason+'" align="right" id="zgGridTtable_'+rowindex+'_tr_reason" tdindex="zgGridTtable_reason">'+item.reason+'</td>' +
+                            '<td class="hide" tag="fnStockQty" width="150" title="'+toThousands(item.fnStockQty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_fnStockQty" tdindex="zgGridTtable_fnStockQty">'+toThousands(item.fnStockQty)+'</td>' +
                              '</tr>'
                         tableGrid.append(html);
                     });
@@ -900,14 +914,14 @@ define('materialDataEntry', function () {
                         }
                         item.rowIndex=uuid();
                         var html = '<tr data-index="'+item.rowIndex+'">' +
-                            '<td tag="barcode" width="130" title="'+item.barcode+'" align="center" id="zgGridTtable_'+rowindex+'_tr_barcode" tdindex="zgGridTtable_barcode">'+item.barcode+'</td>' +
-                            '<td tag="articleId" width="130" title="'+item.articleId+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId" tdindex="zgGridTtable_articleId">'+item.articleId+'</td>' +
-                            '<td tag="articleName" width="130" title="'+item.articleName+'" align="left" id="zgGridTtable_'+rowindex+'_tr_articleName" tdindex="zgGridTtable_articleName">'+item.articleName+'</td>' +
-                            '<td tag="uom" width="130" title="'+item.uom+'" align="left" id="zgGridTtable_'+rowindex+'_tr_uom" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
-                            '<td tag="qty" width="130" title="'+toThousands(item.qty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_qty" tdindex="zgGridTtable_qty">'+toThousands(item.qty)+'</td>' +
-                            '<td tag="stockQty" width="130" title="'+toThousands(item.stockQty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_stockQty" tdindex="zgGridTtable_stockQty">'+toThousands(item.stockQty)+'</td>' +
-                            '<td hidden tag="reasonCode" width="130" title="'+item.reasonCode+'" align="right" id="zgGridTtable_'+rowindex+'_tr_reasonCode" tdindex="zgGridTtable_reasonCode">'+item.reasonCode+'</td>' +
-                            '<td tag="reason" width="130" title="'+item.reason+'" align="right" id="zgGridTtable_'+rowindex+'_tr_reason" tdindex="zgGridTtable_reason">'+item.reason+'</td>' +
+                            '<td tag="barcode" width="150" title="'+item.barcode+'" align="center" id="zgGridTtable_'+rowindex+'_tr_barcode" tdindex="zgGridTtable_barcode">'+item.barcode+'</td>' +
+                            '<td tag="articleId" width="150" title="'+item.articleId+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId" tdindex="zgGridTtable_articleId">'+item.articleId+'</td>' +
+                            '<td tag="articleName" width="150" title="'+item.articleName+'" align="left" id="zgGridTtable_'+rowindex+'_tr_articleName" tdindex="zgGridTtable_articleName">'+item.articleName+'</td>' +
+                            '<td tag="uom" width="150" title="'+item.uom+'" align="left" id="zgGridTtable_'+rowindex+'_tr_uom" tdindex="zgGridTtable_uom">'+item.uom+'</td>' +
+                            '<td tag="qty" width="150" title="'+toThousands(item.qty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_qty" tdindex="zgGridTtable_qty">'+toThousands(item.qty)+'</td>' +
+                            '<td tag="stockQty" width="150" title="'+toThousands(item.stockQty)+'" align="right" id="zgGridTtable_'+rowindex+'_tr_stockQty" tdindex="zgGridTtable_stockQty">'+toThousands(item.stockQty)+'</td>' +
+                            '<td hidden tag="reasonCode" width="150" title="'+item.reasonCode+'" align="right" id="zgGridTtable_'+rowindex+'_tr_reasonCode" tdindex="zgGridTtable_reasonCode">'+item.reasonCode+'</td>' +
+                            '<td tag="reason" width="150" title="'+item.reason+'" align="right" id="zgGridTtable_'+rowindex+'_tr_reason" tdindex="zgGridTtable_reason">'+item.reason+'</td>' +
                             '</tr>'
                         tableGrid.append(html);
                     });
@@ -1087,14 +1101,14 @@ define('materialDataEntry', function () {
                     name: "barcode",
                     type: "text",
                     text: "center",
-                    width: "130",
+                    width: "150",
                     ishide: false
                 },
                 {
                     name: "articleId",
                     type: "text",
                     text: "center",
-                    width: "130",
+                    width: "150",
                     ishide: false,
                     css: ""
                 },
@@ -1102,7 +1116,7 @@ define('materialDataEntry', function () {
                     name: "articleName",
                     type: "text",
                     text: "left",
-                    width: "130",
+                    width: "150",
                     ishide: false,
                     css: ""
                 },
@@ -1110,7 +1124,7 @@ define('materialDataEntry', function () {
                     name: "uom",
                     type: "text",
                     text: "left",
-                    width: "130",
+                    width: "150",
                     ishide: false,
                     css: ""
                 },
@@ -1118,7 +1132,7 @@ define('materialDataEntry', function () {
                     name: "qty",
                     type: "text",
                     text: "right",
-                    width: "130",
+                    width: "150",
                     ishide: false,
                     // getCustomValue:getThousands
                 },
@@ -1126,7 +1140,7 @@ define('materialDataEntry', function () {
                     name: "stockQty",
                     type: "text",
                     text: "right",
-                    width: "130",
+                    width: "150",
                     ishide: false,
                     getCustomValue:getThousands
                 },
@@ -1134,21 +1148,21 @@ define('materialDataEntry', function () {
                     name: "reasonCode",
                     type: "text",
                     text: "right",
-                    width: "130",
+                    width: "150",
                     ishide: true,
                 },
                 {
                     name: "reason",
                     type: "text",
                     text: "right",
-                    width: "130",
+                    width: "150",
                     ishide: false,
                 },
                 {
                     name: "fnStockQty",
                     type: "text",
                     text: "right",
-                    width: "130",
+                    width: "150",
                     ishide: true,
                     getCustomValue:getThousands
                 }

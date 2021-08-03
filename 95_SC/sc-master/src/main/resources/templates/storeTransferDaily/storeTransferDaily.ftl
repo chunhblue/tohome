@@ -189,7 +189,7 @@
                                             <a id="districtRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
                                         </div>
                                     </div>
-                                    <label for="aStore" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">Transfer From Store</label>[#-- 店铺 --]
+                                    <label for="aStore" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">Transfer Store</label>[#-- 店铺 --]
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                                         <div class="aotu-pos">
                                             <input type="text" class="form-control my-automatic input-sm" id="aStore">
@@ -261,15 +261,6 @@
                                         </div>
                                     </div>
 
-                                    <label for="storeCd1" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label" style="white-space: nowrap">Transfer To Store</label>
-                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-                                        <div class="aotu-pos">
-                                            <input type="text" class="form-control my-automatic input-sm" id="storeCd1">
-                                            <a id="storeCd1Refresh" href="javascript:void(0);" title="Refresh" class="auto-but glyphicon glyphicon-refresh refresh"></a>
-                                            <a id="storeCd1Remove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
-                                        </div>
-                                    </div>
-
                                     <label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Barcode</label>
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                                         <input type="text" id="barcode" class="form-control input-sm">
@@ -282,7 +273,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null" style="white-space: nowrap">Tranfer Out Date</label>
+                                    <label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null" style="white-space: nowrap">Tranfer Date</label>
                                     <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
                                         <input id="startDate" nextele="sell_end_date" placeholder="Start Date" class="form-control input-sm select-date" type="text" value="">
                                     </div>
@@ -342,26 +333,21 @@
                     <table id="dailyTable" class="table table-hover table-striped table-condensed table-bordered zgrid-table"
                            style="margin-bottom: 10px">
                         <tr>
-                            <th title="From Store" style="width: 6%;">From Store</th>
-[#--                            <th title="Store Name">Store Name</th>--]
-                            <th title="To Store" style="width: 6%;">To Store</th>
-[#--                            <th title="Store Name">Store Name</th>--]
-                            <th title="Tranfer Out Date" style="width: 6%;">Tranfer Out Date</th>
-                            <th title="Top Department" style="width: 5%;">Top Department</th>
-                            <th title="Department" style="width: 5%;">Department</th>
-                            <th title="Category" style="width: 6%;">Category</th>
-                            <th title="Sub Category" style="width: 6%;">Sub Category</th>
+                            <th title="From Store" style="width: 10%;">From Store</th>
+                            <th title="To Store" style="width: 10%;">To Store</th>
+                            <th title="Transfer Date" style="width: 6%;">Transfer Date</th>
+                            <th title="Top Department" style="width: 6%;">Top Department</th>
+                            <th title="Department" style="width: 6%;">Department</th>
+                            <th title="Category" style="width: 8%;">Category</th>
+                            <th title="Sub Category" style="width: 8%;">Sub Category</th>
                             <th title="Item Code">Item Code</th>
-                            <th title="Item Name" style="width: 6%;">Item Name</th>
+                            <th title="Item Name" style="width: 16%;">Item Name</th>
                             <th title="Barcode">Barcode</th>
                             <th title="UOM">UOM</th>
-                            <th title="Transfer Out Qty" style="width: 6%;">Transfer Out Qty</th>[#--调出数量--]
-                            <th title="Transfer In Qty" style="width: 6%;">Transfer In Qty</th>[#--调入数量--]
-                            <th title="Tranfer In Date" style="width: 6%;">Tranfer In Date</th>
-                            <th title="Different Qty Reason" style="width: 7%;">Different Qty Reason</th>[#--调拨数量不一致的原因--]
+                            <th title="Transfer Qty">Transfer Qty</th>[#--调出数量--]
 [#--                            <th title="Transfer Amount">Transfer Amount</th>--][#--调拨金额--]
-                            <th title="Transfer Reason" style="width: 7%;">Transfer Reason</th>[#--调拨原因--]
-                            <th title="Area Manager Name" style="width: 7%;">Area Manager Name</th>
+                            <th title="Transfer Reason" style="width: 6%;">Transfer Reason</th>[#--调拨原因--]
+                            <th title="Area Manager Name" style="width: 6%;">Area Manager Name</th>
                         </tr>
                     </table>
 

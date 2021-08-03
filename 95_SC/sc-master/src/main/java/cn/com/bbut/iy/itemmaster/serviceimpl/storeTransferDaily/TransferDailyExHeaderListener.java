@@ -32,8 +32,8 @@ public class TransferDailyExHeaderListener implements ExEventListener {
         String row1 = "";
 
         // 列标题
-        String row2 = "NO.,From Store,To Store,Tranfer Out Date,Top Department,Department,Category,Sub Category,Item Code,Item Name," +
-                "Barcode,Uom,Transfer Out Qty,Transfer In Qty,Tranfer In Date,Different Qty Reason,Transfer Reason,Area Manager Name";
+        String row2 = "NO.,From Store,To Store,Transfer Date,Top Department,Department,Category,Sub Category,Item Code,Item Name," +
+                "Barcode,Uom,Transfer Qty,Transfer Reason,Area Manager Name";
         String[] titles = row2.split(",");
 
         // 开始拼接excel头信息

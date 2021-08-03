@@ -187,9 +187,9 @@
 									<label for="warehouseCd" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null">DC</label>
 									<div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
 										<div class="aotu-pos">
-											<input type="text" class="form-control my-automatic input-sm" id="warehouseCd">
-											<a id="vendorIdRefresh" href="javascript:void(0);" title="Refresh" class="auto-but glyphicon glyphicon-refresh refresh"></a>
-											<a id="vendorIdRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
+											<input type="text" disabled class="form-control my-automatic input-sm" id="warehouseCd">
+											<a id="vendorIdRefresh" href="javascript:void(0);" title="Refresh" hidden class="auto-but glyphicon glyphicon-refresh refresh hidden"></a>
+											<a id="vendorIdRemove" href="javascript:void(0);" title="Clear"  class="auto-but glyphicon glyphicon-remove  circle hidden "></a>
 										</div>
 									</div>
 										<label for="dire_total_qty"  class="col-xs-12 col-sm-3 col-md-2 col-lg-1 control-label" style="white-space: nowrap">Total Return Qty</label>

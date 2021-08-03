@@ -36,6 +36,7 @@ public class PaymentAmtDto {
     private BigDecimal payInAmt4;
     private BigDecimal payInAmt5;
     private BigDecimal payInAmt6;
+    private BigDecimal payInAmt7;
 
     private Integer customerCount;
     /**

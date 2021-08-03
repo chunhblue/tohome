@@ -727,6 +727,8 @@ define('receiptEdit', function () {
                             setDisable(true);
                             m.enterFlag='view';
                             _common.prompt("Data saved successfully！",5,"success",function(){/*保存成功*/
+                                // 生成盘点差异报表数据
+                                updateVarianceData(param);
                                 // 为 null 代表 第一次 提交, 没有submit , 需要手动submit,
                                 // 不为null 表示 审核驳回后的修改, 自动 submit
                                 if (reviewStatus==null||reviewStatus=='') {
@@ -821,6 +823,25 @@ define('receiptEdit', function () {
             m.pd_end_time.val("");
         });
     }
+
+    var updateVarianceData = function (param) {
+        $.myAjaxs({
+            url:url_left+"/updateVarianceData",
+            async:true,
+            cache:false,
+            type :"post",
+            data :'&param='+JSON.stringify(param),
+            dataType:"json",
+            success:function(result){
+                if(result.false){
+                    _common.prompt(result.msg,5,"error");
+                }
+            },
+            error : function(e){
+                _common.prompt("Data updated failed！",5,"error");/*保存失败*/
+            }
+        });
+    };
 
     var searchItem = function () {
         // 还没有添加商品

@@ -11,10 +11,6 @@
     from ma4340
     left join ma1000
         on ma4340.store_cd = ma1000.store_cd
-            <![CDATA[
-                and ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-                and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-            ]]>
     <where>
         1=1
       <if test="launchingTime != null and launchingTime != ''">

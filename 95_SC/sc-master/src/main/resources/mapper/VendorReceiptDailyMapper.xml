@@ -36,7 +36,7 @@
             #{store,jdbcType=VARCHAR}
         </foreach>
         <if test="receiptDaily.startDate!=null and receiptDaily.startDate!='' and receiptDaily.endDate!=null and receiptDaily.endDate!=''">
-            AND od1.update_ymd BETWEEN #{receiptDaily.startDate} AND #{receiptDaily.endDate}
+            AND od1.update_ymd between #{receiptDaily.startDate} AND #{receiptDaily.endDate}
         </if>
         <if test="receiptDaily.depCd!=null and receiptDaily.depCd!=''">
             AND MA1.dep_cd = #{receiptDaily.depCd}
@@ -98,7 +98,7 @@
         <if test="v!=null and v!=''">
             AND (
             lower(B.c_operatorcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-            OR lower(B.c_operatorcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(B.c_operatorname) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
             )
         </if>
     </select>
@@ -122,7 +122,7 @@
         <if test="v!=null and v!=''">
             AND (
             lower(B.c_operatorcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-            OR lower(B.c_operatorcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(B.c_operatorname) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
             )
         </if>
     </select>
@@ -293,7 +293,41 @@
         AND #{receiptDaily.businessDate} BETWEEN MA4.effective_start_date
         AND MA4.effective_end_date
         AND A.store_cd IN
-        <include refid="commonInclude"></include>
+        <foreach item="store" index="index" collection="receiptDaily.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="receiptDaily.startDate!=null and receiptDaily.startDate!='' and receiptDaily.endDate!=null and receiptDaily.endDate!=''">
+            AND od1.update_ymd between #{receiptDaily.startDate} AND #{receiptDaily.endDate}
+        </if>
+        <if test="receiptDaily.depCd!=null and receiptDaily.depCd!=''">
+            AND MA1.dep_cd = #{receiptDaily.depCd}
+        </if>
+        <if test="receiptDaily.pmaCd!=null and receiptDaily.pmaCd!=''">
+            AND MA1.pma_cd = #{receiptDaily.pmaCd}
+        </if>
+        <if test="receiptDaily.categoryCd!=null and receiptDaily.categoryCd!=''">
+            AND MA1.category_cd = #{receiptDaily.categoryCd}
+        </if>
+        <if test="receiptDaily.subCategoryCd!=null and receiptDaily.subCategoryCd!=''">
+            AND MA1.sub_category_cd = #{receiptDaily.subCategoryCd}
+        </if>
+        <if test="receiptDaily.articleName!=null and receiptDaily.articleName!=''">
+            AND concat(lower( MA1.article_id ),'',lower( MA1.article_name ),'',lower( MA1.article_name_en ),'',lower(
+            MA1.article_short_name_en )) LIKE lower( CONCAT('%',#{receiptDaily.articleName},'%') )
+        </if>
+        <if test="receiptDaily.city!=null and receiptDaily.city!=''">
+            AND MA2.zo_cd = #{receiptDaily.city}
+        </if>
+        <if test="receiptDaily.am!=null and receiptDaily.am!=''">
+            AND MA2.ofc = #{receiptDaily.am}
+        </if>
+        <if test="receiptDaily.om!=null and receiptDaily.om!=''">
+            AND MA2.om = #{receiptDaily.om}
+        </if>
+        <if test="receiptDaily.receiveId !=null and receiptDaily.receiveId !=''">
+            AND lower(od1.receive_id) like lower(CONCAT('%',#{receiptDaily.receiveId},'%'))
+        </if>
         )AS TEMP;
     </select>
 
@@ -581,7 +615,41 @@
         AND #{receiptDaily.businessDate} BETWEEN MA4.effective_start_date
         AND MA4.effective_end_date
         AND A.store_cd IN
-        <include refid="commonInclude"></include>
+        <foreach item="store" index="index" collection="receiptDaily.stores"
+                 open="(" separator="," close=")">
+            #{store,jdbcType=VARCHAR}
+        </foreach>
+        <if test="receiptDaily.startDate!=null and receiptDaily.startDate!='' and receiptDaily.endDate!=null and receiptDaily.endDate!=''">
+            AND od1.update_ymd between #{receiptDaily.startDate} AND #{receiptDaily.endDate}
+        </if>
+        <if test="receiptDaily.depCd!=null and receiptDaily.depCd!=''">
+            AND MA1.dep_cd = #{receiptDaily.depCd}
+        </if>
+        <if test="receiptDaily.pmaCd!=null and receiptDaily.pmaCd!=''">
+            AND MA1.pma_cd = #{receiptDaily.pmaCd}
+        </if>
+        <if test="receiptDaily.categoryCd!=null and receiptDaily.categoryCd!=''">
+            AND MA1.category_cd = #{receiptDaily.categoryCd}
+        </if>
+        <if test="receiptDaily.subCategoryCd!=null and receiptDaily.subCategoryCd!=''">
+            AND MA1.sub_category_cd = #{receiptDaily.subCategoryCd}
+        </if>
+          <if test="receiptDaily.articleName!=null and receiptDaily.articleName!=''">
+              AND concat(lower( MA1.article_id ),'',lower( MA1.article_name ),'',lower( MA1.article_name_en ),'',lower(
+              MA1.article_short_name_en )) LIKE lower( CONCAT('%',#{receiptDaily.articleName},'%') )
+        </if>
+        <if test="receiptDaily.city!=null and receiptDaily.city!=''">
+            AND MA2.zo_cd = #{receiptDaily.city}
+        </if>
+        <if test="receiptDaily.am!=null and receiptDaily.am!=''">
+            AND MA2.ofc = #{receiptDaily.am}
+        </if>
+        <if test="receiptDaily.om!=null and receiptDaily.om!=''">
+            AND MA2.om = #{receiptDaily.om}
+        </if>
+        <if test="receiptDaily.receiveId !=null and receiptDaily.receiveId !=''">
+            AND lower(od1.receive_id) like lower(CONCAT('%',#{receiptDaily.receiveId},'%'))
+        </if>
         <if test="receiptDaily.flg">
             LIMIT ${receiptDaily.rows} OFFSET ${receiptDaily.limitStart}
         </if>

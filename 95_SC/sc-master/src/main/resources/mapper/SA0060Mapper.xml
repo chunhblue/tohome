@@ -535,8 +535,8 @@
         AND b.tran_serial_no = CAST ( cbs.tran_serial_no AS INTEGER )
         where
         a.pos_id = b.pos_id
+        and a.store_cd = b.store_cd
         and a.acc_date = b.acc_date
-        and a.pos_id = b.pos_id
         and a.tran_serial_no = b.tran_serial_no
         <if test="dto.billSaleNo!=null and dto.billSaleNo != ''">
             <choose>

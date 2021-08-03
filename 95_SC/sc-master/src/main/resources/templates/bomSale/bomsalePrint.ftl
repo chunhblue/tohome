@@ -19,7 +19,10 @@
         font-family: verdana,arial,sans-serif;
         text-align: center;
     }
-    .table-box .title {
+	table.gridTable{
+		width: 100%;
+	}
+	.table-box .title {
         font-size:20px;
         font-weight: bold;
         margin-bottom: 10px;
@@ -51,6 +54,7 @@
         -khtml-border-radius: 5px;
     }
     table.gridTable th {
+		text-align: center;
         padding: 8px;
         font-size:13px;
         border-top: 1px solid #666666;

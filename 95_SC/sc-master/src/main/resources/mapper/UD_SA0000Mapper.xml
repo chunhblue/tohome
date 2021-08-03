@@ -56,10 +56,7 @@
     ) as pos_display_name,
     (select store_name from ma1000
     where
-    <![CDATA[
-        ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-    ]]>
+    1=1
     and ma1000.store_cd = sa0005.store_cd) as store_name,
     (select pos_name from sa0160
     where sa0160.store_cd= sa0005.store_cd
@@ -81,10 +78,7 @@
     ) as pos_display_name,
     (select store_name from ma1000
     where
-    <![CDATA[
-        ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-    ]]>
+    1=1
     and ma1000.store_cd = sa0005.store_cd) as store_name,
     (select pos_name from sa0160
     where sa0160.store_cd= sa0005.store_cd
@@ -108,10 +102,7 @@
     ) as pos_display_name,
     (select store_name from ma1000
     where
-    <![CDATA[
-        ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-    ]]>
+    1=1
     and ma1000.store_cd = sa0005.store_cd) as store_name,
     (select pos_name from sa0160
     where sa0160.store_cd= sa0005.store_cd
@@ -134,10 +125,7 @@
     ) as pos_display_name,
     (select store_name from ma1000
     where
-    <![CDATA[
-        ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-    ]]>
+    1=1
     and ma1000.store_cd = sa0005.store_cd) as store_name,
     (select pos_name from sa0160
     where sa0160.store_cd= sa0005.store_cd

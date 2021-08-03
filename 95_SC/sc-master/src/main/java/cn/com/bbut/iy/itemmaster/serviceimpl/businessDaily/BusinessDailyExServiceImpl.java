@@ -720,7 +720,8 @@ public class BusinessDailyExServiceImpl implements ExService {
                         .subtract(payAmtDTO.getPayAmt3().multiply(new BigDecimal(100)).divide(payAmtDTO.getPayAmt(),1,BigDecimal.ROUND_HALF_UP))
                         .subtract(payAmtDTO.getPayAmt4().multiply(new BigDecimal(100)).divide(payAmtDTO.getPayAmt(),1,BigDecimal.ROUND_HALF_UP))
                         .subtract(payAmtDTO.getPayAmt5().multiply(new BigDecimal(100)).divide(payAmtDTO.getPayAmt(),1,BigDecimal.ROUND_HALF_UP))
-                        .subtract(payAmtDTO.getPayAmt6().multiply(new BigDecimal(100)).divide(payAmtDTO.getPayAmt(),1,BigDecimal.ROUND_HALF_UP));
+                        .subtract(payAmtDTO.getPayAmt6().multiply(new BigDecimal(100)).divide(payAmtDTO.getPayAmt(),1,BigDecimal.ROUND_HALF_UP))
+                        .subtract(payAmtDTO.getPayAmt7().multiply(new BigDecimal(100)).divide(payAmtDTO.getPayAmt(),1,BigDecimal.ROUND_HALF_UP));
             }else {
                 Contribution = new BigDecimal(0.0);
             }
@@ -805,6 +806,19 @@ public class BusinessDailyExServiceImpl implements ExService {
             percent = Contribution.toString();
             if(payAmtDTO.getCustomerCount6() != null){
                 customerCount = payAmtDTO.getCustomerCount6();
+            }
+        }  else if (rowNum == 7) {
+//            payName = "ShopeePay";
+            payName = payAmtDTO.getPayCd7();
+            payAmt = payAmtDTO.getPayAmt7();
+            if(!BigDecimal.ZERO.equals(payAmtDTO.getPayAmt())){
+                Contribution = payAmtDTO.getPayAmt7().multiply(new BigDecimal(100)).divide(payAmtDTO.getPayAmt(),1,BigDecimal.ROUND_HALF_UP);
+            }else {
+                Contribution = new BigDecimal(0.0);
+            }
+            percent = Contribution.toString();
+            if(payAmtDTO.getCustomerCount7() != null){
+                customerCount = payAmtDTO.getCustomerCount7();
             }
         } else if (rowNum == rowHeight) {
             payName = "Total";

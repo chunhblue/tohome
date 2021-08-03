@@ -134,6 +134,7 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
         dto.setPayAmt4(paymentAmtDto.getPayInAmt4()); // Zalo
         dto.setPayAmt5(paymentAmtDto.getPayInAmt5()); // VNPAY
         dto.setPayAmt6(paymentAmtDto.getPayInAmt6()); // GrabMoca
+        dto.setPayAmt7(paymentAmtDto.getPayInAmt7()); // ShopeePay
         for(PaymentAmtDto payDto:payCdList){
             switch (payDto.getPayCd()){
                 case "01":
@@ -157,13 +158,16 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
                 case "18":
                     dto.setPayCd6(payDto.getPayName());
                     break;
+                case "05":
+                    dto.setPayCd7(payDto.getPayName());
+                    break;
                 default:
 
             }
         }
 
         dto.setPayAmt(dto.getPayAmt0().add(dto.getPayAmt1()).add(dto.getPayAmt2())
-                .add(dto.getPayAmt3()).add(dto.getPayAmt4()).add(dto.getPayAmt5()).add(dto.getPayAmt6()));
+                .add(dto.getPayAmt3()).add(dto.getPayAmt4()).add(dto.getPayAmt5()).add(dto.getPayAmt6()).add(dto.getPayAmt7()));
 
         List<PaymentAmtDto> _countList = mapper.getCountCustomerByPayCd(getTimeStamp(payDate),storeCd);
         Integer count = 0;
@@ -190,6 +194,9 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
                 case "18":
                     dto.setCustomerCount6(_count.getCustomerCount());
                     break;
+                case "05":
+                    dto.setCustomerCount7(_count.getCustomerCount());
+                    break;
                 default:
             }
             count += _count.getCustomerCount();
@@ -200,8 +207,15 @@ public class BusinessDailyServiceImpl implements BusinessDailyService {
 
     private BusinessDailyDto getServiceInAmt(String payDate, String storeCd) {
         BusinessDailyDto dto = new BusinessDailyDto();
-        PaymentAmtDto serviceAmtDto = mapper.getServiceAmt(getTimeStamp(payDate),storeCd);
-        PaymentAmtDto countServiceDto = mapper.getCountByService(getTimeStamp(payDate),storeCd);
+        List<String> momoList = mapper.getMomoList();
+        List<String> payCodeList = mapper.getPayCodeList();
+        List<String> payBillList = mapper.getPayBillList();
+        List<String> payViettelList = mapper.getViettelList();
+
+        PaymentAmtDto serviceAmtDto = mapper.getServiceAmt(getTimeStamp(payDate),storeCd,
+                momoList,payCodeList,payBillList,payViettelList);
+        PaymentAmtDto countServiceDto = mapper.getCountByService(getTimeStamp(payDate),storeCd,
+                momoList,payCodeList,payBillList,payViettelList);
         dto.setMomoCashInAmt(serviceAmtDto.getMomoCashInAmt());
         dto.setPayooBillAmt(serviceAmtDto.getPayooBillAmt());
         dto.setPayooCodeAmt(serviceAmtDto.getPayooCodeAmt());

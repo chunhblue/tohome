@@ -2,7 +2,6 @@ package cn.com.bbut.iy.itemmaster.controller;
 
 import cn.com.bbut.iy.itemmaster.annotation.Permission;
 import cn.com.bbut.iy.itemmaster.annotation.Secure;
-import cn.com.bbut.iy.itemmaster.annotation.TimeCheck;
 import cn.com.bbut.iy.itemmaster.constant.Constants;
 import cn.com.bbut.iy.itemmaster.constant.ConstantsAudit;
 import cn.com.bbut.iy.itemmaster.constant.PermissionCode;
@@ -16,22 +15,20 @@ import cn.com.bbut.iy.itemmaster.dto.returnOrder.OrderInfoDTO;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.returnVendor.*;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.ReturnHeadResult;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.RWHItemsGridResult;
-import cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.RWHListResult;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.ReturnWarehouseDetailInfo;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.ReturnWarehouseParamDTO;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.entity.od0000.OD0000;
-import cn.com.bbut.iy.itemmaster.entity.od0010.OD0010;
 import cn.com.bbut.iy.itemmaster.excel.ExService;
 import cn.com.bbut.iy.itemmaster.service.*;
-import cn.com.bbut.iy.itemmaster.service.cm9010.Cm9010Service;
-import cn.com.bbut.iy.itemmaster.service.ma1000.Ma1000Service;
 import cn.com.bbut.iy.itemmaster.util.ExportUtil;
 import cn.com.bbut.iy.itemmaster.util.Utils;
 import cn.shiy.common.baseutil.Container;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +37,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -73,6 +74,7 @@ public class ReturnVendorController extends BaseAction {
     private MRoleStoreService mRoleStoreService;
     @Autowired
     private Ma4320Service ma4320Service;
+    private SXSSFWorkbook wb;
     /**
      * 退供应商申请单管理画面
      *
@@ -139,7 +141,6 @@ public class ReturnVendorController extends BaseAction {
         this.saveToken(request);
         return mv;
     }
-
     /**
      * 原单据编号list
      * @param session
@@ -218,7 +219,27 @@ public class ReturnVendorController extends BaseAction {
         }
         return list;
     }
+    @RequestMapping(value = "/getDirectItems")
+    @ResponseBody
+    public List<AutoCompleteDTO> getDirectItems(HttpSession session, HttpServletRequest req,
+                                          ReturnWarehouseParamDTO param,String returnType,String storeCd) {
 
+        List<AutoCompleteDTO> list = new ArrayList<>();
+
+        if (returnType.equals("10")){
+            param.setStoreCd(storeCd);
+            //获取业务时间
+            String date = cm9060Service.getValByKey("0000");
+            param.setOrderDate(date);
+            list = returnWarehouseService.getdirectItemsList(param);
+        }
+        if(param!=null){
+            if(StringUtils.isNotBlank(param.getOrderId())){
+                list = returnWarehouseService.getItems(param);
+            }
+        }
+        return list;
+    }
     /**
      * 该店铺退货商品详细信息
      * @param session
@@ -281,9 +302,9 @@ public class ReturnVendorController extends BaseAction {
         }
         SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMdd");
         SimpleDateFormat sdf1 = new SimpleDateFormat("HHmmss");
-        Date date = new Date();
-        String ymd = sdf.format(date);
-        String hms = sdf1.format(date);
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         if (!param.getReturnType().equals("10")){
             if(StringUtils.isBlank(param.getStoreCd())||
                     StringUtils.isBlank(param.getOrderDate())||
@@ -355,6 +376,8 @@ public class ReturnVendorController extends BaseAction {
         return res;
     }
 
+
+
     /**
      * 根据编号查询退货单商品信息
      * @param request
@@ -373,6 +396,35 @@ public class ReturnVendorController extends BaseAction {
         }
         return grid;
     }
+    //  2021/7/23开始
+    @ResponseBody
+    @RequestMapping(value = "/getDocumentPrintData",method={RequestMethod.POST,RequestMethod.GET})
+    public   AjaxResultDto getDocumentPrintData(HttpServletRequest request, HttpSession session,
+                                                Map<String, ?> model, String searchJson) {
+        AjaxResultDto resultDto = new AjaxResultDto();
+        GridDataDTO<RWHItemsGridResult> grid = new GridDataDTO<>();
+
+        Gson gson = new Gson();
+        ReturnWarehouseParamDTO returnParamDTO = gson.fromJson(searchJson, ReturnWarehouseParamDTO.class);
+        if (StringUtils.isNotBlank(returnParamDTO.getOrderId())) {
+            List<RWHItemsGridResult> list = returnWarehouseService.getReturnItemsDetail(returnParamDTO);
+            grid.setRows(list);
+            resultDto.setData(grid.getRows());
+            resultDto.setSuccess(true);
+        }else {
+            resultDto.setSuccess(false);
+        }
+
+        return resultDto;
+
+    }
+
+
+
+
+
+
+
 
     /**
      * 验收  退货登录(供应商)
@@ -505,6 +557,39 @@ public class ReturnVendorController extends BaseAction {
         }
     }
 
+
+    @RequestMapping(value = "/exportBySupplier")
+    @Permission(codes = {
+            PermissionCode.CODE_SC_V_RETURN_EXPORT
+    })
+    public String exportBySupplier(HttpServletRequest request, HttpSession session, String searchJson) {
+        if(StringUtils.isBlank(searchJson)){
+            log.info("导出查询参数为空");
+            return null;
+        }
+        // 获取当前角色店铺权限
+        RVListParam dto = new Gson().fromJson(searchJson,RVListParam.class);
+            Collection<String> stores = getStores(session, dto);
+            if(stores.size() == 0){
+                log.info(">>>>>>>>>>>>>>>>>>>>> get stores is null");
+                return null;
+            }
+            // 设置参数对象
+            ExcelParam exParam = new ExcelParam();
+            exParam.setStores(stores);
+            exParam.setParam(searchJson);
+            exParam.setPCode(PermissionCode.CODE_SC_V_RETURN_EXPORT);
+            exParam.setExFileName(EXCEL_EXPORT_NAME);
+            ExService service = Container.getBean("rVendorIdBySupplier", ExService.class);
+            return ExportUtil.export(EXCEL_EXPORT_KEY, request, service, exParam);
+
+    }
+
+
+
+
+
+
     @RequestMapping(value = "/print")
     @Permission(codes = { PermissionCode.CODE_SC_V_RETURN_LIST_VIEW})
     public ModelAndView toPrintView(HttpServletRequest request, HttpSession session,
@@ -534,7 +619,27 @@ public class ReturnVendorController extends BaseAction {
         }
 
     }
+    @RequestMapping(value = "/printDocument")
+    @Permission(codes = { PermissionCode.CODE_SC_V_RETURN_LIST_VIEW})
+    public ModelAndView toprintDocumentView(HttpServletRequest request, HttpSession session,
+                                    String searchJson) {
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        Gson gson = new Gson();
+        ReturnWarehouseParamDTO returnParamDTO = gson.fromJson(searchJson,ReturnWarehouseParamDTO.class);
+            User u = this.getUser(session);
+            log.debug("User:{} 进入 退供应商申请单打印画面", u.getUserId());
+            ModelAndView mv = new ModelAndView("return/vendor/returnPrintDocument");
+            mv.addObject("searchJson", searchJson);
+            mv.addObject("returnParamDTO", returnParamDTO);
+            mv.addObject("userName", u.getUserName());
+            mv.addObject("printTime", Utils.getFormateDate(ymd));
+            mv.addObject("remarkValue", returnParamDTO.getOrderRemark());
+            mv.addObject("useMsg", "退供应商申请单打印画面");
+            return mv;
 
+
+    }
     @RequestMapping(value = "/print/getPrintData")
     @ResponseBody
     public AjaxResultDto printData(HttpServletRequest request, HttpSession session, RVListParamDTO param) {

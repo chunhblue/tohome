@@ -58,13 +58,13 @@ define('bomSalePrint', function () {
 		if(_endDate < _startDate){
 			return false;
 		}
-		var temp = m.itemId.val();
-		if(temp!=null && $.trim(temp)!=''){
-			var reg = /^[0-9]*$/;
-			if(!reg.test(temp)){
-				return false;
-			}
-		}
+		// var temp = m.itemId.val();
+		// if(temp!=null && $.trim(temp)!=''){
+		// 	var reg = /^[0-9]*$/;
+		// 	if(!reg.test(temp)){
+		// 		return false;
+		// 	}
+		// }
 		return true;
 	}
 
@@ -124,13 +124,13 @@ define('bomSalePrint', function () {
 			"<th>UOM</th>" +
 			"<th>Sales Quantity</th>" +
 			"<th>Sales Amount(+VAT)</th>" +
-			"<th>Sales VAT Amount</th>" +
-			"<th>Returning Quantity</th>" +
-			"<th>Returning Amount(+VAT)</th>" +
-			"<th>Returning VAT Amount</th>" +
-			"<th>GP</th>" +
+			// "<th>Sales VAT Amount</th>" +
+			// "<th>Returning Quantity</th>" +
+			// "<th>Returning Amount(+VAT)</th>" +
+			// "<th>Returning VAT Amount</th>" +
+			/*"<th>GP</th>" +
 			"<th>GP%</th>" +
-			"<th>Daily Cost</th>" +
+			"<th>Daily Cost</th>" +*/
 			"</tr>";
 		// 计算求和
 		var saleQtyTal = 0, saleCostTal = 0, saleAmtTal = 0, saleTaxTal = 0;
@@ -139,21 +139,21 @@ define('bomSalePrint', function () {
 			var re = data[i];
 			_str = _str + "<tr>" +
 				"<td>" + fmtIntDate(re.accDate) + "</td>" +
-				"<td>" + re.storeCd + "</td>" +
-				"<td>" + re.storeName + "</td>" +
-				"<td>" + re.barcode + "</td>" +
-				"<td>" + re.articleId + "</td>" +
-				"<td>" + re.articleName + "</td>" +
-				"<td>" + re.salesUnit + "</td>" +
+				"<td>" + isEmpty(re.storeCd) + "</td>" +
+				"<td>" + isEmpty(re.storeName) + "</td>" +
+				"<td>" + isEmpty(re.barcode) + "</td>" +
+				"<td>" + isEmpty(re.articleId) + "</td>" +
+				"<td>" + isEmpty(re.articleName) + "</td>" +
+				"<td>" + isEmpty(re.salesUnit) + "</td>" +
 				"<td>"+ toThousands(re.saleQtyT) +"</td>" +
 				"<td>" + toThousands(re.saleAmtT) + "</td>" +
-				"<td>" + toThousands(re.saleTaxT) + "</td>" +
-				"<td>" + toThousands(re.returnQtyT) + "</td>" +
-				"<td>" + toThousands(re.returnAmtT) + "</td>" +
-				"<td>" + toThousands(re.returnTaxT) + "</td>" +
-				"<td>" + toThousands(re.grossMargin) + "</td>" +
-				"<td>" + fmtRate(re.grossMarginRate) + "</td>" +
-				"<td>" + toThousands(re.avgCostNoTax) + "</td>" +
+				// "<td>" + toThousands(re.saleTaxT) + "</td>" +
+				// "<td>" + toThousands(re.returnQtyT) + "</td>" +
+				// "<td>" + toThousands(re.returnAmtT) + "</td>" +
+				// "<td>" + toThousands(re.returnTaxT) + "</td>" +
+				// "<td>" + toThousands(re.grossMargin) + "</td>" +
+				// "<td>" + fmtRate(re.grossMarginRate) + "</td>" +
+				// "<td>" + toThousands(re.avgCostNoTax) + "</td>" +
 				"</tr>";
 			saleCostTal = accAdd(saleCostTal, re.saleCostT);
 			saleQtyTal = accAdd(saleQtyTal, re.saleQtyT);
@@ -176,13 +176,13 @@ define('bomSalePrint', function () {
 			"<td></td>" +
 			"<td>" + toThousands(saleQtyTal) + "</td>" +
 			"<td>" + toThousands(saleAmtTal) + "</td>" +
-			"<td>" + toThousands(saleTaxTal) + "</td>" +
-			"<td>" + toThousands(returnQtyTal) + "</td>" +
-			"<td>" + toThousands(returnAmtTal) + "</td>" +
-			"<td>" + toThousands(returnTaxTal) + "</td>" +
-			"<td>" + toThousands(grossMarginTal) + "</td>" +
-			"<td>" + fmtRate(grossMarginTalRate) + "</td>" +
-			"<td></td>" +
+			// "<td>" + toThousands(saleTaxTal) + "</td>" +
+			// "<td>" + toThousands(returnQtyTal) + "</td>" +
+			// "<td>" + toThousands(returnAmtTal) + "</td>" +
+			// "<td>" + toThousands(returnTaxTal) + "</td>" +
+			/*"<td>" + toThousands(grossMarginTal) + "</td>" +
+			"<td>" + fmtRate(grossMarginTalRate) + "</td>" +*/
+			// "<td></td>" +
 			"</tr>";
 		_str = _str + totalTr;
 		// 打印信息设置
@@ -237,7 +237,12 @@ define('bomSalePrint', function () {
 			return (r1/r2)*pow(10,t2-t1);
 		}
 	}
-
+	var isEmpty = function (str) {
+		if (str == null || str == undefined || str == '') {
+			return '';
+		}
+		return str;
+	};
 	// 获取当前日期
 	function getDate(){
 		var mydate = new Date();

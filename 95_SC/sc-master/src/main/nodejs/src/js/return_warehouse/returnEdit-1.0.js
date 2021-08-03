@@ -39,6 +39,8 @@ define('returnWarehouseEdit', function () {
         returnType = null,
         attachmentsParamGrid = null,
         selectTrTempFile = null,
+        warehouseCd=null,
+        aStore=null,
         common = null;
     const KEY = 'ITEM_RETURN_REQUEST_ENTRY_TO_DC';
     var m = {
@@ -156,6 +158,9 @@ define('returnWarehouseEdit', function () {
         $("#reType").on("change", function () {
             var reTypeValue = $("#reType").val();
             if (reTypeValue == '10') {
+                // 20210719
+                $.myAutomatic.cleanSelectObj(aStore);
+                $.myAutomatic.cleanSelectObj(warehouseCd);
                 $("#directReturn").show();
                 $("#indirectReturn").hide();
                 $("#org_order_id").attr("disabled", true);
@@ -168,6 +173,9 @@ define('returnWarehouseEdit', function () {
                 $("#storeRefresh").show();
                 $("#storeRemove").show();
             } else {
+                // 20210719
+                $.myAutomatic.cleanSelectObj(aStore);
+                $.myAutomatic.cleanSelectObj(warehouseCd);
                 $("#org_order_id").attr("disabled", false);
                 $("#org_order_id_refresh").show();
                 $("#org_order_id_clear").show();
@@ -186,6 +194,11 @@ define('returnWarehouseEdit', function () {
             ePageSize: 10,
             startCount: 0,
             selectEleClick: function (thisObj) {
+                $("#warehouseCd").attr("disabled",false);
+                $("#vendorIdRefresh").removeClass("hidden");
+                $("#vendorIdRemove").removeClass("hidden");
+               var strStr="&storeCd="+thisObj.attr("k");
+                $.myAutomatic.replaceParam(warehouseCd, strStr);//赋值
                 $("#hidStore").val($("#aStore").attr("k"));
             }
         });
@@ -196,7 +209,8 @@ define('returnWarehouseEdit', function () {
 
 
         warehouseCd = $("#warehouseCd").myAutomatic({
-            url: systemPath + "/ma5321/getList",
+          // url: systemPath + "/ma5321/getList",
+            url: systemPath + "/ma5321/getDcList",
             ePageSize: 10,
             startCount: 0
         });
@@ -488,6 +502,7 @@ define('returnWarehouseEdit', function () {
                 if (success) {
                     m.approvalBut.prop("disabled", false);
                 } else {
+                    $("#print").removeClass("disabled");
                     m.approvalBut.prop("disabled", true);
                 }
             });
@@ -496,12 +511,19 @@ define('returnWarehouseEdit', function () {
 
     //禁用不可修改栏位
     var disableNotModify = function () {
+        //  2021 /7/19
         if (m.reType.val()==="20"){
+            // 20210719
+            $.myAutomatic.cleanSelectObj(aStore);
+            $.myAutomatic.cleanSelectObj(warehouseCd);
             $("#aStore").attr("disabled", true);
-            $("#warehouseCd").attr("disabled", true);
+           // $("#warehouseCd").attr("disabled", true);
         }else if(m.reType.val()==="10"){
+            // 20210719
+            $.myAutomatic.cleanSelectObj(aStore);
+            $.myAutomatic.cleanSelectObj(warehouseCd);
             $("#aStore").attr("disabled", false);
-            $("#warehouseCd").attr("disabled", false);
+           // $("#warehouseCd").attr("disabled", false);
         }
         m.order_id.prop('disabled', true);
         m.order_date.prop('disabled', true);
@@ -770,6 +792,24 @@ define('returnWarehouseEdit', function () {
                 })
             }
         });
+
+        $("#print").on("click",function () {
+            let _storeCd = m.aStore.attr('k');
+            let bean = {
+                orderId:m.order_id.val(),
+                orderDate:m.order_date.val(),
+                storeCd:m.aStore.attr('k'),
+                orderRemark: m.order_remark.val(),
+                storeName:m.aStore.attr("v")
+            };
+            m.searchJson.val(JSON.stringify(bean));
+            paramGrid = "searchJson="+m.searchJson.val();
+            var url = url_left +"/printDcDocument?"+ paramGrid+"&returnType="+m.reType.val();
+            window.open(encodeURI(url), "excelprint", "width=1400,height=600,scrollbars=yes");
+        })
+
+
+
         //返回一览
         m.returnsViewBut.on("click", function () {
             var bank = $("#returnsSubmitBut").attr("disabled");
@@ -1478,6 +1518,10 @@ define('returnWarehouseEdit', function () {
                     butId: "delete",
                     butText: "Delete",
                     butSize: ""
+                },
+                {
+                    butType: "custom",
+                    butHtml:"<button id='print' type='button' class='btn btn-info btn-sm disabled'><span class='glyphicon glyphicon-print'></span>Print</button>"
                 },
                 {
                     butType: "custom",

@@ -4,6 +4,7 @@ import cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO;
 import cn.com.bbut.iy.itemmaster.dto.inventory.*;
 import cn.com.bbut.iy.itemmaster.dto.ma100Ld.Ma1000DTO;
 import cn.com.bbut.iy.itemmaster.dto.ma8350.MA8350dto;
+import cn.com.bbut.iy.itemmaster.entity.SK0010;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -206,4 +207,9 @@ public interface InventoryVouchersMapper {
         String getLastCorrTransfer(@Param("voucherNo1")String voucherNo1,@Param("voucherType")String voucherType);
 
         List<Sk0020DTO> getLastCorrQty(String voucherNo);
+        List<AutoCompleteDTO> getMa1172OutItemList(@Param("storeCd") String storeCd,
+                                          @Param("v") String v,
+                                          @Param("businessDate") String businessDate);
+
+        List<AutoCompleteDTO> getMa1172InItemList(@Param("outArticleId")String outArticleId,@Param("storeCd")String storeCd, @Param("v") String v,  @Param("businessDate") String businessDate);
 }

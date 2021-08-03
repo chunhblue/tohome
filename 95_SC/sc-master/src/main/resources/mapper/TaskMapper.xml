@@ -43,10 +43,6 @@
 		  <if test="storeList == null">
 			  and ma4310.store_cd  = ''
 		  </if>
-		  <![CDATA[
-        and ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-        ]]>
 		  and ma1000.store_cd = ma4310.store_cd
 		  <if test="isReply != null and isReply !=''">
 			  --         查询当前用户是否回复 1为回复 0则没有

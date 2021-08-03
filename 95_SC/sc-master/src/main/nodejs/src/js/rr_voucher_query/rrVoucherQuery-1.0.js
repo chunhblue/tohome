@@ -149,8 +149,8 @@ define('receipt', function () {
                 getRecordStatus(cols["orderId"],cols["status"], _typeId,function (result) {
                     if(result.data=='5' || result.data=='10'){
                         // 验证退货日是否为当前业务日
-                        _common.checkBusinessDate(subfmtDate(cols["orderDate"]),null,function (result) {
-                            if(result.success){
+                        // _common.checkBusinessDate(subfmtDate(cols["orderDate"]),null,function (result) {
+                        //     if(result.success){
                                 if(_differentiate == '0'){
                                     // 供应商退货
                                     top.location = url_root + "/returnVendor/cancelOrderDetail?flag=1&orderId="+cols["orderId"];
@@ -161,11 +161,11 @@ define('receipt', function () {
                                     _common.prompt("Failed to get parameters, please refresh!",3,"info");
                                     return false;
                                 }
-                            }else{
-                                _common.prompt("Selected document is not created within today and cannot be modified!",3,"info");
-                                return false;
-                            }
-                        })
+                        //     }else{
+                        //         _common.prompt("Selected document is not created within today and cannot be modified!",3,"info");
+                        //         return false;
+                        //     }
+                        // })
                     }else if(result.data=='20'){
                         _common.prompt("The document has been Returned/Received!",3,"info");
                         return false;
@@ -177,8 +177,8 @@ define('receipt', function () {
             }else if(_type == '1'){
                 if(cols["reviewSts"] == '15'){
                     // 验证收货日是否为当前业务日
-                    _common.checkBusinessDate(subfmtDate(cols["orderDate"]), cols["orderId"],function (result) {
-                        if(result.success){
+                    // _common.checkBusinessDate(subfmtDate(cols["orderDate"]), cols["orderId"],function (result) {
+                    //     if(result.success){
                             if(_differentiate == '0'){
                                 console.log('供应商收货');
                                 // 供应商收货
@@ -192,11 +192,11 @@ define('receipt', function () {
                                 _common.prompt("Failed to get parameters, please refresh!",3,"info");
                                 return false;
                             }
-                        }else{
-                            _common.prompt("Selected document is not created within today and cannot be modified!",3,"info");
-                            return false;
-                        }
-                    })
+                    //     }else{
+                    //         _common.prompt("Selected document is not created within today and cannot be modified!",3,"info");
+                    //         return false;
+                    //     }
+                    // })
                 }else if(cols["reviewSts"] == '20'){
                     _common.prompt("The document has been Returned/Received!",3,"info");
                     return false;

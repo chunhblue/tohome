@@ -169,19 +169,14 @@
         )T
         LEFT JOIN (
             SELECT store_cd, store_name FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         ) T1
         ON T.store_cd = T1.store_cd
         LEFT JOIN lateral(
             SELECT
-            receive_id,review_status reveive_status,physical_receiving_date,create_ymd,update_ymd,update_hms
+            receive_id,store_cd,order_id,review_status reveive_status,physical_receiving_date,update_ymd,update_hms
             FROM OD0000_T
-            WHERE
-            store_cd = T.store_cd
-            AND order_id = T.order_id
             order by create_ymd desc,create_hms desc
-            limit 1
-        ) T2 on true
+        ) T2 ON T.store_cd = T2.store_cd and T.order_id = T2.order_id
         WHERE
         1=1
         <if test="receivingStartDate != null and receivingStartDate != ''">
@@ -203,39 +198,34 @@
         SELECT
             count(*)
         FROM (
-            SELECT
-            store_cd, order_id, org_order_id, vendor_id, delivery_type_cd, delivery_center_id,
-            delivery_area_cd, shipment, order_type, order_method, payment_type, promotion_id,
-            order_date, delivery_date, expire_date, receive_date, vendor_address, store_address,
-            order_sts, nr_flg, order_remark, purchase_vat_cd, tax_rate, order_amt, order_tax,
-            receive_amt, receive_tax, upload_flg, upload_date, create_user_id, create_ymd,
-            create_hms, update_user_id, update_ymd, update_hms, update_screen_id, update_ip_address,
-            nr_update_flg, nr_ymd, nr_hms, order_differentiate, n_reviewid, review_status, multiple_flg
-            FROM OD0000 O
-            <if test="itemId != null and itemId != ''">
-                JOIN (
-                SELECT store_cd AS temp1, order_id AS temp2, article_id FROM OD0010
-                ) O1
-                ON O.store_cd = O1.temp1 AND O.order_id = O1.temp2
-            </if>
-            WHERE order_differentiate = '1'
-            <include refid="selectReceiptCondition"></include>
+        SELECT
+        store_cd, order_id, org_order_id, vendor_id, delivery_type_cd, delivery_center_id,
+        delivery_area_cd, shipment, order_type, order_method, payment_type, promotion_id,
+        order_date, delivery_date, expire_date, receive_date, vendor_address, store_address,
+        order_sts, nr_flg, order_remark, purchase_vat_cd, tax_rate, order_amt, order_tax,
+        receive_amt, receive_tax, upload_flg, upload_date, create_user_id, create_ymd,
+        create_hms, update_user_id, update_ymd, update_hms, update_screen_id, update_ip_address,
+        nr_update_flg, nr_ymd, nr_hms, order_differentiate, n_reviewid, review_status, multiple_flg
+        FROM OD0000 O
+        <if test="itemId != null and itemId != ''">
+            JOIN (
+            SELECT store_cd AS temp1, order_id AS temp2, article_id FROM OD0010
+            ) O1
+            ON O.store_cd = O1.temp1 AND O.order_id = O1.temp2
+        </if>
+        WHERE order_differentiate = '1'
+        <include refid="selectReceiptCondition"></include>
         )T
         LEFT JOIN (
-            SELECT store_cd, store_name FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        SELECT store_cd, store_name FROM MA1000
         ) T1
         ON T.store_cd = T1.store_cd
         LEFT JOIN lateral(
-            SELECT
-            receive_id,review_status reveive_status,physical_receiving_date,create_ymd,update_ymd,update_hms
-            FROM OD0000_T
-            WHERE
-            store_cd = T.store_cd
-            AND order_id = T.order_id
-            order by create_ymd desc,create_hms desc
-            limit 1
-        ) T2 on true
+        SELECT
+        receive_id,store_cd,order_id,review_status reveive_status,physical_receiving_date,update_ymd,update_hms
+        FROM OD0000_T
+        order by create_ymd desc,create_hms desc
+        ) T2 ON T.store_cd = T2.store_cd and T.order_id = T2.order_id
         WHERE
         1=1
         <if test="receivingStartDate != null and receivingStartDate != ''">
@@ -314,7 +304,6 @@
         )T
         LEFT JOIN (
             SELECT store_cd, store_name,store_name_en FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         ) T1
         ON T.store_cd = T1.store_cd
         LEFT JOIN (
@@ -392,7 +381,6 @@
         ) T
         LEFT JOIN (
             SELECT article_id, article_name FROM MA1100
-            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         ) T1
         ON T.article_id = T1.article_id
         ORDER BY T.serial_no
@@ -432,7 +420,6 @@
     )T
     LEFT JOIN (
     SELECT store_cd, store_name FROM MA1000
-    WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
     ) T1
     ON T.store_cd = T1.store_cd
     UNION ALL
@@ -489,11 +476,20 @@
     ON O.store_cd = O2.temp3 AND O.order_id = O2.temp4
     )T
     LEFT JOIN (
-    SELECT store_cd, store_name FROM MA1000
-    WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+    SELECT store_cd, store_name FROM ma1000
     ) T1
     ON T.store_cd = T1.store_cd
     ) A
     ORDER BY order_date DESC, order_id DESC, tab_type, create_ymd, create_hms DESC
+    </select>
+
+    <select id="getSoTransfer" resultMap="ReceiptGridResultMap" parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.warehouse.WarehouseReceiptGridDTO">
+        SELECT store_cd,order_id,count(*) as num FROM OD0001 where
+        store_cd || order_id  in (
+        <foreach item="item" index="index" collection="list" separator=",">
+            #{item.storeCd,jdbcType=VARCHAR} || #{item.orderId,jdbcType=VARCHAR}
+        </foreach>
+        )
+        group by store_cd,order_id
     </select>
 </mapper>

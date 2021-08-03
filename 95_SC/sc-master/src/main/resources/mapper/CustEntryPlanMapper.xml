@@ -98,7 +98,6 @@
             and p3.sp_id = '0000'
             and p1.store_cd = p2.store_cd
             AND P1.create_user_id = P4.emp_num_id
-            and p3.sp_value BETWEEN p2.effective_start_date and p2.effective_end_date
     </select>
 
     <select id="getPmaList" resultType="java.util.HashMap">
@@ -123,8 +122,6 @@
             p2.sp_id = '0000'
             AND P.store_cd = p1.store_cd
             AND P.create_user_id = p3.emp_num_id
-            AND p2.sp_value BETWEEN p1.effective_start_date
-            AND p1.effective_end_date
             and P.store_cd IN
             <foreach item="store" index="index" collection="pi0100Param.stores"
                      open="(" separator="," close=")">
@@ -169,7 +166,6 @@
             p2.sp_id = '0000'
             AND P.store_cd = p1.store_cd
             AND P.create_user_id = p3.emp_num_id
-            AND p2.sp_value BETWEEN p1.effective_start_date AND p1.effective_end_date
             and P.store_cd IN
             <foreach item="store" index="index" collection="pi0100Param.stores"
                      open="(" separator="," close=")">
@@ -288,8 +284,6 @@
             p2.sp_id = '0000'
             AND P.store_cd = p1.store_cd
             AND P.create_user_id = p3.emp_num_id
-            AND p2.sp_value BETWEEN p1.effective_start_date
-            AND p1.effective_end_date
             and P.store_cd IN
             <foreach item="store" index="index" collection="pi0100Param.stores"
                      open="(" separator="," close=")">

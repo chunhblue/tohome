@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+
 @Mapper
 public interface ReturnVendorMapper {
     /**
@@ -34,4 +35,5 @@ public interface ReturnVendorMapper {
     ReturnHeadResult selectVHeadByOrderId(@Param("orderId") String orderId);
 
 
+    List<RVListResult> selectArticleBySupplier(@Param("jsonParam") RVListParam jsonParam);
 }

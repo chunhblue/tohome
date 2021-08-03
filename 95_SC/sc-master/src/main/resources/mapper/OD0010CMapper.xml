@@ -318,7 +318,6 @@
     ) T
     JOIN (
         SELECT article_id, article_name, effective_start_date AS temp1, sales_unit_id FROM MA1100
-        WHERE #{param.businessDate} BETWEEN effective_start_date AND effective_end_date
     ) T3
     ON T.article_id = T3.article_id
   </select>
@@ -403,12 +402,9 @@
     AND C.sp_id = '0000'
     AND A.order_id = D.order_id
     AND D.order_differentiate = #{param.orderDifferentiate}
-    AND C.sp_value BETWEEN B.effective_start_date AND B.effective_end_date
-    /*AND '20200402' BETWEEN B.effective_start_date AND B.effective_end_date*/
     AND B.article_id = E.article_id
     AND B.effective_start_date = E.effective_start_date
     AND A.store_cd = F.store_cd
-    AND C.sp_value BETWEEN F.effective_start_date AND F.effective_end_date
     AND A.vendor_id = G.vendor_id
     AND C.sp_value BETWEEN G.effective_start_date AND G.effective_end_date
     AND D.store_cd IN
@@ -487,12 +483,10 @@
     ) T
     JOIN (
       SELECT article_id, article_name, effective_start_date AS temp1, sales_unit_id FROM MA1100
-      WHERE #{param.businessDate} BETWEEN effective_start_date AND effective_end_date
     ) T3
     ON T.article_id = T3.article_id
     LEFT JOIN (
         SELECT store_cd, store_name, zo_cd FROM MA1000
-        WHERE #{param.businessDate} BETWEEN effective_start_date AND effective_end_date
     ) T1
     ON T.store_cd = T1.store_cd
     LEFT JOIN (
@@ -826,12 +820,10 @@ FROM
     ) T
     JOIN (
     SELECT article_id, article_name, effective_start_date AS temp1, sales_unit_id FROM MA1100
-    WHERE #{param.businessDate} BETWEEN effective_start_date AND effective_end_date
     ) T3
     ON T.article_id = T3.article_id
     LEFT JOIN (
     SELECT store_cd, store_name, zo_cd FROM MA1000
-    WHERE #{param.businessDate} BETWEEN effective_start_date AND effective_end_date
     ) T1
     ON T.store_cd = T1.store_cd
     LEFT JOIN (
@@ -1790,12 +1782,7 @@ FROM
         WHERE
             ma1100.article_id = od0010.article_id
             AND ma1000.store_cd = od0010.store_cd
-            AND #{param.orderDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date
-            AND ma1000.effective_end_date
-            AND #{param.orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date
-            AND ma1100.effective_end_date
             AND ma1100.article_id = ma1110.article_id
-    /*--     AND ma1100.effective_start_date = ma1110.effective_start_date*/
             AND ma1110.structure_cd = (
                 select admin_structure_cd from MA0020 where structure_cd =
                 (SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = od0010.store_cd and effective_sts = '10') and effective_sts = '10'
@@ -1847,10 +1834,6 @@ FROM
         WHERE
             ma1100.article_id = od0010.article_id
             AND ma1000.store_cd = od0010.store_cd
-            AND #{param.orderDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date
-            AND ma1000.effective_end_date
-            AND #{param.orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date
-            AND ma1100.effective_end_date
             AND ma1100.article_id = ma1110.article_id
 --             AND ma1100.effective_start_date = ma1110.effective_start_date
             AND ma1110.structure_cd = (
@@ -1868,7 +1851,7 @@ FROM
   <select id="selectList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
     SELECT distinct ma.vendor_id k, CONCAT(ma.vendor_id,' ',ma.vendor_name) AS v
     FROM ma2000 ma,od0000 od
-    WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN ma.EFFECTIVE_START_DATE AND ma.EFFECTIVE_END_DATE
+    WHERE 1=1
     and od.order_type = '01'
     and od.order_differentiate = '0'
     and od.vendor_id = ma.vendor_id

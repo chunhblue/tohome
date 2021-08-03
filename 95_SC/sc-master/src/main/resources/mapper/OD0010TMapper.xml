@@ -72,6 +72,7 @@
 				and OD0010.order_id = OD0010_T.order_id
 				and OD0010.article_id = OD0010_T.article_id
 				and od0010.is_free_item = od0010_t.is_free_item
+				and od0010.serial_no = od0010_t.serial_no
 				left join OD0020 on OD0010.store_cd = OD0020.store_cd
 				and OD0010.order_id = OD0020.order_id
 				and OD0010.article_id = OD0020.article_id
@@ -80,7 +81,6 @@
 		) T
 		LEFT JOIN (
 			SELECT article_id, article_name FROM MA1100
-			WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
 		) T1
 		ON T.article_id = T1.article_id
 		ORDER BY T.serial_no
@@ -116,6 +116,7 @@
 				and OD0010.order_id = OD0010_T.order_id
 				and OD0010.article_id = OD0010_T.article_id
 				and od0010.is_free_item = od0010_t.is_free_item
+				and od0010.serial_no = od0010_t.serial_no
 				left join OD0020 on OD0010.store_cd = OD0020.store_cd
 				and OD0010.order_id = OD0020.order_id
 				AND OD0010.serial_no = cast(coalesce(OD0020.line_num,0)+1 as VARCHAR)
@@ -124,7 +125,6 @@
 		) T
 		LEFT JOIN (
 			SELECT article_id, article_name FROM MA1100
-			WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
 		) T1
 		ON T.article_id = T1.article_id
 		ORDER BY T.serial_no
@@ -257,7 +257,6 @@
 		ON T.order_id = T0.order_id AND T.storeCd = T0.store_cd AND T.articleId = T0.article_id and T.is_free_item = T0.is_free_item
 		LEFT JOIN (
 			SELECT article_id, article_name, article_name_en, spec FROM MA1100
-			WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
 		) T1
 		ON T.articleId = T1.article_id
 		ORDER BY T.serialNo
@@ -284,7 +283,6 @@
 		ON T.order_id = T0.order_id AND T.storeCd = T0.store_cd AND T.articleId = T0.article_id and T.is_free_item = T0.is_free_item
 		LEFT JOIN (
 			SELECT article_id, article_name, article_name_en, spec FROM MA1100
-			WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
 		) T1
 		ON T.articleId = T1.article_id
     </select>

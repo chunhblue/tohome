@@ -14,6 +14,7 @@ import cn.com.bbut.iy.itemmaster.dto.difference.DifferenceListResult;
 import cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.OrderInfoDTO;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.ReturnHeadResult;
+import cn.com.bbut.iy.itemmaster.dto.returnOrder.returnVendor.RVListParam;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.*;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.entity.od0000.OD0000;
@@ -106,6 +107,31 @@ public class ReturnWarehouseController extends BaseAction {
         return returnWarehouseService.getReturnWHQueryList(param);
     }
 
+
+    @RequestMapping(value = "/printDcDocument")
+    @Permission(codes = { PermissionCode.CODE_SC_V_RETURN_LIST_VIEW})
+    public ModelAndView toprintDocumentView(HttpServletRequest request, HttpSession session,
+                                            String searchJson) {
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        Gson gson = new Gson();
+        ReturnWarehouseParamDTO returnParamDTO = gson.fromJson(searchJson,ReturnWarehouseParamDTO.class);
+        User u = this.getUser(session);
+        log.debug("User:{} 进入 退供应商申请单打印画面", u.getUserId());
+        ModelAndView mv = new ModelAndView("return/warehouse/returnPrintDocument");
+        mv.addObject("searchJson", searchJson);
+        mv.addObject("returnParamDTO", returnParamDTO);
+        mv.addObject("userName", u.getUserName());
+        mv.addObject("orderRemark", returnParamDTO.getOrderRemark());
+        mv.addObject("printTime", Utils.getFormateDate(ymd));
+        mv.addObject("useMsg", "退供应商申请单打印画面");
+        return mv;
+
+
+    }
+
+
+
     /**
      * 退货单详情管理画面
      * @param request
@@ -137,6 +163,59 @@ public class ReturnWarehouseController extends BaseAction {
         this.saveToken(request);
         return mv;
     }
+
+    //  2021/7/26开始
+    @ResponseBody
+    @RequestMapping(value = "/getDocumentPrintData",method={RequestMethod.POST,RequestMethod.GET})
+    public   AjaxResultDto getDocumentPrintData(HttpServletRequest request, HttpSession session,
+                                                Map<String, ?> model, String searchJson) {
+        AjaxResultDto resultDto = new AjaxResultDto();
+        GridDataDTO<RWHItemsGridResult> grid = new GridDataDTO<>();
+
+        Gson gson = new Gson();
+        ReturnWarehouseParamDTO returnParamDTO = gson.fromJson(searchJson, ReturnWarehouseParamDTO.class);
+        if (StringUtils.isNotBlank(returnParamDTO.getOrderId())) {
+            List<RWHItemsGridResult> list = returnWarehouseService.getDcReturnItemsDetail(returnParamDTO);
+            grid.setRows(list);
+            resultDto.setData(grid.getRows());
+            resultDto.setSuccess(true);
+        }else {
+            resultDto.setSuccess(false);
+        }
+
+        return resultDto;
+
+    }
+
+
+    @RequestMapping(value = "/exportDcBySupplier")
+    @Permission(codes = {
+            PermissionCode.CODE_SC_V_RETURN_EXPORT
+    })
+    public String exportDcBySupplier(HttpServletRequest request, HttpSession session, String searchJson) {
+        if(StringUtils.isBlank(searchJson)){
+            log.info("导出查询参数为空");
+            return null;
+        }
+        // 获取当前角色店铺权限
+        RWHListParam dto = new Gson().fromJson(searchJson,RWHListParam.class);
+        Collection<String> stores = getStores(session, dto);
+        if(stores.size() == 0){
+            log.info(">>>>>>>>>>>>>>>>>>>>> get stores is null");
+            return null;
+        }
+        // 设置参数对象
+        ExcelParam exParam = new ExcelParam();
+        exParam.setStores(stores);
+        exParam.setParam(searchJson);
+        exParam.setPCode(PermissionCode.CODE_SC_V_RETURN_EXPORT);
+        exParam.setExFileName(EXCEL_EXPORT_NAME);
+        ExService service = Container.getBean("rDcBySupplier", ExService.class);
+        return ExportUtil.export(EXCEL_EXPORT_KEY, request, service, exParam);
+
+    }
+
+
 
     /**
      * 原单据编号list

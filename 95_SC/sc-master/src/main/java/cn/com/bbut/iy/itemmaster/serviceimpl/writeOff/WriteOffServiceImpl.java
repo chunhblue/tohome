@@ -72,35 +72,30 @@ public class WriteOffServiceImpl implements WriteOffService {
         List<WriteOffDTO> result = writeOffMapper.selectListByCondition(dto);
 
         // 占时注释掉sale_qty
-        List<String> storePosTranNoList = new ArrayList<>();
-        for (WriteOffDTO dto1 : result) {
-            String storePosTranNo = dto1.getStoreCd()+"_"+dto1.getArticleId()+"_"+dto1.getWriteOffDate();
-            storePosTranNoList.add(storePosTranNo);
-        }
-        if (storePosTranNoList.size()>0){
-            List<WriteOffDTO> exSaleDetail = writeOffMapper.getExSaleDetail(storePosTranNoList);
-            for (WriteOffDTO dto2:result) {
-                for (WriteOffDTO dto3: exSaleDetail) {
-                    if ((dto2.getStoreCd()+"_"+dto2.getArticleId()+"_"+dto2.getWriteOffDate())
-                            .equals(dto3.getStoreCd()+"_"+dto3.getArticleId()+"_"+dto3.getAccDate())){
-                        dto2.setSaleQty(dto3.getSaleQty());
-                    }
-                }
-            }
-        }
+//        List<String> storePosTranNoList = new ArrayList<>();
+//        for (WriteOffDTO dto1 : result) {
+//            String storePosTranNo = dto1.getStoreCd()+"_"+dto1.getArticleId()+"_"+dto1.getWriteOffDate();
+//            storePosTranNoList.add(storePosTranNo);
+//        }
+//        if (result.size()!=0){
+//            List<WriteOffDTO> exSaleDetail = writeOffMapper.getExSaleDetail(storePosTranNoList);
+//            for (WriteOffDTO dto2:result) {
+//                for (WriteOffDTO dto3: exSaleDetail) {
+//                    if (dto2.getArticleId().equals(dto3.getArticleId())){
+//                        dto2.setSaleQty(dto3.getSaleQty());
+//                    }
+//                }
+//            }
+//        }
 
         Map<String,Object> map = new HashMap<String,Object>();
 
         map.put("totalPage",totalPage);
         map.put("count",count);
-
         map.put("data",result);
-//        map.put("ItemQty",writeOffQty);
-//        map.put("ItemQty","0");
-//        map.put("itemSaleQty", saleqty);
-//        map.put("itemSaleQty","0");
-//        map.put("totalItem",records);
-//        map.put("totalItem","0");
+        map.put("ItemQty",writeOffQty);
+        map.put("itemSaleQty", saleqty);
+        map.put("totalItem",records);
         return map;
     }
 
@@ -124,20 +119,14 @@ public class WriteOffServiceImpl implements WriteOffService {
             Integer ItemQty=0;
             Integer saleQty=0;
             dto.setFlg(false);
-            List<String> storePosTranNoList = new ArrayList<>();
             int countItemSku = writeOffMapper.getCountItemSku(dto);
             List<WriteOffDTO> ItemAllQty = writeOffMapper.selectSaleQty(dto);
-
             for (WriteOffDTO item:ItemAllQty) {
                 BigDecimal bigDecimal =item.getWriteOffQty();
+                BigDecimal bigSaleQty =item.getSaleQty();
                 ItemQty+=bigDecimal.intValue();
-                String storePosTranNo = item.getStoreCd()+"_"+item.getArticleId()+"_"+item.getWriteOffDate();
-                storePosTranNoList.add(storePosTranNo);
+                saleQty+=bigSaleQty.intValue();
             }
-            if (storePosTranNoList.size()>0) {
-                saleQty = writeOffMapper.getTotalSaleQty(storePosTranNoList);
-            }
-
             WriteOffDTO offDTO = new WriteOffDTO();
             offDTO.setWriteOffQty(BigDecimal.valueOf(ItemQty));
             offDTO.setSaleQty(BigDecimal.valueOf(saleQty));
@@ -150,17 +139,21 @@ public class WriteOffServiceImpl implements WriteOffService {
         param.setBusinessDate(getBusinessDate());
         WriteOffDTO offDTO;
         BigDecimal  writeOffQty;
+        BigDecimal  itemSaleQty;
         Integer records=0;
         param.setFlg(false);
         List<WriteOffDTO> result = writeOffMapper.selectListByCondition(param);
         Map<String,Object> map = new HashMap<String,Object>();
         offDTO = this.deleteGetOffQty(param);
         writeOffQty = offDTO.getWriteOffQty();
+        itemSaleQty = offDTO.getSaleQty();
         records= Math.toIntExact(offDTO.getRecords());
         map.put("data",result);
         map.put("ItemQty",writeOffQty);
         map.put("totalItem",records);
+        map.put("itemSaleQty",itemSaleQty);
         return map;
     }
+
 }
 

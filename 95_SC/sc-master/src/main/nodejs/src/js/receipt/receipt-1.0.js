@@ -317,6 +317,30 @@ define('receipt', function () {
 				return false;
 			}
 			let params = JSON.stringify(_params);
+
+			var soTransferFlg = true;
+			$.myAjaxs({
+				url:url_root+"/receipt/getSoTransfer",
+				async:false,
+				cache:false,
+				type :"post",
+				//data :"&orderId="+cols['orderId']+"&storeCd="+cols['storeCd'],
+				data :"&searchJson="+params,
+				dataType:"json",
+				success:function(result){
+					let temp = '';
+					if(!result.success){
+
+						console.log(result.data);
+						_common.prompt(result.data + " so_request didn't arrive S.S yet, cannot process quick receiving!",3,"error");
+						soTransferFlg = false;
+					}
+				}
+			});
+			if(!soTransferFlg){
+				return false;
+			}
+
 			_common.myConfirm("Are you sure you want to receiving?",function(result){
 				if(result=="true"){
 					$.myAjaxs({
@@ -704,12 +728,12 @@ define('receipt', function () {
 					butText: "View",
 					butSize: ""
 				},//查看
-				{
+				/*{
 					butType: "update",
 					butId: "update",
 					butText: "Confirm Order Details and Receiving",
 					butSize: ""
-				},//修改
+				},//修改*/
 				{butType:"custom",butHtml:"<button id='quickReceiving' type='button' class='btn  btn-primary   btn-sm ' ><span class='glyphicon glyphicon glyphicon-ok'></span> Quick Receiving</button>"},
 				{
 					butType:"custom",

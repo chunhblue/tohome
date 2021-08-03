@@ -87,11 +87,11 @@ define('bomSale', function () {
 	//初始化下拉
 	var initAutoMatic = function () {
 		// 获取 Bom 商品数据
-		item=$("#item").myAutomatic({
-			url: url_left + "/getBomItemList",
-			ePageSize:5,
-			startCount:0,
-		})
+		// item=$("#item").myAutomatic({
+		// 	url: url_left + "/getBomItemList",
+		// 	ePageSize:5,
+		// 	startCount:0,
+		// })
 	}
     
     // 画面按钮点击事件
@@ -109,7 +109,9 @@ define('bomSale', function () {
     	});
     	// 检索按钮点击事件
     	m.search.on("click",function(){
+
     		if(verifySearch()){
+				_common.loading();
 				// 拼接检索参数
 				setParamJson();
 				// 查询数据
@@ -127,8 +129,11 @@ define('bomSale', function () {
 							$("#grid_table").empty();
 							_common.prompt(result.msg,5,"info");
 						}
+						_common.loading_close();
 					},
-					error : function(e){
+
+				error : function(e){
+					_common.loading_close();
 						_common.prompt("Query failed!",5,"info");/*查询销售数据失败*/
 					}
 				});
@@ -153,7 +158,7 @@ define('bomSale', function () {
 			var storeName = $("#aStore").attr("v");
 			var saleStartDate = fmtStringDate(m.saleStartDate.val());
 			var saleEndDate = fmtStringDate(m.saleEndDate.val());
-			var articleId = m.item.attr('k');
+			var articleId = m.item.val();
 			var _param = "regionCd=" + regionCd + "&cityCd=" + cityCd + "&districtCd=" + districtCd +
 				"&storeCd=" + storeCd + "&regionName=" + regionName + "&cityName=" + cityName + "&districtName=" +
 				districtName +"&storeName=" + storeName +
@@ -192,12 +197,12 @@ define('bomSale', function () {
 			"<th>UOM</th>" +
 			"<th>Sales Quantity</th>" +
 			"<th>Sales Amount(+VAT)</th>" +
-			"<th>Sales VAT Amount</th>" +
-			"<th>Returning Quantity</th>" +
-			"<th>Returning Amount(+VAT)</th>" +
-			"<th>Returning VAT Amount</th>" +
-			"<th>GP</th>" +
-			"<th>GP%</th>" +
+			// "<th>Sales VAT Amount</th>" +
+			// "<th>Returning Quantity</th>" +
+			// "<th>Returning Amount(+VAT)</th>" +
+			// "<th>Returning VAT Amount</th>" +
+			// "<th>GP</th>" +
+			// "<th>GP%</th>" +
 			// "<th>Daily Cost%</th>" +
 			"</tr>";
 		// 计算求和
@@ -215,12 +220,12 @@ define('bomSale', function () {
 				"<td>" + isEmpty(re.salesUnit) + "</td>" +
 				"<td>"+ toThousands(re.saleQtyT) +"</td>" +
 				"<td>" + toThousands(re.saleAmtT) + "</td>" +
-				"<td>" + toThousands(re.saleTaxT) + "</td>" +
-				"<td>" + toThousands(re.returnQtyT) + "</td>" +
-				"<td>" + toThousands(re.returnAmtT) + "</td>" +
-				"<td>" + toThousands(re.returnTaxT) + "</td>" +
-				"<td>" + toThousands(re.grossMargin) + "</td>" +
-				"<td>" + fmtRate(re.grossMarginRate) + "</td>" +
+				// "<td>" + toThousands(re.saleTaxT) + "</td>" +
+				// "<td>" + toThousands(re.returnQtyT) + "</td>" +
+				// "<td>" + toThousands(re.returnAmtT) + "</td>" +
+				// "<td>" + toThousands(re.returnTaxT) + "</td>" +
+				// "<td>" + toThousands(re.grossMargin) + "</td>" +
+				// "<td>" + fmtRate(re.grossMarginRate) + "</td>" +
 				// "<td>" + toThousands(re.avgCostNoTax) + "</td>" +
 				"</tr>";
 			saleCostTal = accAdd(saleCostTal, re.saleCostT);
@@ -245,13 +250,13 @@ define('bomSale', function () {
 			"<td></td>" +
 			"<td>" + toThousands(saleQtyTal) + "</td>" +
 			"<td>" + toThousands(saleAmtTal) + "</td>" +
-			"<td>" + toThousands(saleTaxTal) + "</td>" +
-			"<td>" + toThousands(returnQtyTal) + "</td>" +
-			"<td>" + toThousands(returnAmtTal) + "</td>" +
-			"<td>" + toThousands(returnTaxTal) + "</td>" +
-			"<td>" + toThousands(grossMarginTal) + "</td>" +
-			"<td>" + fmtRate(grossMarginTalRate) + "</td>" +
-			"<td></td>" +
+			// "<td>" + toThousands(saleTaxTal) + "</td>" +
+			// "<td>" + toThousands(returnQtyTal) + "</td>" +
+			// "<td>" + toThousands(returnAmtTal) + "</td>" +
+			// "<td>" + toThousands(returnTaxTal) + "</td>" +
+			// "<td>" + toThousands(grossMarginTal) + "</td>" +
+			// "<td>" + fmtRate(grossMarginTalRate) + "</td>" +
+			// "<td></td>" +
 			"</tr>";
 		_str = _str + totalTr;
 		$("#grid_table").empty();
@@ -269,7 +274,7 @@ define('bomSale', function () {
 		var freezeRowNum = table.attr('freezeRowNum');        //获取页面table定义的冻结行和列
 		var freezeColumnNum = table.attr('freezeColumnNum');
 
-			freezeTable(table, freezeRowNum,  freezeColumnNum, pageWidth()-20, pageHeight()-200);
+			freezeTable(table, freezeRowNum,  freezeColumnNum, pageWidth(), pageHeight()-200);
 
 			var flag = false;
 			$(window).resize(function() {
@@ -277,7 +282,7 @@ define('bomSale', function () {
 					return ;
 
 				setTimeout(function() {
-					adjustTableSize(tableId, pageWidth()-20, pageHeight()-200);
+					adjustTableSize(tableId, pageWidth(), pageHeight()-200);
 					flag = false;
 				}, 100);
 
@@ -528,7 +533,7 @@ define('bomSale', function () {
 			storeCd:$("#aStore").attr("k"),
 			saleStartDate: _startDate,
 			saleEndDate: _endDate,
-			articleId:m.item.attr('k'),
+			articleId:m.item.val(),
  		};
  		m.searchJson.val(JSON.stringify(searchJsonStr));
     }

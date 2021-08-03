@@ -1179,6 +1179,7 @@ define('receiptEdit', function () {
 				}
 				_common.myConfirm("Are you sure you want to save?",function(result){
 					if(result!="true"){return false;}
+					$("#saveBtn").prop("disabled", true);
 					$.myAjaxs({
 						url:url_root+'/receive/save',
 						async:true,
@@ -1696,7 +1697,7 @@ define('receiptEdit', function () {
 		$("#receiveQty2").on("blur change", function () {
 			let receiveQty = parseInt(reThousands($("#receiveQty2").val()));
 			let receiveNoQty = parseInt(reThousands($("#receiveNoQty2").val()));
-			let orderQty = parseInt(toThousands(isNotNull(cols['orderQty'])));
+			let orderQty = parseInt(reThousands(isNotNull(cols['orderQty'])));
 			let orderNoQty = parseInt(reThousands(isNotNull(cols['orderNoChargeQty'])));
 			if(receiveQty < orderQty){
 				$("#differenceReason2").prop("disabled",false);

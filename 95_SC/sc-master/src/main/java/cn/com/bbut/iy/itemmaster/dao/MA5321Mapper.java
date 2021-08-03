@@ -15,4 +15,5 @@ public interface MA5321Mapper {
      */
     List<AutoCompleteDTO> selectWarehouse(@Param("v") String v);
 
+    List<AutoCompleteDTO> selectWarehouseList(@Param("storeCd")String storeCd,@Param("v") String v);
 }

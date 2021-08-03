@@ -113,21 +113,21 @@ public class WriteOffExServiceImpl implements ExService {
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));
-            setCellValue(cell, ls.getDepCd()+" "+ls.getDepName());
+            setCellValue(cell, setStrValue(ls.getDepCd())+" "+setStrValue(ls.getDepName()));
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));
-            setCellValue(cell, ls.getPmaCd()+" "+ls.getPmaName());
+            setCellValue(cell, setStrValue(ls.getPmaCd())+" "+setStrValue(ls.getPmaName()));
 
 
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));
-            setCellValue(cell, ls.getCategoryCd()+" "+ls.getCategoryName());
+            setCellValue(cell, setStrValue(ls.getCategoryCd())+" "+setStrValue(ls.getCategoryName()));
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));
-            setCellValue(cell, ls.getSubCategoryCd()+" "+ls.getSubCategoryName());
+            setCellValue(cell, setStrValue(ls.getSubCategoryCd())+" "+setStrValue(ls.getSubCategoryName()));
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));
@@ -135,7 +135,7 @@ public class WriteOffExServiceImpl implements ExService {
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
-            setCellValue(cell, ls.getArticleName());
+            setCellValue(cell, setStrValue(ls.getArticleName()));
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
@@ -153,9 +153,9 @@ public class WriteOffExServiceImpl implements ExService {
 //            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
 //            setCellValue(cell, ls.getWriteOffAmt());
 //SALE Qty 占时隐藏
-//            cell = row.createCell(curCol++);
-//            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
-//            setCellValue(cell, ls.getSaleQty());
+            cell = row.createCell(curCol++);
+            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+            setCellValue(cell, ls.getSaleQty());
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
@@ -210,7 +210,7 @@ public class WriteOffExServiceImpl implements ExService {
 
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_3));
-        setCellValue(cell, formatNum(offDto.getRecords()+""));
+        setCellValue(cell, (int) offDto.getRecords());
 
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
@@ -226,11 +226,11 @@ public class WriteOffExServiceImpl implements ExService {
 
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
-        setCellValue(cell, formatNum(offDto.getWriteOffQty()+""));
+        setCellValue(cell, offDto.getWriteOffQty());
 
-//        cell = row.createCell(curCol++);
-//        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
-//        setCellValue(cell, formatNum(offDto.getSaleQty()+""));
+        cell = row.createCell(curCol++);
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+        setCellValue(cell, offDto.getSaleQty());
 
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
@@ -257,6 +257,7 @@ public class WriteOffExServiceImpl implements ExService {
         sheet.setColumnWidth(columnIndex++, 22 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 15 * 256);
+        sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 25 * 256);
         sheet.setColumnWidth(columnIndex++, 25 * 256);

@@ -438,7 +438,32 @@ public class InventoryVouchersController extends BaseAction {
         List<AutoCompleteDTO> _list = service.getItemList(storeCd, v);
         return _list;
     }
-
+    /**
+     * 获得 item 列表
+     */
+    @ResponseBody
+    @RequestMapping(value = "/getMa1172InItemList")
+    public List<AutoCompleteDTO> getMa1172InItemList(HttpServletRequest request, HttpSession session,
+                                             String storeCd,String outArticleId, String v) {
+        if(StringUtils.isBlank(storeCd)){
+            return null;
+        }
+        System.out.println(storeCd);
+        System.out.println(outArticleId);
+        System.out.println(v);
+        List<AutoCompleteDTO> _list = service.getMa1172InItemList(outArticleId,storeCd, v);
+        return _list;
+    }
+    @ResponseBody
+    @RequestMapping(value = "/getMa1172OutItemList")
+    public List<AutoCompleteDTO> getMa1172OutItemList(HttpServletRequest request, HttpSession session,
+                                             String storeCd, String v) {
+        if(StringUtils.isBlank(storeCd)){
+            return null;
+        }
+        List<AutoCompleteDTO> _list = service.getMa1172OutItemList(storeCd, v);
+        return _list;
+    }
     /**
      * 保存传票
      *
@@ -848,7 +873,7 @@ public class InventoryVouchersController extends BaseAction {
      */
     private Collection<String> getStores(HttpSession session,InventoryVouchersParamDTO param){
         Collection<String> stores = new ArrayList<>();
-        // 画面未选择，直接返回所有权限店铺
+        //        // 画面未选择，直接返回所有权限店铺
         if(StringUtils.isEmpty(param.getRegionCd()) && StringUtils.isEmpty(param.getCityCd())
                 && StringUtils.isEmpty(param.getDistrictCd()) && StringUtils.isEmpty(param.getStoreCd())){
             stores = (Collection<String>) session.getAttribute(Constants.SESSION_STORES);

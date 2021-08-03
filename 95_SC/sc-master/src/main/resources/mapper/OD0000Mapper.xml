@@ -924,7 +924,6 @@
     where
     a.store_cd = f.store_cd
     and g.sp_id = '0000'
-    and g.sp_value between f.effective_start_date and f.effective_end_date
     <if test="orderId != null and orderId != ''" >
       and a.order_id = #{orderId}
     </if>
@@ -1022,8 +1021,6 @@
     WHERE
     A.store_cd = f.store_cd
     AND G.sp_id = '0000'
-    AND G.sp_value BETWEEN f.effective_start_date
-    AND f.effective_end_date
     <if test="orderId != null and orderId != ''" >
       and a.order_id = #{orderId}
     </if>

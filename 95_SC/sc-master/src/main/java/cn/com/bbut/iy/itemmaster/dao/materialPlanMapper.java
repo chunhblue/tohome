@@ -55,4 +55,6 @@ public interface materialPlanMapper {
 
     List<MaterialDTO> selectAllItem(@Param("param") ItemInStoreDto param);
 
+    String searchStructurecd(String storeCd);
+
 }

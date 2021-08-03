@@ -101,4 +101,11 @@ public interface ReturnWarehouseService {
     List<AutoCompleteDTO>   getdirectItems(ReturnWarehouseParamDTO param);
 
     ReturnWarehouseDetailInfo getdirectItemInfo(ReturnWarehouseParamDTO param);
+
+    List<AutoCompleteDTO> getdirectItemsList(ReturnWarehouseParamDTO param);
+
+   List<RWHItemsGridResult> getReturnItemsDetail(ReturnWarehouseParamDTO returnParamDTO);
+
+    List<RWHItemsGridResult> getDcReturnItemsDetail(ReturnWarehouseParamDTO returnParamDTO);
+
 }

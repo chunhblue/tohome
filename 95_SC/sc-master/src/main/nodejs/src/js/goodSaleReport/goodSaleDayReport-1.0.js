@@ -151,9 +151,8 @@ define('goodsSaleDayReport' , function (){
                     }
                 }
             });
-            // 默认当天
-            let _start = new Date();
-            startDate.val(_start.Format('dd/MM/yyyy'));
+            let sumdate = new Date().getTime() - (86400000 * 3);
+            startDate.val(new Date(sumdate).Format('dd/MM/yyyy'));
         }
 
         if (endDate) {
@@ -175,9 +174,10 @@ define('goodsSaleDayReport' , function (){
                     }
                 }
             });
+            let _start = new Date();
+            endDate.val(_start.Format('dd/MM/yyyy'));
             // 结束日期 当前日期 加 三天
-            let sumdate = new Date().getTime() + (86400000 * 3);
-            endDate.val(new Date(sumdate).Format('dd/MM/yyyy'));
+
         }
     }
     var but_event=function () {
@@ -376,8 +376,8 @@ define('goodsSaleDayReport' , function (){
             var _StartDate = new Date(fmtDate($("#startDate").val())).getTime();
             var _EndDate = new Date(fmtDate($("#endDate").val())).getTime();
             var difValue = parseInt(Math.abs((_EndDate-_StartDate)/(1000*3600*24)));
-            if(difValue >62){
-                _common.prompt("Query Period cannot exceed 62 days!",5,"error"); // 日期期间取值范围不能大于62天
+            if(difValue >3){
+                _common.prompt("Query Period cannot exceed 3 days!",5,"error"); // 日期期间取值范围不能大于62天
                 $("#endDate").focus();
                 return false;
             }

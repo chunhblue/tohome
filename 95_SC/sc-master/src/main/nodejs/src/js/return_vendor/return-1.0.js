@@ -229,14 +229,14 @@ define('returnVendor', function () {
                 _common.getRecordStatus(tempTrOrderId,m.typeId.val(),function (result) {
                     if(result.success){
                         //验证订货日是否为当前业务日
-                        _common.checkBusinessDate(tempTrOrderDate,null,function (result) {
-                           if(result.success){
+                        // _common.checkBusinessDate(tempTrOrderDate,null,function (result) {
+                        //    if(result.success){
                                 saveParamToSession();
                                 top.location = url_left+"/cancelOrderDetail?flag=1&orderId="+ tempTrOrderId ;
-                           }else{//禁用
-                               _common.prompt("Selected document is not created within today and cannot be modified!",5,"error");
-                           }
-                       })
+                       //     }else{//禁用
+                       //         _common.prompt("Selected document is not created within today and cannot be modified!",5,"error");
+                       //     }
+                       // })
                    }else if(result.data=='20'){
                        _common.prompt("The document has been returned",5,"error");
                    }else{
@@ -287,8 +287,15 @@ define('returnVendor', function () {
                 window.open(encodeURI(url), "excelExportWin", "width=450,height=300,scrollbars=yes");
             }
         });
+        $("#exportBySupplier").on("click",function () {
+            setParamJson();
+            paramGrid = "searchJson=" + m.searchJson.val();
+            var url = url_left + "/exportBySupplier?" + paramGrid;
+            window.open(encodeURI(url), "excelExportWin", "width=450,height=300,scrollbars=yes");
+        })
     }
     //拼接检索参数
+
     var setParamJson = function(){
         // 创建请求字符串
         var	_reviewStatus = null;
@@ -314,12 +321,16 @@ define('returnVendor', function () {
         m.searchJson.val(JSON.stringify(searchJsonStr));
     }
 
+
+
+
     function judgeNaN (value) {
         return value !== value;
     }
 
     //验证检索项是否合法
     var verifySearch = function () {
+
         let _StartDate = null;
         if(!$("#rt_start_date").val()){
             _common.prompt("Please select a start date!",3,"info");/*请选择开始日期*/
@@ -358,6 +369,19 @@ define('returnVendor', function () {
             $("#rt_end_date").focus();
             return false;
         }
+        // 20210726
+        if (m.vendor_id.val()!=null && m.vendor_id.val()!==''){
+            $("#exportBySupplier").attr("disabled",false);
+        }else {
+            $("#exportBySupplier").attr("disabled",true);
+        }
+        // 20210726
+  // if (m.vendor_id.val()!=null && m.vendor_id.val()!==''){
+  //           $("#exportBySupplier").removeClass('disabled');
+  //       }
+  //       if (m.vendor_id.val()==null && m.vendor_id.val()==''){
+  //           $("#exportBySupplier").attr('disabled',true);
+  //       }
         return true;
     }
 
@@ -392,6 +416,11 @@ define('returnVendor', function () {
             selectTrTemp = null;
             _common.clearTable();
         });
+        $("#vendor_id").on("blur",function () {
+           if (m.vendor_id.val()!=null && m.vendor_id.val()!==" "){
+               $("#exportBySupplier").attr("disabled",true);
+           }
+    });
     }
 
     // 选项选中事件
@@ -479,6 +508,10 @@ define('returnVendor', function () {
                 {
                     butType:"custom",
                     butHtml:"<button id='export' type='button' class='btn btn-info btn-sm'><span class='glyphicon glyphicon-export'></span> Export</button>"
+                },
+                {
+                    butType:"custom",
+                    butHtml:"<button id='exportBySupplier' type='button' class='btn btn-info btn-sm'  disabled='disabled'><span class='glyphicon glyphicon-export'></span> Export By Supplier</button>"
                 }
             ],
 

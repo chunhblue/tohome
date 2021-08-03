@@ -30,4 +30,6 @@ public interface Cm9010Service {
 
 
     List<AutoCompleteDTO> getAllReason(String v);
+
+    List<AutoCompleteDTO> getItemOutInReasonCode(String v);
 }

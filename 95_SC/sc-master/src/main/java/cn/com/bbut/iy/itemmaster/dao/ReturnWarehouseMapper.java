@@ -4,6 +4,7 @@ import cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.OrderInfoDTO;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.ReturnHeadResult;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.RealtimeStockItem;
+import cn.com.bbut.iy.itemmaster.dto.returnOrder.returnVendor.RVListResult;
 import cn.com.bbut.iy.itemmaster.dto.returnOrder.returnWarehouse.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -99,4 +100,11 @@ public interface ReturnWarehouseMapper {
      */
     List<RWHListResult> selectPrintWHQueryListBy(RWHListParam rwhListParam);
 
+    List<AutoCompleteDTO> getdirectItemsList(@Param("dto") ReturnWarehouseParamDTO param);
+
+    List<RWHItemsGridResult> getReturnVendorItemsList(@Param("dto")ReturnWarehouseParamDTO returnParamDTO);
+
+    List<RWHItemsGridResult> getDcReturnWarehouseItemsList(@Param("dto") ReturnWarehouseParamDTO returnParamDTO);
+
+    List<RWHListResult> selectArticleBySupplier(@Param("jsonParam") RWHListParam jsonParam);
 }

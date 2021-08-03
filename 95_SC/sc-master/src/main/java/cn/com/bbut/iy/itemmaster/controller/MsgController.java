@@ -22,9 +22,9 @@ public class MsgController {
     @RequestMapping(value = "/tomsg")
     public ModelAndView view(HttpSession session, Map<String, ?> model, String targetUrl,
             String text) {
-        ModelAndView mv = new ModelAndView("/common/msg");
-        mv.addObject("targetUrl", targetUrl);
-        mv.addObject("text", text);
+            ModelAndView mv = new ModelAndView("/common/msg");
+            mv.addObject("targetUrl", targetUrl);
+            mv.addObject("text", text);
         return mv;
     }
 }

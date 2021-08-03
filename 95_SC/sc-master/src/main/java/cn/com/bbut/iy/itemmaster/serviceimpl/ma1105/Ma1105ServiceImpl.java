@@ -75,7 +75,10 @@ public class Ma1105ServiceImpl implements Ma1105Service {
         for(Ma1105Example example:examples) {
             String storeCd = example.getStoreCd();
             List<Ma1105> ma1105s = example.getMa1105s();
-
+            for (Ma1105  example1:ma1105s) {
+                String productName = example1.getProductName().replaceAll("'", "\'");
+                example1.setProductName(productName);
+            }
             ma1105Mapper.insertMa1105tSelective(ma1105s);
             //添加审核信息
             ma1105Mapper.insertAudit(storeCd);

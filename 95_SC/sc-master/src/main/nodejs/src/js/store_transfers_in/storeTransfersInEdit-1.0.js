@@ -363,9 +363,13 @@ define('storeTransfersInEdit', function () {
 
 		// 修改
 		$("#updateItemDetails").on("click",function() {
-			if (selectTrTemp == null) {
+			let _list = tableGrid.getCheckboxTrs();
+			if((_list == null || _list.length == 0) && selectTrTemp==null){
 				_common.prompt("Please select at least one row of data!", 3, "info");
 				return false;
+			}
+			if(_list.length == 1){
+				selectTrTemp = _list[0];
 			}
 			let _storeCd = $("#tstore").attr('k');
 			if (!_storeCd) {
@@ -413,10 +417,15 @@ define('storeTransfersInEdit', function () {
 
 		// 查看
 		$("#viewItemDetails").on("click",function(){
-			if(selectTrTemp==null){
-				_common.prompt("Please select at least one row of data!",3,"info");
+			let _list = tableGrid.getCheckboxTrs();
+			if((_list == null || _list.length == 0) && selectTrTemp==null){
+				_common.prompt("Please select at least one row of data!", 3, "info");
 				return false;
-			}else{
+			}
+			if(_list.length == 1){
+				selectTrTemp = _list[0];
+			}
+
 				let cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,spec,priceNoTax,qty2,qty1,differenQty,differenceReason,differenceReasonText,adjustReasonText");
 				$("#item_input_cd").val(cols['barcode']);
 				$.myAutomatic.setValueTemp(itemInput,cols['articleId'],cols['articleName']);
@@ -432,7 +441,7 @@ define('storeTransfersInEdit', function () {
 				setDialogDisable(1);
 				$('#update_dialog').attr("flg","view");
 				$('#update_dialog').modal("show");
-			}
+
 		});
 
 		// 删除按钮
@@ -1702,8 +1711,17 @@ define('storeTransfersInEdit', function () {
 			ajaxSuccess:function(resData){
 				return resData;
 			},
+			loadCompleteEvent: function (self) {
+				isDisabledBtn();
+				return self;
+			},
 			eachTrClick:function(trObj,tdObj){//正常左侧点击
 				selectTrTemp = trObj;
+				isDisabledBtn();
+				let _list = tableGrid.getCheckboxTrs();
+				if(_list.length<1){
+					selectTrTemp = null;//清空选择的行
+				}
 			},
 			buttonGroup:[
 				/*{
@@ -1722,17 +1740,31 @@ define('storeTransfersInEdit', function () {
 					butId: "viewItemDetails",
 					butText: "View",
 					butSize: ""//,
-				},{
+				},
+				/*{
 					butType: "delete",
 					butId: "deleteItemDetails",
 					butText: "Delete",
 					butSize: ""//,
-				},
+				},*/
 				{butType:"custom",butHtml:"<button id='attachments' type='button' class='btn btn-primary btn-sm'><span class='glyphicon glyphicon glyphicon-file'></span> Attachments</button>"},//附件
 			],
 		});
 	}
-
+	// 多选时查看、编辑禁用
+	function isDisabledBtn(){
+		let flg = m.viewSts.val();
+		let _list = tableGrid.getCheckboxTrs();
+		if(_list == null || _list.length > 1){
+			$("#updateItemDetails").prop("disabled",true);
+			$("#viewItemDetails").prop("disabled",true);
+		}else{
+			if(flg=="add" || flg=="edit"){
+				$("#updateItemDetails").prop("disabled",false);
+			}
+			$("#viewItemDetails").prop("disabled",false);
+		}
+	}
     // 日期字段格式化格式
     var dateFmt = function(tdObj, value){
 		if(value!=null&&value.trim()!=''&&value.length==8) {

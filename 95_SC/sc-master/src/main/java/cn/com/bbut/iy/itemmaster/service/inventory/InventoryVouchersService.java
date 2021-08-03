@@ -151,4 +151,11 @@ public interface InventoryVouchersService {
     List<AutoCompleteDTO> getOutStoreList(String v, String zoCd);
     List<AutoCompleteDTO> getStoreListByInStore(String v, String vstore);
 
+    List<AutoCompleteDTO> getMa1172OutItemList(String storeCd, String v);
+
+    List<AutoCompleteDTO> getMa1172InItemList(String outArticleId, String storeCd, String v);
+
+    SK0010 getStoreSeries(String storeCd);
+
+    List<SK0010> getApprovedInfo(String voucherNo);
 }

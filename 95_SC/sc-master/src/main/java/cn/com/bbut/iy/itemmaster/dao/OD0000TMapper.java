@@ -81,4 +81,7 @@ public interface OD0000TMapper {
 
     OD0000TDTO getHHTreceiveDateTime(String orderId,String storeCd);
 
+
+    OD0000TDTO receiveIdIsExist(String orderId);
+
 }

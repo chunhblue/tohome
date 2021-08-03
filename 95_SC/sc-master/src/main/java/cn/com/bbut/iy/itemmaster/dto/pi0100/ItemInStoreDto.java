@@ -17,6 +17,8 @@ import java.util.Collection;
 public class ItemInStoreDto extends GridParamDTO {
 
     private String articleId;
+    private String structureCd;
+    private String adminStructureCd;
     private String articleName;
     private String storeCd;
     private String storeName;

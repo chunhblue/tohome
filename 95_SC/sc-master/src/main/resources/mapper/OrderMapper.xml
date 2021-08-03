@@ -182,7 +182,7 @@
         ON do_order_count.dep_cd = can_order.dep_cd and do_order_count.pma_cd = can_order.pma_cd
         left join (select dep_cd,pma_cd,count(DISTINCT ma1100.article_id) as num
         from ma1100,ma1110,ma2240 where
-        #{orderDate,jdbcType=VARCHAR} between ma1100.effective_start_date and ma1100.effective_end_date
+        1=1
         <if test="vendorId !=null and vendorId != ''">
             and ma2240.vendor_id = #{vendorId,jdbcType=VARCHAR}
         </if>
@@ -258,7 +258,7 @@
         full join (
             select ma1105.shelf,count(DISTINCT ma1100.article_id) as num
             from ma1100,ma1105,ma1110,ma2240 where ma1105.item_code = ma1100.article_id
-                and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR} and #{orderDate,jdbcType=VARCHAR} between ma1100.effective_start_date and ma1100.effective_end_date
+                and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
                 <if test="pogCd != null and pogCd != ''">
                     AND ma1105.shelf = any (
                     array(SELECT shelf
@@ -358,7 +358,6 @@
             and od8020.order_date = #{orderDate,jdbcType=VARCHAR}
             and od8020.store_cd = #{storeCd,jdbcType=VARCHAR}
             left join ma1100 on ma8040.article_nocharge_id = ma1100.article_id
-            and #{orderDate,jdbcType=VARCHAR} between ma1100.effective_start_date and ma1100.effective_end_date
             AND ma1100.inventory_item='1',
             ma5322,ma5323
         where
@@ -626,12 +625,7 @@
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
         and ma8040.vendor_id= ma2000.vendor_id
         and ma1100.article_id = ma8040.article_id
-        and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
         and ma0220.unit_id =ma8040.purchase_unit_id
-        <![CDATA[
-      and #{orderDate,jdbcType=VARCHAR}>= ma2000.effective_start_date
-      and #{orderDate,jdbcType=VARCHAR}<= ma2000.effective_end_date;
-      ]]>
     </select>
 
 
@@ -680,7 +674,7 @@
                 select ma1105.shelf,count(DISTINCT ma1100.article_id) as num
                 from ma1100,ma1105,ma1110,ma2240
                 where ma1105.item_code = ma1100.article_id
-                    and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR} and #{orderDate,jdbcType=VARCHAR} between ma1100.effective_start_date and ma1100.effective_end_date
+                    and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
                     <if test="pogCd != null and pogCd != ''">
                         AND ma1105.shelf = any (
                         array(SELECT shelf
@@ -813,7 +807,6 @@
         od8020.dc_item = '0'
         and od8020.order_sts = '1'
 				and od8020.article_id = ma1100.article_id
-				and od8020.order_date BETWEEN ma1100.effective_start_date and ma1100.effective_end_date
         and od8020.store_cd = #{storeCd,jdbcType=VARCHAR}
         and od8020.order_date = #{orderDate,jdbcType=VARCHAR}
     </select>
@@ -897,10 +890,7 @@
         select distinct ma1000.store_cd k,CONCAT(ma1000.store_cd,' ',ma1000.store_name_en) v from ma1000
         /*,ma1106*/
         where
-        <![CDATA[
-        effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-        ]]>
+        1=1
         /*and ma1000.store_cd not in (
         select distinct store_cd from od0000 where order_type = '01'
         )
@@ -924,7 +914,6 @@
          to_char(to_date(a.open_date, 'yyyymmdd') + cast(c.sp_value as int), 'yyyymmdd') as open_date
         from ma1000 a,cm9060 c
         where a.store_cd = #{storeCd,jdbcType=VARCHAR}
-            and #{businessDate,jdbcType=VARCHAR} BETWEEN a.effective_start_date and a.effective_end_date
             and c.sp_id = '0221'
     </select>
 
@@ -969,8 +958,6 @@
             od8020.order_date = #{businessDate,jdbcType=VARCHAR}
             and od8020.store_cd = #{storeCd,jdbcType=VARCHAR}
             and od8020.article_id = ma1100.article_id
-            and #{businessDate,jdbcType = VARCHAR} BETWEEN ma1100.effective_start_date AND ma2000.effective_end_date
-            and #{businessDate,jdbcType = VARCHAR} BETWEEN ma2000.effective_start_date AND ma2000.effective_end_date
             and od8020.vendor_id = ma2000.vendor_id
             and od8020.dc_item = '0'
     </select>
@@ -988,7 +975,6 @@
     WHERE
         ma2000.vendor_id = ma2400.vendor_id
         AND ma2400.vendor_id = #{ vendorId,jdbcType = VARCHAR}
-        AND #{businessDate,jdbcType = VARCHAR} BETWEEN ma2000.effective_start_date AND ma2000.effective_end_date
         AND ma2400.structure_cd = (
     SELECT
         admin_structure_cd
@@ -1005,8 +991,6 @@
         where ma2000.vendor_id = ma2002.vendor_id
         and ma2000.effective_start_date = ma2002.effective_start_date
         and ma2000.vendor_id = #{vendorId,jdbcType=VARCHAR}
-        and #{businessDate,jdbcType=VARCHAR}
-                BETWEEN ma2000.effective_start_date AND ma2000.effective_end_date
         and ma2002.structure_cd = (
                     select admin_structure_cd from ma0020
                     where structure_cd = (
@@ -1050,7 +1034,6 @@
         promotion_cd = #{promotionCd}
         and condition_article_id = #{articleId}
         and ma4032.present_article_id = ma1100.article_id
-        and (SELECT sp_value FROM cm9060 WHERE sp_id = '0000') BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
     </select>
 
     <update id="updateOrderEffStsByVendor">
@@ -1193,7 +1176,7 @@
         ON do_order_count.dep_cd = can_order.dep_cd and do_order_count.pma_cd = can_order.pma_cd
         left join (select dep_cd,pma_cd,count(DISTINCT ma1100.article_id) as num
         from ma1100,ma1110,ma2240 where
-        #{orderDate,jdbcType=VARCHAR} between ma1100.effective_start_date and ma1100.effective_end_date
+        1=1
         <if test="vendorId !=null and vendorId != ''">
             and ma2240.vendor_id = #{vendorId,jdbcType=VARCHAR}
         </if>
@@ -1261,7 +1244,7 @@
         ON do_order_count.shelf = ma1105.shelf
         full join (select ma1105.shelf,count(DISTINCT ma1100.article_id) as num
         from ma1100,ma1105,ma1110,ma2240 where ma1105.item_code = ma1100.article_id
-        and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR} and #{orderDate,jdbcType=VARCHAR} between ma1100.effective_start_date and ma1100.effective_end_date
+        and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
         <if test="pogCd != null and pogCd != ''">
             and ma1105.shelf in (
             select shelf from ma1108 where pog_cd = #{pogCd,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=VARCHAR}
@@ -1372,7 +1355,6 @@
             from ma1100,ma1105,ma1110,ma2240
             where ma1105.item_code = ma1100.article_id
             and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
-            and #{orderDate,jdbcType=VARCHAR} between ma1100.effective_start_date and ma1100.effective_end_date
             <if test="pogCd != null and pogCd != ''">
             and ma1105.shelf in (
             select shelf from ma1108 where pog_cd = #{pogCd,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=VARCHAR}
@@ -1459,7 +1441,6 @@
             full join od8020_t ON od8020_t.article_id=ma8040.article_id
             and od8020_t.store_cd = #{storeCd,jdbcType=VARCHAR}
             left join ma1100 on ma8040.article_nocharge_id = ma1100.article_id
-            and #{orderDate,jdbcType=VARCHAR} between ma1100.effective_start_date and ma1100.effective_end_date
             AND ma1100.inventory_item='1',ma5322,ma5323
         where
             ma8040.article_id = ma8140.article_id
@@ -1716,12 +1697,7 @@
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
         and ma8040.vendor_id= ma2000.vendor_id
         and ma1100.article_id = ma8040.article_id
-        and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
         and ma0220.unit_id =ma8040.purchase_unit_id
-        <![CDATA[
-      and #{orderDate,jdbcType=VARCHAR}>= ma2000.effective_start_date
-      and #{orderDate,jdbcType=VARCHAR}<= ma2000.effective_end_date;
-      ]]>
     </select>
 
     <select id="selectSpecialOrder" parameterType="cn.com.bbut.iy.itemmaster.dto.order.OrderItemDetailDTO" resultMap="BaseResultMap1">
@@ -1863,8 +1839,7 @@
         od8020_t.dc_item = '0'
         and od8020_t.order_sts = '1'
 				and od8020_t.article_id = ma1100.article_id
-				and od8020_t.order_date BETWEEN ma1100.effective_start_date and ma1100.effective_end_date
-        and od8020_t.store_cd = #{storeCd,jdbcType=VARCHAR}
+		and od8020_t.store_cd = #{storeCd,jdbcType=VARCHAR}
         and od8020_t.order_date = #{orderDate,jdbcType=VARCHAR}
     </select>
 
@@ -1876,8 +1851,6 @@
             where
             od8020_t.store_cd = #{storeCd,jdbcType=VARCHAR}
             and od8020_t.article_id = ma1100.article_id
-            and #{businessDate,jdbcType = VARCHAR} BETWEEN ma1100.effective_start_date AND ma2000.effective_end_date
-            and #{businessDate,jdbcType = VARCHAR} BETWEEN ma2000.effective_start_date AND ma2000.effective_end_date
             and od8020_t.vendor_id = ma2000.vendor_id
             and od8020_t.dc_item = '0'
     </select>

@@ -28,6 +28,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import static cn.com.bbut.iy.itemmaster.util.CommonUtils.*;
+import static cn.com.bbut.iy.itemmaster.util.CommonUtils.formatNum;
 
 /**
  * Excel生成
@@ -96,6 +97,8 @@ public class BomSaleExServiceImpl implements ExService {
         // 查询数据
         List<BomSaleDTO> _list = bomSaleMapper.selectListByCondition(jsonParam);
         // 遍历数据
+        BigDecimal TotalSaleQty=BigDecimal.ZERO;
+        BigDecimal TotalSaleAmt=BigDecimal.ZERO;
         int no = 1;
         for (BomSaleDTO ls : _list) {
             int curCol = 0;
@@ -136,33 +139,36 @@ public class BomSaleExServiceImpl implements ExService {
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
             setCellValue(cell, formatNum(saleQtyT));
+            BigDecimal saleQtyT1 = ls.getSaleQtyT();
+            TotalSaleQty=TotalSaleQty.add(saleQtyT1);
 
             String saleAmtT = String.valueOf(ls.getSaleAmtT());
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
             setCellValue(cell, formatNum(saleAmtT));
+            BigDecimal saleAmtT1 = ls.getSaleAmtT();
+            TotalSaleAmt=TotalSaleAmt.add(saleAmtT1);
+//            String saleTaxT = String.valueOf(ls.getSaleTaxT());
+//            cell = row.createCell(curCol++);
+//            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
+//            setCellValue(cell, formatNum(saleTaxT));
+//
+//            String returnQtyT = String.valueOf(ls.getReturnQtyT());
+//            cell = row.createCell(curCol++);
+//            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+//            setCellValue(cell, formatNum(returnQtyT));
+//
+//            String returnAmtT = String.valueOf(ls.getReturnAmtT());
+//            cell = row.createCell(curCol++);
+//            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
+//            setCellValue(cell, formatNum(returnAmtT));
+//
+//            String returnTaxT = String.valueOf(ls.getReturnTaxT());
+//            cell = row.createCell(curCol++);
+//            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
+//            setCellValue(cell, formatNum(returnTaxT));
 
-            String saleTaxT = String.valueOf(ls.getSaleTaxT());
-            cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
-            setCellValue(cell, formatNum(saleTaxT));
-
-            String returnQtyT = String.valueOf(ls.getReturnQtyT());
-            cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
-            setCellValue(cell, formatNum(returnQtyT));
-
-            String returnAmtT = String.valueOf(ls.getReturnAmtT());
-            cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
-            setCellValue(cell, formatNum(returnAmtT));
-
-            String returnTaxT = String.valueOf(ls.getReturnTaxT());
-            cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
-            setCellValue(cell, formatNum(returnTaxT));
-
-            String grossMargin = String.valueOf(ls.getGrossMargin());
+           /* String grossMargin = String.valueOf(ls.getGrossMargin());
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
             setCellValue(cell, formatNum(grossMargin));
@@ -174,29 +180,75 @@ public class BomSaleExServiceImpl implements ExService {
             String avgCostNoTax = String.valueOf(ls.getAvgCostNoTax());
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
-            setCellValue(cell, formatNum(avgCostNoTax));
+            setCellValue(cell, formatNum(avgCostNoTax));*/
 
             curRow++;
         }
+        Row row = sheet.createRow(curRow);
+        int curCol = 0;
+        Cell cell = row.createCell(curCol++);
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
+        setCellValueNo(cell, no++);
+
+        cell = row.createCell(curCol++);
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
+        setCellValue(cell, " ");
+
+        cell = row.createCell(curCol++);
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
+        setCellValue(cell, "Total:");
+
+        cell = row.createCell(curCol++);
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
+        setCellValue(cell, " ");
+
+        cell = row.createCell(curCol++);
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
+        setCellValue(cell, " ");
+
+        cell = row.createCell(curCol++);
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
+        setCellValue(cell, " ");
+
+        cell = row.createCell(curCol++);
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
+        setCellValue(cell, " ");
+
+        cell = row.createCell(curCol++);
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
+        setCellValue(cell, " ");
+
+
+        cell = row.createCell(curCol++);
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
+        setCellValue(cell, formatNum(TotalSaleQty.toString()));
+
+
+        cell = row.createCell(curCol++);
+        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_5));
+        setCellValue(cell, formatNum(TotalSaleAmt.toString()));
+
+
+
         // 设置列宽
         int columnIndex = 0;
         sheet.setColumnWidth(columnIndex++, 5 * 256);
         sheet.setColumnWidth(columnIndex++, 15 * 256);
         sheet.setColumnWidth(columnIndex++, 10 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);
-        sheet.setColumnWidth(columnIndex++, 25 * 256);
+        sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 14 * 256);
-        sheet.setColumnWidth(columnIndex++, 10 * 256);
+        sheet.setColumnWidth(columnIndex++, 25 * 256);
         sheet.setColumnWidth(columnIndex++, 15 * 256);
         sheet.setColumnWidth(columnIndex++, 19 * 256);
+        sheet.setColumnWidth(columnIndex++, 25 * 256);
+        sheet.setColumnWidth(columnIndex++, 25 * 256);
+        sheet.setColumnWidth(columnIndex++, 25 * 256);
+        sheet.setColumnWidth(columnIndex++, 25 * 256);
+        sheet.setColumnWidth(columnIndex++, 25 * 256);
+        /*sheet.setColumnWidth(columnIndex++, 13 * 256);
         sheet.setColumnWidth(columnIndex++, 18 * 256);
-        sheet.setColumnWidth(columnIndex++, 19 * 256);
-        sheet.setColumnWidth(columnIndex++, 22 * 256);
-        sheet.setColumnWidth(columnIndex++, 20 * 256);
-        sheet.setColumnWidth(columnIndex++, 13 * 256);
-        sheet.setColumnWidth(columnIndex++, 13 * 256);
-        sheet.setColumnWidth(columnIndex++, 18 * 256);
-        sheet.setColumnWidth(columnIndex++, 18 * 256);
+        sheet.setColumnWidth(columnIndex++, 18 * 256);*/
     }
 
 }

@@ -299,4 +299,7 @@ public class OD0010 extends OD0010Key {
 
     // 是否搭赠商品（0：normal/1：free）
     private String isFreeItem;
+
+    // 商品失效日期
+    private String expiredDate;
 }

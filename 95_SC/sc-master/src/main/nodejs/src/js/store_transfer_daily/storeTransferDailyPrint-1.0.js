@@ -73,9 +73,6 @@ define('storeTransferDailyPrint', function () {
                             '<td title="' + isEmpty(item.barcode) + '" style="text-align:right;">' + isEmpty(item.barcode) + '</td>' +
                             '<td title="' + isEmpty(item.uom) + '" style="text-align:left;">' + isEmpty(item.uom) + '</td>' +
                             '<td title="' + toThousands(item.qty2) + '" style="text-align:right;">' + toThousands(item.qty2) + '</td>' +
-                            '<td title="' + toThousands(item.qty1) + '" style="text-align:right;">' + toThousands(item.qty1) + '</td>' +
-                            '<td title="' + isEmpty(item.tranInDate) + '" style="text-align:center;">' + isEmpty(item.tranInDate) + '</td>' +
-                            '<td title="' + isEmpty(item.differenceReasonText) + '" style="text-align:left;">' + isEmpty(item.differenceReasonText) + '</td>' +
                             // '<td title="' + toThousands(item.amtNoTax) + '" style="text-align:right;">' + toThousands(item.amtNoTax) + '</td>' +
                             '<td title="' + isEmpty(item.adjustReasonText) + '" style="text-align:left;">' + isEmpty(item.adjustReasonText) + '</td>' +
                             '<td title="' + isEmpty(item.amName) + '" style="text-align:left;">' + isEmpty(item.amName) + '</td>' +
@@ -94,8 +91,7 @@ define('storeTransferDailyPrint', function () {
                         "<td></td>" +
                         "<td>Total Qty</td>" +
                         "<td style='text-align:right;'>" + toThousands(totalOutQty) + "</td>" +
-                        "<td style='text-align:right;'>" + toThousands(totalInQty) + "</td>" +
-                        "<td></td>" +"<td></td>" +"<td></td>" +"<td></td>" +
+                        "<td></td>" +"<td></td>" +
                         "</tr>";
                     m.grid_table.append(totalTr);
                 }else {

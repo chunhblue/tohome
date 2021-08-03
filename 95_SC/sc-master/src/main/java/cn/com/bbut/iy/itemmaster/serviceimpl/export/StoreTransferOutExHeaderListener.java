@@ -26,13 +26,13 @@ public class StoreTransferOutExHeaderListener implements ExEventListener {
     public void action(Workbook wb) {
         Sheet sheet = wb.getSheet(Constants.EXCEL_SHEET_DEF_NAME);
         // 大标题
-        String row0 = "Store Transfer Out Query";
+        String row0 = "Store Transfer Query";
 
         // 二号标题
         String row1 = "";
 
         // 列标题
-        String row2 = "NO.,Transfer Out Date,Document No.,Transfer From Store,Transfer To Store," +
+        String row2 = "NO.,Transfer Date,Document No.,Transfer From Store,Transfer To Store," +
                 "Document Status,Document Description,Date Created,Created By";
         String[] titles = row2.split(",");
 

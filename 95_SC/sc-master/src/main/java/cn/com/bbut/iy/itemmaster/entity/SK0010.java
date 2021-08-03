@@ -1,11 +1,13 @@
 package cn.com.bbut.iy.itemmaster.entity;
 
+import cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -180,4 +182,15 @@ public class SK0010 extends SK0010Key {
 
     //附件信息
     private String fileDetailJson;
+    // 明细信息
+    private List<Sk0020DTO> list;
+
+    private String districtCd;
+    private String districtName;
+    private String cityCd;
+    private String cityName;
+    private String nOperatorId; // 审核人
+    private String nOperatorName; // 审核人
+    private String auditTime;   // 审核时间
+
 }

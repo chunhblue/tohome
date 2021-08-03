@@ -1,5 +1,6 @@
 package cn.com.bbut.iy.itemmaster.serviceimpl.operatorLog;
 
+import cn.com.bbut.iy.itemmaster.dao.MA4320Mapper;
 import cn.com.bbut.iy.itemmaster.dao.OperatorLogMapper;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.operatorLog.OperatorLogDTO;
@@ -7,6 +8,7 @@ import cn.com.bbut.iy.itemmaster.dto.operatorLog.OperatorLogParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.pi0100.PI0100DTO;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.entity.base.Menu;
+import cn.com.bbut.iy.itemmaster.service.Ma4320Service;
 import cn.com.bbut.iy.itemmaster.service.operatorLog.OperatorLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,8 @@ public class OperatorLogServiceImpl implements OperatorLogService {
 
     @Autowired
     private OperatorLogMapper operatorLogMapper;
+    @Autowired
+    private MA4320Mapper ma4320Mapper;
 
     /**
      * 保存用户的操作记录
@@ -39,9 +43,12 @@ public class OperatorLogServiceImpl implements OperatorLogService {
             return;
         }
         // 封装数据
-        String ymdhms = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
-        String ymd = ymdhms.split("-")[0];
-        String hms = ymdhms.split("-")[1];
+//        String ymdhms = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+//        String ymd = ymdhms.split("-")[0];
+//        String hms = ymdhms.split("-")[1];
+        String nowDate = ma4320Mapper.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         OperatorLogDTO dto = new OperatorLogDTO();
         dto.setUserId(user.getUserId());
         dto.setUserName(user.getUserName());

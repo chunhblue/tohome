@@ -136,26 +136,10 @@ public class TransferDailyExServiceImpl implements ExService {
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
             if(ls.getQty2() != null){
-                setCellValue(cell, formatNum((ls.getQty2()).toString()));
+                setCellValue(cell, ls.getQty2());
             }else {
                 setCellValue(cell, formatNum(null));
             }
-
-            cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
-            if(ls.getQty1() != null){
-                setCellValue(cell, formatNum((ls.getQty1()).toString()));
-            }else {
-                setCellValue(cell, formatNum(null));
-            }
-
-            cell = row.createCell(curCol++);
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_1));
-            setCellValue(cell, fmtDateToStr(ls.getTranInDate()));
-            cell = row.createCell(curCol++);
-
-            cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
-            setCellValue(cell, ls.getDifferenceReasonText());
 
             cell = row.createCell(curCol++);
             cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
@@ -219,19 +203,7 @@ public class TransferDailyExServiceImpl implements ExService {
 
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
-        setCellValue(cell, formatNum(data.getQty2().toString()));
-
-        cell = row.createCell(curCol++);
-        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_4));
-        setCellValue(cell, formatNum(data.getQty1().toString()));
-
-        cell = row.createCell(curCol++);
-        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
-        setCellValue(cell, "");
-
-        cell = row.createCell(curCol++);
-        cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
-        setCellValue(cell, "");
+        setCellValue(cell, data.getQty2());
 
         cell = row.createCell(curCol++);
         cell.setCellStyle(MAP_STYLE.get(STYPE_KEY_2));
@@ -251,16 +223,13 @@ public class TransferDailyExServiceImpl implements ExService {
         sheet.setColumnWidth(columnIndex++, 18 * 256);
         sheet.setColumnWidth(columnIndex++, 18 * 256);
         sheet.setColumnWidth(columnIndex++, 18 * 256);
-        sheet.setColumnWidth(columnIndex++, 25 * 256);
         sheet.setColumnWidth(columnIndex++, 17 * 256);
         sheet.setColumnWidth(columnIndex++, 25 * 256);
         sheet.setColumnWidth(columnIndex++, 17 * 256);
-        sheet.setColumnWidth(columnIndex++, 15 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 20 * 256);
-        sheet.setColumnWidth(columnIndex++, 22 * 256);
-        sheet.setColumnWidth(columnIndex++, 22 * 256);
+        sheet.setColumnWidth(columnIndex++, 20 * 256);
         sheet.setColumnWidth(columnIndex++, 26 * 256);
     }
 

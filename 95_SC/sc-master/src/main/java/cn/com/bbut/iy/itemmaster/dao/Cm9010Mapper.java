@@ -34,4 +34,6 @@ public interface Cm9010Mapper extends Cm9010GenMapper {
      * @return
      */
     List<AutoCompleteDTO> getAllReasonValue(@Param("v")String v);
+
+    List<AutoCompleteDTO> getItemOutInReasonCode(@Param("v") String v);
 }

@@ -21,6 +21,4 @@ public interface WriteOffMapper {
     int getCountItemSku(WriteOffParamDTO dto);
 
     List<WriteOffDTO> selectSaleQty(@Param("dto")WriteOffParamDTO dto);
-
-    Integer getTotalSaleQty(@Param("list")List<String> list);
 }

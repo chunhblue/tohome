@@ -128,21 +128,14 @@
                                         <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
                                             <select id="voucherType" class="form-control input-sm">
                                                 <option value="">-- All/Please Select --</option>
-                                                <option value="501">Store Transfer In</option>
-                                                <option value="502">Store Transfer Out</option>
-                                                <option value="504">Transfer In Correction</option>
-                                                <option value="505">Transfer Out Correction</option>
+[#--                                                <option value="501">Store Transfer In</option>--]
+                                                <option value="502">Store Transfer</option>
+[#--                                                <option value="504">Transfer In Correction</option>--]
+[#--                                                <option value="505">Transfer Out Correction</option>--]
                                                 <option value="604">Inventory Adjustment</option>
                                                 <option value="603">Inventory Write-off</option>
                                                 <option value="601">In-store Item Transfer</option>
 [#--                                                <option value="602">In-store Item Transfer</option>--]
-[#--                                                <option value="506">Transfer</option>--]
-[#--                                                <option value="603">Scrap</option>--]
-[#--                                                <option value="605">Take Stock</option>--]
-[#--                                                <option value="604">Stock Adjustment</option>--]
-[#--                                                <option value="500">Transfer Instructions</option>--]
-[#--                                                <option value="501">Store Transfer In</option>--]
-[#--                                                <option value="502">Store Transfer Out</option>--]
                                             </select>
                                         </div>
 									    <label for="voucherStartDate" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label not-null" style="white-space: nowrap">Document Date</label>

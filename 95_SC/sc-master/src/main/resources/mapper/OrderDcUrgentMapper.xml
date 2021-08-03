@@ -98,7 +98,6 @@
             ma0220.unit_name,
             od0010.order_qty AS order_qty,
             od0010.order_nocharge_qty,
-            /*COALESCE(od0010.order_qty, 0)+COALESCE(od0010.order_nocharge_qty, 0) order_total_qty,*/
             COALESCE(od0010.order_qty, 0) order_total_qty,
             ( SELECT ma8070.psd ma8070 FROM ma8070 WHERE ma8070.store_cd = #{storeCd,jdbcType=VARCHAR} AND ma8070.article_id = od0010.article_id ) AS psd,
             od0010.order_amt AS order_total_amt
@@ -121,10 +120,6 @@
         WHERE
             ma1100.article_id = od0010.article_id
             AND ma1000.store_cd = od0010.store_cd
-            AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date
-            AND ma1000.effective_end_date
-            AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date
-            AND ma1100.effective_end_date
             AND ma1100.article_id = ma1110.article_id
             AND ma1100.effective_start_date = ma1110.effective_start_date
             AND ma1110.structure_cd = (
@@ -132,7 +127,6 @@
                 (SELECT admin_structure_cd FROM MA0020 WHERE structure_cd = od0010.store_cd and effective_sts = '10') and effective_sts = '10'
                 )
             AND od0010.vendor_id = ma1110.vendor_id
---             AND ma1110.ma_cd = ma1000.ma_cd
             AND od0010.order_id =#{orderId,jdbcType=VARCHAR}
         ORDER BY
             od0010.article_id ASC;
@@ -154,8 +148,7 @@
         left join ma5321
             on ma5321.warehouse_no = od0000.vendor_id
         left join ma1000
-            on od0000.order_date between ma1000.effective_start_date and ma1000.effective_end_date
-            and ma1000.store_cd = od0000.store_cd
+            on ma1000.store_cd = od0000.store_cd
         where od0000.order_id = #{orderId,jdbcType=VARCHAR}
     </select>
 
@@ -251,7 +244,6 @@
         where
         ma8040.article_id = c.article_id
         and ma1100.article_id = ma8040.article_id
-        and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
         <if test="articleId !=null and articleId != ''">
             and ma8040.article_id = #{articleId,jdbcType=VARCHAR}
@@ -286,7 +278,6 @@
         where
         ma8040.order_tax_type_cd = tax.code_value
         and ma1100.article_id = ma8040.article_id
-        and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
         /*限制货架信息
         and ma1105.item_code = ma8040.article_id
         and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
@@ -328,7 +319,6 @@
         where
         ma8040.article_id = c.article_id
         and ma1100.article_id = ma8040.article_id
-        and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
         /*限制货架信息*/
         and ma1105.item_code = ma8040.article_id
         and ma1105.store_cd = #{storeCd,jdbcType=VARCHAR}
@@ -500,7 +490,6 @@
         where
         ma8040.article_id = c.article_id
         and ma1100.article_id = ma8040.article_id
-        and #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
 
         /*and od0010.article_id = ma8040.article_id*/
         and ma8040.effective_date = #{orderDate,jdbcType=VARCHAR}
@@ -562,7 +551,6 @@
         WHERE
             od0000.order_id = #{orderId,jdbcType=VARCHAR}
             AND od0000.store_cd = ma1000.store_cd
-            AND #{auditDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
             AND cm9060.sp_id = '0221'
             <![CDATA[
             AND  #{auditDate,jdbcType=VARCHAR} <= to_char( to_date( ma1000.open_date, 'yyyymmdd' ) + CAST ( cm9060.sp_value AS INT ), 'yyyymmdd' );

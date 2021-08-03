@@ -365,6 +365,13 @@
                             <td id="Contribution6" style="text-align: right">0</td>
                             <td id="customerCount6">0</td>
                         </tr>
+                        <tr>
+                            [#--ShopeePay--]
+                            <td id="payCd7"></td>
+                            <td id="payAmt7">0</td>
+                            <td id="Contribution7" style="text-align: right">0</td>
+                            <td id="customerCount7">0</td>
+                        </tr>
                         <tr style="background-color: #00B2EE">
                             <td>Total</td>
                             <td id="payAmt">0</td>

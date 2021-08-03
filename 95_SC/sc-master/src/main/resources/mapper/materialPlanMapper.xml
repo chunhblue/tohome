@@ -248,9 +248,22 @@ WHERE
          pi0160.material_type
          FROM PI0160
          WHERE 1=1
+         AND  structure_cd=#{param.adminStructureCd}
         <if test="param.articleId !=null and param.articleId !=''">
             AND  pi0160.article_id like concat('%',#{param.articleId},'%')
         </if>
+    </select>
+    <select id="searchStructurecd" parameterType="cn.com.bbut.iy.itemmaster.dto.pi0100.ItemInStoreDto" resultType="String">
+        select admin_structure_cd
+ FROM ma0020
+ WHERE
+structure_cd=
+ (select admin_structure_cd
+ FROM ma0020
+ WHERE 1=1 and ma0020.structure_cd=(SELECT ma0020.admin_structure_cd
+ FROM ma0020
+ WHERE ma0020.structure_cd=#{storeCd}));
+
     </select>
 
 

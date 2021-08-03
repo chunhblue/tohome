@@ -121,8 +121,18 @@ public class RealtimeExServiceImpl implements ExService {
             }
             Gson gson = new Gson();
             // 获取第一层的信息
-            ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
-
+            ArrayList<RtInvContent> rtInvContent2 = new ArrayList<>();
+            String[] str = urlData.split("}");
+            if(str.length<=1){
+                RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+                if("500".equals(param.getStatus()) || param.getContent() == null){
+                    String message = "Failed to connect to live inventory data！";
+                    return;
+                }
+            }else {
+                rtInvContent2 = gson.fromJson(urlData, new TypeToken<List<RtInvContent>>() {
+                }.getType());
+            }
             RtInvContent rtInvContent = rtInvContent2.get(0);
             if(rtInvContent == null){
                 rtInvContent = new RtInvContent();

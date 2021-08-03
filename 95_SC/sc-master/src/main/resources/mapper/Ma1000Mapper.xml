@@ -212,10 +212,7 @@
   <select id="getListByStorePm" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
     select distinct store_cd k,CONCAT(store_cd,' ',store_name_en) v from ma1000
     where
-    <![CDATA[
-        effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-        ]]>
+    1=1
     and ma1000.store_cd in
     <foreach item="storeCd" index="index" collection="stores"
              open="(" separator="," close=")">
@@ -234,10 +231,7 @@
   <select id="getListByPM" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
     select distinct m_role_store.store_cd k,CONCAT(m_role_store.store_cd,' ',store_name) v from ma1000,m_role_store
     where
-    <![CDATA[
-        effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-        ]]>
+    1=1
     and m_role_store.role_id in
     <foreach item="roleId" index="index" collection="roleIds"
              open="(" separator="," close=")">
@@ -264,10 +258,7 @@
   <select id="getListAll" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
     select store_cd k,CONCAT(store_cd,' ',store_name,store_name_en) v from ma1000
     where
-    <![CDATA[
-        effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-        ]]>
+    1=1
     <if test="storeCd != null and storeCd !=''">
       and (
       lower(store_cd) like lower(CONCAT('%',#{storeCd,jdbcType=VARCHAR},'%'))
@@ -281,10 +272,6 @@
     from ma1000 inner join m_role_store
     on m_role_store.role_id = #{roleId,jdbcType=INTEGER}
     and ma1000.store_cd = m_role_store.store_cd
-    <![CDATA[
-        and effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-        ]]>
     UNION
         select m_role_store.store_cd storeCd,'' storeName
         from m_role_store where

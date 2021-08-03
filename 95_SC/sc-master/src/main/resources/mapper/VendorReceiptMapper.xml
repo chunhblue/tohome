@@ -161,19 +161,14 @@
         )T
         LEFT JOIN (
             SELECT store_cd, store_name FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         ) T1
         ON T.store_cd = T1.store_cd
         LEFT JOIN lateral(
             SELECT
-            receive_id,review_status reveive_status,physical_receiving_date,update_ymd,update_hms
+            receive_id,store_cd,order_id,review_status reveive_status,physical_receiving_date,update_ymd,update_hms
             FROM OD0000_T
-            WHERE
-            store_cd = T.store_cd
-            AND order_id = T.order_id
             order by create_ymd desc,create_hms desc
-            limit 1
-        ) T2 on true
+        ) T2 ON T.store_cd = T2.store_cd and T.order_id = T2.order_id
         WHERE
         1=1
         <if test="receivingStartDate != null and receivingStartDate != ''">
@@ -192,11 +187,8 @@
     </select>
     <select id="selectReceiptCount" resultType="INT"
             parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.vendor.VendorReceiptParamDTO">
-        SELECT COUNT (Tplus.order_id)
-        FROM
-        (SELECT
-        T.*, CONCAT(T1.store_cd,' ',T1.store_name) AS
-        store_name,T2.receive_id,T2.reveive_status,T2.physical_receiving_date,T2.update_ymd as receive_date_t
+        SELECT
+        count(*)
         FROM (
         SELECT
         store_cd, order_id, org_order_id, vendor_id, delivery_type_cd, delivery_center_id,
@@ -218,20 +210,14 @@
         )T
         LEFT JOIN (
         SELECT store_cd, store_name FROM MA1000
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         ) T1
         ON T.store_cd = T1.store_cd
         LEFT JOIN lateral(
         SELECT
-        receive_id,review_status reveive_status,physical_receiving_date,update_ymd,update_hms
+        receive_id,store_cd,order_id,review_status reveive_status,physical_receiving_date,update_ymd,update_hms
         FROM OD0000_T
-        WHERE
-        store_cd = T.store_cd
-        AND order_id = T.order_id
-
         order by create_ymd desc,create_hms desc
-        limit 1
-        ) T2 on true
+        ) T2 ON T.store_cd = T2.store_cd and T.order_id = T2.order_id
         WHERE
         1=1
         <if test="receivingStartDate != null and receivingStartDate != ''">
@@ -240,31 +226,11 @@
         <if test="receivingEndDate != null and receivingEndDate != ''">
             AND #{receivingEndDate,jdbcType=VARCHAR} >= T2.update_ymd
         </if>
-        GROUP BY order_date ,
-        t.store_cd,t.order_id,t.org_order_id,t.vendor_id,T.delivery_type_cd,t.delivery_center_id,t.delivery_area_cd,T.shipment,
-        T.order_type, T.order_method, T.payment_type, T.promotion_id, T.order_date, T.delivery_date, T.expire_date,
-        T.receive_date, T.vendor_address, T.store_address, T.order_sts, T.nr_flg, T.order_remark, T.purchase_vat_cd,
-        T.tax_rate, T.order_amt, T.order_tax, T.receive_amt, T.receive_tax, T.upload_flg, T.upload_date,
-        T.create_user_id, T.create_ymd, T.create_hms, T.update_user_id, T.update_ymd, T.update_hms, T.update_screen_id,
-        T.update_ip_address, T. nr_update_flg, T.nr_ymd, T.nr_hms, T.order_differentiate, T.n_reviewid, T.review_status,
-        T.multiple_flg,T.free_order_id,t1.store_cd,t1.store_name,t2.receive_id,T2.reveive_status,T2.physical_receiving_date,T2.update_ymd )
-        AS Tplus;
+        <if test="receiveId != null and receiveId != ''">
+            AND lower(T2.receive_id) like lower(CONCAT('%',#{receiveId},'%'))
+        </if>
     </select>
 
-    <select id="selectReceiptCount*" resultType="INT"
-            parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.vendor.VendorReceiptParamDTO">
-        SELECT
-        COUNT(1)
-        FROM OD0000 O
-        <if test="itemId != null and itemId != ''">
-            JOIN (
-            SELECT store_cd AS temp1, order_id AS temp2, article_id FROM OD0010
-            ) O1
-            ON O.store_cd = O1.temp1 AND O.order_id = O1.temp2
-        </if>
-        WHERE order_differentiate = '0'
-        <include refid="selectReceiptCondition"></include>
-    </select>
 
     <select id="selectDetailByKey" resultMap="ReDetailsDTOMap"
             parameterType="cn.com.bbut.iy.itemmaster.dto.receipt.vendor.VendorDetailsGridDTO">
@@ -334,7 +300,6 @@
         )T
         LEFT JOIN (
             SELECT store_cd, store_name FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         ) T1
         ON T.store_cd = T1.store_cd
         LEFT JOIN (
@@ -406,7 +371,6 @@
         ) T
         LEFT JOIN (
             SELECT article_id, article_name FROM MA1100
-            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
             ) T1
             ON T.article_id = T1.article_id
         LEFT JOIN (
@@ -450,7 +414,6 @@
         )T
         LEFT JOIN (
         SELECT store_cd, store_name FROM MA1000
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         ) T1
         ON T.store_cd = T1.store_cd
         UNION ALL
@@ -505,7 +468,6 @@
         )T
         LEFT JOIN (
         SELECT store_cd, store_name FROM MA1000
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         ) T1
         ON T.store_cd = T1.store_cd
         ) A

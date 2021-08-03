@@ -24,6 +24,8 @@ import cn.com.bbut.iy.itemmaster.dto.rtInventory.RtInvContent;
 import cn.com.bbut.iy.itemmaster.dto.rtInventory.SaveInventoryQty;
 import cn.com.bbut.iy.itemmaster.dto.stocktakeProcess.StocktakeProcessDTO;
 import cn.com.bbut.iy.itemmaster.dto.stocktakeProcess.StocktakeProcessItemsDTO;
+import cn.com.bbut.iy.itemmaster.entity.SK0010;
+import cn.com.bbut.iy.itemmaster.entity.SK0010Key;
 import cn.com.bbut.iy.itemmaster.entity.User;
 import cn.com.bbut.iy.itemmaster.entity.base.Ma1000;
 import cn.com.bbut.iy.itemmaster.exception.SystemRuntimeException;
@@ -31,6 +33,7 @@ import cn.com.bbut.iy.itemmaster.service.*;
 import cn.com.bbut.iy.itemmaster.service.audit.IAuditService;
 import cn.com.bbut.iy.itemmaster.service.audit.INotificationService;
 import cn.com.bbut.iy.itemmaster.service.audit.IReviewService;
+import cn.com.bbut.iy.itemmaster.service.inventory.InventoryVouchersService;
 import cn.com.bbut.iy.itemmaster.service.inventoryQtyCor.AllRtInCorrQtyService;
 import cn.com.bbut.iy.itemmaster.service.returnsDaily.ReturnsDailyService;
 import cn.com.bbut.iy.itemmaster.serviceimpl.RealTimeInventoryQueryServiceImpl;
@@ -84,6 +87,8 @@ public class AuditTaskController extends BaseAction{
     private CustEntryMapper custEntryMapper;
     @Value("${esUrl.inventoryUrl}")
     private String inventoryUrl;
+    @Autowired
+    private InventoryVouchersService iVService;
 
     /**
      * 审核任务画面一览
@@ -360,6 +365,13 @@ public class AuditTaskController extends BaseAction{
                 if(r > 0){
                     if(flag){
                         log.debug("-------------------------步骤更新完成，生成流程下一步-------------------------");
+                        SK0010 _dto = new SK0010();
+                        if(auditStep.getNReviewid() == ConstantsAudit.REVIEW_ORDER_TRANSFEROUT){
+                            SK0010Key sk0010 = new SK0010Key();
+                            sk0010.setVoucherNo(recordCd);
+                            _dto = iVService.getSk0010(sk0010);
+                        }
+
                         // 生成新的流程
                         AuditBean newAuditBean = new AuditBean();
                         // 审核流程ID
@@ -369,8 +381,12 @@ public class AuditTaskController extends BaseAction{
                         newAuditBean.setDistinguishId(auditStep.getDistinguishId());
                         // 主档类型ID
                         newAuditBean.setNTypeid(typeId);
+                        if(auditStep.getNReviewid() == ConstantsAudit.REVIEW_ORDER_TRANSFEROUT && subNo>=1){
+                            newAuditBean.setStoreCd(_dto.getStoreCd1());
+                        }else {
+                            newAuditBean.setStoreCd(storeCd);
+                        }
 
-                        newAuditBean.setStoreCd(storeCd);
                         // 主档ID
                         newAuditBean.setCRecordCd(auditStep.getCRecordCd());
                         // 适用开始日
@@ -408,7 +424,11 @@ public class AuditTaskController extends BaseAction{
                             // 主档ID
                             notificationBean.setCRecordCd(auditStep.getCRecordCd());
                             // 店铺
-                            notificationBean.setStoreCd(storeCd);
+                            if(auditStep.getNReviewid() == ConstantsAudit.REVIEW_ORDER_TRANSFEROUT && subNo>=1){
+                                notificationBean.setStoreCd(_dto.getStoreCd1());
+                            }else {
+                                notificationBean.setStoreCd(storeCd);
+                            }
 
                             // 适用开始日
                             notificationBean.setEffectiveStartDate("00000000");
@@ -831,7 +851,7 @@ public class AuditTaskController extends BaseAction{
                 return checkFlg;
             case "tmp_transfer_out":
                 _sk0020List = allRtService.getVoucherItemList(recordCd);
-                checkFlg = checkReNewMsg(detailType,storeCd,_sk0020List);
+                checkFlg = checkTransferNewMsg(detailType,storeCd,_sk0020List);
                 return checkFlg;
             case "tmp_transfer_in":
                 _sk0020List = allRtService.getVoucherItemList(recordCd);
@@ -1351,6 +1371,15 @@ public class AuditTaskController extends BaseAction{
                     String message = "Failed to connect to live inventory data！";
                     checkData = false;
                 }
+                String[] str = urlData.split("}");
+                if(str.length<=1){
+                    Gson gson = new Gson();
+                    RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+                    if("500".equals(param.getStatus()) || param.getContent() == null){
+                        String message = "Failed to connect to live inventory data！";
+                        checkData = false;
+                    }
+                }
 
                 if(checkData){
                     Gson gson = new Gson();
@@ -1473,6 +1502,224 @@ public class AuditTaskController extends BaseAction{
 
         }
 
+        return checkFlg;
+    }
+
+    // inventory下店间转移修正库存
+    protected boolean checkTransferNewMsg(String detailType,String storeCd,List<Sk0020DTO> _sk0020List){
+        boolean checkFlg = true;
+        String storeCd1 = "";
+        // 判断母货号是否允许操作（Group Sale子母货号是否分开管理  0：分开 1：不分开）
+        // String _val = cm9060Service.getValByKey("0634");
+        // boolean parentFlg = "0".equals(_val) ? true : false;
+        List<String> parentList = new ArrayList<>();
+        List<SaveInventoryQty> saveRtQtyList = new ArrayList<>();
+        List<SaveInventoryQty> saveRtInQtyList = new ArrayList<>();
+        if(_sk0020List.size() > 0){
+            storeCd = _sk0020List.get(0).getStoreCd();
+            storeCd1 = _sk0020List.get(0).getStoreCd1();
+            for(Sk0020DTO sk020:_sk0020List){
+                SaveInventoryQty saveDetail = new SaveInventoryQty();
+                saveDetail.setDetailType(detailType);
+                saveDetail.setStoreCd(storeCd);
+                saveDetail.setArticleId(sk020.getArticleId());
+                if(sk020.getQty1() == null){
+                    sk020.setQty1(BigDecimal.ZERO);
+                }
+                if(sk020.getQty2() == null){
+                    sk020.setQty2(BigDecimal.ZERO);
+                }
+                 /*stripTrailingZeros() 去除小数点
+                 toPlainString() 转换字符串*/
+                float qty1 = Float.parseFloat(sk020.getQty1().stripTrailingZeros().toPlainString());
+                float qty2 = Float.parseFloat(sk020.getQty2().stripTrailingZeros().toPlainString());
+
+                if(detailType.equals("tmp_transfer_out") ){
+                    qty1 = qty2;
+                }
+                saveDetail.setInventoryQty(qty1);
+                if(saveDetail.getInventoryQty() == 0.0){
+                    continue;
+                }
+                // 转入商品信息
+                SaveInventoryQty saveDetailInQty = new SaveInventoryQty();
+                saveDetailInQty.setDetailType("tmp_transfer_in");
+                saveDetailInQty.setStoreCd(sk020.getStoreCd1());
+                saveDetailInQty.setArticleId(sk020.getArticleId());
+                saveDetailInQty.setInventoryQty(qty1);
+                if(saveDetailInQty.getInventoryQty() == 0.0){
+                    continue;
+                }
+
+                saveRtQtyList.add(saveDetail);
+                if(detailType.equals("tmp_transfer_out") ){
+                    saveRtInQtyList.add(saveDetailInQty);
+                }
+                parentList.add(sk020.getArticleId());
+            }
+
+            if(saveRtQtyList.size() == 0){
+                return true;
+            }
+            // 修正商品实时库存（修正bi库存时,有可能会修改saveRtQtyList的数量的正负号，因此先进行修正实时库存）
+            RtInvContent rtInvContent = rtService.saveRtQtyListToEs(saveRtQtyList);
+            if(saveRtInQtyList.size()>0){
+                RtInvContent tranferInContent = rtService.saveRtQtyListToEs(saveRtInQtyList);
+                if(!tranferInContent.getStatus().equals("0")){
+                    checkFlg = false;
+                }
+            }
+            if(!rtInvContent.getStatus().equals("0")){
+                checkFlg = false;
+            }
+            // 修正bi库存
+            String rtBi = rtService.saveBIrtQty(saveRtQtyList,detailType,storeCd);
+            if(rtBi == null){
+                checkFlg = false;
+            }
+            if(saveRtInQtyList.size()>0){
+                String rtTranferInBi = rtService.saveBIrtQty(saveRtInQtyList,"tmp_transfer_in",storeCd1);
+                if(rtTranferInBi == null){
+                    checkFlg = false;
+                }
+            }
+
+            // 判断是否存在group商品母货号
+            List<SaveInventoryQty> groupSavertList = new ArrayList<>();
+            List<SaveInventoryQty> groupSavertTranInList = new ArrayList<>();
+            List<String> result = ma1200Service.checkList(parentList);
+            log.info("<<<result:"+result.size());
+            if(result.size()>0){
+                // 取得子商品明细
+                List<Map<String, String>> _result = ma1200Service.getChildDetail(result);
+                if(_result.size()>0){
+                    for (Map<String, String> map : _result) {
+                        for (SaveInventoryQty saveQty:saveRtQtyList) {
+                            if(saveQty.getArticleId().equals(map.get("parentArticleId"))){
+                                float qty1 = saveQty.getInventoryQty();
+                                // 对子商品进行库存操作
+                                float articleQty = qty1*Integer.parseInt(map.get("childQty"));
+                                String childeArticleId = map.get("childArticleId");
+                                SaveInventoryQty saveGroupDetail = new SaveInventoryQty();
+                                saveGroupDetail.setArticleId(childeArticleId);
+                                saveGroupDetail.setInventoryQty(articleQty);
+                                saveGroupDetail.setDetailType(detailType);
+                                saveGroupDetail.setStoreCd(storeCd);
+                                groupSavertList.add(saveGroupDetail);
+                            }
+                        }
+                        if(saveRtInQtyList.size()>0) {
+                            for (SaveInventoryQty saveInQty : saveRtInQtyList) {
+                                if (saveInQty.getArticleId().equals(map.get("parentArticleId"))) {
+                                    float qty1 = saveInQty.getInventoryQty();
+                                    // 对子商品进行库存操作
+                                    float articleQty = qty1 * Integer.parseInt(map.get("childQty"));
+                                    String childeArticleId = map.get("childArticleId");
+                                    SaveInventoryQty saveGroupDetail = new SaveInventoryQty();
+                                    saveGroupDetail .setArticleId(childeArticleId);
+                                    saveGroupDetail.setInventoryQty(articleQty);
+                                    saveGroupDetail.setDetailType(saveInQty.getDetailType());
+                                    saveGroupDetail.setStoreCd(saveInQty.getStoreCd());
+                                    groupSavertTranInList.add(saveGroupDetail);
+                                }
+                            }
+                        }
+                    }
+                }
+                // 修正子商品实时库存
+                RtInvContent rtChildContent = rtService.saveRtQtyListToEs(groupSavertList);
+                if (!rtChildContent.getStatus().equals("0")) {
+                    checkFlg = false;
+                }
+                if(groupSavertTranInList.size()>0){
+                    RtInvContent rtInChildContent = rtService.saveRtQtyListToEs(groupSavertTranInList);
+                    if (!rtInChildContent.getStatus().equals("0")) {
+                        checkFlg = false;
+                    }
+                }
+
+                // 修正bi库存
+                String groupRtBi = rtService.saveBIrtQty(groupSavertList,detailType,storeCd);
+                if(groupRtBi == null){
+                    checkFlg = false;
+                }
+                if(groupSavertTranInList.size()>0){
+                    // 修正转入商品bi库存
+                    String groupInRtBi = rtService.saveBIrtQty(groupSavertTranInList,"tmp_transfer_in",storeCd1);
+                    if(groupInRtBi == null){
+                        checkFlg = false;
+                    }
+                }
+            }
+
+            // 判断是否存在BOM商品母货号
+            List<SaveInventoryQty> bomSavertList = new ArrayList<>();
+            List<SaveInventoryQty> bomSaveTranInrtList = new ArrayList<>();
+            List<String> bomResult = ma1200Service.checkBOMList(parentList);
+            if(bomResult.size()>0){
+                // 取得子商品明细
+                List<Map<String, String>> _result = ma1200Service.getBOMChildDetail(bomResult);
+                if (_result.size() > 0) {
+                    for (Map<String, String> map : _result) {
+                        for (SaveInventoryQty saveQty : saveRtQtyList) {
+                            if (saveQty.getArticleId().equals(map.get("parentArticleId"))) {
+                                float qty1 = saveQty.getInventoryQty();
+                                // 对子商品进行库存操作
+                                float articleQty = qty1*Float.parseFloat(map.get("childQty"));
+                                String childeArticleId = map.get("childArticleId");
+                                SaveInventoryQty saveBomDetail = new SaveInventoryQty();
+                                saveBomDetail.setArticleId(childeArticleId);
+                                saveBomDetail.setInventoryQty(articleQty);
+                                saveBomDetail.setDetailType(detailType);
+                                saveBomDetail.setStoreCd(storeCd);
+                                bomSavertList.add(saveBomDetail);
+                            }
+                        }
+                        if(saveRtInQtyList.size()>0) {
+                            for (SaveInventoryQty saveQty : saveRtInQtyList) {
+                                if (saveQty.getArticleId().equals(map.get("parentArticleId"))) {
+                                    float qty1 = saveQty.getInventoryQty();
+                                    // 对子商品进行库存操作
+                                    float articleQty = qty1*Float.parseFloat(map.get("childQty"));
+                                    String childeArticleId = map.get("childArticleId");
+                                    SaveInventoryQty saveBomDetail = new SaveInventoryQty();
+                                    saveBomDetail.setArticleId(childeArticleId);
+                                    saveBomDetail.setInventoryQty(articleQty);
+                                    saveBomDetail.setDetailType(saveQty.getDetailType());
+                                    saveBomDetail.setStoreCd(saveQty.getStoreCd());
+                                    bomSaveTranInrtList.add(saveBomDetail);
+                                }
+                            }
+                        }
+                    }
+                    // 修正子商品实时库存
+                    RtInvContent rtChildContent = rtService.saveRtQtyListToEs(bomSavertList);
+                    if (!rtChildContent.getStatus().equals("0")) {
+                        checkFlg = false;
+                    }
+                    if(bomSaveTranInrtList.size()>0){
+                        // 修正转入数量子商品实时库存
+                        RtInvContent rtInChildContent = rtService.saveRtQtyListToEs(bomSaveTranInrtList);
+                        if (!rtInChildContent.getStatus().equals("0")) {
+                            checkFlg = false;
+                        }
+                    }
+                    // 修正bi库存
+                    String bomRtBi = rtService.saveBIrtQty(bomSavertList,detailType,storeCd);
+                    if(bomRtBi == null){
+                        checkFlg = false;
+                    }
+                    if(bomSaveTranInrtList.size()>0){
+                        // 修正转入商品bi库存
+                        String bomInRtBi = rtService.saveBIrtQty(bomSaveTranInrtList,"tmp_transfer_in",storeCd1);
+                        if(bomInRtBi == null){
+                            checkFlg = false;
+                        }
+                    }
+                }
+            }
+            return checkFlg;
+        }
         return checkFlg;
     }
 }

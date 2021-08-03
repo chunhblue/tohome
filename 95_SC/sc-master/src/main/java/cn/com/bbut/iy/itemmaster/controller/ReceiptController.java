@@ -6,11 +6,13 @@ import cn.com.bbut.iy.itemmaster.annotation.TimeCheck;
 import cn.com.bbut.iy.itemmaster.constant.Constants;
 import cn.com.bbut.iy.itemmaster.constant.ConstantsAudit;
 import cn.com.bbut.iy.itemmaster.constant.PermissionCode;
+import cn.com.bbut.iy.itemmaster.dto.AjaxResultDto;
 import cn.com.bbut.iy.itemmaster.dto.ExcelParam;
 import cn.com.bbut.iy.itemmaster.dto.base.CommonDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.ReturnDTO;
 import cn.com.bbut.iy.itemmaster.dto.mRoleStore.MRoleStoreParam;
+import cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TDTO;
 import cn.com.bbut.iy.itemmaster.dto.receipt.rrVoucher.RRVoucherParamDTO;
 import cn.com.bbut.iy.itemmaster.dto.receipt.warehouse.WarehouseDetailsGridDTO;
 import cn.com.bbut.iy.itemmaster.dto.receipt.warehouse.WarehouseDetailsParamDTO;
@@ -437,6 +439,48 @@ public class ReceiptController extends BaseAction {
                 stores = (Collection<String>) session.getAttribute(Constants.SESSION_STORES);
         dto.setStoreCds(stores);
         return mRoleStoreService.getStoreByChoose(dto);
+    }
+
+    @RequestMapping(value = "/getSoTransfer")
+    @ResponseBody
+    public AjaxResultDto getSoTransfer(HttpServletRequest request, HttpSession session,
+                                       String searchJson) {
+
+        AjaxResultDto res = ajaxRepeatSubmitCheck(request, session);
+        Gson gson = new Gson();
+        List<WarehouseReceiptGridDTO> _list = gson.fromJson(searchJson, new TypeToken<List<WarehouseReceiptGridDTO>>(){}.getType());
+        List<WarehouseReceiptGridDTO> re_list = warehouseService.getSoTransfer(_list);
+        if (re_list != null && re_list.size() > 0){
+            StringBuilder temp = new StringBuilder();
+            for (int i=0;i<re_list.size();i++){
+                if(re_list.get(i).getNum()<=0){
+                    if(temp.length()==0){
+                        temp.append(re_list.get(i).getOrderId());
+                    }else {
+                        temp.append(",").append(re_list.get(i).getOrderId());
+                    }
+                }
+            }
+            if(temp.length()==0){
+                res.setSuccess(true);
+            }else {
+                res.setSuccess(false);
+                res.setData(temp);
+            }
+            return res;
+        }else{
+            StringBuilder temp1 = new StringBuilder();
+            for (int i=0;i<_list.size();i++){
+                if(temp1.length()==0){
+                    temp1.append(_list.get(i).getOrderId());
+                }else {
+                    temp1.append(",").append(_list.get(i).getOrderId());
+                }
+            }
+            res.setData(temp1);
+            res.setSuccess(false);
+        }
+        return res;
     }
 
 

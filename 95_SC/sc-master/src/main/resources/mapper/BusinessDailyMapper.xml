@@ -183,7 +183,12 @@
             when b.pay_cd2='18' then b.pay_amount2
             when b.pay_cd3='18' then b.pay_amount3
             when b.pay_cd4='18' then b.pay_amount4
-            end),0) as payInAmt6
+            end),0) as payInAmt6,
+            COALESCE(sum(case when b.pay_cd1='05' then b.pay_amount1
+            when b.pay_cd2='05' then b.pay_amount2
+            when b.pay_cd3='05' then b.pay_amount3
+            when b.pay_cd4='05' then b.pay_amount4
+            end),0) as payInAmt7
         from sa0010 b
         ,sa0020
         where
@@ -399,7 +404,7 @@
         /* GROUP BY  SA0010.acc_date*/
     </select>
     <select id="getPayName" resultType="cn.com.bbut.iy.itemmaster.dto.businessDaily.PaymentAmtDto">
-        select pay_cd,pay_name from sa0000 where effective_sts = '10'
+        select distinct pay_cd,pay_name from sa0000 where effective_sts = '10'
     </select>
 
     <select id="getServiceAmt" resultType="cn.com.bbut.iy.itemmaster.dto.businessDaily.PaymentAmtDto">
@@ -428,7 +433,11 @@
         AND sa0010.tran_type in('sale','return') /*有效销售*/
         AND sa0020.detail_type in ('s','r','ra')
         AND sa0020.detail_void = '0'
-        AND sa0020.article_id in (SELECT article_id from to_hq_tmp.service_sales ss where service_type = 'Momo Cash In')
+        AND sa0020.article_id in
+        <foreach item="momoItem" index="index" collection="momoList"
+                 open="(" separator="," close=")">
+            #{momoItem,jdbcType=VARCHAR}
+        </foreach>
         and sa0020.sale_seq_no = 1
         ),0) AS momoCashInAmt,
         COALESCE((SELECT SUM
@@ -456,7 +465,11 @@
         AND sa0010.tran_type in('sale','return') /*有效销售*/
         AND sa0020.detail_type in ('s','r','ra')
         AND sa0020.detail_void = '0'
-        AND sa0020.article_id IN (SELECT article_id from to_hq_tmp.service_sales ss where service_type = 'Payoo Pay Code')
+        AND sa0020.article_id in
+        <foreach item="codeItem" index="index" collection="payCodeList"
+                 open="(" separator="," close=")">
+            #{codeItem,jdbcType=VARCHAR}
+        </foreach>
         and sa0020.sale_seq_no = 1
         ),0 ) AS payooCodeAmt,
         COALESCE((SELECT SUM
@@ -483,7 +496,11 @@
         AND sa0010.tran_type in('sale','return') /*有效销售*/
         AND sa0020.detail_type in ('s','r','ra')
         AND sa0020.detail_void = '0'
-        AND sa0020.article_id IN (SELECT article_id from to_hq_tmp.service_sales ss where service_type = 'Payoo Pay Bill')
+        AND sa0020.article_id in
+        <foreach item="billItem" index="index" collection="payBillList"
+                 open="(" separator="," close=")">
+            #{billItem,jdbcType=VARCHAR}
+        </foreach>
         and sa0020.sale_seq_no = 1
         ),0 ) AS payooBillAmt,
         COALESCE((SELECT SUM
@@ -511,7 +528,11 @@
         AND sa0010.tran_type in('sale','return') /*有效销售*/
         AND sa0020.detail_type in ('s','r','ra')
         AND sa0020.detail_void = '0'
-        AND sa0020.article_id in (SELECT article_id from to_hq_tmp.service_sales ss where service_type = 'VIETTEL PHONE CARD')
+        AND sa0020.article_id in
+        <foreach item="viettelItem" index="index" collection="payViettelList"
+                 open="(" separator="," close=")">
+            #{viettelItem,jdbcType=VARCHAR}
+        </foreach>
         and sa0020.sale_seq_no = 1
         ),0 ) AS viettelAmt
     </select>
@@ -538,7 +559,11 @@
         AND sa0010.tran_type in('sale','return') /*有效销售*/
         AND sa0020.detail_type in ('s','r','ra')
         AND sa0020.detail_void = '0'
-        AND sa0020.article_id in (SELECT article_id from to_hq_tmp.service_sales ss where service_type = 'Momo Cash In')
+        AND sa0020.article_id in
+        <foreach item="momoItem" index="index" collection="momoList"
+                 open="(" separator="," close=")">
+            #{momoItem,jdbcType=VARCHAR}
+        </foreach>
         and sa0020.sale_seq_no = 1
         and (sa0010.pay_cd1 = '01' or sa0010.pay_cd2 = '01'
         or sa0010.pay_cd3 = '01' or sa0010.pay_cd4 = '01')) as momoCashIncount,
@@ -562,7 +587,11 @@
         AND sa0010.tran_type in('sale','return') /*有效销售*/
         AND sa0020.detail_type in ('s','r','ra')
         AND sa0020.detail_void = '0'
-        AND sa0020.article_id in (SELECT article_id from to_hq_tmp.service_sales ss where service_type = 'Payoo Pay Code')
+        AND sa0020.article_id in
+        <foreach item="codeItem" index="index" collection="payCodeList"
+                 open="(" separator="," close=")">
+            #{codeItem,jdbcType=VARCHAR}
+        </foreach>
         and sa0020.sale_seq_no = 1
         and (sa0010.pay_cd1 = '01' or sa0010.pay_cd2 = '01'
         or sa0010.pay_cd3 = '01' or sa0010.pay_cd4 = '01')) as payooCodeCount,
@@ -586,7 +615,11 @@
         AND sa0010.tran_type in('sale','return') /*有效销售*/
         AND sa0020.detail_type in ('s','r','ra')
         AND sa0020.detail_void = '0'
-        AND sa0020.article_id in (SELECT article_id from to_hq_tmp.service_sales ss where service_type = 'Payoo Pay Bill')
+        AND sa0020.article_id in
+        <foreach item="billItem" index="index" collection="payBillList"
+                 open="(" separator="," close=")">
+            #{billItem,jdbcType=VARCHAR}
+        </foreach>
         and sa0020.sale_seq_no = 1
         and (sa0010.pay_cd1 = '01' or sa0010.pay_cd2 = '01'
         or sa0010.pay_cd3 = '01' or sa0010.pay_cd4 = '01')) as payooBillCount,
@@ -610,7 +643,11 @@
         AND sa0010.tran_type in('sale','return') /*有效销售*/
         AND sa0020.detail_type in ('s','r','ra')
         AND sa0020.detail_void = '0'
-        AND sa0020.article_id in (SELECT article_id from to_hq_tmp.service_sales ss where service_type = 'VIETTEL PHONE CARD')
+        AND sa0020.article_id in
+        <foreach item="viettelItem" index="index" collection="payViettelList"
+                 open="(" separator="," close=")">
+            #{viettelItem,jdbcType=VARCHAR}
+        </foreach>
         and sa0020.sale_seq_no = 1
         and (sa0010.pay_cd1 = '01' or sa0010.pay_cd2 = '01'
         or sa0010.pay_cd3 = '01' or sa0010.pay_cd4 = '01')) as viettelCount
@@ -619,5 +656,21 @@
     <select id="getCashBalanceCount" resultType="int">
         select count(*) from sa0170 where store_cd = #{storeCd,jdbcType=VARCHAR}
             and pay_date = #{ businessDate, jdbcType = VARCHAR }
+    </select>
+
+    <select id="getMomoList" resultType="String">
+        SELECT article_id from to_hq_tmp.service_sales ss where service_type = 'Momo Cash In'
+    </select>
+
+    <select id="getPayCodeList" resultType="String">
+        SELECT article_id FROM to_hq_tmp.service_sales ss WHERE service_type = 'Payoo Pay Code'
+    </select>
+
+    <select id="getPayBillList" resultType="String">
+        SELECT article_id FROM to_hq_tmp.service_sales ss WHERE service_type = 'Payoo Pay Bill'
+    </select>
+
+    <select id="getViettelList" resultType="String">
+        SELECT article_id FROM to_hq_tmp.service_sales ss WHERE service_type = 'VIETTEL PHONE CARD'
     </select>
 </mapper>

@@ -243,10 +243,10 @@ define('order', function () {
 									if(result.success){
 										$("#submitAuditBut").removeAttr("disabled");
 										// 北京时间下午两点之后，不允许订货，不允许审核
-										if(parseInt($("#hms").val()) > 130000){
+										/*if(parseInt($("#hms").val()) > 130000){
 											$("#update").attr("disabled","disabled");
 											$("#submitAuditBut").attr("disabled","disabled");
-										}
+										}*/
 									}else{
 										$("#submitAuditBut").attr("disabled","disabled");
 									}
@@ -257,9 +257,9 @@ define('order', function () {
 							$("#submitAuditBut").attr("disabled","disabled");
 						}
 						// 北京时间下午两点之后，不允许订货，不允许审核
-						if(parseInt($("#hms").val()) > 130000){
+						/*if(parseInt($("#hms").val()) > 130000){
 							$("#submitAuditBut").attr("disabled","disabled");
-						}
+						}*/
 					});
 				}
 			},
@@ -828,6 +828,12 @@ define('order', function () {
 					tableGrid.showColumn("categoryName");
 					tableGrid.showColumn("subCategoryName");
 				}
+				$("#submitAuditBut").removeAttr("disabled");
+				// 北京时间下午两点之后，不允许订货，不允许审核
+				/*if(parseInt($("#hms").val()) > 130000){
+					$("#update").attr("disabled","disabled");
+					$("#submitAuditBut").attr("disabled","disabled");
+				}*/
 				return self;
 			},
 			eachTrClick:function(trObj,tdObj){//正常左侧点击

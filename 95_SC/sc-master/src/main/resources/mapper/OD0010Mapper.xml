@@ -46,6 +46,7 @@
     <result column="adjust_qty" property="adjustQty" jdbcType="NUMERIC" />
     <result column="is_free_item" property="isFreeItem" jdbcType="CHAR" />
     <result column="last_correction_difference" property="lastCorrectionDifference" jdbcType="NUMERIC" />
+    <result column="expired_date" property="expiredDate" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Example_Where_Clause" >
     <!--
@@ -346,6 +347,9 @@
       <if test="lastCorrectionDifference != null" >
         last_correction_difference,
       </if>
+      <if test="expiredDate != null and expiredDate != ''" >
+        expired_date,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="storeCd != null" >
@@ -470,6 +474,9 @@
       </if>
       <if test="lastCorrectionDifference != null" >
         #{lastCorrectionDifference,jdbcType=CHAR},
+      </if>
+      <if test="expiredDate != null and expiredDate != ''" >
+        #{expiredDate,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -862,7 +869,7 @@
       WHERE
           1=1
           AND A.order_differentiate = #{orderDifferentiate}
-          AND A.order_id = B.order_id
+          AND A.order_id = B.order_id 
           AND A.store_cd = D.store_cd
         <if test='orderDifferentiate=="0"' >
           AND A.vendor_id = F.vendor_id
@@ -1004,8 +1011,8 @@
     (select sum(adjust_amt) from od0010 where order_id = a.order_id) as total_amt
     from
     od0000 a,
-    (select * from ma1000 where #{businessDate} between effective_start_date and effective_end_date) c,
-    (select * from ma2000 where #{businessDate} between effective_start_date and effective_end_date) d
+    (select * from ma1000 where 1=1 ) c,
+    (select * from ma2000 ) d
     where
     1=1
 --     a.order_sts = '07'
@@ -1066,8 +1073,8 @@
     (select sum(adjust_amt) from od0010 where order_id = a.order_id) as total_amt
     from
     od0000 a,
-    (select * from ma1000 where #{businessDate} between effective_start_date and effective_end_date) c,
-    (select * from ma2000 where #{businessDate} between effective_start_date and effective_end_date) d
+    (select * from ma1000 where 1=1 ) c,
+    (select * from ma2000) d
     where
     1=1
 --     and a.order_sts = '07'
@@ -1241,8 +1248,8 @@
     (select sum(adjust_amt) from od0010 where order_id = a.order_id) as total_amt
     from
     od0000 a,
-    (select * from ma1000 where #{businessDate} between effective_start_date and effective_end_date) c,
-    (select * from ma2000 where #{businessDate} between effective_start_date and effective_end_date) d
+    (select * from ma1000) c,
+    (select * from ma2000 ) d
     where
     a.order_sts = '07'
     and a.order_type = '07'

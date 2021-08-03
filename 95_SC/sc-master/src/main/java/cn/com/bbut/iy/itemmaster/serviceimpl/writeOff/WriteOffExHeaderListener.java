@@ -26,13 +26,13 @@ public class WriteOffExHeaderListener implements ExEventListener {
     public void action(Workbook wb) {
         Sheet sheet = wb.getSheet(Constants.EXCEL_SHEET_DEF_NAME);
         // 大标题
-        String row0 = "Store Discards Daily Report";
+        String row0 = "Store Inventory Write Off Daily Report";
 
         // 二号标题
         String row1 = "";
 
         // 列标题
-        String row2 = "NO,Store No.,Store Name,Write Off Date,TopDepartment,Department,Category, SubCategory,Item Code,Item Name,Barcode,Uom,Write Off Quantity," +
+        String row2 = "NO,Store No.,Store Name,Write Off Date,TopDepartment,Department,Category, SubCategory,Item Code,Item Name,Barcode,Uom,Write Off Quantity,Sale Quantity," +
                 "Write Off Reason,Area Manager Code,Area Manager Name";
         String[] titles = row2.split(",");
 

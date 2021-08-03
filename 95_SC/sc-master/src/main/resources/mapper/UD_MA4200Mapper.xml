@@ -19,7 +19,6 @@
     FROM ma4200
     left join ma1000
         on ma4200.store_cd=ma1000.store_cd
-        and #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
     left join ma4160 on ma4200.job_type_cd = ma4160.job_type_cd
     left join ma4210 on emp_num_id = ma4210.user_code
     <where>
@@ -64,7 +63,6 @@
     FROM ma4200
     left join ma1000
     on ma4200.store_cd=ma1000.store_cd
-    and #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
     left join ma4160 on ma4200.job_type_cd = ma4160.job_type_cd
     left join ma4210 on emp_num_id = ma4210.user_code
     <where>
@@ -148,7 +146,6 @@
      select distinct ma4210.store_cd as store_detail_cd,ma1000.store_name as store_detail_name from ma4210
      left join ma1000
         on ma4210.store_cd=ma1000.store_cd
-        and #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         where ma4210.user_code = #{userCode,jdbcType=VARCHAR}
         order by ma4210.store_cd
         <if test="rows>0">

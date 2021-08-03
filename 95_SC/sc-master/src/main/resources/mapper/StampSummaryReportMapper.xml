@@ -20,10 +20,8 @@
         ma8436
         left join ma1000
         on ma8436.store_cd = ma1000.store_cd
-        and #{param.businessDate} between ma1000.effective_start_date AND ma1000.effective_end_date
         left join ma1100
         on ma8436.article_id = ma1100.article_id
-        and #{param.businessDate} between ma1100.effective_start_date AND ma1100.effective_end_date
         WHERE
         1 = 1
         AND ma8436.store_cd =  #{param.storeCd,jdbcType=VARCHAR}
@@ -47,10 +45,8 @@
         ma8436
         left join ma1000
         on ma8436.store_cd = ma1000.store_cd
-        and #{param.businessDate} between ma1000.effective_start_date AND ma1000.effective_end_date
         left join ma1100
         on ma8436.article_id = ma1100.article_id
-        and #{param.businessDate} between ma1100.effective_start_date AND ma1100.effective_end_date
         WHERE
         1 = 1
         AND ma8436.store_cd =  #{param.storeCd,jdbcType=VARCHAR}
@@ -78,10 +74,8 @@
         ma8435
         left join ma1000
         on ma8435.store_cd = ma1000.store_cd
-        and #{param.businessDate} between ma1000.effective_start_date AND ma1000.effective_end_date
         left join ma1100
         on ma8435.article_id = ma1100.article_id
-        and #{param.businessDate} between ma1100.effective_start_date AND ma1100.effective_end_date
         WHERE
         1 = 1
         AND ma8435.store_cd In
@@ -111,10 +105,8 @@
         ma8435
         left join ma1000
         on ma8435.store_cd = ma1000.store_cd
-        and #{param.businessDate} between ma1000.effective_start_date AND ma1000.effective_end_date
         left join ma1100
         on ma8435.article_id = ma1100.article_id
-        and #{param.businessDate} between ma1100.effective_start_date AND ma1100.effective_end_date
         WHERE
         1 = 1
         AND ma8435.store_cd In

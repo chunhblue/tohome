@@ -485,7 +485,6 @@
     and b.c_enable <![CDATA[<>]]> '0'
     and d.c_enable = '1'
     and e.vendor_id = f.vendor_id
-    and e.effective_date between f.effective_start_date and f.effective_end_date
     and d.n_operatorid = #{id}
 
     UNION ALL

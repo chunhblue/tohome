@@ -49,14 +49,20 @@
             border-top: 1px solid #666666;
             border-bottom: 1px solid #666666;
             background-color: #fff;
+            text-align: center;
         }
         table.gridTable td {
+            width: 10%;
             border: none;
             padding: 8px;
             font-size:12px;
             background-color: #ffffff;
         }
+        #grid_table_tableHeadClone {
+            width: 100%;
+        }
         table.gridTable tr:last-child td {
+
             border-top: 1px dashed #666666;
         }
 
@@ -106,13 +112,9 @@
                                             <input id="saleEndDate"  placeholder="End Date" class="form-control input-sm select-date" type="text" value="">
                                         </div>
 
-                                        <label for="item" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Item</label>
+                                        <label for="item" class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Item Code/Name/<br/>Barcode</label>
                                         <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
-                                            <div class="aotu-pos">
-                                                <input type="text" class="form-control my-automatic input-sm" id="item">
-                                                <a id="itemRefresh" href="javascript:void(0);" title="Refresh" class="auto-but glyphicon glyphicon-refresh refresh"></a>
-                                                <a id="itemRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
-                                            </div>
+                                            <input type="text" id="item" class="form-control input-sm">
                                         </div>
 									</div><!-- form-group -->
 

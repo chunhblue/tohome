@@ -6,7 +6,6 @@
         vendor_name
         from ma2000
         where vendor_id = #{vendorId,jdbcType=CHAR}
-        and (SELECT C.sp_value FROM CM9060 C WHERE C.sp_id = '0000') BETWEEN ma2000.effective_start_date AND ma2000.effective_end_date
     </select>
 
     <select id="selectById" resultType="cn.com.bbut.iy.itemmaster.entity.ma2000.MA2000">
@@ -32,10 +31,6 @@
 --         ma2002.effective_start_date = ma2000.effective_start_date
 --         AND ma2000.vendor_id = ma2002.vendor_id
         where ma2000.vendor_id = #{vendorId,jdbcType=VARCHAR}
-    <![CDATA[
-        and ma2000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and ma2000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-        ]]>
         limit 1
     </select>
 
@@ -47,10 +42,7 @@
     ,ma2100
     where
     /*有效业务日期内*/
-    <![CDATA[
-        ma2000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and ma2000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-    ]]>
+    1=1
     <if test="vendorId != null and vendorId !=''">
       and (lower(ma2000.vendor_id) like '%'|| lower(#{vendorId,jdbcType=VARCHAR}) || '%'
       or lower(ma2000.vendor_name) like '%'|| lower(#{vendorId,jdbcType=VARCHAR}) || '%')

@@ -145,6 +145,8 @@ public class RRModifyServiceImpl implements IRRModifyService {
                 articleIdList.add(rtDto.getArticleId());
                 if(BigDecimal.ZERO.equals(rtDto.getModifyQty()) || rtDto.getModifyQty() == null){
                     rtDto.setModifyQty(rtDto.getRrOrderQty());
+                    // 暂时添加
+                    rtDto.setRealtimeQty(BigDecimal.ZERO);
                 }
             }
         }
@@ -155,35 +157,44 @@ public class RRModifyServiceImpl implements IRRModifyService {
             String inEsTime = cm9060Service.getValByKey("1206");
             String connUrl = inventoryUrl + "GetRelTimeInventory/"+"/"+param.getStoreCd()
                     +"/*/*/*/*/*/" + inEsTime+"/*/*";
-            String urlData = RealTimeInventoryQueryServiceImpl.RequestPost(articleIdListJson,connUrl);
+            /*String urlData = RealTimeInventoryQueryServiceImpl.RequestPost(articleIdListJson,connUrl);
             if(urlData == null || "".equals(urlData)){
                 String message = "Failed to connect to live inventory data！";
-            }
-            Gson gson = new Gson();
-            // 获取第一层的信息
-            ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
+            }else {
+                Gson gson = new Gson();
+                String[] str = urlData.split("}");
+                if(str.length<=1){
+                    RtInvContent param1 = gson.fromJson(urlData, RtInvContent.class);
+                    if("500".equals(param1.getStatus()) || param1.getContent() == null){
+                        String message = "Failed to connect to live inventory data！";
+                    }
+                }else {
+                    // 获取第一层的信息
+                    ArrayList<RtInvContent> rtInvContent2 = gson.fromJson(urlData,new TypeToken<List<RtInvContent>>() {}.getType());
 
-            RtInvContent rtInvContent = rtInvContent2.get(0);
-            if(rtInvContent == null){
-                rtInvContent = new RtInvContent();
-            }
-            String content = rtInvContent.getContent();
-            // 获取第二层的信息
-            ArrayList<RealTimeDto> realTimeDto2 = gson.fromJson(content,new TypeToken<List<RealTimeDto>>() {}.getType());
-            if(realTimeDto2.size()>0) {
-                for (RRModifyDetailsDTO rtDto : _list) {
-                    for (RealTimeDto realTimeDto : realTimeDto2) {
-                        if (realTimeDto.getArticle_id().equals(rtDto.getArticleId())) {
-                        // 计算实时库存数量
-                            BigDecimal rTimeQty = realTimeDto.getOn_hand_qty().add(realTimeDto.getReceive_qty().add(realTimeDto.getReceive_corr_qty()))
-                                    .add(realTimeDto.getAdjustment_qty()).subtract(realTimeDto.getTransfer_out_qty().add(realTimeDto.getTransfer_out_corr_qty()))
-                                    .subtract(realTimeDto.getSale_qty()).subtract(realTimeDto.getWrite_off_qty()).add(realTimeDto.getTransfer_in_qty().add(realTimeDto.getTransfer_in_corr_qty()))
-                                    .subtract(realTimeDto.getReturn_qty().add(realTimeDto.getReturn_corr_qty()));
-                            rtDto.setRealtimeQty(rTimeQty);
+                    RtInvContent rtInvContent = rtInvContent2.get(0);
+                    if(rtInvContent == null){
+                        rtInvContent = new RtInvContent();
+                    }
+                    String content = rtInvContent.getContent();
+                    // 获取第二层的信息
+                    ArrayList<RealTimeDto> realTimeDto2 = gson.fromJson(content,new TypeToken<List<RealTimeDto>>() {}.getType());
+                    if(realTimeDto2.size()>0) {
+                        for (RRModifyDetailsDTO rtDto : _list) {
+                            for (RealTimeDto realTimeDto : realTimeDto2) {
+                                if (realTimeDto.getArticle_id().equals(rtDto.getArticleId())) {
+                                    // 计算实时库存数量
+                                    BigDecimal rTimeQty = realTimeDto.getOn_hand_qty().add(realTimeDto.getReceive_qty().add(realTimeDto.getReceive_corr_qty()))
+                                            .add(realTimeDto.getAdjustment_qty()).subtract(realTimeDto.getTransfer_out_qty().add(realTimeDto.getTransfer_out_corr_qty()))
+                                            .subtract(realTimeDto.getSale_qty()).subtract(realTimeDto.getWrite_off_qty()).add(realTimeDto.getTransfer_in_qty().add(realTimeDto.getTransfer_in_corr_qty()))
+                                            .subtract(realTimeDto.getReturn_qty().add(realTimeDto.getReturn_corr_qty()));
+                                    rtDto.setRealtimeQty(rTimeQty);
+                                }
+                            }
                         }
                     }
                 }
-            }
+            }*/
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

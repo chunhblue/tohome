@@ -14,6 +14,7 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReturnWarehouseParamDTO extends GridParamDTO {
+    private String orderRemark;
     /**
      * 订货区分
      */
@@ -34,6 +35,10 @@ public class ReturnWarehouseParamDTO extends GridParamDTO {
      * 店铺号
      */
     private String storeCd;
+    /**
+     * 店铺号
+     */
+    private String storeName;
     /**
      * 商品id
      */

@@ -35,5 +35,9 @@ public class MA5321Controller extends BaseAction {
     public List<AutoCompleteDTO> getList(String v){
         return service.getWarehouse(v);
     }
-
+    @ResponseBody
+    @RequestMapping(value = "/getDcList")
+    public List<AutoCompleteDTO> getDcList(String storeCd,String v){
+        return service.getWarehouseList(storeCd,v);
+    }
 }

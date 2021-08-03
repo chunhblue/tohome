@@ -86,10 +86,7 @@
       AND ma4040.promotion_cd in (
       select DISTINCT ma4070.promotion_cd from ma4070 where ma4070.article_id in (
       select DISTINCT article_id from ma1100 where
-      <![CDATA[
-                effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-                and effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-                ]]>
+      1=1
       AND lower(article_name) like lower(CONCAT('%',#{itemName,jdbcType=VARCHAR},'%'))
       )
       )
@@ -198,8 +195,6 @@
     from ma4110,ma0020,ma4120,ma1100,ma0080,ma4140,ma2000
     where ma4110.location=ma0020.structure_cd and ma4110.promotion_id=ma4120.promotion_id and ma4120.item_code=ma1100.article_id and ma1100.pma_cd=ma0080.pma_cd
     and ma4120.material_type=ma4140.material_type_id and ma4120.vendor_id=ma2000.vendor_id and ma0020.effective_sts='10' and ma0020.level = '0'
-    and ma4110.create_ymd between ma2000.effective_start_date and ma2000.effective_end_date
-    and ma4110.create_ymd between ma1100.effective_start_date and ma1100.effective_end_date
     and ma0080.effective_sts='10' and ma4140.effective_sts='10'
     and ma4110.promotion_id = #{promotionCd,jdbcType=VARCHAR}
     <if test="orderByClause != null">
@@ -216,8 +211,6 @@
     from ma4110,ma0020,ma4120,ma1100,ma0080,ma4140,ma2000
     where ma4110.location=ma0020.structure_cd and ma4110.promotion_id=ma4120.promotion_id and ma4120.item_code=ma1100.article_id and ma1100.pma_cd=ma0080.pma_cd
     and ma4120.material_type=ma4140.material_type_id and ma4120.vendor_id=ma2000.vendor_id and ma0020.effective_sts='10' and ma0020.level = '0'
-    and ma4110.create_ymd between ma2000.effective_start_date and ma2000.effective_end_date
-    and ma4110.create_ymd between ma1100.effective_start_date and ma1100.effective_end_date
     and ma0080.effective_sts='10' and ma4140.effective_sts='10'
     and ma4110.promotion_id = #{promotionCd,jdbcType=VARCHAR}
   </select>

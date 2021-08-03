@@ -127,9 +127,11 @@
 
                                 <div class="form-group">
                                     <label for=""  class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">Remarks</label>
-                                    <div class="col-xs-4 col-sm-4 col-md-3 col-lg-8">
-                                        <input style="width: 61.5%" type="text" id="remarks" class="form-control input-sm">
-                                    </div>
+                                    <div class="col-xs-4 col-sm-4 col-md-3 col-lg-6">
+                                        <input style="width: 100%" type="text" id="remarks" class="form-control input-sm">
+                                        </div>
+                                    <button id="confirm" type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-ok"></span>Confirm</button>
+
 
                                 </div>
                             </div>
@@ -139,7 +141,7 @@
                             <div class="col-xs-4 col-sm-4 col-md-3 col-lg-4">
                                 <input type="text" id="searchItemInp" placeholder="Item Code" class="form-control input-sm">
                             </div>
-                            <button id="searchItemBtn" type="button" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-search icon-right"></span>Inquire</button>
+                            <button id="searchItemBtn" type="button" class="btn btn-primary btn-sm disabled"><span class="glyphicon glyphicon-search icon-right"></span>Inquire</button>
                         </div>
                     </div>
                 </div>

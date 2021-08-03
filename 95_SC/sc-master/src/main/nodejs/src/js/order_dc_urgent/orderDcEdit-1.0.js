@@ -853,7 +853,18 @@ define('orderDcEdit', function () {
 				orderDetailJson:orderDetail,
 				use:m.use.val(),
 				toKen:m.toKen.val()
+			};
+			var position = 1;
+			_common.checkPosition($("#aStore").attr("k"),function (result) {
+				if(!result.success){
+					_common.prompt("You do not have permission to order it!",5,"info");
+					position = 0;
+				}
+			});
+			if(position<1){
+				return false;
 			}
+
 			_common.myConfirm("Are you sure you want to save？",function(result){
 				if(result!="true"){return false;}
 				$.myAjaxs({

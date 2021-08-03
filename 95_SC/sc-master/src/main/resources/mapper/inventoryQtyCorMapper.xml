@@ -38,6 +38,7 @@
     <!--库存明细-->
     <resultMap id="ReSk0020" type="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO">
         <id column="store_cd" property="storeCd" jdbcType="CHAR" />
+        <id column="store_cd1" property="storeCd1" jdbcType="CHAR" />
         <id column="voucher_no" property="voucherNo" jdbcType="VARCHAR" />
         <id column="voucher_type" property="voucherType" jdbcType="VARCHAR" />
         <id column="voucher_date" property="voucherDate" jdbcType="CHAR" />
@@ -75,7 +76,7 @@
     </select>
 
     <select id="getVoucherItemList" resultMap="ReSk0020">
-        select voucher_no,voucher_type,store_cd,article_id,coalesce(qty1,0) qty1,coalesce(qty2,0) qty2
+        select voucher_no,voucher_type,store_cd,store_cd1,article_id,coalesce(qty1,0) qty1,coalesce(qty2,0) qty2
         from sk0020
         where voucher_no = #{voucherNo, jdbcType=VARCHAR}
     </select>

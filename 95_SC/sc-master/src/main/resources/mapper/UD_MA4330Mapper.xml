@@ -7,10 +7,7 @@
     ma4330.create_ymd,ma4330.create_hms,ma4330.create_user_id,
     (select store_name from ma1000
     where
-    <![CDATA[
-        ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-        and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-    ]]>
+    1=1
     and ma1000.store_cd = ma4330.store_cd) as store_name,
     (select code_name log_type_name from cm9010 where
     ma4330.log_type = cm9010.code_value

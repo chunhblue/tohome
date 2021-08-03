@@ -89,8 +89,22 @@ public interface BusinessDailyMapper {
      * @param storeCd
      * @return
      */
-    PaymentAmtDto getServiceAmt(@Param("payDate")String payDate, @Param("storeCd")String storeCd);
-    PaymentAmtDto getCountByService(@Param("payDate")String payDate, @Param("storeCd")String storeCd);
+    PaymentAmtDto getServiceAmt(@Param("payDate")String payDate, @Param("storeCd")String storeCd,
+                                @Param("momoList")List<String> momoList,@Param("payCodeList")List<String> payCodeList,
+                                @Param("payBillList")List<String> payBillList,@Param("payViettelList")List<String> payViettelList);
+
+    PaymentAmtDto getCountByService(@Param("payDate")String payDate, @Param("storeCd")String storeCd,
+                                    @Param("momoList")List<String> momoList,@Param("payCodeList")List<String> payCodeList,
+                                    @Param("payBillList")List<String> payBillList,@Param("payViettelList")List<String> payViettelList);
 
     int getCashBalanceCount(@Param("businessDate")String businessDate, @Param("storeCd")String storeCd);
+
+    // Momo Cash In itemList
+    List<String> getMomoList();
+    // Payoo Pay Code itemList
+    List<String> getPayCodeList();
+    // Payoo Pay Bill itemList
+    List<String> getPayBillList();
+    // VIETTEL PHONE CARD itemList
+    List<String> getViettelList();
 }

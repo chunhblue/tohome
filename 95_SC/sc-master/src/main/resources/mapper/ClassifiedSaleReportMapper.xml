@@ -73,7 +73,6 @@
         WHERE
             ia.store_cd = ma1.store_cd
             AND cm1.sp_id = '0000'
-            AND cm1.sp_value BETWEEN ma1.effective_start_date AND ma1.effective_end_date
             AND ma1.ofc = oper.c_operatorcode
             AND ia.store_cd In
             <foreach item="store" index="index" collection="classParamdto.stores"
@@ -134,7 +133,6 @@
         WHERE
             ia.store_cd = ma1.store_cd
             AND cm1.sp_id = '0000'
-            AND cm1.sp_value BETWEEN ma1.effective_start_date AND ma1.effective_end_date
             AND ma1.ofc = oper.c_operatorcode
             AND ia.store_cd In
             <foreach item="store" index="index" collection="classParamdto.stores"
@@ -214,7 +212,6 @@
         WHERE
         ia.store_cd = ma1.store_cd
         AND cm1.sp_id = '0000'
-        AND cm1.sp_value BETWEEN ma1.effective_start_date AND ma1.effective_end_date
         AND ma1.ofc = oper.c_operatorcode
         AND ia.store_cd In
         <foreach item="store" index="index" collection="classParamdto.stores"

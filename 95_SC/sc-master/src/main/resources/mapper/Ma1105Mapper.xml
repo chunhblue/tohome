@@ -146,14 +146,6 @@
       and ma1105.store_cd = ma1000.store_cd
       and ma1000.store_type_cd = trim(ma0030.store_type_cd)
       and ma1000.store_group_cd = trim(ma0035.store_group_cd)
-      <if test="businessDate !=null and businessDate !=''">
-        <![CDATA[
-            AND #{businessDate,jdbcType=VARCHAR} >=ma1100.EFFECTIVE_START_DATE
-            AND ma1100.EFFECTIVE_END_DATE >= #{businessDate,jdbcType=VARCHAR}
-            AND #{businessDate,jdbcType=VARCHAR} >=ma1000.EFFECTIVE_START_DATE
-            AND ma1000.EFFECTIVE_END_DATE >= #{businessDate,jdbcType=VARCHAR}
-        ]]>
-      </if>
       and ma1100.dep_cd = ma0070.dep_cd
       and ma1100.pma_cd = ma0080.pma_cd
       and ma1100.category_cd = ma0090.category_cd
@@ -353,14 +345,6 @@
       and ma1105.store_cd = ma1000.store_cd
       and ma1000.store_type_cd = trim(ma0030.store_type_cd)
       and ma1000.store_group_cd = trim(ma0035.store_group_cd)
-      <if test="businessDate !=null and businessDate !=''">
-        <![CDATA[
-            AND #{businessDate,jdbcType=VARCHAR} >=ma1100.EFFECTIVE_START_DATE
-            AND ma1100.EFFECTIVE_END_DATE >= #{businessDate,jdbcType=VARCHAR}
-            AND #{businessDate,jdbcType=VARCHAR} >=ma1000.EFFECTIVE_START_DATE
-            AND ma1000.EFFECTIVE_END_DATE >= #{businessDate,jdbcType=VARCHAR}
-        ]]>
-      </if>
       and ma1100.dep_cd = ma0070.dep_cd
       and ma1100.pma_cd = ma0080.pma_cd
       and ma1100.category_cd = ma0090.category_cd
@@ -549,9 +533,7 @@
 
   <select id="getStoreInfo" resultType="cn.com.bbut.iy.itemmaster.entity.base.Ma1105">
         select ma_cd,store_type_cd from ma1000
-        WHERE #{businessDate,jdbcType=VARCHAR}
-        BETWEEN effective_start_date AND effective_end_date
-        AND store_cd = #{storeCd,jdbcType=VARCHAR}
+        WHERE 1=1
         limit 1
   </select>
 

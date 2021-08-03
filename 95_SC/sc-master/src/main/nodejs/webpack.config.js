@@ -52,6 +52,8 @@ module.exports = {
         returnVendorEdit: './js/return_vendor/returnEdit-1.0.js',
         vendorReturnPrint: './js/return_vendor/returnPrint-1.0.js',
         vendorReturnOrgPrint: './js/return_vendor/returnOrgPrint-1.0.js',
+        returnDocumentPrint:'./js/return_vendor/returnDocumentPrint-1.0.js',
+        returnDcDocumentPrint:'./js/return_warehouse/returnDcDocumentPrint-1.0.js',
         orderNewStore: './js/order_newStore/orderNewStore-1.0.js',
         orderNewStoreEdit: './js/order_newStore/orderNewStoreEdit-1.0.js',
         stockAdjustment: './js/stock_adjustment/stockAdjustment-1.0.js',
@@ -224,6 +226,7 @@ module.exports = {
         remoteUpdate:'./js/remoteUpdate/remoteUpdate-1.0.js',
         remoteUpdateEdit:'./js/remoteUpdate/remoteUpdateEdit-1.0.js',
         clearInventory:'./js/clear_stock/clearInventory-1.0.js',
+
     },
     output: {
         filename: devMode ? "[name].js" : "[name].[hash:5].js",

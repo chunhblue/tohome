@@ -37,7 +37,7 @@
 		WHERE
 			N_TYPEID = #{invalidBean.nTypeid}
 		AND RECORD_CD = #{invalidBean.cRecordCd}
-		AND STORE_CD = #{invalidBean.storeCd}
+
 	</update>
 
   <update id="updateAuditStatus">

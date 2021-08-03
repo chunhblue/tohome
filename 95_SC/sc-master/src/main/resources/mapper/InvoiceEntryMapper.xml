@@ -175,7 +175,6 @@
         B.code_type = '00540'
         AND B.code_value = A.status
         AND ma1000.store_cd = A.store_cd
-        AND A.acc_date BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
         AND A.store_cd IN
         <foreach item="store" index="index" collection="param.stores"
                  open="(" separator="," close=")">
@@ -200,7 +199,6 @@
         WHERE
         B.code_type = '00540'
         AND ma1000.store_cd = A.store_cd
-        AND A.acc_date BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
         AND B.code_value = A.status
         AND A.store_cd IN
         <foreach item="store" index="index" collection="param.stores"

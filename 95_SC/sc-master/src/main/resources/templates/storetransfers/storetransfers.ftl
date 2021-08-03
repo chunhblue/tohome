@@ -68,7 +68,7 @@
 	<!--页头-->
 [@common.header][/@common.header]
 	<!--导航-->
-[@common.nav "HOME&Inventory&Store Transfer Out Entry"][/@common.nav]
+[@common.nav "HOME&Inventory&Store Transfer Entry"][/@common.nav]
 <div class="container-fluid" id="main_box">
 	<!--row 分割-->
 	<div class="row">

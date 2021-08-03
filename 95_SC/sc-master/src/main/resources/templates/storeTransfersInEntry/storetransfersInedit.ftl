@@ -253,11 +253,11 @@
                                 <label for="item_input_tamount"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label not-null">Tranfer Out Qty</label>
                                 <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
                                     <input type="hidden" id="on_hand_qty" class="form-control input-sm">
-                                    <input type="text" id="item_input_tamount" class="form-control input-sm">
+                                    <input type="text" id="item_input_tamount" readonly="true" class="form-control input-sm">
                                 </div>
                                 <label for="actualQty"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label">Tranfer In Qty</label>
                                 <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
-                                    <input type="text" id="actualQty" disabled class="form-control input-sm">
+                                    <input type="text" id="actualQty" readonly="true" class="form-control input-sm">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -277,7 +277,7 @@
                                 <label for="adjustReason"  class="col-xs-12 col-sm-2 col-md-2 col-lg-2 control-label not-null">Transfer Reason</label>
                                 <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
                                     <div class="aotu-pos good-select">
-                                        <input type="text" class="form-control my-automatic input-sm" id="adjustReason">
+                                        <input type="text" class="form-control my-automatic input-sm" id="adjustReason" readonly="true">
                                         <a id="reasonRefresh" href="javascript:void(0);" title="Refresh" class="auto-but glyphicon glyphicon-refresh refresh"></a>
                                         <a id="reasonRemove" href="javascript:void(0);" title="Clear" class="auto-but glyphicon glyphicon-remove circle"></a>
                                     </div>

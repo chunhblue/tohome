@@ -103,8 +103,12 @@ public class SaleReconciliation extends BaseAction {
         dto.setLimitStart((page - 1)*rows);
         dto.setFlg(true);
         GridDataDTO<CashDetail> grid = cashService.getCashDetailyList(dto);
-        CashDetail cashTotal = grid.getRows().get(0);
-
+        CashDetail cashTotal = new CashDetail();
+        if(grid != null ){
+            if(grid.getRows()!= null && grid.getRows().size()>0){
+                cashTotal = grid.getRows().get(0);
+            }
+        }
         BigDecimal payInAmt0 = BigDecimal.ZERO,payInAmt1 = BigDecimal.ZERO,payInAmt2 = BigDecimal.ZERO,
                 additional=BigDecimal.ZERO,offsetClaim=BigDecimal.ZERO;
         BigDecimal payAmt0 = BigDecimal.ZERO,payAmt1 = BigDecimal.ZERO,payAmt2 = BigDecimal.ZERO,payInAmt = BigDecimal.ZERO,

@@ -118,14 +118,11 @@
     )T
     left join ma1100 T1
         ON T.article_id = T1.article_id
-        and T.order_date between T1.effective_start_date and T1.effective_end_date
     left join ma1000 T2
         ON T.store_cd = T2.store_cd
-        and T.order_date between T2.effective_start_date and T2.effective_end_date
     <choose>
         <when test="orderDifferentiate == '0'.toString()">
             left join ma2000 on T.vendor_id = ma2000.vendor_id
-            and T.order_date between ma2000.effective_start_date and ma2000.effective_end_date
             and T.order_differentiate = '0'
         </when>
         <otherwise>
@@ -181,7 +178,6 @@
         <where>
             o1.order_id = T.order_id and o1.store_cd = T.store_cd and o1.vendor_id = T.vendor_id
             and o1. article_id= ma1100.article_id
-            AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
             and T.create_user_id = ma4200.emp_num_id
             and (total_order_qty &lt; T5.min_order_qty OR total_order_amt &lt; T5.min_order_amt)
             <if test="vendorInfo != null and vendorInfo != ''">
@@ -236,7 +232,6 @@
         <where>
             o1.order_id = T.order_id and o1.store_cd = T.store_cd and o1.vendor_id = T.vendor_id
             and o1. article_id= ma1100.article_id
-            AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date AND ma1100.effective_end_date
             and T.create_user_id = ma4200.emp_num_id
             and (total_order_qty &lt; T5.min_order_qty OR total_order_amt &lt; T5.min_order_amt)
             <if test="vendorInfo != null and vendorInfo != ''">
@@ -294,10 +289,6 @@
         WHERE
         ma1100.article_id = od0010.article_id
         AND ma1000.store_cd = od0010.store_cd
-        AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date
-        AND ma1000.effective_end_date
-        AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date
-        AND ma1100.effective_end_date
         AND ma1100.article_id = ma1110.article_id
         AND ma1100.effective_start_date = ma1110.effective_start_date
         AND ma1110.structure_cd = (
@@ -322,10 +313,6 @@
         WHERE
         ma1100.article_id = od0010.article_id
         AND ma1000.store_cd = od0010.store_cd
-        AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1000.effective_start_date
-        AND ma1000.effective_end_date
-        AND #{orderDate,jdbcType=VARCHAR} BETWEEN ma1100.effective_start_date
-        AND ma1100.effective_end_date
         AND ma1100.article_id = ma1110.article_id
         AND ma1100.effective_start_date = ma1110.effective_start_date
         AND ma1110.structure_cd = (

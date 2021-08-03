@@ -69,6 +69,16 @@ public class ReturnWarehouseServiceImpl implements ReturnWarehouseService {
         return list;
     }
 
+    // 20210722
+    @Override
+    public List<RWHItemsGridResult> getReturnItemsDetail(ReturnWarehouseParamDTO returnParamDTO) {
+        return returnWarehouseMapper.getReturnVendorItemsList(returnParamDTO);
+    }
+
+    @Override
+    public List<RWHItemsGridResult> getDcReturnItemsDetail(ReturnWarehouseParamDTO returnParamDTO) {
+        return returnWarehouseMapper.getDcReturnWarehouseItemsList(returnParamDTO);
+    }
 
     @Override
     public List<AutoCompleteDTO> getOrgOrderIdList(ReturnWarehouseParamDTO dto) {
@@ -127,6 +137,11 @@ public class ReturnWarehouseServiceImpl implements ReturnWarehouseService {
     public List<AutoCompleteDTO> getdirectItems(ReturnWarehouseParamDTO param) {
         return returnWarehouseMapper.getdirectItems(param);
     }
+    @Override
+    public List<AutoCompleteDTO> getdirectItemsList(ReturnWarehouseParamDTO param) {
+        return returnWarehouseMapper.getdirectItemsList(param);
+    }
+
 
     @Override
     public ReturnWarehouseDetailInfo getdirectItemInfo(ReturnWarehouseParamDTO param) {

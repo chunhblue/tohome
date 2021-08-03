@@ -71,7 +71,7 @@
         JOIN (
             SELECT store_cd, store_name
             FROM ma1000
-            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+            WHERE 1=1
 
             <if test="am !=null and am!=''">
             AND  ma1000.ofc={#ma,jdbcType=VARCHAR}
@@ -84,7 +84,7 @@
             FROM
                 ma1100
             WHERE
-                #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+               1=1
             <if test="depCd != null and depCd != ''">
                 AND dep_cd = #{depCd,jdbcType=VARCHAR}
                 <if test="pmaCd != null and pmaCd != ''">
@@ -159,7 +159,7 @@
         SELECT store_cd, store_name,ofc,
         (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
         FROM ma1000
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="am !=null and am !=''">
           AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
         </if>
@@ -171,8 +171,7 @@
         effective_start_date, article_name, dep_cd, pma_cd, category_cd,sub_category_cd
         FROM
         ma1100
-        WHERE
-        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="depCd != null and depCd != ''">
             AND dep_cd = #{depCd,jdbcType=VARCHAR}
         </if>
@@ -269,7 +268,7 @@
         SELECT store_cd, store_name,ofc,
         (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
         FROM ma1000
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="am !=null and am !=''">
             AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
         </if>
@@ -280,8 +279,7 @@
         article_id, effective_start_date, article_name, dep_cd, pma_cd, category_cd,sub_category_cd
         FROM
         ma1100
-        WHERE
-        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="depCd != null and depCd != ''">
             AND dep_cd = #{depCd,jdbcType=VARCHAR}
         </if>
@@ -370,7 +368,7 @@
         SELECT store_cd, store_name,ofc,
         (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
         FROM ma1000
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="am !=null and am !=''">
             AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
         </if>
@@ -382,8 +380,7 @@
         effective_start_date,dep_cd, pma_cd, category_cd,sub_category_cd
         FROM
         ma1100
-        WHERE
-        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="depCd != null and depCd != ''">
             AND dep_cd = #{depCd,jdbcType=VARCHAR}
         </if>
@@ -474,7 +471,7 @@
         SELECT store_cd, store_name,ofc,
         (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
         FROM ma1000
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="am !=null and am !=''">
             AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
         </if>
@@ -485,8 +482,7 @@
         article_id, effective_start_date, article_name, dep_cd, pma_cd, category_cd,sub_category_cd
         FROM
         ma1100
-        WHERE
-        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="depCd != null and depCd != ''">
             AND dep_cd = #{depCd,jdbcType=VARCHAR}
         </if>
@@ -575,7 +571,7 @@
         SELECT store_cd, store_name,ofc,
         (select  t_operator.c_operatorname  from  t_operator where t_operator.c_operatorcode=ofc ) AS ofc_name
         FROM ma1000
-        WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="am !=null and am !=''">
             AND   ma1000.ofc=#{am,jdbcType=VARCHAR}
         </if>
@@ -587,8 +583,7 @@
         effective_start_date,dep_cd, pma_cd, category_cd,sub_category_cd
         FROM
         ma1100
-        WHERE
-        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         <if test="depCd != null and depCd != ''">
             AND dep_cd = #{depCd,jdbcType=VARCHAR}
         </if>
@@ -693,8 +688,6 @@
         ma1100
         WHERE
         1=1
-        AND  #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
-        AND effective_end_date
         ) T1 ON T.article_id = T1.article_id
        where 1=1
         <if test="depCd != null and depCd != ''">
@@ -729,6 +722,7 @@
 	T.sales_unit_id,
 	T.adjust_reason,
 	T.qty1,
+    coalesce(sa0022.sale_qty,0) sale_qty,
 	T.amt_notax,
 	T.barcode,
 	T.display_seq,
@@ -785,6 +779,9 @@ WHERE
 	AND S.voucher_type = '603'
   <include refid="selectCondition"></include>
 	) T
+	left join sa0022 on
+	T.store_cd = sa0022.store_cd and T.voucher_date = sa0022.acc_date
+	and T.article_id = sa0022.article_id
 	LEFT JOIN (
 	SELECT
 		store_cd,
@@ -795,8 +792,6 @@ WHERE
 		ma1000
 	WHERE
 	1=1
-
-      and   #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
 	) T0 ON T.store_cd = T0.store_cd
 	LEFT JOIN (
 	SELECT
@@ -814,8 +809,6 @@ WHERE
 		ma1100
 	WHERE
 	1=1
-       AND  #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
-		AND effective_end_date
 	) T1 ON T.article_id = T1.article_id
 	LEFT JOIN ( SELECT dep_cd, pma_cd, pma_name FROM ma0080 WHERE effective_sts = '10' ) T2 ON T1.dep_cd = T2.dep_cd
 	AND T1.pma_cd = T2.pma_cd
@@ -888,7 +881,6 @@ WHERE
 	AND MA0100.category_cd = T1.category_cd
 	) AS sub_category_name,
 	concat( T3.code_value, ' ', T3.code_name ) AS adjust_reason_name
--- 	COALESCE ( T4.sale_qty, 0 ) sale_qty
 FROM
 	(
 SELECT
@@ -932,8 +924,6 @@ WHERE
 		ma1000
 	WHERE
 	1=1
-       AND  #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
-		AND effective_end_date
 	) T0 ON T.store_cd = T0.store_cd
 	LEFT JOIN (
 	SELECT
@@ -949,11 +939,6 @@ WHERE
 		sub_category_cd
 	FROM
 		ma1100
-	WHERE
-      1=1
-        AND #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
-		AND effective_end_date
-
 	) T1 ON T.article_id = T1.article_id
 	LEFT JOIN ( SELECT dep_cd, pma_cd, pma_name FROM ma0080 WHERE effective_sts = '10' ) T2 ON T1.dep_cd = T2.dep_cd
 	AND T1.pma_cd = T2.pma_cd
@@ -984,36 +969,28 @@ WHERE
 	) AS B;
     </select>
     <select id="getExSaleDetail" resultMap="ReMap">
-    SELECT
-    article_id,
-    store_cd,
-    (case when
-    <![CDATA[ to_char(sale_date,'HH24miss')<'060000' ]]>
-    then to_char(sale_date+ '-1 day','yyyyMMdd')
-    else to_char(sale_date,'yyyyMMdd') end) AS acc_date,
-    COALESCE ( sum( sale_qty ), 0 ) sale_qty
-    FROM
-    sa0020
-    WHERE
-    detail_type = 's'
-    and (sa0020.store_cd||'_'||sa0020.article_id || '_' ||
-    (case when
-    <![CDATA[ to_char(sale_date,'HH24miss')<'060000' ]]>
-    then to_char(sale_date+ '-1 day','yyyyMMdd')
-    else to_char(sale_date,'yyyyMMdd') end))
-    in
-    <foreach item="item" index="index" collection="list"
-             open="(" separator="," close=")">
-        #{item}
-    </foreach>
-    GROUP BY
-    article_id,
-    store_cd,
-    case when
-    <![CDATA[ to_char(sale_date,'HH24miss')<'060000' ]]>
-    then to_char(sale_date+ '-1 day','yyyyMMdd')
-    else to_char(sale_date,'yyyyMMdd') end
-</select>
+        	SELECT
+		article_id,
+		store_cd,
+		acc_date,
+		COALESCE ( sum( sale_qty ), 0 ) sale_qty
+	FROM
+		sa0020
+	WHERE
+		detail_type = 's'
+        and (sa0020.store_cd||'_'||sa0020.article_id || '_' || sa0020.acc_date)
+        <if test="list !=null || list !=''">
+         in
+        <foreach item="item" index="index" collection="list"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        </if>
+	GROUP BY
+		article_id,
+		store_cd,
+		acc_date
+    </select>
     <select id="selectSaleQty2" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultMap="ReMap">
         select
         COALESCE ( T4.sale_qty, 0 ) sale_qty,
@@ -1054,7 +1031,6 @@ WHERE
         ma1000
         WHERE
         1=1
-        and #{dto.businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         )AS T0 ON T.store_cd = T0.store_cd
         left join (SELECT article_id,store_cd,acc_date,coalesce(SUM(sale_qty),0) sale_qty FROM sa0020
         where detail_type = 's'
@@ -1082,10 +1058,6 @@ WHERE
         sub_category_cd
         FROM
         ma1100
-        WHERE
-        1=1
-        AND #{dto.businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
-        AND effective_end_date
         ) T1 ON T.article_id = T1.article_id
         where 1=1
         <if test="dto.depCd != null and dto.depCd != ''">
@@ -1117,20 +1089,22 @@ WHERE
      </select>
     <select id="selectSaleQty" parameterType="cn.com.bbut.iy.itemmaster.dto.writeOff.WriteOffParamDTO" resultMap="ReMap">
         select
-        T.store_cd,
-        T.voucher_date,
-        T.article_id,
+        T.sale_qty,
         T.qty1
         from
         (SELECT
          S.store_cd,
          S.voucher_date,
          S1.qty1,
+        COALESCE ( sa0022.sale_qty, 0 ) sale_qty,
          S1.barcode,
          S1.article_id
          FROM
          sk0010 S,
          sk0020 S1
+         left join sa0022 on
+         S1.store_cd = sa0022.store_cd
+         and S1.voucher_date = sa0022.acc_date and S1.article_id = sa0022.article_id
          WHERE
          S.store_cd = S1.store_cd /*审核通过*/
          AND S.review_status = 10
@@ -1164,8 +1138,6 @@ WHERE
         ma1000
         WHERE
         1=1
-        AND  #{dto.businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
-        AND effective_end_date
         ) T0 ON T.store_cd = T0.store_cd
         LEFT JOIN (
         SELECT
@@ -1183,8 +1155,6 @@ WHERE
         ma1100
         WHERE
         1=1
-        AND  #{dto.businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
-        AND effective_end_date
         ) T1 ON T.article_id = T1.article_id
         where 1=1
         <if test="dto.depCd != null and dto.depCd != ''">
@@ -1270,8 +1240,7 @@ WHERE
         ( SELECT t_operator.c_operatorname FROM t_operator WHERE t_operator.c_operatorcode = ofc ) AS ofc_name
         FROM
         ma1000
-        WHERE
-        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        WHERE 1=1
         ) T0 ON T.store_cd = T0.store_cd
         LEFT JOIN (
         SELECT
@@ -1289,8 +1258,6 @@ WHERE
         ma1100
         WHERE
         1=1
-        AND  #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date
-        AND effective_end_date
         ) T1 ON T.article_id = T1.article_id
         LEFT JOIN ( SELECT dep_cd, pma_cd, pma_name FROM ma0080 WHERE effective_sts = '10' ) T2 ON T1.dep_cd = T2.dep_cd
         AND T1.pma_cd = T2.pma_cd
@@ -1316,22 +1283,4 @@ WHERE
             and T.barcode=#{barcode}
         </if>
      </select>
-    <select id="getTotalSaleQty" resultType="Integer">
-        SELECT
-        COALESCE ( sum( sale_qty ), 0 ) sale_qty
-        FROM
-        sa0020
-        WHERE
-        detail_type = 's'
-        and (sa0020.store_cd||'_'||sa0020.article_id || '_' ||
-        (case when
-        <![CDATA[ to_char(sale_date,'HH24miss')<'060000' ]]>
-        then to_char(sale_date+ '-1 day','yyyyMMdd')
-        else to_char(sale_date,'yyyyMMdd') end))
-        in
-        <foreach item="item" index="index" collection="list"
-                 open="(" separator="," close=")">
-            #{item}
-        </foreach>
-    </select>
 </mapper>

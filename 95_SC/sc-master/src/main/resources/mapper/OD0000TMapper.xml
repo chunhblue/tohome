@@ -84,7 +84,6 @@
         )T
         LEFT JOIN (
             SELECT store_cd, store_name FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         ) T1
         ON T.store_cd = T1.store_cd
         LEFT JOIN (
@@ -152,7 +151,6 @@
         )T
         LEFT JOIN (
             SELECT store_cd, store_name FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         ) T1
         ON T.store_cd = T1.store_cd
         ORDER BY create_ymd DESC, create_hms DESC
@@ -322,4 +320,13 @@
                 and store_cd = #{storeCd,jdbcType=VARCHAR}
                 order by line_num limit 1
     </select>
+
+    <select id="receiveIdIsExist" resultMap="ReOD0000TMap">
+        SELECT
+                *
+            FROM od0000_t
+            WHERE
+                order_id = #{orderId,jdbcType=VARCHAR}
+    </select>
+
 </mapper>

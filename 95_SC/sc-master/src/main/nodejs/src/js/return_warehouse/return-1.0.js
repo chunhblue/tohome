@@ -175,6 +175,7 @@ define('returnWarehouse', function () {
 			startCount: 0
 		});
 		$("#centerIdRemove").on("click", function (e) {
+			$("#exportBySupplier").attr("disabled",true);
 			$.myAutomatic.cleanSelectObj(dc);
 		});
 	}
@@ -235,15 +236,15 @@ define('returnWarehouse', function () {
 				_common.getRecordStatus(tempTrOrderId,m.typeId.val(),function (result) {
 					if(result.success){
 						//验证订货日是否为当前业务日
-						_common.checkBusinessDate(tempTrOrderDate,null,function (result) {
-						if(result.success){
+						// _common.checkBusinessDate(tempTrOrderDate,null,function (result) {
+						// if(result.success){
 								saveParamToSession();
 								top.location = url_left+"/cancelOrderDetail?flag=1&orderId="+ tempTrOrderId ;
-							}else{//禁用
-							_common.prompt("Selected document is not created within today and cannot be modified!",5,"error");
+							// }else{//禁用
+							// _common.prompt("Selected document is not created within today and cannot be modified!",5,"error");
 							// top.location = url_left+"/cancelOrderDetail?flag=1&orderId="+ tempTrOrderId ;
-							}
-						})
+						// 	}
+						// })
 					//8/17加上 cesium
 					}else if(result.data=='20'){
 						_common.prompt("The document has been returned",5,"error");
@@ -294,6 +295,12 @@ define('returnWarehouse', function () {
 				window.open(encodeURI(url), "excelExportWin", "width=450,height=300,scrollbars=yes");
 			}
 		});
+		$("#exportBySupplier").on("click",function () {
+			setParamJson();
+			paramGrid = "searchJson=" + m.searchJson.val();
+			var url = url_left + "/exportDcBySupplier?" + paramGrid;
+			window.open(encodeURI(url), "excelExportWin", "width=450,height=300,scrollbars=yes");
+		})
 	}
 
 	// //设置 是否禁用
@@ -307,7 +314,6 @@ define('returnWarehouse', function () {
 			}
 		})
 	}
-
 
 
 	//拼接检索参数
@@ -378,6 +384,10 @@ define('returnWarehouse', function () {
 			$("#rt_end_date").focus();
 			return false;
 		}
+		// 20210726
+		if (m.delivery_center_id.attr("k")!=null && m.delivery_center_id.attr("k")!==''){
+			$("#exportBySupplier").attr("disabled",false);
+		}
 		return true;
 	}
 
@@ -409,6 +419,14 @@ define('returnWarehouse', function () {
 			selectTrTemp = null;
 			_common.clearTable();
 		});
+		// $("#delivery_center_id").on("blur",function () {
+		// 	if (m.delivery_center_id.attr("k")!=null && m.delivery_center_id.attr("k")!==''){
+		// 		$("#exportBySupplier").removeClass('disabled');
+		// 	}else {
+		// 		$("#exportBySupplier").attr('disabled',true);
+		// 	}
+		// });
+
 	}
 
 	// 选项选中事件
@@ -427,7 +445,7 @@ define('returnWarehouse', function () {
 				"Store No.","Store Name","Document Status","Return Qty","Return Amount","Return Type"],
 			colModel:[
 				{name:"orderDate",type:"text",text:"center",width:"100",ishide:false,css:"",getCustomValue:dateFmt},
-				{name:"orderId",type:"text",text:"right",width:"130",ishide:false,css:""},
+				{name:"orderId",type:"text",text:"right",width:"150",ishide:false,css:""},
 				{name:"orgOrderId",type:"text",text:"right",width:"160",ishide:false,css:""},
 				{name:"deliveryCenterId",type:"text",text:"right",width:"100",ishide:false,css:""},
 				{name:"deliveryCenterName",type:"text",text:"left",width:"220",ishide:false,css:""},
@@ -496,6 +514,10 @@ define('returnWarehouse', function () {
 				{
 					butType:"custom",
 					butHtml:"<button id='export' type='button' class='btn btn-info btn-sm'><span class='glyphicon glyphicon-export'></span> Export</button>"
+				},
+				{
+					butType:"custom",
+					butHtml:"<button id='exportBySupplier' type='button' class='btn btn-info btn-sm' disabled='disabled'><span class='glyphicon glyphicon-export'></span> Export By Supplier</button>"
 				}
 			],
 

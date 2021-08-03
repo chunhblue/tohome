@@ -858,11 +858,11 @@ define('receiptReturnVendorEdit', function () {
         var orderPriceTotal = 0,totalQty = 0;
         $("#zgGridTtable>.zgGrid-tbody tr").each(function () {
             var orderAmount = parseFloat(reThousands($(this).find('td[tag=orderAmount]').text()));
-            var orderQty = parseFloat(reThousands($(this).find('td[tag=orderQty]').text()));
+            var receiveQty = parseFloat(reThousands($(this).find('td[tag=receiveQty]').text()));
             if(!isNaN(orderAmount))
                 orderPriceTotal +=  parseFloat(orderAmount);
-            if(!isNaN(orderQty))
-                totalQty +=  parseFloat(orderQty);
+            if(!isNaN(receiveQty))
+                totalQty +=  parseFloat(receiveQty);
         });
         m.total_amt.val(orderPriceTotal);
         m.total_qty.val(toThousands(totalQty));

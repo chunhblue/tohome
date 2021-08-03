@@ -123,7 +123,6 @@
         sa0070.article_id=ma1100.article_id
         and sa0070.new_price <![CDATA[<>]]> -1
         and ma1000.store_cd = sa0070.store_cd
-        and sa0070.acc_date BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
         and ma1100.sales_unit_id=ma0220.unit_id
         and ma1100.effective_end_date = (select max(ma1100.effective_end_date) from ma1100 where ma1100.article_id =sa0070.article_id)
         and sa0070.store_cd IN
@@ -179,7 +178,6 @@
         sa0070.article_id=ma1100.article_id
         and sa0070.new_price <![CDATA[<>]]> -1
         and ma1000.store_cd = sa0070.store_cd
-        and sa0070.acc_date BETWEEN ma1000.effective_start_date AND ma1000.effective_end_date
         and ma1100.sales_unit_id=ma0220.unit_id
         and ma1100.effective_end_date = (select max(ma1100.effective_end_date) from ma1100 where ma1100.article_id =sa0070.article_id)
         and sa0070.store_cd IN

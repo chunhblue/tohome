@@ -117,9 +117,6 @@
         left join ma0100 on ma1100.sub_category_cd = ma0100.sub_category_cd
        WHERE
             iv.store_cd = #{storeCd,jdbcType=VARCHAR}
-           <if test="stockDate != null and stockDate != ''">
-                AND  #{stockDate} between ma1100.effective_start_date and ma1100.effective_end_date
-            </if>
             <if test="depId != null and depId != ''">
                 AND ma1100.dep_cd = #{depId}  /*部门*/
             </if>
@@ -192,9 +189,6 @@
             left join ma0100 on ma1100.sub_category_cd = ma0100.sub_category_cd
             WHERE
             iv.store_cd = #{storeCd,jdbcType=VARCHAR}
-            <if test="stockDate != null and stockDate != ''">
-                AND  #{stockDate} between ma1100.effective_start_date and ma1100.effective_end_date
-            </if>
             <if test="depId != null and depId != ''">
                 AND ma1100.dep_cd = #{depId}  /*部门*/
             </if>
@@ -274,9 +268,6 @@
         left join ma0100 on ma1100.sub_category_cd = ma0100.sub_category_cd
         WHERE
         ma1000.store_cd = #{storeCd,jdbcType=VARCHAR}
-        <if test="stockDate != null and stockDate != ''">
-            AND  #{stockDate} between ma1100.effective_start_date and ma1100.effective_end_date
-        </if>
         AND ma1100.article_id in
         <foreach item="itemCode" index="index" collection="articles"
                  open="(" separator="," close=")">

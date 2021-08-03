@@ -105,7 +105,7 @@
 		UPDATE t_backlog 
 		SET C_ENABLE = 0 
 		WHERE n_typeid = #{invalidBean.nTypeid} AND record_cd = #{invalidBean.cRecordCd} 
-		AND store_cd = #{invalidBean.storeCd}
+
 	</update>
 
 
@@ -444,7 +444,6 @@
 				and b.c_enable <![CDATA[ <>]]> '0'
 				and d.c_enable = '1'
 				and e.vendor_id = f.vendor_id
-				and e.effective_date between f.effective_start_date and f.effective_end_date
 				and d.n_operatorid = #{operatorId}
 				
 		UNION ALL
@@ -1081,7 +1080,6 @@
 		and b.c_enable <![CDATA[<>]]> '0'
 		and d.c_enable = '1'
 		and e.vendor_id = f.vendor_id
-		and e.effective_date between f.effective_start_date and f.effective_end_date
 		and d.n_operatorid = #{id}
 
 		UNION ALL
@@ -1926,20 +1924,21 @@
 	</select>
 	<select id="selectMailByMd" resultType="java.lang.String">
 		SELECT
-		DISTINCT ma4200.emp_email FROM ma4200,ma4210
+		DISTINCT trim(ma4200.emp_email) emp_email FROM ma4200,ma4210
 			where
 			ma4210.user_code = ma4200.emp_num_id
 			and ma4200.emp_email is not null
 			and ma4210.position = #{position}
 			and ma4210.store_cd = #{storeCd}
+			and ma4210.user_code not in ('nri','system')
 	</select>
 	<select id="selectMailBySm" resultType="java.lang.String">
-		SELECT DISTINCT ma4200.emp_email FROM ma4200
+		SELECT DISTINCT trim(ma4200.emp_email) emp_email FROM ma4200
 		where
 		 ma4200.store_cd = #{storeCd} and ma4200.emp_email is not null
 	</select>
 	<select id="selectMailByPostion" resultType="java.lang.String">
-		select DISTINCT ma4200.emp_email FROM ma4200,ma4160
+		select DISTINCT trim(ma4200.emp_email) emp_email FROM ma4200,ma4160
 		where ma4200.job_type_cd is not null
 		and ma4200.emp_email is not null
 		and ma4200.job_type_cd = ma4160.job_type_cd

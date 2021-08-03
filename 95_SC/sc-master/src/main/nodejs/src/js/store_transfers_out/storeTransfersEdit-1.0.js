@@ -353,6 +353,15 @@ define('storeTransfersEdit', function () {
 			}else {
 				$("#vstore").css("border-color","#CCC");
 			}
+			let _toStoreCd = $("#tstore").attr('k');
+			if(!_toStoreCd){
+				_common.prompt("Please select the to store!",3,"info");
+				$("#tstore").css("border-color","red");
+				$("#tstore").focus();
+				return false;
+			}else {
+				$("#tstore").css("border-color","#CCC");
+			}
 			clearDialog(true);
 			setDialogDisable(0);
 			$('#update_dialog').attr("flg","add");
@@ -361,9 +370,17 @@ define('storeTransfersEdit', function () {
 
 		// 修改
 		$("#updateItemDetails").on("click",function(){
-			if(selectTrTemp==null){
+			let _list = tableGrid.getCheckboxTrs();
+			if(_list.length<1){
 				_common.prompt("Please select at least one row of data!",3,"info");
 				return false;
+			}
+			if(_list.length >= 2){
+				_common.prompt("Please select only one row of data!",3,"info");
+				return false;
+			}
+			if(_list.length == 1){
+				selectTrTemp = _list[0];
 			}
 			let _storeCd = $("#vstore").attr('k');
 			if(!_storeCd){
@@ -374,7 +391,7 @@ define('storeTransfersEdit', function () {
 			}else {
 				$("#vstore").css("border-color","#CCC");
 			}
-			let cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,spec,priceNoTax,taxRate,qty2,qty1,adjustReason,adjustReasonText");
+			let cols = tableGrid.getSelectColValue(_list[0],"barcode,articleId,articleName,uom,spec,priceNoTax,taxRate,qty2,qty1,adjustReason,adjustReasonText");
 			$("#item_input_cd").val(cols['barcode']);
 			$.myAutomatic.setValueTemp(itemInput,cols['articleId'],cols['articleName']);
 			$("#item_input_uom").val(cols['uom']);
@@ -396,10 +413,19 @@ define('storeTransfersEdit', function () {
 
 		// 查看
 		$("#viewItemDetails").on("click",function(){
-			if(selectTrTemp==null){
+			let _list = tableGrid.getCheckboxTrs();
+			if((_list == null || _list.length == 0) && selectTrTemp==null){
 				_common.prompt("Please select at least one row of data!",3,"info");
 				return false;
-			}else{
+			}
+			if(_list.length >= 2){
+				_common.prompt("Please select only one row of data!",3,"info");
+				return false;
+			}
+			if(_list.length == 1){
+				selectTrTemp = _list[0];
+			}
+
 				let _storeCd = $("#vstore").attr('k');
 				let cols = tableGrid.getSelectColValue(selectTrTemp,"barcode,articleId,articleName,uom,spec,priceNoTax,qty2,qty1,adjustReasonText");
 				$("#item_input_cd").val(cols['barcode']);
@@ -415,7 +441,7 @@ define('storeTransfersEdit', function () {
 				$('#update_dialog').modal("show");
 				// 查询实时库存
 				getStock(_storeCd, cols['articleId']);
-			}
+
 		});
 
 		// 删除按钮
@@ -432,8 +458,50 @@ define('storeTransfersEdit', function () {
 						for(let i = 0; i < _list.length; i++){
 							$(_list[i].selector).remove();
 						}
+						if($("#zgGridTtable>.zgGrid-tbody tr").length>0){
+							let i=0;
+							$("#zgGridTtable>.zgGrid-tbody tr").each(function () {
+								i++;
+								$(this).find("td[tag=num]").text(i);
+							});
+						}
+						total_item();
 					}
 				});
+			}
+		});
+		//
+		$("#print").on("click", function () {
+			if (verifySearch()) {
+				// 拼接检索参数
+				let _data = {
+					storeCd:m._storeCd.val(),
+					voucherNo:m._voucherNo.val(),
+					voucherType:m._voucherType.val(),
+					voucherDate:m._voucherDate.val(),
+					storeCd1:m._storeCd1.val()
+				}
+				let param = JSON.stringify(_data);
+				var url = url_left + "/writerPdf?searchJson="+param;
+				window.open(encodeURI(url), "toPdf");
+				// $.myAjaxs({
+				// 				// 	url: url_left + "/toPrint",
+				// 				// 	async: true,
+				// 				// 	cache: false,
+				// 				// 	type: "post",
+				// 				// 	data: "searchJson=" + param,
+				// 				// 	dataType: "json",
+				// 				// 	success: function (result) {
+				// 				// 		if (result.success) {
+				// 				//
+				// 				// 		} else{
+				// 				// 			_common.prompt(result.msg, 5, "info");
+				// 				// 		}
+				// 				// 	},
+				// 				// 	error: function (e) {
+				// 				// 		_common.prompt("Search for receipt failed!", 5, "error"); // 查询小票失败
+				// 				// 	}
+				// 				// });
 			}
 		});
     }
@@ -518,21 +586,21 @@ define('storeTransfersEdit', function () {
 				}
 				$("#audit_affirm").prop("disabled",true);
 				var detailType = "tmp_transfer_out";
-				$.myAjaxs({
-					url: url_left + '/update',
-					async: true,
-					cache: false,
-					type: "post",
-					data: _data,
-					dataType: "json",
-					success: function (result) {
-						if (result.success) {
+				// $.myAjaxs({
+				// 	url: url_left + '/update',
+				// 	async: true,
+				// 	cache: false,
+				// 	type: "post",
+				// 	data: _data,
+				// 	dataType: "json",
+				// 	success: function (result) {
+				// 		if (result.success) {
 							// 提交后实际调拨数量不能再编辑
 							m.actualQty.attr("e", "0");
 							$("#updateItemDetails").prop("disabled", true);
 							// 执行审核提交
 							$.myAjaxs({
-								url: _common.config.surl + "/audit/submit",
+								url: _common.config.surl + "/storeTransfers/submit",
 								async: true,
 								cache: false,
 								type: "post",
@@ -560,12 +628,12 @@ define('storeTransfersEdit', function () {
 								},
 								complete: _common.myAjaxComplete
 							});
-						} else {
-							_common.prompt("Data update failed, Please try again!", 2, "error");
-						}
-					},
-					complete: _common.myAjaxComplete
-				});
+						// } else {
+						// 	_common.prompt("Data update failed, Please try again!", 2, "error");
+						// }
+				// 	},
+				// 	complete: _common.myAjaxComplete
+				// });
 			})
 		})
 	}
@@ -581,6 +649,7 @@ define('storeTransfersEdit', function () {
 			m.dj_status.val("1");
 			//禁用审核按钮
 			m.approvalBut.prop("disabled",true);
+			$("#print").prop("disabled",true);
 		}else if(_sts == "edit"){
 			setDisable(false);
 			m.actualQty.attr("e","1");
@@ -588,17 +657,23 @@ define('storeTransfersEdit', function () {
 			getInventoryVouchers();
 			//禁用审核按钮
 			m.approvalBut.prop("disabled",true);
+			$("#print").prop("disabled",true);
 		}else if(_sts == "view"){
 			setDisable(true);
 			// 查询加载数据
 			getInventoryVouchers();
+			// 审核状态不可以更改实际调拨量，因此编辑按钮不可用
+			$("#updateItemDetails").prop("disabled", true);
+			if($("#_stsName").val() == "Approved"){
+				$("#print").prop("disabled",false);
+			}else {
+				$("#print").prop("disabled",true);
+			}
 			//检查是否允许审核
 			_common.checkRole(m._voucherNo.val(),m.typeId.val(),function (success) {
 				if(success){
-					// 审核状态可以更改实际调拨量，因此编辑按钮可用
 					m.actualQty.attr("e","1");
 					m.approvalBut.prop("disabled",false);
-					$("#updateItemDetails").prop("disabled", false);
 				}else{
 					m.approvalBut.prop("disabled",true);
 				}
@@ -895,6 +970,8 @@ define('storeTransfersEdit', function () {
 
 				_common.myConfirm("Are you sure to save?",function(result){
 					if(result!="true"){return false;}
+					m.returnsViewBut.prop("disabled",true);
+					setDisable(true);
 					//附件信息
 					var fileDetail = [],fileDetailJson = "";
 					$("#attachmentsTable>.zgGrid-tbody tr").each(function () {
@@ -955,6 +1032,7 @@ define('storeTransfersEdit', function () {
 									$("#tf_cd").val(result.o);
 								}
 								_common.prompt("Data saved successfully！",2,"success",function(){/*保存成功*/
+									m.returnsViewBut.prop("disabled",false);
 									submitFlag=true;
 									//发起审核
 									let typeId =m.typeId.val();
@@ -1036,8 +1114,10 @@ define('storeTransfersEdit', function () {
 						if(trId!=null&&trId!=''){
 							rowindex = parseInt(trId.substring(trId.indexOf("_")+1,trId.indexOf("_")+2))+1;
 						}
+						var num = $("#zgGridTtable>.zgGrid-tbody tr").length + 1;
 						let tr = '<tr id="zgGridTtable_'+rowindex+'_tr" class="">' +
 							'<td tag="ckline" align="center" style="color:#428bca;" id="zgGridTtable_'+rowindex+'_tr_ckline" tdindex="zgGridTtable_ckline"><input type="checkbox" value="zgGridTtable_'+rowindex+'_tr" name="zgGridTtable"> </td>' +
+							'<td tag="num" width="50" title="' + num + '" align="center" id="zgGridTtable_' + rowindex + '_tr_line" tdindex="zgGridTtable_ckline">' + num + '</td>' +
 							'<td align="right" tag="barcode" title="'+m.item_input_cd.val()+'" align="center" id="zgGridTtable_'+rowindex+'_tr_barcode" tdindex="zgGridTtable_barcode">'+m.item_input_cd.val()+'</td>' +
 							'<td align="right" tag="articleId" title="'+m.item_input.attr('k')+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleId" tdindex="zgGridTtable_articleId">'+m.item_input.attr('k')+'</td>' +
 							'<td align="left" tag="articleName" title="'+m.item_input.attr('v')+'" align="center" id="zgGridTtable_'+rowindex+'_tr_articleName" tdindex="zgGridTtable_articleName">'+m.item_input.attr('v')+'</td>' +
@@ -1078,6 +1158,7 @@ define('storeTransfersEdit', function () {
 						}
 					}
 					m.isChange.val('1');
+					total_item();
 					$('#update_dialog').modal("hide");
 				}
 			});
@@ -1378,6 +1459,7 @@ define('storeTransfersEdit', function () {
 			page:1,//当前页
 			rowPerPage:10,//每页数据量
 			isPage:false,//是否需要分页
+			lineNumber:true,
 			// sidx:"bm.bm_type,order.bm_code",//排序字段
 			// sord:"asc",//升降序
 			isCheckbox:true,
@@ -1389,8 +1471,18 @@ define('storeTransfersEdit', function () {
 			ajaxSuccess:function(resData){
 				return resData;
 			},
+			loadCompleteEvent: function (self) {
+				isDisabledBtn();
+				total_item();
+				return self;
+			},
 			eachTrClick:function(trObj,tdObj){//正常左侧点击
 				selectTrTemp = trObj;
+				isDisabledBtn();
+				let _list = tableGrid.getCheckboxTrs();
+				if(_list.length<1){
+					selectTrTemp = null;//清空选择的行
+				}
 			},
 			buttonGroup:[
 				{
@@ -1415,10 +1507,32 @@ define('storeTransfersEdit', function () {
 					butSize: ""//,
 				},
 				{butType:"custom",butHtml:"<button id='attachments' type='button' class='btn btn-primary btn-sm'><span class='glyphicon glyphicon glyphicon-file'></span> Attachments</button>"},//附件
+				{butType:"custom",butHtml:"<button id='print' type='button' class='btn  btn-info   btn-sm ' ><span class='glyphicon glyphicon-log-out'></span>To PDF</button>"},
 			],
 		});
-	}
+		$("#zgGridTtable_main_foot").append("<div class='zgGrid-tfoot-td' id='zgGridTtable_tfoot_box'><span class='zg-page-records'>Total: <span id='records'>0</span> items</span></div>");
 
+	};
+
+	let total_item = function () {
+		//更新总条数(注减一是去除标题行)
+		var total = tableGrid.find("tr").length-1;
+		$("#records").text(total);
+	};
+	// 多选时查看、编辑禁用
+	function isDisabledBtn(){
+		let flg = m.viewSts.val();
+		let _list = tableGrid.getCheckboxTrs();
+		if(_list == null || _list.length > 1){
+			$("#updateItemDetails").prop("disabled",true);
+			$("#viewItemDetails").prop("disabled",true);
+		}else{
+			if(flg=="add" || flg=="edit"){
+				$("#updateItemDetails").prop("disabled",false);
+			}
+			$("#viewItemDetails").prop("disabled",false);
+		}
+	}
     // 日期字段格式化格式
     var dateFmt = function(tdObj, value){
 		if(value!=null&&value.trim()!=''&&value.length==8) {

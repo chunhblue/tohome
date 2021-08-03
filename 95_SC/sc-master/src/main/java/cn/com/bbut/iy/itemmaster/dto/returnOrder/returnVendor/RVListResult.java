@@ -34,5 +34,9 @@ public class RVListResult extends GridDataDTO {
     private String status;//审核状态
     private String orderType;//审核状态
     private String returnType;//退货类型
+    private String barcode;//退货类型
+    private String depName;//退货类型
+    private String articleName;//退货类型
+    private String articleId;//退货类型
 
 }

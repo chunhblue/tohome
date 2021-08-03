@@ -13,10 +13,6 @@
       from ma4315,ma4200,ma1000
       <where>
         and ma4200.emp_num_id = ma4315.reply_user_id
-      <![CDATA[
-          and ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-          and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-          ]]>
         and ma1000.store_cd = ma4315.store_cd
         <if test="informReply!=null and informReply!=''">
             and ma4315.reply_user_id = #{userId,jdbcType=VARCHAR}
@@ -42,10 +38,6 @@
     from ma4315,ma4200,ma1000
     <where>
       and ma4200.emp_num_id = ma4315.reply_user_id
-      <![CDATA[
-          and ma1000.effective_start_date <= #{businessDate,jdbcType=VARCHAR}
-          and ma1000.effective_end_date >= #{businessDate,jdbcType=VARCHAR}
-          ]]>
       and ma1000.store_cd = ma4315.store_cd
       <if test="informCd!=null and informCd!=''">
         and ma4315.inform_cd = #{informCd,jdbcType=VARCHAR}

@@ -264,7 +264,7 @@
         FROM
         MA1100
         WHERE
-        #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
+        1=1
         <include refid="selectCondition"></include>
         ) T
         left join ma1140

@@ -157,6 +157,7 @@ define('writeOff', function () {
 				_common.loadPaging(1,1,1,10);
 				page=1;
 				setParamJson();
+				_common.loading();
 				getData(page,rows);
 				total_detail(m.searchJson.val());
 			}
@@ -265,8 +266,10 @@ define('writeOff', function () {
 					// 加载分页条数据
 					_common.loadPaging(totalPage,count,page,rows);
 				}
+				_common.loading_close();
 				// 激活 分页按钮点击
 				but_paging();
+
 			},
 			error: function (e) {
 
@@ -305,10 +308,12 @@ define('writeOff', function () {
 		$('.pagination li').on('click',function () {
 			page = $($(this).context).val();
 			if(verifySearch()){
+				_common.loading();
 				// 拼接检索参数
 				setParamJson();
 				// 分页获取数据
 				getData(page,rows);
+				_common.loading_close();
 			}
 		});
 	}

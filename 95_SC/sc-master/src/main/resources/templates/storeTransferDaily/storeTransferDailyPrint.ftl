@@ -75,10 +75,8 @@
                 <table id="grid_table" class="table table-hover table-striped table-condensed table-bordered zgrid-table" style="margin-bottom: 10px">
                     <tr>
                         <th title="From Store">From Store</th>
-                        [#--                            <th title="Store Name">Store Name</th>--]
                         <th title="To Store">To Store</th>
-                        [#--                            <th title="Store Name">Store Name</th>--]
-                        <th title="Tranfer Out Date">Tranfer Out Date</th>
+                        <th title="Transfer Date">Transfer Date</th>
                         <th title="Top Department">Top Department</th>
                         <th title="Department">Department</th>
                         <th title="Category">Category</th>
@@ -87,11 +85,7 @@
                         <th title="Item Name">Item Name</th>
                         <th title="Barcode">Barcode</th>
                         <th title="UOM">UOM</th>
-                        <th title="Transfer Out Qty">Transfer Out Qty</th>[#--调出数量--]
-                        <th title="Transfer In Qty">Transfer In Qty</th>[#--调入数量--]
-                        <th title="Tranfer In Date">Tranfer In Date</th>
-                        <th title="Different Qty Reason">Different Qty Reason</th>[#--调拨数量不一致的原因--]
-                        [#--                            <th title="Transfer Amount">Transfer Amount</th>--][#--调拨金额--]
+                        <th title="Transfer Out Qty">Transfer Qty</th>[#--调出数量--]
                         <th title="Transfer Reason">Transfer Reason</th>[#--调拨原因--]
                         <th title="Area Manager Name">Area Manager Name</th>
                     </tr>

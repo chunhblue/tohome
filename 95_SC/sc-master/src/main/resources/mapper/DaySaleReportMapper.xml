@@ -204,7 +204,7 @@
         t.store_name
         FROM
         ia0040 a
-        LEFT JOIN ( SELECT t_operator.c_operatorname, ma1000.store_name,ma1000.store_cd FROM MA1000 LEFT JOIN t_operator
+        LEFT JOIN ( SELECT t_operator.c_operatorname,MA1000.ofc, ma1000.store_name,ma1000.store_cd FROM MA1000 LEFT JOIN t_operator
         ON MA1000.ofc = t_operator.c_operatorcode )
         AS T ON t.store_cd = a.store_cd
         where 1=1
@@ -216,6 +216,9 @@
         <if test="daySaleReportParamdto.effectiveStartDate !=null and daySaleReportParamdto.effectiveEndDate !=null and  daySaleReportParamdto.effectiveEndDate!='' ">
             AND a.acc_date between #{daySaleReportParamdto.effectiveStartDate} and
             #{daySaleReportParamdto.effectiveEndDate}
+        </if>
+        <if test="daySaleReportParamdto.am !=null and daySaleReportParamdto.am !=''">
+            AND  T.ofc=#{daySaleReportParamdto.am,jdbcType=VARCHAR}
         </if>
         <if test="daySaleReportParamdto.includeService!=null and daySaleReportParamdto.includeService!=''">
             AND a.in_service = #{daySaleReportParamdto.includeService}
@@ -231,7 +234,7 @@
         t.store_name
         FROM
         ia0050 a
-        LEFT JOIN ( SELECT t_operator.c_operatorname, ma1000.store_name,ma1000.store_cd FROM MA1000 LEFT JOIN t_operator
+        LEFT JOIN ( SELECT t_operator.c_operatorname,MA1000.ofc, ma1000.store_name,ma1000.store_cd FROM MA1000 LEFT JOIN t_operator
         ON MA1000.ofc = t_operator.c_operatorcode )
         AS T ON t.store_cd = a.store_cd
         where 1=1
@@ -243,6 +246,9 @@
         <if test="daySaleReportParamdto.effectiveStartDate !=null and daySaleReportParamdto.effectiveEndDate !=null and  daySaleReportParamdto.effectiveEndDate!='' ">
             AND a.pos_business_date between #{daySaleReportParamdto.effectiveStartDate} and
             #{daySaleReportParamdto.effectiveEndDate}
+        </if>
+        <if test="daySaleReportParamdto.am !=null and daySaleReportParamdto.am !=''">
+            AND  T.ofc=#{daySaleReportParamdto.am,jdbcType=VARCHAR}
         </if>
         <if test="daySaleReportParamdto.includeService!=null and daySaleReportParamdto.includeService!=''">
             AND a.in_service = #{daySaleReportParamdto.includeService}
@@ -325,7 +331,7 @@
         B.hour18_20,B.hour20_22,B.hour22_24,B.hour0_2,B.hour2_4,B.hour4_6
      FROM
 	ia0040 a
-	LEFT JOIN ( SELECT t_operator.c_operatorname, ma1000.store_name,ma1000.store_cd FROM MA1000 LEFT JOIN t_operator ON MA1000.ofc = t_operator.c_operatorcode )
+	LEFT JOIN ( SELECT t_operator.c_operatorname,MA1000.ofc, ma1000.store_name,ma1000.store_cd FROM MA1000 LEFT JOIN t_operator ON MA1000.ofc = t_operator.c_operatorcode )
 	AS T ON t.store_cd = a.store_cd
 	left join
        ia0041 B
@@ -343,6 +349,9 @@
         <if test="daySaleReportParamdto.includeService!=null and daySaleReportParamdto.includeService!=''">
             AND a.in_service = #{daySaleReportParamdto.includeService}
         </if>
+        <if test="daySaleReportParamdto.am !=null and daySaleReportParamdto.am !=''">
+            AND  T.ofc=#{daySaleReportParamdto.am,jdbcType=VARCHAR}
+        </if>
         <if test="daySaleReportParamdto.flg">
         LIMIT ${daySaleReportParamdto.rows} OFFSET ${daySaleReportParamdto.limitStart}
     </if>
@@ -357,7 +366,7 @@
         B.hour18_20,B.hour20_22,B.hour22_24,B.hour0_2,B.hour2_4,B.hour4_6
         FROM
         ia0050 a
-        LEFT JOIN ( SELECT t_operator.c_operatorname, ma1000.store_name,ma1000.store_cd FROM MA1000 LEFT JOIN t_operator ON MA1000.ofc = t_operator.c_operatorcode )
+        LEFT JOIN ( SELECT t_operator.c_operatorname,MA1000.ofc, ma1000.store_name,ma1000.store_cd FROM MA1000 LEFT JOIN t_operator ON MA1000.ofc = t_operator.c_operatorcode )
         AS T ON t.store_cd = a.store_cd
         left join
         ia0051 B
@@ -374,6 +383,9 @@
         </if>
         <if test="daySaleReportParamdto.includeService!=null and daySaleReportParamdto.includeService!=''">
             AND a.in_service = #{daySaleReportParamdto.includeService}
+        </if>
+        <if test="daySaleReportParamdto.am !=null and daySaleReportParamdto.am !=''">
+            AND  T.ofc=#{daySaleReportParamdto.am,jdbcType=VARCHAR}
         </if>
         <if test="daySaleReportParamdto.flg">
             LIMIT ${daySaleReportParamdto.rows} OFFSET ${daySaleReportParamdto.limitStart}

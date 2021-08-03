@@ -63,7 +63,9 @@
         [id$="_tr_ckline"]{
             width: 50px;
         }
-
+        [id$="_tr_line"]{
+            width: 50px;
+        }
     </STYLE>
 [@common.header][/@common.header]
 </head>
@@ -333,6 +335,12 @@
                         <label for="isFreeItemText" class="col-sm-2 col-lg-4 control-label">Item Type</label>
                         <div class="col-sm-6">
                             <input type="text" id="isFreeItemText" class="form-control my-automatic input-sm" readonly="true">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="expired_date"  class="col-sm-2 col-lg-4 control-label">Expiry Date</label>
+                        <div class="col-sm-6">
+                            <input id="expired_date"   placeholder="Expired Date" class="form-control input-sm select-date"   type="text" value="">
                         </div>
                     </div>
                     <div class="form-group">

@@ -38,5 +38,7 @@ public class RWHItemsGridResult extends GridDataDTO {
     private BigDecimal getReceiveNochargeQty;
     private String isFreeItem; // 是否搭赠商品
     private String isFreeItemText;
+    private String orderRemark;
+    private String expiredDate;
 
 }

@@ -1,10 +1,12 @@
 package cn.com.bbut.iy.itemmaster.serviceimpl;
 
+import cn.com.bbut.iy.itemmaster.constant.ConstantsAudit;
 import cn.com.bbut.iy.itemmaster.dao.Cm9060Mapper;
 import cn.com.bbut.iy.itemmaster.dao.MA4320Mapper;
 import cn.com.bbut.iy.itemmaster.dao.OD0000TMapper;
 import cn.com.bbut.iy.itemmaster.dao.OD0010TMapper;
 import cn.com.bbut.iy.itemmaster.dao.receipt.warehouse.WarehouseMapper;
+import cn.com.bbut.iy.itemmaster.dto.audit.NotificationBean;
 import cn.com.bbut.iy.itemmaster.dto.base.CommonDTO;
 import cn.com.bbut.iy.itemmaster.dto.base.GridDataDTO;
 import cn.com.bbut.iy.itemmaster.dto.od0000_t.OD0000TDTO;
@@ -15,6 +17,7 @@ import cn.com.bbut.iy.itemmaster.entity.MA4320Example;
 import cn.com.bbut.iy.itemmaster.entity.base.Cm9060;
 import cn.com.bbut.iy.itemmaster.service.ReceiveService;
 import cn.com.bbut.iy.itemmaster.service.SequenceService;
+import cn.com.bbut.iy.itemmaster.service.audit.INotificationService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +48,8 @@ public class ReceiveServiceImpl implements ReceiveService {
     private SequenceService sequenceService;
     @Autowired
     private WarehouseMapper warehouseMapper;
+    @Autowired
+    protected INotificationService notificationServiceImpl;
 
     /**
      * 获取当前业务日期
@@ -120,14 +125,20 @@ public class ReceiveServiceImpl implements ReceiveService {
         StringBuilder storeCdBuilder = new StringBuilder();
         try{
             for(OD0000TDTO _dto : list){
+                long reviewId = 0;
+                int typeId = 0;
                 _dto.setCommonDTO(dto);
                 // 订货区分 "0"供应商  "1"物流
                 String orderDiff = _dto.getOrderDifferentiate();
                 String receiveId = "";
                 if ("1".equals(orderDiff)) {
                     receiveId = sequenceService.getSequence("od0000_t_red_id_seq","RED",_dto.getStoreCd());
+                    reviewId = Long.parseLong(String.valueOf(ConstantsAudit.REVIEW_RECEIPT_WAREHOUSE));
+                    typeId = ConstantsAudit.TYPE_RECEIPT_WAREHOUSE;
                 } else if ("0".equals(orderDiff)) {
                     receiveId = sequenceService.getSequence("od0000_t_res_id_seq","RES",_dto.getStoreCd());
+                    reviewId = Long.parseLong(String.valueOf(ConstantsAudit.REVIEW_RECEIPT_VENDOR));
+                    typeId = ConstantsAudit.TYPE_RECEIPT_VENDOR;
                 }
                 if(i == 0){
                     od0000TMapper.deleteCopy(_dto);
@@ -147,6 +158,33 @@ public class ReceiveServiceImpl implements ReceiveService {
                 } else if ("1".equals(orderDiff)) {
                     od0010TMapper.insertDCByCopy(_dto);
                 }
+
+                // 收货邮件发送
+                NotificationBean notificationBean = new NotificationBean();
+                // 店铺cd
+                notificationBean.setStoreCd(_dto.getStoreCd());
+                // 流程ID
+                notificationBean.setNReviewid(reviewId);
+                // 优先级
+                notificationBean.setCPriority(91);
+                // 步骤
+                notificationBean.setCSubNo(1);
+                // 类型ID
+                notificationBean.setNTypeid(typeId);
+                // 主档ID
+                notificationBean.setCRecordCd(receiveId);
+                // 角色ID
+                notificationBean.setNRoleid(4);
+                // URL
+                String Url;
+                if(typeId != 0){
+                    Url = notificationServiceImpl.getUrlByTypeId(typeId);
+                }else{
+                    Url = "";
+                }
+                notificationBean.setCUrl(Url);
+                //与邮件有关
+                notificationServiceImpl.sendEmail(notificationBean);
 
                 /*_dto.setOrderSts("04");
                 _dto.setReviewSts(20);
@@ -176,13 +214,19 @@ public class ReceiveServiceImpl implements ReceiveService {
     @Override
     @Transactional
     public String insertByReceive(OD0000TDTO dto, List<OD0010TDTO> list) {
+        long reviewId = 0;
+        int typeId = 0;
         // 订货区分
         String orderDiff = dto.getOrderDifferentiate();
         String receiveId = "";
         if ("1".equals(orderDiff)) {
             receiveId = sequenceService.getSequence("od0000_t_red_id_seq","RED",dto.getStoreCd());
+            reviewId = Long.parseLong(String.valueOf(ConstantsAudit.REVIEW_RECEIPT_WAREHOUSE));
+            typeId = ConstantsAudit.TYPE_RECEIPT_WAREHOUSE;
         } else if ("0".equals(orderDiff)) {
             receiveId = sequenceService.getSequence("od0000_t_res_id_seq","RES",dto.getStoreCd());
+            reviewId = Long.parseLong(String.valueOf(ConstantsAudit.REVIEW_RECEIPT_VENDOR));
+            typeId = ConstantsAudit.TYPE_RECEIPT_VENDOR;
         }
         try{
             dto.setReceiveId(receiveId);
@@ -192,6 +236,33 @@ public class ReceiveServiceImpl implements ReceiveService {
                 _dto.setReceiveId(receiveId);
                 od0010TMapper.insertByKey(_dto);
             }
+            // 收货邮件发送
+            NotificationBean notificationBean = new NotificationBean();
+            // 店铺cd
+            notificationBean.setStoreCd(dto.getStoreCd());
+            // 流程ID
+            notificationBean.setNReviewid(reviewId);
+            // 优先级
+            notificationBean.setCPriority(91);
+            // 步骤
+            notificationBean.setCSubNo(1);
+            // 类型ID
+            notificationBean.setNTypeid(typeId);
+            // 主档ID
+            notificationBean.setCRecordCd(receiveId);
+            // 角色ID
+            notificationBean.setNRoleid(4);
+            // URL
+            String Url;
+            if(typeId != 0){
+                Url = notificationServiceImpl.getUrlByTypeId(typeId);
+            }else{
+                Url = "";
+            }
+            notificationBean.setCUrl(Url);
+            //与邮件有关
+            notificationServiceImpl.sendEmail(notificationBean);
+
             /*dto.setOrderSts("04");
             dto.setReviewSts(20);
             od0000TMapper.updateOldRecord(dto);
@@ -224,7 +295,16 @@ public class ReceiveServiceImpl implements ReceiveService {
     @Override
     @Transactional
     public String updateReceive(OD0000TDTO dto, List<OD0010TDTO> list) {
+        long reviewId = 0;
+        int typeId = 0;
         String receiveId = dto.getReceiveId();
+        if ("1".equals(dto.getOrderDifferentiate())) {
+           reviewId = Long.parseLong(String.valueOf(ConstantsAudit.REVIEW_RECEIPT_WAREHOUSE));
+            typeId = ConstantsAudit.TYPE_RECEIPT_WAREHOUSE;
+        } else if ("0".equals(dto.getOrderDifferentiate())) {
+           reviewId = Long.parseLong(String.valueOf(ConstantsAudit.REVIEW_RECEIPT_VENDOR));
+            typeId = ConstantsAudit.TYPE_RECEIPT_VENDOR;
+        }
         try{
             od0010TMapper.deleteByReceiveId(receiveId);
             od0000TMapper.updateRecord(dto);
@@ -233,6 +313,32 @@ public class ReceiveServiceImpl implements ReceiveService {
                 _dto.setReceiveId(receiveId);
                 od0010TMapper.insertByKey(_dto);
             }
+            // 收货邮件发送
+            NotificationBean notificationBean = new NotificationBean();
+            // 店铺cd
+            notificationBean.setStoreCd(dto.getStoreCd());
+            // 流程ID
+            notificationBean.setNReviewid(reviewId);
+            // 优先级
+            notificationBean.setCPriority(91);
+            // 步骤
+            notificationBean.setCSubNo(1);
+            // 类型ID
+            notificationBean.setNTypeid(typeId);
+            // 主档ID
+            notificationBean.setCRecordCd(receiveId);
+            // 角色ID
+            notificationBean.setNRoleid(4);
+            // URL
+            String Url;
+            if(typeId != 0){
+                Url = notificationServiceImpl.getUrlByTypeId(typeId);
+            }else{
+                Url = "";
+            }
+            notificationBean.setCUrl(Url);
+            //与邮件有关
+            notificationServiceImpl.sendEmail(notificationBean);
             /*dto.setOrderSts("04");
             dto.setReviewSts(20);
             od0000TMapper.updateOldRecord(dto);
@@ -287,6 +393,16 @@ public class ReceiveServiceImpl implements ReceiveService {
     @Override
     public int updateStatus(String receiveId,CommonDTO dto) {
         return od0000TMapper.updateNewRecord(receiveId,dto,1);
+    }
+
+    @Override
+    public boolean receiveIdIsExist(String orderId) {
+        boolean flag  = false;
+        OD0000TDTO dto = od0000TMapper.receiveIdIsExist(orderId);
+        if (null != dto){
+            flag = true;
+        }
+        return flag;
     }
 
     /**

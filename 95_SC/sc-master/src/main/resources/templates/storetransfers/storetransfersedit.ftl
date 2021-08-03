@@ -68,7 +68,7 @@
 <body>
 
 <!--导航-->
-[@common.nav "HOME&Inventory&Store Transfer Out Entry"][/@common.nav]
+[@common.nav "HOME&Inventory&Store Transfer Entry"][/@common.nav]
 <div class="container-fluid" id="main_box">
 
 	<div class="row">
@@ -183,7 +183,7 @@
 		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-center">
 			<button id='resetBtn' type='button' class='btn btn-default'><span class='glyphicon glyphicon-refresh icon-right'></span>Reset</button>
 			<button id='saveBtn' type='button' class='btn btn-default'><span class='glyphicon glyphicon-ok icon-right'></span>Submit</button>
-			<button id="approvalBut" type="button" class="btn btn-default returnsViewBut"><span class="glyphicon glyphicon-paperclip icon-right"></span>Approval</button>
+			<button id="approvalBut" type="button" class="btn btn-default approvalBut"><span class="glyphicon glyphicon-paperclip icon-right"></span>Approval</button>
 			<button id="returnsViewBut" type="button" class="btn btn-default returnsViewBut"><span class="glyphicon glyphicon-share icon-right"></span>Back</button>
 		</div>
 	</div><!--row 分割-->
@@ -301,6 +301,7 @@
 <input type="hidden" id="_voucherType" value="${data.voucherType!}"/>
 <input type="hidden" id="_voucherDate" value="${data.voucherDate!}"/>
 <input type="hidden" id="_storeCd1" value="${data.storeCd1!}"/>
+<input type="hidden" id="_stsName" value="${stsName!}"/>
 <input type="hidden" id="toKen" value="${toKen!}"/>
 <input type="hidden" id="typeId" value="${typeId!}">
 <input type="hidden" id="reviewId" value="${reviewId!}">

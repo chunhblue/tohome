@@ -377,9 +377,9 @@ public class StockEntryController extends BaseAction {
             return new ReturnDTO(false, "Parameter exception!");
         }
         // 设置修改时间
-        String str = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
-        String ymd = str.split("-")[0];
-        String hms = str.split("-")[1];
+        String nowDate = ma4320Service.getNowDate();
+        String ymd = nowDate.substring(0,8);
+        String hms = nowDate.substring(8,14);
         pi0100.setUpdateUserId(loginUser.getUserId());
         pi0100.setUpdateYmd(ymd);
         pi0100.setUpdateHms(hms);
@@ -393,6 +393,33 @@ public class StockEntryController extends BaseAction {
         if (count == -1) {
             return new ReturnDTO(false, "Data saved failed!");
         }
+
+        return new ReturnDTO(true, "Data saved successfully!");
+    }
+
+
+    @PostMapping("/updateVarianceData")
+    @ResponseBody
+    public ReturnDTO updateVarianceData( String param,HttpServletRequest request, HttpSession session) {
+        User loginUser = this.getUser(session);
+
+        if (loginUser == null) {
+            // 没有登陆
+            return new ReturnDTO(false, "请先登录!");
+        }
+
+        Gson gson = new Gson();
+        // 盘点头档数据
+        PI0100DTO pi0100 = gson.fromJson(param, PI0100DTO.class);
+        if (pi0100 == null) {
+            return new ReturnDTO(false, "Parameter exception!");
+        }
+        String piCd = pi0100.getPiCd();
+        String piDate = pi0100.getPiDate();
+        String storeCd = pi0100.getStoreCd();
+        String reviewStatus = pi0100.getReviewStatus();
+        // 生成盘点差异报表数据
+         stocktakeEntryService.updateStocktakingVarianceReport(piCd, piDate,storeCd,reviewStatus);
 
         return new ReturnDTO(true, "Data saved successfully!");
     }

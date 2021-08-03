@@ -77,8 +77,8 @@ public class postatusReportExServiceImpl implements ExService {
         int no = 1;
         for (hhtReportDto dto : reportDTOList1) {
             for (hhtReportDto dto1 : reportDTOList2) {
-//                if (dto1.getStoreCd().equals(dto.getStoreCd()) && dto1.getOrderDate().equals(dto.getOrderDate())) {
-                if (dto1.getStoreCd().equals(dto.getStoreCd())) {
+                if (dto1.getStoreCd().equals(dto.getStoreCd()) && dto1.getOrderDate().equals(dto.getOrderDate())) {
+//                if (dto1.getStoreCd().equals(dto.getStoreCd())) {
                     if (dto.getNoOfPendingGrpo() == null  || dto.getNoOfPendingGrpo()==0 ){
                         dto.setNoOfPendingGrpo(dto1.getNoOfPendingGrpo());
                     }
@@ -87,8 +87,8 @@ public class postatusReportExServiceImpl implements ExService {
                 }
             }
             for (hhtReportDto dto1 : reportDTOList3) {
-//                if (dto1.getStoreCd().equals(dto.getStoreCd()) && dto1.getOrderDate().equals(dto.getOrderDate())) {
-                if (dto1.getStoreCd().equals(dto.getStoreCd())) {
+                if (dto1.getStoreCd().equals(dto.getStoreCd()) && dto1.getOrderDate().equals(dto.getOrderDate())) {
+//                if (dto1.getStoreCd().equals(dto.getStoreCd())) {
                     if (dto.getGrpoOfQty() == null  || dto.getGrpoOfQty()==0 ){
                         dto.setGrpoOfQty(dto1.getGrpoOfQty());
                     }
@@ -102,14 +102,14 @@ public class postatusReportExServiceImpl implements ExService {
                 }
             }
             for (hhtReportDto dto1 : reportDTOList4) {
-//                if (dto1.getStoreCd().equals(dto.getStoreCd()) && dto1.getOrderDate().equals(dto.getOrderDate())) {
-                if (dto1.getStoreCd().equals(dto.getStoreCd())) {
+                if (dto1.getStoreCd().equals(dto.getStoreCd()) && dto1.getOrderDate().equals(dto.getOrderDate())) {
+//                if (dto1.getStoreCd().equals(dto.getStoreCd())) {
                     if (dto.getNoOfConfiPo() == null  || dto.getNoOfConfiPo()==0 ){
                         dto.setNoOfConfiPo(dto1.getNoOfConfiPo());
                     }
                 } else {
                     if (dto.getNoOfConfiPo() == null  || dto.getNoOfConfiPo()==0 ){
-                        dto.setNoOfConfiPo(dto1.getNoOfConfiPo());
+                        dto.setNoOfConfiPo(0);
                     }else {
                         dto.setNoOfConfiPo(dto.getNoOfConfiPo());
                     }

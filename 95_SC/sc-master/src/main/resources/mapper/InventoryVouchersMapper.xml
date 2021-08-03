@@ -1,786 +1,854 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-    <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-    <mapper namespace="cn.com.bbut.iy.itemmaster.dao.inventory.InventoryVouchersMapper" >
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.bbut.iy.itemmaster.dao.inventory.InventoryVouchersMapper" >
 
-        <resultMap id="GetListMap" type="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersGridDTO" >
-            <id column="store_cd" property="storeCd" jdbcType="CHAR" />
-            <id column="voucher_no" property="voucherNo" jdbcType="VARCHAR" />
-            <id column="voucher_type" property="voucherType" jdbcType="VARCHAR" />
-            <id column="voucher_date" property="voucherDate" jdbcType="CHAR" />
-            <id column="store_cd1" property="storeCd1" jdbcType="CHAR" />
-            <result column="voucher_no1" property="voucherNo1" jdbcType="VARCHAR" />
-            <result column="voucher_sts" property="voucherSts" jdbcType="VARCHAR" />
-            <result column="audit_type" property="auditType" jdbcType="VARCHAR" />
-            <result column="remark" property="remark" jdbcType="VARCHAR" />
-            <result column="tax_rate" property="taxRate" jdbcType="NUMERIC" />
-            <result column="voucher_amt_notax" property="voucherAmtNoTax" jdbcType="NUMERIC" />
-            <result column="voucher_tax" property="voucherTax" jdbcType="NUMERIC" />
-            <result column="voucher_amt" property="voucherAmt" jdbcType="NUMERIC" />
-            <result column="upload_flg" property="uploadFlg" jdbcType="CHAR" />
-            <result column="upload_date" property="uploadDate" jdbcType="CHAR" />
-            <result column="create_user_name" property="createUser" jdbcType="VARCHAR" />
-            <result column="create_ymd" property="createYmd" jdbcType="CHAR" />
-            <result column="store_name" property="storeName" jdbcType="VARCHAR" />
-            <result column="store_name_1" property="storeName1" jdbcType="VARCHAR" />
-            <result column="review_sts_name" property="stsName" jdbcType="VARCHAR" />
-            <result column="upload_flg_name" property="uploadName" jdbcType="VARCHAR" />
-            <result column="review_status" property="reviewSts" />
-            <result column="review_id" property="reviewId" />
-            <result column="oc" property="oc" jdbcType="VARCHAR" />
-            <result column="oc_name" property="ocName" jdbcType="VARCHAR" />
-            <result column="ofc" property="ofc" jdbcType="VARCHAR" />
-            <result column="ofc_name" property="ofcName" jdbcType="VARCHAR" />
-            <result column="om" property="om" jdbcType="VARCHAR" />
-            <result column="om_name" property="omName" jdbcType="VARCHAR" />
-        </resultMap>
+    <resultMap id="GetListMap" type="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersGridDTO" >
+        <id column="store_cd" property="storeCd" jdbcType="CHAR" />
+        <id column="voucher_no" property="voucherNo" jdbcType="VARCHAR" />
+        <id column="voucher_type" property="voucherType" jdbcType="VARCHAR" />
+        <id column="voucher_date" property="voucherDate" jdbcType="CHAR" />
+        <id column="store_cd1" property="storeCd1" jdbcType="CHAR" />
+        <result column="voucher_no1" property="voucherNo1" jdbcType="VARCHAR" />
+        <result column="voucher_sts" property="voucherSts" jdbcType="VARCHAR" />
+        <result column="audit_type" property="auditType" jdbcType="VARCHAR" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="tax_rate" property="taxRate" jdbcType="NUMERIC" />
+        <result column="voucher_amt_notax" property="voucherAmtNoTax" jdbcType="NUMERIC" />
+        <result column="voucher_tax" property="voucherTax" jdbcType="NUMERIC" />
+        <result column="voucher_amt" property="voucherAmt" jdbcType="NUMERIC" />
+        <result column="upload_flg" property="uploadFlg" jdbcType="CHAR" />
+        <result column="upload_date" property="uploadDate" jdbcType="CHAR" />
+        <result column="create_user_name" property="createUser" jdbcType="VARCHAR" />
+        <result column="create_ymd" property="createYmd" jdbcType="CHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+        <result column="store_name_1" property="storeName1" jdbcType="VARCHAR" />
+        <result column="review_sts_name" property="stsName" jdbcType="VARCHAR" />
+        <result column="upload_flg_name" property="uploadName" jdbcType="VARCHAR" />
+        <result column="review_status" property="reviewSts" />
+        <result column="review_id" property="reviewId" />
+        <result column="oc" property="oc" jdbcType="VARCHAR" />
+        <result column="oc_name" property="ocName" jdbcType="VARCHAR" />
+        <result column="ofc" property="ofc" jdbcType="VARCHAR" />
+        <result column="ofc_name" property="ofcName" jdbcType="VARCHAR" />
+        <result column="om" property="om" jdbcType="VARCHAR" />
+        <result column="om_name" property="omName" jdbcType="VARCHAR" />
+    </resultMap>
 
-        <resultMap id="ReItemInfo" type="cn.com.bbut.iy.itemmaster.dto.inventory.ItemInfoDTO">
-            <result column="article_id" property="itemCode" jdbcType="VARCHAR" />
-            <result column="barcode" property="barcode" jdbcType="VARCHAR" />
-            <result column="spec" property="spec" jdbcType="VARCHAR" />
-            <result column="sales_unit_id" property="uom" jdbcType="VARCHAR" />
-            <result column="avg_cost_notax" property="avgCost" jdbcType="NUMERIC" />
-            <result column="base_order_price" property="baseOrderPrice" jdbcType="NUMERIC" />
-            <result column="order_tax_rate" property="taxRate" jdbcType="NUMERIC" />
-        </resultMap>
+    <resultMap id="ReItemInfo" type="cn.com.bbut.iy.itemmaster.dto.inventory.ItemInfoDTO">
+        <result column="article_id" property="itemCode" jdbcType="VARCHAR" />
+        <result column="barcode" property="barcode" jdbcType="VARCHAR" />
+        <result column="spec" property="spec" jdbcType="VARCHAR" />
+        <result column="sales_unit_id" property="uom" jdbcType="VARCHAR" />
+        <result column="avg_cost_notax" property="avgCost" jdbcType="NUMERIC" />
+        <result column="base_order_price" property="baseOrderPrice" jdbcType="NUMERIC" />
+        <result column="order_tax_rate" property="taxRate" jdbcType="NUMERIC" />
+    </resultMap>
 
-        <resultMap id="ReStoreInfo" type="cn.com.bbut.iy.itemmaster.dto.inventory.StoreInfoDTO">
-            <result column="store_cd" property="storeCd" jdbcType="VARCHAR" />
-            <result column="store_name" property="storeName" jdbcType="VARCHAR" />
-        </resultMap>
+    <resultMap id="ReStoreInfo" type="cn.com.bbut.iy.itemmaster.dto.inventory.StoreInfoDTO">
+        <result column="store_cd" property="storeCd" jdbcType="VARCHAR" />
+        <result column="store_name" property="storeName" jdbcType="VARCHAR" />
+    </resultMap>
 
-        <resultMap id="ReSk0020" type="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO">
-            <id column="store_cd" property="storeCd" jdbcType="CHAR" />
-            <id column="voucher_no" property="voucherNo" jdbcType="VARCHAR" />
-            <id column="voucher_type" property="voucherType" jdbcType="VARCHAR" />
-            <id column="voucher_date" property="voucherDate" jdbcType="CHAR" />
-            <id column="article_id" property="articleId" jdbcType="VARCHAR" />
-            <id column="article_id1" property="articleId1" jdbcType="VARCHAR" />
-            <id column="store_cd1" property="storeCd1" jdbcType="CHAR" />
-            <id column="adjust_reason" property="adjustReason" jdbcType="VARCHAR" />
-            <result column="barcode" property="barcode" jdbcType="CHAR" />
-            <result column="barcode1" property="barcode1" jdbcType="CHAR" />
-            <result column="sales_unit_id" property="salesUnitId" jdbcType="VARCHAR" />
-            <result column="qty1" property="qty1" jdbcType="NUMERIC" />
-            <result column="qty2" property="qty2" jdbcType="NUMERIC" />
-            <result column="bqty1" property="bqty1" jdbcType="NUMERIC" />
-            <result column="price" property="price" jdbcType="NUMERIC" />
-            <result column="price_notax" property="priceNoTax" jdbcType="NUMERIC" />
-            <result column="price_notax1" property="priceNoTax1" jdbcType="NUMERIC" />
-            <result column="amt_notax" property="amtNoTax" jdbcType="NUMERIC" />
-            <result column="amt_tax" property="amtTax" jdbcType="NUMERIC" />
-            <result column="amt" property="amt" jdbcType="NUMERIC" />
-            <result column="upload_flg" property="uploadFlg" jdbcType="CHAR" />
-            <result column="upload_date" property="uploadDate" jdbcType="CHAR" />
-            <result column="display_seq" property="displaySeq" jdbcType="NUMERIC" />
-            <result column="nr_update_flg" property="nrUpdateFlg" jdbcType="CHAR" />
-            <result column="article_name" property="articleName" jdbcType="VARCHAR" />
-            <result column="article_name1" property="articleName1" jdbcType="VARCHAR" />
-            <result column="sales_unit_id" property="uom" jdbcType="VARCHAR" />
-            <result column="sales_unit_id1" property="uom1" jdbcType="VARCHAR" />
-            <result column="spec" property="spec" jdbcType="VARCHAR" />
-            <result column="spec1" property="spec1" jdbcType="VARCHAR" />
-            <result column="reason" property="adjustReasonText" jdbcType="VARCHAR" />
-            <result column="actual_qty" property="actualQty" jdbcType="NUMERIC" />
-            <result column="actual_amt" property="actualAmt" jdbcType="NUMERIC" />
-            <result column="tax_rate" property="taxRate" jdbcType="NUMERIC" />
-            <result column="tax_rate1" property="taxRate1" jdbcType="NUMERIC" />
-            <result column="different_reasons" property="differenceReason" jdbcType="VARCHAR" />
-            <result column="differ_reasons" property="differenceReasonText" jdbcType="VARCHAR" />
-            <result column="expenditure_code" property="expenditureNo" jdbcType="VARCHAR" />
-            <result column="expenditure_code_text" property="expenditureNoText" jdbcType="VARCHAR" />
-            <result column="general_level_cd" property="generalReason" jdbcType="VARCHAR" />
-            <result column="general_level_reason" property="generalReasonText" jdbcType="VARCHAR" />
-        </resultMap>
+    <resultMap id="ReSk0020" type="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO">
+        <id column="store_cd" property="storeCd" jdbcType="CHAR" />
+        <id column="voucher_no" property="voucherNo" jdbcType="VARCHAR" />
+        <id column="voucher_type" property="voucherType" jdbcType="VARCHAR" />
+        <id column="voucher_date" property="voucherDate" jdbcType="CHAR" />
+        <id column="article_id" property="articleId" jdbcType="VARCHAR" />
+        <id column="article_id1" property="articleId1" jdbcType="VARCHAR" />
+        <id column="store_cd1" property="storeCd1" jdbcType="CHAR" />
+        <id column="adjust_reason" property="adjustReason" jdbcType="VARCHAR" />
+        <result column="barcode" property="barcode" jdbcType="CHAR" />
+        <result column="barcode1" property="barcode1" jdbcType="CHAR" />
+        <result column="sales_unit_id" property="salesUnitId" jdbcType="VARCHAR" />
+        <result column="qty1" property="qty1" jdbcType="NUMERIC" />
+        <result column="qty2" property="qty2" jdbcType="NUMERIC" />
+        <result column="bqty1" property="bqty1" jdbcType="NUMERIC" />
+        <result column="price" property="price" jdbcType="NUMERIC" />
+        <result column="price_notax" property="priceNoTax" jdbcType="NUMERIC" />
+        <result column="price_notax1" property="priceNoTax1" jdbcType="NUMERIC" />
+        <result column="amt_notax" property="amtNoTax" jdbcType="NUMERIC" />
+        <result column="amt_tax" property="amtTax" jdbcType="NUMERIC" />
+        <result column="amt" property="amt" jdbcType="NUMERIC" />
+        <result column="upload_flg" property="uploadFlg" jdbcType="CHAR" />
+        <result column="upload_date" property="uploadDate" jdbcType="CHAR" />
+        <result column="display_seq" property="displaySeq" jdbcType="NUMERIC" />
+        <result column="nr_update_flg" property="nrUpdateFlg" jdbcType="CHAR" />
+        <result column="article_name" property="articleName" jdbcType="VARCHAR" />
+        <result column="article_name1" property="articleName1" jdbcType="VARCHAR" />
+        <result column="sales_unit_id" property="uom" jdbcType="VARCHAR" />
+        <result column="sales_unit_id1" property="uom1" jdbcType="VARCHAR" />
+        <result column="spec" property="spec" jdbcType="VARCHAR" />
+        <result column="spec1" property="spec1" jdbcType="VARCHAR" />
+        <result column="reason" property="adjustReasonText" jdbcType="VARCHAR" />
+        <result column="actual_qty" property="actualQty" jdbcType="NUMERIC" />
+        <result column="actual_amt" property="actualAmt" jdbcType="NUMERIC" />
+        <result column="tax_rate" property="taxRate" jdbcType="NUMERIC" />
+        <result column="tax_rate1" property="taxRate1" jdbcType="NUMERIC" />
+        <result column="different_reasons" property="differenceReason" jdbcType="VARCHAR" />
+        <result column="differ_reasons" property="differenceReasonText" jdbcType="VARCHAR" />
+        <result column="expenditure_code" property="expenditureNo" jdbcType="VARCHAR" />
+        <result column="expenditure_code_text" property="expenditureNoText" jdbcType="VARCHAR" />
+        <result column="general_level_cd" property="generalReason" jdbcType="VARCHAR" />
+        <result column="general_level_reason" property="generalReasonText" jdbcType="VARCHAR" />
+    </resultMap>
 
-        <resultMap id="Ma8350Dto" type="cn.com.bbut.iy.itemmaster.dto.ma8350.MA8350dto">
-            <result column="general_level_cd" property="generalLevelCd" jdbcType="VARCHAR" />
-            <result column="general_level_reason" property="generalLevelReason" jdbcType="VARCHAR" />
-        </resultMap>
-        <resultMap id="Ma1000Dto" type="cn.com.bbut.iy.itemmaster.dto.ma100Ld.Ma1000DTO">
+    <resultMap id="Ma8350Dto" type="cn.com.bbut.iy.itemmaster.dto.ma8350.MA8350dto">
+        <result column="general_level_cd" property="generalLevelCd" jdbcType="VARCHAR" />
+        <result column="general_level_reason" property="generalLevelReason" jdbcType="VARCHAR" />
+    </resultMap>
+    <resultMap id="Ma1000Dto" type="cn.com.bbut.iy.itemmaster.dto.ma100Ld.Ma1000DTO">
         <result column="zo_cd" property="zoCd" jdbcType="VARCHAR" />
-       </resultMap>
-        <sql id="selectCondition">
-            <where>
-                store_cd IN
-                <foreach item="store" index="index" collection="stores"
-                         open="(" separator="," close=")">
-                    #{store,jdbcType=VARCHAR}
+    </resultMap>
+    <sql id="selectCondition">
+        <where>
+            store_cd IN
+            <foreach item="store" index="index" collection="stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            <if test="voucherNo != null and voucherNo != ''">
+                AND lower(voucher_no) like lower(CONCAT('%',#{voucherNo,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="voucherNo1 != null and voucherNo1 != ''">
+                AND lower(voucher_no1) like lower(CONCAT('%',#{voucherNo1,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="storeCdTo != null and storeCdTo != ''">
+                AND lower(store_cd1) like lower(CONCAT('%',#{storeCdTo,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="reviewSts != -1">
+                AND review_status  = #{reviewSts,jdbcType=INTEGER}
+            </if>
+            <if test="voucherType != null and voucherType != ''">
+                AND voucher_type  = #{voucherType,jdbcType=VARCHAR}
+            </if>
+            <if test="upload != null and upload != ''">
+                AND upload_flg  = #{upload,jdbcType=VARCHAR}
+            </if>
+            <if test="voucherStartDate != null and voucherStartDate != ''">
+                AND voucher_date >= #{voucherStartDate,jdbcType=VARCHAR}
+            </if>
+            <if test="voucherEndDate != null and voucherEndDate != ''">
+                AND #{voucherEndDate,jdbcType=VARCHAR} >= voucher_date
+            </if>
+            <if test="types != null and types.size > 0">
+                AND voucher_type IN
+                <foreach collection="types" item="item" open="(" separator="," close=")">
+                    #{item,jdbcType=VARCHAR}
                 </foreach>
-                <if test="voucherNo != null and voucherNo != ''">
-                    AND lower(voucher_no) like lower(CONCAT('%',#{voucherNo,jdbcType=VARCHAR},'%'))
-                </if>
-                <if test="voucherNo1 != null and voucherNo1 != ''">
-                    AND lower(voucher_no1) like lower(CONCAT('%',#{voucherNo1,jdbcType=VARCHAR},'%'))
-                </if>
-                <if test="storeCdTo != null and storeCdTo != ''">
-                    AND lower(store_cd1) like lower(CONCAT('%',#{storeCdTo,jdbcType=VARCHAR},'%'))
-                </if>
-                <if test="reviewSts != -1">
-                    AND review_status  = #{reviewSts,jdbcType=INTEGER}
-                </if>
-                <if test="voucherType != null and voucherType != ''">
-                    AND voucher_type  = #{voucherType,jdbcType=VARCHAR}
-                </if>
-                <if test="upload != null and upload != ''">
-                    AND upload_flg  = #{upload,jdbcType=VARCHAR}
-                </if>
-                <if test="voucherStartDate != null and voucherStartDate != ''">
-                    AND voucher_date >= #{voucherStartDate,jdbcType=VARCHAR}
-                </if>
-                <if test="voucherEndDate != null and voucherEndDate != ''">
-                    AND #{voucherEndDate,jdbcType=VARCHAR} >= voucher_date
-                </if>
-                <if test="types != null and types.size > 0">
-                    AND voucher_type IN
-                    <foreach collection="types" item="item" open="(" separator="," close=")">
-                        #{item,jdbcType=VARCHAR}
-                    </foreach>
-                </if>
-                <if test="amCode != null and amCode != ''">
-                    AND  ofc=#{amCode,jdbcType=VARCHAR}
-                </if>
-                <if test="omCode != null and omCode != ''">
-                    AND om=#{omCode,jdbcType=VARCHAR}
-                </if>
-                <if test="ocCode != null and ocCode != ''">
-                    AND oc= #{ocCode,jdbcType=VARCHAR}
-                </if>
-            </where>
-        </sql>
+            </if>
+            <if test="amCode != null and amCode != ''">
+                AND  ofc=#{amCode,jdbcType=VARCHAR}
+            </if>
+            <if test="omCode != null and omCode != ''">
+                AND om=#{omCode,jdbcType=VARCHAR}
+            </if>
+            <if test="ocCode != null and ocCode != ''">
+                AND oc= #{ocCode,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </sql>
 
-        <select id="selectListByCondition" resultMap="GetListMap" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
-            SELECT
-            T.store_cd,
-            T.voucher_no,
-            T.voucher_type,
-            T.voucher_date,
-            T.store_cd1,
-            T.voucher_no1,
-            T.voucher_sts,
-            T.remark,
-            T.tax_rate,
-            T.voucher_amt_notax,
-            T.voucher_tax,
-            T.voucher_amt,
-            T.upload_flg,
-            T.upload_date,
-            T.n_reviewid review_id,
-            T.ofc,
-            T.ofc_name,
-            t.om,
-            t.om_name,
-            t.oc,
-            t.oc_name,
-            CONCAT(T.create_ymd,T.create_hms) AS create_ymd,
-            T.review_status,
-            T2.code_name AS review_sts_name,
-            T3.code_name AS upload_flg_name,
-            CONCAT(T.store_cd,' ',T4.store_name) AS store_name,
-            T5.emp_name AS create_user_name
-            FROM
-            (
-            SELECT
-            distinct
-             S1.ofc_name,
-            S1.ofc,
-            S1.om,
-            S1.om_name,
-            s1.oc,
-            s1.oc_name,
-            S1.temp6,
-            S1.temp5,
-            S1.temp4,
-            S1.temp3,
-            S1.temp2,
-            S.voucher_no,
-            S.review_status,
-            S.store_cd,
-            S.create_user_id,
-            S.voucher_type,
-            S.voucher_date,
-            S.store_cd1,
-            S.voucher_no1,
-            S.voucher_sts,
-            S.tax_rate,
-            S.remark,
-            S.voucher_amt_notax,
-            S.voucher_tax,
-            S.n_reviewid,
-            S.voucher_amt,
-            S.upload_date,
-            S.create_ymd,
-            S.create_hms,
-            S.upload_flg
-             FROM sk0010 S
-            INNER JOIN(
-            SELECT DISTINCT
-            OM.om,
-            OM.om_name,
-            OC.oc,
-            OC.oc_name,
-            ofc.ofc,
-            OFC.ofc_name,
-            O.store_cd AS temp2,
-            O.voucher_no AS temp3,
-            O.voucher_type AS temp4,
-            O.voucher_date AS temp5,
-            O.store_cd1 AS temp6,
-            O.upload_flg,
-            O.store_cd,
-            O.create_user_id ,
-            O.voucher_no,
-            O.voucher_type,
-            O.voucher_date,
-            O.store_cd1
-            /*O1.review_status*/
-/*--             O.store_cd AS temp2,
---             O.voucher_no AS temp3,
---             O.voucher_type AS temp4,
---             O.voucher_date AS temp5,
---             O.store_cd1 AS temp6*/
-            FROM sk0020 O
-            LEFT JOIN
-            ( SELECT t_operator.c_operatorcode, t_operator.c_operatorname  ofc_name,MA1000.ofc, MA1000.store_cd FROM MA1000 INNER JOIN t_operator ON t_operator.c_operatorcode = MA1000.ofc ) OFC ON O.store_cd = OFC.store_cd
-            LEFT JOIN
-            (SELECT ma1000.om, t_operator.c_operatorcode,t_operator.c_operatorname om_name,MA1000.store_cd FROM MA1000 left  JOIN t_operator ON t_operator.c_operatorcode=MA1000.om  )  OM  ON O.store_cd=OM.store_cd
-            LEFT JOIN
-            (SELECT ma1000.oc,t_operator.c_operatorcode,t_operator.c_operatorname oc_name,MA1000.store_cd FROM MA1000 left  JOIN t_operator ON t_operator.c_operatorcode=MA1000.oc  )  OC  ON O.store_cd=OC.store_cd
-            ,
-            MA1100 O1
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN O1.effective_start_date AND O1.effective_end_date
-            AND O.article_id = O1.article_id
-            <if test="itemInfo != null and itemInfo != ''">
-                AND (
-                lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                )
-            </if>
-            <if test="reason != null and reason != ''">
-                AND O.adjust_reason = #{reason,jdbcType=VARCHAR}
-            </if>
-            ) S1
-            ON S.store_cd = S1.temp2
-            AND S.voucher_no = S1.temp3
-            AND S.voucher_type = S1.temp4
-            AND S.voucher_date = S1.temp5
-            AND S.store_cd1 = S1.temp6
-            ) T
-            LEFT JOIN(
-            SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
-            ) T2
-            ON CAST(T.review_status AS VARCHAR) = T2.code_value
-            LEFT JOIN(
-            SELECT code_value,code_name FROM cm9010 WHERE code_type = '00230'
-            ) T3
-            ON T.upload_flg = T3.code_value
-            LEFT JOIN (
-            SELECT
-            store_cd AS temp1, store_name
-            FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN effective_start_date AND effective_end_date
-            ) T4
-            ON T.store_cd = T4.temp1
-            LEFT JOIN (
-            SELECT emp_num_id, emp_name FROM ma4200
-            ) T5
-            ON T.create_user_id = T5.emp_num_id
-            <include refid="selectCondition"></include>
-            ORDER BY voucher_date DESC
-            <if test="flg">
-                LIMIT ${rows} OFFSET ${limitStart}
-            </if>
-        </select>
+    <select id="selectListByCondition" resultMap="GetListMap" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
+        SELECT
+        T.store_cd,
+        T.voucher_no,
+        T.voucher_type,
+        T.voucher_date,
+        T.store_cd1,
+        T.voucher_no1,
+        T.voucher_sts,
+        T.remark,
+        T.tax_rate,
+        T.voucher_amt_notax,
+        T.voucher_tax,
+        T.voucher_amt,
+        T.upload_flg,
+        T.upload_date,
+        T.n_reviewid review_id,
+        T.ofc,
+        T.ofc_name,
+        t.om,
+        t.om_name,
+        t.oc,
+        t.oc_name,
+        CONCAT(T.create_ymd,T.create_hms) AS create_ymd,
+        T.review_status,
+        T2.code_name AS review_sts_name,
+        T3.code_name AS upload_flg_name,
+        CONCAT(T.store_cd,' ',T4.store_name) AS store_name,
+        T5.emp_name AS create_user_name
+        FROM
+        (
+        SELECT
+        distinct
+        S1.ofc_name,
+        S1.ofc,
+        S1.om,
+        S1.om_name,
+        s1.oc,
+        s1.oc_name,
+        S1.temp6,
+        S1.temp5,
+        S1.temp4,
+        S1.temp3,
+        S1.temp2,
+        S.voucher_no,
+        S.review_status,
+        S.store_cd,
+        S.create_user_id,
+        S.voucher_type,
+        S.voucher_date,
+        S.store_cd1,
+        S.voucher_no1,
+        S.voucher_sts,
+        S.tax_rate,
+        S.remark,
+        S.voucher_amt_notax,
+        S.voucher_tax,
+        S.n_reviewid,
+        S.voucher_amt,
+        S.upload_date,
+        S.create_ymd,
+        S.create_hms,
+        S.upload_flg
+        FROM sk0010 S
+        INNER JOIN(
+        SELECT DISTINCT
+        OM.om,
+        OM.om_name,
+        OC.oc,
+        OC.oc_name,
+        ofc.ofc,
+        OFC.ofc_name,
+        O.store_cd AS temp2,
+        O.voucher_no AS temp3,
+        O.voucher_type AS temp4,
+        O.voucher_date AS temp5,
+        O.store_cd1 AS temp6,
+        O.upload_flg,
+        O.store_cd,
+        O.create_user_id ,
+        O.voucher_no,
+        O.voucher_type,
+        O.voucher_date,
+        O.store_cd1
+        /*O1.review_status*/
+        /*--             O.store_cd AS temp2,
+        --             O.voucher_no AS temp3,
+        --             O.voucher_type AS temp4,
+        --             O.voucher_date AS temp5,
+        --             O.store_cd1 AS temp6*/
+        FROM sk0020 O
+        LEFT JOIN
+        ( SELECT t_operator.c_operatorcode, t_operator.c_operatorname  ofc_name,MA1000.ofc, MA1000.store_cd FROM MA1000 INNER JOIN t_operator ON t_operator.c_operatorcode = MA1000.ofc ) OFC ON O.store_cd = OFC.store_cd
+        LEFT JOIN
+        (SELECT ma1000.om, t_operator.c_operatorcode,t_operator.c_operatorname om_name,MA1000.store_cd FROM MA1000 left  JOIN t_operator ON t_operator.c_operatorcode=MA1000.om  )  OM  ON O.store_cd=OM.store_cd
+        LEFT JOIN
+        (SELECT ma1000.oc,t_operator.c_operatorcode,t_operator.c_operatorname oc_name,MA1000.store_cd FROM MA1000 left  JOIN t_operator ON t_operator.c_operatorcode=MA1000.oc  )  OC  ON O.store_cd=OC.store_cd
+        ,
+        MA1100 O1
+        WHERE O.article_id = O1.article_id
+        <if test="itemInfo != null and itemInfo != ''">
+            AND (
+            lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        <if test="reason != null and reason != ''">
+            AND O.adjust_reason = #{reason,jdbcType=VARCHAR}
+        </if>
+        ) S1
+        ON S.store_cd = S1.temp2
+        AND S.voucher_no = S1.temp3
+        AND S.voucher_type = S1.temp4
+        AND S.voucher_date = S1.temp5
+        AND S.store_cd1 = S1.temp6
+        ) T
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
+        ) T2
+        ON CAST(T.review_status AS VARCHAR) = T2.code_value
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00230'
+        ) T3
+        ON T.upload_flg = T3.code_value
+        LEFT JOIN (
+        SELECT
+        store_cd AS temp1, store_name
+        FROM MA1000
+        ) T4
+        ON T.store_cd = T4.temp1
+        LEFT JOIN (
+        SELECT emp_num_id, emp_name FROM ma4200
+        ) T5
+        ON T.create_user_id = T5.emp_num_id
+        <include refid="selectCondition"></include>
+        ORDER BY voucher_date DESC
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
 
-        <select id="selectCountByCondition" resultType="INT" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
-            SELECT
-            count(*) from
-            (
-            SELECT
-            distinct
-            S1.ofc_name,
-            S1.ofc,
-            S1.om,
-            S1.om_name,
-            s1.oc,
-            s1.oc_name,
-            S1.temp6,
-            S1.temp5,
-            S1.temp4,
-            S1.temp3,
-            S1.temp2,
-            S.voucher_no,
-            S.review_status,
-            S.store_cd,
-            S.create_user_id,
-            S.voucher_type,
-            S.voucher_date,
-            S.store_cd1,
-            S.voucher_no1,
-            S.voucher_sts,
-            S.tax_rate,
-            S.remark,
-            S.voucher_amt_notax,
-            S.voucher_tax,
-            S.n_reviewid,
-            S.voucher_amt,
-            S.upload_date,
-            S.create_ymd,
-            S.create_hms,
-            S.upload_flg
-            FROM sk0010 S
-            INNER JOIN(
-            SELECT DISTINCT
-            OM.om,
-            OM.om_name,
-            OC.oc,
-            OC.oc_name,
-            ofc.ofc,
-            ofc.ofc_name,
-            O.store_cd AS temp2,
-            O.voucher_no AS temp3,
-            O.voucher_type AS temp4,
-            O.voucher_date AS temp5,
-            O.store_cd1 AS temp6,
-            O.upload_flg,
-            O.store_cd,
-            O.create_user_id ,
-            O.voucher_no,
-            O.voucher_type,
-            O.voucher_date,
-            O.store_cd1
-            FROM sk0020 O
-            LEFT JOIN
-            ( SELECT t_operator.c_operatorcode, t_operator.c_operatorname  ofc_name,MA1000.ofc, MA1000.store_cd FROM MA1000 INNER JOIN t_operator ON t_operator.c_operatorcode = MA1000.ofc ) OFC ON O.store_cd = OFC.store_cd
-            LEFT JOIN
-            (SELECT ma1000.om, t_operator.c_operatorcode,t_operator.c_operatorname om_name,MA1000.store_cd FROM MA1000 left  JOIN t_operator ON t_operator.c_operatorcode=MA1000.om  )  OM  ON O.store_cd=OM.store_cd
-            LEFT JOIN
-            (SELECT ma1000.oc,t_operator.c_operatorcode,t_operator.c_operatorname oc_name,MA1000.store_cd FROM MA1000 left  JOIN t_operator ON t_operator.c_operatorcode=MA1000.oc  )  OC  ON O.store_cd=OC.store_cd
-            ,
-            MA1100 O1
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN O1.effective_start_date AND O1.effective_end_date
-            AND O.article_id = O1.article_id
-            <if test="itemInfo != null and itemInfo != ''">
-                AND (
-                lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                )
-            </if>
-            <if test="reason != null and reason != ''">
-                AND O.adjust_reason = #{reason,jdbcType=VARCHAR}
-            </if>
-            ) S1
-            ON S.store_cd = S1.temp2
-            AND S.voucher_no = S1.temp3
-            AND S.voucher_type = S1.temp4
-            AND S.voucher_date = S1.temp5
-            AND S.store_cd1 = S1.temp6
-            ) T
-            <include refid="selectCondition"></include>
-        </select>
+    <select id="selectCountByCondition" resultType="INT" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
+        SELECT
+        count(*) from
+        (
+        SELECT
+        distinct
+        S1.ofc_name,
+        S1.ofc,
+        S1.om,
+        S1.om_name,
+        s1.oc,
+        s1.oc_name,
+        S1.temp6,
+        S1.temp5,
+        S1.temp4,
+        S1.temp3,
+        S1.temp2,
+        S.voucher_no,
+        S.review_status,
+        S.store_cd,
+        S.create_user_id,
+        S.voucher_type,
+        S.voucher_date,
+        S.store_cd1,
+        S.voucher_no1,
+        S.voucher_sts,
+        S.tax_rate,
+        S.remark,
+        S.voucher_amt_notax,
+        S.voucher_tax,
+        S.n_reviewid,
+        S.voucher_amt,
+        S.upload_date,
+        S.create_ymd,
+        S.create_hms,
+        S.upload_flg
+        FROM sk0010 S
+        INNER JOIN(
+        SELECT DISTINCT
+        OM.om,
+        OM.om_name,
+        OC.oc,
+        OC.oc_name,
+        ofc.ofc,
+        ofc.ofc_name,
+        O.store_cd AS temp2,
+        O.voucher_no AS temp3,
+        O.voucher_type AS temp4,
+        O.voucher_date AS temp5,
+        O.store_cd1 AS temp6,
+        O.upload_flg,
+        O.store_cd,
+        O.create_user_id ,
+        O.voucher_no,
+        O.voucher_type,
+        O.voucher_date,
+        O.store_cd1
+        FROM sk0020 O
+        LEFT JOIN
+        ( SELECT t_operator.c_operatorcode, t_operator.c_operatorname  ofc_name,MA1000.ofc, MA1000.store_cd FROM MA1000 INNER JOIN t_operator ON t_operator.c_operatorcode = MA1000.ofc ) OFC ON O.store_cd = OFC.store_cd
+        LEFT JOIN
+        (SELECT ma1000.om, t_operator.c_operatorcode,t_operator.c_operatorname om_name,MA1000.store_cd FROM MA1000 left  JOIN t_operator ON t_operator.c_operatorcode=MA1000.om  )  OM  ON O.store_cd=OM.store_cd
+        LEFT JOIN
+        (SELECT ma1000.oc,t_operator.c_operatorcode,t_operator.c_operatorname oc_name,MA1000.store_cd FROM MA1000 left  JOIN t_operator ON t_operator.c_operatorcode=MA1000.oc  )  OC  ON O.store_cd=OC.store_cd
+        ,
+        MA1100 O1
+        WHERE O.article_id = O1.article_id
+        <if test="itemInfo != null and itemInfo != ''">
+            AND (
+            lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        <if test="reason != null and reason != ''">
+            AND O.adjust_reason = #{reason,jdbcType=VARCHAR}
+        </if>
+        ) S1
+        ON S.store_cd = S1.temp2
+        AND S.voucher_no = S1.temp3
+        AND S.voucher_type = S1.temp4
+        AND S.voucher_date = S1.temp5
+        AND S.store_cd1 = S1.temp6
+        ) T
+        <include refid="selectCondition"></include>
+    </select>
 
-        <select id="selectByTypeCondition" resultMap="GetListMap" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
-            SELECT
-            T.store_cd,
-            T.voucher_no,
-            T.voucher_type,
-            T.voucher_date,
-            T.store_cd1,
-            T.voucher_no1,
-            T.voucher_sts,
-            T.remark,
-            T.tax_rate,
-            T.voucher_amt_notax,
-            T.voucher_tax,
-            T.voucher_amt,
-            T.upload_flg,
-            T.upload_date,
-            CONCAT(T.create_ymd,T.create_hms) AS create_ymd,
-            T.review_status,
-            T2.code_name AS review_sts_name,
-            T3.code_name AS upload_flg_name,
-            CONCAT(T.store_cd,' ',T4.store_name) AS store_name,
-            CONCAT(T.store_cd1,' ',T5.store_name) AS store_name_1,
-            T6.emp_name AS create_user_name
-            FROM (
-            SELECT * FROM sk0010 S
-                INNER JOIN(
-                SELECT DISTINCT
-                O.store_cd AS temp2,
-                O.voucher_no AS temp3,
-                O.voucher_type AS temp4,
-                O.voucher_date AS temp5,
-                O.store_cd1 AS temp6
-                FROM sk0020 O, MA1100 O1
-                WHERE #{businessDate,jdbcType=VARCHAR}
-                BETWEEN O1.effective_start_date AND O1.effective_end_date
-                AND O.article_id = O1.article_id
-                <if test="itemInfo != null and itemInfo != ''">
-                    AND (
-                    lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                    OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                    OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                    )
-                </if>
-                <if test="generalReason != null and generalReason != ''">
-                    AND O.adjust_reason in (select detailed_level_cd from ma8360 where general_level_cd = #{generalReason,jdbcType=VARCHAR})
-                </if>
-                <if test="reason != null and reason != ''">
-                    AND O.adjust_reason = #{reason,jdbcType=VARCHAR}
-                </if>
-                ) S1
-                ON S.store_cd = S1.temp2
-                AND S.voucher_no = S1.temp3
-                AND S.voucher_type = S1.temp4
-                AND S.voucher_date = S1.temp5
-                AND S.store_cd1 = S1.temp6
-            ) T
-            LEFT JOIN(
-            SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
-            ) T2
-            ON CAST(T.review_status AS VARCHAR) = T2.code_value
-            LEFT JOIN(
-            SELECT code_value,code_name FROM cm9010 WHERE code_type = '00230'
-            ) T3
-            ON T.upload_flg = T3.code_value
-            LEFT JOIN (
-            SELECT
-            store_cd AS temp0, store_name, ofc
-            FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN effective_start_date AND effective_end_date
-            ) T4
-            ON T.store_cd = T4.temp0
-            LEFT JOIN (
-            SELECT
-            store_cd AS temp1, store_name
-            FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN effective_start_date AND effective_end_date
-            ) T5
-            ON T.store_cd1 = T5.temp1
-            LEFT JOIN (
-            SELECT emp_num_id, emp_name FROM ma4200
-            ) T6
-            ON T.create_user_id = T6.emp_num_id
-            <include refid="selectCondition"></include>
-            <if test="am != null and am != ''">
-                AND T4.ofc = #{am,jdbcType=VARCHAR}
+    <select id="selectByTypeCondition" resultMap="GetListMap" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
+        SELECT
+        T.store_cd,
+        T.voucher_no,
+        T.voucher_type,
+        T.voucher_date,
+        T.store_cd1,
+        T.voucher_no1,
+        T.voucher_sts,
+        T.remark,
+        T.tax_rate,
+        T.voucher_amt_notax,
+        T.voucher_tax,
+        T.voucher_amt,
+        T.upload_flg,
+        T.upload_date,
+        CONCAT(T.create_ymd,T.create_hms) AS create_ymd,
+        T.review_status,
+        T2.code_name AS review_sts_name,
+        T3.code_name AS upload_flg_name,
+        CONCAT(T.store_cd,' ',T4.store_name) AS store_name,
+        CONCAT(T.store_cd1,' ',T5.store_name) AS store_name_1,
+        T6.emp_name AS create_user_name
+        FROM (
+        SELECT * FROM sk0010 S
+        INNER JOIN(
+        SELECT DISTINCT
+        O.store_cd AS temp2,
+        O.voucher_no AS temp3,
+        O.voucher_type AS temp4,
+        O.voucher_date AS temp5,
+        O.store_cd1 AS temp6
+        FROM sk0020 O, MA1100 O1
+        WHERE  O.article_id = O1.article_id
+        <if test="itemInfo != null and itemInfo != ''">
+            AND (
+            lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        <if test="generalReason != null and generalReason != ''">
+            AND O.adjust_reason in (select detailed_level_cd from ma8360 where general_level_cd = #{generalReason,jdbcType=VARCHAR})
+        </if>
+        <if test="reason != null and reason != ''">
+            AND O.adjust_reason = #{reason,jdbcType=VARCHAR}
+        </if>
+        ) S1
+        ON S.store_cd = S1.temp2
+        AND S.voucher_no = S1.temp3
+        AND S.voucher_type = S1.temp4
+        AND S.voucher_date = S1.temp5
+        AND S.store_cd1 = S1.temp6
+        ) T
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
+        ) T2
+        ON CAST(T.review_status AS VARCHAR) = T2.code_value
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00230'
+        ) T3
+        ON T.upload_flg = T3.code_value
+        LEFT JOIN (
+        SELECT
+        store_cd AS temp0, store_name, ofc
+        FROM MA1000
+        ) T4
+        ON T.store_cd = T4.temp0
+        LEFT JOIN (
+        SELECT
+        store_cd AS temp1, store_name
+        FROM MA1000
+        ) T5
+        ON T.store_cd1 = T5.temp1
+        LEFT JOIN (
+        SELECT emp_num_id, emp_name FROM ma4200
+        ) T6
+        ON T.create_user_id = T6.emp_num_id
+        where
+            (store_cd IN
+            <foreach item="store" index="index" collection="stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            or store_cd1 in
+            <foreach item="store" index="index" collection="stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>)
+            <if test="voucherNo != null and voucherNo != ''">
+                AND lower(voucher_no) like lower(CONCAT('%',#{voucherNo,jdbcType=VARCHAR},'%'))
             </if>
-            ORDER BY voucher_date DESC
-            <if test="flg">
-                LIMIT ${rows} OFFSET ${limitStart}
+            <if test="voucherNo1 != null and voucherNo1 != ''">
+                AND lower(voucher_no1) like lower(CONCAT('%',#{voucherNo1,jdbcType=VARCHAR},'%'))
             </if>
-        </select>
-
-        <select id="selectByTypeInCondition" resultMap="GetListMap" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
-            SELECT
-            T.store_cd,
-            T.voucher_no,
-            T.voucher_type,
-            T.voucher_date,
-            T.store_cd1,
-            T.voucher_no1,
-            T.voucher_sts,
-            T.remark,
-            T.tax_rate,
-            T.voucher_amt_notax,
-            T.voucher_tax,
-            T.voucher_amt,
-            T.upload_flg,
-            T.upload_date,
-            CONCAT(T.create_ymd,T.create_hms) AS create_ymd,
-            T.review_status,
-            T2.code_name AS review_sts_name,
-            T3.code_name AS upload_flg_name,
-            CONCAT(T.store_cd,' ',T4.store_name) AS store_name,
-            CONCAT(T.store_cd1,' ',T5.store_name) AS store_name_1,
-            T6.emp_name AS create_user_name
-            FROM (
-            SELECT * FROM sk0010 S
-                INNER JOIN(
-                SELECT DISTINCT
-                O.store_cd AS temp2,
-                O.voucher_no AS temp3,
-                O.voucher_type AS temp4,
-                O.voucher_date AS temp5,
-                O.store_cd1 AS temp6
-                FROM sk0020 O, MA1100 O1
-                WHERE #{businessDate,jdbcType=VARCHAR}
-                BETWEEN O1.effective_start_date AND O1.effective_end_date
-                AND O.article_id = O1.article_id
-                <if test="itemInfo != null and itemInfo != ''">
-                    AND (
-                    lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                    OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                    OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                    )
-                </if>
-                <if test="reason != null and reason != ''">
-                    AND O.adjust_reason = #{reason,jdbcType=VARCHAR}
-                </if>
-                <if test="startQty != null">
-                    AND (O.qty2-O.qty1) >= #{startQty}
-                </if>
-                <if test="endQty != null">
-                    AND #{endQty} >= (O.qty2-O.qty1)
-                </if>
-                ) S1
-                ON S.store_cd = S1.temp2
-                AND S.voucher_no = S1.temp3
-                AND S.voucher_type = S1.temp4
-                AND S.voucher_date = S1.temp5
-                AND S.store_cd1 = S1.temp6
-            ) T
-            LEFT JOIN(
-            SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
-            ) T2
-            ON CAST(T.review_status AS VARCHAR) = T2.code_value
-            LEFT JOIN(
-            SELECT code_value,code_name FROM cm9010 WHERE code_type = '00230'
-            ) T3
-            ON T.upload_flg = T3.code_value
-            LEFT JOIN (
-            SELECT
-            store_cd AS temp0, store_name
-            FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN effective_start_date AND effective_end_date
-            ) T4
-            ON T.store_cd = T4.temp0
-            LEFT JOIN (
-            SELECT
-            store_cd AS temp1, store_name
-            FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN effective_start_date AND effective_end_date
-            ) T5
-            ON T.store_cd1 = T5.temp1
-            LEFT JOIN (
-            SELECT emp_num_id, emp_name FROM ma4200
-            ) T6
-            ON T.create_user_id = T6.emp_num_id
-            inner join (SELECT S.voucher_no FROM sk0010 S where voucher_type = '502' ) T7
-            ON T.voucher_no1 = T7.voucher_no
-            <where>
-                store_cd IN
-                <foreach item="store" index="index" collection="stores"
-                         open="(" separator="," close=")">
-                    #{store,jdbcType=VARCHAR}
+            <if test="storeCdTo != null and storeCdTo != ''">
+                AND lower(store_cd1) like lower(CONCAT('%',#{storeCdTo,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="reviewSts != -1">
+                AND review_status  = #{reviewSts,jdbcType=INTEGER}
+            </if>
+            <if test="voucherType != null and voucherType != ''">
+                AND voucher_type  = #{voucherType,jdbcType=VARCHAR}
+            </if>
+            <if test="upload != null and upload != ''">
+                AND upload_flg  = #{upload,jdbcType=VARCHAR}
+            </if>
+            <if test="voucherStartDate != null and voucherStartDate != ''">
+                AND voucher_date >= #{voucherStartDate,jdbcType=VARCHAR}
+            </if>
+            <if test="voucherEndDate != null and voucherEndDate != ''">
+                AND #{voucherEndDate,jdbcType=VARCHAR} >= voucher_date
+            </if>
+            <if test="types != null and types.size > 0">
+                AND voucher_type IN
+                <foreach collection="types" item="item" open="(" separator="," close=")">
+                    #{item,jdbcType=VARCHAR}
                 </foreach>
-                <if test="voucherNo != null and voucherNo != ''">
-                    AND lower(T.voucher_no) like lower(CONCAT('%',#{voucherNo,jdbcType=VARCHAR},'%'))
-                </if>
-                <if test="voucherNo1 != null and voucherNo1 != ''">
-                    AND lower(voucher_no1) like lower(CONCAT('%',#{voucherNo1,jdbcType=VARCHAR},'%'))
-                </if>
-                <if test="storeCdTo != null and storeCdTo != ''">
-                    AND store_cd1 = #{storeCdTo,jdbcType=VARCHAR}
-                </if>
-                <if test="reviewSts != -1">
-                    AND review_status  = #{reviewSts,jdbcType=INTEGER}
-                </if>
-                <if test="voucherType != null and voucherType != ''">
-                    AND voucher_type  = #{voucherType,jdbcType=VARCHAR}
-                </if>
-                <if test="upload != null and upload != ''">
-                    AND upload_flg  = #{upload,jdbcType=VARCHAR}
-                </if>
-                <if test="voucherStartDate != null and voucherStartDate != ''">
-                    AND voucher_date >= #{voucherStartDate,jdbcType=VARCHAR}
-                </if>
-                <if test="voucherEndDate != null and voucherEndDate != ''">
-                    AND #{voucherEndDate,jdbcType=VARCHAR} >= voucher_date
-                </if>
-                <if test="types != null and types.size > 0">
-                    AND voucher_type IN
-                    <foreach collection="types" item="item" open="(" separator="," close=")">
-                        #{item,jdbcType=VARCHAR}
-                    </foreach>
-                </if>
-            </where>
-            ORDER BY voucher_date DESC
-            <if test="flg">
-                LIMIT ${rows} OFFSET ${limitStart}
             </if>
-        </select>
+            <if test="amCode != null and amCode != ''">
+                AND  ofc=#{amCode,jdbcType=VARCHAR}
+            </if>
+            <if test="omCode != null and omCode != ''">
+                AND om=#{omCode,jdbcType=VARCHAR}
+            </if>
+            <if test="ocCode != null and ocCode != ''">
+                AND oc= #{ocCode,jdbcType=VARCHAR}
+            </if>
+        <if test="am != null and am != ''">
+            AND T4.ofc = #{am,jdbcType=VARCHAR}
+        </if>
+        ORDER BY voucher_date DESC
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
 
-        <select id="selectCountByTypeInCondition" resultType="INT" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
-            SELECT
-            COUNT(*)
-            FROM (
-            SELECT * FROM sk0010 S
-            INNER JOIN(
-            SELECT DISTINCT
-            O.store_cd AS temp2,
-            O.voucher_no AS temp3,
-            O.voucher_type AS temp4,
-            O.voucher_date AS temp5,
-            O.store_cd1 AS temp6
-            FROM sk0020 O, MA1100 O1
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN O1.effective_start_date AND O1.effective_end_date
-            AND O.article_id = O1.article_id
-            <if test="itemInfo != null and itemInfo != ''">
-                AND (
-                lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                )
+    <select id="selectByTypeInCondition" resultMap="GetListMap" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
+        SELECT
+        T.store_cd,
+        T.voucher_no,
+        T.voucher_type,
+        T.voucher_date,
+        T.store_cd1,
+        T.voucher_no1,
+        T.voucher_sts,
+        T.remark,
+        T.tax_rate,
+        T.voucher_amt_notax,
+        T.voucher_tax,
+        T.voucher_amt,
+        T.upload_flg,
+        T.upload_date,
+        CONCAT(T.create_ymd,T.create_hms) AS create_ymd,
+        T.review_status,
+        T2.code_name AS review_sts_name,
+        T3.code_name AS upload_flg_name,
+        CONCAT(T.store_cd,' ',T4.store_name) AS store_name,
+        CONCAT(T.store_cd1,' ',T5.store_name) AS store_name_1,
+        T6.emp_name AS create_user_name
+        FROM (
+        SELECT * FROM sk0010 S
+        INNER JOIN(
+        SELECT DISTINCT
+        O.store_cd AS temp2,
+        O.voucher_no AS temp3,
+        O.voucher_type AS temp4,
+        O.voucher_date AS temp5,
+        O.store_cd1 AS temp6
+        FROM sk0020 O, MA1100 O1
+        WHERE O.article_id = O1.article_id
+        <if test="itemInfo != null and itemInfo != ''">
+            AND (
+            lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        <if test="reason != null and reason != ''">
+            AND O.adjust_reason = #{reason,jdbcType=VARCHAR}
+        </if>
+        <if test="startQty != null">
+            AND (O.qty2-O.qty1) >= #{startQty}
+        </if>
+        <if test="endQty != null">
+            AND #{endQty} >= (O.qty2-O.qty1)
+        </if>
+        ) S1
+        ON S.store_cd = S1.temp2
+        AND S.voucher_no = S1.temp3
+        AND S.voucher_type = S1.temp4
+        AND S.voucher_date = S1.temp5
+        AND S.store_cd1 = S1.temp6
+        ) T
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
+        ) T2
+        ON CAST(T.review_status AS VARCHAR) = T2.code_value
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00230'
+        ) T3
+        ON T.upload_flg = T3.code_value
+        LEFT JOIN (
+        SELECT
+        store_cd AS temp0, store_name
+        FROM MA1000
+        ) T4
+        ON T.store_cd = T4.temp0
+        LEFT JOIN (
+        SELECT
+        store_cd AS temp1, store_name
+        FROM MA1000
+        ) T5
+        ON T.store_cd1 = T5.temp1
+        LEFT JOIN (
+        SELECT emp_num_id, emp_name FROM ma4200
+        ) T6
+        ON T.create_user_id = T6.emp_num_id
+        inner join (SELECT S.voucher_no FROM sk0010 S where voucher_type = '502' ) T7
+        ON T.voucher_no1 = T7.voucher_no
+        <where>
+            store_cd IN
+            <foreach item="store" index="index" collection="stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            <if test="voucherNo != null and voucherNo != ''">
+                AND lower(T.voucher_no) like lower(CONCAT('%',#{voucherNo,jdbcType=VARCHAR},'%'))
             </if>
-            <if test="reason != null and reason != ''">
-                AND O.adjust_reason = #{reason,jdbcType=VARCHAR}
+            <if test="voucherNo1 != null and voucherNo1 != ''">
+                AND lower(voucher_no1) like lower(CONCAT('%',#{voucherNo1,jdbcType=VARCHAR},'%'))
             </if>
-            <if test="startQty != null">
-                AND (O.qty2-O.qty1) >= #{startQty}
+            <if test="storeCdTo != null and storeCdTo != ''">
+                AND store_cd1 = #{storeCdTo,jdbcType=VARCHAR}
             </if>
-            <if test="endQty != null">
-                AND #{endQty} >= (O.qty2-O.qty1)
+            <if test="reviewSts != -1">
+                AND review_status  = #{reviewSts,jdbcType=INTEGER}
             </if>
-            ) S1
-            ON S.store_cd = S1.temp2
-            AND S.voucher_no = S1.temp3
-            AND S.voucher_type = S1.temp4
-            AND S.voucher_date = S1.temp5
-            AND S.store_cd1 = S1.temp6
-            ) T
-            LEFT JOIN(
-            SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
-            ) T2
-            ON CAST(T.review_status AS VARCHAR) = T2.code_value
-            LEFT JOIN(
-            SELECT code_value,code_name FROM cm9010 WHERE code_type = '00230'
-            ) T3
-            ON T.upload_flg = T3.code_value
-            LEFT JOIN (
-            SELECT
-            store_cd AS temp0, store_name
-            FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN effective_start_date AND effective_end_date
-            ) T4
-            ON T.store_cd = T4.temp0
-            LEFT JOIN (
-            SELECT
-            store_cd AS temp1, store_name
-            FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN effective_start_date AND effective_end_date
-            ) T5
-            ON T.store_cd1 = T5.temp1
-            LEFT JOIN (
-            SELECT emp_num_id, emp_name FROM ma4200
-            ) T6
-            ON T.create_user_id = T6.emp_num_id
-            inner join (SELECT S.voucher_no FROM sk0010 S where voucher_type = '502' ) T7
-            ON T.voucher_no1 = T7.voucher_no
-            <where>
-                store_cd IN
-                <foreach item="store" index="index" collection="stores"
-                         open="(" separator="," close=")">
-                    #{store,jdbcType=VARCHAR}
+            <if test="voucherType != null and voucherType != ''">
+                AND voucher_type  = #{voucherType,jdbcType=VARCHAR}
+            </if>
+            <if test="upload != null and upload != ''">
+                AND upload_flg  = #{upload,jdbcType=VARCHAR}
+            </if>
+            <if test="voucherStartDate != null and voucherStartDate != ''">
+                AND voucher_date >= #{voucherStartDate,jdbcType=VARCHAR}
+            </if>
+            <if test="voucherEndDate != null and voucherEndDate != ''">
+                AND #{voucherEndDate,jdbcType=VARCHAR} >= voucher_date
+            </if>
+            <if test="types != null and types.size > 0">
+                AND voucher_type IN
+                <foreach collection="types" item="item" open="(" separator="," close=")">
+                    #{item,jdbcType=VARCHAR}
                 </foreach>
-                <if test="voucherNo != null and voucherNo != ''">
-                    AND lower(T.voucher_no) like lower(CONCAT('%',#{voucherNo,jdbcType=VARCHAR},'%'))
-                </if>
-                <if test="voucherNo1 != null and voucherNo1 != ''">
-                    AND lower(voucher_no1) like lower(CONCAT('%',#{voucherNo1,jdbcType=VARCHAR},'%'))
-                </if>
-                <if test="storeCdTo != null and storeCdTo != ''">
-                    AND store_cd1 = #{storeCdTo,jdbcType=VARCHAR}
-                </if>
-                <if test="reviewSts != -1">
-                    AND review_status  = #{reviewSts,jdbcType=INTEGER}
-                </if>
-                <if test="voucherType != null and voucherType != ''">
-                    AND voucher_type  = #{voucherType,jdbcType=VARCHAR}
-                </if>
-                <if test="upload != null and upload != ''">
-                    AND upload_flg  = #{upload,jdbcType=VARCHAR}
-                </if>
-                <if test="voucherStartDate != null and voucherStartDate != ''">
-                    AND voucher_date >= #{voucherStartDate,jdbcType=VARCHAR}
-                </if>
-                <if test="voucherEndDate != null and voucherEndDate != ''">
-                    AND #{voucherEndDate,jdbcType=VARCHAR} >= voucher_date
-                </if>
-                <if test="types != null and types.size > 0">
-                    AND voucher_type IN
-                    <foreach collection="types" item="item" open="(" separator="," close=")">
-                        #{item,jdbcType=VARCHAR}
-                    </foreach>
-                </if>
-            </where>
-        </select>
-
-        <select id="selectCountByTypeCondition" resultType="INT" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
-            SELECT COUNT(1) FROM(
-            SELECT * FROM sk0010 S
-                INNER JOIN(
-                SELECT DISTINCT
-                O.store_cd AS temp2,
-                O.voucher_no AS temp3,
-                O.voucher_type AS temp4,
-                O.voucher_date AS temp5,
-                O.store_cd1 AS temp6
-                FROM sk0020 O, MA1100 O1
-                WHERE #{businessDate,jdbcType=VARCHAR}
-                BETWEEN O1.effective_start_date AND O1.effective_end_date
-                AND O.article_id = O1.article_id
-                <if test="itemInfo != null and itemInfo != ''">
-                    AND (
-                    lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                    OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                    OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                    )
-                </if>
-            <if test="generalReason != null and generalReason != ''">
-                AND O.adjust_reason in (select detailed_level_cd from ma8360 where general_level_cd = #{generalReason,jdbcType=VARCHAR})
             </if>
-                ) S1
-                ON S.store_cd = S1.temp2
-                AND S.voucher_no = S1.temp3
-                AND S.voucher_type = S1.temp4
-                AND S.voucher_date = S1.temp5
-                AND S.store_cd1 = S1.temp6
-            ) T
-            LEFT JOIN(
-            SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
-            ) T2
-            ON CAST(T.review_status AS VARCHAR) = T2.code_value
-            LEFT JOIN(
-            SELECT code_value,code_name FROM cm9010 WHERE code_type = '00230'
-            ) T3
-            ON T.upload_flg = T3.code_value
-            LEFT JOIN (
-            SELECT
-            store_cd AS temp0, store_name, ofc
-            FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN effective_start_date AND effective_end_date
-            ) T4
-            ON T.store_cd = T4.temp0
-            LEFT JOIN (
-            SELECT
-            store_cd AS temp1, store_name
-            FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN effective_start_date AND effective_end_date
-            ) T5
-            ON T.store_cd1 = T5.temp1
-            LEFT JOIN (
-            SELECT emp_num_id, emp_name FROM ma4200
-            ) T6
-            ON T.create_user_id = T6.emp_num_id
-            <include refid="selectCondition"></include>
-        </select>
+        </where>
+        ORDER BY voucher_date DESC
+        <if test="flg">
+            LIMIT ${rows} OFFSET ${limitStart}
+        </if>
+    </select>
 
-        <select id="selectItemInfoByCode" resultMap="ReItemInfo">
+    <select id="selectCountByTypeInCondition" resultType="INT" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
+        SELECT
+        COUNT(*)
+        FROM (
+        SELECT * FROM sk0010 S
+        INNER JOIN(
+        SELECT DISTINCT
+        O.store_cd AS temp2,
+        O.voucher_no AS temp3,
+        O.voucher_type AS temp4,
+        O.voucher_date AS temp5,
+        O.store_cd1 AS temp6
+        FROM sk0020 O, MA1100 O1
+        WHERE O.article_id = O1.article_id
+        <if test="itemInfo != null and itemInfo != ''">
+            AND (
+            lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        <if test="reason != null and reason != ''">
+            AND O.adjust_reason = #{reason,jdbcType=VARCHAR}
+        </if>
+        <if test="startQty != null">
+            AND (O.qty2-O.qty1) >= #{startQty}
+        </if>
+        <if test="endQty != null">
+            AND #{endQty} >= (O.qty2-O.qty1)
+        </if>
+        ) S1
+        ON S.store_cd = S1.temp2
+        AND S.voucher_no = S1.temp3
+        AND S.voucher_type = S1.temp4
+        AND S.voucher_date = S1.temp5
+        AND S.store_cd1 = S1.temp6
+        ) T
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
+        ) T2
+        ON CAST(T.review_status AS VARCHAR) = T2.code_value
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00230'
+        ) T3
+        ON T.upload_flg = T3.code_value
+        LEFT JOIN (
+        SELECT
+        store_cd AS temp0, store_name
+        FROM MA1000
+        ) T4
+        ON T.store_cd = T4.temp0
+        LEFT JOIN (
+        SELECT
+        store_cd AS temp1, store_name
+        FROM MA1000
+        ) T5
+        ON T.store_cd1 = T5.temp1
+        LEFT JOIN (
+        SELECT emp_num_id, emp_name FROM ma4200
+        ) T6
+        ON T.create_user_id = T6.emp_num_id
+        inner join (SELECT S.voucher_no FROM sk0010 S where voucher_type = '502' ) T7
+        ON T.voucher_no1 = T7.voucher_no
+        <where>
+            store_cd IN
+            <foreach item="store" index="index" collection="stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            <if test="voucherNo != null and voucherNo != ''">
+                AND lower(T.voucher_no) like lower(CONCAT('%',#{voucherNo,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="voucherNo1 != null and voucherNo1 != ''">
+                AND lower(voucher_no1) like lower(CONCAT('%',#{voucherNo1,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="storeCdTo != null and storeCdTo != ''">
+                AND store_cd1 = #{storeCdTo,jdbcType=VARCHAR}
+            </if>
+            <if test="reviewSts != -1">
+                AND review_status  = #{reviewSts,jdbcType=INTEGER}
+            </if>
+            <if test="voucherType != null and voucherType != ''">
+                AND voucher_type  = #{voucherType,jdbcType=VARCHAR}
+            </if>
+            <if test="upload != null and upload != ''">
+                AND upload_flg  = #{upload,jdbcType=VARCHAR}
+            </if>
+            <if test="voucherStartDate != null and voucherStartDate != ''">
+                AND voucher_date >= #{voucherStartDate,jdbcType=VARCHAR}
+            </if>
+            <if test="voucherEndDate != null and voucherEndDate != ''">
+                AND #{voucherEndDate,jdbcType=VARCHAR} >= voucher_date
+            </if>
+            <if test="types != null and types.size > 0">
+                AND voucher_type IN
+                <foreach collection="types" item="item" open="(" separator="," close=")">
+                    #{item,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectCountByTypeCondition" resultType="INT" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
+        SELECT COUNT(1) FROM(
+        SELECT * FROM sk0010 S
+        INNER JOIN(
+        SELECT DISTINCT
+        O.store_cd AS temp2,
+        O.voucher_no AS temp3,
+        O.voucher_type AS temp4,
+        O.voucher_date AS temp5,
+        O.store_cd1 AS temp6
+        FROM sk0020 O, MA1100 O1
+        WHERE  O.article_id = O1.article_id
+        <if test="itemInfo != null and itemInfo != ''">
+            AND (
+            lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        <if test="generalReason != null and generalReason != ''">
+            AND O.adjust_reason in (select detailed_level_cd from ma8360 where general_level_cd = #{generalReason,jdbcType=VARCHAR})
+        </if>
+        ) S1
+        ON S.store_cd = S1.temp2
+        AND S.voucher_no = S1.temp3
+        AND S.voucher_type = S1.temp4
+        AND S.voucher_date = S1.temp5
+        AND S.store_cd1 = S1.temp6
+        ) T
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
+        ) T2
+        ON CAST(T.review_status AS VARCHAR) = T2.code_value
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00230'
+        ) T3
+        ON T.upload_flg = T3.code_value
+        LEFT JOIN (
+        SELECT
+        store_cd AS temp0, store_name, ofc
+        FROM MA1000
+        ) T4
+        ON T.store_cd = T4.temp0
+        LEFT JOIN (
+        SELECT
+        store_cd AS temp1, store_name
+        FROM MA1000
+        ) T5
+        ON T.store_cd1 = T5.temp1
+        LEFT JOIN (
+        SELECT emp_num_id, emp_name FROM ma4200
+        ) T6
+        ON T.create_user_id = T6.emp_num_id
+        where
+            (store_cd IN
+            <foreach item="store" index="index" collection="stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            or store_cd1 in
+            <foreach item="store" index="index" collection="stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>)
+            <if test="voucherNo != null and voucherNo != ''">
+                AND lower(voucher_no) like lower(CONCAT('%',#{voucherNo,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="voucherNo1 != null and voucherNo1 != ''">
+                AND lower(voucher_no1) like lower(CONCAT('%',#{voucherNo1,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="storeCdTo != null and storeCdTo != ''">
+                AND lower(store_cd1) like lower(CONCAT('%',#{storeCdTo,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="reviewSts != -1">
+                AND review_status  = #{reviewSts,jdbcType=INTEGER}
+            </if>
+            <if test="voucherType != null and voucherType != ''">
+                AND voucher_type  = #{voucherType,jdbcType=VARCHAR}
+            </if>
+            <if test="upload != null and upload != ''">
+                AND upload_flg  = #{upload,jdbcType=VARCHAR}
+            </if>
+            <if test="voucherStartDate != null and voucherStartDate != ''">
+                AND voucher_date >= #{voucherStartDate,jdbcType=VARCHAR}
+            </if>
+            <if test="voucherEndDate != null and voucherEndDate != ''">
+                AND #{voucherEndDate,jdbcType=VARCHAR} >= voucher_date
+            </if>
+            <if test="types != null and types.size > 0">
+                AND voucher_type IN
+                <foreach collection="types" item="item" open="(" separator="," close=")">
+                    #{item,jdbcType=VARCHAR}
+                </foreach>
+            </if>
+            <if test="amCode != null and amCode != ''">
+                AND  ofc=#{amCode,jdbcType=VARCHAR}
+            </if>
+            <if test="omCode != null and omCode != ''">
+                AND om=#{omCode,jdbcType=VARCHAR}
+            </if>
+            <if test="ocCode != null and ocCode != ''">
+                AND oc= #{ocCode,jdbcType=VARCHAR}
+            </if>
+    </select>
+
+    <select id="selectItemInfoByCode" resultMap="ReItemInfo">
             SELECT
                 T.*, T1.spec, T1.sales_unit_id, T2.default_barcode barcode, coalesce(T2.base_order_price,0) base_order_price
             FROM (
@@ -792,12 +860,11 @@
             LEFT JOIN (
                 SELECT article_id, effective_start_date, spec, sales_unit_id FROM MA1100
                 WHERE article_id = #{itemCode,jdbcType=VARCHAR}
-                AND #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
             ) T1
             ON T.article_id = T1.article_id
             LEFT JOIN (
                 SELECT distinct article_id,vendor_id,default_barcode,base_order_price FROM MA1110 WHERE article_id=#{itemCode,jdbcType=VARCHAR}
-                AND (#{businessDate,jdbcType=VARCHAR} between effective_start_date and effective_end_date)
+
                 and structure_cd = (
         SELECT
         admin_structure_cd FROM MA0020
@@ -806,28 +873,27 @@
             ON T1.article_id = T2.article_id AND T2.vendor_id = T.major_vendor_id
         </select>
 
-        <select id="selectStoreByCode" resultMap="ReStoreInfo">
+    <select id="selectStoreByCode" resultMap="ReStoreInfo">
             select store_cd, store_name from ma1000
     --         modify by lch 20200601 start
              where store_cd like CONCAT('%',#{storeCd,jdbcType=VARCHAR},'%')
     --         modify by lch 20200601 end
-            and #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
         </select>
 
-        <select id="getStoreList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
-            select store_cd k, CONCAT(store_cd,' ',store_name,store_name_en) v
-            from ma1000
-            where #{businessDate,jdbcType=VARCHAR} BETWEEN effective_start_date AND effective_end_date
-            <if test="v!=null and v!=''">
-                AND (
-                lower(store_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-                OR lower(store_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-                OR lower(store_name_en) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-                )
-            </if>
-        </select>
+    <select id="getStoreList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select store_cd k, CONCAT(store_cd,' ',store_name,store_name_en) v
+        from ma1000
+        where 1 = 1
+        <if test="v!=null and v!=''">
+            AND (
+            lower(store_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(store_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(store_name_en) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+    </select>
 
-        <select id="getItemList1" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+    <select id="getItemList1" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
          select distinct a.k k, a.v v FROM
             (select article_id k, CONCAT(article_id,' ',article_name) v from ma8040
             where structure_cd = (
@@ -868,7 +934,7 @@
             )
             ;
         </select>
-        <select id="getItemList2" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+    <select id="getItemList2" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
             SELECT DISTINCT
             a.k k,
             a.inventory_item,
@@ -937,7 +1003,7 @@
             );
 
         </select>
-        <select id="getItemList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+    <select id="getItemList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
            SELECT
             distinct
             A.inventory_item,
@@ -967,7 +1033,57 @@
             AND #{businessDate,jdbcType=VARCHAR} BETWEEN ma1200.effective_start_date
             AND ma1200.effective_end_date )
            </select>
-       <select id="getInventoryItemList1" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+
+    <select id="getMa1172OutItemList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT DISTINCT
+        a.out_article_id  k,
+        CONCAT(b.article_id,' ',b.article_name) v
+        FROM
+        ma1172 a
+        LEFT JOIN ma1100 b ON a.out_article_id = b.article_id
+        LEFT JOIN ma1110 c ON a.out_article_id = c.article_id
+        left join ma2240 d on d.vendor_id=c.vendor_id
+        left join  sk0000_today e
+        on a.out_article_id=e.article_id
+        AND e.store_cd=#{storeCd}
+        where 1=1
+        <!-- AND e.effective_date = #{businessDate,jdbcType=VARCHAR}-->
+        <if test=" v !='' and v !=null ">
+            and (
+            lower( a.out_article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(c.default_barcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(b.article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        and d.store_cd=#{storeCd}
+    </select>
+    <select id="getMa1172InItemList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT DISTINCT
+        a.in_article_id  k,
+        a.quantity hidek,
+        CONCAT( a.in_article_id,' ',b.article_name) v
+        FROM
+        ma1172 a
+        LEFT JOIN ma1100 b ON a.in_article_id = b.article_id
+        LEFT JOIN ma1110 c ON a.in_article_id = c.article_id
+        left join ma2240 d on d.vendor_id=c.vendor_id
+        left join  sk0000_today e
+        on a.in_article_id=e.article_id
+        AND e.store_cd=#{storeCd}
+        where 1=1
+    <!-- AND e.effective_date = #{businessDate,jdbcType=VARCHAR}-->
+        <if test=" v !='' and v !=null ">
+            and (
+            lower( a.in_article_id) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(c.default_barcode) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(b.article_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        and d.store_cd=#{storeCd}
+        and a.out_article_id=#{outArticleId}
+    </select>
+
+    <select id="getInventoryItemList1" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
         select distinct a.k k, a.v v FROM
             (select article_id k, CONCAT(article_id,' ',article_name) v from ma8040
             where structure_cd = (
@@ -1015,7 +1131,7 @@
             )
             ;
         </select>
-        <select id="getInventoryItemList2" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+    <select id="getInventoryItemList2" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
             SELECT DISTINCT A
             .K K,
             A.v v,
@@ -1082,7 +1198,7 @@
             )
             AND s.article_id NOT IN ( SELECT ma1170.formula_id FROM ma1170 WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN ma1170.effective_start_date AND ma1170.effective_end_date );
         </select>
-       <select id="getInventoryItemList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+    <select id="getInventoryItemList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
             SELECT
             distinct
             A.inventory_item,
@@ -1114,7 +1230,7 @@
             AND C.article_id NOT IN (SELECT ma1170.formula_id FROM ma1170 WHERE #{businessDate,jdbcType=VARCHAR} BETWEEN ma1170.effective_start_date AND ma1170.effective_end_date )
 
   </select>
-        <insert id="insertSk0010" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0010DTO" >
+    <insert id="insertSk0010" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0010DTO" >
             insert into sk0010 (
                 store_cd, voucher_no, voucher_type, voucher_date, store_cd1, voucher_no1,
                 voucher_sts, remark, tax_rate, voucher_amt_notax, voucher_tax, voucher_amt,
@@ -1130,14 +1246,14 @@
             )
         </insert>
 
-        <update id="updateActualQty">
+    <update id="updateActualQty">
             update sk0020 set actual_qty = #{actualQty,jdbcType=NUMERIC}
             where voucher_no = #{voucherNo,jdbcType=VARCHAR} and store_cd = #{storeCd,jdbcType=CHAR}
             and article_id = #{articleId,jdbcType=VARCHAR}
         </update>
 
 
-        <update id="updateSk0010">
+    <update id="updateSk0010">
             update sk0010 set
             remark = #{remark,jdbcType=VARCHAR},
             update_user_id = #{commonDTO.updateUserId,jdbcType=VARCHAR},
@@ -1146,7 +1262,7 @@
             where voucher_no = #{voucherNo,jdbcType=VARCHAR}
         </update>
 
-        <insert id="insertSk0020" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO" >
+    <insert id="insertSk0020" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO" >
             insert into sk0020 (
                 store_cd, voucher_no, voucher_type, voucher_date, article_id, store_cd1,
                 adjust_reason, barcode, sales_unit_id, qty1, qty2, price,
@@ -1168,7 +1284,7 @@
             )
         </insert>
 
-        <select id="selectListSk0020" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO" resultMap="ReSk0020">
+    <select id="selectListSk0020" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO" resultMap="ReSk0020">
             select
                 T.*,
                 concat(T1.article_id,' ',T1.article_name) article_name,
@@ -1187,7 +1303,7 @@
             left join (
                 select article_id, effective_start_date, effective_end_date, article_name, spec from ma1100
             ) T1
-            on T.article_id = T1.article_id and T.voucher_date between T1.effective_start_date and T1.effective_end_date
+            on T.article_id = T1.article_id
             left join (
                 select code_value, code_name from cm9010 where code_type = #{codeType,jdbcType=VARCHAR}
             ) T3
@@ -1203,10 +1319,11 @@
             on T5.voucher_no = T.expenditure_code
             order by display_seq
         </select>
-        <select id="selectListSk0020OutStore" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO" resultMap="ReSk0020">
+    <select id="selectListSk0020OutStore" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO" resultMap="ReSk0020">
             select
                 T.*,
                 concat(T1.article_id,' ',T1.article_name) article_name,
+                T1.article_name article_name1,
                 T1.spec, concat(T3.code_value,' ',T3.code_name) as reason,
                 concat(T4.code_value,' ',T4.code_name) as differ_reasons,
                 T5.voucher_no as expenditure_code_text
@@ -1222,7 +1339,7 @@
             left join (
                 select article_id, effective_start_date, effective_end_date, article_name, spec from ma1100
             ) T1
-            on T.article_id = T1.article_id and T.voucher_date between T1.effective_start_date and T1.effective_end_date
+            on T.article_id = T1.article_id
             left join (
                 select code_value, code_name from cm9010 where code_type = '00235'
             ) T3
@@ -1240,7 +1357,7 @@
             order by display_seq
         </select>
 
-        <select id="selectDetailSk0020" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO" resultMap="ReSk0020">
+    <select id="selectDetailSk0020" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO" resultMap="ReSk0020">
             select
                 T.*,
                 concat(T1.article_id,' ',T1.article_name) article_name,
@@ -1257,7 +1374,7 @@
             left join (
                 select article_id, effective_start_date, effective_end_date, article_name, spec from ma1100
             ) T1
-            on T.article_id = T1.article_id and T.voucher_date between T1.effective_start_date and T1.effective_end_date
+            on T.article_id = T1.article_id
             left join (
                 select code_value, code_name from cm9010 where code_type = '00235'
             ) T3
@@ -1268,7 +1385,7 @@
             on T.different_reasons = T4.code_value
             order by display_seq
         </select>
-          <select id="selectSumArticle" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO"  resultType="INT">
+    <select id="selectSumArticle" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO"  resultType="INT">
               select  COUNT(distinct A.article_id) FROM
               (select
                 T.*,
@@ -1288,7 +1405,7 @@
             left join (
                 select article_id, effective_start_date, effective_end_date, article_name, spec from ma1100
             ) T1
-            on T.article_id = T1.article_id and T.voucher_date between T1.effective_start_date and T1.effective_end_date
+            on T.article_id = T1.article_id
             left join (
                 select code_value, code_name from cm9010 where code_type = '00235'
             ) T3
@@ -1304,7 +1421,7 @@
             on T5.voucher_no = T.expenditure_code
             order by display_seq) AS A
         </select>
-        <delete id="deleteSk0020ByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO">
+    <delete id="deleteSk0020ByKey" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO">
             delete from sk0020
             where store_cd = #{storeCd,jdbcType=CHAR}
             and voucher_no = #{voucherNo,jdbcType=VARCHAR}
@@ -1312,47 +1429,47 @@
             and voucher_date = #{voucherDate,jdbcType=CHAR}
             and store_cd1 = #{storeCd1,jdbcType=CHAR}
         </delete>
-         <select id="getSouthOrNouth" parameterType="String" resultMap="Ma1000Dto">
+    <select id="getSouthOrNouth" parameterType="String" resultMap="Ma1000Dto">
            select zo_cd from ma1000 where store_cd=#{storeCd}
         </select>
-       <select id="getOutStoreList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
-       SELECT
-	    MA0020.structure_cd K,
-	    CONCAT ( MA1000.store_cd, ' ', MA1000.store_name) AS v
-          FROM
-	    MA0020,
-	    MA1000
-         WHERE
-	MA0020.structure_cd = MA1000.store_cd
-	AND MA0020.effective_sts = '10'
-	AND LEVEL = '3'
-	AND admin_structure_cd IN (
-       SELECT
-	structure_cd
+    <select id="getOutStoreList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT
+        MA0020.structure_cd K,
+        CONCAT ( MA1000.store_cd, ' ', MA1000.store_name) AS v
         FROM
-	MA0020
-       WHERE
-	admin_structure_cd IN (
-      SELECT
-	structure_cd
-       FROM
-	MA0020
-     WHERE
-	admin_structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd =#{zoCd} )
-	AND LEVEL = '1'
-	AND effective_sts = '10'
-	)
-	AND LEVEL = '2'
-	AND effective_sts = '10'
-	)
-      <if test="v!=null and v!=''">
-               AND (
-               lower(MA1000.store_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-               OR lower(MA1000.store_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-               OR lower(MA1000.store_name_en) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-               )
-           </if>
-        </select>
+        MA0020,
+        MA1000
+        WHERE
+        MA0020.structure_cd = MA1000.store_cd
+        AND MA0020.effective_sts = '10'
+        AND LEVEL = '3'
+        AND admin_structure_cd IN (
+        SELECT
+        structure_cd
+        FROM
+        MA0020
+        WHERE
+        admin_structure_cd IN (
+        SELECT
+        structure_cd
+        FROM
+        MA0020
+        WHERE
+        admin_structure_cd = ( SELECT admin_structure_cd FROM ma0020 WHERE structure_cd =#{zoCd} )
+        AND LEVEL = '1'
+        AND effective_sts = '10'
+        )
+        AND LEVEL = '2'
+        AND effective_sts = '10'
+        )
+        <if test="v!=null and v!=''">
+            AND (
+            lower(MA1000.store_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(MA1000.store_name) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(MA1000.store_name_en) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+    </select>
 
     <select id="getStoreListByInStore" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
         SELECT distinct
@@ -1382,18 +1499,18 @@
             AND article_id = #{itemId,jdbcType=VARCHAR}
         </select>
 
-        <select id="getDOCList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
-            SELECT voucher_no k ,voucher_no v
-            FROM
-            sk0010 S WHERE voucher_type = '502'
-            AND
-            store_cd = #{storeCd,jdbcType=VARCHAR} AND store_cd1 = #{storeCd1,jdbcType=VARCHAR}
-            <if test="v!=null and v!=''">
+    <select id="getDOCList" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        SELECT voucher_no k ,voucher_no v
+        FROM
+        sk0010 S WHERE voucher_type = '502'
+        AND
+        store_cd = #{storeCd,jdbcType=VARCHAR} AND store_cd1 = #{storeCd1,jdbcType=VARCHAR}
+        <if test="v!=null and v!=''">
             and  lower(voucher_no) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-            </if>
-        </select>
+        </if>
+    </select>
 
-        <select id="existsDOC" resultType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersGridDTO">
+    <select id="existsDOC" resultType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersGridDTO">
         SELECT T.voucher_no1
         FROM sk0010 T
         INNER JOIN ( SELECT voucher_no FROM sk0010 WHERE voucher_type = '502' ) T7 ON T.voucher_no1 = T7.voucher_no
@@ -1401,7 +1518,7 @@
         AND T.store_cd1 = #{storeCd,jdbcType=VARCHAR} AND T.store_cd = #{storeCd1,jdbcType=VARCHAR}
         </select>
 
-        <select id="getApprovedList" resultType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersGridDTO">
+    <select id="getApprovedList" resultType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersGridDTO">
         SELECT voucher_no
         FROM
         sk0010 S WHERE voucher_type = '502'
@@ -1409,17 +1526,17 @@
         AND store_cd = #{storeCd,jdbcType=VARCHAR} AND store_cd1 = #{storeCd1,jdbcType=VARCHAR}
         </select>
 
-        <update id="updateQty1" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO">
+    <update id="updateQty1" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO">
             update sk0020 set qty1 = #{dto.qty1,jdbcType=NUMERIC} where voucher_no = #{dto.voucherNo,jdbcType=VARCHAR}
             and voucher_type = '502' and article_id = #{dto.articleId,jdbcType=VARCHAR};
         </update>
 
-        <update id="updateDifferenceReasons" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO">
+    <update id="updateDifferenceReasons" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO">
             update sk0020 set different_reasons = #{dto.differenceReason,jdbcType=VARCHAR} where voucher_no = #{dto.voucherNo,jdbcType=VARCHAR}
             and voucher_type = '502' and article_id = #{dto.articleId,jdbcType=VARCHAR};
         </update>
 
-        <update id="updateSk0010Amt" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO">
+    <update id="updateSk0010Amt" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020DTO">
             UPDATE sk0010
             SET voucher_amt_notax = T.amt_notax,
                 voucher_tax = T.amt_tax,
@@ -1448,220 +1565,208 @@
             AND sk0010.store_cd1 = T.store_cd1
         </update>
 
-        <select id="selectItemTransfer" resultMap="GetListMap" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
-            SELECT distinct
-            T.store_cd,
-            T.voucher_no,
-            T.voucher_type,
-            T.voucher_date,
-            T.store_cd1,
-            T.voucher_no1,
-            T.voucher_sts,
-            T.remark,
-            T.tax_rate,
-            T.voucher_amt_notax,
-            T.voucher_tax,
-            T.voucher_amt,
-            T.upload_flg,
-            T.upload_date,
-            CONCAT(T.create_ymd,T.create_hms) AS create_ymd,
-            T.review_status,
-            T2.code_name AS review_sts_name,
-            T3.code_name AS upload_flg_name,
-            T4.store_name AS store_name,
-            T5.store_name AS store_name_1,
-            T6.emp_name AS create_user_name
-            FROM (
-            SELECT * FROM sk0010 S
-            INNER JOIN(
-            SELECT DISTINCT
-            O.store_cd AS temp2,
-            O.voucher_no AS temp3,
-            O.voucher_type AS temp4,
-            O.voucher_date AS temp5,
-            O.store_cd1 AS temp6
-            FROM sk0020 O, MA1100 O1
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN O1.effective_start_date AND O1.effective_end_date
-            AND O.article_id = O1.article_id
-            <if test="itemInfo != null and itemInfo != ''">
-                AND (
-                lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                )
+    <select id="selectItemTransfer" resultMap="GetListMap" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
+        SELECT distinct
+        T.store_cd,
+        T.voucher_no,
+        T.voucher_type,
+        T.voucher_date,
+        T.store_cd1,
+        T.voucher_no1,
+        T.voucher_sts,
+        T.remark,
+        T.tax_rate,
+        T.voucher_amt_notax,
+        T.voucher_tax,
+        T.voucher_amt,
+        T.upload_flg,
+        T.upload_date,
+        CONCAT(T.create_ymd,T.create_hms) AS create_ymd,
+        T.review_status,
+        T2.code_name AS review_sts_name,
+        T3.code_name AS upload_flg_name,
+        T4.store_name AS store_name,
+        T5.store_name AS store_name_1,
+        T6.emp_name AS create_user_name
+        FROM (
+        SELECT * FROM sk0010 S
+        INNER JOIN(
+        SELECT DISTINCT
+        O.store_cd AS temp2,
+        O.voucher_no AS temp3,
+        O.voucher_type AS temp4,
+        O.voucher_date AS temp5,
+        O.store_cd1 AS temp6
+        FROM sk0020 O, MA1100 O1
+        WHERE O.article_id = O1.article_id
+        <if test="itemInfo != null and itemInfo != ''">
+            AND (
+            lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        <if test="reason != null and reason != ''">
+            AND O.adjust_reason = #{reason,jdbcType=VARCHAR}
+        </if>
+        ) S1
+        ON S.store_cd = S1.temp2
+        AND S.voucher_no = S1.temp3
+        AND S.voucher_type = S1.temp4
+        AND S.voucher_date = S1.temp5
+        AND S.store_cd1 = S1.temp6
+        ) T
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
+        ) T2
+        ON CAST(T.review_status AS VARCHAR) = T2.code_value
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00230'
+        ) T3
+        ON T.upload_flg = T3.code_value
+        LEFT JOIN (
+        SELECT
+        store_cd AS temp0, store_name, ofc
+        FROM MA1000
+        ) T4
+        ON T.store_cd = T4.temp0
+        LEFT JOIN (
+        SELECT
+        store_cd AS temp1, store_name
+        FROM MA1000
+        ) T5
+        ON T.store_cd1 = T5.temp1
+        LEFT JOIN (
+        SELECT emp_num_id, emp_name FROM ma4200
+        ) T6
+        ON T.create_user_id = T6.emp_num_id
+        <where>
+            store_cd IN
+            <foreach item="store" index="index" collection="stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            AND voucher_type = '602'
+            <if test="voucherNo != null and voucherNo != ''">
+                AND lower(voucher_no) like lower(CONCAT('%',#{voucherNo,jdbcType=VARCHAR},'%'))
             </if>
-            <if test="reason != null and reason != ''">
-                AND O.adjust_reason = #{reason,jdbcType=VARCHAR}
+            <if test="reviewSts != -1">
+                AND review_status  = #{reviewSts,jdbcType=INTEGER}
             </if>
-            ) S1
-            ON S.store_cd = S1.temp2
-            AND S.voucher_no = S1.temp3
-            AND S.voucher_type = S1.temp4
-            AND S.voucher_date = S1.temp5
-            AND S.store_cd1 = S1.temp6
-            ) T
-            LEFT JOIN(
-            SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
-            ) T2
-            ON CAST(T.review_status AS VARCHAR) = T2.code_value
-            LEFT JOIN(
-            SELECT code_value,code_name FROM cm9010 WHERE code_type = '00230'
-            ) T3
-            ON T.upload_flg = T3.code_value
-            LEFT JOIN (
-            SELECT
-            store_cd AS temp0, store_name, ofc
-            FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN effective_start_date AND effective_end_date
-            ) T4
-            ON T.store_cd = T4.temp0
-            LEFT JOIN (
-            SELECT
-            store_cd AS temp1, store_name
-            FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN effective_start_date AND effective_end_date
-            ) T5
-            ON T.store_cd1 = T5.temp1
-            LEFT JOIN (
-            SELECT emp_num_id, emp_name FROM ma4200
-            ) T6
-            ON T.create_user_id = T6.emp_num_id
-            <where>
-                store_cd IN
-                <foreach item="store" index="index" collection="stores"
-                         open="(" separator="," close=")">
-                    #{store,jdbcType=VARCHAR}
+            <if test="upload != null and upload != ''">
+                AND upload_flg  = #{upload,jdbcType=VARCHAR}
+            </if>
+            <if test="voucherStartDate != null and voucherStartDate != ''">
+                AND voucher_date >= #{voucherStartDate,jdbcType=VARCHAR}
+            </if>
+            <if test="voucherEndDate != null and voucherEndDate != ''">
+                AND #{voucherEndDate,jdbcType=VARCHAR} >= voucher_date
+            </if>
+            <if test="types != null and types.size > 0">
+                AND voucher_type IN
+                <foreach collection="types" item="item" open="(" separator="," close=")">
+                    #{item,jdbcType=VARCHAR}
                 </foreach>
-                AND voucher_type = '602'
-                <if test="voucherNo != null and voucherNo != ''">
-                    AND lower(voucher_no) like lower(CONCAT('%',#{voucherNo,jdbcType=VARCHAR},'%'))
-                </if>
-                <if test="reviewSts != -1">
-                    AND review_status  = #{reviewSts,jdbcType=INTEGER}
-                </if>
-                <if test="upload != null and upload != ''">
-                    AND upload_flg  = #{upload,jdbcType=VARCHAR}
-                </if>
-                <if test="voucherStartDate != null and voucherStartDate != ''">
-                    AND voucher_date >= #{voucherStartDate,jdbcType=VARCHAR}
-                </if>
-                <if test="voucherEndDate != null and voucherEndDate != ''">
-                    AND #{voucherEndDate,jdbcType=VARCHAR} >= voucher_date
-                </if>
-                <if test="types != null and types.size > 0">
-                    AND voucher_type IN
-                    <foreach collection="types" item="item" open="(" separator="," close=")">
-                        #{item,jdbcType=VARCHAR}
-                    </foreach>
-                </if>
-
-                <if test="am != null and am != ''">
-                    AND T4.ofc = #{am,jdbcType=VARCHAR}
-                </if>
-                ORDER BY voucher_date DESC
-                <if test="flg">
-                    LIMIT ${rows} OFFSET ${limitStart}
-                </if>
-            </where>
-        </select>
-
-        <select id="selectCountItemTransfer" resultType="INT" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
-            SELECT COUNT(1) FROM(
-            SELECT * FROM sk0010 S
-            INNER JOIN(
-            SELECT DISTINCT
-            O.store_cd AS temp2,
-            O.voucher_no AS temp3,
-            O.voucher_type AS temp4,
-            O.voucher_date AS temp5,
-            O.store_cd1 AS temp6
-            FROM sk0020 O, MA1100 O1
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN O1.effective_start_date AND O1.effective_end_date
-            AND O.article_id = O1.article_id
-            <if test="itemInfo != null and itemInfo != ''">
-                AND (
-                lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
-                )
             </if>
-            <if test="reason != null and reason != ''">
-                AND O.adjust_reason = #{reason,jdbcType=VARCHAR}
+
+            <if test="am != null and am != ''">
+                AND T4.ofc = #{am,jdbcType=VARCHAR}
             </if>
-            ) S1
-            ON S.store_cd = S1.temp2
-            AND S.voucher_no = S1.temp3
-            AND S.voucher_type = S1.temp4
-            AND S.voucher_date = S1.temp5
-            AND S.store_cd1 = S1.temp6
-            ) T
-            LEFT JOIN(
-            SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
-            ) T2
-            ON CAST(T.review_status AS VARCHAR) = T2.code_value
-            LEFT JOIN(
-            SELECT code_value,code_name FROM cm9010 WHERE code_type = '00230'
-            ) T3
-            ON T.upload_flg = T3.code_value
-            LEFT JOIN (
-            SELECT
-            store_cd AS temp0, store_name, ofc
-            FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN effective_start_date AND effective_end_date
-            ) T4
-            ON T.store_cd = T4.temp0
-            LEFT JOIN (
-            SELECT
-            store_cd AS temp1, store_name
-            FROM MA1000
-            WHERE #{businessDate,jdbcType=VARCHAR}
-            BETWEEN effective_start_date AND effective_end_date
-            ) T5
-            ON T.store_cd1 = T5.temp1
-            LEFT JOIN (
-            SELECT emp_num_id, emp_name FROM ma4200
-            ) T6
-            ON T.create_user_id = T6.emp_num_id
-            <where>
-                store_cd IN
-                <foreach item="store" index="index" collection="stores"
-                         open="(" separator="," close=")">
-                    #{store,jdbcType=VARCHAR}
+            ORDER BY voucher_date DESC
+            <if test="flg">
+                LIMIT ${rows} OFFSET ${limitStart}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectCountItemTransfer" resultType="INT" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.InventoryVouchersParamDTO">
+        SELECT COUNT(1) FROM(
+        SELECT * FROM sk0010 S
+        INNER JOIN(
+        SELECT DISTINCT
+        O.store_cd AS temp2,
+        O.voucher_no AS temp3,
+        O.voucher_type AS temp4,
+        O.voucher_date AS temp5,
+        O.store_cd1 AS temp6
+        FROM sk0020 O, MA1100 O1
+        where O.article_id = O1.article_id
+        <if test="itemInfo != null and itemInfo != ''">
+            AND (
+            lower(O.article_id) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O.barcode) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            OR lower(O1.article_name) like lower(CONCAT('%',#{itemInfo,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        <if test="reason != null and reason != ''">
+            AND O.adjust_reason = #{reason,jdbcType=VARCHAR}
+        </if>
+        ) S1
+        ON S.store_cd = S1.temp2
+        AND S.voucher_no = S1.temp3
+        AND S.voucher_type = S1.temp4
+        AND S.voucher_date = S1.temp5
+        AND S.store_cd1 = S1.temp6
+        ) T
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00430'
+        ) T2
+        ON CAST(T.review_status AS VARCHAR) = T2.code_value
+        LEFT JOIN(
+        SELECT code_value,code_name FROM cm9010 WHERE code_type = '00230'
+        ) T3
+        ON T.upload_flg = T3.code_value
+        LEFT JOIN (
+        SELECT
+        store_cd AS temp0, store_name, ofc
+        FROM MA1000
+        ) T4
+        ON T.store_cd = T4.temp0
+        LEFT JOIN (
+        SELECT
+        store_cd AS temp1, store_name
+        FROM MA1000
+        ) T5
+        ON T.store_cd1 = T5.temp1
+        LEFT JOIN (
+        SELECT emp_num_id, emp_name FROM ma4200
+        ) T6
+        ON T.create_user_id = T6.emp_num_id
+        <where>
+            store_cd IN
+            <foreach item="store" index="index" collection="stores"
+                     open="(" separator="," close=")">
+                #{store,jdbcType=VARCHAR}
+            </foreach>
+            AND voucher_type = '602'
+            <if test="voucherNo != null and voucherNo != ''">
+                AND lower(voucher_no) like lower(CONCAT('%',#{voucherNo,jdbcType=VARCHAR},'%'))
+            </if>
+            <if test="reviewSts != -1">
+                AND review_status  = #{reviewSts,jdbcType=INTEGER}
+            </if>
+            <if test="upload != null and upload != ''">
+                AND upload_flg  = #{upload,jdbcType=VARCHAR}
+            </if>
+            <if test="voucherStartDate != null and voucherStartDate != ''">
+                AND voucher_date >= #{voucherStartDate,jdbcType=VARCHAR}
+            </if>
+            <if test="voucherEndDate != null and voucherEndDate != ''">
+                AND #{voucherEndDate,jdbcType=VARCHAR} >= voucher_date
+            </if>
+            <if test="types != null and types.size > 0">
+                AND voucher_type IN
+                <foreach collection="types" item="item" open="(" separator="," close=")">
+                    #{item,jdbcType=VARCHAR}
                 </foreach>
-                AND voucher_type = '602'
-                <if test="voucherNo != null and voucherNo != ''">
-                    AND lower(voucher_no) like lower(CONCAT('%',#{voucherNo,jdbcType=VARCHAR},'%'))
-                </if>
-                <if test="reviewSts != -1">
-                    AND review_status  = #{reviewSts,jdbcType=INTEGER}
-                </if>
-                <if test="upload != null and upload != ''">
-                    AND upload_flg  = #{upload,jdbcType=VARCHAR}
-                </if>
-                <if test="voucherStartDate != null and voucherStartDate != ''">
-                    AND voucher_date >= #{voucherStartDate,jdbcType=VARCHAR}
-                </if>
-                <if test="voucherEndDate != null and voucherEndDate != ''">
-                    AND #{voucherEndDate,jdbcType=VARCHAR} >= voucher_date
-                </if>
-                <if test="types != null and types.size > 0">
-                    AND voucher_type IN
-                    <foreach collection="types" item="item" open="(" separator="," close=")">
-                        #{item,jdbcType=VARCHAR}
-                    </foreach>
-                </if>
-                <if test="am != null and am != ''">
-                    AND T4.ofc = #{am,jdbcType=VARCHAR}
-                </if>
-            </where>
-        </select>
+            </if>
+            <if test="am != null and am != ''">
+                AND T4.ofc = #{am,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
 
-        <select id="InstoreListSk0020" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO" resultMap="ReSk0020">
+    <select id="InstoreListSk0020" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO" resultMap="ReSk0020">
         SELECT DISTINCT A.*, A.qty1 bqty1,
     B.barcode barcode1,
     B.article_id article_id1,
@@ -1689,7 +1794,7 @@
             left join (
                 select article_id, effective_start_date, effective_end_date, article_name, spec from ma1100
             ) T1
-            on T.article_id = T1.article_id and T.voucher_date between T1.effective_start_date and T1.effective_end_date
+            on T.article_id = T1.article_id
             left join (
                 select code_value, code_name from cm9010 where code_type = '00235'
             ) T3
@@ -1716,7 +1821,7 @@
             left join (
                 select article_id, effective_start_date, effective_end_date, article_name, spec from ma1100
             ) T1
-            on T.article_id = T1.article_id and T.voucher_date between T1.effective_start_date and T1.effective_end_date
+            on T.article_id = T1.article_id
             left join (
                 select code_value, code_name from cm9010 where code_type = '00235'
             ) T3
@@ -1729,46 +1834,46 @@
             and A.display_seq=B.display_seq
         </select>
 
-        <select id="getMa8350" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
-            select general_level_cd k,concat(general_level_cd,' ',general_level_reason)  v
-            from MA8350
-            where EFFECTIVE_STS='10'
-            <if test="v!=null and v!=''">
-                AND (
-                lower(general_level_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-                OR lower(general_level_reason) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-                )
-            </if>
-            ORDER BY general_level_cd
-        </select>
+    <select id="getMa8350" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select general_level_cd k,concat(general_level_cd,' ',general_level_reason)  v
+        from MA8350
+        where EFFECTIVE_STS='10'
+        <if test="v!=null and v!=''">
+            AND (
+            lower(general_level_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(general_level_reason) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ORDER BY general_level_cd
+    </select>
 
-        <select id="getMa8360" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
-            select detailed_level_cd k,general_level_cd hidey,concat(detailed_level_reason) v,detailed_level_cd hidek
-            from MA8360
-            where
-            1=1
-            <if test="num==0">
+    <select id="getMa8360" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select detailed_level_cd k,general_level_cd hidey,concat(detailed_level_reason) v,detailed_level_cd hidek
+        from MA8360
+        where
+        1=1
+        <if test="num==0">
             and EFFECTIVE_STS='10'
-            </if>
-            <if test="v!=null and v!=''">
-                AND (
-                lower(detailed_level_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-                OR lower(detailed_level_reason) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-                )
-            </if>
-            ORDER BY detailed_level_cd
-        </select>
-        <select id="getReasondetailAndGeneralReason" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
-            select general_level_cd k,concat(detailed_level_cd,' ',detailed_level_reason) v,detailed_level_cd hidek from ma8360   where EFFECTIVE_STS='10'
-            <if test="v!=null and v!=''">
-                AND (
-                lower(detailed_level_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-                OR lower(detailed_level_reason) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
-                )
+        </if>
+        <if test="v!=null and v!=''">
+            AND (
+            lower(detailed_level_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(detailed_level_reason) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
+        </if>
+        ORDER BY detailed_level_cd
+    </select>
+    <select id="getReasondetailAndGeneralReason" resultType="cn.com.bbut.iy.itemmaster.dto.base.AutoCompleteDTO">
+        select general_level_cd k,concat(detailed_level_cd,' ',detailed_level_reason) v,detailed_level_cd hidek from ma8360   where EFFECTIVE_STS='10'
+        <if test="v!=null and v!=''">
+            AND (
+            lower(detailed_level_cd) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            OR lower(detailed_level_reason) like lower(CONCAT('%',#{v,jdbcType=VARCHAR},'%'))
+            )
 
-           </if>
-        </select>
-        <select id="adjustDetailsList" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO" resultMap="ReSk0020">
+        </if>
+    </select>
+    <select id="adjustDetailsList" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO" resultMap="ReSk0020">
             select
                 T.*,
                 concat(T1.article_id,' ',T1.article_name) article_name,
@@ -1787,7 +1892,7 @@
             left join (
                 select article_id, effective_start_date, effective_end_date, article_name, spec from ma1100
             ) T1
-            on T.article_id = T1.article_id and T.voucher_date between T1.effective_start_date and T1.effective_end_date
+            on T.article_id = T1.article_id
             left join (
                 select detailed_level_cd, detailed_level_reason from ma8360
             ) T3
@@ -1803,7 +1908,7 @@
             on T5.voucher_no = T.expenditure_code
             order by display_seq
         </select>
-        <select id="adjustItemSKU" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO"  resultType="Integer">
+    <select id="adjustItemSKU" parameterType="cn.com.bbut.iy.itemmaster.dto.inventory.Sk0020ParamDTO"  resultType="Integer">
             SELECT  	COUNT ( DISTINCT A.article_id )   from
             (select
                T.article_id,
@@ -1823,7 +1928,7 @@
             left join (
                 select article_id, effective_start_date, effective_end_date, article_name, spec from ma1100
             ) T1
-            on T.article_id = T1.article_id and T.voucher_date between T1.effective_start_date and T1.effective_end_date
+            on T.article_id = T1.article_id
             left join (
                 select detailed_level_cd, detailed_level_reason from ma8360 where effective_sts = '10'
             ) T3
@@ -1842,21 +1947,21 @@
             order by display_seq) AS A
         </select>
 
-        <select id="getGeneralReasonDetail" resultMap="Ma8350Dto">
+    <select id="getGeneralReasonDetail" resultMap="Ma8350Dto">
         select  general_level_cd, general_level_reason from ma8350
         where
         1=1
-            <if test="generalLevelCd !=null and generalLevelCd!=''">
-             and   general_level_cd=#{generalLevelCd,jdbcType=VARCHAR}
-            </if>
-      </select>
-        <select id="getNewGeneralReasonDetail" resultMap="Ma8350Dto">
+        <if test="generalLevelCd !=null and generalLevelCd!=''">
+            and   general_level_cd=#{generalLevelCd,jdbcType=VARCHAR}
+        </if>
+    </select>
+    <select id="getNewGeneralReasonDetail" resultMap="Ma8350Dto">
             select   ma8350.general_level_cd ,general_level_reason from ma8360 left join ma8350
             on ma8350.general_level_cd=ma8360.general_level_cd
              where detailed_level_cd=#{detailedLevelCd,jdbcType=VARCHAR}
         </select>
 
-        <select id="getLastCorrTransfer" resultType="String">
+    <select id="getLastCorrTransfer" resultType="String">
             SELECT voucher_no FROM sk0010
             where voucher_no1 = #{voucherNo1,jdbcType=VARCHAR}
             and voucher_type = #{voucherType,jdbcType=VARCHAR}
@@ -1864,7 +1969,7 @@
             order by concat(create_ymd,create_hms) desc limit 1
         </select>
 
-        <select id="getLastCorrQty" resultMap="ReSk0020">
+    <select id="getLastCorrQty" resultMap="ReSk0020">
             SELECT * from sk0020 where voucher_no = #{voucherNo,jdbcType=VARCHAR};
         </select>
-    </mapper>
+</mapper>

@@ -470,7 +470,6 @@
             AND P1.pi_date = #{piDate}
             and p3.sp_id = '0000'
             and p1.store_cd = p2.store_cd
-            and p3.sp_value BETWEEN p2.effective_start_date and p2.effective_end_date
     </select>
 
     <select id="getPmaList" parameterType="int" resultType="cn.com.bbut.iy.itemmaster.dto.pi0100.PI0110DTO">
@@ -499,7 +498,6 @@
         <where>
             p2.sp_id = '0000'
             and p.store_cd = p1.store_cd
-            and p2.sp_value BETWEEN p1.effective_start_date and p1.effective_end_date
             and p.pi_status = c2.code_value
             and p.pi_type = c1.code_value
             AND P.pi_account_flg = '0'
@@ -556,7 +554,6 @@
         <where>
             p2.sp_id = '0000'
             and p.store_cd = p1.store_cd
-            and p2.sp_value BETWEEN p1.effective_start_date and p1.effective_end_date
             and p.pi_status = c2.code_value
             and p.pi_type = c1.code_value
             AND P.pi_account_flg = '0'
@@ -719,7 +716,6 @@
         <where>
             p2.sp_id = '0000'
             and p.store_cd = p1.store_cd
-            and p2.sp_value BETWEEN p1.effective_start_date and p1.effective_end_date
             and p.pi_status = c2.code_value
             and p.pi_type = c1.code_value
             AND P.pi_account_flg = '0'

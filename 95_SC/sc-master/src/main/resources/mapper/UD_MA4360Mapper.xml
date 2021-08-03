@@ -15,10 +15,6 @@
     ma4360.voucher_cd = #{voucherCd,jdbcType=VARCHAR}
     and ma4360.voucher_cd = ma4350.voucher_cd
     and ma4360.article_id = ma1100.article_id
-    <![CDATA[
-        and ma1100.effective_start_date <= ma4350.sale_date
-        and ma1100.effective_end_date >= ma4350.sale_date
-    ]]>
     and ma1100.sales_unit_id = ma0220.unit_id
   </select>
 </mapper>

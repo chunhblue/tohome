@@ -105,6 +105,9 @@ public class materialEntryServiceImpl implements materialEntryService {
     @Override
     public GridDataDTO<MaterialDTO> storeAllItem(ItemInStoreDto param) {
         List<String> articles = new ArrayList<>();
+        // 根据店铺判断南北方
+     String structurecd= materialplanMapper.searchStructurecd(param.getStoreCd());
+       param.setAdminStructureCd(structurecd);
         List<MaterialDTO> _list= materialplanMapper.selectAllItem(param);
 //        Integer count= materialplanMapper.selectCountItem(param);
         for (MaterialDTO dto:_list) {
@@ -400,6 +403,15 @@ public class materialEntryServiceImpl implements materialEntryService {
                 if(urlData == null || "".equals(urlData)){
                     String message = "Failed to connect to live inventory data！";
                     checkData = false;
+                }
+                String[] str = urlData.split("}");
+                if(str.length<=1){
+                    Gson gson = new Gson();
+                    RtInvContent param = gson.fromJson(urlData, RtInvContent.class);
+                    if("500".equals(param.getStatus()) || param.getContent() == null){
+                        String message = "Failed to connect to live inventory data！";
+                        checkData = false;
+                    }
                 }
 
                 if(checkData){
